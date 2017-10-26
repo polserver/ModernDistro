@@ -1,0 +1,90 @@
+use uo;
+use os;
+
+include ":gumps:include/gumps";
+include ":gumps:include/gumps_ex";
+
+program GumpTest(who)
+	var temp := "";
+	var gump := GFCreateGump(0, 0, 640, 480);
+	GFDisposable(gump, 0);
+	GFResizePic(gump, 0, 0, GetCfgConst("Defaults", "BackGround"), 640, 480);		//Background
+	GFResizePic(gump, 15, 15, GetCfgConst("Defaults", "ForeGround"), 610, 450);	//Foreground
+	
+	GFPage(gump, 10);
+	GFTextMid(gump, 15, 100, 610, 1153, "You have reached page 10!");
+	GFAddButton(gump, 320, 135, 2117, 2118, GF_PAGE_BTN, 1);
+	
+	GFPage(gump, 1);	
+	//Picture Functions
+	GFTextLine(gump, 460, 15, 1153, "Picture Functions");
+	GFTilePic(gump, 470, 35, 2466);
+	GFGumpPic(gump, 510, 40, 0x15A9);
+	
+	//Text Entry Examples
+	GFGumpPic(gump, 350, 130, 0x477);
+	GFTextEntry(gump, 360, 133, 250, 25, 35, "Text Entry #1");
+	GFGumpPic(gump, 350, 160, 0x477);
+	GFTextEntry(gump, 360, 163, 250, 25, 500, "Text Entry #2");
+	
+	//HTML Area Example
+	var html_text := "<BASEFONT COLOR=\"#3344FF\" SIZE=\"5\">"
+			+"<B>o</B> <I>This is an HTML area!</I><BR><BR>"
+			+"<A HREF=\"HTTP://www.polserver.com\">This is a link</A>";
+	GFHTMLArea(gump, 350, 190, 270, 70, html_text, 1, 1);
+	
+	//Buttons
+	GFTextLine(gump, 25, 25, 1153, "Standard Buttons");
+	GFAddButton(gump, 25, 50, 2117, 2118, GF_PAGE_BTN, 10);
+	GFTextLine(gump, 45, 47, 1153, "Page");
+	temp := GFAddButton(gump, 25, 70, 2117, 2118, GF_DUMMY_BTN);
+	GFTextLine(gump, 45, 67, 1153, "("+temp+") -DUMMY_BTN");
+	temp := GFAddButton(gump, 25, 90, 2117, 2118, GF_CLOSE_BTN);
+	GFTextLine(gump, 45, 87, 1153, "("+temp+") -CLOSE_BTN");
+	
+	GFTextLine(gump, 25, 120, 1153, "Check Boxes");
+	temp := GFCheckBox(gump, 25, 140, 0xA9A, 0xA9B);
+	GFTextLine(gump, 45, 140, 1153, "("+temp+")");
+	temp := GFCheckBox(gump, 25, 160, 0xA9A, 0xA9B);
+	GFTextLine(gump, 45, 160, 1153, "("+temp+")");
+		
+	GFTextLine(gump, 25, 200, 1153, "Radio Boxes");
+	GFSetRadioGroup(gump, 1);
+	temp := GFRadioButton(gump, 25, 220, 0xA96, 0xA97);
+	GFTextLine(gump, 45, 220, 1153, "("+temp+")");
+	temp := GFRadioButton(gump, 25, 240, 0xA96, 0xA97);
+	GFTextLine(gump, 45, 240, 1153, "("+temp+")");
+	temp := GFRadioButton(gump, 25, 260, 0xA96, 0xA97);
+	GFTextLine(gump, 45, 260, 1153, "("+temp+")");
+	GFSetRadioGroup(gump, 2);
+	temp := GFRadioButton(gump, 25, 290, 0xA96, 0xA97);
+	GFTextLine(gump, 45, 290, 1153, "("+temp+")");
+	temp := GFRadioButton(gump, 25, 310, 0xA96, 0xA97);
+	GFTextLine(gump, 45, 310, 1153, "("+temp+")");
+	
+	
+	var okay_btn := GFAddButton(gump, 340, 430, 0x81C, 0x81B, GF_CLOSE_BTN);
+	CONST CANCEL_BTN := 0x5000;
+	GFAddButton(gump, 250, 430, 0x819, 0x818, GF_CLOSE_BTN, CANCEL_BTN);
+		
+	var input := GFSendGump(who, gump);
+	if ( input[0] <= 1 )
+		SendSysMessage(who, "Cancelled.");
+		return 0;
+	elseif ( input[okay_btn] )
+		SendSysMessage(who, "*** OKAY button was pressed! ***");
+	elseif ( input[CANCEL_BTN] )
+		SendSysMessage(who, "*** CANCEL button was pressed! ***");
+	endif
+	
+	SendSysMessage(who, "Gump buttons/objects found enabled.");
+	foreach key in (input.keys)
+		var value := input[key];
+		if ( value[2, 2] ==": " )
+			SendSysMessage(who, "Text Entry ["+key+"] ->"+GFExtractData(input, key));
+		else
+			SendSysMessage(who, "Button Input ["+key+"] -> "+value);
+		endif
+		SleepMS(2);
+	endforeach
+endprogram

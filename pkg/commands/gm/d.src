@@ -1,0 +1,18 @@
+use uo;
+use os;
+
+include "include/client";
+program textcmd_e( who )
+  PlaySoundEffect(who, 0x231);
+  PlayMovingEffectXYZ(who.x, who.y, who.z+100, who.x, who.y, who.z, 6002, 10, loop := 0, explode := 0, realm := who.realm );
+  sleepms(1300);
+  PlaySoundEffect(who, 0x146);
+  sleepms(180);
+//	PlayObjectCenteredEffect(who , FX_SPARK_EFFECT , 7 , 0x10 );
+	PlaySoundEffect(who,0x15b);
+  PerformAction(who, 22);
+  sleepms(1200);
+  who.concealed := 1;
+  sleepms(200);
+  PlaySoundEffect(who, 0x246);
+endprogram

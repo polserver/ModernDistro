@@ -1,0 +1,52 @@
+/* $Id: motd.src 596 2006-07-05 18:08:19Z austinheilman $
+ *
+ */
+
+use uo;
+use os;
+use file;
+
+include ":datafile:datafile";
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+include "include/arrays";
+
+CONST ONOFF_BTN	:= 0xE000;
+
+program MessageOfTheDay(mobile)
+
+	var data_file := DFOpenDataFile(":motd:settings", DF_CREATE);
+	var data_elem := DFFindElement(data_file, mobile.acctname, DF_CREATE);
+	var off       := CInt(data_elem.GetProp("noshow"));
+
+	var text_lines := ReadFile("motd.txt");
+	var text := ImplodeArray("\n", text_lines);
+
+	if ( !text )
+		text := "There is no MOTD for today.";
+	endif
+
+	var gump := GFCreateGump();
+	GFResizePic(gump, 0, 0, GFGetCfgConst("Defaults", "BackGround"), 360, 480);
+
+	GFResizePic(gump, 15, 12, GFGetCfgConst("Defaults", "ForeGround"), 330, 30);
+	GFTextLine(gump, 110, 17, 2100, "Messages of the Day");
+
+	GFResizePic(gump, 15, 45, GFGetCfgConst("Backgrounds", "GOLDTRIM"), 330, 390);
+	GFHTMLArea(gump, 22, 53, 322, 375, text, 0, 1);
+
+	GFResizePic(gump, 15, 438,GFGetCfgConst("Defaults", "ForeGround"), 330, 30);
+	GFCheckBox(gump, 20, 443, 0x768, 0x767, (off == 0), ONOFF_BTN);
+	GFTextLine(gump, 45, 443, 2100, "Open on login");
+
+	data_elem.SetProp("FirstLine", text_lines[1]);
+
+	var input := GFSendGump(mobile, gump);
+
+	if ( input[ONOFF_BTN] )
+		data_elem.EraseProp("noshow");
+	else
+		data_elem.SetProp("noshow", 1);
+	endif
+
+endprogram

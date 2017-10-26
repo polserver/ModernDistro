@@ -1,0 +1,122 @@
+use uo;
+use os;
+use cfgfile;
+
+var layout := array(
+    "page 0",
+    "nomove",
+    "noclose",
+    "nodispose",
+    "gumppic  20  60 2624            ",      //account note box
+    "gumppic 285  60 2624            ",      //account note box
+    "gumppic  20   5 2624            ",      //account note box
+    "gumppic 285   5 2624            ",      //account note box
+    "gumppic  20   0 2621            ",      //account note box
+    "gumppic 285   0 2621            ",      //account note box
+    "gumppic  20   0 2620            ",      //account note box
+    "gumppic 535   0 2622            ",      //account note box
+    "gumppic  20   5 2623            ",      //account note box
+    "gumppic 535   5 2625            ",      //account note box
+    "gumppic  20  45 2623            ",      //account note box
+    "gumppic 535  45 2625            ",      //account note box
+    "gumppic  20 250 2627            ",      //account note box
+    "gumppic  20 250 2626            ",      //account note box
+    "gumppic 285 250 2627            ",      //account note box
+    "gumppic 537 250 2628            ",      //account note box
+    "text     90  30   37      0     ",      //warning text          (red)
+    "text     90  45   37      1     ",      //warning text          (red)
+    "text     90  60   37      2     ",      //warning text          (red)
+    "text     90  75   37      3     ",      //warning text          (red)
+    "text     90  90   37      4     ",      //warning text          (red)
+    "text     90 105   37      5     ",      //warning text          (red)
+    "text     90 120   37      6     ",      //warning text          (red)
+    "text    150 135   37      7     ",      //warning text          (red)
+	"gumppic 125 158 1141            ",
+    "textentry 135 160  250 60 910 8  8",
+    "button  255 220  247  249 1 0  1"       //confirm button
+
+);
+
+var data := array(
+    "Greetings... In order to keep our mail system up to date,",      //0
+    "periodically we need to request that you verify your email",     //1
+    "address so that we may contact you if we need to pass on",       //2
+    "any shard related information.. Your Email address will",        //3
+    "be kept confidential, and will not be shared with anyone",       //4
+    "outside this shard, and will only be used for official",        //5
+    "shard business.. At this time, we have the following email",     //6
+    "address on file for your account: ",                             //7
+    "",
+    "",
+    ""
+);
+
+program mailkeeper(who)
+  controlgump(who);
+endprogram
+
+function controlgump(who)
+  var trg := FindAccount(who.acctname);
+  var mail := trg.getprop("email");
+  if(!mail)
+    mail := "Not Provided";
+  endif
+  data[9] := mail;
+  var result := SendDialogGump( who, layout, data);
+  setmail(who, result, trg);
+endfunction
+
+function setmail(who, result, trg)
+  var note:=result[8];
+  note[1, find(note, ": ", 1)+1]:="";
+  if((note == "") || (note == "Not Provided") || (!note) || (note == "error"))
+    controlgump(who);
+  else
+    var length := len(note);
+    var i;
+    var atsign := 0;
+    var dot := 0;
+    for(i:=1; i<=length; i:=i+1)
+      if(note[i] == "@")
+        atsign := 1;
+      elseif(note[i] == ".")
+        if((note[i+1] == "n") && (note[i+2] == "e") && (note[i+3] == "t"))
+          dot := 1;
+        elseif((note[i+1] == "o") && (note[i+2] == "r") && (note[i+3] == "g"))
+          dot := 1;
+        elseif((note[i+1] == "g") && (note[i+2] == "o") && (note[i+3] == "v"))
+          dot := 1;
+        elseif((note[i+1] == "c") && (note[i+2] == "o") && (note[i+3] == "m"))
+          dot := 1;
+        elseif((note[i+1] == "e") && (note[i+2] == "d") && (note[i+3] == "u"))
+          dot := 1;
+        elseif((note[i+1] == "c") && (note[i+2] == "c"))
+          dot := 1;
+        elseif((note[i+1] == "u") && (note[i+2] == "k"))
+          dot := 1;
+        elseif((note[i+1] == "d") && (note[i+2] == "k"))
+          dot := 1;
+        elseif((note[i+1] == "f") && (note[i+2] == "i"))
+          dot := 1;
+        elseif((note[i+1] == "z") && (note[i+2] == "a"))
+          dot := 1;
+        elseif((note[i+1] == "d") && (note[i+2] == "e"))
+          dot := 1;
+        elseif((note[i+1] == "c") && (note[i+2] == "a"))
+          dot := 1;
+        elseif((note[i+1] == "n") && (note[i+2] == "z"))
+          dot := 1;
+        elseif((note[i+1] == "s") && (note[i+2] == "e"))
+          dot := 1;
+        elseif((note[i+1] == "n") && (note[i+2] == "l"))
+          dot := 1;
+        endif
+      endif
+    endfor
+    if((atsign == 1) && (dot == 1))
+      trg.setprop("email", note);
+    else
+      controlgump(who);
+    endif
+  endif
+endfunction

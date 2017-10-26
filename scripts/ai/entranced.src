@@ -1,0 +1,42 @@
+use npc;
+use os;
+use uo;
+
+
+include "include/eventID";
+include ":attributes:attributes";
+include "include/sysEvent";
+include "include/dist";
+
+var me := Self();
+
+program entranced()
+
+	var y := GetObjProperty(me, "bardmaster");
+	var follower := "no";
+	foreach x in EnumerateOnlineCharacters()
+		if (x.serial == y)
+			follower := x;
+		endif
+	endforeach
+
+	if (follower == "no")
+		say("* The enchantment is broken! *");
+		me.script := GetObjProperty(me, "script");
+		RestartScript(me);
+		EraseObjProperty(me, "entrancedscript");
+		EraseObjProperty(me, "bardmaster");
+		return 0;
+	endif
+
+	EraseObjProperty(me, "bardmaster");
+
+	while (GetHp(me))
+
+	WalkToward(follower);
+
+	sleep(1);
+
+	endwhile
+
+endprogram

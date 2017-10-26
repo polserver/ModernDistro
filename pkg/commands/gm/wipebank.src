@@ -1,0 +1,27 @@
+//////////////////////////////////////////////////////////////////////
+//
+//  ".wipebank" text command
+//
+//  NOTE: not entirely safe.  If the person whos bankbox you're
+//        wiping already has their bankbox open, this will cause
+//        access violations if they access the bankbox.
+//        A workaround would be to Move() the character after wiping
+//        the bankbox, which would force them to close it.
+//
+//////////////////////////////////////////////////////////////////////
+use uo;
+
+include "util/bank";
+
+program textcmd_wipebank(who)
+    PrintTextAbovePrivate( who, "Whos bank shall I wipe?", who );
+    var whom := Target( who );
+    if (whom)
+        if (WipeBankBox( who ))
+            PrintTextAbovePrivate( who, "Oooh, that's cold.  Bankbox wiped!", who );
+        else
+            PrintTextAbovePrivate( who, "Hm, no bankbox to wipe!", who );
+        endif
+   
+    endif
+endprogram

@@ -1,0 +1,22 @@
+use uo;
+use os;
+use polsys;
+
+include ":chat:chatIO";
+include ":chat:packets";
+include ":chat:functions";
+include ":chat:settings";
+
+program SendPrivateMessage(params)
+	var character := params[1];
+	var packet := params[2];
+	params := "";
+
+	// check ignore
+	// display message
+	if ( CH_CheckDebug() )
+		Print("SendPrivateMessage: "+character.name+" "+packet);
+	endif
+
+	return 1;
+endprogram

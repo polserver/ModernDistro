@@ -1,0 +1,93 @@
+/* $ID$
+ *
+ *
+ */
+
+use uo;
+
+include ":accounts:accounts";
+include ":accounts:settings";
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+include ":gumps:gumpPrompt";
+
+CONST CANCEL_BTN	:= 0xC00;
+CONST OKAY_BTN		:= 0xC01;
+CONST ACCT_TEXT_POS	:= 0xD01;
+CONST PASS_TEXT_POS	:= 0xD02;
+CONST EMAIL_TEXT_POS	:= 0xD03;
+CONST CMD_TEXT_POS	:= 0xD04;
+CONST EXPANSION_START	:= 0xE00;
+
+program command_newAccount(who)
+	var gump := GFCreateGump(who);
+
+	GFResizePic(gump, 0, 0, GetCfgConst("Defaults", "BackGround"), 360, 320);
+	GFResizePic(gump, 15, 15, GetCfgConst("Defaults", "ForeGround"), 330, 290);
+
+	GFTextMid(gump, 15, 20, 330, 2100, "New Account");
+	GFAddButton(gump, 50, 260, 2128, 2129, GF_CLOSE_BTN, OKAY_BTN);
+	GFAddButton(gump, 245, 260, 2119, 2120, GF_CLOSE_BTN, CANCEL_BTN);
+
+	GFPage(gump, 1);
+	GFTextLine(gump, 20, 53, 2100, "Account Name:");
+	GFResizePic(gump, 120, 50, GetCfgConst("Backgrounds", "GOLDTRIM"), 145, 28);
+	GFTextEntry(gump, 126, 54, 135, 20, 2100, "", ACCT_TEXT_POS);
+	GFTextLine(gump, 20, 73, 2100, "Password:");
+	GFResizePic(gump, 120, 70, GetCfgConst("Backgrounds", "GOLDTRIM"), 145, 28);
+	GFTextEntry(gump, 126, 74, 135, 20, 2100, "", PASS_TEXT_POS);
+
+	GFTextLine(gump, 20, 113, 2100, "E-Mail:");
+	GFResizePic(gump, 120, 110, GetCfgConst("Backgrounds", "GOLDTRIM"), 145, 28);
+	GFTextEntry(gump, 126, 114, 135, 20, 2100, "", EMAIL_TEXT_POS);
+
+	GFTextLine(gump, 20, 163, 2100, "Command Level:");
+	GFResizePic(gump, 120, 160, GetCfgConst("Backgrounds", "GOLDTRIM"), 25, 28);
+	GFTextEntry(gump, 126, 164, 20, 20, 2100, "0", CMD_TEXT_POS);
+
+	GFTextLine(gump, 20, 200, 2100, "Expansion:");
+	GFAddButton(gump, 80, 200, 2710, 2711, GF_PAGE_BTN, 2);
+
+	GFPage(gump, 2);
+	GFTextLine(gump, 20, 200, 2100, "Expansion:");
+	GFAddButton(gump, 80, 200, 2711, 2710, GF_PAGE_BTN, 1);
+
+	var default_exp := ACCT_GetSettingsCfgElem("Settings").DefaultExpansion;
+	var expansions := ACCT_GetSettingsCfgElem("Expansions");
+	expansions := GetConfigStringDictionary(expansions, "Expansion");
+	var y_pos := 50;
+	foreach key in ( expansions.keys() )
+		GFRadioButton(gump, 20, y_pos, 210, 211, (key==default_exp), EXPANSION_START+_key_iter);
+		GFTextLine(gump, 45, y_pos, 2100, expansions[key]);
+		y_pos := y_pos+20;
+		SleepMS(2);
+	endforeach
+
+	var input := GFSendGump(who, gump);
+	if ( input[OKAY_BTN] )
+		var acct_name := GFExtractData(input, ACCT_TEXT_POS);
+		var password := GFExtractData(input, PASS_TEXT_POS);
+		var cmd_lvl := CInt(GFExtractData(input, CMD_TEXT_POS));
+		var email := GFExtractData(input, EMAIL_TEXT_POS);
+		
+		var expansion;
+		foreach key in ( input.keys )
+			if ( key >= EXPANSION_START )
+				expansion := expansions.Keys()[key-EXPANSION_START];
+				break;
+			endif
+			SleepMS(2);
+		endforeach
+		
+		var account := CreateNewAccount(acct_name, password, cmd_lvl, expansion, email);
+		if ( account.errortext )
+			GumpPrompt(who, "Error Creating Account [P] "+account.errortext);
+			return 0;
+		else
+			GumpPrompt(who, "Account created successfully.");	
+			return 1;
+		endif
+	endif
+
+	return 0;
+endprogram

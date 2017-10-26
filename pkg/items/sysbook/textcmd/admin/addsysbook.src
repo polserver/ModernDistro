@@ -1,0 +1,99 @@
+//////////////////////////////////////////////////////////////////////
+// Textcommand for Zulu's sysbooks package.                         //
+// Used to add a new book to the books.cfg file.                    //
+// After entering the command the user is promted to target a book. //
+// The book is checked to be sure it has content and then if so the //
+// contents are reformatted to match the books config file          //
+// format and then the book info is appended to the end of          //
+// :sysbook:books.cfg                                               //
+//                                                                  //
+// Written by Yukiko                                                //
+//////////////////////////////////////////////////////////////////////
+use cfgfile;
+use os;
+use uo;
+
+program addsysbook(who)
+
+    var original_contents := {};
+    var contents := {};
+    var bookstuff := {};
+    var filename, sysbooks, book, title, author, nextspot;
+    var curpage, curline, index;
+    filename := ":sysbook:books";
+    SendSysMessage(who, "Choose the book you wish to add to the book spawn system.", color := 88);
+    book := Target(who);
+    if(!book)
+	SendSysMessage(who, "Cancelled!", color := 33);
+    endif
+    if(!GetObjProperty(book, "contents"))
+	SendSysMessage(who, "This book is blank! We don't want an empty book in the system silly!", color := 33);
+    endif
+    
+    title := GetObjProperty(book, "title");
+    author := GetObjProperty(book, "author");
+    original_contents := GetObjProperty(book, "contents");
+    contents := truncate(original_contents);
+
+    // Get the last book number and add one to it.
+    sysbooks:= ReadConfigFile(filename);
+    nextspot := GetConfigMaxIntKey(sysbooks);
+    if(nextspot.errortext)
+	nextspot := 1;
+    else
+	nextspot := nextspot + 1;
+    endif
+    
+    curpage := 1;
+    curline := 1;
+    for (index := 1; index <= contents.size(); index := index + 1)
+
+	// Allows us to insert a blank page if we want to.
+	if(contents[index] == "@")
+	    curpage := curpage + 1;
+	    curline := 1;
+	else
+	    bookstuff[index + 3] := {"p" + curpage + "l" + curline, contents[index]};
+	    curline := curline + 1;
+	endif
+	if(curline == 9)
+	    curpage := curpage + 1;
+	    curline := 1;
+	endif
+    endfor
+    
+    bookstuff[1] := {"pages", curpage};
+    bookstuff[2] := {"title", title};
+    bookstuff[3] := {"author", author};
+
+
+    AppendConfigFileElem( filename, "book", nextspot, bookstuff );
+    UnloadConfigFile(filename);
+    
+    SendSysMessage(who, "The book was added successfully.", color :=66);
+
+endprogram
+
+//////////////////////////////////////////////////////////////////
+// This function removes the trailing empty lines from a book's //
+// contents.                                                    //
+// oc contains the original contents array                      //
+//////////////////////////////////////////////////////////////////
+function truncate(oc)
+
+    var cont := {};
+    var index;
+    var junk := 1;
+    for (index:=oc.size();index >= 1;index:=index-1)
+	if( Len(oc[index]) )
+	    junk := index;
+	    break;
+	endif
+    endfor
+    
+    for (index := 1; index <= junk; index := index +1)
+	cont[index] := oc[index];
+    endfor
+    
+    return cont;
+endfunction

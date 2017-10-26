@@ -1,0 +1,91 @@
+/////////////////////////////////////////////////////////////////////////////
+//
+//  killpcs.src: Kill player-characters
+//
+//  TODO: Some server support for only paying attention to 'enteredarea'
+//        and 'leftarea' events from PCs would be nice.
+//        we just use the graphic at the moment, so we'd fight
+//        NPCs too.  Oh well.
+//
+//  Author: ENS
+//
+//  Created: 4/98
+//
+//  Modified week of 6/15/99 by DW to allow speech and ranged attacks
+//
+/////////////////////////////////////////////////////////////////////////////
+
+use npc;
+use os;
+use uo;
+use cfgfile;
+
+include "include/eventID";
+include "include/sysEvent";
+include "include/randName";
+include "include/vetement";
+include "include/NPCUtil";
+include "include/objtype";
+include "include/dist";
+include "include/anchors";
+include "ai/main/mainLoopImmobile";
+include "ai/combat/immobileFight";
+include "ai/main/sleepMode";
+include "ai/combat/spellCombatEvent";
+include "ai/setup/spellSetup";
+include "include/NPCCast";
+
+const HALT_THRESHOLD := 10; // how close before he attacks?
+var LAST_BREATH := ReadGameClock();
+
+var npccfgfile := ReadConfigFile( "npcdesc" );
+var idlesnd1 := CInt(npccfgfile[me.npctemplate].idlesound1);
+var idlesnd2 := CInt(npccfgfile[me.npctemplate].idlesound2);
+
+program KillPlayers()
+  SetWarMode( 0 );
+  main_AI_loop();
+endprogram
+
+function CloseDistance( opponent )
+  sleepms(100);
+endfunction
+
+function Herd(ev)
+  var holder := ev.data;
+  var lx := holder[1];
+  var ly := holder[2];
+  var loops := 0;
+  var opponent;
+  var waittime := 0;
+  while(1)
+	if(!CloseIn(me, lx, ly))
+	  loops := loops + 1;
+	  waittime := 0;
+	else
+	  loops := 0;
+	  waittime := 1;
+	endif
+	if((loops >= 30) or (coordist(me.x, me.y, lx, ly) <= 1))
+	  break;
+	endif
+	ev := wait_for_event(waittime);
+	case (ev.type)
+      SYSEVENT_DAMAGED: opponent := ev.source;
+			  		    SetOpponent(opponent);
+					    TurnToward(opponent);
+	  SYSEVENT_ENGAGED: opponent := ev.source;
+			  		    SetOpponent(opponent);
+					    TurnToward(opponent);
+	endcase
+  endwhile
+  Return;
+endfunction
+
+function CloseIn(me, lx, ly)
+  case (coordist(me.x, me.y, lx, ly))
+    0:       return 1;
+    default: WalkTowardLocation(lx, ly);
+             return 0;
+  endcase
+endfunction

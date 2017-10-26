@@ -1,0 +1,34 @@
+use uo;
+
+program textcmd_moveitem( who )
+    SendSysMessage( who, "Select an item to move." );
+    var what := TargetCoordinates( who );
+    if (what)
+      if(what.item)
+        SendSysMessage( who, "Now select a location on the ground." );
+        var where := TargetCoordinates( who );
+        if (where)
+          var itm := what.item;
+          if(itm.movable)
+            var result := MoveObjectToLocation(itm, where.x, where.y, where.z, where.realm, MOVEOBJECT_FORCELOCATION);
+            if(result)
+              PrintTextAbovePrivate(itm, "Done!", who);
+            else
+              SendSysMessage(who, "Unable to move item: " + result.errortext);
+            endif
+          else
+            itm.movable := 1;
+            var result := MoveObjectToLocation(itm, where.x, where.y, where.z, where.realm, MOVEOBJECT_FORCELOCATION);
+            if(result)
+              PrintTextAbovePrivate(itm, "Done!", who);
+            else
+              SendSysMessage(who, "Unable to move item: " + result.errortext);
+            endif
+            itm.movable := 0;
+          endif
+        endif
+      else
+        SendSysMessage(who, "This command only works on items." );
+      endif
+    endif
+endprogram

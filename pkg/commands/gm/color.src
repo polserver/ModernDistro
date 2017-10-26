@@ -1,0 +1,21 @@
+use uo;
+use os;
+
+include "include/client";
+
+
+program color(who, textline)
+        if (!textline)
+            SendSysMessage (who, "Usage is: color [integer] or 'none' (without the quotes)", color := 88);
+            return;
+        endif
+	var item := target(who);
+        if (textline == "none")
+            item.color := 0;
+            return;
+        endif
+        item.color := CINT (textline) + 2; // We add 2 because the colour numbers in Inside UO are off by 2
+        return;
+        
+
+endprogram

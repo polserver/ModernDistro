@@ -1,0 +1,59 @@
+/////////////////////////////////////////////////
+// Simple .hunger script that hopefully will evolve into 
+// something more than just how hungry you are
+/////////////////////////////////////////////////
+
+// Variables used in this script:
+// hunger (This is a number pulled directly off the character
+//              types ".hunger".)
+
+use uo;
+
+Program HungerStatus(character)
+
+    var hungerstatus;
+
+// How hungry is the character?
+	hungerstatus := GetObjProperty(character, "hunger");
+
+// And now to display how hungry the player is...
+	if (hungerstatus <= 0)
+		hungerstatus := 0;
+    endif
+    /*
+    if (hungerstatus <= 2)
+                SendSysMessage(character, "You are not hungry");
+        elseif(hungerstatus < 3)
+                SendSysMessage(character, "You are a bit hungry");
+        elseif(hungerstatus < 5)
+                SendSysMessage(character, "You are hungry");
+        elseif(hungerstatus < 8)
+                SendSysMessage(character, "You are very hungry");
+        else
+                SendSysMessage(character, "You are extremely hungry");
+	endif
+    */
+    case (hungerstatus)
+      0 : SendSysMessage(character, "You are not hungry");
+      1 : SendSysMessage(character, "You are not hungry");
+      2 : SendSysMessage(character, "You are not hungry");
+	  3 : SendSysMessage(character, "You are not hungry");
+	  4 : SendSysMessage(character, "You are not hungry");
+	  5 : SendSysMessage(character, "You are not hungry");
+	  6 : SendSysMessage(character, "You are a bit hungry");
+	  7 : SendSysMessage(character, "You are a bit hungry");
+	  8 : SendSysMessage(character, "You are a bit hungry");
+	  9 : SendSysMessage(character, "You are a bit hungry");
+	  10 : SendSysMessage(character, "You are hungry");
+	  11 : SendSysMessage(character, "You are hungry");
+	  12 : SendSysMessage(character, "You are hungry");
+	  13 : SendSysMessage(character, "You are very hungry");
+	  14 : SendSysMessage(character, "You are very hungry");
+	  15 : SendSysMessage(character, "Your hunger is affecting your body.");
+	  16 : SendSysMessage(character, "You're so hungry you feel light headed.");
+	  17 : SendSysMessage(character, "Your body is fatigued from hunger.");
+	  18 : SendSysMessage(character, "You are extremely hungry", color := 33);
+	  19 : SendSysMessage(character, "You are desperately hungry!!!", color := 33);
+    endcase
+	
+endprogram

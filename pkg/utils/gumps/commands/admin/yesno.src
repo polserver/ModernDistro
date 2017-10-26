@@ -1,0 +1,19 @@
+use uo;
+
+include ":gumps:include/gumps";
+include ":gumps:include/gumps_ex";
+include ":gumps:include/yesNo";
+
+program PromptDemo(who)
+	var prompt := "Are you sure you want to take this course of action?";
+	var yes := "Oh yes! I am most definately sure of this decision.";
+	var no := "Most certainly not! What kind of a GM do you take me for?!";
+	
+	var result := YesNo(who, prompt, yes, no);
+	
+	if ( result )
+		SendSysMessage(who, "You selected 'YES'");
+	else
+		SendSysMessage(who, "You selected 'NO'");
+	endif
+endprogram

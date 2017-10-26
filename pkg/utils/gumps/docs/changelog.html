@@ -1,0 +1,77 @@
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+	<meta http-equiv="Content-Language" content="en-us">
+	<title>brainAI Documentation</title>
+	<link rel="stylesheet" type="text/css" href="docs.css" />
+</head>
+<body>
+<div id="container">
+	<div id="header">
+		<h1>GUMPS DOCUMENTATION</h1>
+		<p>Version 1.5</b>, by <a href="mailto:AustinHeilman@Gmail.com">Austin Heilman</a>.</p>
+		<hr>
+		<h2>Change Log</h2>
+	</div>
+
+	<div id="content">
+		<xmp>
+		-=[ 4:55PM Jul. 07, 2005 (Austin)]=---------
+		Changed:
+			* Renamed "configs" to "config"
+			* Renamed "includes" to "include"
+	  		  - Both for 096 distro standards. 
+	  		  - Include paths changed. Config paths changed.
+		Added:	
+			* New commands
+	  		  - resizepic.src
+			
+			* More constants to GumpInfo.cfg
+
+		-=[ 7:24AM Jun. 21, 2005 (Austin)]=---------
+		Changed:
+			* GFSendGump()
+	  		  This function will now tell the mobile if there were
+	  		  any errors. Useful for determining if a gump has too
+	  		  much data for the client to use.
+
+			* ICP.cfg
+	  		  Updated to correctly point to samplegump.src
+	  		  Now compatable with the soon to be released new version
+	  		  of the ICP/Control system.
+
+		-=[ 2:13AM Jun. 13, 2005 (Austin)]=---------
+
+		Added:		
+			* GFWordWrap() to gumps_ex.inc
+	  		  This function will take in a string of text and the maximum
+          		  width each line should be in pixels and break it up into an
+          		  array of strings. Can then be used with GFText* functions.
+
+			* New include files 
+	  		  - gumpprompt.inc
+	  		  - yesno.inc
+	  		  - requestgump.inc
+			
+			* Sample text commands
+	  		  - gumpprompt.src
+	  		  - yesno.src
+	  		  - requestgump.src
+ 
+		Changed:
+			* GFTextEntry()
+	  		  Now has an additional optional parameter to specify 
+	  		  where in the gump the data will be stored.
+
+			* Assigned spaces to 9 pixels instead of 5.
+		
+		-=[ 5:30AM Jun. 10, 2005 (Austin)]=---------
+
+		* First version released 1.0
+		</xmp>
+	</div>
+
+	<div id="footer">
+		<p>Last Update: $Id: changelog.html 375 2006-06-17 19:26:32Z austinheilman $</p>
+	</div>
+</div>
+</body>

@@ -1,0 +1,43 @@
+use uo;
+use file;
+
+include ":timeutils:time";
+include "include/crafting";
+
+program textcmd_createstack( who, text )
+    var dmy, month, hms, junk, what;
+    var params := SplitWords( text );
+    var objtype := params[1];
+    var amount := CInt( params[2] );
+	var numstacks := CInt(params[3]);
+
+    if (CInt(objtype))
+        objtype := CInt(objtype);
+    endif
+
+    if (!amount)
+        amount := 1;
+    endif
+    if (!numstacks)
+        numstacks := 1;
+    endif
+	junk := 0;
+	
+	while (junk<numstacks)
+		what := CreateItemInBackpack( who, objtype, amount );
+		if (what)
+//		SetObjProperty(what, "Created", who.name);
+		PrintTextAbovePrivate( who, "Created " + what.desc + " in my backpack.", who );
+		dmy := FormatTime(GetTimeStruct(GetTime()), "<DAY>-<MON>-<YY>");
+		hms := FormatTime(GetTimeStruct(GetTime()), "<HH>:<MM>:<SS>");
+		month := FormatTime(GetTimeStruct(GetTime()), "<MON>-<YY>");
+		LogToFile("::log/createstack_" + month + ".log", "On " + dmy + " at " + hms + " " +  who.name +" on account " + who.acctname + " created  " + amount + " of " + get_item_name(what.objtype, 1));
+	
+		else
+			PrintTextAbovePrivate( who, "Couldn't create that: " + what.errortext, who );
+			return 0;
+		endif
+		junk := junk + 1;
+	endwhile
+		
+endprogram

@@ -1,0 +1,15 @@
+use os;
+use uo;
+use util;
+
+include "include/client";
+include "include/objtype";
+include ":housing:housing";
+
+program logon ( who )
+	var sign := FindHouseForLocation (who.x, who.y, who.realm);
+	if(!IsInOCF(who, sign))
+	    MoveObjectToLocation(who, sign.x, sign.y, sign.z, sign.realm, MOVEOBJECT_FORCELOCATION);
+	endif
+endprogram
+

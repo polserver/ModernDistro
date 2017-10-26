@@ -1,0 +1,58 @@
+use uo;
+use os;
+use util;
+use cfgfile;
+
+include ":attributes:attributes";
+include ":magery:spells";
+
+program cast_incognito(parms)
+  var caster := parms[1];
+  
+  
+  if (!GetObjProperty( caster, "realname"))
+	SetObjProperty( caster, "realname", caster.name );
+  endif
+  var newname := AssignName(caster);
+  SetName( caster, newname );
+  PlaySoundEffect(caster, 0x1e1);
+  Detach();
+  set_critical(1);
+  sleep( 60 * CInt(GetAttribute( caster, MAGERY )/10 ) );
+  SetName( caster, GetObjProperty( caster, "realname" ) );
+  EraseObjProperty( caster, "realname" );
+endprogram
+
+function AssignName( me )
+  var index := "MALE";
+  if (me.graphic == 401)
+	index := "FEMALE";
+  endif
+  var cfg := ReadConfigFile( "incognito" );
+  if (!cfg)
+	SendSysMessage(me,"Unable to read incognito.cfg");
+	return;
+  endif
+  var elem := FindConfigElem( cfg, index );
+  var number := GetConfigInt( elem, "Count" );
+  var dice_str := "1d" + CStr(number);
+  var choice := RandomDiceRoll( dice_str );
+  var entry := "Name" + choice;
+  var str := GetConfigString( elem, entry );
+  var title := PreserveTitle( me );
+  str := str + title;
+  return( str );
+endfunction
+
+function PreserveTitle( me )
+  var myname := me.name;
+  var start := find( myname, ">", 1 );
+  if( !start )
+    return;
+  endif
+  var title := myname[ start+1, (len( myname ) - 8) ];
+  if( !title )
+    return("");
+  endif
+  return( title );
+endfunction

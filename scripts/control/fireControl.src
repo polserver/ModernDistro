@@ -1,0 +1,51 @@
+use uo;
+use util;
+use os;
+use cfgfile;
+include ":attributes:attributes";
+// include "include/spellRestrictions";
+include "include/client";
+include "include/spellAttack";
+include ":damage:damage";
+
+program field_control( item )
+  var npccfg1 := ReadConfigFile("::npcdesc");
+  npccfg1 := npccfg1;
+  
+  var creater := CInt(GetObjProperty(item, "creater"));
+  var fieldstrength;
+  var online := EnumerateOnlineCharacters();
+  var boss;
+  foreach char in online
+    if(creater == char.serial)
+      boss := char;
+      break;
+    endif
+  endforeach
+  if(!boss)
+    boss := SystemFindObjectBySerial(creater, SYSFIND_SEARCH_OFFLINE_MOBILES);
+  endif
+  SetScriptController(boss);
+  var dmg := CInt(GetAttribute(boss, MAGERY)/10);
+  if((!dmg) || (dmg == 0))
+    dmg := 5;
+  endif
+  fieldstrength := RandomInt(dmg);
+  foreach character in ListMobilesNearLocation(item.x,item.y, item.z, 0, item.realm)
+    set_priority(1);
+    PlaySoundEffect(character, 0x209);
+    ApplyRawSpellDamageEX(character, fieldstrength, DMG_FIRE, boss, 2);
+
+  endforeach
+  sleepms(1500);
+  while(item)
+    foreach character in ListMobilesNearLocation(item.x,item.y, item.z, 0, item.realm)
+      if((GetHp(character) > 1) && (character.cmdlevel < 2))
+        fieldstrength := RandomInt(dmg);
+        PlaySoundEffect(character, 0x209);
+        ApplyRawSpellDamageEX(character, fieldstrength, DMG_FIRE, boss, 2);
+      endif
+    endforeach
+    sleepms(1500);
+  endwhile
+endprogram

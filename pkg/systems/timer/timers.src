@@ -1,0 +1,75 @@
+use uo;
+use os;
+
+const LONG_COUNT_DECAY_TIME := 144000; //40 hours
+const SHORT_COUNT_DECAY_TIME := 28800; //8 hours
+
+program timers()
+  while(1)
+    foreach character in EnumerateOnlineCharacters()
+      var sessiontime := ReadGameClock() - GetObjProperty(character,"logontime");
+      var timer := CInt(GetObjProperty(character, "onlinetimer"));
+      SetObjProperty(character,"onlinetimer", timer + sessiontime);
+      CheckMurderCountDecay(character);
+    endforeach
+    sleep(300);
+  endwhile
+endprogram
+
+function CheckMurderCountDecay(character);
+  var long_term_counts := CInt(GetObjProperty(character,"longmurders"));
+  if(long_term_counts > 0)
+    CheckLongTermCounts(character);
+  endif
+  var short_term_counts := CInt(GetObjProperty(character,"shortmurders"));
+  if(short_term_counts > 0)
+    CheckShortTermCounts(character);
+  endif
+endfunction
+
+function CheckLongTermCounts(character);
+  var longdecaytime := CInt(GetObjProperty(character, "decaylongcountat"));
+  var onlinetime := GetObjProperty(character, "onlinetimer");
+  if(!longdecaytime)
+    longdecaytime := onlinetime + LONG_COUNT_DECAY_TIME;
+    SetObjProperty(character, "decaylongcountat", longdecaytime);
+    return;
+  endif
+  if(onlinetime > longdecaytime)
+    var longcount := GetObjProperty(character, "longmurders");
+    longcount := longcount - 1;
+    SetObjProperty(character, "longmurders", longcount);
+    if(longcount > 0)
+      SetObjProperty(character, "decaylongcountat", (onlinetime + LONG_COUNT_DECAY_TIME));
+      if((longcount < 5) && (!GetObjProperty(character, "permared")) )
+        character.setMurderer(0);
+      endif
+    endif
+  endif
+endfunction
+
+function CheckShortTermCounts(character);
+  var shortdecaytime := GetObjProperty(character, "decayshortcountat");
+  var onlinetime := GetObjProperty(character, "onlinetimer");
+  if(!shortdecaytime)
+    shortdecaytime := onlinetime + SHORT_COUNT_DECAY_TIME;
+    SetObjProperty(character, "decayshortcountat", shortdecaytime);
+    return;
+  endif
+  if(onlinetime > shortdecaytime)
+    var shortcount := GetObjProperty(character, "shortmurders");
+    shortcount := shortcount - 1;
+    SetObjProperty(character, "shortmurders", shortcount);
+    if(shortcount == 4)
+      var pingpong := CInt(GetObjProperty(character, "pingpong"));
+      pingpong := pingpong + 1;
+      SetObjProperty(character, "pingpong", pingpong);
+      if(pingpong >= 5)
+        SetObjProperty(character, "permared", 1);
+      endif
+    endif
+    if(shortcount > 0)
+        SetObjProperty(character, "decayshortcountat", onlinetime + SHORT_COUNT_DECAY_TIME);
+    endif
+  endif
+endfunction

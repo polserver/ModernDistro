@@ -1,0 +1,7 @@
+use uo;
+use os;
+
+program guildDestroy(stone)
+  stone := stone; // stops ecompile "not used" warning
+  return 1;
+endprogram

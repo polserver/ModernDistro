@@ -1,0 +1,21 @@
+use uo;
+use cfgfile;
+
+program checkname(who)
+  var hisname := lower(who.name);
+  var cfg := ReadConfigFile("badnames");
+  var elem := FindConfigElem(cfg, hisname);
+  if(!elem)
+    return;
+  endif
+  who.name := "invalid name";
+  while (who.name == "invalid name")
+    var newname := SendTextEntryGump( who, "You have selected a name that is not valid on this shard.", TE_CANCEL_DISABLE, TE_STYLE_NORMAL, 20, "Please select a new name");
+    var elem := FindConfigElem(cfg, lower(newname));
+    if(!elem)
+      SendSysMessage(who, "Good choice, " + newname + "!");
+      who.name := newname;
+      return;
+    endif
+  endwhile
+endprogram

@@ -1,0 +1,41 @@
+use uo;
+
+
+
+use cfgfile;include "include/objtype";
+
+program cast_mark( caster, text )
+       
+    SendSysMessage( caster, "Select a rune to mark." );
+    var cast_on := Target( caster, TGTOPT_CHECK_LOS );
+
+    if (!cast_on)
+            SendSysMessage(caster, "Targetting cancelled.");
+            return;
+    endif
+
+    if (cast_on.IsRecallRune())
+		cast_on.SetDestination(caster.x, caster.y, caster.z, caster.realm);
+		SendSysMessage( caster, "You marked: " +  caster.x + " " + caster.y + " " + caster.z + " " + caster.realm );
+		if(text)
+			SetName (cast_on, "A recall rune for " + text);
+		else
+			SetName(cast_on, "a Marked Recall Rune");
+		endif
+		return 1;
+	elseif(cast_on == caster)
+		var coords := struct;
+		coords.+x := caster.x;
+		coords.+y := caster.y;
+		coords.+z := caster.z;
+		coords.+realm := caster.realm;
+		SetObjProperty(caster, "RecallDestination", coords);
+		SendSysMessage( caster, "You marked: yourself for " +  caster.x + " " + caster.y + " " + caster.z + " " + caster.realm );
+		return 1;
+	else
+		SendSysMessage(caster, "You must select a valid target.", 1, 33);
+		return 0;
+    endif
+
+   
+endprogram

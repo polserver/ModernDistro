@@ -1,0 +1,3 @@
+program concealme( who )
+    who.concealed := 0;
+endprogram

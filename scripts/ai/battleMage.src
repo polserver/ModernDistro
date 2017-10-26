@@ -1,0 +1,291 @@
+use vitals;
+use npc;
+use os;
+use uo;
+use cfgfile;
+
+include "include/client";
+include ":attributes:attributes";
+include "include/eventID";
+include "include/sysEvent";
+include "include/randName";
+include "include/vetement";
+include "include/dist";
+include "include/anchors";
+include "include/NPCBackpacks";
+include "include/skillLists";
+include ":poisonwatcher:poisons";
+include ":damage:damage";
+
+var flee_point := 0;
+var npccfg := ReadConfigFile("::npcdesc");
+
+const HALT_THRESHOLD := 10;
+var me := Self();
+var cfgfile     := ReadConfigFile("::gzone");
+var keys        := GetConfigStringKeys(cfgfile);
+var next_wander := ReadGameClock() + 30;
+var nextchk     := ReadGameClock() + 120;
+
+program CastleGuard()
+  SetObjProperty(me, "MerchantType", "BattleMage");
+  me.concealed := 1;
+  start_script("NPCKeeper", me);
+  var myanchor := GetObjProperty(me, "Anchor");
+  if(myanchor)
+    MoveObjectToLocation(me, myanchor[1], myanchor[2], myanchor[3], me.realm, MOVEOBJECT_FORCELOCATION);
+  endif
+  drop_anchor();
+  myanchor := GetObjProperty(me, "Anchor");
+  EnableEvents(SYSEVENT_ENGAGED);
+  EnableEvents(EVID_NODE);
+  SetWarMode(0);
+  set_priority(100);
+  var ev;
+  var evtext;
+  var next_wander := ReadGameClock() + 10;
+  var wanders := 9;
+  var txt;
+  var ph := SplitWords(me.name);
+  var myname := lower(ph[1]);
+  while (1)
+    ev := os::wait_for_event(120);
+	if (ev)
+      case(ev.type)
+        EVID_NODE:           foreach thing in (ev.crims)
+                               Fight(thing);
+                             endforeach
+        SYSEVENT_ENGAGED:    if((ev.source) && (!ev.source.dead))
+		                       say("Thou wilt regret thine actions, swine!");
+                               Fight(ev.source);
+                             endif
+        SYSEVENT_DAMAGED:    if((ev.source) && (!ev.source.dead))
+		                       say("Thou wilt regret thine actions, swine!");
+                               Fight(ev.source);
+                             endif
+      endcase
+	endif
+	if(ReadGameClock() >= next_wander)
+      if(coordist(me.x, me.y, myanchor[1], myanchor[2]) > 15)
+        MoveObjectToLocation(me, myanchor[1], myanchor[2], myanchor[3], me.realm, MOVEOBJECT_FORCELOCATION);
+      endif
+      next_wander := ReadGameClock() + 10;
+    endif
+    if(ReadGameClock() > nextchk)
+      lookiehere();
+      nextchk := ReadGameClock() + 120;
+    endif
+  endwhile
+endprogram
+
+function WanderMe()
+  wander();
+  if(coordist(me.x, me.y, myanchor[1], myanchor[2]) > 15)
+    MoveObjectToLocation(me, myanchor[1], myanchor[2], myanchor[3], me.realm, MOVEOBJECT_FORCELOCATION);
+  endif
+endfunction
+
+function lookiehere()
+  foreach npc in ListMobilesNearLocation(me.x, me.y, me.z, 15, me.realm)
+    foreach listing in keys
+      var range := SplitWords(cfgfile[listing].range);  //check to see if npc is in guard zone, and act accordingly
+      if((npc.x >= CInt(range[1])) && (npc.x <= CInt(range[3])) && (npc.y >= CInt(range[2])) && (npc.y <= CInt(range[4])))
+        var timer := Cint(GetObjProperty(npc, "guardstimer"));
+      	if((npc.criminal) and (!npc.dead))
+          if(timer < ReadGameClock())
+            SetObjProperty(npc, "#guardstimer", ReadGameClock() + 15);
+      	    Fight(npc);
+          endif
+      	elseif(((npc.script == "tamed") || (npc.script == "employed")) and (npc.criminal))
+          if(timer < ReadGameClock())
+            SetObjProperty(npc, "#guardstimer", ReadGameClock() + 15);
+      	    Fight(npc);
+          endif
+        elseif((!npccfg[npc.npctemplate].guardignore) and (npc.isA(POLCLASS_NPC)))
+          if(timer < ReadGameClock())
+            SetObjProperty(npc, "#guardstimer", ReadGameClock() + 15);
+      	    Fight(npc);
+          endif
+        endif
+        break;
+      endif
+    endforeach
+  endforeach
+endfunction
+
+function Fight(opponent)
+  SetAnchor( me.x, me.y, 20, 0 );
+  if(opponent.isA(POLCLASS_NPC))
+	SetObjProperty(opponent, "guardkill", 1);
+  endif
+  if((opponent.cmdlevel > 0) || (opponent.serial == me.serial))
+    SetWarMode(0);
+    opponent := 0;
+	return;
+  endif
+  if(opponent.multi.serial)
+	if(me.multi.serial != opponent.multi.serial)
+      SetWarMode(0);
+      opponent := 0;
+	  return;
+	endif
+  endif
+  var parms := {};
+  parms[1] := me.x;
+  parms[2] := me.y;
+  parms[3] := me.z;
+  SetObjProperty(me, "StartCoords", parms);
+  var tries := 0;
+  while(((Distance(me, opponent) > 7) || (!CheckLineOfSight(me, opponent))) and (tries < 5))
+    var newx := opponent.x + RandomInt(4) - RandomInt(4);
+    var newy := opponent.y + RandomInt(4) - RandomInt(4);
+    sleepms(500);
+    MoveObjectToLocation(me, newx, newy, opponent.z, me.realm, MOVEOBJECT_FORCELOCATION);
+    tries := tries + 1;
+  endwhile
+  var gate := CreateItemAtLocation(me.x, me.y, me.z, 0xdda, 1, me.realm);
+  PlaySoundEffect(gate, 0x20f);
+  sleepms(200);
+  me.concealed := 0;
+  sleepms(200);
+  DestroyItem(gate);
+  PrintTextAbove(me, "Thou wilt regret thine actions, swine!");
+  TurnToward(opponent);
+  PerformAction(me, 17);
+  opponent.frozen := 1;
+  sleep(1);
+  PlaySoundEffect(opponent, 0x2a);
+  PlayLightningBoltEffect(opponent);
+  sleepms(100);
+  PlayLightningBoltEffect(opponent);
+  sleepms(100);	
+  PlayLightningBoltEffect(opponent);
+  sleepms(100);
+  PlayLightningBoltEffect(opponent);
+  sleepms(100);
+  ApplyRawDamage(opponent, GetHp(opponent) + 10);
+  sleep(1);
+  PerformAction(me, 17);
+  sleepms(200);
+  gate := CreateItemAtLocation(me.x, me.y, me.z, 0xdda, 1, me.realm);
+  PlaySoundEffect(gate, 0x20f);
+  sleepms(200);
+  me.concealed := 1;
+  sleep(1);
+  DestroyItem(gate);
+  var oldprio := set_priority(50);
+  var loops := 0;
+  var ev;
+  var waittime := 0;
+  post_combat();
+  return;
+endfunction
+
+function post_combat()
+  DisableCombatEvents();
+  EnableMainEvents();
+  SetWarMode(0);
+  SetOpponent(0);
+  lookiehere();
+  var allpoisons := GetAllPoisons(me);
+  if(allpoisons.size() > 0)
+    sleep(1);
+    PerformAction(me, 0x22);
+    foreach poison in allpoisons
+      CureSpecific(me, poison, -1);
+    endforeach
+    PlaySoundEffect(me, 0x31);
+    sleep(1);
+  endif
+  if(GetHp(me) < GetStrength(me))
+    sleep(1);
+    PerformAction(me, 0x22);
+    SetHp(me, me.strength);
+    PlaySoundEffect(me, 0x32);
+    sleep(1);
+  endif
+  lookiehere();
+  sleep(1);
+  RestartScript(me);
+endfunction
+
+function CloseDistance( opponent )
+  case Distance( me, opponent )
+    1:
+    0:       return 1;
+    default: RunToward( opponent );
+             return 0;
+  endcase
+endfunction
+
+function CheckForCriminals(jerk)
+  if(jerk.dead)
+	return;
+  endif
+  if(jerk.criminal)
+	say("Thou wilt regret thine actions, swine!");
+	Fight(jerk);
+  endif
+endfunction
+
+function cleareventque()
+  var ev;
+  repeat
+  until(!(ev := os::wait_for_event(0)));
+endfunction
+
+function prepare_for_fight(opponent)
+  DisableMainEvents();
+  EnableCombatEvents();
+endfunction
+
+function EnableMainEvents()
+    cleareventque();
+    DisableEvents(SYSEVENT_DISENGAGED);
+    EnableEvents(SYSEVENT_ENGAGED + SYSEVENT_DAMAGED);
+    EnableEvents(SYSEVENT_ITEM_GIVEN);
+endfunction
+
+function DisableMainEvents()
+    cleareventque();
+    DisableEvents(SYSEVENT_ENGAGED + SYSEVENT_DAMAGED );
+    DisableEvents(SYSEVENT_ITEM_GIVEN);
+endfunction
+
+function EnableCombatEvents()
+    EnableEvents( SYSEVENT_ENGAGED + SYSEVENT_DAMAGED + EVID_PEACEMADE );
+endfunction
+
+function DisableCombatEvents()
+    DisableEvents( SYSEVENT_ENGAGED + SYSEVENT_DAMAGED + EVID_PEACEMADE );
+endfunction
+
+function in_combat_event_loop(opponent, loops)
+  if(GetObjProperty(me, "poison_level"))
+    sleep(1);
+    PerformAction(me, 0x22);
+    EraseObjProperty(me, "poison_level");
+    PlaySoundEffect(me, 0x31);
+    sleep(1);
+  endif
+  if(GetHp(me) < (GetStrength(me) / 2))
+    sleep(1);
+    PerformAction(me, 0x22);
+    SetHp(me, me.strength);
+    PlaySoundEffect(me, 0x32);
+    sleep(1);
+  endif
+  if(loops > 50)
+	RestartScript(me);
+	return;
+  endif
+endfunction
+
+function GoldForSkillGain( npc_skill, pc_skill, skillid )
+  var maxskill := npc_skill - pc_skill;
+  return maxskill*10;
+endfunction
+
+function SkillGainForGold(npc_level, pc_level, trainskillid, goldreceived)
+  return (goldreceived/10) + pc_level;
+endfunction

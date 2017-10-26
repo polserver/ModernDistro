@@ -1,0 +1,8 @@
+use uo;
+use util;
+
+program txtcmd_nsight( caster )
+
+        caster.setlightlevel( 0, 600 );
+
+endprogram

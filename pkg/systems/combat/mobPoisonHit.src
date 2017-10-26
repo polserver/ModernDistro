@@ -1,0 +1,35 @@
+use uo;
+use util;
+use os;
+use cfgfile;
+
+include "include/client";
+
+
+program poisonhit(param)
+  var npccfg := ReadConfigFile("::npcdesc");
+  var attacker := param[1];
+  var defender := param[2];
+  var weapon := param[3];
+  var armor := param[4];
+  var basedamage := param[5];
+  var rawdamage := param[6];
+  SetObjProperty(defender, "TempDamage", rawdamage);
+  if((RandomInt(4)+1) == 1)
+    return;
+  endif
+  var level := GetObjProperty(attacker, "poison_strength");
+  if (!level)
+    level := 1;
+  endif
+  Detach();
+  foreach mobile in ListMobilesInLineOfSight(defender, 8)
+    if(mobile != defender)
+      PrintTextAbovePrivate(defender, defender.name + " has been poisoned!", mobile);
+    endif
+  endforeach
+  PrintTextAbovePrivate(defender, "You have been poisoned by " + attacker.name +"!", defender);
+  var passparms := { defender, attacker, "poisoned weapon", level};
+  SetObjProperty(defender, "LastHit", {attacker.name, attacker.serial, "poisoned weapon" });
+  start_script(":spells:poisonDamage", passparms);
+endprogram

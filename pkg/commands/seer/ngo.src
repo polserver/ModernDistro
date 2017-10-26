@@ -1,0 +1,107 @@
+// $Id: go.src 470 2006-06-27 23:53:51Z austinheilman $
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  name:    go.src - Staff Textcommand
+//  version: 2.0c
+//  author:  MuadDib
+//
+//  Purpose: Lists and Gumps are now cached via DataFiles instead of Config files. Initial use of
+//           the command will import the /config/golocs.cfg file. New features are as follows:
+//
+//           Buttons:
+//           Goto - Will move you to the selected location.
+//           Send - Will move the object you target to the selected location.
+//           Add Button - Will add the new location to the menu version you are viewing only.
+//           Copy Button - Will copy a location you select from the menu version you are viewing
+//                         to the other menu version.
+//           Edit Button - Allows you to rename a location, change the coords, or delete the
+//                         location totally.
+//           Public/Private Button - This button will switch you the menu version the button states.
+//
+//           Other Abilities:
+//           Text Parsing from the command line. If you pass "xyz" as the location to go to, it will
+//              expect the x and y at least with it. The format is ".go xyz x y [z] [realm]". Z and
+//              realm are optional.
+//           Location Parsing from the command line. If you pass the location name from the command
+//              line, it will auto move you to that location.
+//           Refresh. If you pass the word "refresh" on the command line, it will refresh all the
+//              gumps for your private gumps, and the main gump.
+//
+////////////////////////////////////////////////////////////////////////////////////////////////////
+use polsys;
+use uo;
+use os;
+use datafile;
+
+include ":datafile:datafile";
+include ":gumps:gumps";
+include ":gumps:gumpPrompt";
+include ":gumps:gumps_ex";
+include ":gumps:yesNo";
+include ":commands:goAdd";
+include ":commands:goEdit";
+include ":commands:goText";
+include ":commands:goGumps";
+include ":commands:goTemplate";
+
+CONST ADD_NEW_PUBLIC      := 0x20001;
+CONST ADD_NEW_PRIVATE     := 0x20002;
+CONST COPY_PUBLIC_ITEM    := 0x20003;
+CONST COPY_PRIVATE_ITEM   := 0x20004;
+CONST EDIT_PUBLIC_ITEM    := 0x20005;
+CONST EDIT_PRIVATE_ITEM   := 0x20006;
+CONST UPDATE_BUTTON       := 0x20007;
+CONST DELETE_BUTTON       := 0x20008;
+CONST SHOW_PUBLIC_INDEX   := 0x20009;
+CONST SHOW_PRIVATE_INDEX  := 0x2000A;
+
+CONST BUILD_FROM_OLD      := 0x1;
+
+var go_Reserved_Words := array("refresh", "xyz");
+var go_data_gumps := DFOpenDataFile(":commands:GoGumps", DF_CREATE);
+var go_data_file  := DFOpenDataFile(":commands:GoFile", DF_CREATE);
+var go_elem       := DFFindElement(go_data_file, "GoList", DF_CREATE);
+var go_prop_base  := go_elem.GetProp("base_Distro");
+var go_keys_base  := go_prop_base.Keys();
+var go_prop;
+var go_keys;
+var num_keys;
+var edit_name;
+var edit_update;
+var edit_delete;
+var xg_pos;
+var yg_pos;
+var zg_pos;
+
+program command_go( who, text )
+
+	Go_CheckInit(who);
+
+	// See if there is an element in the DataFile that matches their
+	// account name.
+	go_prop := go_elem.GetProp( who.acctname );
+
+	// If there is no Element in the DataFile that matches their account name
+	// let's create it now.
+	if ( !go_prop )
+		var temp := dictionary;
+		go_elem.SetProp(who.acctname, temp);
+		go_prop  := go_elem.GetProp(who.acctname);
+	endif
+
+	go_keys  := go_prop.Keys();
+
+	if( Go_Parse_Text(who, text) )
+		return 0;
+	endif
+
+	var gump_Open := GetObjProperty(who, "#Go_Gump");
+	case(gump_Open)
+		1: Go_LocationIndex(who);
+		2: Go_LocationIndex(who, who.acctname);
+		default: Go_LocationIndex(who);
+	endcase
+
+
+endprogram

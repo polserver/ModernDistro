@@ -1,0 +1,602 @@
+use uo;
+use util;
+use os;
+
+include ":gumps:old/old-gumps";
+include "include/gumpUtil";
+include "util/bank";
+include ":attributes:attributes";
+include ":gmtools:info";
+include ":gmtools:accountLayout";
+
+var gmpages := GetGlobalProperty("counpages");
+
+program textcmd_pagegm(who)
+  pagemenu(who);
+endprogram
+
+function pagemenu( who )
+  GFInitGump(0, 0);
+  GFPage(0);
+  GFGumpPic(  0,   0,  206);
+  GFGumpPic( 44,   0,  201);
+  GFGumpPic(244,   0,  201);
+  GFGumpPic(444,   0,  201);
+  GFGumpPic(840,   0,  207);
+  GFGumpPic(  0,  40,  202);
+  GFGumpPic( 44,  40, 2604);
+  GFGumpPic(244,  40, 2604);
+  GFGumpPic(444,  40, 2604);
+  GFGumpPic(840,  40,  203);
+  GFGumpPic(  0, 350,  204);
+  GFGumpPic( 44, 350,  233);
+  GFGumpPic(240, 350,  233);
+  GFGumpPic(440, 350,  233);
+  GFGumpPic(840, 350,  205);
+  GFGumpPic( 40,  35,   40);
+  GFGumpPic( 95,  35,   40);
+  GFGumpPic(185,  35,   40);
+  GFGumpPic(275,  35,   40);
+  GFGumpPic(365,  35,   40);
+  GFGumpPic(455,  35,   40);
+  GFGumpPic(545,  35,   40);
+  GFGumpPic( 40,  65,   40);
+  GFGumpPic( 95,  65,   40);
+  GFGumpPic(185,  65,   40);
+  GFGumpPic(275,  65,   40);
+  GFGumpPic(365,  65,   40);
+  GFGumpPic(455,  65,   40);
+  GFGumpPic(545,  65,   40);
+  GFGumpPic(635,  35,   40);
+  GFGumpPic(725,  35,   40);
+  GFGumpPic(745,  35,   40);
+  GFGumpPic(635,  65,   40);
+  GFGumpPic(725,  65,   40);
+  GFGumpPic(745,  65,   40);
+  GFTextLine(205,  15,    0, "Counselor Page Menu, select an option");
+  GFTextLine( 50,  80,  500, "D");
+  GFTextLine( 70,  80,  500, "G");
+  GFTextLine( 90,  80,  500, "M");
+  GFTextLine(135,  80,  500, "Name");
+  GFTextLine(295,  80,  500, "Request");
+  GFButtonPage(225,  47, 2117, 2118, 1);
+  GFButtonPage(255,  47, 2117, 2118, 2);
+  GFButtonPage(285,  47, 2117, 2118, 3);
+  GFButtonPage(315,  47, 2117, 2118, 4);
+  GFButtonPage(345,  47, 2117, 2118, 5);
+  GFButtonPage(375,  47, 2117, 2118, 6);
+  GFButtonPage(405,  47, 2117, 2118, 7);
+  GFButtonPage(435,  47, 2117, 2118, 8);
+  GFButtonPage(465,  47, 2117, 2118, 9);
+  GFButtonPage(495,  47, 2117, 2118, 10);
+  ComposeSubMenu();
+  var res := GFSendGump(who);
+  if(res[0] == 0)
+    SendSysMessage(who, "Cancelled");
+    return;
+  else
+    var hld := Cint(res[0] / 100);
+    var ind := gmpages[hld];
+    var val := (res[0] - (hld * 100));
+    var chr := SystemFindObjectBySerial(ind[3]);
+    case(val)
+      2: gmpages := RemoveElement(gmpages, hld);
+         SetGlobalProperty("counpages", gmpages);
+         SendSysMessage(who, "Page Deleted.");
+      3: if(!chr)
+           SendSysMessage(who, "ERROR: Could not find mobile");
+           return;
+         endif
+         MoveObjectToLocation(who, chr.x, chr.y, chr.z, chr.realm, MOVEOBJECT_FORCELOCATION );
+         SendSysMessage(who, "Going to " + chr.name);
+      4: if(!chr)
+           SendSysMessage(who, "ERROR: Could not find mobile");
+           return;
+         endif
+         var themessage := RequestInput(who, who.backpack, "What message would you like to send to " + chr.name + "?");
+         if (!themessage)
+           SendSysMessage(who,"cancelled");
+           return;
+         endif
+         SendSysMessage(chr, "Message from " + who.name + ": " + themessage);
+         foreach staff in EnumerateOnlineCharacters()
+           if ( (staff.cmdlevel == 5) && (GetObjProperty(staff, "HearMsgs") ) )
+             SendSysMessage(staff, "Msg from " + who.name + " to " + chr.name + ": " + themessage);
+           endif
+         endforeach
+    endcase
+  endif
+  pagemenu(who);
+endfunction
+
+function ComposeSubMenu()
+  var num := 1;
+  var amt := 2;
+  var who, txt, ser, i;
+  var val := 1;
+  GFPage(1);
+  foreach thing in gmpages
+    if(num > 10)
+      GFPage(amt);
+      amt := amt + 1;
+      num := 1;
+    endif
+    who := thing[1];
+    txt := thing[2];
+    ser := thing[3];
+    i := (num * 20) + 90;
+    GFButtonIDC( 53, i, 2361, 2362, 1, (val*100)+2);
+    GFButtonIDC( 73, i, 2361, 2362, 1, (val*100)+3);
+    GFButtonIDC( 93, i, 2361, 2362, 1, (val*100)+4);
+    GFTextLine(135, (i - 5), 0, who);
+    GFTextLine(285, (i - 5), 0, txt);
+    val := val + 1;
+    num := num + 1;
+  endforeach
+endfunction
+
+function RemoveElement(arry, position)
+  var newarray := { };
+  foreach thing in arry
+    if(thing != arry[position])
+      newarray.append(thing);
+    endif
+  endforeach
+  return newarray;
+endfunction
+
+function GFButtonIDC(x, y, release, press, close, retval)
+        var line := "button " + CStr(gfref.x + Cint(x)) + " " + CStr(gfref.y + Cint(y));
+        line := line + " " + CStr(Cint(release)) + " " + CStr(Cint(press)) + " ";
+        line := line + Cstr(close) + " 0 ";
+        line := line + CStr(retval);
+        gflayout.append( line );
+endfunction
+
+function maintainaccountgump(who, chr)
+  var trg := FindAccount(chr.acctname);
+  if(!trg)
+    SendSysMessage(who,"cancelled");
+  else
+    if(!trg.getprop("email"));
+      trg.setprop("email", "");
+    endif
+    if(!trg.getprop("notes"));
+      trg.setprop("notes", "");
+    endif
+    if(!trg.getprop("releaseday"));
+      trg.setprop("releaseday", "");
+    endif
+    testdata[16] := trg.name;
+    if(trg.banned == 1)
+      testdata[17] := "banned";
+    elseif(trg.enabled == 0)
+      testdata[17] := "jailed";
+    else
+      testdata[17] := "active";
+    endif
+    testdata[18] := trg.GetCharacter(1).name;
+    if(testdata[18] == error)
+      testdata[18] := "";
+    endif
+    testdata[19] := trg.GetCharacter(2).name;
+    if(testdata[19] == error)
+      testdata[19] := "";
+    endif
+    testdata[20] := trg.GetCharacter(3).name;
+    if(testdata[20] == error)
+      testdata[20] := "";
+    endif
+    testdata[21] := trg.GetCharacter(4).name;
+    if(testdata[21] == error)
+      testdata[21] := "";
+    endif
+    testdata[22] := trg.GetCharacter(5).name;
+    if(testdata[22] == error)
+      testdata[22] := "";
+    endif
+    var mail := trg.getprop("email");
+    if(!mail)
+      mail := "Not Provided";
+    endif
+    testdata[23] := mail;
+    if(!trg)
+      SendSysMessage(who,"canceled");
+      return;
+    endif
+    SetNotes(trg.name); // Modified by Shinigami
+    if(trg.enabled == 0)
+      testlayout.append("button  400 195 2662 2662 1 0 10");    //jail index box
+      testlayout.append("gumppic 400 185 2660 2660 1 0 10");    //jail index box
+      testlayout.append("text    320 190  910 37"); //jail duration text   (white)
+      testlayout.append("text    440 190  910 38"); //jail duration text   (white)
+      testlayout.append("text    408 190  100 39"); //jail tine left text  (blue)
+      var releaseday := trg.getprop("releaseday");
+      var timeremaining :=(((releaseday - ReadGameClock())/86400) + 1);
+      if(timeremaining < 2)
+        timeremaining := 0;
+      endif
+      testdata[40] := timeremaining;
+    endif
+    var accounttool := SendDialogGump(who, testlayout, testdata);
+    case(accounttool[0])
+      2: jail(who, trg.name);
+      3: Notes(trg.name, accounttool); //notes(who, trg.name); // Modified by Shinigami
+      4: editemail(who, trg);
+      5: info(who, trg.GetCharacter(1).serial, trg);
+      6: info(who, trg.GetCharacter(2).serial, trg);
+      7: info(who, trg.GetCharacter(3).serial, trg);
+      8: info(who, trg.GetCharacter(4).serial, trg);
+      9: info(who, trg.GetCharacter(5).serial, trg);
+     10: editjail(who, trg);
+     11: ban(who, trg.name);
+    endcase
+  endif
+  pagemenu(who);
+endfunction
+
+function SetNotes(acctname) // Added by Shinigami
+  var act:=FindAccount(acctname);
+  var note:=act.GetProp("notes");
+  if((!note) ||(note==error))
+    note:="";
+  endif
+  var split:=SplitWords(note);
+  var width:=0;
+  var lines:=0;
+  var index:=1;
+  while((index<=len(split)) &&(lines<=12))
+    if(width==0)
+      var testword:=split[index];
+      lines:=lines+1;
+      testdata[25+lines] := testword;
+      width := GumpTextWidthFast(testword);
+      index:=index+1;
+    else
+      var testword:=" "+split[index];
+      var testwidth:=GumpTextWidthFast(testword);
+      if(width+testwidth<CInt(790/1.5))
+        testdata[25+lines]:=testdata[25+lines]+testword;
+        width:=width+testwidth;
+        index:=index+1;
+      else
+        width:=0;
+      endif
+    endif
+  endwhile
+  if(lines>12)
+    testdata[24+lines]:=testdata[24+lines]+"...";
+  else
+    while(lines<12)
+      lines:=lines+1;
+      testdata[25+lines]:="";
+    endwhile
+  endif
+endfunction
+
+function editjail(who, trg);
+  var val := CInt(SendTextEntryGump(who, "enter new total?(Max 14)", 40));
+  var time;
+  case(val)
+     1: time := 86400;
+     2: time := 172800;
+     3: time := 259200;
+     4: time := 345600;
+     5: time := 432000;
+     6: time := 518400;
+     7: time := 604800;
+     8: time := 691200;
+     9: time := 777600;
+    10: time := 864000;
+    11: time := 950400;
+    12: time := 1036800;
+    13: time := 1123200;
+    14: time := 1209600;
+  endcase
+  trg.setprop("releaseday",(ReadGameClock() + time));
+endfunction
+
+function ban(who, acctname);
+  var banverify := SendDialogGump(who, banlayout, bandata);
+  var act := FindAccount(acctname);
+  case(banverify[0])
+    1: var characters := EnumerateOnlineCharacters();
+       foreach char in characters
+         if(char.acctname == acctname)
+           SendSysMessage(char, "You were kicked by " + who.name + ".");
+           SetObjProperty(char,"justbanned", 1);
+           DisconnectClient(char);
+           break;
+         endif
+       endforeach
+       foreach chr in characters
+         if(chr.cmdlevel > 1)
+           SendSysMessage(chr, "account " + acctname + " has been banned.");
+         endif
+       endforeach
+       Detach();
+       sleep(10);
+       act.ban();
+           var x, i;
+       WipeBankBox(act.GetCharacter(1));
+           for(i := 1; i <= 25; i := i + 1)
+             x := GetEquipmentByLayer(act.GetCharacter(1), i);
+             MoveItemToContainer(x, act.GetCharacter(1).backpack);
+           endfor
+       DestroyItem(act.GetCharacter(1).backpack);
+       act.DeleteCharacter(1);
+       i := 0;
+       WipeBankBox(act.GetCharacter(2));
+           for(i := 1; i <= 25; i := i + 1)
+             x := GetEquipmentByLayer(act.GetCharacter(2), i);
+             MoveItemToContainer(x, act.GetCharacter(2).backpack);
+           endfor
+       DestroyItem(act.GetCharacter(2).backpack);
+       act.DeleteCharacter(2);
+       i := 0;
+       WipeBankBox(act.GetCharacter(3));
+           for(i := 1; i <= 25; i := i + 1)
+             x := GetEquipmentByLayer(act.GetCharacter(3), i);
+             MoveItemToContainer(x, act.GetCharacter(3).backpack);
+           endfor
+       DestroyItem(act.GetCharacter(3).backpack);
+       act.DeleteCharacter(3);
+       i := 0;
+       WipeBankBox(act.GetCharacter(4));
+           for(i := 1; i <= 25; i := i + 1)
+             x := GetEquipmentByLayer(act.GetCharacter(4), i);
+             MoveItemToContainer(x, act.GetCharacter(4).backpack);
+           endfor
+       DestroyItem(act.GetCharacter(4).backpack);
+       act.DeleteCharacter(4);
+       i := 0;
+       WipeBankBox(act.GetCharacter(5));
+           for(i := 1; i <= 24; i := i + 1)
+             x := GetEquipmentByLayer(act.GetCharacter(5), i);
+             MoveItemToContainer(x, act.GetCharacter(5).backpack);
+           endfor
+       DestroyItem(act.GetCharacter(5).backpack);
+       act.DeleteCharacter(5);
+    2: SendSysMessage(who,"cancelled");
+       return;
+  endcase
+endfunction
+
+function Notes(acctname, result) // Added by Shinigami
+  var note:=result[25];
+  note[1, find(note, ": ", 1)+1]:="";
+  var subnote;
+  var i;
+  for(i:=26; i<=36; i:=i+1)
+    subnote:=result[i];
+    subnote[1, find(subnote, ": ", 1)+1]:="";
+    if(subnote!="")
+      note:=note+" "+subnote;
+    endif
+  endfor
+  var act:=FindAccount(acctname);
+  act.setprop("notes", note);
+endfunction
+
+function editemail(who, trg);
+  var val := CStr(SendTextEntryGump(who, "enter the new email address?", 40));
+  trg.setprop("email", val);
+endfunction
+
+function jail(who, acctname);
+  var val := CInt(SendTextEntryGump(who, "How many days will this account remain jailed?(Max 14)", 40));
+  var time;
+  case(val)
+     1: time := 86400;
+     2: time := 172800;
+     3: time := 259200;
+     4: time := 345600;
+     5: time := 432000;
+     6: time := 518400;
+     7: time := 604800;
+     8: time := 691200;
+     9: time := 777600;
+    10: time := 864000;
+    11: time := 950400;
+    12: time := 1036800;
+    13: time := 1123200;
+    14: time := 1209600;
+  endcase
+  var act := FindAccount(acctname);
+  act.setprop("releaseday",(ReadGameClock() + time));
+  var characters := EnumerateOnlineCharacters();
+  act.disable();
+  foreach char in characters
+    if(char.acctname == acctname)
+      SendSysMessage(char, "You were kicked by " + who.name + ".");
+      DisconnectClient(char);
+      break;
+    endif
+  endforeach
+endfunction
+
+function GetAccountLayoutLength();
+    return(len(gotolayout));
+endfunction
+
+function GetAccountDataLength();
+    return(len(accountdata));
+endfunction
+
+function info(who, character, trg)
+  var online := 0;
+  foreach char in EnumerateOnlineCharacters()
+    if(char.serial == character)
+      character := char;
+      online := 1;
+    endif
+  endforeach
+  if(online == 0)
+    character := SystemFindObjectBySerial(character, SYSFIND_SEARCH_OFFLINE_MOBILES);
+  endif
+  if(!character)
+     SendSysMessage(who, "That player does not exist. Cancelled.");
+  else
+    infodata[1] := "Info On: " + character.name;
+    FillInStats(character);
+    FillInSkills(character);
+    FillInWeapon(character);
+    var result := SendDialogGump(who, infolayout, infodata);
+    var reskey;
+    foreach key in(result.keys)
+      if(key >= 1000)
+        reskey := key;
+      endif
+    endforeach
+    case(result[0])
+       1:   //fall through intentional
+       2:
+       3:
+       4:
+       5:
+       6:
+       7:
+       9:
+      11:
+      14:
+      13:
+      15: EditStat(who, character, result[0], trg);
+      16: EditSkill(who, character, reskey-1000, trg);
+      17: character.frozen := 1; SendSysMessage(who, character.name + " is frozen.");
+      18: character.frozen := 0; SendSysMessage(who, character.name + " is unfrozen.");
+      19: if(!character.isA(POLCLASS_NPC))
+            SendSysMessage(character, "You were kicked by " + who.name + ".");
+            DisconnectClient(character);
+          endif
+      20: MoveObjectToLocation(character, 5288, 1176, 0, "britannia"); // newmap problem
+      21: if(!character.isA(POLCLASS_NPC))
+            var bankbox := FindBankBox(character);
+            SendOpenSpecialContainer(who, bankbox);
+          else
+            SendSysMessage(who, "Only can be used on players.");
+          endif
+      22: if(!character.isA(POLCLASS_NPC))
+            SendOpenSpecialContainer(who, character.backpack);
+          else
+            SendSysMessage(who, "Only can be used on players.");
+          endif
+      23: MoveObjectToLocation(character, who.x, who.y, who.z, who.realm);
+      24: SetName(character, RequestInput(who, who.backpack, "Enter a new name."));
+    endcase
+  endif
+endfunction
+
+function FillInStats(who)
+  var levelname;
+  case(who.cmdlevel)
+      0: levelname := "Player";
+      1: levelname := "Counselor";
+      2: levelname := "Seer";
+      3: levelname := "GM";
+      4: levelname := "Admin";
+      5: levelname := "Development";
+  endcase
+  infodata[8] := GetStrength(who);
+  infodata[10] := GetIntelligence(who);
+  infodata[12] := GetDexterity(who);
+  infodata[14] := who.x;
+  infodata[16] := who.y;
+  infodata[18] := who.z;
+  infodata[20] := GetHp(who) + "/" + GetMaxHp(who);
+  infodata[22] := GetMana(who) + "/" + GetMaxMana(who);
+  infodata[24] := GetStamina(who) + "/" + GetMaxStamina(who);
+  infodata[26] := who.ar;
+  infodata[28] := who.graphic;
+  infodata[30] := who.color;
+  infodata[144] := levelname;
+  infodata[146] := who.acctname;
+endfunction
+
+function FillInSkills(who)
+  var datindx;
+  var attribindex := 1;
+  var attribs := array;
+  attribs := GetAttributeIds();
+  for(datindx := 32; datindx <= 128; datindx := datindx + 2)
+    infodata[datindx] := GetAttribute(who, attribs[attribindex]);
+    attribindex += 1;
+   endfor
+endfunction
+
+function FillInWeapon(who)
+  var weapfile := ReadConfigFile(":combat:itemdesc");
+  var npcfile := ReadConfigFile("::npcdesc");
+  if(who.weapon)
+    var idx := find(who.weapon.name, "[", 1); //ignore maker's mark
+    if(idx!=0)
+      var tempn := who.weapon.desc;
+      tempn := tempn[1,idx-1];
+      infodata[138] := tempn;
+    else
+      if(who.weapon.desc == "nodraw")
+        infodata[138] := "Wrestling";
+      else
+        infodata[138] := who.weapon.desc;
+      endif
+    endif
+    var dam := weapfile[who.weapon.objtype].Damage;
+    if(!dam)
+      infodata[140] := "n/a";
+    else
+      infodata[140] := dam;
+    endif
+    infodata[142] := who.weapon.hp + " / " + who.weapon.maxhp;
+   else
+    infodata[138] := "n/a";
+    infodata[140] := "n/a";
+    infodata[142] := "n/a";
+    if(who.isA(POLCLASS_NPC)) //Hi, i'm an NPC
+      var dam := npcfile[who.npctemplate].AttackDamage;
+      var weap := npcfile[who.npctemplate].AttackSkillId;
+      var ar := npcfile[who.npctemplate].AR;
+      if(weap)
+        infodata[138] := weap;
+      endif
+      if(dam)
+        infodata[140] := dam;
+      endif
+      if(ar)
+        infodata[142] := "AR: " + ar;
+      endif
+    endif
+  endif
+endfunction
+
+function EditStat(who, character, result, trg)
+    SendSysMessage(who, "Caution! Values are changed immediately, Integers only!. Hit ESC to cancel.");
+    var val := CInt(RequestInput(who, who.backpack, "Enter a new value."));
+    if(!val)
+      SendSysMessage(who, "Cancelled.");
+    else
+      case(result)
+         1: SetBaseStrength(character,val);
+         2: SetBaseIntelligence(character,val);
+         3: SetBaseDexterity(character,val);
+         4: MoveObjectToLocation(character, val, character.y, character.z, character.realm);
+         5: MoveObjectToLocation(character, character.x, val, character.z, character.realm);
+         6: MoveObjectToLocation(character, character.x, character.y, val, character.realm);
+         7: SetHp(character, val);
+         9: SetMana(character, val);
+        11: SetStamina(character, val);
+        13: character.ar_mod := 0;
+            character.ar_mod := val - character.ar;
+        14: character.graphic := val;
+        15: character.color := val;
+      endcase
+    endif
+endfunction
+
+function EditSkill(who, character, skill, trg);
+    SendSysMessage(who, "Caution! Values are changed immediately, Integers only!. Hit ESC to cancel.");
+    var val := CInt(RequestInput(who, who.backpack, "Enter a new value.")) * 10;
+    if((!val) &&(val != 0))
+      SendSysMessage(who, "Cancelled.");
+    else
+      SetBaseSkillBaseValue(character, skill, val);
+    endif
+endfunction

@@ -1,0 +1,33 @@
+include ":magery:summon";
+include "include/spellRestrictions";
+
+
+program chrcast_sfamiliar( parms )
+  var circle := 1;
+  var delivery := "notarget";
+  var noto := "neutral";
+  var result := maincast(parms, delivery, circle, noto, 608);
+  if(result == 0)
+    return;
+  endif
+  var caster := result[1];
+
+var fey :=systemfindobjectbyserial(getobjproperty(caster, "fey"));
+
+if(fey)
+MoveObjectToLocation(fey,0,0,0, fey.realm,MOVEOBJECT_FORCELOCATION);
+ApplyRawDamage(fey, GetHp(fey) + 10);
+eraseobjproperty(caster, "fey");
+endif
+
+var wisp := Createnpcfromtemplate("fiend", caster.x, caster.y, caster.z, 0, caster.realm);
+playsoundeffect(wisp, 534);
+wisp.setmaster(caster);
+setobjproperty(wisp, "master", caster.serial);
+setobjproperty(wisp, "fey", 1);
+setobjproperty(wisp, "summoned", 1);
+setobjproperty(caster, "fey", wisp.serial);
+wisp.script:= "summoned";
+restartscript(wisp);
+
+endprogram

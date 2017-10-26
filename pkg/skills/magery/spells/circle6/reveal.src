@@ -1,0 +1,60 @@
+/////////////////////////////////////////////////////////////////////////////
+// I chose to leave this spell as is rather than convert to the new Distro //
+// version of it.                                                          //
+/////////////////////////////////////////////////////////////////////////////
+
+use uo;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+
+
+program reveal_hider ( parms )
+  var caster := parms[1];
+  var info := parms[2];
+  var cast_on := MS_TargetCoordinates(caster, info.targ, "Select a target.");
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+  if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+        return 0;
+  endif
+  
+  var range := ( GetAttribute( caster, MAGERY  )/10 ) - 5;
+  if (range < 1)
+	range := 1;
+  endif
+  var hiders := ListMobilesNearLocationEx( caster.x, caster.y, caster.z, range, LISTEX_FLAG_HIDDEN, caster.realm );
+  var numfound := 0;
+  PlaySoundEffect(caster, SFX_1FE);
+  if(len(hiders) > 0)
+	foreach mobile in hiders
+	  if( Found( caster,  mobile) )
+		numfound := 1;
+		mobile.hidden := 0;
+		PrintTextAbovePrivate( mobile, "You have been revealed!", mobile );
+		PrintTextAbovePrivate( mobile, "You have found someone!!", caster );
+		PlaySoundEffect(mobile, SFX_1FE);
+	  endif
+	endforeach
+  endif
+  if (!numfound)
+    PrintTextAbovePrivate( caster, "You didnt find any anyone.", caster );
+  endif
+endprogram
+
+function Found( finder, hider )
+  var magic_skill := Resisted(6, finder, hider, GetAttribute( finder, MAGERY ));
+  var resist := (GetAttribute( finder, RESISTING_SPELLS)/1.5);
+  if ( magic_skill > resist )
+	return 1;
+  else
+	return 0;
+  endif
+endfunction

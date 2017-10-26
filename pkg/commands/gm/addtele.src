@@ -1,0 +1,60 @@
+use uo;
+use cfgfile;
+
+
+program addteleporter(who)
+  var elem := {};
+  var cfg, maxint, origin_realm, where_to_realm;
+  elem.+pname;
+  elem.+pvalue;
+  var elems := array;
+  origin_realm := who.realm; // added to record the realm where user was before selecting destination.
+  SendSysMessage(who, "Where would you like the destination to be?");
+  SendSysMessage(who, "You can .goto, .goxyz, or walk to the destination");
+  var whereto := TargetCoordinates(who);
+  where_to_realm := who.realm; // Added to record where the user was after selecting destination.
+  if (!whereto)
+    SendSysMessage(who, "Targetting cancelled");
+    return;
+  endif
+  // added realm support to teleporters cfg file
+  elem.pname := "fromx";
+  elem.pvalue := who.x;
+  elems.append(elem);
+  elem.pname := "fromy";
+  elem.pvalue := who.y;
+  elems.append(elem);
+  elem.pname := "fromz";
+  elem.pvalue := GetMapInfo(who.x, who.y, origin_realm).z;
+  elems.append(elem);
+  elem.pname := "fromrealm";
+  elem.pvalue := origin_realm;
+  elems.append(elem);
+  elem.pname := "tox";
+  elem.pvalue := whereto.x;
+  elems.append(elem);
+  elem.pname := "toy";
+  elem.pvalue := whereto.y;
+  elems.append(elem);
+  elem.pname := "toz";
+  elem.pvalue := whereto.z;
+  elems.append(elem);
+  elem.pname := "torealm";
+  elem.pvalue := where_to_realm;
+  elems.append(elem);
+  cfg := ReadConfigFile("teleporters");
+  maxint := GetConfigMaxIntKey(cfg) + 1;
+  AppendConfigFileElem("teleporters", "teleporter", maxint, elems );
+  print("adding " + elems + " to teleporter");
+  UnloadConfigFile("teleporters");
+  var teleporter := CreateItemAtLocation(who.x, who.y, who.z, 25088, 1, origin_realm);
+  if(teleporter)
+    SetObjProperty( teleporter, "DestX", whereto.x );
+    SetObjProperty( teleporter, "DestY", whereto.Y );
+    SetObjProperty( teleporter, "DestZ", GetMapInfo(whereto.x, whereto.y, where_to_realm).z );
+    SetObjProperty( teleporter, "Realm", where_to_realm );
+
+  else
+    SendSysMessage( who, "Error: " + teleporter.errortext  );
+  endif
+endprogram

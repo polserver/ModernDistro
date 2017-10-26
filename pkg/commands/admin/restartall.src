@@ -1,0 +1,23 @@
+use uo;
+use os;
+
+var number := 0;
+program npcres( you )
+
+set_critical(0);
+
+var x, y, z;
+for( x := 6144; x > 16; x := x  - 32)
+   SendSysMessage(you, "Restarting NPCs, X=" + x );
+    for( y := 16; y < 4096; y := y + 32 )
+        for( z := -60; z <= 60; z := z + 30 )
+            foreach npc in ListMobilesNearLocation( x, y, z, 32, you.realm )
+		RestartScript( npc );
+		number := number + 1;
+            endforeach
+        endfor
+    endfor
+    SendSysMessage(you, "Total NPCs restarted:" + number);
+endfor
+
+endprogram

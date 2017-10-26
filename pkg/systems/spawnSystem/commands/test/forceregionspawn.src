@@ -1,0 +1,40 @@
+/*
+
+	spawnSystem originally created by Austin for the 0.97 Distro
+	
+	Bugs fixed by Edwards
+	
+	Adapted for the Basic Distro by Yukiko 10-Sep-2015
+
+
+*/
+use uo;
+use os;
+use polsys;
+
+
+include ":spawnsystem:engines";
+include ":spawnsystem:groups";
+include ":spawnsystem:regions";
+
+program textcommand_ForceRegionSpawn( mobile, region_name )
+
+		if( !region_name )
+                SendSysMessage( mobile, "Usage is .ForceRegionSpawn <region name>" );
+                return 0;
+        endif
+
+        foreach group_name in ( SS_GetGroupsInRegion( region_name ).Keys() )
+                var realm_name := SS_GetRegionRealm( region_name );
+                var engine_name := SS_GetGroupEngine( group_name );
+                var script := SS_StartSpawnEngine( engine_name, realm_name, region_name, group_name );
+                if( script.errortext )
+                        Broadcast( "Error: Unable to start engine ("+engine_name+") for group ("+group_name+") in region ("+region_name+"). ->"+script.errortext, color := 33 );
+                endif
+
+                SS_SetRegionSpawnTime( region_name, POLCore().systime );
+                SleepMS(10);
+        endforeach
+
+        return 1;
+endprogram

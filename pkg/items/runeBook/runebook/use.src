@@ -1,0 +1,98 @@
+use uo;
+use os;
+use math;
+use cliloc;
+
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+include ":runebook:runebookFunctions";
+include ":runebook:customSpells";
+include "include/itemUtil";
+
+program use_Runebook( who, book )
+
+	if( !useItem_check( who, book, DEFAULT_ITEM ))
+		return 0;
+	endif
+
+	var charge_prop := GetObjProperty( book, "%Charges%" );
+	if( TypeOf( charge_prop ) != "Dictionary" )
+		charge_prop := dictionary { "charges" -> 0, "max_charges" -> 5 };
+		SetObjProperty(book, "%Charges%", charge_prop);
+	endif
+ 
+	var charges := charge_prop["charges"];
+	if( !charges )
+		charges := 0;
+	endif
+
+	var max_charges := charge_prop["max_charges"];
+	if( !max_charges )
+		max_charges := 5;
+	endif
+
+	var book_gump := CreateRunebookGump( who, book );
+
+	var result := GFSendGump( who, book_gump );
+
+	if( result[0] == 0 )
+		return 0;
+	elseif( result[0] == 50 )
+		if( book.movable == 0 )
+			SendSysMessageCL ( who, 502413, color := 0x21 ); // That cannot be done while the book is locked down.
+			return 0;
+		else
+			SetBookName( book, who, 0 );
+			return 1;
+		endif
+	endif
+
+	if( result[0] >= 101 && result[0] <= 120 )
+		if( charges < 1 )
+			SendSysMessageCL ( who, 502412, color := 0x21 ); // There are no charges left on that item.
+			return 0;
+		endif
+  
+		var rune_info := GetRuneDetails( book, ( result[0]-100 ));
+		if( !rune_info )
+			return 0;
+		endif
+  
+		runebookRecall( who, rune_info, book, charges, 1 );
+		return 1;
+	elseif( result[0] >= 201 && result[0] <= 220 )
+		var rune_info := GetRuneDetails( book, ( result[0]-200 ));
+		runebookRecall( who, rune_info, book, charges );
+		return 1;
+	elseif( result[0] >= 301 && result[0] <= 320 )
+		var rune_info := GetRuneDetails( book, ( result[0]-300 ));
+		runebookGate( who, rune_info, book );
+		return 1;
+	elseif( result[0] >= 401 && result[0] <= 420 )
+		var rune_info := GetRuneDetails( book, ( result[0]-400 ));
+		runebookSacredJourney( who, rune_info, book );
+		return 1;
+	elseif( result[0] >= 501 && result[0] <= 520 )
+		if( book.movable == 0 )
+			SendSysMessageCL ( who, 502413, color := 0x21 ); // That cannot be done while the book is locked down.
+			return 0;
+		else
+			var rune_info := GetRuneDetails( book, ( result[0]-500 ));
+			var rune := CreateItemInBackpack( who, 0x1F14 );
+			SetName( rune, rune_info.name );
+			SetObjProperty( rune, "Destination", rune_info );
+			rune.color := rune_info.color;
+			DeleteRune( book, ( result[0]-500 ));
+			return 1;
+		endif
+	elseif( result[0] >= 601 && result[0] <= 620 )
+		if( book.movable == 0 )
+			SendSysMessageCL ( who, 502413, color := 0x21 ); // That cannot be done while the book is locked down.
+			return 0;
+		else
+			SetDefault( book, who, ( result[0]-600 ));
+			return 1;
+		endif
+	endif
+	return 1;
+endprogram

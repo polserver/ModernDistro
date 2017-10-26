@@ -1,0 +1,11 @@
+use uo;
+
+program textcmd_unbequip( who )
+    SendSysMessage( who, "What shall be unequipped?", color := 88 );
+
+    var what := Target(who);
+    if (!what)
+        return;
+    endif
+    MoveObjectToLocation(what, who.x, who.y, who.z, who.realm, MOVEOBJECT_FORCELOCATION);
+ endprogram

@@ -1,0 +1,248 @@
+use uo;
+use os;
+use util;
+include ":attributes:attributes";
+
+program spawnpointcontrol(spawnpoint)
+  var spawn := GetObjProperty(spawnpoint, "Spawn");
+  var amount := GetObjProperty(spawnpoint, "Amount");
+  var i, x;
+  var spawnqueue := {};
+  var children := {};
+  spawn := GetObjProperty(spawnpoint, "Spawn");
+  while(spawn == "NONE")
+    sleep(10);
+    spawn := GetObjProperty(spawnpoint, "Spawn");
+  endwhile
+  KillChildren(spawnpoint);
+  ResetSpawnQueue(spawnpoint);
+  i := RandomInt(20);
+  sleep(i);
+  while(1)
+    var resetme := GetObjProperty(spawnpoint, "ResetMe");
+    if(resetme)
+      amount := GetObjProperty(spawnpoint, "Amount");
+      KillChildren(spawnpoint);
+      ResetSpawnQueue(spawnpoint);
+      EraseObjProperty(spawnpoint, "ResetMe");
+    endif
+    spawn := GetObjProperty(spawnpoint, "Spawn");
+    while(spawn == "NONE")
+      sleep(10);
+      spawn := GetObjProperty(spawnpoint, "Spawn");
+    endwhile
+    children := GetObjProperty(spawnpoint, "Children");
+    spawnqueue := GetObjProperty(spawnpoint, "SpawnQueue");
+    for(i:=1; i<=amount; i:=i+1);
+      if((children[i] != error) && (children[i] != "Empty"))
+        x := SystemFindObjectBySerial(children[i]);
+        if((!x) || (x.dead == 1) || (x.script=="tamed"))
+          spawnqueue[i] := "Empty";
+          children[i] := "Empty";
+        endif
+      endif
+    endfor
+    SetObjProperty(spawnpoint, "Children", children);
+    SetObjProperty(spawnpoint, "SpawnQueue", spawnqueue);
+    ResetSpawnQueue(spawnpoint);
+    spawnqueue := GetObjProperty(spawnpoint, "SpawnQueue");
+    for(i:=1; i<=amount; i:=i+1)
+      x := spawnqueue[i];
+      if((x != "Empty") && (x != "Active"))
+        if(x == 0)
+          children[i] := CreateSpawn(spawnpoint);
+          spawnqueue[i] := "Active";
+        else
+          spawnqueue[i] := x - 1;
+        endif
+      endif
+    endfor
+    SetObjProperty(spawnpoint, "SpawnQueue", spawnqueue);
+    SetObjProperty(spawnpoint, "Children", children);
+    sleep(60);
+  endwhile
+endprogram
+
+function KillChildren(spawnpoint)
+  var i;
+  var children := GetObjProperty(spawnpoint, "Children");
+  if(children)
+    foreach x in children
+      if(x != "Empty")
+        x := CInt(x);
+        i := SystemFindObjectBySerial(x);
+        SetObjProperty(i, "summoned", 1);
+        RevokePrivilege(i, "invul" );
+        ApplyRawDamage(i, GetHp(i)+3);
+      endif
+    endforeach
+  endif
+  var amount := GetObjProperty(spawnpoint, "Amount");
+  var spawnqueue := {};
+  children := {};
+  for(i:=1; i<=amount; i:=i+1);
+    spawnqueue[i] := "Empty";
+    children[i] := "Empty";
+  endfor
+  SetObjProperty(spawnpoint, "Children", children);
+  SetObjProperty(spawnpoint, "SpawnQueue", spawnqueue);
+endfunction
+
+function ResetSpawnQueue(spawnpoint)
+  var i;
+  var amount := GetObjProperty(spawnpoint, "Amount");
+  var mindelay := GetObjProperty(spawnpoint, "MinDelay");
+  var maxdelay := GetObjProperty(spawnpoint, "MaxDelay");
+  var spawnqueue := GetObjProperty(spawnpoint, "SpawnQueue");
+  if(mindelay < 1)
+    mindelay := 1;
+  endif
+  if(maxdelay < 1)
+    maxdelay := 1;
+  endif
+  for(i:=1; i<=amount; i:=i+1)
+    if(spawnqueue[i] == "Empty")
+      if(mindelay == maxdelay)
+        spawnqueue[i] := mindelay;
+      else
+        spawnqueue[i] := RandomInt(maxdelay - mindelay) + mindelay + 1;
+      endif
+    endif
+  endfor
+  SetObjProperty(spawnpoint, "SpawnQueue", spawnqueue);
+endfunction
+
+function CreateSpawn(spawnpoint)
+  var loscheck := GetObjProperty(spawnpoint, "IgnoreLOS");
+  var spawn := GetObjProperty(spawnpoint, "Spawn");
+  if((spawn == "orchorde") || (spawn == "undead") || (spawn == "lesserundead") || (spawn == "trolls") || (spawn == "vermin") || (spawn == "dracos") || (spawn == "orcs") || (spawn == "lizardmen") || (spawn == "ratmen"))
+    spawn := GetCritter(spawn);
+  endif
+  var range := GetObjProperty(spawnpoint, "Range");
+  var x, y, z, thingy, success := 0;
+  var i := 1;
+  while(success == 0)
+    if(range == 0)
+      x := spawnpoint.x;
+      y := spawnpoint.y;
+      z := spawnpoint.z;
+    elseif(spawnpoint.z >= 0)
+      x := spawnpoint.x + RandomInt(2 * range) - range;
+      y := spawnpoint.y + RandomInt(2 * range) - range;
+      z := GetWorldHeight(x, y, spawnpoint.realm);
+    elseif(spawnpoint.z < 0)
+      x := spawnpoint.x + RandomInt(2 * range) - range;
+      y := spawnpoint.y + RandomInt(2 * range) - range;
+      z := spawnpoint.z;
+    endif
+    if(!loscheck)
+	thingy := CreateItemAtLocation(6102, 20, 0, 0xeed, 1, "britannia_alt");
+	thingy.invisible := 1;
+	MoveObjectToLocation(thingy, x, y, z, spawnpoint.realm, MOVEOBJECT_FORCELOCATION);
+      if(CheckLineOfSight(spawnpoint, thingy))
+        var i := CreateNpcFromTemplate(spawn, x, y, z, 0, spawnpoint.realm);
+        success := 1;
+        return CInt(i.serial);
+      endif
+    else
+      var i := CreateNpcFromTemplate(spawn, x, y, z, 0, spawnpoint.realm);
+      success := 1;
+      return CInt(i.serial);
+    endif
+    i := i + 1;
+    if(i > 10)
+      var i := CreateNpcFromTemplate(spawn, spawnpoint.x, spawnpoint.y, spawnpoint.z, 0, spawnpoint.realm);
+      success := 1;
+      return CInt(i.serial);
+    endif
+  endwhile
+endfunction
+
+function GetCritter(type)
+  if(type == "vermin")
+    case(RandomInt(11) + 1)
+      1: return "grat";
+      2: return "grat";
+      3: return "grat";
+      4: return "jwilson";
+      5: return "slime";
+      6: return "slime";
+      7: return "slime";
+      8: return "giant_serpent";
+      9: return "giant_serpent";
+     10: return "giantscorp";
+     11: return "giantscorp";
+    endcase
+  elseif(type == "orcs")
+     case(RandomInt(10) + 1)
+      1: return "orcmage";
+      2: return "orclord";
+      3: return "orc1";
+      4: return "orc1";
+      5: return "orc1";
+      6: return "orc2";
+      7: return "orc2";
+      8: return "orc2";
+      9: return "ettin";
+     10: return "ettin2";
+    endcase
+  elseif(type == "orchorde")
+    case(RandomInt(8) + 1)
+      1: return "orc1";
+      2: return "orc1";
+      3: return "orc1";
+      4: return "orcmage";
+      5: return "orclord";
+      6: return "orc2";
+      7: return "orc2";
+      8: return "orc2";
+    endcase
+  elseif(type == "ratmen")
+    case(RandomInt(3) + 1)
+      1: return "ratman3";
+      2: return "ratman2";
+      3: return "ratman1";
+    endcase
+  elseif(type == "lizardmen")
+    case(RandomInt(3) + 1)
+      1: return "lizardman3";
+      2: return "lizardman2";
+      3: return "lizardman1";
+    endcase
+  elseif(type == "dracos")
+    case(RandomInt(4) + 1)
+      1: return "dragon1";
+      2: return "dragon2";
+      3: return "drake1";
+      4: return "drake2";
+    endcase
+  elseif(type == "trolls")
+    case(RandomInt(3) + 1)
+      1: return "troll1";
+      2: return "troll2";
+      3: return "troll3";
+    endcase
+  elseif(type == "undead")
+    case(RandomInt(7) + 1)
+      1: return "zombie";
+      2: return "zombie";
+      3: return "skeleton";
+      4: return "skeleton";
+      5: return "shade";
+      6: return "shade";
+      7: return "liche";
+    endcase
+  elseif(type == "lesserundead")
+    case(RandomInt(4) + 1)
+      1: return "zombie";
+      2: return "zombie";
+      3: return "skeleton";
+      4: return "skeleton";
+    endcase
+  elseif(type == "ettins")
+    case(RandomInt(2) + 1)
+      1: return "ettin";
+      2: return "ettin2";
+    endcase
+  endif
+endfunction

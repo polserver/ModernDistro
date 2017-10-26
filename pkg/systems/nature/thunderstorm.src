@@ -1,0 +1,65 @@
+use vitals;
+use uo;
+use os;
+use util;
+
+include "include/client";
+include ":nature:nature";
+include ":damage:damage";
+
+const SOUND_EFFECT_THUNDER :=  0x002a;
+
+program LightningEffect()
+  var daymoon := GetGlobalProperty("Nature");
+  var thundelay;
+  while (daymoon[CURRENTWEATHER] == 5)
+    if (DEBUG)
+      syslog("Bolt!");
+    endif
+    SetRegionLightLevel("Background", 0);
+    foreach who in EnumerateOnlineCharacters()
+      if (who.x <= 5119)
+        if (RandomInt(15) >= 14)
+          DoBolt(who);
+        endif
+      endif
+    endforeach
+    sleepms(500);
+    SetRegionLightLevel("Background", cint(daymoon[CURRENTLIGHT]));
+    thundelay := RandomInt(5);
+    if (thundelay)
+      sleep(thundelay);		
+    endif
+    foreach who in EnumerateOnlineCharacters()
+      if (who.x <= 5119)
+        PlaySoundEffect(who, SOUND_EFFECT_THUNDER);
+      endif
+      EraseObjProperty(who, "#heardbolt");
+    endforeach
+    var randompause := Cint(RandomInt(120));
+    sleep(randompause);
+    daymoon := GetGlobalProperty("Nature");
+  endwhile
+endprogram
+
+function DoBolt(who)
+  if (who.multi)
+    return;
+  endif
+  var xpos := who.x;
+  var ypos := who.y;
+  var xrand := RandomInt(20);
+  var yrand := RandomInt(20);
+  xpos := ((xpos - xrand) + 10);
+  ypos := ((ypos - yrand) + 10);
+  var zpos := GetMapInfo( xpos, ypos, who.realm ).z;
+  var mob := CreateNpcFromTemplate( "Rabbit", xpos, ypos, zpos, 0, who.realm);
+  mob.cmdlevel := 2;
+  mob.concealed := 1;
+  setobjproperty(mob, "guardkill", 1);
+  PlayLightningBoltEffect( mob );
+  PlaySoundEffect(who, SOUND_EFFECT_THUNDER);
+  SetObjProperty(who, "#heardbolt", 1);
+  MoveObjectToLocation(mob,0,0,0, "britannia_alt", MOVEOBJECT_FORCELOCATION); // newmap problem
+  ApplyRawDamage( mob, mob.hp+2 );
+endfunction

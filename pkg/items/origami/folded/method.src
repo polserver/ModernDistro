@@ -1,0 +1,14 @@
+use uo;
+use os;
+
+program Install()
+
+	return 1;
+endprogram
+
+exported function IsOrigamiFolded( item )
+
+        item := item; //Avoid compiler warnings
+        
+	return 1;
+endfunction

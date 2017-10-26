@@ -1,0 +1,131 @@
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+	<meta http-equiv="Content-Language" content="en-us">
+	<title>brainAI Documentation</title>
+	<link rel="stylesheet" type="text/css" href="docs.css" />
+</head>
+<body>
+<div id="container">
+	<div id="header">
+		<h1>GUMPS DOCUMENTATION</h1>
+		<p>Version 1.5, by <a href="mailto:AustinHeilman@Gmail.com">Austin Heilman</a>.</p>
+		<hr>
+		<h2>requestgump.inc</h2>
+	</div>
+
+	<div id="content">
+    <table border="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" id="AutoNumber1" cellpadding="2">
+	<tr>
+		<td width="1%" bgcolor="#C0C0C0" bordercolorlight="#000000" bordercolordark="#000000" style="border-style:solid; border-width:1; " align="center" colspan="2">
+		<br>
+		<b><font face="Tahoma" size="2">requestgump.inc Functions</font></b><br>&nbsp;</td>
+	</tr>
+	<tr>
+		<td width="1%" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style: none; border-left-width: medium; border-right-style: none; border-right-width: medium; " align="center" colspan="2">&nbsp;</td>
+	</tr>
+	<!----!>
+	<tr>
+		<td width="1%" bgcolor="#808080" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1" colspan="2">
+		<b><font face="Tahoma" size="2">Constants</font></b></td>
+	</tr>
+	<tr>
+		<td width="1%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-style: solid; border-width: 1" colspan="2">
+		<font face="Tahoma" size="2">The following constants are in gumps_ex.inc</font></td>
+	</tr>
+	<tr>
+		<td width="1%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-style: solid; border-width: 1" colspan="2">
+		<font face="Tahoma" size="2"><BR>
+		<B>Constants for RequestGump()</B><BR>
+		CONST CANCEL_BTN_OFF	:= 0x0<BR>
+		CONST CANCEL_BTN_ON	:= 0x1<BR><BR>
+		</font></td>
+	</tr>
+	<tr>
+		<td width="1%" colspan="2">&nbsp;</td>
+	</tr>
+	<!----!>
+	<tr>
+		<td width="1%" bordercolor="#000000" bgcolor="#C0C0C0" bordercolorlight="#000000" bordercolordark="#000000" style="border-style:solid; border-width:1; " align="center" colspan="2">
+		<p align="center"><b><font face="Tahoma">RequestGump</font></b></td>
+	</tr>
+	<tr>
+		<td width="1%" bgcolor="#808080" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1" colspan="2">
+		<b><font face="Tahoma" size="2">Parameters</font></b></td>
+	</tr>
+	<tr>
+		<td width="1%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-style: solid; border-width: 1" colspan="2">
+		<font face="Tahoma" size="2">(mobile, question, option := "", pre_val := "", cancel_btn:=CANCEL_BTN_OFF)</font></td>
+	</tr>
+	<tr>
+		<td width="25%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1">
+		<font face="Tahoma" size="2">Name</font></td>
+		<td width="102%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1" height="17">
+		<font face="Tahoma" size="2">Type</font></td>
+	</tr>
+	<tr>
+		<td width="25%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium">
+		<font face="Tahoma" size="2">mobile</font></td>
+		<td width="102%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium" height="18">
+		<font face="Tahoma" size="2">Mobile to send the gump to.</font></td>
+	</tr>
+	<tr>
+		<td width="25%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium">
+		<font face="Tahoma" size="2">question</font></td>
+		<td width="102%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium" height="18">
+		<font face="Tahoma" size="2">Primary text field, instructing the mobile on what to enter (is word wrapped).</font></td>
+	</tr>
+	<tr>
+		<td width="25%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium">
+		<font face="Tahoma" size="2">option</font></td>
+		<td width="102%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium" height="18">
+		<font face="Tahoma" size="2">Optional text line displayed directly above the input box.</font></td>
+	</tr>
+	<tr>
+		<td width="25%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium">
+		<font face="Tahoma" size="2">pre_val</font></td>
+		<td width="102%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium" height="18">
+		<font face="Tahoma" size="2">Default text to display in the input box.</font></td>
+	</tr>
+	<tr>
+		<td width="25%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium">
+		<font face="Tahoma" size="2">cancel_btn</font></td>
+		<td width="102%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium" height="18">
+		<font face="Tahoma" size="2">CANCEL_BTN_OFF - No cancel button will be shown<BR>
+		CANCEL_BTN_ON - A cancel button will be shown
+		</font></td>
+	</tr>
+	<tr>
+		<td width="1%" bgcolor="#808080" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-style: solid; border-width: 1" colspan="2">
+		<b><font face="Tahoma" size="2">Explanation</font></b></td>
+	</tr>
+	<tr>
+		<td width="1%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-style: solid; border-width: 1" colspan="2">
+		<font face="Tahoma" size="2">Template to create a single field input gump. See the ".requestgump" command for an example.</font></td>
+	</tr>
+	<tr>
+		<td width="1%" bgcolor="#808080" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-style: solid; border-width: 1" colspan="2">
+		<b><font face="Tahoma" size="2">Return Values</font></b></td>
+	</tr>
+	<tr>
+		<td width="1%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-style: solid; border-width: 1" colspan="2">
+		<font face="Tahoma" size="2">Returns 'error' if the cancel button is clicked.<BR>
+		Returns 0 or the text that was entered.
+		</font></td>
+	</tr>
+	<tr>
+		<td width="1%" colspan="2">&nbsp;</td>
+	</tr>
+	<!----!>
+	
+	
+    </table>
+    </td>
+  </tr>
+</table>
+	</div>
+
+	<div id="footer">
+		<p>Last Update: $Id: requestgump.html 375 2006-06-17 19:26:32Z austinheilman $</p>
+	</div>
+</div>
+</body>

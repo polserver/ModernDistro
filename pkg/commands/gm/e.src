@@ -1,0 +1,10 @@
+use uo;
+include "include/client";
+program textcmd_e( who, text )
+ 	PlayObjectCenteredEffect(who, 0x3709, 0x0a, 0x1e );
+	PlayObjectCenteredEffect(who, FX_SPARK_EFFECT, 7, 0x10 );
+	PlaySoundEffect(who,0xf8);
+        if (text)
+          who.concealed := who.cmdlevel;
+        endif
+endprogram

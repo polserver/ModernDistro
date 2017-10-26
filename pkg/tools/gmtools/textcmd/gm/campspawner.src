@@ -1,0 +1,123 @@
+use uo;
+use os;
+use util;
+
+include "include/client";
+
+var layout := array(
+	"page 0                            ",
+	"gumppic   0   0  206              ",
+	"gumppic  44   0  201              ",
+	"gumppic 444   0  207              ",
+	"gumppic   0  40  202              ",
+	"gumppic  44  40 2604              ",
+	"gumppic 444  40  203              ",
+	"gumppic   0 350  204              ",
+	"gumppic  44 350  233              ",
+	"gumppic 444 350  205              ",
+	"gumppic 251 114 2444              ",
+    "text    155  20  900    0         ",
+    "text     55  50  900    1         ",
+    "text     55  70  900    2         ",
+    "text     55  90  900    3         ",
+    "text     55 115  900    4         ",
+    "text     55 150  900    6         ",
+    "text    120 150  900    7         ",
+    "text    205 150  900    8         ",
+    "text    310 150  900    9         ",
+    "text    385 150  900   10         ",
+    "text     55 180  900   11         ",
+  "textentry 260 115   50   30  0  5  5",
+    "button  400 350 2450 2451  1  0 99",
+    "tilepic  75 250 1055              ",
+    "tilepic 375 250 1064              ",
+    "tilepic 225 250 8416              ",
+    "group 2",
+    "radio   200  50 208  2225  1 11   ",
+    "radio   225  50 208  2226  0 12   ",
+    "radio   250  50 208  2227  0 13   ",
+    "group 3",
+    "radio   200  70 208  2226  1 22   ",
+    "radio   225  70 208  2227  0 23   ",
+    "radio   250  70 208  2228  0 24   ",
+    "group 4",
+    "radio   200  90 208  2226  1 31   ",
+    "radio   225  90 208  2227  0 32   ",
+    "radio   250  90 208  2228  0 33   ",
+    "group 5",
+    "radio    90 150 208   209  1 41   ",
+    "radio   175 150 208   209  0 42   ",
+    "radio   280 150 208   209  0 43   ",
+    "radio   360 150 208   209  0 44   ",
+    "radio   435 150 208   209  0 45   ",
+    "group 6",
+    "radio   200 180 208  2226  1 51   ",
+    "radio   225 180 208  2227  0 52   ",
+    "radio   250 180 208  2228  0 53   ",
+    "radio   275 180 208  2229  0 54   ",
+    "radio   300 180 208  2230  0 55   ",
+    "radio   325 180 208  2231  0 56   ",
+    "radio   350 180 208  2232  0 57   "
+);
+
+var data := array(
+    "Camp Spawn Interface",
+    "Chest Level",
+    "Chest Amount",
+    "Spawn Radius",
+    "Rest Period [in minutes]",
+    "15",
+    "Orcs",
+    "Ratmen",
+    "Lizardmen",
+    "Bandit",
+    "Gypsie",
+    "NPC Count"
+);
+
+program chestspawner(who)
+  var res := SendDialogGump(who, layout, data);
+  if(res[0] == 99)
+    var duration := res[5];
+    var amount, level, range, type, count;
+    foreach thing in (res.keys)
+      if((thing >= 10) && (thing < 20))
+        level := thing - 10;
+      elseif((thing >= 20) && (thing < 30))
+        amount := thing - 20;
+      elseif((thing >= 30) && (thing < 40))
+        range := thing - 30;
+      elseif((thing >= 40) && (thing < 50))
+        type := thing - 40;
+      elseif((thing >= 50) && (thing < 60))
+        count := thing - 50;
+      endif
+    endforeach
+    var targ := TargetCoordinates(who);
+    if(!targ)
+      return;
+    endif
+    var item := CreateItemAtLocation(targ.x, targ.y, targ.z, 0x888c, 1, who.realm);
+    if(!item)
+      SendSysMessage(who, "Error. couldnt create spawner.");
+      return;
+    endif
+    duration[1, find(duration, ": ", 1)+1]:="";
+    var newduration := (CInt(duration) * 60);
+    var location := { item.x, item.y, item.z };
+    SetObjProperty(item, "AnchorPoint", location);
+    SetObjProperty(item, "level", level);
+    SetObjProperty(item, "range", range);
+    SetObjProperty(item, "amount", amount);
+    SetObjProperty(item, "duration", CInt(newduration));
+    EraseObjProperty(item,"waiting");
+    case(type)
+      1: SetObjProperty(item, "CritterType", "orcs");
+      2: SetObjProperty(item, "CritterType", "ratmen");
+      3: SetObjProperty(item, "CritterType", "lizardmen");
+      4: SetObjProperty(item, "CritterType", "bandit");
+      5: SetObjProperty(item, "CritterType", "gypsie");
+    endcase
+    SetObjProperty(item, "CritterAmount", count);
+  endif
+endprogram

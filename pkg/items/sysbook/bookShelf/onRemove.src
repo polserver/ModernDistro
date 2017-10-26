@@ -1,0 +1,40 @@
+use uo;
+use os;
+use file;
+
+include ":sysbook:eventID";
+
+program on_remove(mobile, bookshelf, item, movetype)
+
+    if(!mobile)
+      return 1;
+    elseif(mobile.cmdlevel >= 2)
+    	return 1;
+    endif
+  
+  var pid := bookshelf.getprop("#pid");
+  
+  if(!pid)
+  	LogToFile("::log/sysbook.log", "[bookShelf/onRemove.ecl]: PID missing from shelf x:"+bookshelf.x+" y:"+bookshelf.y+" z:"+bookshelf.z+" r:"+bookshelf.realm, LOG_DATETIME);
+  	print("Sysbook error - check sysbook.log");
+    PrintTextAbovePrivate(bookshelf, "If you take this book it won't come back.", mobile);
+  	return 0;
+  else
+  	var proc := GetProcess(pid);
+  	var ev := struct{"type" := EVID_SYSBOOK_BOOK_REMOVED};
+  	proc.sendEvent( ev );
+  	return 1;
+  endif
+  
+  
+  
+//	The below if block would be to deny people removing books from shelves if they are locked
+//	Current functionality might not be there for this, This would just be if you wanted to
+//	make it so that people couldn't remove books.
+  if( bookshelf.getProp("locked") )
+    PrintTextAbovePrivate(bookshelf, "You will have to steal that.", mobile);
+    return 0;
+  endif
+  
+  
+endprogram

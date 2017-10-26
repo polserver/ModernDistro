@@ -1,0 +1,46 @@
+//
+// .create command - create items
+// Items created with this command will not decay.
+// Two forms:
+//   ".create [objtype] [amount]" - specify object type and amount
+//       amount defaults to 1
+//   ".create" - show the item creation menu, create one of that item
+//
+use uo;
+
+program textcmd_createat( who, text )
+    if (text)
+        var params := SplitWords( text );
+        var objtype := params[1];
+        var amount := CInt( params[2] );
+
+        if (CInt(objtype))
+            objtype := CInt(objtype);
+        endif
+
+        if (!amount)
+            amount := 1;
+        endif
+
+        // print( "objtype=" + Hex(objtype) + ", amount=" + amount );
+       
+        var i;
+        for( i := 1; i <= amount; i := i + 1 )
+            SendSysMessage( who, "Now select a location on the ground, where you want the item to appear." );
+            var place := TargetCoordinates( who );
+            var item := CreateItemAtLocation( place.x, place.y, place.z, objtype, 1, who.realm );
+            item.decayAt := 0;
+        endfor
+    else
+/*        var selection := SelectMenuItem2( who, "ItemCreation" );
+        if (selection)
+            SendSysMessage( who, "Now select a location on the ground, where you want the item to appear." );
+            var place := TargetCoordinates( who );
+            var created := CreateItemAtLocation( place.x, place.y, place.z, selection.objtype, 1, who.realm );
+            created.color := selection.color;
+            created.decayAt := 0;
+            SetObjProperty(created, "Created", who.name);
+        endif */
+        SendSysMessage (who, "You must specify an item to create.", color :=33);
+    endif
+endprogram

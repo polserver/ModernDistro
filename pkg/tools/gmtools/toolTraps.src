@@ -1,0 +1,73 @@
+use vitals;
+use uo;
+use util;
+use os;
+
+include "include/client";
+include ":damage:damage";
+
+const FX_POISON_GAS := 0x113a;
+
+program open_trapped_item(character, item)
+      var traptype := GetObjProperty(item,"trap_type");
+      var trapstrength := GetObjProperty(item,"trap_strength");
+      case (traptype)
+        1:   PlaySoundEffect(character, SFX_224);
+             var dmg := (RandomInt(20) + CInt(trapstrength));
+             SendSysMessage(character, "You set off a needle trap!");
+             ApplyRawDamageEX(character, dmg, DMG_FORCED, 0);
+             var scr := GetObjProperty(item,"usescript");
+             if (!scr || scr == error)
+               item.usescript := "";
+             else
+               item.usescript := scr;
+             endif
+		     EraseObjProperty( item, "trap_type" );
+		     EraseObjProperty( item, "trap_strength" );
+	         EraseObjProperty( item, "usescript" );
+        2:  start_script(":traps:poisonTrapTriggered", {character, item, "You set off a poison trap!", trapstrength});
+             var scr := GetObjProperty(item,"usescript");
+             if (!scr || scr == error)
+               item.usescript := "";
+             else
+               item.usescript := scr;
+             endif
+	     EraseObjProperty( item, "usescript" );
+        3:   PlaySoundEffect(character, SFX_208);
+             SendSysMessage(character, "You set off an explosion trap!");
+             PlayObjectCenteredEffect( character, FX_EXPLODE_3, 10,10);
+             var dmg := (RandomInt(20) + CInt(trapstrength));
+             ApplyRawDamageEX(character, dmg, DMG_FIRE, 0);
+             var scr := GetObjProperty(item,"usescript");
+             if (!scr || scr == error)
+               item.usescript := "";
+             else
+               item.usescript := scr;
+             endif
+		     EraseObjProperty( item, "trap_type" );
+		     EraseObjProperty( item, "trap_strength" );
+	         EraseObjProperty( item, "usescript" );
+        default: SendSysMessage(character, "You narrowly avoid the trap!");
+      endcase
+endprogram
+/*
+function Resisted(who, amt)
+  var magery  := CInt(RandomInt(99)+1);
+  var evalint := CInt(RandomInt(99)+1);
+  var halfamt := amt/2;
+  var rezamt := CInt(( (RandomInt(halfamt)+1) * evalint ) / 100);
+  if (SkillCheck(who,RESISTING_SPELLS, 70, 300))
+	SendSysMessage(who, "You feel yourself resisting magical energy!");
+	PlaySoundEffect(who, SFX_SPELL_WEAKEN);
+	PlayObjectCenteredEffect( who, FX_CURSE_EFFECT, 5,5);
+	if (evalint > 0)
+	  amt := rezamt + halfamt;
+	else
+	  amt := halfamt;
+    endif
+	return amt;
+  else
+	return amt;
+  endif
+endfunction
+*/

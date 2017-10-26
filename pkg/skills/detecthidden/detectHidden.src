@@ -1,0 +1,206 @@
+use vitals;
+use uo;
+use os;
+use util;
+use cfgfile;
+
+include "include/client";
+include ":attributes:attributes";
+include ":poisonwatcher:poisons";
+include "include/trainingskill";
+include ":damage:damage";
+
+var thepoints;
+var item_cfg;
+
+const FX_POISON_GAS := 0x113a;
+const TRAP := "hiddentrap";
+
+const CRITICAL_FAILURE := 1;
+
+program detect_hidden ( who )
+        var data1 := {};
+        data1[1] := "detectinghidden";
+        data1[2] := ReadGameClock();
+        data1[3] := 14;
+        SetObjProperty(who, "LastUsedSkill", data1 );
+        TrainingSkill(who, data1[3]);
+
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+    thepoints := 30;
+    item_cfg := ReadConfigFile( "::itemdesc" );
+    SendSysMessage(who,"target the location to search");
+    var targ := TargetCoordinates( who );
+    var range := getDetectRange( GetAttribute( who, DETECTING_HIDDEN  ) );
+    var hiders := ListMobilesNearLocationEx( cint(targ.x), cint(targ.y), cint(targ.z), range, LISTEX_FLAG_HIDDEN, who.realm );
+    var items  := ListItemsNearLocation( cint(targ.x), cint(targ.y), cint(targ.z), range, who.realm );
+    var elem;
+    var data;
+    var prop;
+    var dtct;
+    var foundany := 0;
+    foreach mobile in hiders
+      if( Found( who,  mobile) )
+        mobile.hidden := 0;
+        foundany := 1;
+        PrintTextAbovePrivate( mobile, "You have been discovered!", mobile );
+        PrintTextAbovePrivate( mobile, "You have found someone!!", who );
+      endif
+    endforeach
+    if (!foundany)
+      SendSysMessage( who, "You didn't find anyone." );
+    endif
+    foreach item in items
+	 elem := FindConfigElem( item_cfg, item.objtype );
+     data := GetConfigString( elem, "WalkOnScript" );
+     prop := GetObjProperty(item,"trap_type");
+	 dtct := GetObjProperty(item, "trapped");
+     var trapstrength := GetObjProperty(item,"trap_strength");
+     thepoints := trapstrength *2;
+	 if( dtct )
+        if(SkillCheck( who, DETECTING_HIDDEN, -1, thepoints ))
+	      PrintTextAbovePrivate( item, "Trapped", who);
+        else
+          var results := RandomInt(9) + 1;
+          if ((results < 4) && CRITICAL_FAILURE) // critical failure
+            case (prop)
+              "1" :   PlaySoundEffect(who, SFX_224);
+                      var dmg := (RandomInt(20) + CInt(trapstrength));
+                      SendSysMessage(who, "You set off a needle trap!");
+                      ApplyDamageEX(who, dmg, DMG_PHYSICAL, 0);
+                      item.usescript := "";
+		              EraseObjProperty( item, "trap_type" );
+		              EraseObjProperty( item, "trap_strength" );
+
+              "2" :   start_script(":traps:poisonTrapTriggered", {who, item, "You set off a poison trap!", trapstrength});
+
+              "3" :   PlaySoundEffect(who, SFX_208);
+                      SendSysMessage(who, "You set off an explosion trap!");
+                      PlayStationaryEffect( item.x, item.y, item.z, FX_EXPLODE_3, 10,10, 0, item.realm);
+                      var dmg := (RandomInt(20) + CInt(trapstrength));
+                      item.usescript := "";
+		              EraseObjProperty( item, "trap_type" );
+		              EraseObjProperty( item, "trap_strength" );
+                      ApplyDamageEX(who, dmg, DMG_PHYSICAL, 0);
+            endcase
+            break;
+          endif
+        endif
+      elseif( data == TRAP)
+        if(SkillCheck( who, DETECTING_HIDDEN, -1, thepoints ))
+	      PrintTextAbovePrivate( item, "Trap", who );
+          SetObjProperty( item, "trapped", 1 );
+        else
+          var results := RandomInt(9) + 1;
+          if ((results < 4) && CRITICAL_FAILURE) // critical failure
+            case (prop)
+              "1" :   PlaySoundEffect(who, SFX_224);
+                      var dmg := (RandomInt(20) + CInt(trapstrength));
+                      SendSysMessage(who, "You set off a needle trap!");
+                      ApplyDamageEX(who, dmg, DMG_PHYSICAL, 0);
+                      item.usescript := "";
+		              EraseObjProperty( item, "trap_type" );
+		              EraseObjProperty( item, "trap_strength" );
+              "2" :   PlaySoundEffect(who, SFX_232);
+                      PrintTextAbovePrivate(who, "You set off a poison trap!", who);
+                      PlayStationaryEffect( item.x, item.y, item.z, FX_POISON_GAS, 10,10, 0, item.realm);
+                      start_script( ":spells:poisonDamage", {who,"","poison trap",trapstrength} );
+                      item.usescript := "";
+		      EraseObjProperty( item, "trap_type" );
+		      EraseObjProperty( item, "trap_strength" );
+              "3" :   PlaySoundEffect(who, SFX_208);
+                      SendSysMessage(who, "You set off an explosion trap!");
+                      PlayStationaryEffect( item.x,item.y,item.z, FX_EXPLODE_3, 10,10, 0, item.realm);
+                      var dmg := (RandomInt(20) + CInt(trapstrength));
+                      ApplyDamageEX(who, dmg, DMG_PHYSICAL);
+                      item.usescript := "";
+		              EraseObjProperty( item, "trap_type" );
+		              EraseObjProperty( item, "trap_strength" );
+                      ApplyDamageEX(who, dmg, DMG_PHYSICAL, 0);
+            endcase
+            break;
+          endif
+        endif
+     elseif( prop )
+        if(SkillCheck( who, DETECTING_HIDDEN, -1, thepoints ))
+	      PrintTextAbovePrivate( item, "Trapped", who);
+	      SetObjProperty( item, "trapped", 1 );
+        else
+          var results := RandomInt(9) + 1;
+          if ((results < 4) && CRITICAL_FAILURE) // critical failure
+            case (prop)
+              "1" :   PlaySoundEffect(who, SFX_224);
+                      var dmg := (RandomInt(20) + CInt(trapstrength));
+                      SendSysMessage(who, "You set off a needle trap!");
+                      ApplyDamageEX(who, dmg, DMG_PHYSICAL, 0);
+                      item.usescript := "";
+		              EraseObjProperty( item, "trap_type" );
+		              EraseObjProperty( item, "trap_strength" );
+              "2" :   PlaySoundEffect(who, SFX_232);
+                      PrintTextAbovePrivate(who, "You set off a poison trap!", who);
+                      PlayStationaryEffect( item.x,item.y,item.z, FX_POISON_GAS, 10,10, 0, item.realm);
+                      var plevel := CInt(GetObjProperty(who, "poison_level"));
+                      var poisoned := GetObjProperty(who, "#poisonisrunning");
+                      if (poisoned)
+                        if ((plevel < trapstrength) || (!plevel))
+                          SetObjProperty(who,"poison_level", trapstrength);
+                          return;
+                        endif
+                      else
+		                SetObjProperty(who, "#poisonisrunning",1);
+                        SetObjProperty(who, "poison_level",CStr( trapstrength));
+		                var passparms := { who, who, "poison trap" };
+		                start_script(":spells:poisonDamage", passparms);
+                      endif
+                      item.usescript := "";
+		              EraseObjProperty( item, "trap_type" );
+		              EraseObjProperty( item, "trap_strength" );
+              "3" :   PlaySoundEffect(who, SFX_208);
+                      SendSysMessage(who, "You set off an explosion trap!");
+                      PlayStationaryEffect( item.x,item.y,item.z, FX_EXPLODE_3, 10,10, 0, item.realm);
+                      var dmg := (RandomInt(20) + CInt(trapstrength));
+                      ApplyRawDamageEX(who, dmg, DMG_PHYSICAL);
+                      item.usescript := "";
+		              EraseObjProperty( item, "trap_type" );
+		              EraseObjProperty( item, "trap_strength" );
+                      ApplyDamageEX(who, dmg, DMG_PHYSICAL, 0);
+            endcase
+            break;
+          endif
+        endif
+     endif
+   endforeach
+endprogram
+
+
+function Found( finder, hider ) //FIXME: should not be 100% certain to find a hider if your skill is greater
+  var hide_skill := GetAttribute( hider, HIDING );
+  if (SkillCheck( finder, DETECTING_HIDDEN, hide_skill, thepoints ) )
+    return 1;
+  else
+    return 0;
+  endif
+endfunction
+
+function getDetectRange( skill )
+    if( skill >= 100 )
+        return 10;
+    elseif( skill >= 90 )
+        return 9;
+    elseif( skill >= 80 )
+        return 7;
+    elseif( skill >= 70 )
+        return 6;
+    elseif( skill >= 60 )
+        return 5;
+    elseif( skill >= 50 )
+        return 4;
+    elseif( skill >= 30 )
+        return 3;
+    elseif( skill >= 10 )
+        return 2;
+    else
+        return 1;
+    endif
+endfunction

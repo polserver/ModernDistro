@@ -1,0 +1,32 @@
+use uo;
+use vitals;
+
+include "include/spellRestrictions";
+
+program chrcast_dfury( parms )
+	var caster := params[1];
+	var info := params[2]; // Struct containing additional info about the spell.
+	var spellID := params[3];
+	
+  
+    if(Cint(GetObjProperty(caster, "EnemyOfOne")))
+        SendSysMessage(caster, "You are under the influence of this spell.",3,40);
+        return 0;
+    endif
+
+	var pal := Cint(AP_GetSkill(caster, CHIVALRY));
+
+	PlayObjectCenteredEffect( caster, FX_BLESS_EFFECT, 7,7);
+	PlaySoundEffect(caster, 0x5C1);
+
+	Setobjproperty(caster, "EnemyOfOne", 1);
+	detach();
+	sleep(pal*3);
+
+	if(Cint(GetObjProperty(caster, "EnemyOfOne")))
+		SendSysMessage(caster, "The effect Enemy of One has faded.",3,40);
+		eraseobjproperty(caster, "EnemyOfOne");
+		eraseobjproperty(caster, "#SWrog");
+	endif
+
+endprogram

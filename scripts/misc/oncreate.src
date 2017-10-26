@@ -1,0 +1,38 @@
+use uo;
+
+include "include/startEqp";
+include ":timeutils:time";
+
+program oncreate(who, skillids, profession)
+   var dmy, hms;
+
+  Sleep(1);
+
+  if((13 in CAscZ(who.name)) || (10 in CAscZ(who.name)))
+    var account := who.acct;
+    account.ban();
+    for i:=1 to 5
+      account.DeleteCharacter( i );
+    endfor
+    syslog("ALERT! Account " + account.name + " was banned for cheating.");
+  endif
+  
+  
+  if(CInt(who.truecolor) <= 32768)
+    who.truecolor := who.truecolor + 32768;
+    who.color := who.truecolor;
+  endif
+  
+  Sleep(2);
+  
+  SetObjProperty(who, "OnCreate", ReadGameClock());
+  dmy := FormatTime(GetTimeStruct(GetTime()), "<DAY>-<MON>-<YY>");
+  hms := FormatTime(GetTimeStruct(GetTime()), "<HH>:<MM>:<SS>");
+  SetObjProperty(who, "CreationDate", dmy + " " + hms);
+  
+  Sleep(2);
+  
+  // MoveObjectToLocation( who, 2953, 922, 0, "britannia", MOVEOBJECT_FORCELOCATION ); //Vesper
+  
+   CreateStartingEquipment(who, skillids);
+endprogram

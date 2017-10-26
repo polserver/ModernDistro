@@ -1,0 +1,159 @@
+use npc;
+use os;
+use uo;
+
+include "include/eventID";
+include "include/sysEvent";
+include "include/randName";
+include "include/utility";
+include "include/mrcSpawn";
+include "include/vetement";
+include "include/NPCBackpacks";
+include "include/client";
+include "include/anchors";
+include "include/findCity";
+include "include/dist";
+include "include/begging";
+include ":attributes:attributes";
+include "include/trainSkill";
+
+const MAX_SKILLS      := 48;
+
+var me := Self();
+me.hidden := 1;
+var inv_fs, inv_pb, inv_1c, inv_rs;
+var merchant_type := GetObjProperty(me,"MerchantType");
+var equipt        := GetObjProperty(me, "Equipt");
+var npccfg        := ReadConfigFile("npcdesc");
+
+set_priority(50);
+
+program barber()
+  if(!merchant_type)
+    SetObjProperty(me, "MerchantType", "Mage");
+    merchant_type := "Mage";
+  endif
+  start_script("NPCKeeper", me);
+  var myanchor := GetObjProperty(me, "Anchor");
+  if(myanchor)
+    MoveObjectToLocation(me, myanchor[1], myanchor[2], myanchor[3], me.realm, MOVEOBJECT_FORCELOCATION);
+  endif
+  drop_anchor();
+  myanchor     := GetObjProperty(me, "Anchor");
+  var spawnname := merchant_type + " " + myanchor[1] + " " + myanchor[2] + " " + myanchor[3];
+  inv_fs := FindRootItemInStorageArea(storage, spawnname + " FS");
+  inv_pb := FindRootItemInStorageArea(storage, spawnname + " PB");
+  inv_1c := FindRootItemInStorageArea(storage, spawnname + " 1C");
+  inv_rs := FindRootItemInStorageArea(storage, spawnname + " RS");
+  while((!inv_rs) or(!inv_fs) or(!inv_pb) or(!inv_1c))
+    sleep(5);
+    inv_fs := FindRootItemInStorageArea(storage, spawnname + " FS");
+    inv_pb := FindRootItemInStorageArea(storage, spawnname + " PB");
+    inv_1c := FindRootItemInStorageArea(storage, spawnname + " 1C");
+    inv_rs := FindRootItemInStorageArea(storage, spawnname + " RS");
+  endwhile
+  me.hidden := 0;
+  EnableEvents(SYSEVENT_ITEM_GIVEN);
+  DisableEvents(SYSEVENT_SPEECH);
+  if(GetObjProperty(me, "frozen"))
+    me.frozen := 1;
+  endif
+  var next_wander := ReadGameClock() + 10;
+  const loops := 0;
+  var ev;
+  while(1)
+    ev := os::wait_for_event(120);
+    if(ev)
+      case(ev.type)
+        EVID_NODE:                var txt := lower(ev.text);
+                                  if((ev.source.cmdlevel > 2) && (txt["showinventory"]))
+                                    SendOpenSpecialContainer(ev.source, inv_fs);
+                                  else
+                                    if(txt["buy"])
+                                      TurnToward(ev.source);
+                                      var res := SendBuyWindow(ev.source, inv_fs, Self(), inv_pb);
+                                    elseif (txt["sell"])
+                                      if(GetObjProperty(inv_rs, "MyGold") >= 1000)
+                                        TurnToward(ev.source);
+                                        var count := ModifyPCSellList(merchant_type, (ev.source));
+                                        if(count >= 1)
+                                          var res := SendSellWindow(ev.source, Self(), inv_fs, inv_pb, inv_1c);
+                                        else
+                                          PrintTextAbovePrivate(Self(), "You dont have anything I would be interested in.", ev.source);
+                                        endif
+                                      else
+                                        PrintTextAbovePrivate(Self(), "I cannot afford any more of that", ev.source );
+                                      endif
+                                    elseif((txt["vendor train"]) || (txt["vendor teach"]) || (txt["merchant train"]) || (txt["merchant teach"]))
+                                      TurnToward(ev.source);
+                                      MerchantTrain(me, ev.source, ev.text);
+                                    endif
+                                  endif
+        SYSEVENT_MERCHANT_BOUGHT: TurnToward(ev.source);
+                                  PrintTextAbovePrivate( me, "The total of thy sale is " + ev.amount, ev.source);
+                                  if(lower(merchant_type) != "appraiser")
+                                    var mygold := GetObjProperty(inv_rs, "MyGold");
+                                    mygold := mygold - ev.amount;
+                                    SetObjProperty(inv_rs, "MyGold", mygold);
+                                  endif
+                                  foreach thing in EnumerateItemsInContainer(inv_pb)
+                                    if(MoveItemToContainer(thing, inv_fs))
+                                      SetObjProperty(thing,"ClearRestock", (ReadGameClock() + 1800));
+//                                      thing.buyprice  := itemconfig[thing.objtype].VendorBuysFor;
+//                                      thing.sellprice := itemconfig[thing.objtype].VendorSellsFor;
+                                    else
+                                      DestroyItem(thing);
+                                    endif
+                                  endforeach
+                                  PlaySoundEffect(me, 0x38);
+        SYSEVENT_MERCHANT_SOLD:   TurnToward(ev.source);
+                                  PrintTextAbovePrivate(me, "The total of thy purchase is " + ev.amount, ev.source);
+                                  var mygold := GetObjProperty(inv_rs, "MyGold");
+                                  mygold := mygold + ev.amount;
+                                  SetObjProperty(inv_rs, "MyGold", mygold);
+                                  foreach item in EnumerateItemsInContainer( ev.source.backpack)
+                                    EraseObjProperty(item, "ClearRestock");
+                                    var hairwhere := GetObjProperty(item, "faceloc");
+                                    if(hairwhere)
+                                      if(hairwhere == 11)
+                                        EraseObjProperty(item, "faceloc");
+                                        DestroyItem(GetEquipmentByLayer(ev.source, 0x0b));
+                                        EquipItem(ev.source, item);
+                                      elseif(hairwhere == 16)
+                                        EraseObjProperty(item, "faceloc");
+                                        DestroyItem(GetEquipmentByLayer(ev.source, 0x10));
+                                        if(ev.source.graphic == 0x191)
+                                          say("Silly woman, you cannot grow a beard!");
+                                          DestroyItem(item);
+                                        else
+                                          EquipItem(ev.source, item);
+                                        endif
+                                      endif
+                                    endif
+                                  endforeach
+                                  PlaySoundEffect(me, 0x38);
+      endcase
+    endif
+    if(ReadGameClock() >= next_wander)
+    begpurse(me);
+      wander();
+      if(coordist(me.x, me.y, myanchor[1], myanchor[2]) > 5)
+        MoveObjectToLocation(me, myanchor[1], myanchor[2], myanchor[3], me.realm, MOVEOBJECT_FORCELOCATION);
+      endif
+      next_wander := ReadGameClock() +(RandomInt(9) + 21);
+    endif
+  endwhile
+endprogram
+
+function Lookiehere(who, npc)
+  var ev;
+  ev := array;
+  ev.+ type;
+  ev.+ source;
+  ev.type := SYSEVENT_SPEECH;
+  ev.text := "node";
+  ev.source := npc;
+  foreach thing in ListItemsNearLocationOfType(who.x, who.y, who.z, 15, 0x1887b, who.realm)
+    SendEvent(thing, ev);
+  endforeach
+endfunction

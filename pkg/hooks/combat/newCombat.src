@@ -1,0 +1,45 @@
+use uo;
+use os;
+use cfgfile;
+
+include ":attributes:attributes";
+
+
+program newcombat()
+  Print( "Using NewCombatAdvancement..." );
+  return 1;
+endprogram
+
+exported function NewCombatAdvancement(attacker, weapon, defender)
+  var skid;
+  var cfg;
+  if(attacker.npctemplate)
+    cfg := ReadConfigFile("::npcdesc");
+    skid := cfg[attacker.npctemplate].AttackAttribute;
+  else
+    cfg := ReadConfigFile(":*:itemdesc");
+    skid := cfg[weapon.objtype].Attribute;
+  endif
+  if(!skid)
+    return;
+  endif
+  var skillid := FindSkillidByIdentifier(skid);
+	SkillCheck(attacker, AP_SkillIDToAttributeName(skillid), -1, -3, 3);
+	SkillCheck(attacker, TACTICS, -1, -3, 3);
+	SkillCheck(defender, TACTICS, -1, -3, 3);
+  /*AwardPoints(attacker, skillid, 15);
+  AwardPoints(attacker, AP_AttributeNameToSkillId(TACTICS), 7);
+  AwardPoints(defender, AP_AttributeNameToSkillId(TACTICS), 7);*/
+endfunction
+
+function FindSkillidByIdentifier(skid)
+  var retval;
+  case(skid)
+    "Wrestling": retval := AP_AttributeNameToSkillId(WRESTLING);
+    "Fencing":   retval := AP_AttributeNameToSkillId(FENCING);
+    "Swordsmanship":    retval := AP_AttributeNameToSkillId(SWORDSMANSHIP);
+    "Macefighting":      retval := AP_AttributeNameToSkillId(MACEFIGHTING);
+    "Archery":    retval := AP_AttributeNameToSkillId(ARCHERY);
+  endcase
+  Return retval;
+endfunction

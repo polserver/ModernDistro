@@ -1,0 +1,64 @@
+/* $Id: newAccount.src 375 2006-06-17 19:26:32Z austinheilman $
+ *
+ */
+use uo;
+use os;
+
+include ":accounts:accounts";
+include ":accounts:settings";
+
+/* NOTES:
+ *
+ * Expects a packed array:
+ * 1 - username (string)
+ * 2 - password (string)
+ * 3 - default command level (integer)
+ * 4 - expansion (string)
+ * 5 - email ( string) 
+ * 6 - creation password (string) - if set in settings.cfg
+ *
+ */
+program AuxService(connection)
+	var report;
+	var settings := ACCT_GetSettingsCfgElem("Settings");
+	while ( connection )
+		if ( !settings.AllowWWWAccounts )
+			report := array{"Error", "Web account maker is disabled."};
+			connection.Transmit(report);
+			return 0;
+		endif
+	
+		var event := Wait_For_Event(5);
+		if ( event ) // New account to be made?
+			var username := event[1];
+			var password := event[2];
+			var cmd_lvl := event[3];
+			var expansion := event[4];
+			var email := event[5];
+			var admin_pw := event[6];
+			
+			if ( settings.AuxWebPassword )
+				if ( settings.AuxWebPassword != admin_pw )
+					report := array{"Error", "Invalid administration password."};
+					connection.Transmit(report);
+					return 0;
+				endif
+			endif
+			
+			var result := CreateNewAccount(username, password, cmd_lvl, expansion, email);
+			if ( result.errortext )
+				report := array{"Error", result.errortext};
+			else
+				report := array{"Success", "The acount was created successfully."};
+			endif
+			
+			connection.Transmit(report);
+			
+			return 1;
+		else
+			report := array{"Error", "Connection timed out."};
+			connection.Transmit(report);
+			return 0;
+		endif
+	endwhile
+endprogram

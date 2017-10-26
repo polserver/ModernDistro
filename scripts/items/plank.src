@@ -1,0 +1,53 @@
+/*
+ * plank - plank double-click script
+ *
+ * changes a plank type from extended to retracted, or vice-versa
+ *
+ * TODO:
+ *     sound effects?
+ *
+ * 1/7/1999 ENS
+ */
+
+use os;
+use uo;
+
+program useplank( character, plank )
+    if (plank.locked)
+        PrintTextAbovePrivate( plank, "That is locked.", character );
+    else
+        var partnertype := plankpartner( plank.graphic );
+        if (partnertype)
+            plank.graphic := partnertype;
+        endif
+    endif
+endprogram
+
+
+//
+// Perhaps this should be config-file driven.
+//
+
+function plankpartner( planktype )
+    case (planktype)
+             // boat 0x4000, 0x4002 - see config/boats.cfg
+        0x3ed5: return 0x3eb1;
+        0x3eb1: return 0x3ed5;
+        0x3ed4: return 0x3eb2;
+        0x3eb2: return 0x3ed4;
+       
+             // boat 0x4001, 0x4003
+        0x3e84: return 0x3e85;
+        0x3e85: return 0x3e84;
+        0x3e89: return 0x3e8a;
+        0x3e8a: return 0x3e89;
+           
+        default:
+            syslog( "Unknown plank type 0x" + Hex( planktype ) );
+            return error;
+                // local err := error;
+                // err .+ errortext;
+                // err.errortext := "unknown plank type";
+                // return err;
+    endcase
+endfunction

@@ -1,0 +1,317 @@
+
+use uo;
+use os;
+use cfgfile;
+
+include ":timeutils:time";
+include "include/clock";
+include "include/arrays";
+include ":nature:nature";
+include "include/std";
+
+var length := (Cint(GetDayLength()) * 60);
+var transtime := (Cint(GetTransition()) * 60);
+var bcastflag := setFlag();
+
+program DNCycle()
+
+  if (!length)
+    length := 3600;
+  endif
+  if (!transtime)
+    transtime := 300;
+  endif
+
+  if (DEBUG)
+    syslog("Whole day length = " + length);
+    syslog("Transtime = " + transtime);
+  endif
+
+  start_script("weather");
+
+  set_critical(1);
+  syslog("Starting Day/Night cycle...");
+
+  var wstuff := GetGlobalProperty("Nature");
+  var midnight := 0;
+  var nexttrans;
+
+  if (DEBUG)
+    syslog("Starting daynight while loop.");
+  endif
+
+//  start_script("setLight");
+
+  while (1)
+
+    //Midnight
+    if (midnight)
+      incrementCalendar();
+      midnight := 0;
+      if (DEBUG)
+        syslog("It is midnight.");
+      endif
+    endif
+    nexttrans := DAWNTIME - GetTime();
+    if (nexttrans > 0)
+      if (DEBUG)
+        syslog("Time until dawn: " + nexttrans);
+      endif
+      sleep(nexttrans);
+      set_critical(1);
+    endif
+      
+
+    // Dawn
+    if ((GetTime() >= DAWNTIME) and (GetTime() < (transtime + DAWNTIME)))
+      announce("Dawn approaches.");
+      if (DEBUG)
+        syslog("Dawn approaches.");
+        syslog("GetTime()="+GetTime()+" GetTimeofDay="+GetTimeofDay());
+      endif
+      wstuff := GetGlobalProperty("Nature");
+      wstuff[DAY] := 0;
+      SetGlobalProperty("Nature",wstuff);
+      if (DEBUG)
+        syslog("GetTime()="+GetTime()+" GetTimeofDay="+GetTimeofDay());
+      endif
+      transition(transtime);
+    endif
+      
+    if (DEBUG)
+      syslog("GetTime()="+GetTime()+" GetTimeofDay="+GetTimeofDay());
+    endif
+    nexttrans := (transtime + DAWNTIME) - GetTime();
+    if (nexttrans > 0)
+      if (DEBUG)
+        syslog("Time until day: " + nexttrans);
+      endif
+      sleep(nexttrans);
+      set_critical(1);
+    endif
+     
+    //Day
+    if ((GetTime() >= (transtime + DAWNTIME)) and (GetTime() < (length/2 + DAWNTIME)))
+      announce("Day has begun.");
+      if (DEBUG)
+        syslog("Day has begun.");
+      endif
+      wstuff := GetGlobalProperty("Nature");
+      wstuff[DAY] := 1;
+      SetGlobalProperty("Nature",wstuff);
+      start_script("setLight");
+    endif
+      
+    if (DEBUG)
+      syslog("GetTime()="+GetTime()+" GetTimeofDay="+GetTimeofDay());
+    endif
+    nexttrans := (length/2 + DAWNTIME) - GetTime();
+    if (nexttrans > 0)
+      if (DEBUG)
+        syslog("Time until dusk: " + nexttrans);
+      endif
+      sleep(nexttrans);
+      set_critical(1);
+    endif
+            
+    //Dusk
+    if ((GetTime() >= (length/2 + DAWNTIME)) and (GetTime()< (length/2 + transtime + DAWNTIME)))
+      announce("The day has come to an end.");
+      if (DEBUG)
+        syslog("The day has come to an end.");
+      endif
+      wstuff := GetGlobalProperty("Nature");
+      wstuff[DAY] := 2;
+      SetGlobalProperty("Nature",wstuff);
+      if (DEBUG)
+        syslog("GetTime()="+GetTime()+" GetTimeofDay="+GetTimeofDay());
+      endif
+      transition(transtime, length);
+    endif
+      
+    if (DEBUG)
+      syslog("GetTime()="+GetTime()+" GetTimeofDay="+GetTimeofDay());
+    endif
+    nexttrans := ((length/2) + transtime + DAWNTIME) - GetTime();
+    if (nexttrans > 0)
+      if (DEBUG)
+        syslog("Time until night: " + nexttrans);
+      endif
+      sleep(nexttrans);
+      set_critical(1);
+    endif
+      
+    //Night
+    announce("Night has fallen.");
+    if (DEBUG)
+      syslog("Night has fallen.");
+    endif
+    wstuff := GetGlobalProperty("Nature");
+    wstuff[DAY] := 3;
+    SetGlobalProperty("Nature",wstuff);      
+    start_script("setLight");
+    midnight := 1;
+
+    if (DEBUG)
+      syslog("GetTime()="+GetTime()+" GetTimeofDay="+GetTimeofDay());
+    endif
+    if ((GetTime() >= (length/2 + transtime + DAWNTIME)) or (GetTime() < DAWNTIME))
+      nexttrans := length - GetTime();
+      if (nexttrans > 0)
+        if (DEBUG)
+          syslog("Time until midnight: " + nexttrans);
+        endif
+        sleep(nexttrans);
+        set_critical(1);
+      endif
+    endif
+
+    set_critical(0);
+    if (DEBUG)
+      syslog("Time for stutter: " + GetTime());
+    endif
+    sleepms(1);
+    set_critical(1);
+
+  endwhile
+
+endprogram
+
+function incrementCalendar()
+
+  var cfg := ReadConfigFile("nature");
+  var elem := FindConfigElem(cfg, "seasons");
+  var seasons := GetConfigInt(elem, "seasonal");
+  elem := FindConfigElem(cfg, "clienttype");
+  var client := GetConfigInt(elem, "client");
+  UnloadConfigFile("nature");
+
+  var calendar := GetGlobalProperty("Calendar");
+  calendar[DAY] := calendar[DAY]+1;
+  if (calendar[DAY] == 29)
+    calendar[DAY] := 1;
+    calendar[MONTH] := calendar[MONTH]+1;
+    if (!GetGlobalProperty("Desolation"))
+      case (calendar[MONTH])
+        3: Broadcast("The cold of winter begins to thaw as spring arrives.");
+           if (seasons and (client == 2))
+             var everyone := EnumerateOnlineCharacters();
+             foreach dude in everyone
+               Season(dude, SEASON_SPRING);
+             endforeach
+           endif
+        6: Broadcast("The warmth of summer spreads across the land.");
+           if (seasons and (client == 2))
+             var everyone := EnumerateOnlineCharacters();
+             foreach dude in everyone
+               Season(dude, SEASON_SUMMER);
+             endforeach
+           endif
+        9: Broadcast("The leaves begin to turn as autumn touches the land.");
+           if (seasons and (client == 2))
+             var everyone := EnumerateOnlineCharacters();
+             foreach dude in everyone
+               Season(dude, SEASON_FALL);
+             endforeach
+           endif
+        12: Broadcast("Winter's cold hand is felt throughout the land.");
+            if (seasons and (client == 2))
+              var everyone := EnumerateOnlineCharacters();
+              foreach dude in everyone
+                if (seasons == 1)
+                  Season(dude, SEASON_WINTER);
+                elseif (seasons == 3)
+                  Season(dude, SEASON_FELUCCA);
+                endif
+              endforeach
+            endif
+         default:
+      endcase
+    endif
+  endif
+  if (calendar[MONTH] == "13")
+    Broadcast("Happy New Year!!!");
+    calendar[MONTH] := 1;
+    calendar[YEAR] := calendar[YEAR]+1;
+  endif
+  SetGlobalProperty("Calendar",calendar);
+  
+endfunction
+
+function transition(transtime, length := 0)
+
+  if (DEBUG)
+    syslog("Transition");
+  endif
+  var stuff := GetGlobalProperty("Nature");
+  var night := (NIGHTLIGHT-((FindLight(stuff[TRAMMEL])+FindLight(stuff[FELUCCA]))/2));
+  if (DEBUG)
+    syslog("Current night level: " + night);
+  endif
+  var starts := 0;
+  var ends := 0;
+  var sleeplength := 0;
+  var segments := array;
+  case (stuff[DAY])
+    0:
+    default:
+      starts := night-1;
+      ends := 1;
+      sleeplength := ((transtime + 900) - GetTime())/starts;
+      segments := fill_array(starts, ends, -1);
+    2:
+      starts := 1;
+      ends := night-1;
+      sleeplength := (((length/2) + transtime + 900) - GetTime())/ends;
+      segments := fill_array(starts, ends, 1);
+  endcase
+  var light := 0;
+  foreach i in segments
+    stuff := GetGlobalProperty("Nature");
+    case (stuff[CURRENTWEATHER])
+      0:
+      1:
+        light := i;
+      2:
+        light := i + 1;
+      3:
+        light := i + 2 + CInt((night-i) / (night-1));
+      4:
+        light := i + 4 + CInt(((1.0*(night -i))/(night-1)) * 2);
+      5:
+        light := i + 5 + CInt(((1.0*(night -i))/(night-1)) * 4);
+    endcase
+    if (light > NIGHTLIGHT)
+      light := NIGHTLIGHT;
+    endif
+    stuff[CURRENTLIGHT] := light;
+    if (DEBUG)
+      syslog("Transition: setting light level to: " + light);
+    endif
+    SetGlobalProperty("Nature", stuff);
+    SetRegionLightLevel("Background", stuff[CURRENTLIGHT]);
+    if (DEBUG)
+      syslog("Sleeping for: " + sleeplength);
+    endif
+    if (sleeplength > 0)
+      sleep(sleeplength);
+      set_critical(1);
+    endif
+  endforeach
+      
+endfunction
+
+function setFlag()
+  var cfg := ReadConfigFile("nature");
+  var elem := FindConfigElem(cfg, "broadcasts");
+  var seasons := GetConfigInt(elem, "broadcast");
+  UnloadConfigFile("nature");
+
+  return seasons;
+endfunction
+
+function announce(text)
+  if (bcastflag)
+    broadcast(text);
+  endif
+endfunction

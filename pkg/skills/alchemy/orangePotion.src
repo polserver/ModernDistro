@@ -1,0 +1,34 @@
+use os;
+use uo;
+use util;
+use cfgfile;
+include ":alchemy:drinkPotion";
+include "include/canAccess";
+include ":poisonwatcher:poisons";
+
+program drink_orange (who, potion)
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  if(!can_access(who, potion))
+    return;
+  endif
+  if(potion.movable == 0)
+    SendSysMessage(who, "You cannot drink that.");
+    return;
+  endif
+  if(!checkifcandrink(who, "orange"))
+    return;
+  endif
+  var potion_strength := 1;
+  case(potion.objtype)
+    0x1DC14: potion_strength := 1;
+    0x1DC15: potion_strength := 2;
+    0x1DC16: potion_strength := 3;
+  endcase
+  empty_bottle(who, potion);
+  if( ListPoisonsByType(who, "DefaultPoison").size() > 0 )
+    PlaySoundEffect(who, SOUND_EFFECT_CURE);
+    PlayObjectCenteredEffect(who, EFFECT_SPARKLE, 10,10);
+    CurePoison(who, 120, "defaultPoison", potion_strength);
+  endif
+endprogram

@@ -1,0 +1,26 @@
+/* $Id: handlePartyLoot.src 523 2006-06-30 17:36:14Z tekproxy $
+ *
+ */
+
+use uo;
+use os;
+
+include ":partySystem:config";
+include ":partySystem:packetInfo";
+
+program handlePartyLoot(params)
+	Set_Critical(DEBUG_SET_CRITICAL);
+
+	var character := params[1];
+	var loot := params[2];
+
+	if ( loot )
+		SetObjProperty(character, PARTY_LOOT_PROP, 1);
+		SendSysMessage(character, "You have chosen to allow your party to loot your corpse.");
+	else
+		EraseObjProperty(character, PARTY_LOOT_PROP);
+		SendSysMessage(character, "You have chosen to prevent your party from looting your corpse.");
+	endif
+
+	return 1;
+endprogram

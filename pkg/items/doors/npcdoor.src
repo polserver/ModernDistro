@@ -1,0 +1,36 @@
+///////////////////
+//  This program is called by NPCs, and it opens all the doors in their area
+///////////////////
+
+use os;
+use uo;
+use util;
+
+include "include/client";
+include "include/objtype";
+include "include/itemtypes";
+include "../pkg/items/doors/doors";
+
+program open_door_for_npc (me)
+	var whenopened := ReadGameClock();
+	var opendoors := array;
+	foreach item in ListItemsNearLocation(me.x, me.y, me.z, 2, me.realm)
+		if (item.isa (POLCLASS_DOOR))
+			if (IsLocked(me, item))
+				PrintTextAbovePrivate(item, "*Locked!*", me);
+			else
+				SetObjProperty(item, "#WhenOpened", whenopened );
+				OpenDoor(item);
+				opendoors.append (item);
+			endif
+		endif
+	endforeach
+
+	sleep(10);
+	foreach door in opendoors
+		if (GetObjProperty(door, "#WhenOpened") == whenopened)
+			CloseDoor(door);
+			EraseObjProperty(door, "#WhenOpened");
+		endif
+	endforeach
+endprogram

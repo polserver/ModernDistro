@@ -1,0 +1,45 @@
+////////////////////////////////////////////////////////////
+// FORGIVE.SRC                                            //
+//                                                        //
+// Author: olor                                           //
+// Date: 22.04.2001                                       //
+//                                                        //
+// Description: Erase all crimes / murders of a PC        //
+////////////////////////////////////////////////////////////
+
+use uo;
+
+var crimeprops := {"longmurders",
+                   "decaylongcountat",
+                   "permared",
+                   "shortmurders",
+                   "decayshortcountat",
+                   "pingpong",
+                   "guardkill"};
+
+program textcmd_forgive (me)
+  SendSysMessage(me, "Whom do you want to forgive?");
+  var who :=  Target(me, TGTOPT_NOCHECK_LOS );
+  if (who == error)
+	SendSysMessage( me, "Error: " + who.errortext );
+    return;
+  elseif (TypeOf(who) == "ItemRef")
+	SendSysMessage( me, "Not a player character");
+	return;
+  elseif (TypeOf(who) == "MobileRef")
+    if (who.isA(POLCLASS_NPC))
+      SendSysMessage( me, "Not a player character");
+  	  return;
+    endif;
+    var i := 0;
+    var lenarr := len(crimeprops);
+    who.setMurderer(0);
+    who.setCriminal(0);
+    for (i:=1; i<=lenarr; i:=i+1)
+      EraseObjProperty(who, crimeprops[i]);
+    endfor
+    SendSysMessage(me, who.name + " is innocent like a new-born child");
+  else
+    SendSysMessage(me, "Cancelled");
+  endif
+endprogram

@@ -1,0 +1,10 @@
+Some of these files are usedd in scripts containe in the Distro and some are not.
+
+All of the include files in this folder were originally shipped with the POL 0.95
+Distro upon which this Distro is based. I am not sure why the original developers
+included unused files in the Distro. I asssume they were intended to be used as a
+source of useful functions for other developers to use in their code. So I am
+including them in this version of the Distro.
+
+Yukiko
+11-Sep-2015

@@ -1,0 +1,111 @@
+use uo;
+use os;
+use cfgfile;
+include "include/hitScriptInc";
+include ":attributes:attributes";
+
+var speech;
+
+program WrestlingHitScript(attacker, defender, weapon, armor, basedamage, rawdamage)
+
+	if (defender.isA(POLCLASS_NPC))
+		basedamage := basedamage * 1.3;
+		rawdamage := rawdamage * 1.3;
+	endif
+
+	if (GetObjProperty(defender, "#BLINKING") != error )
+		if ( (GetObjProperty(defender, "#BLINKING") <= ReadGameClock() ) && (RandomInt(2) == 1) )
+			PrintTextAbove(defender, CStr(defender.name) + " evades the attack!");
+			return 0;
+		endif
+	endif
+
+	SetObjProperty(defender, "LastHit", {attacker.name, attacker.serial, weapon });
+        var x := CheckTempProtections(attacker, defender, rawdamage);
+	if (x == 0)
+		return 0;
+	else
+		rawdamage := x;
+	endif
+
+	weapon := attacker;
+
+	var armorhit;
+	if ( (armor == 0) || (!armor) )
+	  armorhit := GetObjProperty(defender, "OnArmorHit");
+	else
+	  armorhit := GetObjProperty(armor, "OnHit");
+	endif
+
+	var weaponhit := GetObjProperty(weapon, "OnHit");
+	if (!weaponhit)
+		weaponhit := GetObjProperty(attacker, "OnHit");
+	endif
+
+	var gloves := GetEquipmentByLayer(attacker, 0x07);
+	var gloveshit := 0;
+	if (gloves)
+		gloveshit := GetObjProperty(gloves, "OnHit");
+	endif
+
+	if (armorhit)
+	    SetObjProperty(defender, "TempDamage", rawdamage);
+		foreach x in armorhit
+		  Detach();
+		  run_script_to_completion(x, { attacker, defender, weapon, armor, basedamage, rawdamage } );
+		  rawdamage := CInt(GetObjProperty(defender, "TempDamage") );
+		endforeach
+		EraseObjProperty(defender, "TempDamage");
+		if (rawdamage > 0)
+		  DealDamage(defender, attacker, rawdamage);
+		  return;
+		else
+		  return;
+		endif
+	endif
+
+	if (!weaponhit)
+		if (!gloveshit)
+			DealDamage(defender, attacker, rawdamage);
+			return;
+		else
+		  foreach x in gloveshit
+			Detach();
+			run_script_to_completion(CStr(x), { attacker, defender, gloves, armor, basedamage, rawdamage } );
+			rawdamage := GetObjProperty(gloves, "TempDamage");
+		  endforeach
+		  EraseObjProperty(weapon, "TempDamage");
+		  if (rawdamage < 1)
+        		rawdamage := 1;
+		  endif
+  	  	  DealDamage(defender, attacker, rawdamage);
+		  return;
+		endif
+	else
+	  foreach x in weaponhit
+		Detach();
+		run_script_to_completion(CStr(x), { attacker, defender, weapon, armor, basedamage, rawdamage } );
+		rawdamage := GetObjProperty(weapon, "TempDamage");
+	  endforeach
+	  EraseObjProperty(weapon, "TempDamage");
+	  if (rawdamage < 1)
+            rawdamage := 1;
+          endif
+	        if (!gloveshit)
+			DealDamage(defender, attacker, rawdamage);
+			return;
+		else
+		  foreach x in gloveshit
+			Detach();
+			run_script_to_completion(CStr(x), { attacker, defender, gloves, armor, basedamage, rawdamage } );
+			rawdamage := GetObjProperty(gloves, "TempDamage");
+		  endforeach
+		  EraseObjProperty(weapon, "TempDamage");
+		  if (rawdamage < 1)
+        		rawdamage := 1;
+		  endif
+		endif
+      	  DealDamage(defender, attacker, rawdamage);
+	  return;
+	endif
+endprogram

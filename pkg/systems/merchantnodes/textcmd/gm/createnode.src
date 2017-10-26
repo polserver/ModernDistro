@@ -1,0 +1,73 @@
+use uo;
+use os;
+
+var layout := array(
+  "  page 0                            ",
+  "  gumppic   0   0  206              ",
+  "  gumppic  44   0  201              ",
+  "  gumppic 444   0  207              ",
+  "  gumppic   0  40  202              ",
+  "  gumppic  44  40 2604              ",
+  "  gumppic 444  40  203              ",
+  "  gumppic   0 350  204              ",
+  "  gumppic  44 350  233              ",
+  "  gumppic 444 350  205              ",
+  "  gumppic 251 160 2444              ",
+  "  gumppic 251  70 2444              ",
+  "  text    155  40  900    0         ",
+  "  text     55  70  900    1         ",
+  "  text     55 130  900    3         ",
+  "  text     55 160  900    4         ",
+  "  text    225 130  900    7         ",
+  "  text    325 130  900    8         ",
+  "textentry 260  70   50 30 0  2  2   ",
+  "textentry 260 160   50 30 0  5  5   ",
+  "  button  400 350 2450 2451  1  0 99",
+
+  "  group     2                       ",
+  "  radio   200 130 208   209  1 11   ",
+  "  radio   300 130 208   209  0 12   "
+);
+
+var data := array(
+    "Merchant Spawn Interface",
+    "Define Listening Range",
+    "15",
+    "NPC Template",
+    "Next Respawn [in minutes]",
+    "30",
+    "",
+    "Merchant",
+    "Banker"
+);
+
+program textcnd_createnpode(who)
+  var res := SendDialogGump(who, layout, data);
+  if(res[0] == 99)
+    var where := TargetCoordinates(who);
+    var node := CreateItemAtLocation(where.x, where.y, where.z, 0x1887a, 1, who.realm);
+    if(!node)
+      SendSysMessage(who, node.errortext);
+      return;
+    endif
+    SetObjProperty(node, "sleep", 1);
+    var split := SplitWords(res[5]);
+    SetObjProperty(node, "Restock", CInt(split[2]));
+    split := SplitWords(res[2]);
+    SetObjProperty(node, "Range", CInt(split[2]));
+    var tmparray := res[6];
+    tmparray := SplitWords(tmparray);
+    var tmplt := CStr(tmparray[2]);
+    SetObjProperty(node, "Template", tmplt);
+    var count := 0;
+    if(res[11])
+      SetObjProperty(node, "Template", 1); // merchant
+    else
+      SetObjProperty(node, "Template", 2); // banker
+    endif
+    EraseObjProperty(node, "sleep");
+    node.invisible := 1;
+  else
+    SendSysMessage(who, "Cancelled");
+  endif
+endprogram

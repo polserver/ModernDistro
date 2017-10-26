@@ -1,0 +1,69 @@
+use uo;
+use util;
+use cfgfile;
+
+include ":magery:spells";
+include "include/objtype";
+include ":housing:housing";
+
+program cast_mark(parms)
+  var caster := parms[1];
+  var info := parms[2];
+  var interdiction;
+  
+  var cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_NEUTRAL);
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+
+  if (cast_on.objtype != UOBJ_RUNE)
+    SendSysMessage(caster, "You can only cast that on a recall rune!", color := 33);
+	return;
+  endif
+  if ( !Accessible( caster, cast_on ) )
+        SendSysMessage (caster, "You can't mark that right now.", color := 33);
+        return 0;
+  endif
+  
+  interdiction := ListItemsNearLocationOfType(caster.x, caster.y, caster.z, 20, 0xaa07, caster.realm);
+  foreach i in interdiction
+    if (Distance(caster, i) <= CInt( GetObjProperty(i, "Range")))
+	SendSysMessage(caster, "Something interferes with this spell.");
+	return 0;
+    endif
+  endforeach
+
+  if(caster.multi)
+    SendSysMessage(caster,"You cant mark runes here inside this location.", color := 33);
+    PlaySoundEffect(caster,0x005d);
+    PlayObjectCenteredEffect(caster, 0x3735,0x0a, 0x1e);
+    return;
+  endif
+  if(FindHouseForLocation(caster.x, caster.y, caster.realm))
+    SendSysMessage(caster,"You cant mark runes here inside this location.", color := 33);
+    PlaySoundEffect(caster,0x005d);
+    PlayObjectCenteredEffect(caster, 0x3735,0x0a, 0x1e);
+    return;
+  endif
+  if(((caster.x >= 5120) && (caster.x <= 5375) && (caster.y >= 0) && (caster.y <= 255)) or (caster.multi))
+    SendSysMessage(caster, "You cannot mark runes here.", color := 33);
+    return;
+  endif
+  if (!Accessible(caster, cast_on))
+	SendSysMessage(caster, "You can't reach that!", color := 33);
+  endif
+  if (cast_on.objtype != UOBJ_RUNE)
+	SendSysMessage(caster, "You can only cast that on a recall rune!", color := 33);
+	return;
+  endif
+  if(!ReserveItem(cast_on))
+    SendSysMessage(caster,"your spell fizzles.", color := 33);
+    return;
+  endif
+  PlayObjectCenteredEffect(  caster, FX_MARK_EFFECT, 10, 10);
+  PlaySoundEffect( caster, SFX_SPELL_MARK );
+  cast_on.SetDestination(caster.x, caster.y, caster.z, caster.realm);
+
+  SetName(cast_on, "a marked recall rune");
+endprogram

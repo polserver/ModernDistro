@@ -1,0 +1,124 @@
+use uo;
+use os;
+use cfgfile;
+
+include "include/canAccess";
+include ":attributes:attributes";
+include "include/client";
+
+program resmelt(who)
+  var itemcfg   := ReadConfigFile(":mining:itemdesc");
+  var smith_cfg := ReadConfigFile(":blacksmithy:blacksmithy");
+  var near_items := ListItemsNearLocation(who.x, who.y, who.z, 3, who.realm);
+  var forge_near := 0;
+  foreach forge in near_items
+    if((forge.objtype == 0xfb1) || ((forge.objtype >= 0x197a) && (forge.objtype <= 0x19a9)))
+      forge_near := 1;
+      break;
+    endif
+  endforeach
+  if(forge_near == 0)
+    SendSysMessage(who, "You must be near a forge to re-smelt items.");
+    return;
+  endif
+  SendSysMessage(who, "Select the item you wish to melt down");
+  var use_on := Target(who, TGTOPT_CHECK_LOS);
+  if(!use_on)
+    SendSysMessage(who, "Targetting cancelled");
+    return;
+  endif
+  if(!can_access(who, use_on))
+    SendSysMessage(who, "You cannot use that.");
+    return;
+  endif
+  if(!Accessible(who, use_on) || !ReserveItem( use_on ))
+    SendSysMessage(who, "You cannot use that.");
+    return;
+  endif
+  if(use_on.isa(POLCLASS_CONTAINER))
+    var contitems := EnumerateItemsInContainer(use_on);
+    var skill, amt, elemcol, ingot, color;
+    var valid_ingot := { 0x6309, 0x630a, 0x630b, 0x630c, 0x630d, 0x630e, 0x630f, 0x6310, 0x6311 };
+    foreach thing in contitems
+      if(smith_cfg[thing.objtype])
+        skill := smith_cfg[thing.objtype]."skill";
+        amt := CInt(smith_cfg[thing.objtype]."material");
+        if((!skill) || (!amt))
+          SendSysMessage(who, "You cannot resmelt that.");
+          return;
+        endif
+        amt := CInt((amt * AP_GetSkill(who,BLACKSMITHY) * 75 ) / 10000);
+        if(amt < 1)
+          amt := 1;
+        endif
+        ingot := -1;
+        color := thing.color;
+        foreach entry in valid_ingot
+          elemcol := itemcfg[entry]."Color";
+          if(color == elemcol)
+            ingot := entry;
+            break;
+          endif
+        endforeach
+        if(ingot == -1)
+          PrintTextAbovePrivate(thing, "You can't melt this metal down!", who);
+          return;
+        endif
+        PlaySoundEffect(who, 0x2c);
+        sleep(1);
+        PlaySoundEffect(who, 0x22);
+        if(DestroyItem(thing))
+          if(SkillCheck(who, BLACKSMITHY, skill, 10))
+            SendSysMessage(who, "You manage to get a bit of material out of that");
+            CreateItemInBackpack(who, ingot, amt);
+          else
+            SendSysMessage(who, "You fail, and destroy the item");
+          endif
+        endif
+        sleep(1);
+      endif
+    endforeach
+  else
+    var skill := smith_cfg[use_on.objtype]."skill";
+    var amt := CInt(smith_cfg[use_on.objtype]."material");
+    if((!skill) || (!amt))
+      SendSysMessage(who, "You cannot resmelt that.");
+      return;
+    endif
+    amt := CInt((amt * AP_GetSkill(who,BLACKSMITHY) * 75 ) / 10000);
+    if(amt < 1)
+      amt := 1;
+    endif
+    var itemcfg := ReadConfigFile(":mining:itemdesc");
+    if(!itemcfg)
+      return;
+    endif
+    var elemcol;
+    var ingot := -1;
+    var color := use_on.color;
+    var valid_ingot := { 0x6309, 0x630a, 0x630b, 0x630c, 0x630d, 0x630e, 0x630f, 0x6310, 0x6311 };
+    foreach entry in valid_ingot
+      elemcol := itemcfg[entry]."Color";
+      if(color == elemcol)
+        ingot := entry;
+        break;
+      endif
+    endforeach
+    if(ingot == -1)
+      PrintTextAbovePrivate(use_on, "You can't melt this metal down!", who);
+      return;
+    endif
+    PlaySoundEffect(who, 0x2c);
+    sleep(1);
+    PlaySoundEffect(who, 0x22);
+    if(DestroyItem(use_on))
+      if(SkillCheck(who, BLACKSMITHY, skill, 10))
+        SendSysMessage(who, "You manage to get a bit of material out of that");
+        CreateItemInBackpack(who, ingot, amt);
+      else
+        SendSysMessage(who, "You fail, and destroy the item");
+      endif
+      return;
+    endif
+  endif
+endprogram

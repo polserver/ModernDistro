@@ -1,0 +1,107 @@
+use uo;
+use os;
+
+program infernotrap(who, item)
+  Detach();
+  if (who.dead || who.cmdlevel >0)
+    return;
+  endif
+  if(GetObjProperty(item,"#isrunning") == 1)
+    PrintTextAbove(item,"you step on a trigger, but nothing seems to happen!");
+    return;
+  endif
+  var charges := GetObjProperty(item,"charges");
+  if (!charges)
+    SetObjProperty(item,"charges", 10);
+    charges := 10;
+  endif
+  if (charges > 0)
+    charges := charges - 1;
+    SetObjProperty(item,"charges", charges);
+  elseif (charges == 0)
+    PrintTextAbove(item,"you step on a trigger, but nothing seems to happen!");
+    return;
+  endif
+  SetObjProperty(item,"#isrunning", 1);
+  PrintTextAbove(item,"you step on a trigger and set off a trap!");
+  summoninferno(item);
+  sleep(40);
+  EraseObjProperty(item,"#isrunning");
+endprogram
+
+
+function summoninferno(me)
+    var groundzero := me;
+    PlaySoundEffect(me, 0x1f4);
+    CreateItemAtLocation(groundzero.x-3, groundzero.y-3, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-3, groundzero.y-3, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-3, groundzero.y-2, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-3, groundzero.y-2, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-3, groundzero.y-1, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-3, groundzero.y, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-3, groundzero.y+1, groundzero.z, 0x3996, 1, me.realm);
+	CreateItemAtLocation(groundzero.x-3, groundzero.y+2, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-3, groundzero.y+3, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-3, groundzero.y+4, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-2, groundzero.y-3, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-2, groundzero.y-2, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-2, groundzero.y-2, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-2, groundzero.y-2, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-2, groundzero.y-1, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-2, groundzero.y, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-2, groundzero.y+1, groundzero.z, 0x3996, 1, me.realm);
+	CreateItemAtLocation(groundzero.x-2, groundzero.y+2, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-2, groundzero.y+3, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-2, groundzero.y+4, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-1, groundzero.y-3, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-1, groundzero.y-2, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-1, groundzero.y-1, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-1, groundzero.y-1, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-1, groundzero.y, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-1, groundzero.y+1, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-1, groundzero.y+1, groundzero.z, 0x398c, 1, me.realm);
+	CreateItemAtLocation(groundzero.x-1, groundzero.y+2, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-1, groundzero.y+3, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x-1, groundzero.y+4, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x, groundzero.y-3, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x, groundzero.y-2, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x, groundzero.y-1, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x, groundzero.y, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x, groundzero.y, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x, groundzero.y+1, groundzero.z, 0x398c, 1, me.realm);
+	CreateItemAtLocation(groundzero.x, groundzero.y+2, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x, groundzero.y+3, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x, groundzero.y+4, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x+1, groundzero.y-3, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x+1, groundzero.y-2, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x+1, groundzero.y-1, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x+1, groundzero.y, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x+1, groundzero.y+1, groundzero.z, 0x3996, 1, me.realm);
+	CreateItemAtLocation(groundzero.x+1, groundzero.y+2, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x+1, groundzero.y+3, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x+1, groundzero.y+4, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x+2, groundzero.y-3, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x+2, groundzero.y-2, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x+2, groundzero.y-1, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x+2, groundzero.y, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x+2, groundzero.y+1, groundzero.z, 0x3996, 1, me.realm);
+	CreateItemAtLocation(groundzero.x+2, groundzero.y+2, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x+2, groundzero.y+3, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x+2, groundzero.y+4, groundzero.z, 0x398c, 1, me.realm);
+    CreateItemAtLocation(groundzero.x+3, groundzero.y-3, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x+3, groundzero.y-2, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x+3, groundzero.y-1, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x+3, groundzero.y, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x+3, groundzero.y+1, groundzero.z, 0x3996, 1, me.realm);
+	CreateItemAtLocation(groundzero.x+3, groundzero.y+2, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x+3, groundzero.y+3, groundzero.z, 0x3996, 1, me.realm);
+    CreateItemAtLocation(groundzero.x+3, groundzero.y+3, groundzero.z, 0x3996, 1, me.realm);
+    var tgt := ListItemsNearLocation(groundzero.x, groundzero.y, groundzero.z, 4, me.realm );
+    Detach();
+    sleep(20);
+    foreach x in tgt
+      if ((x.objtype == 0x3996) || (x.objtype == 0x398c))
+            DestroyItem( x );
+      endif
+    endforeach
+endfunction

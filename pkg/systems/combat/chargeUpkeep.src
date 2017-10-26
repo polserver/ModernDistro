@@ -1,0 +1,134 @@
+use uo;
+use os;
+use util;
+
+include "include/client";
+include ":attributes:attributes";
+
+const EVID_UNEQUIP   := 0x123456;
+const EVID_DISCHARGE := 0x123457;
+
+program charge_upkeep(parms)
+  var who := parms[1];
+  var item := parms[2];
+  var pid := GetPid();
+  SetObjProperty(item, "Pid", pid);
+  var charges := GetObjProperty(item, "charges");
+  if(!charges)
+    SendSysMessage(who, "that item is out of charges");
+    return;
+  endif
+  var mods := Process_Mods(who, item);
+  var ret  := upkeep_server(who, item, mods[1]);
+  if(ret == 1)
+    SendSysMessage(who, item.name + " is out of charges");
+  endif
+  Process_Unmods(who, item, mods, ret);
+endprogram
+
+function Process_Mods(who, item);
+  if(Cint(GetObjProperty(item, "HoldMods")))
+    repeat
+      sleep(1);
+    until(!Cint(GetObjProperty(item, "HoldMods")));
+  endif
+  Set_Critical(1);
+  SetObjProperty(item, "HoldMods", 1);
+  var holder;
+  var type   := GetObjProperty(item, "type");
+  var gain   := GetObjProperty(item, "gain");
+  if(!gain)
+    return;
+  endif
+  case(type)
+    "strength":     ModifyAttributeTemporaryMod(who, ATTRIBUTEID_STRENGTH, gain);
+    "invisibility": who.hidden := 1;
+    "sight":        who.setlightlevel(0, 70);
+    "protection":   ModifyAttributeTemporaryMod(who, PARRYING, gain);
+    "reflect":      SetObjProperty(who, "mr", 2);
+    "bless":        ModifyAttributeTemporaryMod(who, ATTRIBUTEID_STRENGTH,     gain);
+                    ModifyAttributeTemporaryMod(who, ATTRIBUTEID_INTELLIGENCE, gain);
+                    ModifyAttributeTemporaryMod(who, ATTRIBUTEID_DEXTERITY,    gain);
+                    ModifyAttributeTemporaryMod(who, PARRYING,        (gain *3 ));
+  endcase
+  RecalcVitals(who);
+  EraseObjProperty(item, "HoldMods");
+  holder := {};
+  holder.append(type);
+  holder.append(gain);
+  holder.append(item.serial);
+  Set_Critical(0);
+  return holder;
+endfunction
+
+function upkeep_server(who, item, type)
+  var charges;
+  var charge := ReadGameClock() + 60;
+  var depleted := 0;
+  var ev;
+  var brk;
+  while(1)
+	ev := wait_for_event(1);
+	case(ev.type)
+	  EVID_UNEQUIP:   depleted := 0;
+	                  brk := 1;
+	endcase
+    if(brk == 1)
+      break;
+    endif
+    if(!who.ip)
+      break;
+    endif
+    if(type == "vis")
+      who.setlightlevel(0, 70);
+    endif
+	if(charge <= ReadGameClock())
+      charge := ReadGameClock() + 60;
+      charges := GetObjProperty(item, "charges");
+      if(!charges)
+        depleted := 1;
+        break;
+      endif
+	  SetObjProperty(item, "charges", Cint(charges - 1));
+	else
+      charge := ReadGameClock() + 5;
+      charges := GetObjProperty(item, "charges");
+      if(!charges)
+        depleted := 1;
+        break;
+      endif
+	  SetObjProperty(item, "charges", Cint(charges - 1));
+	endif
+  endwhile
+  return depleted;
+endfunction
+
+function Process_Unmods(who, item, mods, loff)
+  if(Cint(GetObjProperty(item, "HoldMods")))
+    repeat
+      sleep(1);
+    until(!Cint(GetObjProperty(item, "HoldMods")));
+  endif
+  Set_Critical(1);
+  SetObjProperty(item, "HoldMods", 1);
+  var type := mods[1];
+  var gain := Cint(mods[2]);
+  if(!who.ip)
+    who := SystemFindObjectBySerial(who.serial, SYSFIND_SEARCH_OFFLINE_MOBILES);
+  endif
+  case(type)
+    "strength":     ModifyAttributeTemporaryMod(who, ATTRIBUTEID_STRENGTH, (0 - gain));
+    "invisibility": who.hidden := 0;
+    "sight":        who.setlightlevel(0, 1);
+    "protection":   ModifyAttributeTemporaryMod(who, PARRYING, (0 - gain));
+    "reflect":      EraseObjProperty(who, "mr");
+    "bless":        ModifyAttributeTemporaryMod(who, ATTRIBUTEID_STRENGTH,     (0 - gain));
+                    ModifyAttributeTemporaryMod(who, ATTRIBUTEID_INTELLIGENCE, (0 - gain));
+                    ModifyAttributeTemporaryMod(who, ATTRIBUTEID_DEXTERITY,    (0 - gain));
+                    ModifyAttributeTemporaryMod(who, PARRYING,        (0 - (gain *3)));
+  endcase
+  RecalcVitals(who);
+  EraseObjProperty(item, "HoldMods");
+  Set_Critical(0);
+  return;
+endfunction

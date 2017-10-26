@@ -1,0 +1,26 @@
+use uo;
+use os;
+
+include "include/res";
+include "include/resPenalty";
+include "include/client";
+
+const SOUND_EFFECT_RES := 0x215;
+const ACTION_EFFECT_CAST2 := 0x11;
+
+program do_res(mobile)
+  if(mobile.dead)
+    set_critical(1);
+  	if(GetObjProperty(mobile, "#ResMenu"))
+  	  return;
+  	endif
+	SetObjProperty(mobile, "#ResMenu", 1);
+	set_critical(0);
+	if(ResNow(mobile)==1)
+	  PlaySoundEffect(mobile, SOUND_EFFECT_RES);
+      Resurrect(mobile);
+      ResPenalties(mobile);
+    endif
+    EraseObjProperty(mobile, "#ResMenu");
+  endif
+endprogram

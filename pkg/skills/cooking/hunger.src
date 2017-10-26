@@ -1,0 +1,47 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+
+program Hunger(chr)
+ if(chr.cmdlevel == 0)
+  var hunger;
+  while(chr)
+    hunger := CInt(GetObjProperty(chr, "hunger"));
+    if(hunger >= 9)
+	  hunger := 9;
+    elseif (!hunger)
+      hunger :=0;
+    endif
+    var who := chr;
+    hunger := hunger +1;
+    SetObjProperty(chr, "hunger", hunger);
+    case (hunger)
+	  0 : SetStaminaRegenRate(who, 1000);
+	  1 : SetStaminaRegenRate(who, 1300);
+	  2 : SetStaminaRegenRate(who, 1200);
+	  3 : SetStaminaRegenRate(who, 1200);
+	  4 : SetStaminaRegenRate(who, 1200);
+	  5 : SetStaminaRegenRate(who, 1200);
+	  6 : SetStaminaRegenRate(who, 1200);
+	  7 : SetStaminaRegenRate(who, 1000);
+	  8 : SetStaminaRegenRate(who, 800);
+	  9 : SetStaminaRegenRate(who, 600);
+	  10: SetStaminaRegenRate(who, 400);
+    endcase
+	if (hunger > 8)
+		if (GetStamina(chr) > GetMaxStamina(chr))
+			SetStamina(chr,GetMaxStamina(chr));
+			RecalcVitals(chr);
+		endif
+	endif
+    case (hunger)
+	  4 : SendSysMessage(chr, "You could use a bite to eat...");
+	  8 : SendSysMessage(chr, "You're getting pretty hungry...");
+	  10: SendSysMessage(chr, "You're absolutely famished!");
+    endcase
+    sleep(60 * 60);
+  endwhile
+ endif
+endprogram

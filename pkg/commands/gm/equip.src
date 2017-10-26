@@ -1,0 +1,23 @@
+use uo;
+
+program textcmd_equip( speaker )
+    SendSysMessage( speaker, "What shall be equipped?" );
+
+    var what := Target( speaker );
+    if (!what)
+        return;
+    endif
+
+    SendSysMessage( speaker, "On whom shall " + what.desc + " be equipped?" );
+    var who := Target( speaker );
+    if (!who)
+        return;
+    endif
+
+    var res := EquipItem( who, what );
+    if (res)
+        SendSysMessage( speaker, "Done!" );
+    else
+        SendSysMessage( speaker, "Unable to equip item: " + res.errortext );
+    endif
+endprogram

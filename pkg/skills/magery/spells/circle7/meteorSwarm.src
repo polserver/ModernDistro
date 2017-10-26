@@ -1,0 +1,83 @@
+use cfgfile;
+use uo;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+//include "include/spellAttack";
+include ":damage:damage";
+
+program cast_meteor( parms )
+  var caster := parms[1];
+  var info := parms[2];
+//////////////////////////////////////////////////////////////////////////////////////////
+// Removed targetting  because Distor 0.97 uses caster as centre for area of effect for //
+// this spell.                                                                          //
+//////////////////////////////////////////////////////////////////////////////////////////
+/*  var cast_on := MS_TargetCoordinates(caster, info.targ, "Select a target.");
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+  if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+        return 0;
+  endif */
+
+///////////////////// 0.97 Distro stuff starts here //////////////////////////////////
+	Detach();
+	// Base damage is a decimal number in between min and max damage
+	var min_damage := CInt(GetConfigInt(info.spell_config, "MinBaseDamage"));
+	var max_damage := CInt(GetConfigInt(info.spell_config, "MaxBaseDamage"));
+	var base_damage := min_damage + (CDbl(RandomInt(CInt((max_damage - min_damage) * 10)) + 1) / 10);
+	var damage;
+
+	// Get all targets in area excluding party and self. Damaged is divided by number of valid targets.
+	var area_size := CInt(GetConfigInt(info.spell_config, "AreaSize"));
+	var exclude := GetObjProperty(caster, "#Party");
+	exclude.Append(caster.serial);
+	var targs := MS_GetVaildTargets(caster, area_size, 1, exclude);
+
+	foreach vtarg in targs
+                if(Reflected(vtarg))
+                    SendSysMessage (caster, "The spell was reflected back onto you!!!", color := 33);
+                    vtarg := caster;
+                    PlaySoundEffect( vtarg, SFX_SPELL_FIREBALL );
+                    PlayMovingEffect( caster, vtarg, FX_FIREBALL, 5, 1 );
+                endif
+
+		damage := MS_GetSpellDamage(caster, vtarg, base_damage) / targs.Size();
+                PlaySoundEffect( vtarg, SFX_SPELL_FIREBALL );
+                PlayMovingEffect( caster, vtarg, FX_FIREBALL, 5, 1 );
+                SetObjProperty(vtarg, "LastHit", {caster.name, caster.serial, "meteor swarm"});
+		ApplyRawSpellDamageEX(vtarg, damage, info.damage_type, caster, info.Circle);
+	endforeach
+        
+	return 1;
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////
+/*  Detach();
+  var dmg;
+  var victims := ListMobilesNearLocationEx( cast_on.x, cast_on.y, cast_on.z, 3, 0x03, caster.realm);
+  foreach mobile in victims
+    if(Reflected(mobile))
+	  mobile := caster;
+	  PlaySoundEffect( mobile, SFX_SPELL_FIREBALL );
+	  PlayMovingEffect( caster, mobile, FX_FIREBALL, 5, 1 );
+    endif
+	dmg := RandomDiceRoll("6d8");
+	send_attack(mobile,caster, 55);
+    if(GetHp(mobile) > 1)
+      if(cast_on.npctemplate)
+        dmg := dmg * 2;
+      endif
+      ApplyRawDamage(mobile, Resisted(info.circle,caster,mobile,dmg));
+    endif
+	sleep(1);
+  endforeach */
+endprogram

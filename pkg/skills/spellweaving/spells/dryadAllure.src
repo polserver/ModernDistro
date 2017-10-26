@@ -1,0 +1,66 @@
+use uo;
+use vitals;
+
+include "include/spellRestrictions";
+
+program chrcast_dryad( parms )
+  var circle := 5;
+  var delivery := "direct";
+  var noto := "harmful";
+  var result := maincast(parms, delivery, circle, noto, 612);
+
+  if(result == 0)
+    return 0;
+  endif
+
+  var caster := result[1];
+  var cast_on := result[2];
+  
+var dru := Cint(GetEffectiveSkill(caster, SPELLWEAVING));
+var alore := Cint(GetEffectiveSkill(caster, SKILLID_ANIMALLORE));
+var int := GetIntelligence(caster);
+
+var bonus := 0;
+
+if(caster.ip)
+bonus := int/5;
+endif
+
+var npcdesc := ReadConfigFile("::npcdesc");
+var human  := CInt(npcdesc[cast_on.npctemplate].humanoid);
+
+if(!human)
+SendSysMessage(caster, "Cel nie jest stworzeniem humanoidalnym.");
+return 0;
+endif
+
+
+
+SetObjProperty( cast_on, "happiness", 100);
+SetObjProperty(cast_on, "master", caster.serial);
+SetObjProperty(cast_on,"script",cast_on.script);
+cast_on.setmaster( caster );
+cast_on.script := "tamed";
+PlaySoundEffect(caster, 0x5C5);
+RestartScript(cast_on);
+PrintTextAbove(cast_on, "*jest teraz kontrolowany przez " + caster.name + "*");
+var duration := ((dru + alore)/5) + bonus;
+
+Detach();
+sleep(duration);
+
+cast_on.script := npcdesc[cast_on.npctemplate].script;
+cast_on.setmaster(0);
+EraseObjProperty(cast_on, "master");
+EraseObjProperty(cast_on, "serial");
+EraseObjProperty(cast_on, "script");
+EraseObjProperty(cast_on, "happiness");
+EraseObjProperty(cast_on, "mounted");
+EraseObjProperty(cast_on, "mounted_on"); 
+PlaySoundEffect(cast_on, 0x5C6);
+RestartScript(cast_on);
+PrintTextAbove(cast_on, "*nie jest juz kontrolowany przez " + caster.name + "*");
+
+
+
+endprogram

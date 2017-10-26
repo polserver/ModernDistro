@@ -1,0 +1,17 @@
+use os;
+use uo;
+
+const UOBJ_REG_START := 0xf78;
+const UOBJ_REG_END := 0xf91;
+
+program makeregs(who, amount)
+  amount := CInt(amount);
+  if(!amount)
+    amount := 20;
+  endif
+  var backpack := CreateItemInBackpack(who, "backpack", 1);
+  backpack.color := 0x3;
+  foreach thing in array( 0x0f7a, 0x0f7b, 0x0f84, 0x0f85, 0x0f86, 0x0f88, 0x0f8c, 0x0f8d )
+    CreateItemInContainer(backpack, thing, amount);
+  endforeach
+endprogram

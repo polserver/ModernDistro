@@ -1,0 +1,35 @@
+use uo;
+use os;
+use polsys;
+
+include ":chat:chatIO";
+include ":chat:packets";
+include ":chat:functions";
+include ":chat:settings";
+
+program CreateNewConference(params)
+	var character := params[1];
+	var packet := params[2];
+	params := "";
+
+	if ( CH_CheckDebug() )
+		Print("CreateNewConference: "+character.name+" "+packet);
+	endif
+	
+	var conference_name := CChrZ(packet.GetUnicodeString(9, (packet.GetSize() / 2) - 5));
+	var conference_pass := "";
+	
+	if ( Find(conference_name, "{", 1) )
+		conference_pass := conference_name[Find(conference_name, "{", 1) + 1, Find(conference_name, "}", 1) - 2];
+		conference_name := conference_name[1, Find(conference_name, "{", 1) - 1];	
+	endif
+	
+	Print("Recieved conference: "+conference_name+" "+conference_pass);
+
+	// Create conference and automaticly join player (if valid) since confs are destroyed when all leave.
+	if ( CreateConference(conference_name, conference_pass, character) )
+		AddPlayerToConference(character, conference_name, conference_pass);
+	endif
+	
+	return 1;
+endprogram

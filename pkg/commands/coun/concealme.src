@@ -1,0 +1,10 @@
+program concealme(who, txt)
+  txt := CInt(txt);
+  if(!txt)
+    txt := 1;
+  endif
+  if(txt > who.cmdlevel)
+    txt := who.cmdlevel;
+  endif
+  who.concealed := txt;
+endprogram

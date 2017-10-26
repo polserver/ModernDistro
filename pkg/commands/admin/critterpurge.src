@@ -1,0 +1,12 @@
+use vitals;
+use uo;
+use os;
+
+program purge(who)
+  foreach critter in ListMobilesNearLocation(who.x, who.y, who.z, 20, who.realm)
+    if((critter.npctemplate) && (critter.script != "tamed"))
+      SetObjProperty(critter, "guardkill", 1);
+      ApplyRawDamage(critter, 1000);
+    endif
+  endforeach
+endprogram

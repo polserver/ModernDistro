@@ -1,0 +1,93 @@
+
+use uo;
+use os;
+
+include ":attributes:attributes";
+include ":poisonwatcher:poisons";
+include ":damage:damage";
+
+program default_poison(params)
+
+	var who := params[1];
+	var attacker := params[2];
+	var level := params[3];
+
+	if (!level)
+		level := 1;
+	endif
+
+	if (attacker)
+		SetScriptController(attacker);
+	endif
+
+	var dmg := 0;
+	var stam := 0;
+	var poisonedmsg := "";
+	var viewermsg := "";
+	var time := 15;
+	case (level)
+		default:
+		1: dmg := Cint(GetMaxHp(who) / 40);
+		   if (dmg < 3)
+			dmg := 3;
+		   endif
+		   poisonedmsg := "You feel feverish.";
+		   viewermsg := "* - " + who.name + " appears to be sick. - *";
+		2: dmg := Cint(GetMaxHp(who) / 32);
+		   if(dmg < 5)
+			dmg := 5;
+  		   endif
+		   poisonedmsg := "You feel feverish and nauseous.";
+		   viewermsg := "* - " + who.name + " appears diseased. - *";
+		   time := 12;
+		3: dmg := Cint(GetMaxHp(who) / 16);
+		   if(dmg < 7)
+			dmg := 7;
+		   endif
+		   stam := Cint(GetMaxStamina(who) / 30);
+		   poisonedmsg := "You feel extremely feverish and have trouble breathing.";
+		   viewermsg := "* - " + who.name + " appears diseased and in pain. - *";
+		   time := 10;
+		4: dmg := Cint(GetMaxHp(who) / 8);
+		   if(dmg < 6)
+			dmg := 6;
+		   endif
+		   stam := Cint(GetMaxStamina(who) / 20);
+		   poisonedmsg := "You have trouble standing from the dizziness and fever!";
+		   viewermsg := "* - " + who.name + " stumbles around in a feverish haze! - *";
+		   time := 5;
+		5: dmg := Cint(GetMaxHp(who) / 4);
+		   if(dmg < 12)
+			dmg := 12;
+		   endif
+		   stam := Cint(GetMaxStamina(who) / 10);
+		   poisonedmsg := "You feel as if you may die very soon!!!";
+		   viewermsg := "* - " + who.name + " begins to spasm uncontrollably and looks close to death! - *";
+		   time := 5;
+	endcase
+
+	while(1)
+		PrintTextAbovePrivate(who, poisonedmsg, who);
+		foreach mob in ListMobilesInLineOfSight(who, 8)
+			if((mob.ip) and (mob != who))
+				PrintTextAbovePrivate(who, viewermsg, mob);
+			endif
+		endforeach		
+
+		var lasthitparms := {attacker.name, attacker.serial, "poison"};
+		SetObjProperty(who, "LastHit", lasthitparms );
+		ApplyRawDamageEX(who, dmg, DMG_POISON);
+
+		Set_Critical(1);
+			var curr := CInt(GetStamina(who));
+			if (curr >= stam)
+				SetStamina(who, (curr-stam));
+			else
+				SetStamina(who, 0);
+			endif
+		Set_Critical(0);
+		RecalcVitals(who);
+		sleep(time);
+	endwhile
+
+endprogram

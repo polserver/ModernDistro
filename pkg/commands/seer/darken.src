@@ -1,0 +1,14 @@
+use uo;
+
+program textcmd_darken(who)
+
+	SendSysMessage(who, "Select target.");
+	var victim := Target(who);
+	if (!victim.ip)
+		SendSysMessage(who, "Aborted.");
+		return;
+	endif
+
+	victim.setlightlevel( 30, 6000 );
+
+endprogram

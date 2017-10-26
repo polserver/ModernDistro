@@ -1,0 +1,16 @@
+use uo;
+use os;
+
+
+program popupmenu(who)
+
+// A placeholder for popup menu program.
+// This should stop the console exception error reporting the missing popupmenu.ecl missing.
+
+// In the future I will try to determine if this program is necessary and if so will actually add functional
+// code to it.
+
+
+
+endprogram
+

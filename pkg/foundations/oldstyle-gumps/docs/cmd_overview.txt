@@ -1,0 +1,98 @@
+Gump Command Document
+=====================
+
+NOTE: All values *must* be in decimal! Hex values can
+NOTE: (and usually will) crash the gump!
+
+page #
+
+- Sets the "page number" to '#'
+- Page 0  = Background page -- this is ALWAYS showing (and is MANDATORY!)
+- Page 1+ = Foreground pages -- these overlap page-0 (also see "button")
+
+noclose
+
+- Won't let the gump be closed with a right-click
+
+nodispose
+
+- Won't let the gump be closed by clicking ESCAPE
+- YOU MUST HAVE THIS!!!! This is NOT an option!
+
+nomove
+
+- Disallows dragging of the gump.
+
+gumppic X Y GUMPID
+
+- Displays a single "art gump" at [X,Y]
+- (Uses "Gump" art from InsideUO)
+
+resizepic X Y GUMPID W H
+
+- Resized "gump" made up of art from 'GUMPID' to 'GUMPID+8'
+- Top-left is at [X,Y]. W and H specify Width and Height.
+- (Uses "Gump" art from InsideUO)
+
+tilepic X Y TILEID
+
+- Displays a single "tile" graphic at [X,Y] on the gump
+- (Uses "Static Tiles" from InsideUO [under Artwork])
+
+text X Y COLOR DATAIDX
+
+- Display a line of text on the gump at [X,Y] in colour 'COLOR'
+- DATAIDX is the position of the text in the data[] array
+- NOTE: DATAIDX goes from 0-xxx ... data[] goes from 1-(xxx+1)...
+- I.E.: DATAIDX=0 -> data[1] ; DATAIDX=12 -> data[13] ; etc...
+
+croppedtext X Y W H COLOR DATAIDX
+
+- Display a line of text on the gump at [X,Y] in colour 'COLOR'
+- W and H are the width and height of the croppedtext's bounding box
+- DATAIDX is the position of the text in the data[] array
+- NOTE: See 'text' for info on DATAIDX
+- If the text exceeds the bounding box, it is truncated with an ellipsis (...)
+
+textentry X Y W H COLOR KEYID DATAIDX
+
+- Display a text-entry control on the gump at [X,Y] in colour 'COLOR'
+- W and H are the width and height of the textentry's bounding box
+- KEYID is the Key Value that the text is returned in [from SendDialogGump()]
+- DATAIDX is the position of the text in the data[] array (see "text")
+
+1) button X Y UPID DOWNID 0 PAGE
+2) button X Y UPID DOWNID 1 0 KEYID
+
+- Display a button on the gump at [X,Y]
+- 1) Changes which page is shown on-top to 'PAGE' (using "page X", above)
+- 2) A button that closes the gump, returning KEYID.
+- UPID is the 'gump art' that shows in it's normal (unpressed) state
+- DOWNID is the 'gump art' that is shown when you press it.
+
+checkbox X Y OFFID ONID STATE KEYID
+
+- Displays a check-box (can be off/on) on the gump at [X,Y]
+- OFFID is the 'gump art' shown when the checkbox is 'OFF' (or 'FALSE')
+- ONID is the 'gump art' shown when the checkbox is 'ON' (or 'TRUE')
+- STATE specifies the checkbox's initial state (1=ON , 0=OFF)
+- KEYID is the checkbox's return value - This is ONLY returned when set to ON!
+
+radio X Y OFFID ONID STATE KEYID
+
+- Displays a radio-button (can be off/on) on the gump at [X,Y]
+- OFFID is the 'gump art' shown when the button is 'OFF' (unselected)
+- ONID is the 'gump art' shown when the button is 'ON' (selected)
+- STATE specifies the button's initial state (1=selected , 0=unselected)
+- KEYID is the button's return value - This is ONLY returned when set to ON!
+- Only ONE radio button can be selected in a group.
+- New groups can be specified by using the "GROUP #" command.
+
+group #
+
+- Sets the group number for radio buttons
+- Must be used before the radio-buttons are created
+
+-------------------------------------------------------------------------------
+Document created by Myrathi <myrathi@templar.dhs.org>
+12-Feb-2000

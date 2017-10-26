@@ -1,0 +1,216 @@
+use uo;
+use os;
+use util;
+use cfgfile;
+
+include "include/eventID";
+include ":attributes:attributes";
+include "include/sysEvent";
+include "include/dist";
+include "util/bank";
+
+var npclist := {};
+var spawn, amt, item, status;
+var cfgfile := ReadConfigFile("::gzone");
+var npccfg  := ReadConfigFile("::npcdesc");
+var keys := GetConfigStringKeys(cfgfile);
+
+program guardnode(itm)
+  item := itm;
+  SetObjProperty(item, "#Pid", GetPid());
+  item.color := 53;
+  item.invisible := 1;
+  SetObjProperty(item, "#wait", 1);
+  item.name := "a guard node [initializing]";
+  sleep(RandomInt(60));
+  if(GetGlobalProperty("noguards"))
+    item.name := "a guard node [globally disabled]";
+    SetObjProperty(item, "#wait", 2);
+    while(GetGlobalProperty("noguards"))
+      sleep(60);
+    endwhile
+  endif
+  item.name := "a guard node [enabled]";
+  EraseObjProperty(item, "#wait");
+  item.color := 133;
+  EnableEvents(SYSEVENT_SPEECH, 30);
+  RegisterForSpeechEvents(item, 30);
+  foreach entry in GetObjProperty(item, "NpcList")
+    var critter := SystemFindObjectBySerial(entry);
+    if(critter)
+      npclist.append(critter);
+    endif
+  endforeach
+  spawn := GetObjProperty(item, "Type");
+  if(!spawn)
+    spawn := "townguard";
+    SetObjProperty(item, "Type", "townguard");
+  endif
+  amt := GetObjProperty(item, "Amount");
+  if(!amt)
+    SetObjProperty(item, "Amount", 1);
+    amt := 1;
+  endif
+  if(!GetObjProperty(item, "Status"))
+    SetObjProperty(item, "Status", "on");
+  endif
+  var gc := 0;
+  while(item)
+    if((GetObjProperty(item, "Status") == "on") and (!GetGlobalProperty("noguards")))
+      spawn := GetObjProperty(item, "Type");
+      amt   := GetObjProperty(item, "Amount");
+      if(ReadGameClock() >= gc)
+        ValidateSpawns();
+        SpawnAll();
+        ValidateSpawns();
+        gc := ReadGameClock() + 60;
+      endif
+      var ev := os::wait_for_event(30);
+      case(ev.type)
+        SYSEVENT_SPEECH: if(lower(ev.text)["guard"])
+                           var crims := CrimCheck(ev.source);
+                           if(len(crims) != 0)
+                             var evnt     := array;
+                             evnt.+type   := EVID_NODE;
+                             evnt.+crims  := crims;
+                             foreach mobile in npclist
+                               SendEvent(mobile, evnt);
+                             endforeach
+                           endif
+                         endif
+        "Respawn":       spawn := GetObjProperty(item, "Type");
+                         amt   := GetObjProperty(item, "Amount");
+                         ValidateSpawns();
+                         DespawnAll();
+                         SpawnAll();
+                         ValidateSpawns();
+        "Despawn":       DespawnAll();
+                         ValidateSpawns();
+      endcase
+    else
+      item.color := 53;
+      if(GetObjProperty(item, "Status") == "off")
+        item.name := "a guard node [disabled]";
+      else
+        item.name := "a guard node [globally disabled]";
+      endif
+      DespawnAll();
+      ValidateSpawns();
+      while((GetObjProperty(item, "Status") == "off") or (GetGlobalProperty("noguards")))
+        var ev := os::wait_for_event(120);
+      endwhile
+      SpawnAll();
+      ValidateSpawns();
+      item.color := 133;
+      item.name := "a guard node [enabled]";
+    endif
+  endwhile
+endprogram
+
+function ValidateSpawns()
+  var chk := array;
+  foreach thing in npclist
+    if(GetHP(thing))
+      chk.append(thing);
+    endif
+  endforeach
+  npclist := chk;
+  var holder := array;
+  foreach thing in npclist
+    holder.append(thing.serial);
+  endforeach
+  SetObjProperty(item, "NpcList", holder);
+endfunction
+
+function DespawnAll()
+  var chk := array;
+  foreach thing in npclist
+    var hp := GetHP(thing);
+    if(hp)
+      MoveObjectToLocation(thing, 5279, 1184, 0, "britannia", MOVEOBJECT_FORCELOCATION); // newmap problem
+      ApplyRawDamage(thing, Cint(hp + 100));
+    endif
+  endforeach
+  npclist := array;
+  SetObjProperty(item, "NpcList", npclist);
+endfunction
+
+function SpawnAll()
+  while(len(npclist) < amt)
+    var x := cint(item.x + RandomInt(11) - RandomInt(11));
+    var y := cint(item.y + RandomInt(11) - RandomInt(11));
+    var z := cint(GetWorldHeight(x, y, item.realm));
+    var npc := CreateNpcFromTemplate(spawn, x, y, z, 0, item.realm);
+    if(npc)
+      npclist.append(npc);
+    endif
+    sleep(2);
+  endwhile
+  var holder := array;
+  foreach thing in npclist
+    holder.append(thing.serial);
+  endforeach
+  SetObjProperty(item, "NpcList", holder);
+endfunction
+
+function crimcheck(me)
+  var crims := array;
+  var timer;
+  if(!InGuardZone(me))
+    return crims;
+  endif
+  foreach npc in ListMobilesNearLocation(me.x, me.y, me.z, 15, me.realm)
+    if(InGuardZone(npc))
+      timer := Cint(GetObjProperty(npc, "guardstimer"));
+      if((npc.criminal) and (!npc.dead))
+        if(timer < ReadGameClock())
+          crims.append(npc);
+        endif
+      elseif((npc.script == "tamed") || (npc.script == "employed"))
+        var master := GetObjProperty(npc, "master");
+        if(master)
+          if(SystemFindObjectBySerial(master, SYSFIND_SEARCH_OFFLINE_MOBILES).criminal)
+            if(timer < ReadGameClock())
+              SetObjProperty(npc, "#guardstimer", ReadGameClock() + 15);
+              crims.append(npc);
+            endif
+          endif
+        endif
+      elseif((!npccfg[npc.npctemplate].guardignore) and (npc.isA(POLCLASS_NPC)))
+        if(timer < ReadGameClock())
+          crims.append(npc);
+        endif
+      else
+        foreach combatant in ListHostiles(npc, 15)
+          timer := Cint(GetObjProperty(combatant, "guardstimer"));
+          if(((combatant.criminal) and (!combatant.dead)) and ((Cint(GetObjProperty(combatant, "guardstimer")) >= ReadGameClock()) || (timer.errortext)))
+            if(timer < ReadGameClock())
+              crims.append(combatant);
+            endif
+          elseif(((npc.script == "tamed") || (npc.script == "employed")) and (npc.criminal))
+            if(timer < ReadGameClock())
+              crims.append(combatant);
+            endif
+          elseif((!npccfg[combatant.npctemplate].guardignore) and (combatant.isA(POLCLASS_NPC)))
+            if(timer < ReadGameClock())
+              crims.append(combatant);
+            endif
+          endif
+        endforeach
+      endif
+    endif
+  endforeach
+  return crims;
+endfunction
+
+function InGuardZone(mobile)
+  var chk := 0;
+  foreach listing in keys
+    var range := SplitWords(cfgfile[listing].range);
+    if((mobile.x >= CInt(range[1])) && (mobile.x <= CInt(range[3])) && (mobile.y >= CInt(range[2])) && (mobile.y <= CInt(range[4])))
+      chk := 1;
+      break;
+    endif
+  endforeach
+  return chk;
+endfunction

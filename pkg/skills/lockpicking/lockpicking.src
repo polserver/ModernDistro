@@ -1,0 +1,162 @@
+use uo;
+use os;
+use cfgfile;
+use util;
+
+include "include/client";
+include "include/dist";
+include "include/objtype";
+include "include/startEqp";
+include "util/key";
+include "include/canAccess";
+include ":attributes:attributes";
+
+program pick( me, lockpick )
+  EraseObjProperty(me, "IsMeditating");
+  EraseObjProperty(me, "HealTimer");
+  if(!can_access(me, lockpick))
+    return;
+  endif
+  if(lockpick.movable == 0)
+    SendSysMessage(me, "You cannot use that.");
+    return;
+  endif
+  if (!ReserveItem(lockpick))
+    return;
+  endif
+  SendSysMessage(me, "choose something to pick?");
+  var chest := Target(me);
+  if (!chest)
+    SendSysMessage(me,"canceled");
+    return;
+  endif
+  if ( (!Accessible(me,chest)) || (!Accessible(me,lockpick)) )
+	SendSysMessage(me, "Can't reach it!");
+	return;
+  endif
+  if (GetObjProperty(chest,"spawnchest"))
+	PickSpawnChest(me, lockpick, chest);
+  elseif (GetObjProperty(chest,"lockable"))
+	PickLockedItem(me, lockpick, chest);
+  elseif (GetObjProperty(chest,"level"))
+	PickTreasureChest(me, lockpick, chest);
+  else
+    SendSysMessage(me, "You have no chance of picking that lock!");
+    ReleaseItem(lockpick);
+  endif
+endprogram
+
+function PickTreasureChest(me, lockpick, chest)
+  var lvl := GetObjProperty(chest,"level" );
+  if (!lvl)
+	DestroyItem(chest);
+  endif
+  if (!chest.locked)
+	SendSysMessage(me,"That doesn't appear to be locked");
+	return;
+  endif
+  PlaySoundEffect(chest,SFX_242);
+  sleep(2);
+  var diff := (lvl * 20)+10;
+  if ( SkillCheck(me, LOCKPICKING,diff,0) )
+	PlaySoundEffect(chest,SFX_200);
+	PrintTextAbovePrivate(chest,"*Unlocked!*",me);
+  else
+	PrintTextAbovePrivate(chest,"You fail to pick the lock.",me);
+	if (diff < 10)
+	  diff := 0;
+	else
+	  diff := diff -10;
+	endif
+	if (!SkillCheck(me, LOCKPICKING,diff,0) )
+	  PlaySoundEffect(chest,0xef);
+	  SendSysMessage(me,"Your pick breaks!");
+	  SubtractAmount(lockpick,1);
+	  endif
+	return;
+  endif
+  set_critical(1);
+  chest.locked := 0;
+  set_critical(0);
+  ReleaseItem(lockpick);
+endfunction
+
+function PickSpawnChest(me, lockpick, chest)
+  var lvl := GetObjProperty(chest,"lockpicking" );
+  if (!lvl)
+	DestroyItem(chest);
+  endif
+  if (!chest.locked)
+	SendSysMessage(me,"That doesn't appear to be locked");
+	return;
+  endif
+  PlaySoundEffect(chest,SFX_242);
+  sleep(2);
+  var diff := (lvl * 10)+10;
+  if ( SkillCheck(me, LOCKPICKING,diff,0) )
+	PlaySoundEffect(chest,SFX_200);
+	PrintTextAbovePrivate(chest,"*Unlocked!*",me);
+  else
+	PrintTextAbovePrivate(chest,"You fail to pick the lock.",me);
+	if (diff < 10)
+	  diff := 0;
+	else
+	  diff := diff -10;
+	endif
+	if (!SkillCheck(me, LOCKPICKING,diff,0) )
+	  PlaySoundEffect(chest,0xef);
+	  SendSysMessage(me,"Your pick breaks!");
+	  SubtractAmount(lockpick,1);
+	  endif
+	return;
+  endif
+  set_critical(1);
+  SpawnTheChest(chest,lvl);
+  chest.locked := 0;
+  var allchests := GetGlobalProperty("unlockedchests");
+  if (!allchests)
+	allchests[1]:=chest.serial;
+  else
+	allchests[len(allchests)+1]:=chest.serial;
+  endif
+  SetGlobalProperty("unlockedchests",allchests);
+  set_critical(0);
+  ReleaseItem(lockpick);
+endfunction
+
+function SpawnTheChest(chest, lvl)
+  var lootgroup := (108+lvl);
+  MakeLoot( chest, lootgroup );
+endfunction
+
+function PickLockedItem(me, lockpick, chest)
+  var lvl := GetObjProperty(chest,"lockable" );
+  if (!lvl)
+	SendSysMessage(me,"that cannot be picked");
+    return;
+  endif
+  if (!chest.locked)
+	SendSysMessage(me,"That doesn't appear to be locked");
+	return;
+  endif
+  PlaySoundEffect(chest,SFX_242);
+  sleepms(1500);
+  var diff := (lvl+10);
+  if ( SkillCheck(me, LOCKPICKING,diff,(diff*2)) )
+	PlaySoundEffect(chest,SFX_200);
+    chest.locked := 0;
+  else
+	SendSysMessage(me,"You fail to pick the lock.");
+	if (diff < 10)
+	  diff := 0;
+	else
+	  diff := diff -10;
+	endif
+	if ((RandomInt(99)+1) <= diff)
+	  PlaySoundEffect(chest,0xef);
+	  SendSysMessage(me,"Your pick breaks!");
+	  SubtractAmount(lockpick,1);
+	endif
+	return;
+  endif
+endfunction

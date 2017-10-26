@@ -1,0 +1,14 @@
+
+use uo;
+
+include "util/bank";
+
+program open_bank( who )
+
+             var bankbox;
+           
+             bankbox := FindBankBox( who );
+
+             SendOpenSpecialContainer( who, bankbox );
+   
+endprogram

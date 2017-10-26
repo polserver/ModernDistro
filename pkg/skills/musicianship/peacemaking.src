@@ -1,0 +1,32 @@
+use os;
+use uo;
+
+include "include/bard";
+include "include/client";
+include "include/eventID";
+
+program bard_peacemake(who)
+  EraseObjProperty(who, "IsMeditating");
+    if(Cint(GetObjProperty(who, "LastPeace")) > ReadGameClock())
+    SendSysMessage(who, "You must wait a moment before playing again.");
+    return;
+  endif
+  SetObjProperty(who, "LastPeace", Cint(ReadGameClock() + 2));
+  var instrument := findinstrument(who);
+  if(!instrument)
+    SendSysMessage(who, "You don't have an instrument to play!");
+    return;
+  endif
+  if(!ReserveItem(instrument))
+    return;
+  endif
+  var ev := array;
+  ev.+ type;
+  ev.type := EVID_PEACEMADE;
+  var success := play(who, -1, instrument, SKILLID_PEACEMAKING);
+  foreach thetarg in ListMobilesNearLocation(who.x, who.y, who.z, 8)
+	if(success)
+      SendEvent(thetarg, ev);
+	endif
+  endforeach
+endprogram

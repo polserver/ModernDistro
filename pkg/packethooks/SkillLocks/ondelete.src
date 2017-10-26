@@ -1,0 +1,15 @@
+/* $Id: ondelete.src 544 2006-07-04 03:13:44Z austinheilman $
+ *
+ */
+
+
+include ":datafile:datafile";
+include ":skilllocks:common";
+
+program skillLock_OnDelete(character)
+	var data_file  := SLPH_GetDataFile();
+	if ( data_file )
+		return data_file.DeleteElement(Hex(character.serial));
+	endif
+	return 1;
+endprogram

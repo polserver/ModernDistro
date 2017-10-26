@@ -1,0 +1,27 @@
+use basic;
+use uo;
+
+include "include/yesNo";
+include "include/kasa";
+
+program imie(who)
+	SendSysMessage(who, "Ile chcesz kupic dziesieciny? " + " 1 dziesieciny = 50 gp. ", 3, 90);
+	var ile := SendTextEntryGump(who, "Ile dziesieciny chcesz kupic?",TE_CANCEL_ENABLE,TE_STYLE_NUMERICAL, 100000);
+	ile := cint(ile);
+	if(!ile || ile < 0)
+		SendSysMessage(who, "Zle wybrales.", 3, 40);
+		return 0;
+	endif
+	if(YesNo(who, "Wyniesie cie to ogolnie: " + ile*50 + " sztuk zlota."))
+		if(SubtractCash(who, ile*50))
+			var dziesiecina := Cint(getobjproperty(who, "dziesiecina")); 
+			if(!dziesiecina)
+				dziesiecina := 0;
+			endif 
+			dziesiecina := dziesiecina + ile; 
+			SetObjProperty(who, "dziesiecina", dziesiecina);
+			SendSysMessage(who, "Dziesiecina: " + CStr(dziesiecina), 3, 63); 
+		endif
+	endif
+endprogram
+

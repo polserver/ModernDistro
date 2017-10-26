@@ -1,0 +1,83 @@
+use uo;
+use os;
+use util;
+use cfgfile;
+
+include "include/canAccess";
+include ":attributes:attributes";
+include ":poisonwatcher:poisons";
+
+program eat_food(who, food)
+	EraseObjProperty(who, "IsMeditating");
+	EraseObjProperty(who, "HealTimer");
+
+	if(!can_access(who, food))
+		return;
+	endif
+	if(food.movable == 0)
+		SendSysMessage(who, "You cannot use that.");
+		return;
+	endif
+
+	var foodcfg := ReadConfigFile(":*:itemdesc");
+	var retval, themsg;
+	var poison := CInt(GetObjProperty(food, "poison_level"));
+	var foodvalue := foodcfg[food.objtype].foodvalue;
+	var hunger := CInt(GetObjProperty(who, "hunger"));
+	if(!foodvalue)
+		foodvalue := 1;
+	endif
+	if(hunger == 0)
+		SendSysMessage(who, "You are too full to eat any more.");
+		return;
+	endif
+
+	if(SubtractAmount(food, 1))
+		case(RandomInt(3) + 1)
+			1: PlaySoundEffect(who, 0x3b);
+			2: PlaySoundEffect(who, 0x3c);
+			3: PlaySoundEffect(who, 0x3d);
+		endcase
+		PerformAction(who, 0x22);
+		SetStamina(who, GetStamina(who) +(RandomInt(5)+foodvalue));
+		if(GetStamina(who) > GetDexterity(who))
+			SetStamina(who, who.dexterity);
+		endif
+		hunger := hunger - foodvalue;
+		case(hunger)
+			0:  themsg := "you manage to eat the food, but you are stuffed";
+			1:  themsg := "you manage to eat the food, but you are stuffed";
+			2:  themsg := "you feel quite full after consuming the food";
+			3:  themsg := "you feel quite full after consuming the food";
+			4:  themsg := "after eating the food you feel much less hungry";
+			5:  themsg := "after eating the food you feel much less hungry";
+			6:  themsg := "after eating the food you feel much less hungry";
+			7:  themsg := "after eating the food you feel much less hungry";
+			8:  themsg := "you eat the food but are still extremely hungry";
+			9:  themsg := "you eat the food but are still extremely hungry";
+			10: themsg := "you eat the food but are still extremely hungry";
+			endcase
+			if(hunger < 0)
+				themsg := "you manage to eat the food, but you are stuffed";
+				hunger := 0;
+			endif
+			SetObjProperty(who, "hunger", hunger);
+		case (hunger)
+			0 : SetStaminaRegenRate(who, 1000);
+			1 : SetStaminaRegenRate(who, 1300);
+			2 : SetStaminaRegenRate(who, 1200);
+			3 : SetStaminaRegenRate(who, 1200);
+			4 : SetStaminaRegenRate(who, 1200);
+			5 : SetStaminaRegenRate(who, 1200);
+			6 : SetStaminaRegenRate(who, 1200);
+			7 : SetStaminaRegenRate(who, 1000);
+			8 : SetStaminaRegenRate(who, 800);
+			9 : SetStaminaRegenRate(who, 600);
+			10: SetStaminaRegenRate(who, 400);
+		endcase
+		SendSysMessage(who, themsg);
+		if(poison > 0)
+			AddPoison(who, "defaultPoison", 120, who, poison);
+		endif
+	endif
+endprogram

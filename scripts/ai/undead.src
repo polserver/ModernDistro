@@ -1,0 +1,205 @@
+use npc;
+use os;
+use uo;
+use cfgfile;
+
+include "include/eventID";
+include ":attributes:attributes";
+include "include/sysEvent";
+include "include/randName";
+include "include/vetement";
+include "include/NPCUtil";
+include "include/objtype";
+include "include/dist";
+include "include/anchors";
+
+const HALT_THRESHOLD := 8; // how close before he attacks?
+var me := Self();
+var npccfgfile := ReadConfigFile( "npcdesc" );
+var idlesnd1 := CInt(npccfgfile[me.npctemplate].idlesound1);
+var idlesnd2 := CInt(npccfgfile[me.npctemplate].idlesound2);
+
+program KillPlayers()
+drop_anchor();
+  start_script("NPCKeeper", me);
+  SetWarMode(0);
+  main_AI_loop();
+endprogram
+
+function main_AI_loop()
+  var ev;
+  var wanders := 60;
+  EnableMainEvents();
+  look_around();
+  while(1)
+    wander();
+    if((RandomInt(1) + 1) == 3)
+      if(RandomInt(1) == 1)
+        PlaySoundEffect(me, idlesnd1);
+      else
+        PlaySoundEffect(me, idlesnd2);
+      endif
+    endif
+    wanders := wanders +1;
+    if(wanders >= 60)
+      wanders :=0;
+      ev := sleepmode();
+    else
+      ev := os::wait_for_event(2);
+    endif
+    if(ev)
+      repeat
+        case(ev.type)
+          SYSEVENT_ENTEREDAREA: if((!(ev.source).npctemplate) || (((ev.source).script == "employed") || ((ev.source).script == "tamed")))
+                                  Fight(ev.source);
+                                endif
+          EVID_ALL_ATTACK_CMD:  Fight(ev.source);
+          SYSEVENT_ENGAGED:
+          SYSEVENT_DAMAGED:     if(ev.source)
+                                  Fight(ev.source);
+                                endif
+        endcase
+      until (!(ev := os::wait_for_event(2)));
+    endif
+  endwhile
+endfunction
+
+function Fight(opponent)
+  if((opponent.cmdlevel > 0) || (opponent.serial == me.serial))
+    SetWarMode(0);
+    opponent := 0;
+	return;
+  endif
+  var oldprio := set_priority(50);
+  SetOpponent(opponent);
+  prepare_for_fight(opponent);
+  TurnToward(opponent);
+  var loops := 0;
+  var ev;
+  var waittime := 0;
+  while((opponent) && (!opponent.dead) && (!opponent.hidden) && (!opponent.concealed) && (dist(me,opponent) < 20))
+	if(!CloseDistance(opponent))
+	  loops := loops + 1;
+	  waittime := 0;
+	else
+	  loops := 0;
+	  waittime := 1;
+	endif
+	in_combat_event_loop(opponent, loops);
+	ev := wait_for_event(waittime);
+	case (ev.type)
+      SYSEVENT_DAMAGED:
+	  SYSEVENT_ENGAGED: if(ev.source)
+			              if(RandomInt(6)==1)
+				            if((!ev.source.npctemplate) || (ev.source.script == "tamed"))
+					          opponent := ev.source;
+			  		          SetOpponent(opponent);
+					          TurnToward(opponent);
+				            endif
+			              endif
+			            endif
+      EVID_PEACEMADE:   SetWarMode(0);
+			            SetOpponent(0);
+			            sleep(1);
+			            DisableCombatEvents();
+			            EnableMainEvents();
+			            return;
+	endcase
+  endwhile
+  post_combat();
+endfunction
+
+function in_combat_event_loop(opponent, loops)
+  if(loops > 50)
+    if((dist(me, opponent) > 12) && (!CheckLineOfSight(me, opponent)))
+	  RestartScript(me);
+	  return;
+    endif
+  endif
+endfunction
+
+function post_combat()
+  DisableCombatEvents();
+  EnableMainEvents();
+  SetWarMode(0);
+  SetOpponent(0);
+  sleep(1);
+  look_around();
+endfunction
+
+function prepare_for_fight(opponent)
+  DisableMainEvents();
+  EnableCombatEvents();
+endfunction
+
+function EnableCombatEvents()
+  EnableEvents(SYSEVENT_ENGAGED + SYSEVENT_DAMAGED + EVID_PEACEMADE);
+endfunction
+
+function DisableCombatEvents()
+  DisableEvents(SYSEVENT_ENGAGED + SYSEVENT_DAMAGED + EVID_PEACEMADE);
+endfunction
+
+function look_around()
+  foreach npc in ListMobilesInLineOfSight(me, HALT_THRESHOLD)
+    if((!npc.npctemplate) || (npc.script == "employed") || (npc.script == "tamed"))
+      Fight(npc);
+      return;
+    endif
+  endforeach
+endfunction
+
+function EnableMainEvents()
+  DisableEvents(SYSEVENT_SPEECH + SYSEVENT_LEFTAREA + SYSEVENT_DISENGAGED + SYSEVENT_OPPONENT_MOVED);
+  EnableEvents(SYSEVENT_ENGAGED + SYSEVENT_DAMAGED + SYSEVENT_ENTEREDAREA, HALT_THRESHOLD);
+endfunction
+
+function DisableMainEvents()
+  DisableEvents(SYSEVENT_ENGAGED + SYSEVENT_DAMAGED + SYSEVENT_ENTEREDAREA);
+endfunction
+
+function sleepmode()
+  foreach critter in ListMobilesNearLocation(me.x,me.y,me.z, 10, me.realm);
+    if(!critter.isA(POLCLASS_NPC))
+      return 0;
+    endif
+  endforeach
+  DisableMainEvents();
+  EnableEvents(SYSEVENT_ENTEREDAREA, 18);
+  EnableEvents(SYSEVENT_ENGAGED);
+  var ev;
+  while(1)
+    ev := os::wait_for_event(30);
+    repeat
+    if((RandomInt(1) + 1) == 1)
+      PlaySoundEffect(me, idlesnd1);
+    else
+      PlaySoundEffect(me, idlesnd2);
+    endif
+    case (ev.type)
+      SYSEVENT_ENGAGED:
+      SYSEVENT_DAMAGED:
+      EVID_ALL_ATTACK_CMD:  EnableMainEvents();
+                            return ev;
+      SYSEVENT_ENTEREDAREA: if((!ev.source.npctemplate) || (ev.source.script == "employed") || (ev.source.script == "tamed"))
+                              EnableMainEvents();
+                              return ev;
+                            endif
+    endcase
+    until(!(ev := os::wait_for_event(30)));
+  endwhile
+endfunction
+
+function CloseDistance(opponent)
+  var sleepdelay := 400 - (CInt(GetDexterity(me)) * 1.5);
+  if(sleepdelay < 0)
+    sleepdelay := 0;
+  endif
+  case (Distance(me, opponent))
+    1:
+    0:       return 1;
+    default: RunToward(opponent);
+             sleepms(sleepdelay);
+             return 0;
+  endcase
+endfunction

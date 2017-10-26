@@ -1,0 +1,75 @@
+
+use uo;
+use cfgfile;
+
+include "../../nature";
+include "include/std";
+
+program setyear(who, text)
+
+    text := CInt(text);
+    if (!text)
+	text := 1;
+    endif
+
+    if (text < 1)
+	text := 1;
+    endif
+
+    var calendar := GetGlobalProperty("Calendar");
+    calendar[MONTH] := text;
+    SetGlobalProperty("Calendar", calendar);
+
+    var cfg := ReadConfigFile("nature");
+    var elem := FindConfigElem(cfg, "seasons");
+    var seasons := GetConfigInt(elem, "seasonal");
+    UnloadConfigFile(cfg);
+
+    if (!GetGlobalProperty("Desolation"))
+        case (calendar[MONTH])
+           
+           3:
+           4:
+           5: 
+              if (seasons)
+                   var everyone := EnumerateOnlineCharacters();
+                   foreach dude in everyone
+                       Season(dude, SEASON_SPRING);
+                   endforeach
+              endif
+           6: 
+           7:
+           8:
+              if (seasons)
+                   var everyone := EnumerateOnlineCharacters();
+                   foreach dude in everyone
+                       Season(dude, SEASON_SUMMER);
+                   endforeach
+              endif
+           9:
+           10:
+           11:
+              if (seasons)
+                   var everyone := EnumerateOnlineCharacters();
+                   foreach dude in everyone
+                       Season(dude, SEASON_FALL);
+                   endforeach
+              endif
+           12:
+           1:
+           2:
+              if (seasons)
+                   var everyone := EnumerateOnlineCharacters();
+                   foreach dude in everyone
+		       if (seasons == 1)
+                           Season(dude, SEASON_WINTER);
+		       elseif (seasons == 3)
+			   Season(dude, SEASON_FELUCCA);
+                       endif
+                   endforeach
+              endif
+           default:
+        endcase
+    endif
+
+endprogram

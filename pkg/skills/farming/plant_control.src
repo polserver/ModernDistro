@@ -1,0 +1,363 @@
+use uo;
+use os;
+use util;
+
+const NEW_PLANT_GROW_TIME			:= 200;
+const REGROW_TIME					:= 450;
+
+program control_plant (plant)
+	if ( GetObjProperty(plant, "new") )
+		plant.decayAt := ReadGameClock() + 1209600;
+		GrowPlant(plant);
+	endif
+
+	//now we sleep a random amount of time.  This is so that all the plants don't regrow all at
+	//the same time after a server reset
+	sleep(RandomInt(REGROW_TIME) + REGROW_TIME);
+
+	//plants die if neglected.  I used the decayat property to save memory
+//	if (plant.decayAt < ReadGameClock())
+		//make sure its not a beehive or special reagent plant
+//		if (IsADecayablePlant(plant))
+//			DestroyItem(plant);
+//			return;
+//		endif
+//	endif
+
+	var harvested_amount := CInt(GetObjProperty(plant, "#harvested"));
+
+	while (plant)
+		sleep(REGROW_TIME);
+
+		harvested_amount := CInt(GetObjProperty(plant, "#harvested"));
+		if (!harvested_amount)
+			EraseObjProperty(plant, "#harvested");
+		elseif (harvested_amount == 1)
+			EraseObjProperty(plant, "#harvested");
+			case (plant.objtype)
+				//wheat
+				0x0c56:	plant.graphic := 0x0c58;
+				//carrots
+				0x0c76:	plant.graphic := 0x0c76;
+				//onions
+				0x0c6f:	plant.graphic := 0x0c6f;
+				//corn
+				0x0c7d:	plant.graphic := 0x0c7d;
+				//flax
+				0x1a99:	plant.graphic := 0x1a9b;
+				//cotton
+				0x0c4f:	plant.graphic := 0x0c4f;
+				//turnip
+				0x0c61:	plant.graphic := 0x0c62;
+				//hops
+				0x1a9e:	plant.graphic := 0x1a9e;
+				//lettuce
+				0x1708e:	plant.graphic := 0x0ca7;
+						plant.color := 270;
+				//cabbage
+				0x1708f:	plant.graphic := 0x0d04;
+						plant.color := 276;
+				//apple tree bottom
+				0x0d98:
+					var planttopserial := GetObjProperty(plant, "planttop");
+					var planttop := SystemFindObjectBySerial(planttopserial);
+					if (!planttop)
+						syslog("destroying an apple tree at " + plant.x + ", " + plant.y + " - no top");
+						DestroyItem(plant);
+						return;
+					endif
+				//apple tree top
+				0x0d9a:
+					var plantbottomserial := GetObjProperty(plant, "plantbottom");
+					var plantbottom := SystemFindObjectBySerial(plantbottomserial);
+					if (!plantbottom)
+						syslog("destroying an apple tree at " + plant.x + ", " + plant.y + " - no bottom");
+						DestroyItem(plant);
+						return;
+					endif
+					plant.graphic := 0x0d9a;
+				//peach tree bottom
+				0x0d9c:
+					var planttopserial := GetObjProperty(plant, "planttop");
+					var planttop := SystemFindObjectBySerial(planttopserial);
+					if (!planttop)
+						syslog("destroying an peach tree at " + plant.x + ", " + plant.y + " - no top");
+						DestroyItem(plant);
+						return;
+					endif
+				//peach tree top
+				0x0d9e:
+					var plantbottomserial := GetObjProperty(plant, "plantbottom");
+					var plantbottom := SystemFindObjectBySerial(plantbottomserial);
+					if (!plantbottom)
+						syslog("destroying an peach tree at " + plant.x + ", " + plant.y + " - no bottom");
+						DestroyItem(plant);
+						return;
+					endif
+					plant.graphic := 0x0d9e;
+				//pear tree bottom
+				0x0da4:
+					var planttopserial := GetObjProperty(plant, "planttop");
+					var planttop := SystemFindObjectBySerial(planttopserial);
+					if (!planttop)
+						syslog("destroying an pear tree at " + plant.x + ", " + plant.y + " - no top");
+						DestroyItem(plant);
+						return;
+					endif
+				//pear tree top
+				0x0da6:
+					var plantbottomserial := GetObjProperty(plant, "plantbottom");
+					var plantbottom := SystemFindObjectBySerial(plantbottomserial);
+					if (!plantbottom)
+						syslog("destroying an pear tree at " + plant.x + ", " + plant.y + " - no bottom");
+						DestroyItem(plant);
+						return;
+					endif
+					plant.graphic := 0x0da6;
+				default:
+			endcase;
+		else
+			harvested_amount := CInt(harvested_amount - 1);
+			SetObjProperty(plant, "#harvested", harvested_amount);
+		endif
+	endwhile
+
+endprogram
+
+
+
+
+///////////////////
+//  Counts the plants directly surrounding the given plant
+///////////////////
+
+function CountPlantsInArea(byref plant, range)
+	var plant_count := 0;
+
+	foreach item in ListItemsNearLocation(plant.x, plant.y, plant.z, range, plant)
+		if (IsAPlant(item))
+			plant_count := plant_count + 1;
+		endif
+	endforeach
+
+	return plant_count;
+endfunction
+
+
+
+
+///////////////////
+//  Makes the plants go through a step-by-step growth cycle when they're first planted
+///////////////////
+
+function GrowPlant(byref plant)
+	SetObjProperty(plant, "#harvested", 10);
+	sleep(NEW_PLANT_GROW_TIME);
+
+	if (CountPlantsInArea(plant, 1) > 5)
+		DestroyItem(plant);
+		return;
+	endif
+
+	if (CountPlantsInArea(plant, 0) > 1)
+		DestroyItem(plant);
+		return;
+	endif
+
+	case (plant.objtype)
+		//wheat
+		0x0c56:	plant.graphic := 0x1ebe;
+				sleep(NEW_PLANT_GROW_TIME);
+				plant.graphic := 0x0c55;
+				sleep(NEW_PLANT_GROW_TIME);
+				plant.graphic := 0x0c57;
+		//carrots
+		0x0c76:	plant.graphic := 0x0c68;
+				sleep(NEW_PLANT_GROW_TIME);
+				plant.graphic := 0x0c69;
+		//onions
+		0x0c6f:	plant.graphic := 0x0c68;
+				sleep(NEW_PLANT_GROW_TIME);
+				plant.graphic := 0x0c69;
+		//corn
+		0x0c7d:	plant.graphic := 0x0cb5;
+				plant.name := "a corn stalk";
+				sleep(NEW_PLANT_GROW_TIME);
+				plant.graphic := 0x0c7e;
+		//flax
+		0x1a99:	plant.graphic := 0x1a99;
+				sleep(NEW_PLANT_GROW_TIME);
+				plant.graphic := 0x1a9a;
+		//cotton
+		0x0c4f:	plant.graphic := 0x0c51;
+				sleep(NEW_PLANT_GROW_TIME);
+				plant.graphic := 0x0c53;
+		//turnip
+		0x0c61:	plant.graphic := 0x0c61;
+		//hops
+		0x1a9e:	plant.graphic := 0x0cb0;
+				plant.name := "hops";
+				sleep(NEW_PLANT_GROW_TIME);
+				plant.graphic := 0x1a9f;
+		//lettuce
+		0x1708e:	plant.graphic := 0x0cb5;
+				plant.name := "lettuce";
+				sleep(NEW_PLANT_GROW_TIME);
+				plant.graphic := 0x0c93;
+				plant.color := 270;
+		//cabbage
+		0x1708f:	plant.graphic := 0x0cb5;
+				plant.name := "cabbage";
+				sleep(NEW_PLANT_GROW_TIME);
+				plant.graphic := 0x0c93;
+				plant.color := 276;
+		//banana tree
+		0x0caa:	plant.graphic := 0x0cab;
+				plant.name := "a banana tree";
+				sleep(NEW_PLANT_GROW_TIME);
+				plant.graphic := 0x0ca8;
+				sleep(NEW_PLANT_GROW_TIME);
+				plant.graphic := 0x0caa;
+		//apple tree
+		0x0d98:	var planttopserial := GetObjProperty(plant, "planttop");
+				var planttop := SystemFindObjectBySerial(planttopserial);
+				if (!planttop)
+					syslog("destroying an apple tree at " + plant.x + ", " + plant.y + " - no top");
+					DestroyItem(plant);
+					return;
+				endif
+				plant.graphic := 0x0ce9;
+				plant.name := "an apple tree";
+				sleep(NEW_PLANT_GROW_TIME);
+				plant.graphic := 0x0d94;
+				planttop.graphic := 0x0d95;
+				sleep(NEW_PLANT_GROW_TIME);
+				plant.graphic := 0x0d98;
+				planttop.graphic := 0x0d99;
+		//peach tree
+		0x0d9c:	var planttopserial := GetObjProperty(plant, "planttop");
+				var planttop := SystemFindObjectBySerial(planttopserial);
+				if (!planttop)
+					syslog("destroying a peach tree at " + plant.x + ", " + plant.y + " - no top");
+					DestroyItem(plant);
+					return;
+				endif
+				plant.graphic := 0x0ce9;
+				plant.name := "a peach tree";
+				sleep(NEW_PLANT_GROW_TIME);
+				plant.graphic := 0x0da0;
+				planttop.graphic := 0x0da1;
+				sleep(NEW_PLANT_GROW_TIME);
+				plant.graphic := 0x0d9c;
+				planttop.graphic := 0x0d9d;
+		//pear tree
+		0x0da4:	var planttopserial := GetObjProperty(plant, "planttop");
+				var planttop := SystemFindObjectBySerial(planttopserial);
+				if (!planttop)
+					syslog("destroying a pear tree at " + plant.x + ", " + plant.y + " - no top");
+					DestroyItem(plant);
+					return;
+				endif
+				plant.graphic := 0x0ce9;
+				plant.name := "a pear tree";
+				sleep(NEW_PLANT_GROW_TIME);
+				plant.graphic := 0x0da8;
+				planttop.graphic := 0x0da9;
+				sleep(NEW_PLANT_GROW_TIME);
+				plant.graphic := 0x0da4;
+				planttop.graphic := 0x0da5;
+		//treetops - make sure there's no floating ones
+		0x0d9a:
+		0x0d9e:
+		0x0da6:
+				var plantbottomserial := GetObjProperty(plant, "plantbottom");
+				var plantbottom := SystemFindObjectBySerial(plantbottomserial);
+				if (!plantbottom)
+					syslog("destroying a treetop at " + plant.x + ", " + plant.y + " - no bottom");
+					DestroyItem(plant);
+					return;
+				endif
+				sleep(NEW_PLANT_GROW_TIME);
+				sleep(NEW_PLANT_GROW_TIME);
+		default:
+	endcase;
+
+	//another check to make sure there's not too many plants in the area
+	if (CountPlantsInArea(plant, 1) > 5)
+		DestroyItem(plant);
+		return;
+	endif
+
+	if (CountPlantsInArea(plant, 0) > 1)
+		DestroyItem(plant);
+		return;
+	endif
+
+	EraseObjProperty(plant, "new");
+	SetObjProperty(plant, "#harvested", 10);
+endfunction
+
+
+
+
+///////////////////
+//  determines if the given item is a plant
+///////////////////
+
+function IsAPlant(byref item)
+	case (item.objtype)
+		0x0c4f:
+		0x0c50:
+		0x0c55:
+		0x0c56:
+		0x0c57:
+		0x0c58:
+		0x0c59:
+		0x0c5a:
+		0x0c5b:
+		0x0c6f:
+		0x0c76:
+		0x0c7d:
+		0x0c7e:
+		0x0c61:
+		0x0c62:
+		0x0c63:
+		0x0caa:
+		0x1a99:
+		0x1a9a:
+		0x1a9b:
+		0x1a9e:
+		0x1a9f:
+		0x1aa0:
+		0x1aa1:
+		0x1708e:
+		0x1708f:
+			return 1;
+	endcase
+	return 0;
+endfunction
+
+
+
+
+///////////////////
+//  Some plants don't decay, such as the reagent plants and beehives
+///////////////////
+
+function IsADecayablePlant(plant)
+	case (plant.objtype)
+		0x18df:
+		0x18e0:
+		0x18e1:
+		0x18e2:
+		0x18e5:
+		0x18e6:
+		0x18e9:
+		0x18ea:
+			return 0;
+	endcase
+	if (GetObjProperty(plant, "nodecay"))
+		return 0;
+	endif
+	return 1;
+endfunction

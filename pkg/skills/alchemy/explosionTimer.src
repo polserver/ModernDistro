@@ -1,0 +1,15 @@
+use uo;
+use os;
+use cfgfile;
+
+program explosion_timer(parms)
+  var potion := parms[1];
+  //var who := parms[2]; // uncomment if needed
+  PrintTextAbove(potion, "3");
+  sleep(1);
+  PrintTextAbove(potion, "2");
+  sleep(1);
+  PrintTextAbove(potion, "1");
+  sleep(1);
+  start_script(":alchemy:exploder", parms);
+endprogram

@@ -1,0 +1,90 @@
+use uo;
+use cfgfile;
+
+ 
+program makeset( who )
+  var prop2 := array;
+  var props2 := array;
+  prop2.+ name;
+  prop2.+ value;
+  var cfg := ReadConfigfile("sets");
+  var numprops2 := 1;
+  var numthings := 0;
+  var things := array;
+  var theitem:= array;
+  var ttype;
+  sendsysmessage(who, "Select the center of the set area:");
+  var wherecenter := targetcoordinates(who);
+  sendsysmessage(who, "Select the upper left corner of the set area.");
+  sendsysmessage(who, "Remember to take the 45 degree tilt into account!");
+  var whereleft := targetcoordinates(who);
+  sendsysmessage(who, "Select the lower right corner of the set area:");
+  var whereright := targetcoordinates(who);
+  var lowerz := Requestinput(who, who.backpack , "Type the lower z coordinate of the set area:");
+  var upperz := Requestinput(who, who.backpack , "Type the upper z coordinate of the set area:");
+  lowerz := CInt(lowerz);
+  upperz := CInt(upperz);
+  var thesetname := Requestinput(who, who.backpack , "What would you like to call this set?");
+  if (cfg[thesetname])
+    sendsysmessage(who, "That set name is already taken!");
+    return;
+  endif
+  var stuff := ListObjectsInBox( whereleft.x,whereleft.y,lowerz,whereright.x,whereright.y,upperz, who.realm);
+  theitem.+ objtype;
+  theitem.+ x;
+  theitem.+ y;
+  theitem.+ z;
+  theitem.+ color;
+  theitem.+ key;
+  foreach thing in stuff
+    if (!thing.IsA(POLCLASS_ITEM))
+      continue;
+    endif          
+    theitem.objtype := thing.objtype;
+    numthings := numthings + 1;                
+    theitem.x := wherecenter.x - thing.x;
+    theitem.y := wherecenter.y - thing.y;
+    theitem.z := lowerz - thing.z;
+    theitem.color := thing.color;
+    things[numthings] := theitem;
+  endforeach
+  var intkey := GetConfigMaxIntKey( cfg);      
+  intkey := intkey + 1;      
+  foreach item in things   
+    var prop := array;
+    var props := array;
+    prop.+ name;
+    prop.+ value;
+    var num_props := 1;    
+    prop.name := "objtype";
+    prop.value := item.objtype;
+    props[num_props] := prop;
+    num_props := num_props + 1;            
+    prop.name := "x";
+    prop.value := item.x;
+    props[num_props] := prop;
+    num_props := num_props + 1;     
+    prop.name := "y";
+    prop.value := item.y;
+    props[num_props] := prop;
+    num_props := num_props + 1; 
+    prop.name := "z";
+    prop.value := item.z;
+    props[num_props] := prop;
+    num_props := num_props + 1;  
+    prop.name := "color";
+    prop.value := item.color;
+    props[num_props] := prop;
+    num_props := num_props + 1;  
+    ttype := "setitem";  
+    AppendConfigFileElem( "sets", ttype, intkey, props );
+    item.key := intkey;           
+    prop2.name := "item";
+    prop2.value := intkey;
+    intkey := intkey + 1;
+    props2[numprops2] := prop2;
+    numprops2 := numprops2 + 1; 
+  endforeach      
+  AppendConfigFileElem( "sets", "set", thesetname, props2 );
+  unloadconfigfile("sets");
+endprogram

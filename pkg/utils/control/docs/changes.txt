@@ -1,0 +1,38 @@
+-=[ 3:22PM Aug. 29, 2005 (Austin)]=---------
+Changed:
+	* You can now do multiple "Description" entries in icp.cfg
+	  and they will be displayed as one long string. Use [P]
+	  to create a line break.
+
+-=[ 6:32PM Jul. 07, 2005 (Austin)]=---------
+Changed:
+	* Renamed folder 'configs' to 'config'
+	* Renamed folder 'includes' to 'include'
+	
+	* ICP will now look for icp.cfg in a package's 'config' folder
+	* Updated scripts to match folder name changes
+	* Updated scripts to use datafile.inc from its package
+
+-=[ 8:30PM Jul. 01, 2005 (Austin)]=---------
+
+Added:
+	* Up/Down page flipping for package listing gump. (oops!)
+
+Changed:
+	* Renamed 'counselor' directory to 'coun' for distro compatability.
+
+-=[ 9:36AM Jun. 21, 2005 (Austin)]=---------
+* Completely rewritten (again)
+
+Added:
+	* Gump cache support.
+	* Makes use of new gumps package.
+	* Support for longer package descriptions.
+
+Changed:
+	* checkpackages.src
+	  Looks for ICP.cfg in a "configs" folder in a package rather
+	  than at the top level.
+
+-=[ 5:30AM Mar. 16, 2001 (Austin)]=---------
+* Package was created. First version.

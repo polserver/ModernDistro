@@ -1,0 +1,50 @@
+use uo;
+use os;
+
+include "include/canAccess";
+
+program use_dyes(who, dyes)
+  if(!ReserveItem(dyes))
+    SendSysMessage(who, "Those dyes are already in use.");
+    return;
+  endif
+  if(!can_access(who, dyes))
+    return;
+  endif
+  SendSysMessage(who, "Select a dye tub to use the dyes on.");
+  var dyetub := Target(who, TGTOPT_CHECK_LOS);
+  if(!ReserveItem(dyetub))
+     SendSysMessage(who, "That is already in use.");
+     return;
+  endif
+  if(!can_access(who, dyetub))
+    return;
+  endif
+  if(!Accessible(who, dyetub))
+    SendSysMessage(who, "You cannot reach that!");
+    return;
+  endif
+  if((dyetub.objtype != 0x1B00f) && (dyetub.objtype != 0x0fab))
+    SendSysMessage(who, "That is not a dye tub!");
+    return;
+  endif
+  var color := SelectColor(who, dyetub);
+  if( color > 1001 )
+    var account := who.acct;
+    SendSysMessage( who, "Bug abusers aren't tolerated here." );
+    who.frozen := 1;
+    SendSysMessage(who, "You have been banned for exploiting.");
+    SetObjProperty(who,"justbanned", 1);
+    var characters := EnumerateOnlineCharacters();
+    foreach chr in characters
+      if(chr.cmdlevel > 1)
+        SendSysMessage(chr, "account " + who.acctname + " has been banned for dye exploiting.");
+      endif
+    endforeach
+    sleep(5);
+    DisconnectClient(who);
+    start_script(":tailoring:dyeBan", who);
+  else
+    dyetub.color := color;
+  endif
+endprogram

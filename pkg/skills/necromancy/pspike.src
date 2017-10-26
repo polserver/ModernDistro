@@ -1,0 +1,55 @@
+// Deviates from official spell
+
+use uo;
+use vitals;
+
+include ":attributes:attributes";
+include ":damage:damage";
+
+program pain_spike( params )
+	var caster := params[1];
+	var info := params[2]; // Struct containing additional info about the spell.
+	var spellID := params[3];
+	var circle := info.circle;
+
+	SendSysMessage(caster, "Select your victim:", 1, 88);
+	var cast_on := Target(caster);
+	
+	var dmg := 0;
+
+	var cast_onrs := Cint(AP_GetSkill(caster, RESISTING_SPELLS));
+	var sspeak := Cint(AP_GetSkill(caster, SPIRITSPEAK));
+
+	if(cast_on.isA(POLCLASS_NPC))
+		dmg :=  ((sspeak - cast_onrs) / 10) + 30;
+	else
+		 dmg := ((sspeak - cast_onrs) / 100) + 18;
+	endif
+
+
+
+
+	if(Cint(GetObjProperty(caster, "#pspike")))
+		SendSysMessage(caster, "You have to wait until the enemy heals some of the damage.",3,40);
+		return 0;
+	endif
+	
+	SetObjProperty(caster, "#pspike", 1);
+	PlaySoundEffect(cast_on, 0x210);
+	PlayObjectCenteredEffectEx( cast_on, 0x37C4, 1, 8, 9916, 39, 0, 3 );
+	SleepMS(60);
+	PlayObjectCenteredEffectEx( cast_on, 0x37C4, 1, 8, 9916, 39, 0, 4 );
+	ApplySpellDamageEX(cast_on, dmg, DMG_PHYSICAL, caster, circle);
+	Detach();
+	sleep(3);
+	
+	if(!cast_on.dead && cast_on.ip)
+		HealDamage(cast_on, dmg/4);
+		PrintTextAbove(cast_on, "+" + Cint(dmg/4),3,63);
+	elseif(!cast_on.dead && cast_on.npctemplate)
+		HealDamage(cast_on, dmg/3);
+		PrintTextAbove(cast_on, "+" + Cint(dmg/3),3,63);
+	endif
+	
+	EraseObjProperty(caster, "#pspike");
+endprogram

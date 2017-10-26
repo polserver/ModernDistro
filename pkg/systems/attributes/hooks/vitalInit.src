@@ -1,0 +1,137 @@
+/* $Id: vitalInit.src 470 2006-06-27 23:53:51Z austinheilman $
+*
+*/
+
+/*===============================================================
+* Current Version
+* regenRates.src
+* Updated 9/24/2005 6:52PM
+*
+* -- Revision v1.0 --
+* Austin:
+*  Created file
+===============================================================*/
+use uo;
+use util;
+
+include ":attributes:attributes";
+include "include/NPCUtil";
+
+program Install()
+	print("INSTALLING: Exported Vital - RegenRate and MaxValue functions ...");
+	return 1;
+endprogram
+
+// *****
+// Hit Point Functions
+// *****
+exported function GetHitsRegenRate(mobile)
+	var base_regen := CInt(AP_GetSettingsCfgElem("Regen").Hits) * 100;
+
+	return base_regen + AP_GetVitalRegenRateMod(mobile, "hits");
+endfunction
+
+exported function GetHitsMaximumValue(mobile)
+	var vital_points := GetNPCVitalSetting(mobile, "HITS");
+	if ( !vital_points )
+		vital_points := GetAttribute(mobile, "Strength") * 100;
+	endif
+
+	return vital_points;
+endfunction
+
+// *****
+// Mana Functions
+// *****
+exported function GetManaRegenRate(mobile)
+	var base_regen := CInt(AP_GetSettingsCfgElem("Regen").Mana) * 100;
+
+	return base_regen + AP_GetVitalRegenRateMod(mobile, "mana");
+endfunction
+
+exported function GetManaMaximumValue(mobile)
+	var vital_points := GetNPCVitalSetting(mobile, "MANA");
+	if ( !vital_points )
+		vital_points := GetAttribute(mobile, "Intelligence") * 100;
+	endif
+
+	return vital_points;
+endfunction
+
+// *****
+// Stamina Functions
+// *****
+exported function GetStaminaRegenRate(mobile)
+	var base_regen := CInt(AP_GetSettingsCfgElem("Regen").Stamina) * 100;
+
+	return base_regen + AP_GetVitalRegenRateMod(mobile, "stamina");
+endfunction
+
+exported function GetStaminaMaximumValue(mobile)
+	var vital_points := GetNPCVitalSetting(mobile, "STAM");
+	if ( !vital_points )
+		vital_points := GetAttribute(mobile, "Dexterity") * 100;
+	endif
+
+	return vital_points;
+endfunction
+
+// *****
+// Hunger Functions
+// Note: This vital is not linked to any attributes.
+// *****
+exported function GetHungerRegenRate(mobile)
+	var base_regen := CInt(AP_GetSettingsCfgElem("Regen").Hunger) * 100;
+
+	return base_regen + AP_GetVitalRegenRateMod(mobile, "Hunger");
+endfunction
+
+exported function GetHungerMaximumValue(mobile)
+	var vital_points := GetNPCVitalSetting(mobile, "HUNGER");
+	if ( !vital_points )
+		vital_points := 100*100; // '100' points.
+	endif
+
+	return vital_points;
+endfunction
+
+
+
+// *****
+// Private Function for NPC stuff
+// *****
+function GetNPCVitalSetting(mobile, vital)
+	if ( !mobile.npctemplate )
+		return 0;
+	endif
+
+	var value := 0;
+
+	// CProp used if NPC had dice settings - so they dont change over and over.
+	var vital_settings := GetObjProperty(mobile, "%NPC_Vitals%");
+
+	if ( vital_settings.Exists(vital) )
+		value := CInt(vital_settings[vital]);
+	else
+		// No prior setup took place - get information from the npcdesc.cfg
+		var npc_cfg := NPC_GetNPCConfig(mobile.npctemplate);
+		value := GetConfigString(npc_cfg, vital);
+
+		if ( !value )
+			return 0;
+		endif
+
+		if ( value["d"] ) // Dice
+			value := RandomDiceRoll(value);
+			if ( Lower(TypeOf(vital_settings)) != "dictionary" )
+				vital_settings := dictionary;
+			endif
+			vital_settings[vital] := CInt(value);
+			SetObjProperty(mobile, "%NPC_Vitals%", vital_settings);
+		else
+			value := CInt(value);
+		endif
+	endif
+
+	return (value * 100);
+endfunction

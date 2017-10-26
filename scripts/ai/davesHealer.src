@@ -1,0 +1,118 @@
+use npc;
+use os;
+use uo;
+
+include "include/NPCCast";
+include ":attributes:attributes";
+include "include/NPCBackpacks";
+include "include/randName";
+include "include/vetement";
+include "include/eventID";
+include "include/sysEvent";
+include "include/dist";
+include "include/anchors";
+include "include/speech";
+include "include/client";
+include "include/res";
+include "include/resPenalty";
+include "include/begging";
+
+const SOUND_EFFECT_RES := 0x215;
+const ACTION_EFFECT_CAST2 := 0x11;
+const REACT_THRESHOLD := 3;
+
+var speech := 99;
+var me:= Self();
+var npccfgfile := ReadConfigFile( "npcdesc" );
+var idlesnd1 := CInt(npccfgfile[me.npctemplate].idlesound1);
+var idlesnd2 := CInt(npccfgfile[me.npctemplate].idlesound2);
+var dmgsound := npccfgfile[me.npctemplate].damagedsound;
+var summons := 1;
+var saywords := 1;
+
+
+program HealerAI()
+  start_script("NPCKeeper", me);
+  drop_anchor();
+  SetAnchor(me.x, me.y, 5, 20);
+  var next_wander := ReadGameClock() + 10;
+  EnableEvents(SYSEVENT_ENGAGED + SYSEVENT_DISENGAGED + SYSEVENT_DAMAGED);
+  EnableEvents(SYSEVENT_ENTEREDAREA, REACT_THRESHOLD);
+  EnableEvents(SYSEVENT_SPEECH, 5);
+  EnableEvents(SYSEVENT_ITEM_GIVEN);
+  if(GetObjProperty(me, "frozen"))
+	me.frozen := 1;
+  endif
+  SetWarMode( 0 );
+  var ev;
+  while(1)
+    ev := os::wait_for_event(120);
+    repeat
+    case(ev.type)
+      SYSEVENT_SPEECH:      next_wander := ReadGameClock()+60;
+                            check_speech(ev.text, ev.source);
+      SYSEVENT_ENGAGED:
+      SYSEVENT_DAMAGED:     PlaySoundEffect(me,dmgsound);
+                            if (ev.source)
+                              Fight( ev.source );
+                            endif
+      SYSEVENT_ENTEREDAREA: if(!ev.source.isA(POLCLASS_NPC))
+                              HealerStuff(ev.source);
+                            endif
+      SYSEVENT_ITEM_GIVEN:  next_wander := ReadGameClock()+60;
+		                TakeItem(ev.source,ev.item);
+    endcase
+    until(!(ev := os::wait_for_event(4)));
+    if (ReadGameClock() >= next_wander)
+      begpurse(me);
+      wander();
+      next_wander := ReadGameClock() + 10;
+    endif
+  endwhile
+endprogram
+
+function Fight( opponent )
+  var oldprio := set_priority(50);
+  DisableEvents(SYSEVENT_LEFTAREA);
+  SetOpponent(opponent);
+  var waittime;
+  outer:
+  while (opponent && not (opponent.dead || opponent.hidden || opponent.concealed) && (dist(me,opponent) < 15))
+    waittime := CloseDistance(opponent) * 15;
+    var ev := wait_for_event(waittime);
+    repeat
+     case (ev.type)
+       SYSEVENT_DISENGAGED:
+       SYSEVENT_ENGAGED:
+       SYSEVENT_DAMAGED:        PlaySoundEffect(me,dmgsound);
+                                if(GetHp(me) < (GetMaxHp(me)/2))
+                                  CastSpell(me, me, "greaterHeal");
+                                endif
+       SYSEVENT_OPPONENT_MOVED: break;
+       SYSEVENT_ENTEREDAREA:    if(!ev.source.isA(POLCLASS_NPC))
+                                  HealerStuff(ev.source);
+                                endif
+     endcase
+     until(!(ev := wait_for_event(0)));
+   endwhile
+   EnableEvents(SYSEVENT_ENTEREDAREA + SYSEVENT_LEFTAREA, REACT_THRESHOLD);
+   SetWarMode(0);
+   set_priority(oldprio);
+endfunction
+
+function CloseDistance( opponent )
+  case (Distance( me, opponent ))
+    1:
+    0:       return 1;
+    2:       WalkToward( opponent );
+             return 0;
+    default: RunToward( opponent );
+             return 0;
+  endcase
+endfunction
+
+function HealerStuff(mobile)
+  var parms := {me, mobile};
+  start_script("doRes", parms);
+  return;
+endfunction

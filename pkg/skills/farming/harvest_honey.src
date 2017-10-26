@@ -1,0 +1,82 @@
+///////////////////
+//  This program is called when you double click a beehive.  It produces honey and wax
+///////////////////
+
+use uo;
+use os;
+use util;
+use attributes;
+use vitals;
+
+include "include/client";
+include "include/objtype";
+include "include/yesNo";
+include ":attributes:attributes";
+
+const ITEM_SWARM		:= 0x091b;
+const SOUND_SCRUNCH		:= 0x58;
+const ACTION_BOW		:= 0x0020;
+
+const MAX_PER_HIVE	:= 10;
+
+program harvest_honey (character, beehive)
+	if (Distance(character, beehive) > 3)
+		SendSysMessage(character, "That is too far away!");
+		return;
+	endif
+
+	var already_harvested_amount := CInt(GetObjProperty(beehive, "#harvested"));
+
+	//if there's no honey or wax, ask the user if they want to destroy the hive
+	if (already_harvested_amount >= MAX_PER_HIVE)
+		SendSysMessage(character, "The hive is empty.");
+		SendSysMessage(character, "Do you want to destroy the beehive?");
+		var destroy := YesNo(character, "Destroy?");
+		if (destroy)
+			CreateItemAtLocation(beehive.x, beehive.y, beehive.z, ITEM_SWARM, 1);
+			SendSysMessage(character, "You fail to destroy the hive, and now the bees are pretty angry...");
+		endif
+		return;
+	endif
+
+	SendSysMessage(character, "You begin harvesting.");
+	var characterx := character.x;
+	var charactery := character.y;
+	repeat
+		//action, sound, and time delay
+		PlaySoundEffect( character, SOUND_SCRUNCH );
+		PerformAction( character, ACTION_BOW );
+		sleep(2);
+		PlaySoundEffect( character, SOUND_SCRUNCH );
+		PerformAction( character, ACTION_BOW );
+		sleep(3);
+
+		//do a skill check to see if they manage to harvest anything
+		if (SkillCheck(character, LUMBERJACKING, 30, 20))
+			already_harvested_amount := CInt(GetObjProperty(beehive, "#harvested"));
+			if (!already_harvested_amount)
+				SetObjProperty(beehive, "#harvested", 1);
+			else
+				SetObjProperty(beehive, "#harvested", CInt(already_harvested_amount + 1));
+			endif
+		
+			CreateItemInBackpack(character, UOBJ_HONEY, 1);
+			CreateItemInBackpack(character, UOBJ_WAX, 1);
+		endif
+
+		//See if they stir up any bees
+		if (!SkillCheck(character, ANIMALLORE, 50, 250))
+			if (RandomInt(4) == 1)
+				CreateItemAtLocation(beehive.x, beehive.y, beehive.z, ITEM_SWARM, 1, character.realm);
+				SendSysMessage(character, "Uh-oh...");
+				return;
+			endif
+		endif
+	
+		if (already_harvested_amount >= MAX_PER_HIVE)
+			SendSysMessage(character, "There's nothing left to harvest right now.");
+			return;
+		endif
+	until (character.x != characterx || character.y != charactery);
+	SendSysMessage(character, "You stop harvesting.");
+endprogram

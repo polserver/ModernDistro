@@ -1,0 +1,112 @@
+/*
+
+	spawnSystem originally created by Austin for the 0.97 Distro
+	
+	Bugs fixed by Edwards
+	
+	Adapted for the Basic Distro by Yukiko 10-Sep-2015
+
+
+*/
+use uo;
+use os;
+use cfgfile;
+use polsys;
+
+include ":spawnsystem:groups";
+include ":spawnsystem:realms";
+include ":spawnsystem:regions";
+
+program FirstRun()
+
+	if( !SetupDefaultGroups() )
+		return 0;
+	endif
+	
+	foreach realm_name in ( Realms().Keys() )
+		SetupRealm( realm_name );
+		SleepMS(2);
+	endforeach
+	
+	return 1;
+endprogram
+
+function SetupDefaultGroups()
+
+	UnloadConfigFile( ":spawnsystem:defaultGroups" );
+ 
+	var cfg_file := ReadConfigFile( ":spawnsystem:defaultGroups" );
+	if( !cfg_file )
+		Broadcast( "Error: Could not load defaultGroups.cfg ->"+cfg_file.errortext, color := 33 );
+		return 0;
+	endif
+
+	foreach group_name in ( GetConfigStringKeys( cfg_file ))
+                
+		var group_info := cfg_file[group_name];
+		if( !group_info.Engine )
+			Broadcast( "Error: No engine name was set for group ("+group_name+").", color := 33 );
+			continue;
+		endif
+  
+		if( !SS_GetGroupDataElem( group_name ))
+			SS_AddGroup( group_name, group_info.Engine );
+		endif
+
+		foreach entry in ( GetConfigStringArray( group_info, "Entry" ))
+			SS_AddEntryToGroup(group_name, entry);
+			SleepMS(10);
+		endforeach
+
+		SleepMS(10);
+	endforeach
+
+	return 1;
+endfunction
+
+function SetupRealm( realm_name )
+
+	UnloadConfigFile( ":spawnsystem:setup-"+realm_name );
+ 
+	var cfg_file := ReadConfigFile( ":spawnsystem:setup-"+realm_name );
+	if( !cfg_file )
+		return 0;
+	else
+		SS_AddRealm( realm_name );
+	endif
+	
+	foreach region_name in ( GetConfigStringKeys( cfg_file ))
+                
+		if( !SS_GetRegionDataElem( region_name ))
+			SS_AddRegion( region_name );
+		endif
+		
+		var elem_info := cfg_file[region_name];
+		
+		var coords := SplitWords( elem_info.Coords );
+		SS_SetRegionCoordinates( region_name, CInt( coords[1] ), CInt( coords[2] ), CInt( coords[3] ), CInt( coords[4] ));
+		SS_SetRegionSpawnWait( region_name, elem_info.SpawnWait );
+                SS_SetRegionDifficulty( region_name, elem_info.Difficulty );
+		
+		SS_AddRegionToRealm( realm_name, region_name );
+		SS_SetRegionRealm( region_name, realm_name );
+		
+		foreach entry in ( GetConfigStringArray( elem_info, "Group" ))
+			entry := SplitWords( entry );
+			var group_name := entry[1];
+			var max_amt := CInt( entry[2] );
+			
+			if( !SS_GetGroupDataElem( group_name ))
+				Broadcast( "Adding group ("+group_name+") to region ("+region_name+")... failed!", color := 33 );
+			else
+				SS_AddGroupToRegion( region_name, group_name, max_amt, 1 );
+			endif
+			
+			SleepMS(10);
+		endforeach
+		
+		SleepMS(10);
+	endforeach
+	
+	return 1; 
+endfunction

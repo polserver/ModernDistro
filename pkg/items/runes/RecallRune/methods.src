@@ -1,0 +1,69 @@
+use os;
+use cfgfile;
+use util;
+use uo;
+
+
+program Install()
+  return 1;
+endprogram
+
+exported function IsRecallRune( rune )
+
+	rune := rune;
+ 
+	return 1;
+endfunction
+
+exported function SetDestination( rune, x, y, z, realm )
+
+	var coords := struct;
+	coords.+x := CInt(x);
+	coords.+y := CInt(y);
+	coords.+z := CInt(z);
+	coords.+realm := CStr(realm);
+
+	var color_cfg := ReadConfigFile( ":magery:runeColor" );
+	var realm_elem := color_cfg[realm];
+	rune.color := CInt( realm_elem.RuneColor );
+
+	return SetObjProperty( rune, "Destination", coords );
+endfunction
+
+exported function GetDestination( rune )
+
+	//var destination := struct;
+	var dest := struct;
+	var destination := GetObjProperty( rune, "Destination" );
+	// This is for the old way the destination was stored.
+	// Just in case there are older recall runes in the world.
+	if(!destination)
+		var dx := GetObjProperty(rune, "x");
+		var dy := GetObjProperty(rune, "y");
+		var dz := GetObjProperty(rune, "z");
+		var dr := GetObjProperty(rune, "realm");
+		dest.+x := CInt(dx);
+		dest.+y := CInt(dy);
+		dest.+z := CInt(dz);
+		dest.+realm := CStr(dr);
+		// Set the new Destination struct CProp
+		SetObjProperty(rune, "Destination", dest);
+		// Remove the obsolete CProps
+		EraseObjProperty(rune, "x");
+		EraseObjProperty(rune, "y");
+		EraseObjProperty(rune, "z");
+		EraseObjProperty(rune, "realm");
+		destination := dest;
+	endif
+	return destination;
+endfunction
+
+exported function SendToDestination( rune, object )
+
+	var dest := GetDestination( rune );
+	if( !dest )
+		return error{ "errortext":="Rune has no destination set." };
+	endif
+
+	return MoveObjectToLocation( object, dest.x, dest.y, dest.z, dest.realm, MOVEOBJECT_FORCELOCATION );
+endfunction

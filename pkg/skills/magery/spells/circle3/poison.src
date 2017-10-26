@@ -1,0 +1,108 @@
+use os;
+use uo;
+use cfgfile;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+
+var npccfg := ReadConfigFile("npcdesc");
+
+
+program cast_poison(parms)
+    var caster := parms[1];
+    var info := parms[2];
+    var cast_on;
+    cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_HARMFUL);
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+    if ( !MS_MobileCheck(caster, cast_on) )
+        return 0;
+    endif
+    
+
+  if(Reflected(cast_on))
+    cast_on := caster;
+  endif
+  if((!cast_on.isA(POLCLASS_MOBILE)) || (cast_on.dead))
+    SendSysMessage(caster, "You cannot poison that.");
+    return;
+  endif
+  PlaySoundEffect(cast_on, 0x206);
+  PlayObjectCenteredEffect(cast_on, FX_CURSE_EFFECT, 0x0a,0x1e);
+  var p_level :=  0;
+  var skil := GetAttribute(caster, MAGERY);
+  if(skil <= 50)
+    p_level := 1;
+  elseif(skil <= 90)
+    p_level := 2;
+  elseif(skil <= 98)
+    p_level := 3;
+  else
+    p_level := 4;
+  endif
+  p_level := p_level - RandomInt(2);
+  if(p_level < 1)
+    p_level := 1;
+  endif
+  var passparms, newamt;
+  if(cast_on.isA(POLCLASS_NPC))
+    var element := npccfg[cast_on.npctemplate].elemental;
+    if(element == "poison")
+      HealDamage(cast_on, (p_level * 50));
+    else
+      newamt := poisonresist(caster, cast_on, p_level);
+      if(newamt > 0)
+        SendSysMessage(cast_on, "You have been poisoned by " + caster.name +"!");
+        Detach();
+        passparms := {cast_on, caster, "poison spell", newamt};
+        start_script(":spells:poisonDamage", passparms);
+        SetObjProperty(cast_on, "LastHit", {caster.name, caster.serial, "poison spell" });
+      else
+        SendSysMessage(caster, "Your target resists the spell completely.");
+      endif
+    endif
+  else
+    newamt := poisonresist(caster, cast_on, p_level);
+    if(newamt > 0)
+      SendSysMessage(cast_on, "You have been poisoned by " + caster.name +"!");
+      Detach();
+      passparms := {cast_on, caster, "poison spell", newamt};
+      start_script(":spells:poisonDamage", passparms);
+      SetObjProperty(cast_on, "LastHit", {caster.name, caster.serial, "poison spell" });
+    else
+      SendSysMessage(cast_on, "You resist the spell completely.");
+      if(caster != cast_on)
+        SendSysMessage(caster, "Your target resists the spell completely.");
+      endif
+    endif
+  endif
+endprogram
+
+function poisonresist(caster, cast_on, amt)
+  var diff := Cint(GetAttribute(caster, MAGERY) + Cint(GetAttribute(caster, EVALUATING_INTELLIGENCE) / 10));
+  if(SkillCheck(cast_on, RESISTING_SPELLS, diff, (diff * 2)))
+    SendSysMessage(cast_on, "You feel yourself resisting magical energy!");
+    PlaySoundEffect(cast_on, SFX_SPELL_WEAKEN);
+    PlayObjectCenteredEffect( cast_on, FX_CURSE_EFFECT, 5,5);
+    if(amt == 5)
+      amt := 3;
+    elseif(amt == 4)
+      return 2;
+    elseif(amt == 3)
+      return 2;
+    elseif(amt == 2)
+      return 1;
+    elseif(amt == 1)
+      return 0;
+    endif
+  else
+    return amt;
+  endif
+endfunction

@@ -1,0 +1,16 @@
+use uo;
+
+include "include/canAccess";
+
+program torch(character, item)
+  EraseObjProperty(character, "IsMeditating");
+  EraseObjProperty(character, "HealTimer");
+  if(!can_access(character, item))
+    return;
+  endif
+  if(item.graphic == 0x0f64)
+	item.graphic := 0xa12;
+  elseif(item.graphic == 0x0a12)
+	item.graphic := 0x0f64;
+  endif
+endprogram

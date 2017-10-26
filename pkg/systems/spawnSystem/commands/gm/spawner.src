@@ -1,0 +1,574 @@
+/*
+
+	spawnSystem originally created by Austin for the 0.97 Distro
+	
+	Bugs fixed by Edwards
+	
+	Adapted for the Basic Distro by Yukiko 10-Sep-2015
+
+
+*/
+use uo;
+use os;
+
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+include ":gumps:gumpPrompt";
+include ":gumps:yesNo";
+include ":gumps:requestGump";
+include ":spawnsystem:commonTasks";
+include ":spawnsystem:engines";
+include ":spawnsystem:realms";
+include ":spawnsystem:regions";
+include ":spawnsystem:groups";
+
+// Used for input ranges
+CONST REALM_START	:= 0x1000;
+CONST REGION_START	:= 0x2000;
+CONST GROUP_START	:= 0x3000;
+CONST ENGINE_START	:= 0x4000;
+CONST ENTRY_START	:= 0x5000;
+CONST ENABLED_START	:= 0x6000;
+
+// Arbitrary buttons
+CONST CLOSE_BTN		:= 0xA4;
+CONST ADD_REALM_BTN	:= 0xA5;
+CONST ADD_REGION_BTN	:= 0xA6;
+CONST ADD_GROUP_BTN	:= 0xA7;
+CONST DELETE_BTN	:= 0xA8;
+CONST SHOW_REALMS_BTN	:= 0xA9;
+CONST SHOW_REGIONS_BTN	:= 0xAA;
+CONST SHOW_THIS_REGION	:= 0xAB;
+CONST SHOW_GROUPS_BTN	:= 0xAC;
+CONST SHOW_THIS_GROUP	:= 0xAD;
+CONST SEARCH_BTN	:= 0xAE;
+CONST VISIT_REGION_BTN	:= 0xAF;
+CONST APPLY_BTN		:= 0xB0;
+
+// Text entry locations
+CONST X1_TEXT_POS	:= 0xF00;
+CONST Y1_TEXT_POS	:= 0xF01;
+CONST X2_TEXT_POS	:= 0xF02;
+CONST Y2_TEXT_POS	:= 0xF03;
+CONST NAME_TEXT_POS	:= 0xF04;
+CONST WAIT_TEXT_POS	:= 0xF05;
+CONST GENER_TEXT_START	:= 0xF000;
+
+program SpawnerCMD( who )
+
+        
+	var input := SHOW_REALMS_BTN;
+	var cur_menu := SHOW_REALMS_BTN;
+	var cur_realm, cur_region, cur_group;
+	
+	while( who.connected )
+		if( input )
+			if( cur_menu == SHOW_REALMS_BTN )
+				input := BuildRealmListGump( who );
+			elseif( cur_menu == SHOW_REGIONS_BTN )
+				input := BuildRegionListGump( who, cur_realm );
+			elseif( cur_menu == SHOW_THIS_REGION )
+				input := BuildRegionGump( who, cur_realm, cur_region );
+			//elseif( cur_menu == ADD_REALM_BTN )
+				//input := BuildAddRealmGump( who );
+			elseif( cur_menu == ADD_REGION_BTN )
+				input := BuildRegionGump( who, cur_realm );
+			elseif( cur_menu == SHOW_GROUPS_BTN )
+				input := BuildGroupsListGump( who );
+			elseif( cur_menu == ADD_GROUP_BTN )
+				input := BuildGroupGump( who );
+			elseif( cur_menu == SHOW_THIS_GROUP )
+				input := BuildGroupGump( who, cur_group );
+			endif
+		endif
+
+		if( !input || input == CLOSE_BTN )
+			break;
+		elseif( input == VISIT_REGION_BTN )
+			VisitRegionCenter( who, cur_region );
+		elseif( input == SHOW_REALMS_BTN )
+			cur_menu := SHOW_REALMS_BTN;
+		elseif( input == ADD_REALM_BTN )
+			cur_menu := ADD_REALM_BTN;
+		elseif( input == ADD_REGION_BTN )
+			cur_menu := ADD_REGION_BTN;
+		elseif( input == SHOW_REGIONS_BTN )
+			cur_menu := SHOW_REGIONS_BTN;
+		elseif( input == SHOW_GROUPS_BTN )
+			cur_menu := SHOW_GROUPS_BTN;
+		elseif( input == ADD_GROUP_BTN )
+			cur_menu := ADD_GROUP_BTN;
+		elseif( input >= GROUP_START ) // Button next to a group name was clicked.
+			cur_menu := SHOW_THIS_GROUP;
+			var group_list := SS_GetGroupNames();
+			cur_group := group_list[input-GROUP_START];
+		elseif( input >= REGION_START ) // Button next to a region name was clicked.
+			cur_menu := SHOW_THIS_REGION;
+			var region_list := SS_GetRegionsInRealm( cur_realm ).Keys();
+			cur_region := region_list[input-REGION_START];
+		elseif( input >= REALM_START ) // Button next to a realm name was clicked.
+			cur_menu := SHOW_REGIONS_BTN;
+			var realm_list := SS_GetRealmNames();
+			cur_realm := realm_list[input-REALM_START];
+		endif
+	endwhile
+
+	SendSysMessage( who, "Done." );
+ 
+        return 1;
+endprogram
+
+function BuildGumpTemplate( realm_name:="" )
+
+	var bkgnd_silvertrim := GFGetCfgConst( "Defaults", "BackGround" );
+	var bkgnd_dark_stone := GFGetCfgConst( "Defaults", "ForeGround" );
+
+	var gump := GFCreateGump();
+
+        GFPage( gump, 0 );
+        
+	GFClosable( gump, 0 );
+	GFResizePic( gump, 0, 0, bkgnd_silvertrim, 640, 480 );
+	GFResizePic( gump, 15, 15, bkgnd_dark_stone, 125, 450 );
+	GFResizePic( gump, 145, 15, bkgnd_dark_stone, 480, 450 );
+
+	GFAddButton( gump, 35, 23, 2117, 2118, GF_CLOSE_BTN, SHOW_REALMS_BTN );
+	GFTextLine( gump, 50, 20, 2100, "Realm List" );
+	GFAddButton( gump, 35, 43, 2117, 2118, GF_CLOSE_BTN, ADD_REALM_BTN );
+	GFTextLine( gump, 50, 40, 2100, "Add Realm" );
+
+	GFAddButton( gump, 35, 83, 2117, 2118, GF_CLOSE_BTN, SHOW_GROUPS_BTN );
+	GFTextLine( gump, 50, 80, 2100, "Group List" );
+	GFAddButton( gump, 35, 103, 2117, 2118, GF_CLOSE_BTN, ADD_GROUP_BTN );
+	GFTextLine( gump, 50, 100, 2100, "Add Group" );
+
+	if( realm_name )
+		GFAddButton( gump, 35, 143, 2117, 2118, GF_CLOSE_BTN, SHOW_REGIONS_BTN );
+		GFTextLine( gump, 50, 140, 2100, "Regions List" );
+		GFAddButton( gump, 35, 163, 2117, 2118, GF_CLOSE_BTN, ADD_REGION_BTN );
+		GFTextLine( gump, 50, 160, 2100, "Add Region" );
+	endif
+
+	GFAddButton( gump, 35, 443, 2117, 2118, GF_CLOSE_BTN, CLOSE_BTN );
+	GFTextLine( gump, 50, 440, 2100, "CLOSE" );
+
+	return gump;
+endfunction
+
+function BuildRealmListGump( who )
+
+	var realm_list := SS_GetRealmNames();
+	var gump := BuildGumpTemplate();
+
+	GFTextMid( gump, 145, 20, 485, 2100, "Realm List" );
+ 
+	var y_pos := 50;
+	foreach realm_name in ( realm_list )
+		GFAddButton( gump, 155, y_pos+3, 2117, 2118, GF_CLOSE_BTN, ( REALM_START+_realm_name_iter ));
+		GFTextLine( gump, 175, y_pos, 2100, realm_name );
+
+		y_pos += 20;
+		SleepMS(2);
+	endforeach
+
+	var input := GFSendGump( who, gump );
+	return input[0];
+endfunction
+
+function BuildGroupsListGump( who, realm_name:="" )
+
+	var group_list := SS_GetGroupNames();
+	var num_group := group_list.Size();
+	var gump := BuildGumpTemplate( realm_name );
+
+	GFTextMid( gump, 145, 20, 485, 2100, "Groups List" );
+ 
+        GFPage( gump, 1 );
+        
+	var y_pos := 50,
+	    counter := 0;
+     
+	foreach group_name in ( group_list )
+		GFAddButton( gump, 175, y_pos+3, 2117, 2118, GF_CLOSE_BTN, (GROUP_START+_group_name_iter ));
+		GFTextLine( gump, 195, y_pos, 2100, group_name );
+
+		y_pos += 20;
+		counter += 1;
+  
+		if( counter >= 20 && _group_name_iter < num_group )
+			GFAddButton( gump, 155, 430, 0xA92, 0xA93, GF_PAGE_BTN, gump.cur_page+1 );
+			GFPage( gump, gump.cur_page+1 );
+			GFAddButton( gump, 155, 50, 0xA90, 0xA91, GF_PAGE_BTN, gump.cur_page-1 );
+			y_pos := 50;
+			counter := 0;
+		endif
+		SleepMS(2);
+	endforeach
+
+	var input := GFSendGump( who, gump );
+	return input[0];
+endfunction
+
+function BuildRegionListGump( who, realm_name )
+
+	var region_list := SS_GetRegionsInRealm( realm_name ).Keys();
+	var num_region := region_list.Size();
+	var gump := BuildGumpTemplate( realm_name );
+
+	GFTextMid( gump, 145, 20, 485, 2100, "Region List ["+realm_name+"]" );
+ 
+        GFPage( gump, 1 );
+        
+	var y_pos := 50,
+	    counter := 0;
+     
+	foreach region_name in ( region_list )
+		GFAddButton( gump, 175, y_pos+3, 2117, 2118, GF_CLOSE_BTN, (REGION_START+_region_name_iter ));
+		GFTextLine( gump, 195, y_pos, 2100, region_name );
+
+		y_pos += 20;
+		counter += 1;
+
+		if( counter >= 18 && _region_name_iter < num_region )
+			GFAddButton( gump, 155, 390, 0xA92, 0xA93, GF_PAGE_BTN, gump.cur_page+1 );
+			GFPage( gump, gump.cur_page+1 );
+			GFAddButton( gump, 155, 50, 0xA90, 0xA91, GF_PAGE_BTN, gump.cur_page-1 );
+			y_pos := 50;
+			counter := 0;
+		endif
+		SleepMS(2);
+	endforeach
+
+	var input := GFSendGump( who, gump );
+	return input[0];
+endfunction
+
+function BuildAddRealmGump( who )
+
+	var gump := BuildGumpTemplate();
+
+	GFTextMid( gump, 145, 20, 485, 2100, "Add Realm" );
+
+	var used_realms := SS_GetRealmNames();
+	var realm_names := Realms().Keys();
+	var y_pos := 50;
+
+	foreach realm_name in ( realm_names )
+		if( !( realm_name in used_realms ))
+			GFAddButton( gump, 155, y_pos+3, 2117, 2118, GF_CLOSE_BTN, _realm_name_iter );
+			GFTextLine( gump, 175, y_pos, 2100, realm_name );
+			y_pos += 20;
+		endif
+		SleepMS(2);
+	endforeach
+
+	var input := GFSendGump( who, gump );
+	input := input[0];
+
+	var new_realm := realm_names[input];
+	if( new_realm )
+		var result := SS_AddRealm( new_realm );
+		if( result.errortext )
+			GumpPrompt( who, result.errortext );
+		endif
+	endif
+
+	return input;
+endfunction
+
+function BuildRegionGump( who, realm_name, region_name:="" )
+
+	var new_region := ( region_name == "" );
+	var gump := BuildGumpTemplate( realm_name );
+	
+	var group_list := SS_GetGroupsInRegion( region_name );
+	var group_names := group_list.Keys();
+
+	GFTextMid( gump, 145, 20, 485, 2100, "Region Information ["+realm_name+"]" );
+
+	GFTextLine( gump, 155, 50, 2100, "Region Name" );
+	GFResizePic( gump, 230, 46, GFGetCfgConst("Backgrounds", "GOLDTRIM"), 245, 28 );
+ 
+	if( new_region )
+		GFTextEntry( gump, 236, 50, 235, 20, 2100, "", NAME_TEXT_POS );
+	else
+		GFTextLine( gump, 236, 50, 1000, region_name );
+	endif
+
+	var coords := SS_GetRegionCoordinates( region_name );
+ 
+	GFTextLine( gump, 155, 80, 2100, "Coordinates" );
+	GFTextLine( gump, 245, 80, 2100, "X1" );
+	GFResizePic( gump, 230, 100, GFGetCfgConst( "Backgrounds", "GOLDTRIM" ), 45, 28 );
+	GFTextEntry( gump, 236, 104, 35, 20, 2100, CInt( coords.x1 ), X1_TEXT_POS );
+	GFTextLine( gump, 285, 80, 2100, "Y1" );
+	GFResizePic( gump, 270, 100, GFGetCfgConst( "Backgrounds", "GOLDTRIM" ), 45, 28 );
+	GFTextEntry( gump, 276, 104, 35, 20, 2100, CInt( coords.y1 ), Y1_TEXT_POS );
+	GFTextLine( gump, 335, 80, 2100, "X2" );
+	GFResizePic( gump, 320, 100, GFGetCfgConst( "Backgrounds", "GOLDTRIM" ), 45, 28 );
+	GFTextEntry( gump, 326, 104, 35, 20, 2100, CInt( coords.x2 ), X2_TEXT_POS );
+	GFTextLine( gump, 375, 80, 2100, "Y2" );
+	GFResizePic( gump, 360, 100, GFGetCfgConst( "Backgrounds", "GOLDTRIM" ), 45, 28 );
+	GFTextEntry( gump, 366, 104, 35, 20, 2100, CInt( coords.y2 ), Y2_TEXT_POS );
+
+	GFTextLine( gump, 500, 80, 2100, "Spawn Wait (Sec.)" );
+	GFResizePic( gump, 525, 100, GFGetCfgConst( "Backgrounds", "GOLDTRIM" ), 65, 28 );
+	GFTextEntry( gump, 531, 104, 55, 20, 2100, CInt( SS_GetRegionSpawnWait( region_name )), WAIT_TEXT_POS );
+
+	GFAddButton( gump, 354, 174, 0x84C, 0x84B, GF_CLOSE_BTN, APPLY_BTN );
+
+	GFGumpPic( gump, 165, 175, 0x5F );
+	GFGumpPic( gump, 174, 184, 0x60 );
+	GFGumpPic( gump, 411, 184, 0x60 );
+	GFGumpPic( gump, 590, 175, 0x61 );
+	
+	if( !new_region )
+		GFPage( gump, 1 );
+		GFAddButton( gump, 185, 153, 2117, 2118, GF_PAGE_BTN, 200 );
+		GFTextLine( gump, 205, 150, 2100, "Group settings." );
+		
+		GFTextLine( gump, 175, 200, 2100, "Region Features:" );
+
+		GFAddButton( gump, 155, 223, 2117, 2118, GF_CLOSE_BTN, VISIT_REGION_BTN );
+		GFTextLine( gump, 175, 220, 2100, "Goto region center." );
+
+		GFAddButton( gump, 155, 273, 2117, 2118, GF_CLOSE_BTN, DELETE_BTN );
+		GFTextLine( gump, 175, 270, 32, "Delete region." );
+	
+		GFPage( gump, 200 );
+		GFAddButton( gump, 185, 153, 2117, 2118, GF_PAGE_BTN, 1 );
+		GFTextLine( gump, 205, 150, 2100, "Region features." );
+		
+		GFTextLine( gump, 155, 200, 2100, "Add/Del" );
+		GFTextLine( gump, 225, 200, 2100, "Group Name" );
+		GFTextLine( gump, 380, 200, 2100, "Max Amount" );
+		GFTextLine( gump, 470, 200, 2100, "Spawned" );
+		GFTextLine( gump, 540, 200, 2100, "Enabled" );
+  
+		var y_pos := 220;
+		var lines := 1;		
+		for( lines; lines<=12; lines+=1 )
+			GFAddButton( gump, 170, y_pos+3, 2117, 2118, GF_CLOSE_BTN, GROUP_START+lines );
+			var name := group_names[lines];
+			if( group_names[lines] )
+				var group := group_list[name];
+				GFTextLine( gump, 225, y_pos, 2100, name );
+    
+				GFTextEntry( gump, 400, y_pos, 40, 20, 2100, group.max_amt, GENER_TEXT_START+lines );
+
+                                var cur_spawns := CInt( SS_GetSpawnsInRegionGroup( region_name, name ).Size() );
+				GFTextLine( gump, 490, y_pos, 2100, cur_spawns );
+    
+				GFCheckBox( gump, 550, y_pos, 0xD2, 0xD3, ( group.enabled ), ENABLED_START+lines );
+			else
+				GFTextLine( gump, 225, y_pos, 2100, "----" );
+			endif
+			
+			y_pos += 20;
+			SleepMS(2);
+		endfor
+	endif
+
+	var input := GFSendGump( who, gump );
+	if( input[APPLY_BTN] )
+		if( new_region )
+			region_name := GFExtractData( input, NAME_TEXT_POS );
+			var result := SS_AddRegion( region_name, realm_name );
+			if( result.errortext )
+				GumpPrompt( who, "Error Creating Region [P] "+result.errortext );
+				return SHOW_REGIONS_BTN;
+			else
+				SS_AddRegionToRealm( realm_name, region_name );
+			endif
+		else
+			foreach key in ( input.keys )
+				if( key >= GENER_TEXT_START )
+					var position := key-GENER_TEXT_START;
+					var group_name := group_names[position];
+					var max_amt := GFExtractData( input, key );
+					var enabled := GFExtractData( input, ENABLED_START+position );
+					SS_AddGroupToRegion( region_name, group_name, max_amt, enabled );
+				endif
+				SleepMS(2);
+			endforeach
+		endif
+  
+		var x1 := GFExtractData( input, X1_TEXT_POS );
+		var y1 := GFExtractData( input, Y1_TEXT_POS );
+		var x2 := GFExtractData( input, X2_TEXT_POS );
+		var y2 := GFExtractData( input, Y2_TEXT_POS );
+		var wait := GFExtractData( input, WAIT_TEXT_POS );
+  
+		SS_SetRegionCoordinates( region_name, x1, y1, x2, y2 );
+		SS_SetRegionSpawnWait( region_name, wait );
+		
+		GumpPrompt( who, "Region setup complete." );
+	elseif( input[DELETE_BTN] )
+		if( YesNo( who, "Are you sure you want to delete this region?" ))
+			SS_RemoveRegion( region_name );
+			SS_RemoveRegionFromRealm( realm_name, region_name );
+			return SHOW_REGIONS_BTN;
+		endif
+	elseif( input[0] >= GROUP_START && input[0] < ENGINE_START )
+		var position := input[0]-GROUP_START;
+		var group_name := group_names[position];
+		if( group_name )
+			SS_RemoveGroupFromRegion( region_name, group_name );
+		else
+			var group := BuildGroupsListGump( who, realm_name );
+			if( group >= GROUP_START && group < ENGINE_START )
+				group := group-GROUP_START;
+				group := SS_GetGroupNames( group );
+				SS_AddGroupToRegion( region_name, group, 0, 0 );
+			endif
+		endif
+		
+		return SHOW_THIS_REGION;
+	endif
+	
+	return input[0];
+endfunction
+
+function BuildGroupGump( who, group_name:="" )
+
+	var gump := BuildGumpTemplate();
+	var new_group := ( group_name == "" );
+	
+	GFTextMid( gump, 145, 20, 485, 2100, "Group Information" );
+
+	GFTextLine( gump, 155, 50, 2100, "Group Name" );
+	GFResizePic( gump, 230, 46, GFGetCfgConst( "Backgrounds", "GOLDTRIM" ), 245, 28 );
+	if( !new_group )
+		GFTextLine( gump, 236, 50, 1000, group_name );
+	else
+		GFTextEntry( gump, 236, 50, 235, 20, 2100, group_name, NAME_TEXT_POS );
+	endif
+
+	GFAddButton( gump, 555, 50, 0x84C, 0x84B, GF_CLOSE_BTN, APPLY_BTN );
+	
+	GFTextLine( gump, 175, 80, 2100, "Spawn Engine" );
+	GFTextLine( gump, 375, 80, 2100, "Group Entries" );
+			
+	GFPage( gump, 1 );
+	GFAddButton( gump, 155, 82, 0xA96, 0xA97, GF_PAGE_BTN, 200 );
+	GFAddButton( gump, 355, 82, 0xA96, 0xA97, GF_PAGE_BTN, 300 );
+	
+	GFAddButton( gump, 155, 203, 2117, 2118, GF_CLOSE_BTN, DELETE_BTN );
+	GFTextLine( gump, 175, 200, 2100, "Delete Group" );
+	
+	GFPage( gump, 200 );
+	GFAddButton( gump, 155, 82, 0xA97, 0xA96, GF_PAGE_BTN, 1 );
+	GFAddButton( gump, 355, 82, 0xA96, 0xA97, GF_PAGE_BTN, 300 );
+	
+	var engines := SS_GetEnginesList();
+	var cur_engine := SS_GetGroupEngine( group_name );
+	var y_pos := 100;
+	var counter := 0;
+ 
+	foreach engine_name in ( engines )
+		GFRadioButton( gump, 185, y_pos, 0xD2, 0xD3, ( Lower( engine_name ) == Lower( cur_engine )), ENGINE_START+_engine_name_iter );
+		GFTextLine( gump, 215, y_pos, 2100, engine_name );
+		y_pos += 20;
+		counter := counter+1;
+  
+		if( counter >= 16 )
+			GFAddButton( gump, 155, 435, 0xA56, 0xA57, GF_PAGE_BTN, gump.cur_page+1 );
+			GFPage( gump, gump.cur_page+1 );
+			GFAddButton( gump, 155, 100, 0xA5A, 0xA5B, GF_PAGE_BTN, gump.cur_page-1 );
+			counter := 0;
+			y_pos := 100;
+		endif
+		SleepMS(2);
+	endforeach
+ 
+	GFPage( gump, 300 );
+	GFAddButton( gump, 155, 82, 0xA96, 0xA97, GF_PAGE_BTN, 200 );
+	GFAddButton( gump, 355, 82, 0xA97, 0xA96, GF_PAGE_BTN, 1 );
+ 
+	var lines := 16;
+	counter := 1;
+	y_pos := 120;
+ 
+	var cur_entries := SS_GetEntriesInGroup( group_name );
+	cur_entries := cur_entries.Keys();
+ 
+	for( lines; lines>0; lines-=1 )
+		GFResizePic( gump, 155, y_pos-4, GFGetCfgConst( "Backgrounds", "GOLDTRIM" ), 210, 28 );
+		GFTextEntry( gump, 161, y_pos, 200, 20, 2100, SS_GetEntryByNumber( group_name, counter ), ENTRY_START+counter );
+		counter := counter+1;
+		GFResizePic( gump, 405, y_pos-4, GFGetCfgConst( "Backgrounds", "GOLDTRIM" ), 210, 28 );
+		GFTextEntry( gump, 411, y_pos, 200, 20, 2100, SS_GetEntryByNumber( group_name, counter ), ENTRY_START+counter );
+		counter := counter+1;
+		y_pos += 21;
+		SleepMS(2);
+	endfor
+
+	var input := GFSendGump( who, gump );
+	if( input[APPLY_BTN] )
+		if( new_group )
+			group_name := GFExtractData( input, NAME_TEXT_POS );
+		endif
+		
+		var engine_name:=0, entries := array{};
+		foreach key in ( input.keys )
+			if( key >= ENGINE_START && key < ENTRY_START )
+				engine_name := engines[key-ENGINE_START];
+			elseif( key >= ENTRY_START )
+				var entry := GFExtractData( input, key );
+				if( entry )
+					entries.Append( entry );
+				endif
+			endif
+			SleepMS(2);
+		endforeach
+  
+		if( !engine_name )
+			GumpPrompt( who, "Error Creating Group [P] No engine selected." );
+			return SHOW_GROUPS_BTN;
+		endif
+  
+		var result;
+		if( new_group )
+			result := SS_AddGroup( group_name, engine_name );
+			if( result.errortext )
+				GumpPrompt( who, "Error Creating Group [P] "+result.errortext );
+			endif
+		else
+			result := SS_SetGroupEngine( group_name, engine_name );
+		endif
+		
+		if( result != error )
+			foreach entry in entries
+				SS_AddEntryToGroup( group_name, entry );
+				SleepMS(2);
+			endforeach
+			GumpPrompt( who, "Group setup complete." );
+		endif
+	elseif( input[DELETE_BTN] )
+		if( YesNo( who, "Are you sure you want to delete this group?" ))
+			SS_RemoveGroup( group_name );
+			return SHOW_GROUPS_BTN;
+		endif
+	endif
+ 
+	return input[0];
+endfunction
+
+function VisitRegionCenter( who, region_name )
+
+	var realm_name := Lower( SS_GetRegionRealm( region_name ));
+	var coords := SS_GetRegionCoordinates( region_name );
+	var x := (( coords.x2 - coords.x1) / 2 ) + coords.x1;
+	var y := (( coords.y2 - coords.y1) / 2 ) + coords.y1;
+	var z := CInt( GetMapInfo( x, y, realm_name ).z );
+
+	var result := MoveObjectToLocation( who, x, y, z, realm_name, MOVEOBJECT_FORCELOCATION );
+	if ( result.errortext )
+		GumpPrompt( who, "["+region_name+"] ["+x+"] ["+y+"] ["+z+"] ["+realm_name+"] -> "+result.errortext );
+		return 0;
+	else
+		GumpPrompt( who, "Moved to "+realm_name+" [P] X("+x+") Y("+y+") Z("+z+")" );
+	endif
+
+	return 1;
+endfunction

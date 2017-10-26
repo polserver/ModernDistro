@@ -1,0 +1,24 @@
+use uo;
+use os;
+
+include ":datafile:datafile";
+
+program MOTD(who, text)
+	if ( text )
+		text := Lower(text);
+		var data_file := DFOpenDataFile(":motd:settings", DF_CREATE);
+		var data_elem := DFFindElement(data_file, who.acctname, DF_CREATE);
+		
+		if ( text == "off" )
+			SendSysMessage(who, "'Messages of the day' will no longer pop up on login.");
+			data_elem.SetProp("noshow", 1);
+		elseif ( text == "on" )
+			SendSysMessage(who, "'Messages of the day' will pop up on login.");
+			data_elem.EraseProp("noshow");
+		else
+			SendSysMessage(who, "Syntax: .motd on off");
+		endif
+	else
+		Start_Script("motd", who);
+	endif
+endprogram

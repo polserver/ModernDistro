@@ -1,0 +1,167 @@
+use uo;
+use os;
+use boat;
+include "include/objtype";
+include "include/yesNo";
+include "include/myUtil";
+include "util/key";
+include "include/canAccess";
+
+const KEYSTART := 0x100e;
+const KEYEND := 0x1013;
+const KEYRING := 0x1011;
+
+var keyarray := array(4110, 4111, 4112, 4114, 4115);
+
+program use_key(who, key)
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  if(!can_access(who, key))
+    return;
+  endif
+  var thetarget := Target(who);
+  if(!thetarget)
+    SendSysMessage(who, "Cancelled.");
+  elseif(!Accessible(who, thetarget))
+    if(thetarget.objtype != 0x1F010)
+      PrintTextAbovePrivate(who, "You can't reach that.", who);
+    endif
+  elseif(GetObjProperty(thetarget, "Owner"))
+    if(GetObjProperty(thetarget, "Owner") != who.serial)
+      SendSysMessage(who, "You cannot use that.");
+    endif
+  elseif(GetObjProperty(thetarget, "Vendored"))
+    SendSysMessage(who, "You cannot use that.");
+  elseif(key.objtype == KEYRING)
+    Use_KeyRing(who,key,thetarget);
+  elseif(thetarget == key)
+    RenameKey(who, key);
+  elseif(GetObjProperty(thetarget, "Public"))
+    SendSysMessage(who, "You cannot lock that while the house is public.");
+  elseif((thetarget.graphic in keyarray) and (!GetObjProperty(thetarget, "lockid")))
+    if(can_access(who, thetarget))
+      CopyKey(who, thetarget, key);
+    endif
+  else
+    var lockid := GetObjProperty(key, "lockid");
+    var targetlockid := GetObjProperty(thetarget, "lockid");
+    if(!targetlockid)
+      PrintTextAbovePrivate(thetarget, "That doesn't have a lock.", who);
+    elseif((!lockid) and (thetarget.graphic in keyarray))
+      CopyKey(who, key, thetarget);
+    elseif(lockid != targetlockid)
+      PrintTextAbovePrivate(thetarget, "That's the wrong key!", who);
+    else
+      if((thetarget.objtype >= KEYSTART) && (thetarget.objtype <= KEYEND))
+        PrintTextAbovePrivate(who, "These keys match", who);
+      else
+        UnLockIt(thetarget,who);
+      endif
+    endif
+  endif
+endprogram
+
+function UnLockIt(door,who)
+  if(door.graphic in { GID_PLANK_EXTENDED_FACING_EAST, GID_PLANK_EXTENDED_FACING_WEST, GID_PLANK_EXTENDED_FACING_NORTH, GID_PLANK_EXTENDED_FACING_SOUTH })
+    PrintTextAbovePrivate(door, "You can't lock the plank while it's extended.", who);
+    return;
+  elseif(door.locked == 0)
+    if(GetObjProperty(door, "Public"))
+      SendSysMessage(who, "You cannot lock that while the house is public.");
+      return;
+    else
+      door.locked := 1;
+      PrintTextAbovePrivate(door, "You lock it.", who);
+      return;
+    endif
+  else
+    door.locked := 0;
+    PrintTextAbovePrivate(door, "You unlock it.", who);
+    return;
+  endif
+endfunction
+
+function Use_KeyRing(who, key, thetarget)
+  var lockid := GetObjProperty(key, "lockid");
+  var targetlockid := GetObjProperty(thetarget, "lockid");
+  var insidering := FindMyPack(key.serial);
+  if(key.serial == thetarget.serial)
+    PrintTextAbovePrivate(who, "You remove the keys from the ring.", who);
+    foreach otherkey in EnumerateItemsInContainer(insidering)
+      MoveItemToContainer(otherkey, who.backpack);
+    endforeach
+    key.graphic := 4113;
+    return;
+  elseif(!targetlockid)
+    PrintTextAbovePrivate(thetarget, "That doesn't have a lock.", who);
+    return;
+  elseif((thetarget.objtype >= KEYSTART) && (thetarget.objtype <= KEYEND) && (thetarget.objtype != KEYRING))
+    PrintTextAbovePrivate(who, "You put the key on the keyring.", who);
+    MoveItemToContainer(thetarget, insidering);
+    if(!key.graphic)
+      key.graphic := 4113;
+    elseif(key.graphic == 4113)
+      key.graphic := 5993;
+    elseif(key.graphic < 5995)
+      key.graphic := key.graphic + 1;
+    endif
+    return;
+  else
+    foreach otherkey in EnumerateItemsInContainer(insidering)
+      lockid := GetObjProperty(otherkey, "lockid");
+      if(lockid == targetlockid)
+        UnLockIt(thetarget,who);
+        break;
+      endif
+    endforeach
+    return;
+  endif
+  PrintTextAbovePrivate(key, "None of your keys fit that lock.", who);
+endfunction
+
+function RenameKey(who, key)
+  var keydescription := RequestInput(who, key, "Please enter a description for this key.(max 20 whos)");
+     var descriptionlen := len(keydescription);
+  if(keydescription)
+    if(descriptionlen <= 20)
+      key.name := "a key: "+ keydescription;
+      SendSysMessage(who, "Key is renamed.");
+    else
+      SendSysMessage(who, "That name is too long");
+    endif
+  endif
+endfunction
+
+function CopyKey(who, key, thetarget)
+  if(GetObjProperty(key, "lockid"))
+    PrintTextAbovePrivate(key, "This key is blank", who);
+  else
+    var targetlockid := GetObjProperty(thetarget, "lockid");
+    if(thetarget.graphic in keyarray)
+      SetObjProperty(key, "lockid", targetlockid);
+      var shipserial := GetObjProperty(thetarget, "shipserial");
+      if(shipserial)
+        SetObjProperty(key, "shipserial", shipserial);
+      endif
+      PrintTextAbovePrivate(key, "You make a copy of the key", who);
+    endif
+  endif
+endfunction
+
+function OpenTamedStorageAreas()
+  var bank := FindStorageArea("Tamed Storage");
+  if(!bank)
+    bank := CreateStorageArea("Tamed Storage");
+  endif
+  return bank;
+endfunction
+
+function FindMyPack(myserial)
+  var mybank := OpenTamedStorageAreas();
+  var bank_obj_name := "Bankbox  " + Hex(myserial);
+  var bankbox := FindRootItemInStorageArea(mybank, bank_obj_name);
+  if(!bankbox)
+    bankbox := CreateRootItemInStorageArea(mybank, bank_obj_name, UOBJ_BANKBOX );
+  endif
+  return bankbox;
+endfunction

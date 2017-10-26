@@ -1,0 +1,32 @@
+use uo;
+use os;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include "include/fields";
+
+program dispel_field( parms )
+  var caster := parms[1];
+  var info := parms[2];
+  var cast_on := MS_TargetCoordinates(caster, info.targ, "Select a target.");
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+
+  var magery := GetAttribute(caster, MAGERY);
+  var therange := CInt(magery / 10 );
+  var items := ListItemsNearLocation(cast_on.x, cast_on.y, cast_on.z, therange, caster.realm);
+  PlaySoundEffect( caster, SFX_SPELL_DISPEL );
+  foreach item in items
+	if (GetObjProperty(item, "f") == "1")
+	  PlayStationaryEffect( item.x, item.y, item.z, FX_SMOKE, 0xa, 0xa, 0, item.realm );
+      DestroyItem(item);
+	endif
+  endforeach
+endprogram

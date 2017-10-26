@@ -1,0 +1,41 @@
+use uo;
+use vitals;
+
+include "include/spellRestrictions";
+
+program chrcast_cweapon( parms )
+	var caster := params[1];
+	var info := params[2]; // Struct containing additional info about the spell.
+	var spellID := params[3];
+	
+
+  var firsthand := GetEquipmentByLayer (caster, LAYER_HAND1);
+  var secondhand := GetEquipmentByLayer (caster, LAYER_HAND2);
+  var i := 0;
+  
+  if(secondhand.isa(POLCLASS_WEAPON))
+    i := 1;
+  endif
+  
+  if(!firsthand && !secondhand && i == 0)
+    SendSysMessage(caster, "You have to have a weapon in your hand.",3,40);
+    return 0;
+  endif
+  
+  if(Cint(GetObjProperty(caster.weapon, "#Consecrate")))
+    SendSysMessage(caster, "This weapon is already consecrated.",3,40);
+    return 0;
+  endif
+  var pal := Cint(AP_GetSkill(caster, CHIVALRY));
+  Setobjproperty(caster.weapon, "#Consecrate", 1);
+  SetObjProperty(caster, "#ConsecratePid", GetPid());
+  PlayObjectCenteredEffect(caster, 0x3709, 0x0a, 0x1e );
+  PlaySoundEffect( caster, 0x5cB );
+
+  Detach();
+  sleep(pal*3);
+  if(Cint(GetObjProperty(caster.weapon, "#Consecrate")))
+    SendSysMessage(caster, "The Consecration has faded",3,40);
+    EraseObjproperty(caster.weapon, "#Consecrate");
+  endif
+endprogram

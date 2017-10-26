@@ -1,0 +1,17 @@
+use uo;
+
+include ":gumps:include/gumps";
+include ":gumps:include/gumps_ex";
+
+Program GumpTest(who, gump_id)
+	gump_id := CInt(gump_id);
+
+	if ( !gump_id )
+		SendSysMessage(who, "Error - no gump ID to resize was sent.");
+		return 0;
+	endif
+
+	var gump := GFCreateGump(100, 100);
+	GFResizePic(gump, 0, 0, gump_id, 200, 200);
+	GFSendGump(who, gump);
+endprogram

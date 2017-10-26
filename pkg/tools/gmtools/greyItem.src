@@ -1,0 +1,47 @@
+use uo;
+use os;
+include ":attributes:attributes";
+
+program grey(me, item)
+    if (me.cmdlevel < 2)
+      return;
+    endif
+	SetScriptController( me );
+	if (item.color == 910)
+	  item.color := 88;
+	  SendSysMessage(me, "Criminal flag will expire in under two minutes.");
+	  return;
+	endif
+	item.color := 910;
+	var parms := {};
+	parms.+alignment := "good";
+	parms.+name := me.name + "'s whipping boy";
+	var boy := CreateNpcFromTemplate("person",5275,1174,0,parms, me.realm); // newmap problem
+      boy.frozen := 1;
+      boy.invisible := 1;
+      boy.squelch(0);
+    Detach();
+	if (!boy)
+	  SendSysMessage(me,"Sorry, unable to create the whipping boy");
+	  item.color := 88;
+	  return;
+	else
+      boy.frozen := 1;
+	  set_critical(0);
+	  SendSysMessage(me, "You are now flagged criminal");
+	  ApplyDamage(boy,1);
+	  SetHp(boy, boy.maxhp);
+	  sleep(120);
+	endif
+	while (item.color == 910)
+	  SendSysMessage(me, "Still grey");
+	  ApplyDamage(boy,1);
+	  SetHp(boy, boy.maxhp);
+	  sleep(120);
+	endwhile
+	SetScriptController( 0 );
+	RevokePrivilege( boy, "invul" );
+	SetObjProperty(boy,"guardkill",1);
+	ApplyRawDamage( boy, GetMaxHp(boy) + 3 );
+	SendSysMessage(me, "Criminal flag has expired");
+endprogram

@@ -1,0 +1,48 @@
+use uo;
+use cfgfile;
+
+var cWeapon := ReadConfigFile(":combat:itemdesc");
+var weaponElement;
+var arrowElement;
+
+program selectammo(who, weapon)
+
+	SendSysMessage(who, "Select the stack of ammunition you would like to use.");
+	var ammo := Target(who);
+	arrowElement := FindConfigElem(cWeapon, ammo.objtype);
+	weaponElement := FindConfigElem(cWeapon, weapon.objtype);
+
+	if (!arrowElement)
+		SendSysMessage(who, "Invalid selection.");
+		return 0;
+	endif
+	if (ammo.container != who.backpack)
+		SendSysMessage(who, "The ammunition must be in the top layer of your backpack.");
+		return 0;
+	endif
+	if ( CInt(arrowElement.ProjectileAnim) == CInt(weaponElement.ProjectileAnim) )
+		SetObjProperty(weapon, "AmmoType", CInt(ammo.objtype) );
+		SendSysMessage(who, "Now switching to " + CStr(ammo.desc) + ".");
+		DuplicateProps(ammo, weapon);
+		return 1;
+	else
+		SendSysMessage(who, "You cannot fire that type of missile from this weapon.");
+		return 0;
+	endif
+
+endprogram
+
+
+function DuplicateProps(oSource, oTarget)
+
+	var propNames := GetObjPropertyNames(oSource);
+	EraseObjProperty(oTarget, "MissileHit");
+	foreach cProp in propNames
+		if (cProp == "OnHit")
+			SetObjProperty(oTarget, "MissileHit", GetObjProperty(oSource, cProp) );
+		else
+			SetObjProperty(oTarget, cProp, GetObjProperty(oSource, cProp) );
+		endif
+	endforeach
+
+endfunction

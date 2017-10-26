@@ -1,0 +1,30 @@
+use http;
+use uo;
+use os;
+
+WriteHtml( "<html><head><title>POL On-Line Characters</title></head>" +
+           "<body>" +
+           "<div align=center>" +
+           "<table border=1 cellspacing=0 cellpadding=5>" +
+           "  <tr bgcolor=#99CCFF>"
+               + "<td>Script Name</td>"
+               + "<td>Cycles</td>"
+               // + "<td>Sleep Cycles</td>"
+               + "<td>Cycles since Sleep</td>"
+               + "<td>Prog Counter</td>"
+             + "</tr>"  );
+
+foreach script in (polcore().running_scripts)
+    WriteHtml( "<tr>"
+                   + "<td>" + script.name + "</td>"
+                   + "<td>" + script.instr_cycles + "</td>"
+                // + "<td>" + script.sleep_cycles + "</td>" 
+                   + "<td>" + script.consec_cycles + "</td>"
+                   + "<td>" + script.PC + "</td>"
+                 + "</tr>" );
+    sleepms(1);
+endforeach
+
+WriteHtml( "</table></div>" );
+
+WriteHtml( "</BODY></HTML>" );

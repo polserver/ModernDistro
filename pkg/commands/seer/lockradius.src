@@ -1,0 +1,14 @@
+use uo;
+
+
+program lockradius( who, text )
+    var ranget := CInt( text );
+   
+    foreach thingie in ListItemsNearLocation( who.x, who.y, who.z, ranget, who.realm );
+        thingie.movable := 0;
+        SetObjProperty (thingie, "GMLockeddown", 1);
+    endforeach
+   
+    SendSysMessage(who, "Locked down everything in a radius of " + ranget);
+       
+endprogram

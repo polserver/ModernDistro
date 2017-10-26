@@ -1,0 +1,32 @@
+use uo;
+use vitals;
+
+include "include/spellRestrictions";
+
+program chrcast_cwounds( parms )
+	var caster := params[1];
+	var info := params[2]; // Struct containing additional info about the spell.
+	var spellID := params[3];
+	
+	SendSysMessage(caster, "Who do you want to heal?", 1, 88);
+	var cast_on := Target(caster);
+
+	var pal := Cint(AP_GetSkill(caster, CHIVALRY));
+  
+  
+	var healed := CInt(RandomInt(6) + pal / 6) + 5;
+   
+	if(cast_on.isA(POLCLASS_NPC))
+		healed := healed * 4;
+	endif
+
+	HealDamage(cast_on, healed);
+	PlayObjectCenteredEffect(cast_on, 14201, 7, 0x10);
+	PlaySoundEffect(cast_on, SFX_SPELL_HEAL);
+	SendSysMessage(caster, "You healed " + healed + " damage.",3,63);
+	EraseObjProperty(cast_on, "#bleeding");
+
+
+
+
+endprogram

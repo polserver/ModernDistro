@@ -1,0 +1,115 @@
+/*
+
+	spawnSystem originally created by Austin for the 0.97 Distro
+	
+	Bugs fixed by Edwards
+	
+	Adapted for the Basic Distro by Yukiko 10-Sep-2015
+
+
+*/
+use uo;
+use os;
+
+include ":spawnsystem:engines";
+include ":spawnsystem:groups";
+include ":spawnsystem:realms";
+include ":spawnsystem:regions";
+
+program SpawnSystem()
+
+        var system_pid := GetGlobalProperty( "#SpawnSystemPid" );
+        if( GetProcess( system_pid ))
+                //Old spawn system is already running.
+		return 0;
+        endif
+
+	SetGlobalProperty( "#SpawnSystemPid", GetPid() );
+ 
+	Initialize();
+
+	while ( 1 )
+		SpawnTheRegions();
+
+		var delay := CalcNextTick();
+  
+		Wait_For_Event( delay );
+	endwhile
+
+	return 1;
+endprogram
+
+function SpawnTheRegions()
+
+	foreach region_name in ( SS_GetRegionNames() )
+		var next_run := CalcNextRunTime( region_name );
+		if( next_run > POLCore().systime )
+			continue;
+		endif
+
+		foreach group_name in ( SS_GetGroupsInRegion( region_name ).Keys() )
+			var realm_name := SS_GetRegionRealm( region_name );
+			var engine_name := SS_GetGroupEngine( group_name );
+			var script := SS_StartSpawnEngine( engine_name, realm_name, region_name, group_name );
+			if( script.errortext )
+				Broadcast( "Error: Unable to start engine ("+engine_name+") for group ("+group_name+") in region ("+region_name+"). ->"+script.errortext, color := 33 );
+			endif
+
+			SS_SetRegionSpawnTime( region_name, POLCore().systime );
+			SleepMS(10);
+		endforeach
+
+		SleepMS(10);
+	endforeach
+
+	return 1;
+endfunction
+
+function CalcNextRunTime( region_name )
+
+	var last_run := CInt( SS_GetRegionSpawnTime( region_name ));
+	var run_wait := CInt( SS_GetRegionSpawnWait( region_name ));
+	var next_run := CInt( last_run + run_wait );
+
+	return next_run;
+endfunction
+
+function CalcNextTick()
+
+	var delay_time := 0;
+	var region_names := SS_GetRegionNames();
+
+	if( CInt( region_names.Size() ) < 1 )
+		return 60;
+	endif
+
+	foreach region_name in ( region_names )
+		var next_run := CalcNextRunTime( region_name );
+		if( !delay_time || next_run < delay_time )
+			delay_time := next_run;
+		endif
+
+		SleepMS(10);
+	endforeach
+
+	if( delay_time <= 0 )
+		delay_time := 60;
+	endif
+
+	return delay_time;
+endfunction
+
+function Initialize()
+
+	var script := Start_Script( ":spawnsystem:initializer/firstRun" );
+	if( script.errortext )
+		Broadcast( script.errortext, color := 33 );
+		return 0;
+	else
+		while( script.pid )
+			Sleep(1);
+		endwhile
+	endif
+
+	return 1;
+endfunction

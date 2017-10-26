@@ -1,0 +1,88 @@
+/* $Id: handlePartyAccept.src 523 2006-06-30 17:36:14Z tekproxy $
+ *
+ */
+
+use uo;
+use os;
+use polsys;
+
+include ":partySystem:config";
+include ":partySystem:packetInfo";
+include ":partySystem:messages";
+
+CONST OFFSET_PARTY_ADD_SIZE := 6;
+CONST OFFSET_PARTY_ADD_PLAYERIDS := 7;
+
+program handlePartyAccept(params)
+	Set_Critical(DEBUG_SET_CRITICAL);
+
+	var invitee := params[1];
+	var leader := SystemFindObjectBySerial(params[2]);
+	var member;
+
+	if ( GetObjProperty(invitee, PARTY_JOINING_PROP) )
+		EraseObjProperty(invitee, PARTY_JOINING_PROP);
+		SetObjProperty(leader, "#PartyCanidates", CInt(GetObjProperty(leader, "#PartyCanidates"))-1);
+	else
+		SendSysMessage(invitee, "You have not been invited to a party.");
+		return 0;
+	endif
+
+	// Maybe the leader logged off
+	if ( !leader )
+		SendSysMessage(invitee, "Unable to find party creator!");
+		return 0;
+	endif
+
+	var party := GetObjProperty(leader, PARTY_PROP);
+
+	// If there is no party array, start one
+	if ( Lower(TypeOf(party)) != "array" )
+		party := array{leader.serial};
+	else
+		// Check if the party.Size() isn't too big
+		if ( party.Size() + CInt(GetObjProperty(leader, "#PartyCanidates")) > PARTY_MAX_SIZE )
+			SendSysMessage(leader, "You may only have "+PARTY_MAX_SIZE+" in your party (this includes candidates).");
+			return 0;
+		endif
+	endif
+	
+	// Add invitee's serial to the party array
+	party.Append(invitee.serial);
+
+	// Build the packet according to the party array
+	var packet := CreatePacket(MSGTYPE_PARTY, MSGLEN_VARIABLE);
+	packet.SetInt16(OFFSET_PARTY_SUBCMD, SUBCMD_PARTY); // Set subcmd to Party
+	packet.SetInt8(OFFSET_PARTY_SUBSUBCMD, 1); // Set subsubcmd to Add
+	packet.SetInt8(OFFSET_PARTY_ADD_SIZE, party.Size()); // Set party size
+
+	// Append party member's serials at the end of packet
+	for i := 1 to (party.Size())
+		packet.SetInt32(OFFSET_PARTY_ADD_PLAYERIDS + ((i - 1) * 4), party[i]);
+		SleepMS(2);
+	endfor
+
+	// Set packet length
+	packet.Set16(OFFSET_PARTY_MSGLEN, packet.GetSize());
+
+	// Loop through each member in the party array and update PARTY_PROP and send Add packet
+	foreach member_id in (party)
+		member := SystemFindObjectBySerial(member_id);
+		if ( member )
+			SetObjProperty(member, PARTY_PROP, party);
+			packet.SendPacket(member);
+		endif
+	endforeach
+
+	SendSysMessage(invitee, "You have been added to the party.");
+
+	// Sleep 1 second to allow the client to request the status of the other party member
+	// If you don't do this, then sometimes the client wont know the name that goes along
+	// with the party member's serial and will print out: "[]: joined the party."
+	Detach();
+	Sleep(1);
+	
+	SendPartyMessage(party, invitee, "joined the party.");
+
+	return 1;
+endprogram

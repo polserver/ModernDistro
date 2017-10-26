@@ -1,0 +1,45 @@
+use datafile;
+
+function GetBookElem(book)
+  var bookid := book.getprop("bookid");
+  var df := OpenDataFile("staticbooks");
+  return df.FindElement(bookid);
+endfunction
+
+exported function IsWritable(book)
+  book := book; // stops ecompile "not used" warning
+  return 0;
+endfunction
+
+exported function GetNumLines(book)
+  return GetBookElem(book).getprop("contents").size();
+endfunction
+
+exported function GetTitle(book)
+  return GetBookElem(book).getprop("title");
+endfunction
+
+exported function GetAuthor(book)
+  return GetBookElem(book).getprop("author");
+endfunction
+
+exported function GetLine(book, line)
+  var contents := GetBookElem(book).getprop("contents");
+  if(contents == error)
+    contents := array;
+  endif
+  if(line <= contents.size())
+    var text := contents[line];
+    if(text)
+      return text;
+    else
+      return "";
+    endif
+  else
+    return "";
+  endif
+endfunction
+
+program BookInterface()
+  return 1;
+endprogram

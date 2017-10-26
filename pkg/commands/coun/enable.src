@@ -1,0 +1,21 @@
+/////////////////////////////////////////////////////////////////////////////////
+//
+//  .enable [priv]        - enable a privilege
+//
+//  example:
+//      ".enable invul"   - enable invulnerability, if you have that privilege
+//
+//  see also disable.src
+//
+/////////////////////////////////////////////////////////////////////////////////
+
+use uo;
+
+program enable( who, priv )
+    var res := who.enable( priv );
+    if (res)
+        SendSysMessage( who, "Setting '" + priv + "' is enabled." );
+    else
+        SendSysMessage( who, "You don't have that privilege." );
+    endif
+endprogram

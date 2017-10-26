@@ -1,0 +1,20 @@
+use os;
+use uo;
+
+include ":saver:saveOpts";
+
+while (1)
+  sleep( (MINUTES_BETWEEN_SAVES + 2) * 60 );
+  var lastsave := GetGlobalProperty( "#:saver:lastsave" );
+  if (!lastsave)
+    Broadcast( "Saver doesn't seem to have ever saved" );
+    syslog( "Saver doesn't seem to have ever saved" );
+    continue;
+  endif
+  var seconds_since_last := ReadGameClock() - lastsave;
+  if (seconds_since_last > (MINUTES_BETWEEN_SAVES + 2) * 60)
+    var minutes_old := seconds_since_last/60;
+    Broadcast( "Warning! Most recent save is " + minutes_old + " minutes old" );
+    syslog( "Most recent save is " + minutes_old + " minutes old" );
+  endif
+endwhile

@@ -1,0 +1,97 @@
+use uo;
+use os;
+use util;
+use datafile;
+
+program shelfstock(who);
+
+
+  SendSysMessage(who, "This command disabled until Distro team updates it to", 1, 88);
+  SendSysMessage(who, "conform to the updated book spawn system.", 1, 88);
+  return 0;
+
+  var globalshelves;
+  var shelf;
+  globalshelves := GetGlobalProperty("shelves");
+  if(globalshelves)
+    foreach thing in globalshelves
+      shelf := SystemFindObjectBySerial(thing);
+      if(shelf)
+        addbooks(shelf);
+      else
+        globalshelves.erase(ReturnIndex(globalshelves, thing));
+      endif
+    endforeach
+    SetGlobalProperty("shelves", globalshelves);
+  endif
+endprogram
+
+function addbooks(bookcase)
+  var count := 0;
+  var books := EnumerateItemsInContainer(bookcase);
+  var max := GetObjProperty(bookcase, "MaxBooks");
+  if(!max)
+    max := RandomDiceRoll("1d6+4");
+    SetObjProperty(bookcase, "MaxBooks", max);
+  endif
+  if(books.size()!=0)
+    foreach book in books
+     if(book.objtype == 0xfef)
+        count:=count+1;
+      endif
+    endforeach
+  endif
+  var book;
+  while(count < max)
+    if((RandomInt(5)+1) > 3)
+      book := SpecialBook(bookcase);
+    else
+      book := CreateItemInContainer(bookcase, 0xfef, 1);
+    endif
+    case(RandomInt(4)+1)
+      1: book.graphic := 4079;
+      2: book.graphic := 4080;
+      3: book.graphic := 4081;
+      4: book.graphic := 4082;
+    endcase
+    count := count + 1;
+  endwhile
+endfunction
+
+function SpecialBook(bookcase)
+  var book := CreateItemInContainer(bookcase, 0xfef, 1);
+  var rint := CInt(RandomInt(30) + 1);
+  var title := GetTitle(rint);
+  book.setprop("contents", GetContents(rint));
+  book.setprop("title",    title);
+  book.setprop("author",   GetAuthor(rint));
+  book.name := title;
+  return book;
+endfunction
+
+function GetBookElem(bookid)
+  var df := OpenDataFile("staticbooks");
+  return df.FindElement(bookid);
+endfunction
+
+function GetContents(rint)
+  return GetBookElem(rint).getprop("contents");
+endfunction
+
+function GetTitle(rint)
+  return GetBookElem(rint).getprop("title");
+endfunction
+
+function GetAuthor(rint)
+  return GetBookElem(rint).getprop("author");
+endfunction
+
+function ReturnIndex(friendinfo, information)
+  var i;
+  for(i:=1; i<=len(friendinfo); i:=i+1)
+   if(friendinfo[i] == information)
+     return i;
+   endif
+  endfor
+  return 0;
+endfunction

@@ -1,0 +1,45 @@
+//
+// Example program for the "gumps.inc" include file
+//
+// What it does:
+//	Shows a gump with "Are you sure?" and 2 buttons (Okay/Cancel)
+//
+// Where it goes:
+//	scripts/textcmd/test
+//
+// Author:
+//	Myrathi <tjh@myrathi.co.uk>
+//
+// Created  (for v1.0): 25-Jan-2000
+// Modified (for v2.0): 06-Feb-2000
+// Updated  (for v2.2): 15-Aug-2001
+//
+use uo;
+
+include "../gumps";
+
+program textcmd_areyousure( who )
+
+    GFInitGump( 100, 100 );
+    GFNoClose();
+
+    GFGumpPic( 0, 0, 0x816 );
+    GFTextLine( 38, 33, 55, "Are you sure?" );
+    var okay := GFButtonID( 35, 72, 0x81c, 0x81b, 1 );
+    var cancel := GFButtonID( 85, 72, 0x819, 0x818, 1 );
+
+    var keys := GFSendGump( who );
+    if ( keys == error )
+    	SendSysMessage( who, "Failed to open yes/no gump!" );
+    	return;
+    endif
+
+    if ( keys[0] == okay.keyid )
+		SendSysMessage( who, "Okay!" );
+    elseif ( keys[0] == cancel.keyid )
+		SendSysMessage( who, "Cancelled." );
+	else
+		SendSysMessage( who, "Unexpected exit... gump error?" );
+    endif
+
+endprogram

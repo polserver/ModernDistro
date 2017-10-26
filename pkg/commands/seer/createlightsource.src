@@ -1,0 +1,41 @@
+use vitals;
+use uo;
+use os;
+
+include "include/client";
+include ":attributes:attributes";
+
+program createlightsource(caster)
+
+    var cast_loc := TargetCoordinates( caster );
+    if (!cast_loc.x)
+        return;
+    endif
+
+    if (!CheckLosAt( caster, cast_loc.x, cast_loc.y, cast_loc.z ))
+        SendSysMessage( caster, "You don't have line of sight to that." );
+        return;
+    endif
+    var thecritter;
+
+    var parms := {};
+
+    parms .+ script := "tamed";
+	parms .+ name := "a magical lightsource";
+
+    thecritter := CreateNpcFromTemplate("wisp", cast_loc.x, cast_loc.y,cast_loc.z, parms, caster.realm);
+    SetObjProperty(thecritter,"master", caster.serial);
+    SetObjProperty(thecritter, "summoned",1);
+	var thelight := CreateItemAtLocation(1, 1, 1, 0xa22, 1, caster.realm);
+	thelight.newbie := 1;
+	EquipItem(thecritter, thelight);
+	SetHp(thecritter, 1);
+	SetBaseStrength(thecritter,1);
+	SetMana(thecritter, 1);
+	SetBaseIntelligence(thecritter,1);
+    PlaySoundEffect(caster, SFX_SPELL_SUMMON_ELEMENTAL);
+    Detach();
+    sleep(120);
+    ApplyRawDamage(thecritter, GetHp(thecritter) + 3); //should kill it off
+
+endprogram

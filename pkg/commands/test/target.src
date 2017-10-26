@@ -1,0 +1,152 @@
+//////////////////////////////////////////////////////////
+// This program file is here to use for creating little //
+// pieces of code for testing purposes.					//
+//////////////////////////////////////////////////////////
+
+
+use uo;
+use cfgfile;
+use os;
+use basic;
+use cliloc;
+
+include "include/findCity";
+//include "include/myUtil";
+include "util/bank";
+include ":currency:currency";
+include "include/string";
+//include ":gumps:gumpMessage";
+//include ":staticHousing:staticHousing";
+include "include/packets";
+include ":clilocs:clilocs";
+
+program targetbug(who, text)
+
+	// Add buff icon for 10 seconds
+	who.addBuff(0x460, 30, 0x106a85, 0x106a86, CAscZ("1234 "));
+	sleep(30);
+	var debuffed := who.delbuff(0x460);
+	SendSysMessage(who, debuffed.errortext, 2, 66);
+	//who.clearbuffs();
+
+	return;
+/*var cmdlvl := CInt(text);;
+SendSysMessage(who, "Logical test: " + CStr(who.cmdlevel == cmdlvl), 1, 88);
+return 1;
+*/
+/*	var fred := {};
+	SendSysMessage(who, "FRED", 6, 33);
+	return;
+
+	var targ := TargetCoordinates(who);
+	var statics := ListStaticsAtLocation( targ.x, targ.y, targ.z, 0, targ.realm );
+	//var statics := ListStaticsAtLocation( 1224, 1567, 0, 0, "britannia_alt" );
+	if(!Len(statics))
+		SendSysMessage(who, "There are no statics there.", 2, 88);
+		return;
+	endif
+	foreach static in statics
+		SendSysMessage(who, "Len of statics is " + CStr(Len(statics)) + "    Static is " + CInt(static.objtype), 2, 88);
+	endforeach
+	return;
+
+*/
+
+/*
+var targ := TargetCoordinates(who);
+
+var arrayofstatics := {0xc9e, 0xca5, 0xca9};
+var statics := ListStaticsNearLocation( targ.x, targ.y, targ.z, 4, LIST_IGNORE_Z, targ.realm );
+foreach static in statics
+	if(static.objtype in arrayofstatics)
+	SendSysMessage(who, "an ohii tree is here.", 1, 88);
+	endif
+endforeach
+
+return;
+if(FindHouseForLocation(targ.x, targ.y, targ.z, who.realm))
+	SendSysMessage(who, "Yep. Inside the house.", 1, 88);
+else
+	SendSysMessage(who, "Nope. Not inside the house.", 1, 33);
+endif
+return 1;
+
+
+
+gumpmessage(who, text);
+return;
+
+
+
+var num := CInt(text);
+var result := AddCommas(num);
+SendSysMessage(who,CStr(num), 1, 88);
+SendSysMessage(who, result);
+return;
+
+
+
+
+// Test create multi stacks of coins
+var words := SplitWords(text);
+var done := createcoins( who, who.backpack, words[1], CInt(words[2]) );
+
+if(done)
+	SendSysMessage(who, "Success!", 1, 66);
+else
+	SendSysMessage(who, "Failed!", 1, 33);
+endif
+
+*/
+
+/*
+var difference := 0;
+var price := 120000;
+var vault := FindBankBox( who );
+var stacksofcashinbank := GetStacksOfTypeInContainer (vault, 0xEED);
+var stacksofcashinpack := GetStacksOfTypeInContainer (who.backpack, 0xEED);
+var cashinbank := stacksofcashinbank[1];
+var cashinpack := stacksofcashinpack[1];
+var totalcash := cashinbank + cashinpack;
+SendSysMessage(who, totalcash);
+if(cashinbank >= price)
+	SpendCoin(who, price, vault, 0xEED);
+	SendSysMessage(who, "You had enough gold in your bank to buy", 3, 66);
+	SendSysMessage(who, "the house. The gold was subtracted from your bank.", 3, 66);
+elseif(cashinpack >= price)
+	SpendCoin(who, price, who.backpack, 0xEED);
+	SendSysMessage(who, "You had enough gold in your pack to buy", 3, 66);
+	SendSysMessage(who, "the house. The gold was subtracted from your pack.", 3, 66);
+elseif(totalcash >= price)
+	if(cashinbank > cashinpack)
+		difference := price - cashinbank;
+		SpendCoin(who, (price-difference), vault, 0xEED);
+		SpendCoin(who, difference, who.backpack, 0xEED);
+		SendSysMessage(who, "The total of your gold in your bank and your", 3, 66);
+		SendSysMessage(who, "pack was enough to buy the house.", 3, 66);
+	else
+		difference := price - cashinpack;
+		SpendCoin(who, (price-difference), who.backpack, 0xEED);
+		SpendCoin(who, difference, vault, 0xEED);
+		SendSysMessage(who, "The total of your gold in your pack and your", 3, 66);
+		SendSysMessage(who, "bank was enough to buy the house.", 3, 66);
+	endif
+else
+	SendSysMessage(who, "The total of your gold in your bank and your", 3, 40);
+	SendSysMessage(who, "backpack is not enough to buy this house.", 3, 40);
+endif
+*/
+	
+
+
+//	var targ := TargetCoordinates(who);
+//	SendSysMessage(who, "Name is " + targ.name, color := 88);
+//	var multi := CreateMultiAtLocation(targ.x, targ.y, targ.z, CInt(text), 0x100, who.realm );
+//	if(!multi)
+//		SendSysMessage(who, multi.errortext);
+//	endif
+	
+//	SendSysMessage(who, WhatCityAmIIn(who), color := 88);
+//	SendSysMessage(who, IsInsideCity(who), color := 88);
+//	SendSysMessage(who, CStr(Hex(GetTownCurrency("Caemberlyn"))), color := 88);
+endprogram

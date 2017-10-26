@@ -1,0 +1,166 @@
+use cfgfile;
+use util;
+use uo;
+use os;
+
+include "include/eventID";
+include ":attributes:attributes";
+include "include/client";
+//include "../../systems/spawnregion/spawnRegion";
+
+program tame( who )
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  var conf := ReadConfigFile("::npcdesc");
+  var elem;
+  var points := 0;
+  SendSysMessage( who, "What do you want to tame?" );
+  var thecreature := Target(who);
+  if(!thecreature)
+    SendSysMessage(who, "cancelled.");
+    return;
+  endif
+  if(!CheckLineOfSight(who, thecreature))
+    SendSysMessage(who, "You can't see that!");
+    return;
+  endif
+  if(Distance(who,thecreature) > 5)
+     SendSysMessage(who, "You are not close enough to tame that!");
+    return;
+  endif
+  elem := FindConfigElem(conf, thecreature.npctemplate);
+  if(!elem)
+    SendSysMessage(who, "You cannot tame this!");
+    return;
+  endif
+  var difficulty := CInt(GetConfigInt(elem, "tameskill"));
+  points := (difficulty*2);
+  if(!difficulty)
+    SendSysMessage(who, "You can't tame that!");
+    return;
+  endif
+  if (thecreature.script == "tamed")
+    SendSysMessage(who, "That creature looks pretty tame already.");
+    return;
+  endif
+  if (AP_GetSkill(who, TAMING) < (difficulty - 10))
+    SendSysMessage(who, "You have no chance of taming this creature!");
+    return;
+  endif
+  if(GetObjProperty(thecreature, "prevtamed"));
+	if(difficulty > 20)
+	  difficulty := difficulty - 20;
+	else
+	  difficulty := 0;
+	endif
+	if(points > 20)
+	  points := points - 20;
+	else
+	  points := 0;
+	endif
+  endif
+  var ownerarray := GetObjProperty(thecreature, "LastOwners");
+  if(!ownerarray)
+    ownerarray := {};
+  endif
+  if(who.serial in ownerarray)
+    points := 0;
+  endif
+  var amt := len(ownerarray);
+  var holder := {};
+  foreach thing in ownerarray
+    if((thing != who.serial) and (amt < 10))
+      holder.append(thing);
+    else
+      amt := amt - 1;
+    endif
+  endforeach
+  ownerarray := holder;
+  ownerarray.append(who.serial);
+  SetObjProperty(thecreature, "LastOwners", ownerarray);
+  if(points != 0)
+    points := points * 10;
+  endif
+  var thename := get_name(thecreature.name);
+  var critterhp := GetHp(thecreature);
+  var count;
+  var counter := 0;
+  sleep(1);
+  while(counter < 4)
+    if(who.dead)
+      break;
+    else
+      critterhp := GetHp(thecreature);
+      case(counter)
+        0: PrintTextAbove(who, "What a nice " + thename + ".");
+        1: PrintTextAbove(who, "I've always wanted a " + thename + " like you.");
+        2: PrintTextAbove(who, thename + ", will you be my friend?");
+        3: PrintTextAbove(who, "I wont hurt you.");
+      endcase
+      counter := counter + 1;
+      sleep(4);
+      if(GetHp(thecreature) < critterhp)
+        SendSysMessage(who,"That creature is too angry to continue taming");
+        return;
+      endif
+      if(Distance(who,thecreature) > 5)
+        SendSysMessage(who, "You are not close enough to tame that!");
+        return;
+      endif
+    endif
+  endwhile
+  if(who.dead)
+    SendSysMessage(who, "You cannot tame an animal while dead.", 3, 40);
+    return;
+  endif
+  if(thecreature.script == "tamed")
+    SendSysMessage(who, "That creature looks pretty tame already.");
+    return;
+  endif
+  if(SkillCheck(who, TAMING, difficulty + 10, points))
+    SendSysMessage(who, "You successfully tame the " + thename);
+    Run_Script_To_Completion(":spawnregion:death", thecreature);
+    thecreature.script := "tamed";
+    SetObjProperty(thecreature, "master", who.serial);
+    SetObjProperty(thecreature,"script",thecreature.script);
+    SetObjProperty(thecreature,"prevtamed",1);
+    SetObjProperty(thecreature,"happiness", 30);
+    RestartScript(thecreature);
+  else
+    var npccfgfile := ReadConfigFile("::npcdesc");
+    var orneriness := npccfgfile[thecreature.npctemplate].orneriness;
+    if(!orneriness)
+      orneriness := 0;
+    endif
+    orneriness := orneriness * 5;
+    if(((RandomInt(99) + 1) + orneriness) > AP_GetSkill(who, TAMING))
+      SendSysMessage(who, "You seem to have upset the beast!");
+      var ev := array;
+      ev.+ type;
+      ev.+ source;
+      ev.type := EVID_PEACEMADE;
+      ev.source := who;
+      SendEvent(thecreature, ev);
+      ev.type := EVID_ENGAGED;
+      SendEvent(thecreature, ev);
+    else
+      SendSysMessage(who, "You failed to tame the creature.");
+    endif
+  endif
+endprogram
+
+function get_name(thename)
+  if (find(thename, "an ",1) == 1)
+    return thename[4,len(thename)];
+  elseif (find(thename, "a ",1) == 1)
+    return thename[3,len(thename)];
+  else
+    return thename;
+  endif
+endfunction
+
+
+
+
+
+

@@ -1,0 +1,73 @@
+use uo;
+
+include "include/canAccess";
+
+program fillpitcher (who, pitcher)
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  if(!can_access(who, pitcher))
+    return;
+  endif
+  ReserveItem(pitcher);
+  SendSysMessage(who, "What would you like to fill the pitcher from?");
+  var targetted := TargetCoordinates(who);
+  if(!targetted)
+    SendSysMessage(who, "Canceled.");
+    return;
+  endif
+  if(!can_access(who, targetted))
+    return;
+  endif
+  if(!check_accessible(who, targetted.x, targetted.y, targetted.z))
+    SendSysMessage(who,"You cannot see that.");
+    return;
+  endif
+  if(check_for_water(targetted))
+    PlaySoundEffect(who, 0x0026);
+    DestroyItem(pitcher);
+    CreateItemInBackpack(who, 0x1f9e, 1);
+  elseif(check_for_cows(targetted))
+    PlaySoundEffect(who, 0x007a);
+    DestroyItem(pitcher);
+    CreateItemInBackpack(who, 0x09ad, 1);
+  else
+    SendSysMessage(who,"You cannot fill the pitcher there.");
+    return;
+  endif
+endprogram
+
+function check_for_cows(theobj)
+    if (theobj.isA(POLCLASS_NPC))
+        if (theobj.objtype == 0xd8 || theobj.objtype == 0xe7)
+            return 1;
+        endif
+    endif
+endfunction
+
+function check_for_water(theobj)
+    if ((theobj.objtype >= 0x1796) && (theobj.objtype <= 0x17b2) )
+        return 1;
+    elseif ((theobj.objtype >= 0x346e) && (theobj.objtype <= 0x3530))
+        return 1;
+    elseif ((theobj.objtype >= 0xb41) && (theobj.objtype <= 0xb44))
+        return 1;
+    elseif (theobj.objtype == 0x0e7b || theobj.objtype == 0x154d)
+        return 1;
+    else
+        return 0;
+    endif
+endfunction
+
+function check_accessible( who, x, y, z )
+    z := z;
+    var xd, yd;
+    xd := who.x - x;
+    if (xd < -2 || xd > 2)
+        return 0;
+    endif
+    yd := who.y - y;
+    if (yd < -2 || yd > 2)
+        return 0;
+    endif
+    return 1;
+endfunction

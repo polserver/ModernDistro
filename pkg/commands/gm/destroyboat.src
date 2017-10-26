@@ -1,0 +1,30 @@
+use uo;
+use boat;
+
+program destroy_boat( who )
+    SendSysMessage( who, "Target the tillerman" );
+    var mast := TargetCoordinates(who);
+    if (!mast)
+        return;
+    endif
+    var bs := GetObjProperty(mast.item, "shipserial");
+    var boat;
+    if(!bs)
+      boat := BoatFromItem(mast.item);
+    else
+      boat := SystemFindBoatBySerial(bs);
+    endif
+    printtextabove(boat, "BOAT");
+    if (boat.has_offline_mobiles)
+      SendSysMessage( who, "Boat has offline mobiles on the deck." );
+      SendSysMessage( who, "Where should they be moved?" );
+      var newloc := TargetCoordinates( who );
+      if (newloc)
+        boat.move_offline_mobiles( newloc.x, newloc.y, newloc.z );
+      endif
+    endif
+    var res := DestroyMulti( boat );
+    if (!res)
+        SendSysMessage( who, "Can't delete: " + res.errortext );
+    endif
+endprogram

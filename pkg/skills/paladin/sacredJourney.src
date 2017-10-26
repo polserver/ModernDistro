@@ -1,0 +1,97 @@
+use uo;
+use vitals;
+use util;
+
+include "include/spellRestrictions";
+include "include/isValidLoc";
+include "include/findCity";
+
+program chrcast_rcurse( parms )
+	var caster := params[1];
+	var info := params[2]; // Struct containing additional info about the spell.
+	var spellID := params[3];
+	
+
+  
+	if(findcity(caster) == "Crate")
+		return 0;
+	endif
+
+	eraseobjproperty(caster, "rekall");
+
+	var enemies := 0;
+
+	foreach enemy in ListHostiles( caster, 10 );
+		enemies := 1;
+	endforeach
+
+	if(enemies == 1)
+		SendSysMessage(caster, "Uciekac z pola walki? Wstyd!",3,40);
+		return 0;
+	endif
+
+	if(GetObjProperty(caster, "#team") || GetObjProperty(caster, "IgTeam") || GetObjProperty(caster, "CtfTeam"))
+		SendSysMessage(caster, "Where?",3,40);        
+		return 0;
+	endif
+
+
+
+	SendSysMessage(caster, "Select the rune:",3,66);
+	var cast_on := Target(caster);
+	if((cast_on.objtype != 0x1f14) && (cast_on.objtype != 0x6100))
+		SendSysMessage(caster, "You can only use this Sacred Journey on runes.",3,40);
+		return 0;
+	endif
+
+
+	if(!ReserveItem(cast_on))
+		return;
+	endif
+	if(GetObjProperty(cast_on, "Vendored"))
+		SendSysMessage(caster, "You cannot use the runes on a vendor.",3,40);
+		return 0;
+	endif
+  var dest := cast_on.GetDestination(cast_on);
+  if(!dest)
+	SendSysMessage(caster, "That rune has not been marked with a location.", 2, 33);
+	return 0;
+  endif
+  var tox := CInt(dest.x);
+  var toy := CInt(dest.y);
+  var toz := CInt(dest.z);
+  var torealm := dest.realm;
+  if (torealm) 
+        if (torealm != caster.realm)
+            SendSysMessage (caster, "You do not have enough power to cross the boundary to that realm.");
+            return;
+        endif
+  endif
+
+	if(!isValidLoc(dest.x,dest.y))
+		SendSysMessage(caster, "Sacred Journey cannot take you to that location.",3,40);
+		DestroyItem(cast_on);
+		return;
+	endif
+
+	Detach();
+
+	var MultiCheck := ListMultisInBox(dest.x, dest.y, dest.z, dest.x, dest.y, dest.z, dest.realm).size()>0;
+	if(multicheck)
+		SendSysMessage(caster,"You are blocked from journeying there.",3,40);
+		if(cast_on.objtype == 0x1f14)
+			DestroyItem(cast_on);
+		endif
+		return;
+	endif
+
+	PlaySoundEffect( caster, 0x01ff );
+	PlayStationaryEffect( caster.x, caster.y, caster.z, 0x3728, speed:=0xa, loop:=0xa, 0, caster.realm );
+
+	SetObjProperty(caster, "#Teleported", 1);
+	MoveObjectToLocation( caster, dest.x, dest.y, dest.z, dest.realm );
+	EraseObjProperty(caster, "#Teleported");
+
+	PlayStationaryEffect( dest.x, dest.y, dest.z, 0x3728, speed:=0xa, loop:=0xa, 0, dest.realm );
+
+endprogram

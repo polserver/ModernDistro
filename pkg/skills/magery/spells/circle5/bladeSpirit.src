@@ -1,0 +1,37 @@
+use vitals;
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+
+program cast_summon( parms )
+    var caster := parms[1];
+    var info := parms[2];
+    var cast_on := parms[4]; // If NPC casting there'll be something here.
+    if (!cast_on) // If no cast_on then this is being cast by a player.
+      cast_on := MS_TargetCoordinates(caster, info.targ, "Select a target.");
+    endif
+    if (!cast_on)
+      SendSysMessage (caster, "Cancelled.", color := 33);
+      return 0;
+    endif
+    if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+        return 0;
+    endif
+    
+    var thecritter := CreateNpcFromTemplate("bladespirit", cast_on.x, cast_on.y, cast_on.z, 0, caster.realm);
+    PlaySoundEffect(thecritter,SFX_SPELL_BLADE_SPIRITS);
+    SetObjProperty(thecritter, "summoned",1);
+    SetObjProperty(thecritter, "master", caster.serial);
+    Detach();
+    sleep( (GetAttribute( caster, MAGERY ) ) );
+    PlaySoundEffect( thecritter, SFX_SPELL_MANA_VAMPIRE );
+    PlayStationaryEffect( thecritter.x, thecritter.y, thecritter.z, FX_SMOKE, 0xa, 0xa, 0, thecritter.realm );
+    MoveObjectToLocation(thecritter,0,0,0, "britannia", MOVEOBJECT_FORCELOCATION); // newmap problem
+    ApplyRawDamage(thecritter, GetHp(thecritter) + 3);
+endprogram
+

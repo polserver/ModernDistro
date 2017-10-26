@@ -1,0 +1,35 @@
+use uo;
+use os;
+use basic;
+
+include "include/sysEvent";
+
+program receivercontrol(crystal);
+  var i, placeholder, receiver, Links, LinkList, LinkCount;
+  RegisterForSpeechEvents(crystal, 1);
+  EnableEvents(SYSEVENT_SPEECH,1);
+  var ev;
+
+  while(1)
+    ev := os::wait_for_event( 3 );
+    if(ev)
+      var IsOn := GetObjProperty(crystal, "Status");
+      IsOn := CStr(IsOn);
+      if (IsOn == "ON")
+        if (ev.type==SYSEVENT_SPEECH)
+          LinkList := GetObjProperty(crystal, "Links");
+          Links := Splitwords(LinkList);
+          LinkCount := Len(Links);
+          LinkCount := LinkCount + 1;
+          i := 1;
+          while (i < LinkCount)
+            placeholder := Cint(Links[i]);
+            receiver := SystemFindObjectBySerial(placeholder);
+            PrintTextAbove(receiver, "Message from "+ev.source.name+": " + ev.text);
+            i := i + 1;
+          endwhile
+        endif
+      endif
+    endif
+  endwhile
+endprogram

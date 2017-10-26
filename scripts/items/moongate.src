@@ -1,0 +1,41 @@
+use os;
+use uo;
+
+include "include/client";
+include ":attributes:attributes";
+
+program walk_on_moongate(mobile, gate)
+  if((mobile.npctemplate) && (mobile.script != "employed") && (mobile.script != "tamed") && (mobile.script != "escortee"))
+    return;
+  endif
+  var magery := CInt(GetObjProperty(gate,"magery"));
+  if((magery) && (mobile.acctname))
+    if(GetAttribute(mobile, MAGERY) < magery)
+      SendSysMessage(mobile,"your knowledge of the arcane arts is too low to traverse this gate.");
+      return;
+    endif
+  endif
+  set_critical(1);
+  if(GetObjProperty(mobile,"#justgated") )
+	return;
+  endif
+  var x, y, z, grealm;
+  x := GetObjProperty( gate, "GateDestX" );
+  y := GetObjProperty( gate, "GateDestY" );
+  z := GetObjProperty( gate, "GateDestZ" );
+  grealm := GetObjProperty( gate, "DestRealm" );
+  if (!grealm)
+      grealm := "britannia";
+  endif
+  foreach critter in ListMobilesNearLocation(gate.x, gate.y, gate.z, 8, gate.realm);
+    if(((critter.script == "employed") && (CInt(GetObjProperty(critter, "master")) == mobile.serial)) || ((critter.script == "escortee") && (CInt(GetObjProperty(critter, "Escortee")) == mobile.serial)) || ((critter.script == "tamed") && (CInt(GetObjProperty(critter, "master")) == mobile.serial)))
+      SetObjProperty(critter, "Pause", 1);
+      MoveObjectToLocation(critter, gate.x, gate.y, gate.z, grealm, MOVEOBJECT_FORCELOCATION);
+      EraseObjProperty(critter, "Pause");;
+    endif
+  endforeach
+  SetObjProperty(mobile,"#justgated",1);
+  MoveObjectToLocation(mobile, x, y, z, grealm );
+  sleep(1);
+  EraseObjProperty(mobile,"#justgated");
+endprogram

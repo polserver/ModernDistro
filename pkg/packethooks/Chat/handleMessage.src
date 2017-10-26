@@ -1,0 +1,33 @@
+use uo;
+use os;
+use polsys;
+
+include ":chat:chatIO";
+include ":chat:packets";
+include ":chat:functions";
+include ":chat:settings";
+
+program Message(params)
+	var character := params[1];
+	var packet := params[2];
+	params := "";
+
+	if ( CH_CheckDebug() )
+		Print("Message: "+character.name+" "+packet);
+	endif
+	
+	var message := CChrZ(packet.GetUnicodeString(9, (packet.GetSize() / 2) - 5));
+	var conference := CH_GetPlayerConference(character);
+	
+	// Todo: send correct message type: 0x0025 (Message), 0x0026 (Emote), 0x0027 (OOC)
+	// Note sure where OOC comes from but I think emote is a different subcommand...
+	var type;
+	type := 0x0025;
+	if ( conference )
+		SendServerMessage(conference, type, character, message);
+	else
+		SendChatClilocMessage(character, 0x000B); // must be in conf to do this
+	endif
+	
+	return 1;
+endprogram

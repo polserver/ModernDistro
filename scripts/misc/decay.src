@@ -1,0 +1,22 @@
+use os;
+use uo;
+
+function decay(object, blood)
+    sleep(60);
+        /*
+            local theitems := EnumerateItemsInContainer(object);
+            if (len(theitems) > 0)
+            local i;
+            for ( i:= 1; i <= len(theitems); i := i + 1)
+            createitematlocation(object.x, object.y, object.z, theitems[i].objtype, theitems[i].amount);
+            destroyitem(object);
+            endfor
+        */
+    DestroyItem(object);
+    sleep(60);
+    DestroyItem(blood);
+endfunction
+
+program p_decay( theparms )
+    decay(theparms[1], theparms[2]);
+endprogram

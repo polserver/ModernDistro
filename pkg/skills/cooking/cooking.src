@@ -1,0 +1,159 @@
+use uo;
+use os;
+use cfgfile;
+
+include "include/client";
+include ":attributes:attributes";
+include "include/yesNo";
+include "include/canAccess";
+
+program cook(who, item)
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  if(!can_access(who, item))
+    return;
+  endif
+  if(!ReserveItem(item))
+    return;
+  endif
+  if(cookon(who, item))
+    cookit(who, item);
+  endif
+endprogram
+
+function cookon(who, item)
+  if(!item)
+    return 0;
+  endif
+  SendSysMessage(who, "Select the heat source to cook that on.");
+  var trg := Target(who);
+  if(!trg)
+    SendSysMessage(who, "cancelled.");
+    return 0;
+  endif
+  if(!Accessible(who, trg))
+    SendSysMessage(who, "You cannot reach that.");
+    return 0;
+  endif
+  if((trg.objtype >= 0x08cf) && (trg.objtype <= 0x08df))
+    return 1;
+  elseif((trg.objtype >= 0x092b) && (trg.objtype <= 0x096c))
+    return 1;
+  elseif((trg.objtype >= 0x45d) && (trg.objtype <= 0x48e))
+    return 1;
+  elseif((trg.objtype >= 0x0de3) && (trg.objtype <= 0x0de9))
+    return 1;
+  elseif((trg.objtype >= 0x0e31) && (trg.objtype <= 0x0e33))
+    return 1;
+  elseif((trg.objtype >= 0x1849) && (trg.objtype <= 0x1850))
+    return 1;
+  elseif((trg.objtype >= 0x197a) && (trg.objtype <= 0x19a9))
+    return 1;
+  elseif((trg.objtype >= 0x0de3) && (trg.objtype <= 0x0de9))
+    return 1;
+  elseif((trg.objtype == 0x19bb) || (trg.objtype == 0x0fb1))
+    return 1;
+  else
+    SendSysMessage(who, "You cannot cook food on that.");
+    return 0;
+  endif
+endfunction
+
+function cookit(who,item);
+  var cfg := ReadConfigFile(":cooking:cooking");
+  var skill_needed := -1;
+  var points       := cfg[item.objtype].points;
+  var elem      := FindConfigElem(cfg, item.objtype);  
+  var products  := GetConfigStringArray(elem,"product");
+  var product   := Cint(products[RandomInt(len(products))+1]);
+  var ingredients := GetConfigStringArray(elem, "ingredient");
+  var theIngredients := {};
+  var newitem;
+  if (ingredients)
+    theIngredients := GetIngredients(who, ingredients);
+    if (theIngredients == error)
+      SendSysMessage(who, "You do not have the proper ingredients.");
+      return;
+    endif
+  endif
+  if(!points)
+    points := AP_GetSkill(who, COOKING) * 2;
+  endif
+  if(skill_needed)
+    if(SkillCheck( who, COOKING, skill_needed, 0));
+      var amt := item.amount;
+      if(DestroyItem(item))
+        newitem := CreateItemInBackpack(who, product, amt);
+        if(newitem)
+	      SendSysMessage(who, "You put the item in your pack");
+	      AwardRawSkillPoints(who, SKILLID_COOKING, GetPoints(who, skill_needed, points));
+	    else
+	      SendSysMessage(who, "You dont have any room in your backpack.");
+	    endif
+	  endif
+    else
+      SendSysMessage(who, "You burnt it!");
+      SubtractAmount(item, 1);
+    endif
+    foreach thing in theIngredients
+      DestroyItem(thing);
+    endforeach
+  else
+    SendSysMessage(who, "You cannot cook that.");
+  endif
+endfunction
+
+function GetPoints(who, diff, pts)
+  var skill := AP_GetSkill(who, COOKING);
+  if(skill > (diff - 20))
+    if((skill - diff) <= 5)
+      pts := pts;
+    elseif((skill - diff) <= 10)
+      pts := (pts * 3) / 4;
+    elseif((skill - diff) <= 15)
+      pts := pts / 2;
+    elseif((skill - diff) <= 15)
+      pts := pts / 4;
+    else
+      pts := 0;
+    endif
+  endif
+  return pts;
+endfunction
+
+function GetIngredients(who, ingredients)
+var words := {};
+var objtypes;
+var tgt;
+var result := {};
+
+  foreach list in ingredients
+  
+    words := SplitWords(list);
+    objtypes := {};
+    foreach word in words
+      objtypes.append(CInt(word));
+    endforeach
+    
+    SendSysMessage(who, "Select an ingredient for cooking this.");
+    tgt := Target(who);
+    
+    if (tgt.objtype in objtypes)
+      SendSysMessage(who, "Good choice!");
+      result.append(tgt);
+    else
+      SendSysMessage(who, "That is not the right ingredient!");
+      return error;
+    endif
+  endforeach
+
+  foreach item in result
+    if (!can_access(who, item) || !ReserveItem(item))
+      SendSysMessage(who, "But, you can't get to some of the ingredients!");
+      return error;
+    endif
+  endforeach
+
+  return result;
+
+endfunction

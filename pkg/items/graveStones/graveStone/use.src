@@ -1,0 +1,27 @@
+/* $Id: use.src 762 2006-08-28 02:22:55Z AustinHeilman $
+ *
+ */
+
+use uo;
+
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+
+program Usegstone(mobile, gstone)
+	var gump := GFCreateGump();
+	GFGumpPic(gump, 0, 0, gstone.GetGumpPic());
+
+	var text := GFWordWrap(gstone.GetText(), 100);
+	var text_color := gstone.GetTextColor();
+	var y_pos := 20;
+
+	foreach line in ( text )
+		GFTextMid(gump, 20, y_pos, 100, text_color, line);
+		y_pos := y_pos + 20;
+		SleepMS(2);
+	endforeach
+
+	GFSendGump(mobile, gump);
+
+	return 1;
+endprogram

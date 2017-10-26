@@ -1,0 +1,56 @@
+use uo;
+use vitals;
+use attributes;
+
+include "include/spellRestrictions";
+
+program chrcast_grenewal( parms )
+  var circle := 2;
+  var delivery := "notarget";
+  var noto := "heplful";
+  var result := maincast(parms, delivery, circle, noto, 602);
+
+  if(result == 0)
+    return 0;
+  endif
+
+  var caster := result[1];
+
+
+var dru := Cint(GetEffectiveSkill(caster, SPELLWEAVING));
+var alore := Cint(GetEffectiveSkill(caster, SKILLID_ANIMALLORE));
+var int := GetIntelligence(caster);
+
+var bonus := 0;
+
+if(caster.ip)
+bonus := int/5;
+endif
+
+if(Cint(GetObjProperty(caster, "#hh")))
+SendSysMessage(caster, "Juz jestes pod wplywem tego czaru.",3,40);
+return 0;
+endif
+
+
+var duration := (dru + alore + bonus);
+var amount := dru + alore + bonus * 200;
+
+PlayObjectCenteredEffect( caster, 0x3779, 10,45 );
+Playsoundeffect(caster, 0x5CA);
+
+SetObjProperty(caster, "NewRegenRateForLife", amount);
+SetObjProperty(caster, "#hh", 1);
+RecalcVitals(caster);
+Detach();
+sleep(duration);
+
+PlaySoundEffect(caster, SFX_SPELL_BLESS);
+PlayObjectCenteredEffect( caster, 0x3779, 10,45 );
+SendSysMessage(caster, "Czar Gift Renewal zakonczyl swoje dzialanie.",3,40);
+EraseObjProperty(caster, "NewRegenRateForLife");
+EraseObjProperty(caster, "#hh");
+RecalcVitals(caster);
+
+endprogram
+

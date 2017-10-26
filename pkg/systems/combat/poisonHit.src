@@ -1,0 +1,146 @@
+use uo;
+use util;
+use os;
+use cfgfile;
+
+include "include/client";
+include ":attributes:attributes";
+
+
+program poisonhit(param)
+    var npccfg := ReadConfigFile("::npcdesc");
+    var attacker := param[1];
+    var defender := param[2];
+    var weapon := param[3];
+    var armor := param[4];
+    var basedamage := param[5];
+    var rawdamage := param[6];
+    SetObjProperty(defender, "TempDamage", rawdamage);
+
+
+//missiles
+
+	if (GetObjProperty(weapon, "MissileHit") )
+      var defenderplevel := CInt(GetObjProperty(defender,"poison_level"));
+      var potion_strength := (RandomInt(8) + 3);
+      var newplevel := (CInt(potion_strength));
+      var value := (GetAttribute(attacker, POISONING)+2);
+      if(SkillCheck( attacker, POISONING, value, 20))
+        if(defender.npctemplate)
+          var element := npccfg[defender.npctemplate].elemental;
+          if(element == "poison")
+            HealDamage(defender, potion_strength);
+          else
+//            SetObjProperty(defender,"PoisonStamp", ReadGameClock());
+//            SetObjProperty(defender, "poison_level", potion_strength);
+            Detach();
+          var passparms := { defender, attacker, "poisoned weapon", potion_strength };
+          start_script(":spells:poisondamage", passparms);
+          SetObjProperty(defender, "LastHit", {attacker.name, attacker.serial, "poisoned weapon" });
+          endif
+        else
+          PrintTextAbove(defender, defender.name + " has been poisoned!");
+          SendSysMessage(defender, "You have been poisoned by " + attacker.name +"!");
+          if((defenderplevel < newplevel) || (!defenderplevel) || (defenderplevel < 1))
+//            SetObjProperty(defender, "poison_level", potion_strength);
+          endif
+          Detach();
+          var passparms := { defender, attacker, "poisoned weapon", potion_strength };
+          start_script(":spells:poisondamage", passparms);
+          SetObjProperty(defender, "LastHit", {attacker.name, attacker.serial, "poisoned weapon" });
+        endif
+      endif
+      return;
+    endif
+
+
+
+    if((weapon.objtype == 0x999c) || (weapon.objtype == 0x999d))
+      var defenderplevel := CInt(GetObjProperty(defender,"poison_level"));
+      var potion_strength := (RandomInt(20) + 10);
+      var newplevel := (CInt(potion_strength));
+      var value := (GetAttribute(attacker, POISONING)+2);
+      if(SkillCheck( attacker, POISONING, value, 20))
+        if(defender.npctemplate)
+          var element := npccfg[defender.npctemplate].elemental;
+          if(element == "poison")
+            HealDamage(defender, potion_strength);
+          else
+//            SetObjProperty(defender,"PoisonStamp", ReadGameClock());
+//            SetObjProperty(defender, "poison_level", potion_strength);
+            Detach();
+          var passparms := { defender, attacker, "poisoned weapon", potion_strength };
+          start_script(":spells:poisondamage", passparms);
+          SetObjProperty(defender, "LastHit", {attacker.name, attacker.serial, "poisoned weapon" });
+          endif
+        else
+          PrintTextAbove(defender, defender.name + " has been poisoned!");
+          SendSysMessage(defender, "You have been poisoned by " + attacker.name +"!");
+          if((defenderplevel < newplevel) || (!defenderplevel) || (defenderplevel < 1))
+//            SetObjProperty(defender, "poison_level", potion_strength);
+          endif
+          Detach();
+          var passparms := { defender, attacker, "poisoned weapon", potion_strength };
+          start_script(":spells:poisondamage", passparms);
+          SetObjProperty(defender, "LastHit", {attacker.name, attacker.serial, "poisoned weapon" });
+        endif
+      endif
+      return;
+    endif
+    var duration := CInt(GetObjProperty(weapon, "d"));
+    if ((duration < 1) || !duration)
+      var hitscript := GetObjProperty(weapon,"OnHit");
+      if(hitscript)
+        var ind := returnindex(hitscript, ":combat:poisonhit");
+        hitscript.erase(ind);
+        SetObjProperty(weapon,"OnHit", hitscript);
+      endif
+      EraseObjProperty(weapon,"poison_level");
+      EraseObjProperty(weapon,"d");
+      EraseObjProperty(weapon,"ps");
+      EraseObjProperty(weapon,"phit");
+      SetObjProperty(defender, "LastHit", {attacker.name, attacker.serial, weapon });
+	  return;
+	endif
+	var newduration := (duration - 1);
+	SetObjProperty(weapon, "d", newduration);
+	var potion_strength := GetObjProperty(weapon, "poison_level");
+	var defenderplevel := CInt(GetObjProperty(defender,"poison_level"));
+	var newplevel := (CInt(potion_strength));
+        var value := (GetAttribute(attacker, POISONING)+2);
+	  if(SkillCheck( attacker, POISONING, value, 20))
+        if(defender.npctemplate)
+          var element := npccfg[defender.npctemplate].elemental;
+          if(element == "poison")
+            HealDamage(defender, potion_strength);
+          else
+//            SetObjProperty(defender,"PoisonStamp", ReadGameClock());
+//            SetObjProperty(defender, "poison_level", potion_strength);
+            Detach();
+          var passparms := { defender, attacker, "poisoned weapon", potion_strength };
+          start_script(":spells:poisondamage", passparms);
+          SetObjProperty(defender, "LastHit", {attacker.name, attacker.serial, "poisoned weapon" });
+          endif
+        else
+          PrintTextAbove(defender, defender.name + " has been poisoned!");
+          SendSysMessage(defender, "You have been poisoned by " + attacker.name +"!");
+//          if((defenderplevel < newplevel) || (!defenderplevel) || (defenderplevel < 1))
+//            SetObjProperty(defender, "poison_level", potion_strength);
+//          endif
+          Detach();
+          var passparms := { defender, attacker, "poisoned weapon", potion_strength };
+          start_script(":spells:poisondamage", passparms);
+          SetObjProperty(defender, "LastHit", {attacker.name, attacker.serial, "poisoned weapon" });
+        endif
+      endif
+endprogram
+
+function returnindex(info, information)
+  var i;
+  for (i := 1; i <= len(info); i := i + 1)
+    if (info[i] == information)
+      return i;
+    endif
+  endfor
+  return 0;
+endfunction

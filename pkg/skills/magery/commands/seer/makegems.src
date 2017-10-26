@@ -1,0 +1,17 @@
+use os;
+use uo;
+
+const UOBJ_REG_START := 0xf78;
+const UOBJ_REG_END := 0xf91;
+
+program makegems(who, amount)
+  amount := CInt(amount);
+  if(!amount)
+    amount := 20;
+  endif
+  var backpack := CreateItemInBackpack(who, "backpack", 1);
+  backpack.color := 0x3;
+  foreach thing in array( 0x0F0F, 0x0F10, 0x0F11, 0x0F13, 0x0F15, 0x0F16, 0x0F18, 0x0F25, 0x0F30 )
+    CreateItemInContainer(backpack, thing, amount);
+  endforeach
+endprogram

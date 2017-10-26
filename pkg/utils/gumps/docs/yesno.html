@@ -1,0 +1,103 @@
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+	<meta http-equiv="Content-Language" content="en-us">
+	<title>brainAI Documentation</title>
+	<link rel="stylesheet" type="text/css" href="docs.css" />
+</head>
+<body>
+<div id="container">
+	<div id="header">
+		<h1>GUMPS DOCUMENTATION</h1>
+		<p>Version 1.5, by <a href="mailto:AustinHeilman@Gmail.com">Austin Heilman</a>.</p>
+		<hr>
+		<h2>yesno.inc</h2>
+	</div>
+
+	<div id="content">
+    <table border="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" id="AutoNumber1" cellpadding="2">
+	<tr>
+		<td width="1%" bgcolor="#C0C0C0" bordercolorlight="#000000" bordercolordark="#000000" style="border-style:solid; border-width:1; " align="center" colspan="2">
+		<br>
+		<b><font face="Tahoma" size="2">yesno.inc Functions</font></b><br>&nbsp;</td>
+	</tr>
+	<tr>
+		<td width="1%" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style: none; border-left-width: medium; border-right-style: none; border-right-width: medium; " align="center" colspan="2">&nbsp;</td>
+	</tr>
+	<!----!>
+	<tr>
+		<td width="1%" bordercolor="#000000" bgcolor="#C0C0C0" bordercolorlight="#000000" bordercolordark="#000000" style="border-style:solid; border-width:1; " align="center" colspan="2">
+		<p align="center"><b><font face="Tahoma">YesNo</font></b></td>
+	</tr>
+	<tr>
+		<td width="1%" bgcolor="#808080" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1" colspan="2">
+		<b><font face="Tahoma" size="2">Parameters</font></b></td>
+	</tr>
+	<tr>
+		<td width="1%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-style: solid; border-width: 1" colspan="2">
+		<font face="Tahoma" size="2">(mobile, prompt:="", yes_text:="Yes", no_text:="No")</font></td>
+	</tr>
+	<tr>
+		<td width="25%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1">
+		<font face="Tahoma" size="2">Name</font></td>
+		<td width="102%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1" height="17">
+		<font face="Tahoma" size="2">Type</font></td>
+	</tr>
+	<tr>
+		<td width="25%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium">
+		<font face="Tahoma" size="2">mobile</font></td>
+		<td width="102%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium" height="18">
+		<font face="Tahoma" size="2">Mobile to send the gump to.</font></td>
+	</tr>
+	<tr>
+		<td width="25%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium">
+		<font face="Tahoma" size="2">prompt</font></td>
+		<td width="102%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium" height="18">
+		<font face="Tahoma" size="2">Primary text field, instructing the mobile on what the choices are about.</font></td>
+	</tr>
+	<tr>
+		<td width="25%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium">
+		<font face="Tahoma" size="2">yes_text</font></td>
+		<td width="102%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium" height="18">
+		<font face="Tahoma" size="2">Text to be displayed next to the 'YES' button.</font></td>
+	</tr>
+	<tr>
+		<td width="25%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium">
+		<font face="Tahoma" size="2">no_text</font></td>
+		<td width="102%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium" height="18">
+		<font face="Tahoma" size="2">The text to be displayed next to the 'NO' button.</font></td>
+	</tr>
+	<tr>
+		<td width="1%" bgcolor="#808080" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-style: solid; border-width: 1" colspan="2">
+		<b><font face="Tahoma" size="2">Explanation</font></b></td>
+	</tr>
+	<tr>
+		<td width="1%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-style: solid; border-width: 1" colspan="2">
+		<font face="Tahoma" size="2">Template to create a yes / no gump. See the ".yesno" command for an example.</font></td>
+	</tr>
+	<tr>
+		<td width="1%" bgcolor="#808080" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-style: solid; border-width: 1" colspan="2">
+		<b><font face="Tahoma" size="2">Return Values</font></b></td>
+	</tr>
+	<tr>
+		<td width="1%" bgcolor="#C0C0C0" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-style: solid; border-width: 1" colspan="2">
+		<font face="Tahoma" size="2">Returns '0' if no is selected.<BR>
+		Returns '1' if yes is selected.
+		</font></td>
+	</tr>
+	<tr>
+		<td width="1%" colspan="2">&nbsp;</td>
+	</tr>
+	<!----!>
+	
+	
+    </table>
+    </td>
+  </tr>
+</table>
+	</div>
+
+	<div id="footer">
+		<p>Last Update: $Id: yesno.html 375 2006-06-17 19:26:32Z austinheilman $</p>
+	</div>
+</div>
+</body>

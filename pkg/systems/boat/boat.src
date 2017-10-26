@@ -1,0 +1,732 @@
+use os;
+use uo;
+use util;
+use boat;
+
+include "include/client";
+include ":gumps:yesNo";
+// include "include/wodinc";
+include "include/eventID";
+include "include/utility";
+include ":boat:plankUtil";
+include "include/newPerformAction";
+
+const STATE_STATIONARY		:= 0;
+const STATE_MOVING			:= 1;
+const STATE_DRIFTING		:= 2;
+
+const DELAY_FULL_SPEED		:= 200;
+const DELAY_SLOW			:= 1000;
+const DELAY_DRIFTING		:= 15000;
+
+var state := STATE_STATIONARY;
+var relative_direction;
+var ms_delay_between_moves := DELAY_FULL_SPEED;
+var boat, tillerman, owner, wheel;
+
+program autostart_boat (param)
+	boat := param;
+	if (!boat)
+		syslog ("No boat! Huh?");
+		return;
+	endif
+
+	tillerman := boat.tillerman;
+	wheel := boat.wheel;
+	if (!tillerman and !wheel.size())
+		syslog ("No tillerman for boat " + hex(boat.serial) + "! WTF?" );
+		var destroyreturn := DestroyMulti (boat);
+		if (destroyreturn == error)
+			Syslog ("Error destroying boat " + hex(boat.serial) + ", " + destroyreturn.errortext);
+		endif
+		return;
+	endif
+	if (!tillerman)
+		tillerman := wheel[1];
+	endif
+	
+	owner := GetObjProperty (boat.hold, "owner");
+	if (!owner)
+		owner := GetObjProperty (tillerman, "owner");
+	endif
+	AddBoatToGlobalRegistry ();
+
+	RegisterForSpeechEvents (tillerman, 14, LISTENPT_HEAR_GHOSTS);
+	var nextencounter := ReadGameClock() + 120;
+	var nextsound := ReadGameClock() + 5;
+	var driftcounter := 1;
+	var x, y;
+
+	while (boat)
+		case (state)
+			STATE_MOVING:
+				if (ReadGameClock () > nextsound)
+					PlayBoatSounds ();
+					nextsound := ReadGameClock() + 5;
+				endif
+			
+				x := boat.x;
+				y := boat.y;
+				MoveBoatRelative (boat, relative_direction);
+				if (x == boat.x)
+					if (y == boat.y)
+						state := STATE_STATIONARY;
+						PrintTextAbove (tillerman, "Aaargh!  We've run ashore!");
+						SmackEveryone ();
+					endif
+				else
+					//the world is round, so see if we need to wrap
+					if (boat.x < 10)
+						if (boat.x < x)
+							case (boat.realm)
+								"britannia":
+									MoveBoatXY (boat, 5100, boat.y);
+								"tokuno":
+									MoveBoatXY (boat, 1390, boat.y);
+							endcase
+						endif
+					elseif (boat.x > 5100 and boat.realm == "britannia") 
+						if (boat.x > x)
+							MoveBoatXY (boat, 10, boat.y);
+						endif
+					elseif (boat.x > 1390 and boat.realm == "tokuno") 
+						if (boat.x > x)
+							MoveBoatXY (boat, 15, boat.y);
+						endif
+					endif
+				endif
+				sleepms (ms_delay_between_moves);
+				while (events_waiting())
+					process_event (wait_for_event(0));
+				endwhile
+			STATE_DRIFTING:
+				if (ReadGameClock() > nextsound)
+					PlayBoatSounds();
+					nextsound := ReadGameClock()+5;
+				endif
+				if (driftcounter > 15)
+					MoveBoatRelative (boat, RandomInt(8));
+					driftcounter := 1;
+				else
+					driftcounter := driftcounter + 1;
+				endif
+				sleepms (DELAY_SLOW);
+				while (events_waiting())
+					process_event (wait_for_event(0));
+				endwhile
+			STATE_STATIONARY:
+				var ev := wait_for_event (120);
+				if (ev)
+					process_event (ev);
+				endif
+		endcase
+
+		//occasionally, monsters spawn
+		if ( ReadGameClock() > nextencounter )
+			DoEncounter();
+			nextencounter := ReadGameClock() + 120;
+		endif
+	endwhile
+endprogram
+
+
+
+
+///////////////////
+//  When the tillerman 'hears' something, this handles it
+///////////////////
+
+function process_event (event)
+	if (event.type != EVID_SPEECH)
+		return;
+	endif
+	if (!CanCommandBoat (event.source))
+		return;
+	endif
+
+	var text := lower (event.text);
+	if (text == "drydock")
+		DryDock (event);
+		return;
+	endif
+
+	var nocommand := 1;
+	if (text["sail"])
+		nocommand := 0;
+	endif
+
+	if (text["unfurl sail"] or text["unfurl"])
+		if (nocommand)
+			PrintTextAbovePrivate (tillerman, "Say 'unfurl sail' if you want me to do anything", event.source);
+		else
+			state := STATE_MOVING;
+			relative_direction := 0;
+		endif
+	elseif (text["drift"] or text["raise anchor"])
+		if (nocommand)
+			PrintTextAbovePrivate (tillerman, "Say 'sail drift' if you want to drift", event.source);
+		else
+			state := STATE_DRIFTING;
+		endif
+	elseif (text["forward"])
+		if (nocommand)
+			PrintTextAbovePrivate (tillerman, "Say 'sail forward' if you want to move", event.source);
+		else
+			state := STATE_MOVING;
+			if (text["left"])
+				relative_direction := 7;
+			elseif (text["right"])
+				relative_direction := 1;
+			else
+				relative_direction := 0;
+			endif
+		endif
+	elseif (text["back"]) // gets "backward" too
+		if (nocommand)
+			PrintTextAbovePrivate(Tillerman,"Say 'sail back' if you want to move",event.source);
+		else
+			state := STATE_MOVING;
+			if (text["left"])
+				relative_direction := 5;
+			elseif (text["right"])
+				relative_direction := 3;
+			else
+				relative_direction := 4;
+			endif
+		endif
+	elseif (text["stop"] or text["furl sail"] or text["furl"])
+		if (nocommand)
+			PrintTextAbovePrivate(Tillerman,"Say 'furl sail' if you want to stop",event.source);
+		else
+			state := STATE_STATIONARY;
+		endif
+	elseif (text["drop anchor"])
+		state := STATE_STATIONARY;
+	elseif (text["turn right"] or text["starboard"])
+		if (nocommand)
+			PrintTextAbovePrivate(Tillerman,"Say 'sail starboard' if you want to turn",event.source);
+		else
+			TurnBoat( boat, 1 );
+		endif
+	elseif (text["right"])
+		if (nocommand)
+			PrintTextAbovePrivate(Tillerman,"Say 'sail right' if you want to move",event.source);
+		else
+			state := STATE_MOVING;
+			relative_direction := 2;
+		endif
+	elseif (text["turn left"] or text["port"])
+		if (nocommand)
+			PrintTextAbovePrivate(Tillerman,"Say 'sail port' if you want to turn",event.source);
+		else
+	        TurnBoat( boat, 3 );
+		endif
+	elseif (text["left"])
+		if (nocommand)
+			PrintTextAbovePrivate(Tillerman,"Say 'sail left' if you want to move",event.source);
+		else
+			state := STATE_MOVING;
+			relative_direction := 6;
+		endif
+	elseif (text["come about"])
+		if (nocommand)
+			PrintTextAbovePrivate(Tillerman,"Say 'sail come about' if you want to turn",event.source);
+		else
+			TurnBoat( boat, 2 );
+			sleep(1);
+		endif
+	elseif (text["extend plank"])
+		if (!IsExtended (boat.portplank))
+			boat.portplank.locked := 0;
+			Extend (boat.portplank);
+		endif
+		if (!IsExtended (boat.starboardplank))
+			boat.starboardplank.locked := 0;
+			Extend (boat.starboardplank);
+		endif
+	elseif (text["retract plank"])
+		if (IsExtended (boat.portplank))
+			if (!IsPlankOccupied (boat.portplank))
+				Retract (boat.portplank);
+				boat.portplank.locked := 1;
+				EraseObjProperty (boat.portplank, "#WhenOpened");
+			endif
+		endif
+		if (IsExtended (boat.starboardplank))
+			if (!IsPlankOccupied (boat.starboardplank))
+				Retract (boat.starboardplank);
+				boat.starboardplank.locked := 1;
+				EraseObjProperty (boat.starboardplank, "#WhenOpened");
+			endif
+		endif
+	elseif (text["troll"] or text["trawl"])
+		if (nocommand)
+			PrintTextAbovePrivate (Tillerman, "Say 'sail troll' if you want to troll for monsters", event.source);
+		elseif (state == STATE_MOVING)
+			PrintTextAbove (tillerman, "We be moving too fast to be doing that!");
+		elseif (GetObjProperty (tillerman, "#trolling") and GetObjProperty (tillerman, "#trolling") > ReadGameClock() )
+			PrintTextAbove (tillerman, "We do already be trolling for sea creatures!");
+		else
+			var parms := array{ };
+			parms[1] := event.source;
+			parms[2] := tillerman;
+			start_script(":boat:trolling", parms);
+		endif
+	elseif (text["swab the deck"])
+		var parms := array{ };
+		parms[1] := event.source;
+		parms[2] := tillerman;
+		parms[3] := boat;
+		start_script(":boat:swab_the_deck", parms);
+	endif
+
+	if (nocommand)
+		return;
+	endif
+
+	//Refresh the boat
+	SetObjProperty (boat.hold, "lastused", ReadGameClock());
+	PrintTextAbove( tillerman, "Aye, Captain" );
+
+    // a command was executed.  if "full" or "slow" was specified,
+    // modify our speed accordingly
+
+    if (text["full"])
+        ms_delay_between_moves := DELAY_FULL_SPEED;
+    elseif (text["slow"])
+        ms_delay_between_moves := DELAY_SLOW;
+    endif
+
+    sleep(1);
+
+    // if "one" was specified, just move one, then stop.
+	if (text["one"])
+		var x := boat.x;
+		var y := boat.y;
+		MoveBoatRelative (boat, relative_direction);
+		if (x == boat.x)
+			if (y == boat.y)
+				PrintTextAbove (tillerman, "We can't move that way no more, captain!!");
+				SmackEveryone ();
+			endif
+		else
+			//the world is round, so see if we need to wrap
+			if (boat.x < 10)
+				if (boat.x < x)
+					case (boat.realm)
+						"britannia":
+							MoveBoatXY (boat, 5100, boat.y);
+						"tokuno":
+							MoveBoatXY (boat, 1390, boat.y);
+					endcase
+				endif
+			elseif (boat.x > 5100 and boat.realm == "britannia")
+				if (boat.x > x)
+					MoveBoatXY (boat, 6, boat.y);
+				endif
+			elseif (boat.x > 1390 and boat.realm == "tokuno") 
+				if (boat.x > x)
+					MoveBoatXY (boat, 15, boat.y);
+				endif
+			endif
+		endif
+		state := STATE_STATIONARY;
+	endif
+endfunction
+
+
+
+
+///////////////////
+//  Figures out if the source of an event is someone who can boss the tillerman around
+///////////////////
+
+function CanCommandBoat (who)
+	if (!owner)
+		owner := GetObjProperty (boat.hold, "owner");
+	endif
+	if (!owner)
+		owner := GetObjProperty (tillerman, "owner");
+	endif
+
+	//If we're the owner, we can always control the boat
+	if (who.serial == owner)
+		return 1;
+	endif
+
+	//Dead people can only command the boat if there's no one living on board
+	if (who.dead)
+		foreach mob in (boat.mobiles)
+			if (mob.acctname and !mob.dead and mob.ip)
+				return 0;
+			endif
+		endforeach
+	endif
+
+	//make sure they're on the boat
+	if (who.multi == boat)
+		return 1;
+	endif
+
+	return 0;
+endfunction
+
+
+
+
+///////////////////
+//  Drydocks the boat
+///////////////////
+
+function DryDock (event)
+	var player := event.source;
+	if (!player.acctname)
+		return;
+	elseif (player.dead)
+		SendSysMessage (player, "You can't do this while dead!");
+		return;
+	endif
+
+	owner := GetObjProperty (boat.hold, "owner");
+	if (!owner)
+		owner := GetObjProperty (tillerman, "owner");
+	endif
+	
+	if (owner != player.serial and !player.cmdlevel)
+		return;
+	endif
+
+	if (!YesNo (player, "Drydock?"))
+		return;
+	endif
+
+	var shiptype := GetObjProperty (boat.hold, "shiptype");
+	if (!shiptype)
+		shiptype := GetObjProperty (tillerman, "shiptype");
+	endif
+	if (shiptype < 0x10000)
+		shiptype := shiptype + 0x10000;
+	endif
+	var newboat := CreateItemInContainer (player.backpack, shiptype, 1);
+	if (!newboat)
+		PrintTextAbovePrivate (player, "*Your backpack is full!*", player);
+		return;
+	endif
+
+	newboat.graphic := 0x14f3;
+	newboat.color := boat.color;
+	newboat.name := "A Drydocked Ship";
+	if (tillerman.name)
+		SetObjProperty (newboat, "shipname", tillerman.name);
+	elseif (wheel[1].name)
+		SetObjProperty (newboat, "shipname", wheel[1].name);
+	endif
+
+	var oldmovable;
+	foreach item in (boat.items)
+		if (item.objtype == UOBJ_CORPSE)
+			foreach item2 in ListRootItemsInContainer (item)
+				if (!item2.newbie and item2.movable)
+					if (item2.objtype < UOBJ_STARTHAIR or item2.objtype > UOBJ_ENDHAIR)
+						MoveObjectToLocation( item2, player.x, player.y, player.z, player.realm, MOVEOBJECT_FORCELOCATION );
+					endif
+				endif
+			endforeach
+			DestroyItem (item);
+		else
+			oldmovable := item.movable;
+			item.movable := 1;
+			MoveObjectToLocation( item, player.x, player.y, player.z, player.realm, MOVEOBJECT_FORCELOCATION );
+			item.movable := oldmovable;
+		endif
+	endforeach
+
+	foreach item in ListRootItemsInContainer (boat.hold)
+		MoveObjectToLocation( item, player.x, player.y, player.z, player.realm, MOVEOBJECT_FORCELOCATION );
+	endforeach
+
+	var key := FindKey (player, boat.hold);
+	if (!DestroyBoat (player))
+		DestroyItem (newboat);
+		return;
+	endif
+	if (key)
+		DestroyItem (key);
+	endif
+endfunction
+
+
+
+
+///////////////////
+//  Tries to destroy the boat
+///////////////////
+
+function DestroyBoat (who)
+	var res := DestroyMulti (boat);
+	if (!res)
+		SendSysMessage (who, "Can't delete: " + res.errortext);
+		return 0;
+	endif
+
+	return 1;
+endfunction
+
+
+
+
+///////////////////
+//  Occasionally spawns sea creatures
+///////////////////
+
+function DoEncounter()
+	foreach who in ListMobilesNearLocationEx (boat.x, boat.y, GetMapInfo (boat.x, boat.y, boat.realm).z, 4, LISTEX_FLAG_GHOST, boat.realm )
+		if (YesNo(who, "Ressurect?") )
+			PlaySoundEffect (who, SFX_SPELL_RESSURECTION);
+			Resurrect (who);
+		endif
+	endforeach
+
+	var who := (boat.mobiles);
+	who := who[1];
+	if (!who or !who.ip)
+		return;
+	endif
+
+	var x := randomint(10)-5;
+	var y := randomint(10)-5;
+	x := x + boat.x;
+	y := y + boat.y;
+
+	if (x > boat.x)
+		x := x + 5;
+	else
+		x := x - 5;
+	endif
+
+	if ( y > boat.y )
+		y := y + 5;
+	else
+		y := y - 5;
+	endif
+
+	var z := GetMapInfo ( x, y, boat.realm ).z;
+	if (z >= who.z)
+		return;
+	endif
+
+	var it := createnpcfromtemplate (getcritter(), x, y, z, 0, boat.realm);
+	if (it)
+		var ev := struct;
+		ev.+type := EVID_ENTEREDAREA;
+		ev.+source := who;
+		SendEvent(it, ev);
+		setobjproperty (it,"boatspawn",1);
+	endif
+
+endfunction
+
+
+
+
+///////////////////
+//  Picks a random type of sea creature to spawn
+//////////////////
+
+function getcritter()
+/*	case (randomint(26))
+		0:	return ":wild_animals:walrus";
+		1:	return ":wild_animals:walrus";
+		2:	return ":wild_animals:walrus";
+		3:	return ":wild_animals:walrus";
+		4:	return ":wild_animals:alligator";
+		5:	return ":wild_animals:alligator";
+		6:	return ":wild_animals:alligator";
+		7:	return ":wild_animals:alligator";
+		8:	return ":wild_animals:dolphin";
+		9:	return ":wild_animals:dolphin";
+		10:	return ":wild_animals:dolphin";
+		11:	return ":wild_animals:dolphin";
+		12:	return ":wild_animals:dolphin";
+		13:	return ":wild_animals:dolphin";
+		14:	return ":wild_animals:dolphin";
+		15:	return ":wild_animals:dolphin";
+		16:	return ":elementals:waterelemental";
+		17:	return ":elementals:waterelemental";
+		18:	return ":elementals:waterelemental";
+		19:	return ":elementals:airelemental";
+		20:	return ":elementals:airelemental";
+		21:	return ":elementals:airelemental";
+		22:	return ":dragons:seaserpent";
+		23:	return ":dragons:seaserpent";
+		24:	return ":dragons:tentaclebeast";
+		25:	return ":dragons:tentaclebeast";
+	endcase */
+endfunction
+
+
+
+
+///////////////////
+//  If the boat hits land, toss everyone on board around a bit
+///////////////////
+
+function SmackEveryone()
+	foreach mob in (boat.mobiles)
+//		DoDamageByType (0, mob, Randomint(10), DAMAGETYPE_PHYSICAL);
+		NewPerformAction (mob, 4);
+		PlaySoundEffect (mob, 0x110);
+	endforeach
+endfunction
+
+
+
+
+///////////////////
+//  Ambient sea noises
+///////////////////
+
+function PlayBoatSounds()
+	var mobs := (boat.mobiles);
+	var who := RandomInt (len(mobs)+1);
+
+	if (RandomInt(2) == 1)
+		PlaySoundEffect (mobs[who], 0x13);
+	else
+		PlaySoundEffect (mobs[who], 0x14);
+	endif
+endfunction
+
+
+
+
+///////////////////
+//  If everyone on the boat is dead, teleport them back to their homepoint
+///////////////////
+
+function CheckForBeingLostAtSea ()
+	var alldead := 1;
+	var numpcs := 0;
+	foreach mob in (boat.mobiles)
+		if (!mob.npctemplate)
+			numpcs := numpcs + 1;
+			if (!mob.dead)
+				alldead := 0;
+			endif
+		endif
+	endforeach
+
+	if (!alldead or !numpcs)
+		return;
+	endif
+	PrintTextAbove (tillerman, "Arrr!  We be lost at sea!  That we sure be!");
+	sleep (1);
+	if (!IsExtended (boat.starboardplank) or !IsExtended (boat.portplank))
+		sleep (1);
+		PrintTextAbove (tillerman, "I be extending our planks now, that I be.");
+		Extend (boat.starboardplank);
+		boat.starboardplank.locked := 0;
+		Extend (boat.portplank);
+		boat.portplank.locked := 0;
+	endif
+
+	var numcorpses := 0;
+	foreach item in (boat.items);
+		if (item.corpsetype)
+			numcorpses := numcorpses + 1;
+		endif
+	endforeach
+
+	if (numcorpses)
+		return;
+	endif
+
+	PrintTextAbove (tillerman, "I be a pilot of the ship o' the dead");
+	var owner := 0;
+	foreach ghost in (boat.mobiles)
+		if (!ghost.npctemplate)
+			if (!owner)
+				owner := ghost;
+			else
+				if (GetObjProperty (boat.hold, "owner") == ghost.serial )
+					owner := ghost;
+				endif
+			endif
+			var parms := { };
+			parms[1] := "#MOB";
+			parms[2] := ghost;
+			parms[3] := ghost;
+			run_script_to_completion (":travel_spells:recall", parms);
+		endif
+	endforeach
+
+	var shiptype := GetObjProperty (boat.hold, "shiptype");
+	var newboat := CreateItemInContainer (owner.backpack, shiptype, 1);
+	if (!newboat)
+		PrintTextAbovePrivate (owner, "*Your backpack is full!*", owner);
+		return;
+	endif
+
+	newboat.graphic := 0x14f3;
+	if (boat.tillerman.name)
+		newboat.name := boat.tillerman.name;
+	else
+		newboat.name := "a toy boat";
+	endif
+
+	var oldmovable;
+	foreach item in (boat.items)
+		if (item.objtype = UOBJ_CORPSE)
+			foreach item2 in ListRootItemsInContainer (item)
+				if (!item2.newbie and item2.movable)
+					if (item2.objtype < UOBJ_STARTHAIR or item2.objtype > UOBJ_ENDHAIR)
+						MoveItemToLocation (item2, owner.x, owner.y, owner.z, MOVEITEM_FORCELOCATION);
+					endif
+				endif
+			endforeach
+			DestroyItem (item);
+		else
+			oldmovable := item.movable;
+			item.movable := 1;
+			moveitemtolocation (item, owner.x, owner.y, owner.z, MOVEITEM_FORCELOCATION);
+			item.movable := oldmovable;
+		endif
+	endforeach
+
+	foreach item in ListRootItemsInContainer (boat.hold)
+		moveitemtolocation (item, owner.x, owner.y, owner.z, MOVEITEM_FORCELOCATION);
+	endforeach
+
+	var key := FindKey (owner, boat.hold);
+	if (!DestroyBoat (owner))
+		DestroyItem (newboat);
+		return;
+	endif
+	if (key)
+		DestroyItem (key);
+	endif
+endfunction
+
+
+
+///////////////////
+//  A global property that registers boats
+///////////////////
+
+function AddBoatToGlobalRegistry ();
+	sleep (1);
+	set_critical (1);
+	var boat_prop := GetGlobalProperty ("#boat_registry");
+	if (!boat_prop)
+		boat_prop := dictionary;
+	endif
+
+	if (boat_prop.exists (boat.serial))
+		set_critical (0);
+		return;
+	endif
+	
+	boat_prop.insert (boat.serial, owner);
+	SetGlobalProperty ("#boat_registry", boat_prop);
+	set_critical (0);
+endfunction

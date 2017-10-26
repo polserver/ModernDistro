@@ -1,0 +1,43 @@
+use os;
+use uo;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/objtype";
+include "include/fields";
+
+
+program poisonfield( parms )
+  var caster := parms[1];
+  var info := parms[2];
+  var cast_on := MS_TargetCoordinates(caster, info.targ, "Select a target.");
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+  if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+        SendSysMessage (caster, "You cannot see that location.", color := 33);
+        return 0;
+  endif
+  
+  var fields := {};
+  var listeners := {};
+  var sufferers := {};
+  var x := cast_on.x;
+  var y := cast_on.y;
+  var z := cast_on.z;
+  case(get_direction(caster))
+	"NS" : fields:= CreateNorthSouthField(caster, UOBJ_POISONFIELD_NS, x, y, z, 5);
+	"EW" : fields:= CreateEastWestField(caster, UOBJ_POISONFIELD_EW, x, y, z, 5);
+  endcase
+  Detach();
+  var duration := 20 + ( CInt(GetAttribute( caster, MAGERY ) ) / 3 );
+  sleep(duration);
+  foreach fieldpart in fields
+    DestroyItem(fieldpart);
+  endforeach
+endprogram

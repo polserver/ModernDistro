@@ -1,0 +1,122 @@
+use uo;
+use os;
+use cfgfile;
+
+include "include/client";
+include ":attributes:attributes";
+include ":damage:damage";
+
+const EVID_UNEQUIP   := 0x123456;
+
+program unequip(who, item)
+  set_critical(1);
+  var itemdesc := ReadConfigFile("itemdesc");
+  var penalty := CInt(itemdesc[item.objtype].DexPenalty);
+  if(penalty)
+    EraseObjProperty(item, "#equipped");
+    SetDexterityMod(who, GetDexterityMod(who) + penalty);
+  endif
+  var type := GetObjProperty(item,"type");
+  var val := 0;
+  case(type)
+    "accuracy":     val := accuracy(who,item);
+    "cursed":       val := cursed(who,item);
+    "sight":        val := sight(who,item);
+    "reflect":      val := reflect(who,item);
+    "protection":   val := protection(who,item);
+    "wizzohat":     val := wizzohat(who,item);
+    "strength":     val := strengthRemove(who,item);
+    "invisibility": val := invisibility(who, item);
+    default:        val := 1;
+  endcase
+    if(item.resist_fire)
+    ModifyResistance(who, DMG_FIRE, item.resist_fire * -1);
+  endif
+  if(item.resist_cold)
+    ModifyResistance(who, DMG_COLD, item.resist_cold * -1);
+  endif
+  if(item.resist_poison)
+    ModifyResistance(who, DMG_POISON, item.resist_poison * -1);
+  endif
+  if(item.resist_energy)
+    ModifyResistance(who, DMG_ENERGY, item.resist_energy * -1);
+  endif
+  if(item.resist_physical)
+    ModifyResistance(who, DMG_PHYSICAL, item.resist_physical * -1);
+  endif
+
+
+  return val;
+  set_critical(0);
+endprogram
+
+function strengthRemove(who,item)
+  RemoveMods(who, item);
+  return 1;
+endfunction
+
+function wizzohat(who,item)
+  SetIntelligenceMod(who, GetIntelligenceMod(who) - 10);
+  SetStrengthMod(who, GetStrengthMod(who) + 5);
+  SetDexterityMod(who, GetDexterityMod(who) + 5);
+  EraseObjProperty(item, "#equipped");
+  return 1;
+endfunction
+
+function cursed(who,item)
+  return 0;
+endfunction
+
+function invisibility(who,item)
+  RemoveMods(who, item);
+  return 1;
+endfunction
+
+function sight(who,item)
+  RemoveMods(who, item);
+  return 1;
+endfunction
+
+function reflect(who,item)
+  RemoveMods(who, item);
+  return 1;
+endfunction
+
+function accuracy(who,item)
+  if(GetObjProperty(item, "#equipped") == who.serial)
+    var amt := CInt(GetObjProperty(item,"gain"));
+    amt := (0 - amt);
+    if((!amt) || (amt == 0))
+      amt := (0 - 5);
+    endif
+    var cfg := ReadConfigFile(":combat:itemdesc");
+    var attrib := cfg[item.objtype].Attribute;
+    case(attrib)
+      "Wrestling": ModifyAttributeTemporaryMod(who, WRESTLING,     amt);
+      "Fencing":   ModifyAttributeTemporaryMod(who, FENCING,       amt);
+      "Archery":   ModifyAttributeTemporaryMod(who, ARCHERY,       amt);
+      "Swords":    ModifyAttributeTemporaryMod(who, SWORDSMANSHIP, amt);
+      "Mace":      ModifyAttributeTemporaryMod(who, MACEFIGHTING,  amt);
+    endcase
+    EraseObjProperty(item, "#equipped");
+    return 1;
+  else
+    return 1;
+  endif
+
+endfunction
+
+function protection(who,item)
+  RemoveMods(who, item);
+  return 1;
+endfunction
+
+function RemoveMods(who, item)
+  var proc := GetProcess(Cint(GetObjProperty(item, "Pid")));
+  if(proc)
+    var ev := {};
+    ev.+type := EVID_UNEQUIP;
+    proc.sendevent(ev);
+  endif
+  EraseObjProperty(item, "#equipped");
+endfunction

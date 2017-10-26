@@ -1,0 +1,17 @@
+use uo;
+use os;
+
+program tame( who )
+	SendSysMessage(who, "Tame what?", color := 88);
+	var npc := Target(who, TGTOPT_NOCHECK_LOS);
+	if (!npc)
+		SendSysMessage(who, "Canceled.", color := 33);
+		return;
+	endif
+    SetObjProperty( npc, "happiness", 100);
+    SetObjProperty( npc, "master", who.serial );
+    SetObjProperty( npc, "script", npc.script );
+    npc.setmaster( who );
+    npc.script := "tamed";
+    RestartScript(npc);
+endprogram

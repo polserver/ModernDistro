@@ -1,0 +1,13 @@
+use uo;
+use os;
+
+program on_remove(who, backpack, item, movetype)
+  if(!who)
+      return 1;
+  elseif(who.cmdlevel >= 2)
+    return 1;
+  else
+    PrintTextAbovePrivate(backpack, "You will have to steal that.", who);
+    return 0;
+  endif
+endprogram

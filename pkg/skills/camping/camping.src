@@ -1,0 +1,54 @@
+use uo;
+use util;
+use os;
+
+include "include/client";
+include ":attributes:attributes";
+include "include/objtype";
+include "include/canAccess";
+
+program UseWood( who, wood )
+	EraseObjProperty(who, "IsMeditating");
+	EraseObjProperty(who, "HealTimer");
+	if(!can_access(who, wood))
+		return;
+	endif
+	if(wood.movable == 0)
+		SendSysMessage(who, "You cannot light that.");
+		return;
+	endif
+	var camptimer := GetObjProperty(who, "CampTimer");
+	if(camptimer)
+		if(camptimer > ReadGameClock())
+			SendSysMessage(who, "You must wait a few moments to camp again.");
+			return;
+		endif
+	endif
+	SetObjProperty(who, "CampTimer", ReadGameClock() + 5);
+	if(not Accessible(who, wood))
+		PrintTextAbovePrivate( wood, "You can't reach that!", who );
+		return;
+	endif
+	if(wood.container)
+		PrintTextAbovePrivate( wood, "Put that on the ground first!", who );
+		return;
+	endif
+	
+	if(SkillCheck(who, CAMPING, -1, 50))
+		var x := wood.x;
+		var y := wood.y;
+		var z := wood.z;
+		Detach();
+		var campfire := CreateItemAtLocation( x, y, z, UOBJ_CAMPFIRE, 1, who.realm );
+		campfire.movable := 0;
+		SubtractAmount(wood,1);
+		sleep(60);
+		DestroyItem(campfire);
+		campfire := CreateItemAtLocation(x,y,z,UOBJ_ASHES,1, who.realm);
+		campfire.movable := 0;
+		sleep(60);
+		DestroyItem(campfire);
+	else
+		PrintTextAbovePrivate( wood, "You couldn't manage to start the fire.", who );
+	endif
+endprogram

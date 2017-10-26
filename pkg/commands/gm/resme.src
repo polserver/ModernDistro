@@ -1,0 +1,30 @@
+use os;
+use uo;
+use boat;
+
+
+program textcmd_resme( who )
+  if(who.dead)
+    Resurrect( who );
+    foreach item in ListItemsNearLocation(who.x, who.y, who.z, 0, who.realm)
+      if(GetObjProperty(item,"serial") == who.serial)
+//        foreach thing in ListEquippedItems(who)
+//          if(thing.objtype == 0x1f03)
+//            MoveItemToContainer(thing, who.backpack);
+//          endif
+//        endforeach
+//        foreach thing in ListEquippedItems(item)
+//          equipitem(who, thing);
+//        endforeach
+        foreach thing in EnumerateItemsInContainer(item)
+          if(thing.container == item)
+            MoveItemToContainer(thing, who.backpack);
+          endif
+        endforeach
+      endif
+      break;
+    endforeach
+  else
+    SendSysMessage( who, "But I'm not dead yet!" );
+  endif
+endprogram

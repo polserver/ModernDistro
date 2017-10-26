@@ -1,0 +1,36 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+
+program cast_CUNNING( parms )
+    var caster := parms[1];
+    var info := parms[2];
+    var cast_on;
+    cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_HELPFUL);
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+    if ( !MS_MobileCheck(caster, cast_on) )
+        return 0;
+    endif
+  PlaySoundEffect(cast_on, SFX_SPELL_CUNNING);
+  PlayObjectCenteredEffect( cast_on, FX_BLESS_EFFECT, 7,7);
+    
+  if (!CanMod(cast_on, "int"))
+	SendSysMessage(caster,"Already under the influence!");
+	return;
+  endif
+  var magery := GetAttribute(caster, MAGERY);
+  var mod_amount := GetModAmount( magery );
+  var duration := GetModDuration( magery );
+  DoTempMod(cast_on, "int", mod_amount, duration);
+endprogram

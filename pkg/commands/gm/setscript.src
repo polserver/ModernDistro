@@ -1,0 +1,17 @@
+use uo;
+
+
+program textcmd_setusescript( who, text )
+
+	SendSysMessage(who, "Select target.");
+	var targ := Target(who);
+
+	if (!targ.isA(POLCLASS_MOBILE))
+		SendSysMessage(who, "Aborted.");
+		return;
+	endif
+
+	targ.script := text;
+	RestartScript(targ);
+   
+endprogram

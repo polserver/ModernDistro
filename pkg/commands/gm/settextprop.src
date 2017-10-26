@@ -1,0 +1,10 @@
+use uo;
+
+program addobjproperty( who, text )
+	var params := SplitWords( text );
+	var item := Target( who );
+	var textprop := RequestInput(who, item, "Enter the text:");
+
+	SetObjProperty( item, params[1], textprop);
+     
+endprogram

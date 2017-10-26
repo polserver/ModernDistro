@@ -1,0 +1,1163 @@
+use uo;
+use os;
+use cfgfile;
+use util;
+
+include "include/objtype";
+include ":attributes:attributes";
+include "include/math";
+include ":gmtools:layout";
+include ":gmtools:goLayout";
+include ":gmtools:info";
+include ":gmtools:gotoLayout";
+include ":gmtools:accountLayout";
+include ":gmtools:spawnerLayout";
+include "util/bank";
+include "include/gumpUtil"; // Added by Shinigami
+
+const TEXTSTARTLOCY :=  70;
+var locationscount := 0;
+var pagecount := 1;
+var playercount := 0;
+
+program textcmd_gmtools(params)
+  var who;
+  if(params[1] == "ICP")
+    who := params[2];
+  else
+	who := params;
+  endif
+  if(who  == -1)
+	return 1;
+  endif
+  Detach();
+  maintaingump(who);
+endprogram
+
+function maintaingump(who)
+  var gmtool := SendDialogGump(who, layout, data);
+  case(gmtool[0])
+    1: setsummonnpc(who);
+    2: setsummongroup(who);
+    3: setgomenu(who);
+    4: itemaddset(who);
+    5: invokegotomenu(who);
+    6: setmakehidden(who);;
+    7: setcrimflagging(who);
+    8: return;
+    9: return;
+   10: setitemtodefaults(who);
+   11: setinfernotrap(who);
+   12: invokegomenu(who);
+   13: spawnpoint(who);
+   14: showspawn(who, 5);
+   15: showspawn(who, 10);
+   16: hidespawn(who, 5);
+   17: hidespawn(who, 10);
+   18: standard_trap(who, 3);
+   19: standard_trap(who, 2);
+   20: standard_trap(who, 1);
+   21: remove_trap(who);
+   22: hideinferno(who, 5);
+   23: hideinferno(who, 10);
+   24: showinferno(who, 5);
+   25: showinferno(who, 10);
+   26: recall(who);
+   27: gate(who);
+   28: mark(who);
+   29: permgate(who);
+   30: lighting(who);
+   31: SendSysMessage(who,"Target the character whos account you wish to view. canceling will bring up a listing of all accounts.");
+       var person := Target(who);
+       var trg := FindAccount(person.acctname);
+       accountmanagement(who, trg);
+   32: createswitch(who);
+   33: chestspawner(who);
+  endcase
+endfunction
+
+////////////////////////////////////////
+// basic tool functions contained here
+////////////////////////////////////////
+
+function chestspawner(who)
+  var res := SendDialogGump(who, spawnerlayout, spawnerdata);
+  print(res[5]);
+  if(res[0] == 99)
+    var duration := res[5];
+    var amount;
+    var level;
+    var range;
+    foreach thing in(res.keys)
+      if((thing >= 10) &&(thing < 20))
+        level := thing - 10;
+      elseif((thing >= 20) &&(thing < 30))
+        amount := thing - 20;
+      elseif((thing >= 30) &&(thing < 40))
+        range := thing - 30;
+      endif
+    endforeach
+    var targ := TargetCoordinates(who);
+    if(!targ)
+      return;
+    endif
+    duration[1, find(duration, ": ", 1)+1]:="";
+    print("dur " +duration);
+    var newduration :=(CInt(duration) * 60);
+    print("new " +newduration);
+    if(newduration < 60)
+      SendSysMessage(who,"Duration Error: Aborting");
+      return;
+    endif
+    var item := CreateItemAtLocation(targ.x, targ.y, targ.z, 0x1888b, 1, who.realm);
+    SetObjProperty(item,"level", level);
+    SetObjProperty(item,"range", range);
+    SetObjProperty(item,"amount", amount);
+    SetObjProperty(item,"duration", CInt(newduration));
+    EraseObjProperty(item,"waiting");
+  elseif(res[0] == 89)
+    foreach item in ListItemsNearLocationOfType(who.x, who.y, who.z, 5, 0x1888b, who.realm);
+      item.graphic := 4483;
+    endforeach
+  else
+    foreach item in ListItemsNearLocationOfType(who.x, who.y, who.z, 5, 0x1888b, who.realm);
+      item.graphic := 1;
+    endforeach
+  endif
+  maintaingump(who);
+endfunction
+
+function createswitch(who);
+  SendSysMessage(who,"select the item to make a switch out of");
+  var chest := Target(who);
+  if(!chest)
+    SendSysMessage(who,"canceled");
+  else
+    SetObjProperty(chest, "usescript", chest.usescript);
+    SendSysMessage(who, "You create a switch out of the item, be sure to change its graphic through the interface.");
+    chest.usescript := ":gmtools:lever";
+  endif
+  maintaingump(who);
+endfunction
+
+function lighting(who)
+  SendSysMessage(who,"tartet the item you want wish to set this command to.");
+  var targetitem :=Target(who);
+  var oldscript := targetitem.script;
+  SetObjProperty(targetitem,"oldscript", oldscript);
+  var oldgraphic := targetitem.graphic;
+  SetObjProperty(targetitem,"oldgraphic", oldgraphic);
+  var oldcolor := targetitem.color;
+  SetObjProperty(targetitem,"oldcolor", oldcolor);
+  var oldname := targetitem.name;
+  SetObjProperty(targetitem,"oldname", oldname);
+  targetitem.name    := "lighting crystal";
+  targetitem.graphic :=  7885;
+  targetitem.color   :=  0x455;
+  targetitem.usescript := ":gmtools:lightingItem";
+  targetitem.newbie := 1;
+  maintaingump(who);
+endfunction
+
+function permgate(caster)
+  SendSysMessage(caster, "Select a rune to gate from.");
+  var cast_on := Target(caster);
+  var tox := CInt(GetObjProperty(cast_on, "x"));
+  var toy := CInt(GetObjProperty(cast_on, "y"));
+  var toz := CInt(GetObjProperty(cast_on, "z"));
+  var gate1 := CreateItemAtLocation(caster.x, caster.y, caster.z, 0x16008, 1, caster.realm);
+  gate1.movable := 0;
+  var gate2 := CreateItemAtLocation(tox, toy, toz, 0x16008, 1, caster.realm);
+  gate2.movable := 0;
+  SetObjProperty(gate1, "GateDestX", gate2.x);
+  SetObjProperty(gate1, "GateDestY", gate2.y);
+  SetObjProperty(gate1, "GateDestZ", gate2.z);
+  SetObjProperty(gate2, "GateDestX", gate1.x);
+  SetObjProperty(gate2, "GateDestY", gate1.y);
+  SetObjProperty(gate2, "GateDestZ", gate1.z);
+  maintaingump(caster);
+endfunction
+
+function gate(caster)
+  SendSysMessage(caster, "Select a rune to gate from.");
+  var cast_on := Target(caster);
+  var tox := CInt(GetObjProperty(cast_on, "x"));
+  var toy := CInt(GetObjProperty(cast_on, "y"));
+  var toz := CInt(GetObjProperty(cast_on, "z"));
+  set_critical(1);
+  var gate1 := CreateItemAtLocation(caster.x, caster.y, caster.z, UOBJ_BLUE_MOONGATE, 1, caster.realm);
+  gate1.movable := 0;
+  var gate2 := CreateItemAtLocation(tox, toy, toz, UOBJ_BLUE_MOONGATE, 1, caster.realm);
+  gate2.movable := 0;
+  SetObjProperty(gate1, "GateDestX", gate2.x);
+  SetObjProperty(gate1, "GateDestY", gate2.y);
+  SetObjProperty(gate1, "GateDestZ", gate2.z);
+  SetObjProperty(gate2, "GateDestX", gate1.x);
+  SetObjProperty(gate2, "GateDestY", gate1.y);
+  SetObjProperty(gate2, "GateDestZ", gate1.z);
+  Detach();
+  set_critical(0);
+  sleep(10);
+  set_critical(1);
+  DestroyItem(gate1);
+  DestroyItem(gate2);
+  set_critical(0);
+  maintaingump(caster);
+endfunction
+
+function mark(caster)
+  SendSysMessage(caster, "Select a rune to mark.");
+  var cast_on := Target(caster);
+  SetObjProperty(cast_on, "x", caster.x);
+  SetObjProperty(cast_on, "y", caster.y);
+  SetObjProperty(cast_on, "z", caster.z);
+  SendSysMessage(caster, "You marked: " +  caster.x + " " + caster.y + " " + caster.z);
+  SetName(cast_on, "a Marked Recall Rune");
+  maintaingump(caster);
+endfunction
+
+function recall(caster)
+  SendSysMessage(caster, "Select a rune to recall from.");
+  var cast_on := Target(caster);
+  var tox := CInt(GetObjProperty(cast_on, "x"));
+  var toy := CInt(GetObjProperty(cast_on, "y"));
+  var toz := CInt(GetObjProperty(cast_on, "z"));
+  MoveObjectToLocation(caster, tox, toy, toz, caster.realm);
+  maintaingump(caster);
+endfunction
+
+function hideinferno(who, range)
+  var i := 0;
+  foreach x in ListItemsNearLocationOfType(who.x, who.y, who.z, range, 0x1888a, who.realm)
+    x.graphic := 0x0001;
+    x.movable := 0;
+	i := i + 1;
+  endforeach
+  SendSysMessage(who, "hid " + i + " infernos.");
+  maintaingump(who);
+endfunction
+
+function showinferno(who, range)
+  var i := 0;
+  foreach x in ListItemsNearLocationOfType(who.x, who.y, who.z, range, 0x1888a, who.realm)
+    x.graphic := 0x1ea7;
+	PrintTextAbove(x, "Hello, I am bringer of DOOM!");
+	i := i + 1;
+  endforeach
+  SendSysMessage(who, "Revealed " + i + " infernos.");
+  maintaingump(who);
+endfunction
+
+function remove_trap(who)
+  SendSysMessage(who,"select the item to remove traps from");
+  var chest := Target(who);
+  if(!chest)
+    SendSysMessage(who,"canceled");
+  else
+    var scr := GetObjProperty(chest,"usescript");
+    if(!scr || scr == error)
+      chest.usescript := "";
+    else
+      chest.usescript := scr;
+    endif
+	EraseObjProperty(chest, "trap_type");
+	EraseObjProperty(chest, "trap_strength");
+	EraseObjProperty(chest, "usescript");
+  endif
+  maintaingump(who);
+endfunction
+
+function standard_trap(who, type)
+  var str := CInt(SendTextEntryGump(who, "what trap strength? [0 - 100]", 40));
+  SendSysMessage(who,"select the item to place a trap on");
+  var chest := Target(who);
+  if(!chest)
+    SendSysMessage(who,"canceled");
+  else
+    SetObjProperty(chest, "trap_type", type);
+    SetObjProperty(chest, "trap_strength", str);
+    SetObjProperty(chest, "usescript", chest.usescript);
+    SendSysMessage(who, "You carefully place the trap on the container");
+    chest.usescript := ":gmtools:toolTraps";
+  endif
+  maintaingump(who);
+endfunction
+
+function hidespawn(who, range)
+  var i := 0;
+  foreach x in ListItemsNearLocationOfType(who.x, who.y, who.z, range, 0x1A401, who.realm)
+    x.graphic := 0x0001;
+	i := i + 1;
+  endforeach
+  SendSysMessage(who, "hid " + i + " spawnpoints.");
+  maintaingump(who);
+endfunction
+
+function showspawn(who, range)
+  var i := 0;
+  foreach x in ListItemsNearLocationOfType(who.x, who.y, who.z, range, 0x1A401, who.realm)
+    x.graphic := 0x1ea7;
+	PrintTextAbove(x, "Hello, I am a spawnpoint!");
+	i := i + 1;
+  endforeach
+  SendSysMessage(who, "Revealed " + i + " spawnpoints.");
+  maintaingump(who);
+endfunction
+
+function spawnpoint(who)
+  SendSysMessage(who,"where would you like to create it?");
+  var tar := TargetCoordinates(who);
+  if(!tar)
+    SendSysMessage(who,"canceled");
+  else
+    var doodad := CreateItemAtLocation(tar.x, tar.y, tar.z, 0x1A401, 1, who.realm);
+    doodad.movable := 0;
+  endif
+  maintaingump(who);
+endfunction
+
+function setinfernotrap(who)
+  SendSysMessage(who,"set it where");
+  var where := TargetCoordinates(who);
+  var landmine := CreateItemAtLocation(where.x, where.y, where.z, 0x1888a, 1, who.realm);
+  Detach();
+  maintaingump(who);
+endfunction
+
+function setsummonnpc(who)
+  var mobilearray := {};
+  SendSysMessage(who,"target the NPC you wish to call from the item");
+  var npctarget := Target(who);
+  if(!npctarget.isA(POLCLASS_NPC))
+    SendSysMessage(who,"that is not a NPC");
+  else
+    SendSysMessage(who,"now tartet the item you want wish to call the npc from");
+    var targetitem :=Target(who);
+    var oldscript := targetitem.script;
+    SetObjProperty(targetitem,"oldscript", oldscript);
+    mobilearray[1] := npctarget.serial;
+    SetObjProperty(targetitem,"mobilearray", mobilearray);
+    targetitem.usescript := ":gmtools:summonNPC";
+  endif
+  maintaingump(who);
+endfunction
+
+function setsummongroup(who)
+  var mobilearray := {};
+  SendSysMessage(who,"to define the NPCs you wish to summon, the script will ask you to target 2 coordinates that it uses to create a box around the npcs");
+  SendSysMessage(who,"the script will now ask you to choose the coordinates to create that box");
+  SendSysMessage(who,"target the northwest corner of area your NPCs are stored");
+  var boxnw := TargetCoordinates(who);
+  SendSysMessage(who,"now target the southwest corner of the ares your NPCs are stored");
+  var boxse := TargetCoordinates(who);
+  var box := ListObjectsInBox(boxnw.x, boxnw.y, boxnw.z, boxse.x, boxse.y, boxse.z, who.realm);
+  foreach item in box
+    if(item.isA(POLCLASS_NPC))
+      mobilearray.append(item.serial);
+    endif
+  endforeach
+  SendSysMessage(who,"now tartet the item you want wish to call the npc from");
+  var targetitem :=Target(who);
+  var oldscript := targetitem.script;
+  SetObjProperty(targetitem,"oldscript", oldscript);
+  SetObjProperty(targetitem,"mobilearray", mobilearray);
+  targetitem.usescript := ":gmtools:summonNPC";
+  maintaingump(who);
+endfunction
+
+function setgomenu(who)
+  SendSysMessage(who,"tartet the item you want wish to set this command to.");
+  var targetitem :=Target(who);
+  var oldscript := targetitem.script;
+  SetObjProperty(targetitem,"oldscript", oldscript);
+  targetitem.usescript := ":gmtools:itemGo";
+  maintaingump(who);
+endfunction
+
+function itemaddset(who)
+  var range := CInt(SendTextEntryGump(who, "what range do you want to search for items", 40));
+  SendSysMessage(who,"select an item to add this set to");
+  var targetitem := Target(who);
+  SendSysMessage(who, "Select the center of the set area(radius " + range + ")");
+  var whereleft := TargetCoordinates(who);
+  var stuff := ListItemsNearLocation(whereleft.x,whereleft.y,whereleft.z, CInt(range), who.realm);
+  var numthings := 1;
+  var totalthings := {};
+  foreach thing in stuff
+    totalthings.append(thing.objtype);
+    var itemnumber := {};
+    itemnumber.append(thing.x -whereleft.x);
+    itemnumber.append(thing.y -whereleft.y);
+    itemnumber.append(thing.z -whereleft.z);
+    itemnumber.append(thing.color);
+    if(thing.movable == 1)
+      itemnumber.append(1);
+    else
+      itemnumber.append(0);
+    endif
+    SetObjProperty(targetitem, "iteminfo" + numthings, itemnumber);
+    numthings := numthings + 1;
+  endforeach
+  SetObjProperty(targetitem,"totalthings", totalthings);
+  var oldscript := targetitem.script;
+  SetObjProperty(targetitem,"oldscript", oldscript);
+  targetitem.usescript := ":gmtools:itemAddSet";
+  maintaingump(who);
+endfunction
+
+function setmakehidden(who)
+  SendSysMessage(who,"tartet the item you want wish to set this command to.");
+  var targetitem :=Target(who);
+  var oldscript := targetitem.script;
+  SetObjProperty(targetitem,"oldscript", oldscript);
+  targetitem.usescript := ":gmtools:makeHidden";
+  maintaingump(who);
+endfunction
+
+function setcrimflagging(who)
+  SendSysMessage(who,"tartet the item you want wish to set this command to.");
+  var targetitem :=Target(who);
+  var oldscript := targetitem.script;
+  SetObjProperty(targetitem,"oldscript", oldscript);
+  var oldgraphic := targetitem.graphic;
+  SetObjProperty(targetitem,"oldgraphic", oldgraphic);
+  var oldcolor := targetitem.color;
+  SetObjProperty(targetitem,"oldcolor", oldcolor);
+  var oldname := targetitem.name;
+  SetObjProperty(targetitem,"oldname", oldname);
+  targetitem.name    := "criminal flagging crystal";
+  targetitem.graphic :=  7885;
+  targetitem.color   :=  88;
+  targetitem.usescript := ":gmtools:greyItem";
+  targetitem.newbie := 1;
+  maintaingump(who);
+endfunction
+
+function setitemtodefaults(who)
+  SendSysMessage(who,"target the item you wish to return to normal");
+  var targetitem := Target(who);
+  var scrip := GetObjProperty(targetitem,"oldscript");
+  EraseObjProperty(targetitem,"oldscript");
+  EraseObjProperty(targetitem,"mobilearray");
+  if(scrip == error)
+    scrip := "";
+  endif
+  var oldgraphic := GetObjProperty(targetitem,"oldgraphic");
+  targetitem.graphic := oldgraphic;
+  EraseObjProperty(targetitem,"oldgraphic");
+  var oldcolor := GetObjProperty(targetitem,"oldcolor");
+  targetitem.color := oldcolor;
+  EraseObjProperty(targetitem,"oldcolor");
+  var oldname := targetitem.name;
+  if(oldname == "")
+    targetitem.name := "";
+  else
+    targetitem.name := oldname;
+  endif
+  EraseObjProperty(targetitem,"oldname");
+  var totalthings := GetObjProperty(targetitem,"totalthings");
+  if(totalthings)
+    EraseObjProperty(targetitem, "totalthings");
+    var itemtotal := len(totalthings);
+    var i :=1;
+    for(i:=1;i<=itemtotal;i:=i+1)
+      EraseObjProperty(targetitem, "iteminfo" +i);
+    endfor
+  endif
+  targetitem.usescript := scrip;
+  maintaingump(who);
+endfunction
+
+///////////////////////////////////
+// end basic tool functions
+///////////////////////////////////
+
+///////////////////////////////////
+// goto functions contained here
+///////////////////////////////////
+
+function invokegotomenu(who)
+  FillIngotoArrays();
+  var gotoresult := SendDialogGump(who, gotolayout, gotodata);
+  var name := gotodata[gotoresult[0]+2];
+  foreach onlinechr in EnumerateOnlineCharacters()
+    if(onlinechr.name == name)
+      MoveObjectToLocation(who, onlinechr.x, onlinechr.y, onlinechr.z, onlinechr.realm);
+      break;
+    endif
+  endforeach
+  maintaingump(who);
+endfunction
+
+function FillIngotoArrays()
+  var players := EnumerateOnlineCharacters();
+  var datalen;
+  var layoutlen;
+  var prev_y := CInt(80);
+  var datindx;
+  var buttonret := 1;
+  gotolayout[GetLayoutLength()+1] := "page " + pagecount;
+  if(len(EnumerateOnlineCharacters()) > 19)
+    gotolayout[GetLayoutLength()+1] := "button 285 465 2648 2647 0 " +(pagecount + 1);
+  endif
+  foreach player in players
+    playercount := playercount + 1;
+    datalen := GetDataLength();
+    layoutlen := GetLayoutLength();
+    datindx := datalen+1;
+    gotodata[datindx] := player.name;
+    if(playercount == 20 || playercount == 39 || playercount == 58 || playercount == 77 || playercount == 96)
+      pagecount := pagecount + 1;
+      gotolayout[GetLayoutLength()+1] := "page " + pagecount;
+      prev_y := 80;
+      gotolayout[GetLayoutLength()+1] := "button 285 85 2650 2651 0 " +(pagecount - 1);
+      if(len(EnumerateOnlineCharacters()) > playercount + 19)
+        gotolayout[GetLayoutLength()+1] := "button 285 465 2648 2647 0 " +(pagecount + 1);
+      endif
+    endif
+    gotolayout[GetLayoutLength()+1] :=("text 20 " + CStr(prev_y + 20) + " 40 " + datalen);
+    gotolayout[GetLayoutLength()+1] :=("button 260 " + CStr(prev_y + 20) + " 2640 2641 1 0 " + buttonret);
+    prev_y := prev_y + 20;
+    buttonret := buttonret + 1;
+  endforeach
+endfunction
+
+function GetLayoutLength();
+    return(len(gotolayout));
+endfunction
+
+function GetDataLength();
+    return(len(gotodata));
+endfunction
+
+///////////////////////////////////
+// end goto functions
+///////////////////////////////////
+
+///////////////////////////////////
+// go functions contained here
+///////////////////////////////////
+
+function invokegomenu(who)
+  var tname := lower(who.name);
+  FillIngoArrays(tname);
+  var goresult := SendDialogGump(who, golayout, godata);
+  if(!(goresult[0] == 0))
+    var locs    := ReadConfigFile("::golocs");
+    var MaxLocs := GetConfigMaxIntKey(locs)+1;
+    var dest    := locs[mod(goresult[0], MaxLocs)];
+    var traveler;
+    if(goresult[0] > MaxLocs) // teleporting someone else
+      SendSysMessage(who, "Select a MOBILE.");
+      traveler :=  Target(who, TGTOPT_NOCHECK_LOS);
+      if(!traveler || !GetStrength(traveler))
+        SendSysMessage(who, "Invalid selection.");
+      endif
+    else
+      traveler := who;
+    endif
+    MoveObjectToLocation(traveler, dest.X, dest.Y, GetMapInfo(dest.X, dest.Y, who.realm).z, who.realm); // newmap problem - needs updated for re3alms
+    UnloadConfigFile("::golocs");
+  endif
+  maintaingump(who);
+endfunction
+
+function FillIngoArrays(tname)
+    var telelocations := ReadConfigFile("::golocs");
+    var datalen;
+    var layoutlen;
+    var prev_y := CInt(TEXTSTARTLOCY);
+    var datindx := 2;
+    var buttonret := 1;
+    var i;
+    var numlocations := GetConfigMaxIntKey(telelocations);
+    var currloc;
+    for(i := 1; i <= numlocations; i := i + 1)
+      currloc := telelocations[i];
+      if((currloc.TYPE == "all") ||(currloc.TYPE == tname))
+        locationscount := locationscount + 1;
+        datalen := GetgoDataLength();
+        layoutlen := GetgoLayoutLength();
+        // Store Name
+        datindx := datalen+1;
+        godata[datindx] := currloc.Name;
+        if(mod(locationscount, 19) == 1)
+          // Pointer Down
+          if(locationscount >= 19)
+            golayout[GetgoLayoutLength()+1] := "button 285 465 2648 2647 0 " +(pagecount);
+          endif
+          // Set Page Number
+          golayout[GetgoLayoutLength()+1] := "page " + pagecount;
+          pagecount := pagecount + 1;
+          prev_y := TEXTSTARTLOCY;
+          if(locationscount > 19)
+            // Pointer Up
+            if(i > 19)
+              golayout[GetgoLayoutLength()+1] := "button 285 85 2650 2651 0 " +(pagecount - 2);
+            endif
+          endif
+        endif
+        golayout[GetgoLayoutLength()+1] :=("text 20 " + CStr(prev_y + 20) + " 40 " + datalen);
+        golayout[GetgoLayoutLength()+1] :=("button 200 " + CStr(prev_y + 20) + " 2640 2641 1 0 " +((buttonret+1) / 2)); // Go Button
+       golayout[GetgoLayoutLength()+1] :=("button 260 " + CStr(prev_y + 20) + " 2640 2641 1 0 " +(((buttonret+1) / 2) + numlocations+1)); // Send Button
+        prev_y := prev_y + 20;
+      endif
+      buttonret := buttonret + 2;
+    endfor
+endfunction
+
+function GetgoLayoutLength();
+    return(len(golayout));
+endfunction
+
+function GetgoDataLength();
+    return(len(godata));
+endfunction
+
+///////////////////////////////////
+// end go functions
+///////////////////////////////////
+
+//////////////////////////////////////////
+// account info functions contained here
+//////////////////////////////////////////
+
+function accountmanagement(who, trg);
+  Detach();
+  maintainaccountgump(who, trg);
+endfunction
+
+function maintainaccountgump(who, trg)
+  if(!trg ||(trg == error))
+    var act := Accountlisting(who);
+    trg := FindAccount(act);
+  endif
+  if(!trg)
+    SendSysMessage(who,"cancelled");
+  else
+    if(!trg.getprop("email"));
+      trg.setprop("email", "");
+    endif
+    if(!trg.getprop("notes"));
+      trg.setprop("notes", "");
+    endif
+    if(!trg.getprop("releaseday"));
+      trg.setprop("releaseday", "");
+    endif
+    testdata[16] := trg.name;
+    if(trg.banned == 1)
+      testdata[17] := "banned";
+    elseif(trg.enabled == 0)
+      testdata[17] := "jailed";
+    else
+      testdata[17] := "active";
+    endif
+    testdata[18] := trg.GetCharacter(1).name;
+    if(testdata[18] == error)
+      testdata[18] := "";
+    endif
+    testdata[19] := trg.GetCharacter(2).name;
+    if(testdata[19] == error)
+      testdata[19] := "";
+    endif
+    testdata[20] := trg.GetCharacter(3).name;
+    if(testdata[20] == error)
+      testdata[20] := "";
+    endif
+    testdata[21] := trg.GetCharacter(4).name;
+    if(testdata[21] == error)
+      testdata[21] := "";
+    endif
+    testdata[22] := trg.GetCharacter(5).name;
+    if(testdata[22] == error)
+      testdata[22] := "";
+    endif
+    var mail := trg.getprop("email");
+    if(!mail)
+      mail := "Not Provided";
+    endif
+    testdata[23] := mail;
+    if(!trg)
+      SendSysMessage(who,"canceled");
+      return;
+    endif
+    SetNotes(trg.name); // Modified by Shinigami
+    if(trg.enabled == 0)
+      testlayout.append("button  400 195 2662 2662 1 0 10");    //jail index box
+      testlayout.append("gumppic 400 185 2660 2660 1 0 10");    //jail index box
+      testlayout.append("text    320 190  910 37"); //jail duration text   (white)
+      testlayout.append("text    440 190  910 38"); //jail duration text   (white)
+      testlayout.append("text    408 190  100 39"); //jail tine left text  (blue)
+      var releaseday := trg.getprop("releaseday");
+      var timeremaining :=(((releaseday - ReadGameClock())/86400) + 1);
+      if(timeremaining < 2)
+        timeremaining := 0;
+      endif
+      testdata[40] := timeremaining;
+    endif
+    var accounttool := SendDialogGump(who, testlayout, testdata);
+    case(accounttool[0])
+      2: jail(who, trg.name);
+      3: Notes(trg.name, accounttool); //notes(who, trg.name); // Modified by Shinigami
+      4: editemail(who, trg);
+      5: info(who, trg.GetCharacter(1).serial, trg);
+      6: info(who, trg.GetCharacter(2).serial, trg);
+      7: info(who, trg.GetCharacter(3).serial, trg);
+      8: info(who, trg.GetCharacter(4).serial, trg);
+      9: info(who, trg.GetCharacter(5).serial, trg);
+     10: editjail(who, trg);
+     11: ban(who, trg.name);
+    endcase
+  endif
+  maintaingump(who);
+endfunction
+
+function SetNotes(acctname) // Added by Shinigami
+  var act:=FindAccount(acctname);
+  var note:=act.GetProp("notes");
+  if((!note) ||(note==error))
+    note:="";
+  endif
+  var split:=SplitWords(note);
+  var width:=0;
+  var lines:=0;
+  var index:=1;
+  while((index<=len(split)) &&(lines<=12))
+    if(width==0)
+      var testword:=split[index];
+      lines:=lines+1;
+      testdata[25+lines] := testword;
+      width := GumpTextWidthFast(testword);
+      index:=index+1;
+    else
+      var testword:=" "+split[index];
+      var testwidth:=GumpTextWidthFast(testword);
+      if(width+testwidth<CInt(790/1.5))
+        testdata[25+lines]:=testdata[25+lines]+testword;
+        width:=width+testwidth;
+        index:=index+1;
+      else
+        width:=0;
+      endif
+    endif
+  endwhile
+  if(lines>12)
+    testdata[24+lines]:=testdata[24+lines]+"...";
+  else
+    while(lines<12)
+      lines:=lines+1;
+      testdata[25+lines]:="";
+    endwhile
+  endif
+endfunction
+
+function editjail(who, trg);
+  var val := CInt(SendTextEntryGump(who, "enter new total?(Max 14)", 40));
+  var time;
+  case(val)
+     1: time := 86400;
+     2: time := 172800;
+     3: time := 259200;
+     4: time := 345600;
+     5: time := 432000;
+     6: time := 518400;
+     7: time := 604800;
+     8: time := 691200;
+     9: time := 777600;
+    10: time := 864000;
+    11: time := 950400;
+    12: time := 1036800;
+    13: time := 1123200;
+    14: time := 1209600;
+  endcase
+  trg.setprop("releaseday",(ReadGameClock() + time));
+endfunction
+
+function ban(who, acctname);
+  var banverify := SendDialogGump(who, banlayout, bandata);
+  var act := FindAccount(acctname);
+  case(banverify[0])
+    1: var characters := EnumerateOnlineCharacters();
+       foreach char in characters
+         if(char.acctname == acctname)
+           SendSysMessage(char, "You were kicked by " + who.name + ".");
+           SetObjProperty(char,"justbanned", 1);
+           DisconnectClient(char);
+           break;
+         endif
+       endforeach
+       foreach chr in characters
+         if(chr.cmdlevel > 1)
+           SendSysMessage(chr, "account " + acctname + " has been banned.");
+         endif
+       endforeach
+       Detach();
+       sleep(10);
+       act.ban();
+	   var x, i;
+       WipeBankBox(act.GetCharacter(1));
+	   for(i := 1; i <= 25; i := i + 1)
+	     x := GetEquipmentByLayer(act.GetCharacter(1), i);
+	     MoveItemToContainer(x, act.GetCharacter(1).backpack);
+	   endfor
+       DestroyItem(act.GetCharacter(1).backpack);
+       act.DeleteCharacter(1);
+       i := 0;
+       WipeBankBox(act.GetCharacter(2));
+	   for(i := 1; i <= 25; i := i + 1)
+	     x := GetEquipmentByLayer(act.GetCharacter(2), i);
+	     MoveItemToContainer(x, act.GetCharacter(2).backpack);
+	   endfor
+       DestroyItem(act.GetCharacter(2).backpack);
+       act.DeleteCharacter(2);
+       i := 0;
+       WipeBankBox(act.GetCharacter(3));
+	   for(i := 1; i <= 25; i := i + 1)
+	     x := GetEquipmentByLayer(act.GetCharacter(3), i);
+	     MoveItemToContainer(x, act.GetCharacter(3).backpack);
+	   endfor
+       DestroyItem(act.GetCharacter(3).backpack);
+       act.DeleteCharacter(3);
+       i := 0;
+       WipeBankBox(act.GetCharacter(4));
+	   for(i := 1; i <= 25; i := i + 1)
+	     x := GetEquipmentByLayer(act.GetCharacter(4), i);
+	     MoveItemToContainer(x, act.GetCharacter(4).backpack);
+	   endfor
+       DestroyItem(act.GetCharacter(4).backpack);
+       act.DeleteCharacter(4);
+       i := 0;
+       WipeBankBox(act.GetCharacter(5));
+	   for(i := 1; i <= 24; i := i + 1)
+	     x := GetEquipmentByLayer(act.GetCharacter(5), i);
+	     MoveItemToContainer(x, act.GetCharacter(5).backpack);
+	   endfor
+       DestroyItem(act.GetCharacter(5).backpack);
+       act.DeleteCharacter(5);
+    2: SendSysMessage(who,"cancelled");
+       return;
+  endcase
+endfunction
+
+function Notes(acctname, result) // Added by Shinigami
+  var note:=result[25];
+  note[1, find(note, ": ", 1)+1]:="";
+  var subnote;
+  var i;
+  for(i:=26; i<=36; i:=i+1)
+    subnote:=result[i];
+    subnote[1, find(subnote, ": ", 1)+1]:="";
+    if(subnote!="")
+      note:=note+" "+subnote;
+    endif
+  endfor
+  var act:=FindAccount(acctname);
+  act.setprop("notes", note);
+endfunction
+
+function editemail(who, trg);
+  var val := CStr(SendTextEntryGump(who, "enter the new email address?", 40));
+  trg.setprop("email", val);
+endfunction
+
+function jail(who, acctname);
+  var val := CInt(SendTextEntryGump(who, "How many days will this account remain jailed?(Max 14)", 40));
+  var time;
+  case(val)
+     1: time := 86400;
+     2: time := 172800;
+     3: time := 259200;
+     4: time := 345600;
+     5: time := 432000;
+     6: time := 518400;
+     7: time := 604800;
+     8: time := 691200;
+     9: time := 777600;
+    10: time := 864000;
+    11: time := 950400;
+    12: time := 1036800;
+    13: time := 1123200;
+    14: time := 1209600;
+  endcase
+  var act := FindAccount(acctname);
+  act.setprop("releaseday",(ReadGameClock() + time));
+  var characters := EnumerateOnlineCharacters();
+  act.disable();
+  foreach char in characters
+    if(char.acctname == acctname)
+      SendSysMessage(char, "You were kicked by " + who.name + ".");
+      DisconnectClient(char);
+      break;
+    endif
+  endforeach
+endfunction
+
+function Accountlisting(who)
+/*  var menuname := "Select an account";
+  var dict := ListAccounts();
+  var xref := dictionary;
+  var roster := len(dict);
+  var plr;
+  var plrnum := 1;
+  var selection := { };
+  var i;
+  var listplayermenu;
+  repeat
+    listplayermenu := CreateMenu(menuname);
+    for(i := plrnum; i <= plrnum+19; i := i + 1)
+      if(i <= roster)
+        AddMenuItem(listplayermenu, 0, dict[i]);
+      endif
+    endfor
+    if(roster >(plrnum+19))
+      AddMenuItem(listplayermenu, 0, "NEXT PAGE");
+    endif
+    selection := SelectMenuItem2(who, listplayermenu);
+    if(selection[3] == 21)
+      plrnum := plrnum + 20;
+    else
+      if(selection[3])
+        var vote :=selection[3];
+        return dict[vote];
+      else
+        SendSysMessage(who, "Canceled");
+        return 0;
+      endif
+    endif
+  until(selection[3] != 21); */
+  SendSysMessage(who, "Enter the name of the account.");
+  var actname := SendTextEntryGump(who, "What Account Name?", 40);
+  return actname;
+endfunction
+
+function FillInAccountArrays()
+  var players := ListAccounts();
+  var datalen;
+  var layoutlen;
+  var prev_y := CInt(80);
+  var datindx;
+  var buttonret := 1;
+  var i := 0;
+  gotolayout[GetAccountLayoutLength()+1] := "page " + pagecount;
+  if(len(ListAccounts()) > 19)
+    gotolayout[GetAccountLayoutLength()+1] := "button 285 465 2648 2647 0 " +(pagecount + 1);
+  endif
+  foreach player in players
+    i := i + 1;
+    playercount := playercount + 1;
+    datalen := GetAccountDataLength();
+    layoutlen := GetAccountLayoutLength();
+    datindx := datalen+1;
+    accountdata[datindx] := players[i];
+    if(playercount == 20 || playercount == 39 || playercount == 58 || playercount == 77 || playercount == 96)
+      pagecount := pagecount + 1;
+      gotolayout[GetAccountLayoutLength()+1] := "page " + pagecount;
+      prev_y := 80;
+      gotolayout[GetAccountLayoutLength()+1] := "button 285 85 2650 2651 0 " +(pagecount - 1);
+      if(len(players) > playercount + 19)
+        gotolayout[GetAccountLayoutLength()+1] := "button 285 465 2648 2647 0 " +(pagecount + 1);
+      endif
+    endif
+    gotolayout[GetAccountLayoutLength()+1] :=("text 20 " + CStr(prev_y + 20) + " 40 " + datalen);
+    gotolayout[GetAccountLayoutLength()+1] :=("button 260 " + CStr(prev_y + 20) + " 2640 2641 1 0 " + buttonret);
+    prev_y := prev_y + 20;
+    buttonret := buttonret + 1;
+  endforeach
+endfunction
+
+function GetAccountLayoutLength();
+    return(len(gotolayout));
+endfunction
+
+function GetAccountDataLength();
+    return(len(accountdata));
+endfunction
+
+///////////////////////////////////
+// end account info functions
+///////////////////////////////////
+
+///////////////////////////////////
+// info functions contained here
+///////////////////////////////////
+function info(who, character, trg)
+  var online := 0;
+  foreach char in EnumerateOnlineCharacters()
+    if(char.serial == character)
+      character := char;
+      online := 1;
+    endif
+  endforeach
+  if(online == 0)
+    character := SystemFindObjectBySerial(character, SYSFIND_SEARCH_OFFLINE_MOBILES);
+  endif
+  if(!character)
+     SendSysMessage(who, "That player does not exist. Cancelled.");
+  else
+    infodata[1] := "Info On: " + character.name;
+    FillInStats(character);
+    FillInSkills(character);
+    FillInWeapon(character);
+    var result := SendDialogGump(who, infolayout, infodata);
+    var reskey;
+    foreach key in(result.keys)
+      if(key >= 1000)
+        reskey := key;
+      endif
+    endforeach
+    case(result[0])
+       1:   //fall through intentional
+       2:
+       3:
+       4:
+       5:
+       6:
+       7:
+       9:
+      11:
+      14:
+      13:
+      15: EditStat(who, character, result[0], trg);
+      16: EditSkill(who, character, reskey-1000, trg);
+      17: character.frozen := 1; SendSysMessage(who, character.name + " is frozen.");
+      18: character.frozen := 0; SendSysMessage(who, character.name + " is unfrozen.");
+      19: if(!character.isA(POLCLASS_NPC))
+            SendSysMessage(character, "You were kicked by " + who.name + ".");
+            DisconnectClient(character);
+          endif
+      20: MoveObjectToLocation(character, 5288, 1176, 0, "britannia"); // newmap problem
+      21: if(!character.isA(POLCLASS_NPC))
+            var bankbox := FindBankBox(character);
+            SendOpenSpecialContainer(who, bankbox);
+          else
+            SendSysMessage(who, "Only can be used on players.");
+          endif
+      22: if(!character.isA(POLCLASS_NPC))
+            SendOpenSpecialContainer(who, character.backpack);
+          else
+            SendSysMessage(who, "Only can be used on players.");
+          endif
+      23: MoveObjectToLocation(character, who.x, who.y, who.z, who.realm);
+      24: SetName(character, RequestInput(who, who.backpack, "Enter a new name."));
+    endcase
+  endif
+endfunction
+
+function FillInStats(who)
+  var levelname;
+  case(who.cmdlevel)
+      0: levelname := "Player";
+      1: levelname := "Counselor";
+      2: levelname := "Seer";
+      3: levelname := "GM";
+      4: levelname := "Admin";
+      5: levelname := "Development";
+  endcase
+  infodata[8] := GetStrength(who);
+  infodata[10] := GetIntelligence(who);
+  infodata[12] := GetDexterity(who);
+  infodata[14] := who.x;
+  infodata[16] := who.y;
+  infodata[18] := who.z;
+  infodata[20] := GetHp(who) + "/" + GetMaxHp(who);
+  infodata[22] := GetMana(who) + "/" + GetMaxMana(who);
+  infodata[24] := GetStamina(who) + "/" + GetMaxStamina(who);
+  infodata[26] := who.ar;
+  infodata[28] := who.graphic;
+  infodata[30] := who.color;
+  infodata[144] := levelname;
+  infodata[146] := who.acctname;
+endfunction
+
+function FillInSkills(who)
+  var datindx;
+  var attribindex := 1;
+  var attribs := array;
+  attribs := List_of_Skills;
+  for(datindx := 32; datindx <= 128; datindx := datindx + 2)
+    infodata[datindx] := GetAttribute(who, attribs[attribindex]);
+    attribindex += 1;
+   endfor
+endfunction
+
+function FillInWeapon(who)
+  var weapfile := ReadConfigFile(":combat:itemdesc");
+  var npcfile := ReadConfigFile("::npcdesc");
+  if(who.weapon)
+    var idx := find(who.weapon.name, "[", 1); //ignore maker's mark
+    if(idx!=0)
+      var tempn := who.weapon.desc;
+      tempn := tempn[1,idx-1];
+      infodata[138] := tempn;
+    else
+      if(who.weapon.desc == "nodraw")
+        infodata[138] := "Wrestling";
+      else
+        infodata[138] := who.weapon.desc;
+      endif
+    endif
+    var dam := weapfile[who.weapon.objtype].Damage;
+    if(!dam)
+      infodata[140] := "n/a";
+    else
+      infodata[140] := dam;
+    endif
+    infodata[142] := who.weapon.hp + " / " + who.weapon.maxhp;
+   else
+    infodata[138] := "n/a";
+    infodata[140] := "n/a";
+    infodata[142] := "n/a";
+    if(who.isA(POLCLASS_NPC)) //Hi, i'm an NPC
+      var dam := npcfile[who.npctemplate].AttackDamage;
+      var weap := npcfile[who.npctemplate].AttackSkillId;
+      var ar := npcfile[who.npctemplate].AR;
+      if(weap)
+        infodata[138] := weap;
+      endif
+      if(dam)
+        infodata[140] := dam;
+      endif
+      if(ar)
+        infodata[142] := "AR: " + ar;
+      endif
+    endif
+  endif
+endfunction
+
+function EditStat(who, character, result, trg)
+    SendSysMessage(who, "Caution! Values are changed immediately, Integers only!. Hit ESC to cancel.");
+    var val := CInt(RequestInput(who, who.backpack, "Enter a new value."));
+    if(!val)
+      SendSysMessage(who, "Cancelled.");
+    else
+      case(result)
+         1: SetBaseStrength(character,val);
+         2: SetBaseIntelligence(character,val);
+         3: SetBaseDexterity(character,val);
+         4: MoveObjectToLocation(character, val, character.y, character.z, character.realm);
+         5: MoveObjectToLocation(character, character.x, val, character.z, character.realm);
+         6: MoveObjectToLocation(character, character.x, character.y, val, character.realm);
+         7: SetHp(character, val);
+         9: SetMana(character, val);
+        11: SetStamina(character, val);
+        13: character.ar_mod := 0;
+            character.ar_mod := val - character.ar;
+        14: character.graphic := val;
+        15: character.color := val;
+      endcase
+    endif
+endfunction
+
+function EditSkill(who, character, skill, trg);
+    SendSysMessage(who, "Caution! Values are changed immediately, Integers only!. Hit ESC to cancel.");
+    var val := CInt(RequestInput(who, who.backpack, "Enter a new value.")) * 10;
+    if((!val) &&(val != 0))
+      SendSysMessage(who, "Cancelled.");
+    else
+      SetBaseSkillBaseValue(character, skill, val);
+    endif
+endfunction
+
+///////////////////////////////////
+// end info functions
+///////////////////////////////////

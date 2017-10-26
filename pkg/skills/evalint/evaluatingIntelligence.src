@@ -1,0 +1,139 @@
+//
+// Last updated: 26-11-03
+//
+
+use uo;
+use unicode;
+
+include ":attributes:attributes";
+include "include/trainingskill";
+
+program EvaluatingIntelligence(who)
+        var data := {};
+        data[1] := "evalint";
+        data[2] := ReadGameClock();
+        data[3] := 16;
+        SetObjProperty(who, "LastUsedSkill", data );
+        TrainingSkill(who, data[3]);
+  
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  SendSysMessageUC(who, CAscZ("What do you wish to evaluate?"), "ENG");
+  var subject := Target(who);
+  // target checks begin here
+  if(!subject)
+    return;
+  elseif(subject.serial == who.serial)
+    PrintTextAbovePrivateUC(who, CAscZ("You know your mental capabilities quite well enough already."), "ENG", who);
+    return;
+  elseif(subject.graphic == 0x2006)
+    SendSysMessageUC(who, CAscZ("Looks pretty dead to you."), "ENG");
+    return;
+  elseif(!subject.isA(POLCLASS_MOBILE))
+    SendSysMessageUC(who, CAscZ("That can not be evaluated."), "ENG");
+    return;
+  endif
+  // variables for sys messages
+  var intell := getIntell(GetIntelligence(subject), subject.graphic, subject.gender);
+  var mentalStreng := getMentalStreng(CInt(CInt(GetMana(subject))/CDbl(GetMaxMana(subject))*100));
+  var skill := GetAttribute(who, EVALUATING_INTELLIGENCE);
+  // adjust succeed and fail msgs here
+  var strMsg, strFail;
+  if(subject.graphic != 0x190 && subject.graphic != 0x191)
+    strMsg := "That creature";
+    strFail := "that creature's mental abilities.";
+  else
+    strMsg := subject.name;
+    if(upper(subject.name[len(subject.name)]) != "S" || lower(subject.name[len(subject.name)]) != "s" ) 
+      strFail := subject.name + "'s mental abilities.";  
+    else 
+      strFail := subject.name + "' mental abilities."; 
+    endif
+  endif
+/*  var pts := CInt(GetAttribute(who, EVALUATING_INTELLIGENCE) + 1) *3;
+  if (pts < 30) 
+    pts := 30;
+  endif */
+  var pts := CInt(GetAttribute(who, EVALUATING_INTELLIGENCE) / 10) + 15;
+  if(pts > 35)
+    pts := 35;
+  endif
+  if(SkillCheck(who,EVALUATING_INTELLIGENCE, -1, pts/3))
+    PrintTextAbovePrivateUC(subject, CAscZ(strMsg + " looks " + intell + "." ), "ENG", who);	
+    // player's EVALUATING_INTELLIGENCE skill equal/greater than 76 can get mental strength info
+    if(skill >= 76)
+      PrintTextAbovePrivateUC(subject, CAscZ(strMsg + " is at " + mentalStreng + " mental strength."), "ENG", who);
+    endif
+  else
+      PrintTextAbovePrivateUC(subject, CAscZ("You cannot judge " + strFail), "ENG", who);
+    endif
+endprogram
+
+// intelligence
+function getIntell(subject, graphic, gender)
+  // fix sys msgs
+  var strSuper, strGender;
+  if(graphic != 0x190 && graphic != 0x191)
+    strSuper := "supernaturally";
+    strGender := "it";
+  else
+    strSuper := "superhumanly";
+    if(gender == 0)
+      strGender := "he";
+    elseif(gender == 1)
+      strGender := "she";
+    endif
+  endif
+  if(subject >= 100)
+    return strSuper + " intelligent in a manner you cannot comprehend";
+  elseif(subject >= 99)
+    return "like a definite genius";
+  elseif(subject >= 89)
+    return "like a formidable intellect, well beyond even the extraordinary";
+  elseif(subject >= 79)
+    return "extraordinarily intelligent";
+  elseif(subject >= 69)
+    return "extremely intelligent";
+  elseif(subject >= 59)
+    return "very intelligent";
+  elseif(subject >= 49)
+    return "moderately intelligent";
+  elseif(subject >= 39)
+    return "about average";
+  elseif(subject >= 29)
+    return "not the brightest";
+  elseif(subject >= 19)
+    return "fairly stupid";
+  elseif(subject >= 9)
+    return "slightly less intelligent than a rock";
+  else
+    return "smarter than a rock, but dumber than a piece of wood";
+  endif
+endfunction
+
+// mental strength
+function getMentalStreng(subject)
+  if(subject >= 100)
+    return "one-hundred percent";
+  elseif(subject >= 90)
+    return "ninety percent";
+  elseif(subject >= 80)
+    return "eighty percent";
+  elseif(subject >= 70)
+    return "seventy percent";
+  elseif(subject >= 60)
+    return "sixty percent";
+  elseif(subject >= 50)
+    return "fifty percent";
+  elseif(subject >= 40)
+    return "forty percent";
+  elseif(subject >= 30)
+    return "thirty percent";
+  elseif(subject >= 20)
+    return "twenty percent";
+  elseif(subject >= 10)
+    return "low";
+  else
+    return "very low";
+  endif
+endfunction

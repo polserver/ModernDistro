@@ -1,0 +1,137 @@
+use uo;
+use os;
+use math;
+
+
+program rune_conversion( runebook )
+
+	if( GetObjProperty( runebook, "runedefs" ) )
+		ProcessRacalacConversion( runebook );
+			
+	elseif( EnumerateItemsInContainer( runebook ).size() )
+		ProcessShilohenConversion( runebook );
+	endif
+	
+endprogram
+
+
+function ProcessRacalacConversion( runebook )
+
+	var x;
+	var y;
+	var z;
+	var name;
+	
+	var defs := GetObjProperty( runebook, "runedefs" );
+	var defx := Cint( GetObjProperty( runebook, "x" ) );
+	var defy := Cint( GetObjProperty( runebook, "y" ) );
+	var defz := Cint( GetObjProperty( runebook, "z" ) );
+	
+	var runes_def := array;
+	var rune_data	:= struct;
+	rune_data.+tox;
+	rune_data.+toy;
+	rune_data.+toz;
+	rune_data.+name;
+	rune_data.+defloc;
+	rune_data.+dtindex	:= 5;
+	
+	foreach def in defs
+		name	:= defs[1];
+		x	:= defs[2];
+		y	:= defs[3];
+		z	:= defs[4];
+	
+		if( x or y or z )
+			if( !name )
+				name := "A marked rune";
+			endif
+			
+			rune_data.name := name;
+			rune_data.tox  := x;
+			rune_data.toy  := y;
+			rune_data.toz  := z;
+			if( (x == defx) and (y == defy) and (z == defz) )
+				rune_data.defloc := 1;
+			else
+				rune_data.defloc := 0;
+			endif
+			
+			if( !runes_def.append(rune_data) )
+				continue;
+			endif
+		endif
+	endforeach
+	
+	
+	if( !SetObjProperty( runebook, "RuneDefs", runes_def ) )
+		return 0;
+	endif
+	
+	EraseObjProperty( runebook, "runedefs" );
+	
+endfunction
+
+
+function ProcessShilohenConversion( runebook )
+
+	var x;
+	var y;
+	var z;
+	var name;
+
+	var defx := Cint( GetObjProperty( runebook, "x" ) );
+	var defy := Cint( GetObjProperty( runebook, "y" ) );
+	var defz := Cint( GetObjProperty( runebook, "z" ) );
+	
+	var runes_def := array;
+	var rune_data	:= struct;
+	rune_data.+tox;
+	rune_data.+toy;
+	rune_data.+toz;
+	rune_data.+name;
+	rune_data.+defloc;
+	rune_data.+dtindex	:= 5;
+	
+	foreach rune in EnumerateItemsInContainer( runebook )
+		name := rune.name - "A recall rune for ";
+		if( !name )
+			name := "A marked rune";
+		endif
+		
+		x := Cint( GetObjProperty( rune, "x" ) );
+		y := Cint( GetObjProperty( rune, "y" ) );
+		z := Cint( GetObjProperty( rune, "z" ) );
+		
+		if( x or y or z )			
+			rune_data.name := name;
+			rune_data.tox  := x;
+			rune_data.toy  := y;
+			rune_data.toz  := z;
+			if( (x == defx) and (y == defy) and (z == defz) )
+				rune_data.defloc := 1;
+			else
+				rune_data.defloc := 0;
+			endif
+			
+			if( !runes_def.append(rune_data) )
+				if( runebook.container )
+					MoveItemToContainer( rune, runebook.container );
+				else
+					DestroyItem( rune );
+				endif
+				continue;
+			else
+				DestroyItem( rune );
+			endif
+		endif
+	endforeach
+	
+	
+	if( !SetObjProperty( runebook, "RuneDefs", runes_def ) )
+		return 0;
+	endif
+	
+	return 1;
+	
+endfunction

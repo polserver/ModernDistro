@@ -1,0 +1,231 @@
+use uo;
+use cfgfile;
+use os;
+use util;
+
+include "include/client";
+include "include/objtype";
+include "include/utility";
+include "include/yesNo";
+include "include/crafting";
+
+const UACTION_CHOP := 0x0d;
+
+program harvest (who, plant)
+	plant.decayAt := ReadGameClock() + 1209600;
+
+	var mount := GetEquipmentByLayer( who, 25 );
+	if ( mount )
+		PrintTextAbovePrivate( who, "You cannot harvest while mounted.", who, color :=33 );
+		return;
+	endif
+
+        if (Distance(who, plant) > 3)
+		SendSysMessage(who, "That is too far away!", color :=33);
+		return;
+	endif
+
+	if (GetObjProperty(plant, "new") )
+		SendSysMessage(who, "You must wait until the plant is fully grown before you can harvest.", color :=33);
+		return;
+	endif
+
+	//If they double clicked the bottom of a tree, reroute the action to the top
+	if (plant.objtype == 0x0d98 || plant.objtype == 0x0d9c || plant.objtype == 0x0da4)
+		var planttopserial := GetObjProperty(plant, "planttop");
+		var planttop := SystemFindObjectBySerial(planttopserial);
+		if (!planttop)
+			SendSysMessage(who, "Looks dead.");
+			DestroyItem(plant);
+			return;
+		endif
+		plant := planttop;
+		plant.decayAt := ReadGameClock() + 1209600;
+	endif
+
+	var plant_cfg_file := ReadConfigFile("itemdesc");
+	if (!plant_cfg_file)
+		return;
+	endif
+
+	var product_type := plant_cfg_file[plant.objtype].product;
+	if (!product_type)
+		return;
+	endif
+
+	var max_harvest_amount := plant_cfg_file[plant.objtype].maxamount;
+	if (!max_harvest_amount)
+		max_harvest_amount := 10;
+	endif
+
+	var already_harvested_amount := GetObjProperty(plant, "#harvested");
+	if (!already_harvested_amount)
+		already_harvested_amount := 0;
+	elseif (already_harvested_amount >= max_harvest_amount)
+		SendSysMessage(who, "There is nothing here to harvest.", color :=33);
+		DestroyPlant(who, plant);
+		return;
+	endif
+
+	//setup some variables
+	var craftingbag := FindCraftingBag(who);
+	var who_x := who.x;
+	var who_y := who.y;
+	var pts;
+	SendSysMessage(who, "You start harvesting...", color :=88);
+	repeat
+		PlaySoundEffect(who, SFX_58);
+		PerformAction(who, ANIM_BOW);
+		sleep(2);
+				pts := CInt(GetAttribute(who, LUMBERJACKING) / 10) + 15;
+				if(pts > 35)
+					pts := 35;
+				endif
+				if(SkillCheck(who,LUMBERJACKING, -1, pts/3))
+                    if (RandomInt(100) == 0)
+                            SendSysMessage(who, "You have found some fertile dirt!", color :=66);
+                            CreateItemInContainer(craftingbag, UOBJ_FERTILE_DIRT, 1);
+                    endif
+
+                    CreateItemInContainer(craftingbag, product_type, 1);
+                    SendSysMessage(who, "You put the crops in your pack", color :=66);
+                    ChangePlantGraphic(plant);
+
+                    already_harvested_amount := CInt(GetObjProperty(plant, "#harvested"));
+                    if (!already_harvested_amount)
+                            SetObjProperty(plant, "#harvested", 1);
+                    else
+                            SetObjProperty(plant, "#harvested", CInt(already_harvested_amount + 1));
+                    endif
+
+                    if (already_harvested_amount+1 >= max_harvest_amount)
+                            SendSysMessage(who, "There's nothing more here to harvest.", color :=33);
+                            return;
+                    endif
+				endif
+	until ( (who.x != who_x) || (who.y != who_y) );
+endprogram
+
+
+
+
+function DestroyPlant(me, plant);
+	case (plant.objtype)
+	0x18df:
+	0x18e0:
+	0x18e1:
+	0x18e2:
+	0x18e5:
+	0x18e6:
+	0x18e9:
+	0x18ea:
+        0x0caa:         //banana tree
+        0x0d98:         //apple tree
+        0x0d9a:         //apple tree top
+        0x0d9c:         //peach tree
+        0x0d9e:         //peach tree top
+        0x0da4:         //pear tree
+        0x0da6:         //pear tree top
+        
+		return;
+	default:
+		if (YesNo(me,"Destroy it?"))
+			var planttopserial := GetObjProperty(plant, "planttop");
+			var planttop := SystemFindObjectBySerial(planttopserial);
+			if (planttop)
+				LogTreeDestruction(me, plant);
+				DestroyItem(planttop);
+			endif
+			var plantbottomserial := GetObjProperty(plant, "plantbottom");
+			var plantbottom := SystemFindObjectBySerial(plantbottomserial);
+			if (plantbottom)
+				LogTreeDestruction(me, plant);
+				DestroyItem(plantbottom);
+			endif
+			DestroyItem(plant);
+		endif
+	endcase
+endfunction
+
+
+
+
+///////////////////
+//  changes the graphic of the plant to one that's so as fully grown
+///////////////////
+
+function ChangePlantGraphic(plant)
+	case (plant.objtype)
+		//wheat
+		0x0c56:	plant.graphic := 0x0c57;
+		//carrots
+		0x0c76:	plant.graphic := 0x0c69;
+		//onions
+		0x0c6f:	plant.graphic := 0x0c69;
+		//corn
+		0x0c7d:	plant.graphic := 0x0c7e;
+		//flax
+		0x1a99:	plant.graphic := 0x1a9a;
+		//cotton
+		0x0c4f:	plant.graphic := 0x0c53;
+		//turnip
+		0x0c61:	plant.graphic := 0x0c61;
+		//hops
+		0x1a9e:	plant.graphic := 0x1a9f;
+		//lettuce
+		0x1708e:	plant.graphic := 0x0c93;
+				plant.color := 270;
+		//cabbage
+		0x1708f:	plant.graphic := 0x0c93;
+				plant.color := 276;
+		//apple tree
+		0x0d9a:	plant.graphic := 0x0d99;
+		//peach tree
+		0x0d9e:	plant.graphic := 0x0d9d;
+		//pear tree
+		0x0da6:	plant.graphic := 0x0da5;
+		default:
+	endcase;
+endfunction
+
+
+
+
+
+///////////////////
+//  Figures out if the given player is allowed to take the item, and if not, logs it
+///////////////////
+
+function LogTreeDestruction(who, tree);
+	var themessage := {
+		"Character: " + who.name,
+		"Account name: " + who.acctname,
+		"IP address: " + who.ip,
+		"Tree name: " + tree.desc,
+		"Tree serial: " + tree.serial,
+		"Position: " + tree.x + ", " + tree.y + ", " + tree.realm
+	};
+	AppendLog(who, themessage);
+endfunction
+
+
+
+
+///////////////////
+//  Logs the message to a file
+///////////////////
+
+function AppendLog(who, themessage)
+	var log := {};
+	var prop := {};
+	prop.+pname := "";
+	prop.+pvalue := "";
+	foreach line in themessage
+		prop.pvalue := line;
+		log.append (prop);
+	endforeach
+
+	var elemkey := who.name + "(" + who.acctname + ")";
+	AppendConfigFileElem("treelog", "TreeDestroyed:", elemkey, log );
+	UnloadConfigFile("treelog");
+endfunction

@@ -1,0 +1,194 @@
+/////////////////////////////
+//   .lookup          - looks up and sees the condition of the sky.
+//
+/////////////////////////////
+
+
+use uo;
+use util;
+include "../../nature";
+
+program lookup(who)
+
+	if (who.x > 5120)
+		var dungeontext := "The skies are not visible from your location.";
+		PrintTextAbovePrivate(who, dungeonText, who);
+		return;
+	endif
+
+// Also check for being lower than your coordinate's landtile.
+	
+	var nature := GetGlobalProperty("Nature");
+	var TPhase := nature[TRAMMEL];
+	var FPhase := nature[FELUCCA];
+	var weather := nature[CURRENTWEATHER];
+
+	var calendar := GetGlobalProperty("Calendar");
+	var month := calendar[MONTH];
+	var day := nature[DAY];
+
+	var weatherText;
+	
+	case (weather)
+		0:
+		1:
+			weatherText := "It is a ~ADJ~clear ~SEASON~ ~TIME~.";
+			var adj := RandomInt(5);
+			case (adj)
+				0: weatherText["~ADJ~"] := "beautiful ";
+				1: weatherText["~ADJ~"] := "brilliant ";
+				2: weatherText["~ADJ~"] := "gorgeous ";
+				3: weatherText["~ADJ~"] := "";
+				4: 
+				default:
+					if (day == 1)
+						weatherText["~ADJ~"] := "sunny, ";
+					else
+						weatherText["~ADJ~"] := "";
+					endif
+			endcase
+		2:	weatherText := "It is a pleasant, though overcast, ~SEASON~ ~TIME~.";
+		3:
+			var adj := RandomInt(4);
+			case (adj)
+				0: weatherText := "It is an ominously overcast ~SEASON~ ~TIME~.";
+				1: weatherText := "This ~SEASON~ ~TIME~ is marred by a blanket of dark clouds.";
+				2: weatherText := "Heavy, dark clouds obscure the sky.";
+				3: weatherText := "Clouds hang in the sky- heavy, black, and pendulous.";
+			endcase
+		4:
+			var adj := RandomInt(3);
+			if ((month == 1) or (month == 2) or (month == 12))
+				adj := adj + 3;
+			endif
+			case (adj)
+				0: weatherText := "It is a rainy ~SEASON~ ~TIME~.";
+				1: weatherText := "As you look up, you get water in your eyes from the rain.";
+				2: weatherText := "It isn't too bad of a ~SEASON~ ~TIME~, if you don't mind rain.";
+				3: weatherText := "It is a snowy ~SEASON~ ~TIME~.";
+				4: weatherText := "Snow is blanketing the landscape.";
+				5: weatherText := "This is a wonderful ~SEASON~ ~TIME~ if you like making snow gargoyles.";
+			endcase
+		5:
+			weatherText := "The ~SEASON~ ~TIME~ is punctuated by a fierce thunderstorm.";
+	endcase
+		
+	case (month)
+		3:
+		4:
+		5:
+			weatherText["~SEASON~"] := "spring";
+		6:
+		7:
+		8:
+			weatherText["~SEASON~"] := "summer";
+		9:
+		10:
+		11:
+			weatherText["~SEASON~"] := "autumn";
+		12:
+		1:
+		2:
+			weatherText["~SEASON~"] := "winter";
+		default: weatherText["~SEASON~"] := "buggy";
+	endcase
+	
+	case (day)
+		0: weatherText["~TIME~"] := "morning";
+		1: weatherText["~TIME~"] := "day";
+		2: weatherText["~TIME~"] := "evening";
+		3: weatherText["~TIME~"] := "night";
+	endcase
+
+	var outputText := "Trammel ";
+
+	case (TPhase)
+		0:
+		outputText := outputText + "is new, and Felucca ";
+
+		1:
+		outputText := outputText + "is in its first crescent, and Felucca ";
+
+		2:
+		outputText := outputText + "is in its first quarter, and Felucca ";
+
+		3:
+		outputText := outputText + "is waxing gibbous, while Felucca ";
+
+		4:
+		outputText := outputText + "is full, and Felucca ";
+
+		5:
+		outputText := outputText + "is waning gibbous, and Felucca ";
+
+		6:
+		outputText := outputText + "is in its last quarter, while Felucca ";
+
+		7:
+		outputText := outputText + "is a dying crescent, and Felucca ";
+	endcase
+
+	case (FPhase)
+		0:
+		if (TPhase == 0)
+			outputText := "Both moons are new.";
+		else
+			outputText := outputText + "is new.";
+		endif
+
+		1:
+		if (TPhase == 1)
+			outputText := "Both moons are a first crescent.";
+		else
+			outputText := outputText + "is in its first crescent.";
+		endif
+
+		2:
+		if (TPhase == 2)
+			outputText := "Both moons are in their first quarter.";
+		else
+			outputText := outputText + "is in its first quarter.";
+		endif
+
+		3:
+		if (TPhase == 3)
+			outputText := "Both moons are waxing gibbous.";
+		else
+			outputText := outputText + "is a waxing gibbous.";
+		endif
+
+		4:
+		if (TPhase == 4)
+			outputText := "Both moons are dazzlingly full.";
+		else
+			outputText := outputText + "is full.";
+		endif
+
+		5:
+		if (TPhase == 5)
+			outputText := "Both moons are waning gibbous.";
+		else
+			outputText := outputText + "is waning gibbous.";
+		endif
+
+		6:
+		if (TPhase == 6)
+			outputText := "Both moons are in their last quarter.";
+		else
+			outputText := outputText + "is in its last quarter.";
+		endif
+
+		7:
+		if (TPhase == 7)
+			outputText := "Both moons are a faint last crescent.";
+		else
+			outputText := outputText + "is a dying crescent.";
+		endif
+
+	endcase
+
+	PrintTextAbovePrivate(who, weatherText, who);
+	PrintTextAbovePrivate(who, outputText, who);
+
+endprogram
+

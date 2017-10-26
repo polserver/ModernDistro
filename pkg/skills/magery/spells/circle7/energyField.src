@@ -1,0 +1,45 @@
+use os;
+use uo;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include "include/fields";
+include "include/objtype";
+
+program efield( parms )
+  var caster := parms[1];
+  var info := parms[2];
+    var cast_on := MS_TargetCoordinates(caster, info.targ, "Select a target.");
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+
+  PlaySoundEffect(caster,0x20c);
+
+  var fields := {};
+  var listeners := {};
+  var sufferers := {};
+  var x := cast_on.x;
+  var y := cast_on.y;
+  var z := cast_on.z;
+  case(get_direction(caster))
+	"NS" : fields := CreateNorthSouthField(caster, UOBJ_EFIELD_NS, x, y, z, 5);
+	"EW" : fields := CreateEastWestField(caster, UOBJ_EFIELD_EW, x, y, z, 5);
+  endcase
+  PlaySoundEffect(caster,0x20c);
+  Detach();
+  var duration := 20 + ( CInt(GetAttribute( caster, MAGERY ) ) / 3 );
+  var i;
+  sleep(duration);
+  foreach fieldpart in fields
+    DestroyItem(fieldpart);
+  endforeach
+
+endprogram

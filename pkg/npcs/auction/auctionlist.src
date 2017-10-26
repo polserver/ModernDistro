@@ -1,0 +1,118 @@
+// auction  version 1.0
+// by Zulu (zulu@zuluhotel.com)   November 12, 2000
+
+use os;
+use uo;
+
+include "include/utility";
+include "include/client";
+include "util/bank";
+
+var storage:=findstoragearea("Merchant Storage");
+var inv_sell:=find_or_create_item(storage,"AUCTION",0xE7C);
+
+if(!storage or !inv_sell) exit; endif
+
+const UOBJ_GOLDCOIN := 0xeed;
+
+program textcmd_online()
+
+setglobalproperty("#auctionlock",0);
+setglobalproperty("#aucnpc",0);
+
+ while (1)
+    anyitems();
+    sleep(20);
+ endwhile
+
+endprogram
+
+
+function updateplayers(item)
+
+var bid:=GetObjProperty(item,"bid");
+
+foreach chr in EnumerateOnlineCharacters()
+
+   if (getobjproperty(chr,"auction") == "yes")
+	if (bid == 0)
+	  SendSysMessage(chr,item.desc+" did not sell.",FONT_NORMAL,34);
+	else
+	  SendSysMessage(chr,item.desc+" sold for "+bid,FONT_NORMAL,70);
+	endif
+   endif
+
+endforeach
+
+endfunction
+
+
+function anyitems()
+  var backpack:=EnumerateItemsInContainer(inv_sell),timeleft;
+
+  foreach item in backpack
+    timeleft:=(GetObjProperty(item,"time")-ReadGameClock());
+    
+    if ((!timeleft) or (timeleft == ""))
+    elseIf (timeleft<0)
+	updateplayers(item);
+	item_done(item);
+    endif
+  endforeach
+
+endfunction
+
+function remove_properties(item)
+   EraseObjProperty(item,"seller");
+   EraseObjProperty(item,"sellname");
+   EraseObjProperty(item,"buyer");
+   EraseObjProperty(item,"msg");
+   EraseObjProperty(item,"bid");
+   EraseObjProperty(item,"starting");
+   EraseObjProperty(item,"time");
+endfunction
+
+
+function item_done(item)
+
+var bid:=GetObjProperty(item,"bid");
+// var returnitem;
+var temp,bankbox;
+
+temp:=GetObjProperty(item,"seller");
+var seller:=SystemFindObjectBySerial(temp);
+if(!seller) seller:=SystemFindObjectBySerial(temp,SYSFIND_SEARCH_OFFLINE_MOBILES); endif
+
+temp:=GetObjProperty(item,"buyer");
+var buyer:=SystemFindObjectBySerial(temp);
+if(!buyer) buyer:=SystemFindObjectBySerial(temp,SYSFIND_SEARCH_OFFLINE_MOBILES); endif
+
+   remove_properties(item);
+
+   if(bid == 0) // no bids return item to bank
+        bankbox:=FindBankBox(seller);
+	moveitemtocontainer(item,bankbox);
+	return;
+   endif
+
+   // move item to buyer's bank
+   bankbox:=FindBankBox(buyer);
+   moveitemtocontainer(item,bankbox);
+
+   pay_seller(bid,seller);
+
+endfunction
+
+
+function pay_seller(bid,seller)
+
+if (bid>60000)
+    while (bid>60000)
+	CreateItemInBackpack(seller,UOBJ_GOLDCOIN,60000);
+	bid:=bid-60000;
+    endwhile
+endif
+
+if (bid>0) CreateItemInBackpack(seller,UOBJ_GOLDCOIN,bid); endif
+
+endfunction

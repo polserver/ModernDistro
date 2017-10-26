@@ -1,0 +1,15 @@
+use uo;
+
+program teleto(who)
+  SendSysMessage(who, "Move Who?");
+  var what := Target(who);
+  if(!what)
+    return;
+  endif
+  SendSysMessage(who, "Move where?");
+  var where := TargetCoordinates(who);
+  if(!where)
+    return;
+  endif
+  MoveObjectToLocation(what, where.x, where.y, where.z, where.realm, MOVEOBJECT_FORCELOCATION);
+endprogram

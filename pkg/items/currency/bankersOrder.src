@@ -1,0 +1,108 @@
+use uo;
+use os;
+
+include ":gumps:gumps";
+include "include/string";
+
+
+// banker's order
+
+
+program bankersorder(who, bankersorder)
+
+	var city := GetObjProperty(bankersorder, "IssuingBank");
+	var coinamount := CInt(GetObjProperty(bankersorder, "Amount"));
+	var currencytype := CInt(GetObjProperty(bankersorder, "Currency"));
+	var payee := GetObjProperty(bankersorder, "Payee");
+	
+	var strnum := AddCommas(coinamount);
+	
+	gump_bankersorder(who, strnum, city, currencytype, payee);
+
+endprogram
+
+
+function gump_bankersorder(who, stramt, bankcity, cointype, payee)
+
+	var coins := "";
+	case(cointype)
+		0x0EEA:	coins := "Copper";
+		0x0EF0:	coins := "Silver";
+		0x0EED:	coins := "Gold";
+	endcase
+		
+
+	var bankersorder := GFCreateGump();
+	
+	GFPage(bankersorder, 0);
+	
+	//Image 1
+	GFGumpPic(bankersorder, 202, 91, 2080, 0);
+	
+	//Image 2
+	GFGumpPic(bankersorder, 219, 128, 2081, 0);
+	
+	//Image 3
+	GFGumpPic(bankersorder, 218, 197, 2082, 0);
+	
+	//Image 4
+	GFGumpPic(bankersorder, 219, 267, 2081, 0);
+	
+	//Image 5
+	GFGumpPic(bankersorder, 219, 336, 2082, 0);
+	
+	//Image 6
+	GFGumpPic(bankersorder, 220, 406, 2083, 0);
+	
+	//Label 1
+	GFTextLine(bankersorder, 294, 132, 801, "Banker's Order");
+	
+	//Label 7
+	GFTextLine(bankersorder, 250, 156, 804, "Drawn on the Bank of " + bankcity);
+	
+	//Label 8
+	GFTextLine(bankersorder, 254, 344, 803, "Payee:");
+	
+	//Label 9
+	GFTextLine(bankersorder, 258, 370, 907, payee);
+	
+	//HTML 2
+	GFHTMLArea(bankersorder, 248, 203, 210, 128, "<BASEFONT size=7>The person named below is to be paid in the amount of " + stramt + " " + coins + " Coins when this Note is presented to a legal bank representative.</BASEFONT>");
+
+	GFSendGump(who, bankersorder);
+/*	var bankersorder := GFCreateGump();
+	
+	GFPage(bankersorder, 0);
+	//Image 1
+	GFGumpPic(bankersorder, 202, 91, 2080, 0);
+	//Image 2
+	GFGumpPic(bankersorder, 219, 128, 2081, 0);
+	//Image 3
+	GFGumpPic(bankersorder, 218, 197, 2082, 0);
+	//Image 4
+	GFGumpPic(bankersorder, 219, 267, 2081, 0);
+	//Image 5
+	GFGumpPic(bankersorder, 219, 336, 2082, 0);
+	//Image 6
+	GFGumpPic(bankersorder, 220, 406, 2083, 0);
+	//Label 1
+	GFTextLine(bankersorder, 294, 132, 801, "Banker's Order");
+	//Label 2
+	GFTextLine(bankersorder, 270, 195, 908, "The person named below is");
+	//Label 3
+	GFTextLine(bankersorder, 271, 218, 908, "to be paid in the amount of");
+	//Label 4
+	GFTextLine(bankersorder, 268, 244, 908, stramt + " in " + coins + " Coins");
+	//Label 5
+	GFTextLine(bankersorder, 268, 268, 908, "when presented to a legal");
+	//Label 6
+	GFTextLine(bankersorder, 268, 292, 908, "bank representative.");
+	//Label 7
+	GFTextLine(bankersorder, 250, 156, 804, "Drawn on the Bank of " + bankcity);
+	//Label 8
+	GFTextLine(bankersorder, 254, 344, 803, "Payee:");
+	//Label 9
+	GFTextLine(bankersorder, 258, 370, 907, payee);
+	GFSendGump(who, bankersorder);
+*/
+endfunction

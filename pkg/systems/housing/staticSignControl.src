@@ -1,0 +1,433 @@
+use uo;
+use os;
+
+include "include/eventID";
+include ":attributes:attributes";
+include ":housing:housing_settings";
+
+
+program SignListener(sign)
+  RegisterForSpeechEvents(sign, 30);
+  var owneracct, decaytime, friendinfo, coownerinfo, homeinfo, indf, indc, ev, who;
+//  var oacct := GetObjProperty(sign, "owneracct");
+  while(sign)
+    owneracct := GetObjProperty(sign,"owneracct");
+    homeinfo  := GetObjProperty(sign,"homeinfo" );
+    ev := wait_for_event(120);
+    if(ev)
+      who := ev.source;
+      if((who.x >= homeinfo[2]) && (who.x <= homeinfo[4]) && (who.y >= homeinfo[3]) && (who.y <= homeinfo[5]) && 
+		(who.z >= homeinfo[7]) && (who.z <= homeinfo[6]))
+        if(owneracct == who.acctname)
+          handle_speech(ev, sign, 3);
+        else
+          coownerinfo := GetObjProperty(sign,"coowners");
+          indc := returnindex(coownerinfo, who.serial);
+          if(indc > 0)
+            handle_speech(ev, sign, 2);
+          else
+            friendinfo := GetObjProperty(sign,"friends");
+            indf := returnindex(friendinfo, who.serial);
+            if(indf > 0)
+              handle_speech(ev, sign, 1);
+            endif
+          endif
+        endif
+      endif
+    endif
+    decaytime := GetObjProperty(sign,"decay");
+    if ((decaytime) && (!GetObjProperty(sign,"nodecay")))
+      var tname;
+      var newname := GetObjProperty(sign,"signname");
+      if (ReadGameClock() > decaytime)
+        demolish(sign);
+      elseif ((decaytime - ReadGameClock()) > 861000)
+        tname := newname + "     [the owners are about frequently]";
+        SetName(sign, tname);
+      elseif ((decaytime - ReadGameClock()) > 604800)
+        tname := newname + "     [it's been a few days since the owners have been here]";
+        SetName(sign, tname);
+      elseif ((decaytime - ReadGameClock()) > 259200)
+        tname := newname + "     [this house seems a tad neglected]";
+        SetName(sign, tname);
+      elseif ((decaytime - ReadGameClock()) > 86400)
+        tname := newname + "     [looks like folks don't live here]";
+        SetName(sign, tname);
+      else
+        tname := newname + "     [this house might be declared abandoned soon]";
+        SetName(sign, tname);
+      endif
+    endif
+  endwhile
+endprogram
+
+function handle_speech(event, sign, sec)
+  var text := lower(event.text);
+  refresh_house(sign);
+  if((text["i wish to lock this down"]) && (sec >= 2))
+    HouseFunction(sign, event, 1);
+  elseif((text["i wish to release this"]) && (sec >= 2))
+    HouseFunction(sign, event, 2);
+  elseif((text["i wish to secure this"]) && (sec >= 2))
+    secure(sign, event);
+  elseif((text["i wish to unsecure this"]) && (sec >= 2))
+    unsecure(sign, event);
+  elseif((text["remove thyself"]) && (sec >= 1))
+    remove(sign, event);
+  elseif((text["i ban thee"]) && (sec >= 1))
+    banish(sign, event);
+  endif
+endfunction
+
+function demolish(sign)
+  var newsigninfo := {};
+  var homeinfo := GetObjProperty(sign,"homeinfo");
+  var nwx     := homeinfo[2];
+  var nwy     := homeinfo[3];
+  var sex     := homeinfo[4];
+  var sey     := homeinfo[5];
+  var item := ListObjectsInBox(nwx, nwy, -50, sex, sey+1, 50, sign.realm);
+  var builtdeed := SystemFindObjectBySerial(GetObjProperty(sign, "builtdeed"));
+  newsigninfo := GetObjProperty(builtdeed, "homeinfo");;
+
+//  MoveObjectToLocation(builtdeed, sign.x, sign.y, sign.z, sign.realm);
+//  builtdeed.movable := 0;
+	DestroyItem(builtdeed);
+//  SetObjProperty(builtdeed, "NewHouse", 1);
+  SetObjProperty(sign, "NewHouse", 1);
+  foreach itemt in item
+    if (GetObjProperty(itemt,"secure") ==1)
+//      EraseObjProperty(itemt,"secure");
+      if((GetObjProperty(itemt,"secure") == 1) && (itemt.movable == 0))
+        var oldscript := GetObjProperty(itemt,"oldscript");
+        if (oldscript == error)
+          oldscript := "";
+        endif
+        itemt.usescript := oldscript;
+        itemt.movable := 1;
+        EraseObjProperty(itemt, "houseserial");
+        EraseObjProperty(itemt, "oldscript");
+        var newbox := SystemFindObjectBySerial(GetObjProperty(itemt, "boxserial"));
+        var items := EnumerateItemsInContainer(newbox);
+        foreach item in items
+          MoveItemToContainer(item, itemt);
+        endforeach
+        DestroyItem(newbox);
+        EraseObjProperty(itemt, "boxserial");
+		EraseObjProperty(itemt,"secure");
+      endif
+    elseif ((GetObjProperty(itemt, "lockeddown") == 1) && (itemt.movable == 0))
+      itemt.movable := 1;
+      EraseObjProperty(itemt, "lockeddown");
+      SetObjProperty(sign, "numlockdowns", GetObjProperty(sign, "numlockdowns") + 1);
+    elseif (GetObjProperty(itemt,"lockid"))
+      itemt.locked := 0;
+      EraseObjProperty(itemt,"lockid");
+      EraseObjProperty(itemt,"decay");
+    elseif ((itemt.movable == 0) && ((itemt.x != sign.x) && (itemt.y != sign.y)))
+	if(!itemt.IsA(POLCLASS_DOOR))
+	    DestroyItem(itemt);
+	endif
+    endif
+  endforeach
+  EraseObjProperty(sign,"owneracct");
+  EraseObjProperty(sign,"friendinfo");
+  EraseObjProperty(sign,"builtdeed");
+  EraseObjProperty(sign,"decay");
+  EraseObjProperty(sign,"lockid");
+  EraseObjProperty(sign,"numsecure");
+  EraseObjProperty(sign,"numlockdowns");
+  EraseObjProperty(sign,"lastownername");
+  SetObjProperty(sign, "newhomeinfo", newsigninfo);
+  EraseObjProperty(sign,"homeinfo");
+  sign.name := "For Sale: Priced at " + CInt(GetObjProperty(sign, "Price")) + " Gold Crowns";
+  return 1;
+endfunction
+
+function banish(sign, event)
+  var who := event.source;
+  var homeinfo := GetObjProperty(sign,"homeinfo");
+  var nwx := homeinfo[2];
+  var nwy := homeinfo[3];
+  var sex := homeinfo[4];
+  var sey := homeinfo[5];
+  if ((who.x >= nwx) && (who.x <= sex) && (who.y >= nwy) && (who.y <= sey))
+    SendSysMessage(who,"target the person you wish to banish");
+    var idiot := Target(who);
+    if (!idiot)
+      SendSysMessage(who,"cancelled");
+      return;
+    elseif (GetMana(idiot) == error)
+      SendSysMessage(who,"you cannot ban items");
+      return;
+    endif
+    if ((idiot.x >= nwx) && (idiot.x <= sex) && (idiot.y >= nwy) && (idiot.y <= sey))
+      var enemy := GetObjProperty(sign,"enemies");
+      if (!enemy)
+        enemy := {};
+      endif
+      if ((isenemy(sign, idiot) == 0) && (isfriend(sign, idiot) ==0) && (iscoowner(sign, idiot) == 0) && (idiot.serial != who.serial) && ((who.x >= nwx) && (who.x <= sex) && (who.y >= nwy) && (who.y <= sey)) && (idiot.cmdlevel < 2))
+        MoveObjectToLocation(idiot, sign.x, sign.y, sign.z, sign.realm, MOVEOBJECT_FORCELOCATION);
+        SendSysMessage(idiot,"you have been ejected from the house");
+        enemy.append(idiot.serial);
+        SetObjProperty(sign,"enemies", enemy);
+        return;
+      elseif ((isfriend(sign, idiot) ==1) || (iscoowner(sign, idiot) == 1) || (idiot.acctname == GetObjProperty(sign,"owneracct")))
+        SendSysMessage(who,"you cannot ban friends");
+        return;
+      elseif (idiot.serial == who.serial)
+        SendSysMessage(who,"you cannot ban yourself");
+        return;
+      elseif (isenemy(sign, idiot) == 1)
+        MoveObjectToLocation(idiot, sign.x, sign.y, sign.z, sign.realm, MOVEOBJECT_FORCELOCATION);
+        SendSysMessage(idiot,"you have been ejected from the house");
+        SendSysMessage(who,"that person is already an enemy");
+        return;
+      else
+        SendSysMessage(who,"you cannot do that!");
+        return;
+      endif
+    else
+      SendSysMessage(who,"that person isnt inside the house.");
+      return;
+    endif
+  else
+    SendSysMessage(who,"you must be in a house to do this");
+    return;
+  endif
+endfunction
+
+function remove(sign, event)
+  var who := event.source;
+  var homeinfo := GetObjProperty(sign,"homeinfo");
+  var nwx := homeinfo[2];
+  var nwy := homeinfo[3];
+  var sex := homeinfo[4];
+  var sey := homeinfo[5];
+  if ((who.x >= nwx) && (who.x <= sex) && (who.y >= nwy) && (who.y <= sey))
+    SendSysMessage(who,"target the person you wish to remove");
+    var idiot := Target(who);
+    if (!idiot)
+      SendSysMessage(who,"cancelled");
+      return;
+    elseif (GetMana(idiot) == error)
+      SendSysMessage(who,"you cannot eject items");
+      return;
+    endif
+    if ((idiot.x >= nwx) && (idiot.x <= sex) && (idiot.y >= nwy) && (idiot.y <= sey))
+      if ((isfriend(sign, idiot) ==0) && (iscoowner(sign, idiot) == 0) && (idiot.serial != who.serial) && ((who.x >= nwx) && (who.x <= sex) && (who.y >= nwy) && (who.y <= sey)) && (idiot.cmdlevel < 2))
+        MoveObjectToLocation(idiot, sign.x, sign.y, sign.z, sign.realm, MOVEOBJECT_FORCELOCATION);
+        SendSysMessage(idiot,"you have been ejected from the house");
+        return;
+      elseif ((isfriend(sign, who) ==1) || (iscoowner(sign, who) == 1) || (who.acctname == GetObjProperty(sign,"owneracct")))
+        SendSysMessage(who,"you cannot eject friends");
+        return;
+      elseif (idiot.serial == who.serial)
+        SendSysMessage(who,"you cannot eject yourself");
+        return;
+      else
+        SendSysMessage(who,"you cannot do that!");
+      endif
+    else
+      SendSysMessage(who,"that person isnt inside the house.");
+      return;
+    endif
+  else
+    SendSysMessage(who,"you must be in a house to do this");
+    return;
+  endif
+endfunction
+
+function HouseFunction(house, event, num)
+    var itemt := Target(event.source, TGTOPT_NOCHECK_LOS);
+    if(!itemt)
+      SendSysMessage(event.source, "Cancelled.");
+      return;
+    endif
+    var homeinfo := GetObjProperty(house,"homeinfo");
+    var nwx := homeinfo[2];
+    var nwy := homeinfo[3];
+    var sex := homeinfo[4];
+    var sey := homeinfo[5];
+	var deedobj := "";
+	var deedserial := 0;
+    var inside := 0;
+    var box := ListObjectsInBox(nwx, nwy, -100, sex, sey, 100, itemt.realm);
+    foreach item in box
+      if (itemt.serial == item.serial)
+        inside := 1;
+      endif
+    endforeach
+    if(inside == 1)
+      case(num)
+        1: if(GetObjProperty(house, "numlockdowns") > 0)
+             if (itemt.movable == 1)
+               itemt.movable := 0;
+               SetObjProperty(itemt, "lockeddown", 1);
+               SetObjProperty(house, "numlockdowns", GetObjProperty(house, "numlockdowns") - 1);
+               SendSysMessage(event.source, "Locked Down.");
+             else
+               SendSysMessage(event.source, "that is not yours to lock down!");
+             endif
+           else
+             SendSysMessage(event.source, "The house has no more lockdowns remaining.");
+           endif
+        2: if (GetObjProperty(itemt, "lockeddown") && (itemt.movable == 0))
+             itemt.movable := 1;
+             EraseObjProperty(itemt, "lockeddown");
+             SetObjProperty(house, "numlockdowns", GetObjProperty(house, "numlockdowns") + 1);
+             SendSysMessage(event.source, "Released.");
+			 deedobj:= GetObjProperty(itemt, "deedobjtype");
+			 deedserial := GetObjProperty (itemt, "deedserial");
+			 if (deedobj)
+				foreach item in box
+				  if (CInt(GetObjProperty (item, "deedserial")) == deedserial)
+					DestroyItem(item);
+				  endif
+				endforeach
+				DestroyItem(itemt);
+				CreateItemInBackpack(event.source, CInt(deedobj), 1);
+			 endif
+           else
+             SendSysMessage(event.source, "that is not yours to release");
+           endif
+      endcase
+    else
+      SendSysMessage(event.source, "That is not inside the building.");
+    endif
+endfunction
+
+function secure(house, event)
+  var itemt := Target(event.source);
+  if(!itemt)
+    SendSysMessage(event.source, "Canceled.");
+    return;
+  endif
+  if(itemt.movable == 0)
+    if (GetObjProperty(itemt,"lockeddown") ==1)
+      SendSysMessage(event.source, "securing this container. your house will be credited with one lockdown.");
+      SetObjProperty(house, "numlockdowns", GetObjProperty(house, "numlockdowns") + 1);
+      EraseObjProperty(itemt,"lockeddown");
+    else
+      SendSysMessage(event.source, "you cannot secure that.");
+      return;
+    endif
+  endif
+  if(GetObjProperty(house, "numsecure"))
+    var homeinfo := GetObjProperty(house,"homeinfo");
+    var nwx := homeinfo[2];
+    var nwy := homeinfo[3];
+    var sex := homeinfo[4];
+    var sey := homeinfo[5];
+    var inside := 0;
+    var box := ListObjectsInBox(nwx, nwy, -500, sex, sey, 50, itemt.realm);
+    foreach item in box
+      if (itemt.serial == item.serial)
+        inside := 1;
+      endif
+    endforeach
+    if (inside)
+      var newbox := CreateItemInContainer(itemt, itemt.objtype, 1);
+      var boxin := EnumerateItemsInContainer(itemt);
+      foreach item in boxin
+      if (newbox.serial != item.serial)
+        MoveItemToContainer(item, newbox);
+      endif
+      endforeach
+      itemt.movable := 0;
+      SetObjProperty(itemt, "boxserial", newbox.serial);
+      SetObjProperty(itemt, "houseserial", house.serial);
+      SetObjProperty(itemt, "secure", 1);
+      var oldscript := itemt.script;
+      SetObjProperty(itemt,"oldscript", oldscript);
+      itemt.usescript := ":housing:secureCont";
+      SetObjProperty(house, "numsecure", GetObjProperty(house, "numsecure") - 1);
+      SetObjProperty(house, "owneracct", event.source.acctname);
+      SendSysMessage(event.source, "Container is secure.");
+    else
+      SendSysMessage(event.source, "You cannot secure that there.");
+    endif
+  else
+    SendSysMessage(event.source, "The house has no more secure containers remaining.");
+  endif
+endfunction
+
+function unsecure(house, event)
+  var itemt := Target(event.source);
+  if(!itemt)
+    SendSysMessage(event.source, "Canceled.");
+    return;
+  endif
+  if (!GetObjProperty(itemt,"secure") ==1)
+    SendSysMessage(event.source," you cannot unsecure that");
+    return;
+  endif
+  EraseObjProperty(itemt,"secure");
+    if(GetObjProperty(itemt, "houseserial") == house.serial)
+      var lockdowns := GetObjProperty(house, "numlockdowns");
+      var oldscript := GetObjProperty(itemt,"oldscript");
+      if (oldscript == error)
+        oldscript := "";
+      endif
+      itemt.usescript := oldscript;
+      SetObjProperty(house, "numsecure", GetObjProperty(house, "numsecure") + 1);
+      EraseObjProperty(itemt, "houseserial");
+      EraseObjProperty(itemt, "oldscript");
+      var newbox := SystemFindObjectBySerial(GetObjProperty(itemt, "boxserial"));
+      var items := EnumerateItemsInContainer(newbox);
+      foreach item in items
+        MoveItemToContainer(item, itemt);
+      endforeach
+      EraseObjProperty(itemt, "boxserial");
+      DestroyItem(newbox);
+      if (lockdowns > 0)
+        SetObjProperty(itemt, "lockeddown", 1);
+        SetObjProperty(house, "numlockdowns", lockdowns - 1);
+        SendSysMessage(event.source, "the container is locked down and your house has been credited one secure container.");
+      else
+        itemt.movable := 1;
+        SendSysMessage(event.source, "the container is no longer locked down and your house has been credited one secure container.");
+      endif
+    else
+      SendSysMessage(event.source, "that is not secure.");
+    endif
+endfunction
+
+function iscoowner(sign, who)
+  var coownerinfo := GetObjProperty(sign,"coowners");
+  var ind := returnindex(coownerinfo, who.serial);
+  if (ind > 0)
+    return 1;
+  endif
+endfunction
+
+function isenemy(sign, who)
+  var enemyinfo := GetObjProperty(sign,"enemies");
+  var ind := returnindex(enemyinfo, who.serial);
+  if (ind > 0)
+    return 1;
+  endif
+endfunction
+
+function isfriend(sign, who)
+  var friendinfo := GetObjProperty(sign,"friends");
+  var ind := returnindex(friendinfo, who.serial);
+  if (ind > 0)
+    return 1;
+  endif
+endfunction
+
+function returnindex(info, information)
+  var i;
+  for (i := 0; i <= len(info); i := i + 1)
+    if (info[i] == information)
+      return i;
+    endif
+  endfor
+  return 0;
+endfunction
+
+function refresh_house(sign);
+  SetObjProperty(sign,"decay", (ReadGameClock()+  + get_abandon_time()));
+endfunction
+

@@ -1,0 +1,33 @@
+use uo;
+
+program textcmd_create( who, text )
+  if(text)
+    var params := SplitWords( text );
+    var objtype := CInt( params[1] );
+    var amount := CInt( params[2] );
+    if (!objtype)
+        objtype := GetObjtypeByName( params[1] );
+    endif
+    if (!amount)
+        amount := 1;
+    endif
+    if(amount > 10)
+      SendSysMessage(who, "Bad Manner GM! [create 10 or less]");
+      return;
+    endif
+    SendSysMessage(who, "Objtype: " + CInt(objtype));
+    var i, item;
+    for( i := 1; i <= amount; i := i + 1 )
+      item := CreateItemInBackpack(who, objtype, 1);
+      if(item)
+        SetObjProperty(item, "Created", who.name);
+//        item.decayAt := 0;
+      else
+        SendSysMessage( who, "Unable to create: " + item.errortext + ". Your backpack might be full.", 2, 33 );
+      endif
+    endfor
+  else
+    SendSysMessage(who, "Cancelled");
+    return;
+  endif
+endprogram

@@ -1,0 +1,18 @@
+use uo;
+use os;
+program itemaddset( who, item)
+  if (who.cmdlevel < 2)
+    return;
+  endif
+  var totalthings := GetObjProperty(item,"totalthings");
+  var itemtotal := len(totalthings);
+  var i :=1;
+  SendSysMessage(who,"where do you want this to appear?");
+  var where := TargetCoordinates(who);
+  for (i:=1;i<=itemtotal;i:=i+1)
+    var iteminfo := GetObjProperty(item, "iteminfo" +i);
+    var theitem := CreateItemAtLocation(where.x+iteminfo[1], where.y+iteminfo[2], where.z+iteminfo[3], totalthings[i], 1, who.realm);
+    theitem.color := iteminfo[4];
+    theitem.movable := iteminfo[5];
+  endfor
+endprogram

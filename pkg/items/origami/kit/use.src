@@ -1,0 +1,97 @@
+use cfgfile;
+use cliloc;
+use util;
+
+
+include "include/utility";
+include ":gumps:gumps";
+
+program use_origamikit( who, origamikit )
+	
+	var InBackpack := InInventory( who.backpack, origamikit );
+	if(!InBackpack)
+		SendSysMessageCL(who, 1042001, color := 0x21); // That must be in your pack for you to use it.
+	return;
+	endif
+	
+	var inUse := ReserveItem(origamikit);
+	if(!inUse)
+		SendSysMessageCL(who, 500365, color := 0x21); // That is being used by someone else
+	return;
+	endif
+	
+	var ItemType := BuildOrigamiGump(who);
+	if (!ItemType)
+		SendSysMessageCL( who, 1042021, color := 33 ); //Cancelled
+		return;
+	endif
+	ItemType := ItemType[0];
+		
+	var SoundType, SoundChance := RandomDiceRoll("1d3");
+	case (SoundChance)
+		1:	SoundType := 0x501;
+		2:	SoundType := 0x502;
+		3:	SoundType := 0x503;
+	endcase
+
+	PerformAction(who, 0x6, framecount := 1);
+	PlaySoundEffect(who, SoundType);
+	Sleep(2);
+	SendSysMessageCL(who, 1070822, color := 0x42); // You fold the paper into an interesting shape.
+	DestroyItem(origamikit);
+	CreateItemInBackpack(who, ItemType, 1);
+
+endprogram
+
+function BuildOrigamiGump(who)
+	var multiplier, objID, XOffSet, YOffSet, ItemX, ItemY := 48;
+	
+	var cfg	:= ReadConfigFile( ":origami:origami" );
+    if( cfg.errortext )
+        SendSysMessage( who, "Error reading config <:ores:itemdesc> -->"+cfg.errortext );
+    return 0;
+    endif
+
+	var cfg_elem := GetConfigIntKeys( cfg );
+	var num_elem := CInt(cfg_elem.Size());
+	
+	var gump := GFCreateGump(50, 50);
+	GFPage(gump, 0);
+	GFResizePic(gump, 0, 0, 9250, 384, 294);
+	GFPicTiled(gump, 12, 12, 360, 20, 2624);
+	GFHTMLArea(gump, 12, 12, 360, 20, "<basefont color=#ffffff><CENTER>Origami Kit</CENTER>");
+	GFAddAlphaRegion(gump, 12, 12, 360, 20);
+	GFPicTiled(gump, 12, 42, 360, 210, 2624);
+	GFAddAlphaRegion(gump, 12, 42, 360, 210);
+	GFPicTiled(gump, 12, 262, 360, 20, 2624);
+	GFAddAlphaRegion(gump, 12, 262, 360, 20);
+	GFPage(gump, 1);
+	foreach entry in ( cfg_elem )
+		entry := Hex(entry);
+		objID := FindConfigElem( cfg, entry );
+		XOffSet := GetConfigInt( objID, "XOffSet" );
+		YOffSet := GetConfigInt( objID, "YOffSet" );
+		multiplier := CInt( _entry_iter - 1 );
+		
+		ItemX := CInt( 18 + ( 90 * ( multiplier % 4 )));
+		GFAddButton(gump, ItemX, ItemY, 2328, 2329, GF_CLOSE_BTN, entry);
+		GFTilePic(gump, ItemX + XOffSet, ItemY + YOffSet, entry, 0);
+		
+		if( _entry_iter < num_elem && ItemX == 288 && ItemY == 188 )
+				GFAddButton(gump, 344, 262, 4005, 4007, GF_PAGE_BTN, gump.cur_page+1);
+				GFAddHTMLLocalized(gump, 283, 262, 60, 20, 1011066, 0, 0, 0x7FFF); //Next Page
+				GFPage( gump,  gump.cur_page+1 );
+				GFAddButton(gump, 12, 262, 4014, 4016, GF_PAGE_BTN, gump.cur_page-1);
+				GFAddHTMLLocalized(gump, 46, 262, 140, 20, 1011067, 0, 0, 0x7FFF); //Previos Page
+		endif
+			SleepMS( 2 );
+		if ( ItemX == 288 && ItemY == 48 )
+			ItemY := CInt(ItemY + 70);
+		elseif ( ItemX == 288 && ItemY == 118 )
+			ItemY := CInt(ItemY + 70);
+		elseif ( ItemX == 288 && ItemY == 188 )
+			ItemY := CInt(48);
+		endif
+	endforeach
+	return GFSendGump(who, gump);
+endfunction

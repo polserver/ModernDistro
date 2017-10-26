@@ -1,0 +1,49 @@
+// Deviates from official spell
+
+use uo;
+use vitals;
+
+include ":attributes:attributes";
+//include "include/spellRestrictions";
+include ":damage:damage";
+
+
+program wither( params )
+	var caster := params[1];
+	var info := params[2]; // Struct containing additional info about the spell.
+	var spellID := params[3];
+	var cast_on := params[4]; // Target of spell if required.
+	
+    var necroskill := Cint(AP_GetSkill(caster, NECROMANCY));
+    var sspeak := Cint(AP_GetSkill(caster, SPIRITSPEAK));
+    var int := GetIntelligence(caster);
+    var bonus := 0;
+    
+    if(caster.ip)
+        bonus := int/5;
+    endif
+
+
+    var  dmg := ((necroskill + sspeak)/2) + bonus;
+    PlaySoundEffect(caster, 0x1FB);
+    PlaySoundEffect(caster, 0x10B);
+	foreach person in ListMobilesInLineOfSight(caster, 8)
+        SetObjProperty(person, "LastHit", {caster.name, caster.serial, "wither" });
+        PlayObjectCenteredEffectEx( person, 0x374A, 1, 30, 9502, 0, 3, 97 );
+		var daemon := Cint(GetObjProperty(person, "#Daemon"));
+		var daemonqual := daemon * 0.01;
+		
+		if(daemon == 0)
+			EraseObjProperty(person, "#Daemon");
+		endif
+		
+		if(daemon)
+			dmg := dmg - (daemonqual*100);
+		endif
+
+        ApplyRawDamageEX(person, Resisted(CInt(info.circle), caster, person, dmg), DMG_PHYSICAL, caster);
+        dmg := dmg/2; // Below applyrawdamage because it reduces the damage by half after 1 patch
+    endforeach
+
+
+endprogram

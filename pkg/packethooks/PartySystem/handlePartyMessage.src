@@ -1,0 +1,33 @@
+/* $Id: handlePartyMessage.src 523 2006-06-30 17:36:14Z tekproxy $
+ *
+ */
+
+use uo;
+use os;
+use unicode;
+
+include ":partySystem:config";
+include ":partySystem:messages";
+
+program handlePartyMessage(params)
+	Set_Critical(DEBUG_SET_CRITICAL);
+
+	var character := params[1];
+	var targ_id := params[2];
+	var msg := params[3];
+
+	if ( targ_id == character.serial )
+		SendSysMessage(character, "Note to self: "+CAscZ(msg), character.uclang);
+		return 1;
+	endif
+
+	var member := SystemFindObjectBySerial(targ_id);
+
+	if ( member )
+		// Maybe there is a special packet to send private messages, but I could not find it.
+		SendSysMessageUC(character, (CAscZ("[Private->"+member.name+"] "))+msg, member.uclang, 3, 1153);
+		SendPartyMessage(member, character, msg);
+	endif
+
+	return 1;
+endprogram

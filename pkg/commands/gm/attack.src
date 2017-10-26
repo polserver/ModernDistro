@@ -1,0 +1,31 @@
+use uo;
+use util;
+
+include "include/client";
+include "include/objtype";
+include "include/bard";
+include "include/eventID";
+
+program bard_provoke(character)
+  SendSysMessage(character, "Select a creature you wish to provoke");
+  var thetarg := Target(character);
+  if (!thetarg)
+        SendSysMessage(character, "Targetting cancelled.");
+        return;
+  endif
+  SendSysMessage(character, "Select the target");
+  var newtarg := Target(character);
+  var ev := array;
+  ev.+ type;
+  ev.+ source;
+  ev.type := EVID_PEACEMADE;
+  ev.source := newtarg;
+  SendEvent(thetarg, ev);
+  ev.source := thetarg;
+  SendEvent(newtarg, ev);
+  ev.type := EVID_ENGAGED;
+  ev.source := newtarg;
+  SendEvent(thetarg, ev);
+  ev.source := thetarg;
+  SendEvent(newtarg, ev);
+endprogram

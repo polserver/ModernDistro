@@ -1,0 +1,25 @@
+use uo;
+
+program textcmd_strip(who)
+
+	SendSysMessage(who, "Select target.");
+	var victim := Target(who);
+
+	if (!victim.isA(POLCLASS_MOBILE))
+		SendSysMessage(who, "Invalid target.");
+		return;
+	endif
+
+	var x, i;
+	var newpack := CreateItemAtLocation(victim.x, victim.y, victim.z, 0xe75, 1, victim.realm);
+
+	for (i := 1; i <= 24; i := i + 1)
+		if ( (i == 0x0b) || (i == 0x10) || (i == 0x15) )
+			x := { };	// Do nothing.
+		else
+			x := GetEquipmentByLayer(victim, i);
+			MoveItemToContainer(x, newpack);
+		endif
+	endfor
+
+endprogram

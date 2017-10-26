@@ -1,0 +1,9 @@
+use uo;
+
+program worldheight( who, params )
+    params := SplitWords( params );
+    var x := CInt(params[1]);
+    var y := CInt(params[2]);
+    var z := GetWorldHeight( x, y, who.realm );
+    SendSysMessage( who, "(" + x + "," + y + "," + z + ")" );
+endprogram

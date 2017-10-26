@@ -1,0 +1,11 @@
+use uo;
+
+program addintproperty( who, text )
+	var params := SplitWords( text );
+	var item := Target( who );
+	SetObjProperty( item, params[1], CInt(params[2]) );
+
+	print("objprop: " + GetObjProperty( item, params[1] ) );
+
+        
+endprogram

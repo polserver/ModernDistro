@@ -1,0 +1,20 @@
+use uo;
+
+program  textcmd_z(who, howfar)
+  var what := Target(who, TGTOPT_NOCHECK_LOS);
+  var newitem;
+  if(!what)
+    return;
+  endif
+  var tdist;
+  if(howfar == "")
+    tdist := 1;
+  else
+    tdist := CInt(howfar);
+  endif
+  while(what)
+    newitem := CreateItemAtLocation(what.x, what.y, what.z + tdist, what.objtype, 1, who.realm);
+    newitem.movable := 0;
+    what := Target(who, TGTOPT_NOCHECK_LOS);
+  endwhile
+endprogram

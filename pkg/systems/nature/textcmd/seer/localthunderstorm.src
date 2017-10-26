@@ -1,0 +1,69 @@
+use vitals;
+use uo;
+use util;
+use os;
+
+include "setlight";
+include "../../nature";
+
+const SOUND_EFFECT_THUNDER:=  0x002a;
+
+program localthunderstorm(who, radius)
+
+	if (!radius)
+		radius := 50;
+	endif
+
+	var nature := GetGlobalProperty("Nature");
+	var light;
+	case (nature[DAY])
+		0:
+		1:
+			light := 15;
+		2:
+		3:
+			light := 27;
+	endcase
+
+	set_light(who, light, radius);
+	
+	var endtime := ReadGameClock() + 300;
+	
+	while (ReadGameClock() < endtime)
+		
+		if (RandomInt(15) > 10)
+			DoBolt(who, radius);
+		endif
+
+		foreach dude in ListMobilesNearLocation(who.x, who.y, who.z, radius, who.realm)
+			if (!dude.template)
+				PlaySoundEffect(who, SOUND_EFFECT_THUNDER);
+			endif
+		endforeach
+		
+		var randompause := Cint(RandomInt(50) + 10);
+		sleep(randompause);
+	endwhile
+endprogram
+
+function DoBolt(who, radius)
+
+	If (who.multi)
+		return;
+	endif
+	var xpos := who.x;
+	var ypos := who.y;
+	var xrand := RandomInt(radius);
+	var yrand := RandomInt(radius);
+	xpos := ((xpos - xrand) + radius/2);
+	ypos := ((ypos - yrand) + radius/2);
+	var zpos := GetMapInfo( xpos, ypos, who.realm ).z;
+	var mob := CreateNpcFromTemplate( "Rabbit", xpos, ypos, zpos, 0, who.realm);
+	mob.invisible := 1;
+	mob.cmdlevel := 2;
+	setobjproperty(mob, "guardkill", 1);
+	PlayLightningBoltEffect( mob );
+	MoveObjectToLocation(mob,0,0,0, "britannia", MOVEOBJECT_FORCELOCATION);// newmap problem
+	ApplyRawDamage( mob, mob.hp+2 );
+
+endfunction

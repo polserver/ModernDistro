@@ -1,0 +1,34 @@
+use uo;
+use vitals;
+
+include "include/spellRestrictions";
+
+program chrcast_dfury( parms )
+	var caster := params[1];
+	var info := params[2]; // Struct containing additional info about the spell.
+	var spellID := params[3];
+	
+
+	if(Cint(GetObjProperty(caster, "DivineFury")))
+		SendSysMessage(caster, "You are already under the influence of this spell.",3,40);
+		return 0;
+	endif
+	var pal := Cint(AP_GetSkill(caster, CHIVALRY));
+	PlayObjectCenteredEffect( caster, FX_BLESS_EFFECT, 7,7);
+	PlaySoundEffect(caster, 0x5BF);
+	var czas := pal;
+	Setobjproperty(caster, "DivineFury", 1);
+	detach();
+	var i;
+		for( i:= 0; i < czas * 3 ; i:= i + 1)
+			PlayObjectCenteredEffect( caster, 0x1153, 10,45 );
+			sleepms(500);
+			if(Cint(!GetObjProperty(caster, "DivineFury")))
+				break;
+			endif
+    endfor
+	if(Cint(GetObjProperty(caster, "DivineFury")))
+		SendSysMessage(caster, "The divine fury has faded.",3,40);
+		Eraseobjproperty(caster, "DivineFury");
+	endif
+endprogram

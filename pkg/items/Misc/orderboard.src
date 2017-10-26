@@ -1,0 +1,166 @@
+use uo;
+use os;
+
+include "include/clock";
+
+program OrderBoard (user, board )
+  var curday := ReadGameClock()/(GetDayLength()*60);
+  var input, i, oldday, topic, space, age;
+ 
+  var layout := {
+    "page 0",
+    "resizepic 50 50 3600 540 380",
+    "resizepic 75 25 3600 200 50",
+    //"resizepic 365 405 3600 200 50",
+    "button 455 390 2121 2120 1 0 1",
+    "button 455 360 2130 2129 3 2 2",
+    "text 100 40 45 0",
+    "text 80 390 45 1",
+ 
+    "radio 100 100 5002 5003 1 1001",
+    "radio 100 150 5002 5003 0 1002",
+    "radio 100 200 5002 5003 0 1003",
+    "radio 100 250 5002 5003 0 1004",
+    "radio 100 300 5002 5003 0 1005",
+    "radio 100 350 5002 5003 0 1006",
+
+    "text 140  98 45 2",
+    "text 140 148 45 3",
+    "text 140 198 45 4",
+    "text 140 248 45 5",
+    "text 140 298 45 6",
+    "text 140 348 45 7",
+
+    "radio 330 100 5002 5003 0 1007",
+    "radio 330 150 5002 5003 0 1008",
+    "radio 330 200 5002 5003 0 1009",
+    "radio 330 250 5002 5003 0 1010",
+    "radio 330 300 5002 5003 0 1011",
+    "radio 330 350 5002 5003 0 1012",
+
+    "text 370  98 45 8",
+    "text 370 148 45 9",
+    "text 370 198 45 10",
+    "text 370 248 45 11",
+    "text 370 298 45 12",
+    "text 370 348 45 13"
+
+  // "textentry 100 80 150 50 32 1050 2",
+  // "checkbox 10 10 210 211 1 2002",
+  // "checkbox 10 30 210 211 0 2001",
+  };
+
+  var data := {
+    board.name,
+    "Welcome to my Order Board, Please palce an order."
+  };
+
+  // data[1] := board.name;
+
+  for ( i := 1; i <= 12; i := i + 1 )
+    topic := GetObjProperty( board, "Topic" + CStr(i) );
+    if ( topic == error )
+      data[i+2] := "[empty]";
+    else
+      space := find( topic, " ", 1 );
+      oldday := topic[1,space-1];
+      age := curday - CInt(oldday);
+      if (age == 1)
+        data[i+2] := topic[space+1, 10] + " (1 Day)";
+      else
+        topic := topic[space+1, 10];
+        data[i+2] := topic + " (" + age + " Days)";
+      endif
+    endif
+  endfor
+
+  var res := SendDialogGump( user, layout, data );
+  if (res[0] != 2)  //  Antwort != "OK"
+    return;
+  endif
+ 
+  var selected;
+  foreach key in (res.keys)
+    if (key > 1000)
+      selected := CStr(key - 1000);
+      break;
+    endif
+  endforeach
+ 
+  var text := GetObjProperty( board, "Text" + selected );
+  if (text == error)
+    SendSysMessage( user, "Give a SHORT Subject" );
+    topic := RequestInput( user, user.backpack, "(10 characters would be ideal )" );
+    if ( !topic )
+      SendSysMessage( user, "Aborted" );
+      return;
+    endif       
+    text := RequestInput( user, board, "Line 1:" );
+    if ( !text )
+      SendSysMessage( user, "Aborted" );
+      return;
+    endif       
+    for (i := 2; i <= 17; i := i + 1 )
+      input := RequestInput( user, board, "Line " + i + ": (ESC=Abort)" );
+      if (input)
+        text := text + "#" + input;
+      else
+        break;
+      endif
+    endfor
+    SetObjProperty( board, "Topic"+selected, CStr(curday) + " " + topic );
+    SetObjProperty( board, "Text"+selected, text );
+    SetObjProperty( board, "Name"+selected, user.name );
+    SendSysMessage( user, "Aborted" );
+    return;
+  endif
+
+  var data2 := {};
+  layout := {
+    "page 0",
+    "resizepic 50 50 3600 540 380",
+    "resizepic 75 25 3600 400 50",
+    "resizepic 365 405 3600 200 50",
+    "button 395 420 2121 2120 1 0 1",
+    "button 475 420 2130 2129 3 2 2",
+    "checkbox 80 392 210 211 0 3",
+    "text 110 390 45 1",
+    "text 100 40 45 0"
+  };
+
+  topic := GetObjProperty( board, "Topic" + selected );
+  if ( topic == error )
+    data[1] := "(No Topic)";
+  else
+    space := find( topic, " ", 1 );
+    data[1] := topic[space+1, len(topic)-space];
+  endif
+  data[2] := "Delete";
+
+  var crlf;
+  var line := 1;
+   while ( crlf )
+    crlf := find( text, "#", 1 );
+    layout[line+9] := "text 100 " + (82 + line * 16) + " 45 " + (line + 1);
+    data[line+2] := text[1, crlf-1];
+    text := text[crlf+1,len(text)-crlf];
+    line := line + 1;
+   endwhile
+
+  res := SendDialogGump( user, layout, data );
+
+  if ( !res[3] )
+    return;  // don't delete msg
+  endif
+ 
+  oldday := topic[1,space-1];
+  age := curday - CInt(oldday);
+  if (age < 5)
+    SendSysMessage( user, "Message is only " + age + " Days old." );
+    SendSysMessage( user, "It was not deleted." );
+  else
+    EraseObjProperty( board, "Text" + selected );
+    EraseObjProperty( board, "Topic" + selected );
+    SendSysMessage( user, "Message " + selected + " deleted." );
+  endif 
+endprogram

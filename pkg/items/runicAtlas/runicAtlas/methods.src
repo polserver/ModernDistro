@@ -1,0 +1,100 @@
+use uo;
+use basic;
+use cliloc;
+
+include ":runicAtlas:runicAtlasFunctions";
+
+program Install()
+
+	return 1;
+endprogram
+
+exported function IsRunicAtlas( book )
+
+	book := book;
+ 
+	return 1;
+endfunction
+
+exported function SetSelection ( book, who, choice )
+
+	var selection := struct;
+	selection.+serial := book.serial;
+	selection.+selected := CInt(choice);
+
+	return SetObjProperty ( who, "#Selection", selection );
+endfunction
+
+exported function GetSelection ( book, who )
+	var selection := GetObjProperty ( who, "#Selection" );
+	if ( !selection.serial == book.serial )
+		selection := array;
+	endif
+	return selection;
+endfunction
+
+exported function EraseSelection( book, who )
+	book := book;
+	return EraseObjProperty( who, "#Selection" );
+endfunction
+
+exported function SetCharges( book, who, charges )
+
+	var charge_prop := GetObjProperty( book, "%Charges%" );
+	charge_prop["charges"] := CInt( charges );
+	SetObjProperty( book, "%Charges%", charge_prop );
+	SetBookName( book, who, 1 );
+
+	return 1;
+endfunction
+
+exported function GetRuneList( book )
+
+	var rune_list := GetObjProperty( book, "%RuneList%" );
+	if( TypeOf( rune_list ) != "Array" )
+		rune_list := array{};
+		SetObjProperty( book, "%RuneList%", rune_list );
+	endif
+
+	return rune_list;
+endfunction
+
+exported function GetRuneDetails( book, rune_pos )
+
+	var rune_list := GetRuneList( book );
+	if( TypeOf( rune_list ) != "Array" )
+		rune_list := array{};
+		SetObjProperty( book, "%RuneList%", rune_list );
+	endif
+
+	return rune_list[rune_pos];
+endfunction
+
+exported function DeleteRune( book, rune_pos )
+
+	var rune_list := GetRuneList( book );
+	if( TypeOf( rune_list ) != "Array" )
+		rune_list := array{};
+		SetObjProperty( book, "%RuneList%", rune_list );
+	endif
+
+	if( rune_list[rune_pos] )
+		rune_list.Erase( rune_pos );
+		SetObjProperty( book, "%RuneList%", rune_list );
+	endif
+	return 1;
+endfunction
+
+exported function SetDefault( book, who, rune_pos )
+	
+	if ( book.movable == 0 )
+		SendSysMessageCL ( who, 502413, color := 33 ); // That cannot be done while the book is locked down.
+		return 0;
+	endif
+	
+	var rune_info := GetRuneDetails( book, rune_pos );
+	SetObjProperty( book, "Destination", rune_info );
+	SendSysMessage( who, 502417, color := 66 ); // New default location set.
+
+	return 1;
+endfunction

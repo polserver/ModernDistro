@@ -1,0 +1,328 @@
+/////////////////////////////////////////////////////////////
+// SETPROP.SRC
+//
+// Author: DC
+// Date: 2/14/99
+//
+// Description: An GM text command that changes the value
+//	  of the given inherent property. Note that
+//	  mobiles have more props than items &&
+//	  some properties are read-only.
+//
+// Syntax: .setprop <propname> <value>
+// program textcmd_setprop: params: character using
+//				  text
+//			  Splits the param text into 2
+//			  strings (propname && value)
+//					  passes the given prop &&
+//			  value to SetObjctProp &&
+//			  prints the old && new values
+//			  if the write was successful.
+//
+// function SetObjctProp: Matches the given text to one of
+//			the known properties of the
+//			targetted object. If the prop
+//			name could not be matched, it
+//			throws an uninitialized error
+//			which the main program catches.
+//			only writable props are listed.
+//
+// TODO: Give access to props setable only with
+//   "SetObjectProperty" function.
+//
+//   ********
+//   **NOTE**: to change an object's name, use "rename" cmd
+//   ********
+// updated by zulu (zulu@cadvision.com)
+// updated by Shilohen (shilohen@sympatico.ca)
+// n.b. Some properties for items weren't tested as the 
+// walkonscript but those will be there in case of future
+// core changes.
+/////////////////////////////////////////////////////////////
+
+use uo;
+use basic;
+use os;
+
+include ":attributes:attributes";
+
+program textcmd_setprop( who, text )
+
+	var props := SplitWords( text );
+	if( !props[1] )
+		SendSysmessage( who , "Syntax: .setprop [propname] [amount]" );
+	elseif( !props[2] )
+		SendSysmessage( who , "Syntax: .setprop [propname] [amount]" );
+	endif
+
+	var propname	:= props[1];
+	var amount	:= Cint( props[2] );
+	var amount_str	:= Cstr( text - (propname + " ") );
+
+	if( amount == 9999 )
+		amount := 0;
+		amount_str := "";
+	endif
+
+	SendSysMessage( who, "Select an object" );
+	var obj := Target(who);
+	if( !obj )
+		return 0;
+	endif
+	
+	SetScriptController(who);
+	
+	if( obj.IsA(POLCLASS_MOBILE) )
+		ProcessMobileSetProp( who, obj, propname, amount, amount_str );
+	else
+		ProcessItemSetProp( who, obj, propname, amount, amount_str );
+	endif
+
+endprogram
+
+
+function ProcessMobileSetProp( who, mobile, propname, amount, amount_str )
+
+	var old_value := GetMobileProp( mobile, propname );
+	if( !old_value )
+		SendSysMessage( who, "This property don't exist for mobiles." );
+		return 0;
+	endif
+	
+	SendSysmessage( who, propname + " was: " + old_value );
+		
+	if( SetMobileProp( mobile, propname, amount, amount_str ) )
+		var new_value := GetMobileProp( mobile, propname );
+		if( new_value == old_value )
+			if( propname != "lightlevel" )
+				SendSysMessage( who, "Property unchanged." );
+			else
+				SendSysMessage( who, new_value );
+			endif
+		else
+			SendSysmessage( who, propname + " is now: " + new_value );
+		endif
+	else
+		SendSysmessage( who, "Could not write to " + propname + "." );
+	endif
+	
+	return 1;
+	
+endfunction
+
+
+function ProcessItemSetProp( who, item, propname, amount, amount_str )
+
+	var old_value := GetItemProp( item, propname );
+	if( !old_value )
+		SendSysMessage( who, "This property don't exist for items." );
+		return 0;
+	endif
+	
+	SendSysmessage( who, propname + " was: " + old_value );
+		
+	if( SetItemProp( item, propname, amount, amount_str ) )
+		var new_value := GetItemProp( item, propname );
+		if( new_value == old_value )
+			if( propname != "lightlevel" )
+				SendSysMessage( who, "Property unchanged." );
+			else
+				SendSysMessage( who, new_value );
+			endif
+		else
+			SendSysmessage( who, propname + " is now: " + new_value );
+		endif
+	else
+		SendSysmessage( who, "Could not write to " + propname + "." );
+	endif
+	
+	return 1;
+	
+endfunction
+
+
+function GetMobileProp( mobile, propname )
+
+	var retstr;
+	case( propname )
+		"x": 		retstr := mobile.x;				break;
+		"y": 		retstr := mobile.y;				break;
+		"z": 		retstr := mobile.z;				break;
+		"trueobjtype":	retstr := Hex(mobile.trueobjtype);		break;
+		"color": 	retstr := mobile.color;				break;
+		"truecolor":	retstr := mobile.truecolor;			break;
+		"facing": 	retstr := mobile.facing;			break;
+		"name":		retstr := mobile.name;				break;
+		"warmode":	retstr := mobile.warmode;			break;
+		"gender":	retstr := mobile.gender;			break;
+		"hp":		retstr := GetHp(mobile);			break;
+		"mana":		retstr := GetMana(mobile);			break;
+		"stamina":	retstr := GetStamina(mobile);			break;
+		"strength":	retstr := GetStrength(mobile);			break;
+		"dexterity":	retstr := GetDexterity(mobile);			break;
+		"intelligence":	retstr := GetIntelligence(mobile);		break;
+		"strmod":	retstr := GetStrengthMod(mobile);		break;
+		"intmod":	retstr := GetIntelligenceMod(mobile);		break;
+		"dexmod":	retstr := GetDexterityMod(mobile);		break;
+		"armod":	retstr := mobile.ar_mod;			break;
+		"graphic":	retstr := mobile.graphic;			break;
+		"poisoned":	retstr := mobile.poisoned;			break;
+		"paralyzed":	retstr := mobile.paralyzed;			break;
+		"hidden":	retstr := mobile.hidden;			break;
+		"concealed":	retstr := mobile.concealed;			break;
+		"frozen":	retstr := mobile.frozen;			break;
+		"stealthsteps":	retstr := mobile.stealthsteps;			break;
+		"squelched":	retstr := mobile.squelched;			break;
+		"lightlevel":	retstr := "Can't read personnal light level";	break;
+		"title_guild":	retstr := mobile.title_guild;			break;
+		"title_prefix":	retstr := mobile.title_prefix;			break;
+		"title_suffix":	retstr := mobile.title_suffix;			break;
+		"title_race":	retstr := mobile.title_race;			break;
+		"criminal":	retstr := mobile.criminal;			break;
+		"murderer":	retstr := mobile.murderer;			break;
+		default:	retstr := error;
+	endcase
+
+	if( retstr != error )
+		return Cstr(retstr);
+	else
+		return retstr;
+	endif
+	
+endfunction
+
+
+function SetMobileProp( mobile, propname, amount, amount_str )
+
+	var ret := 1;
+	case( propname )
+		"x": 		ret := MoveObjectToLocation( mobile, amount, mobile.y, mobile.z, mobile.realm, MOVEOBJECT_FORCELOCATION );	break;
+		"y": 		ret := MoveObjectToLocation( mobile, mobile.x, amount, mobile.z, mobile.realm, MOVEOBJECT_FORCELOCATION );	break;
+		"z": 		ret := MoveObjectToLocation( mobile, mobile.x, mobile.y, amount, mobile.realm, MOVEOBJECT_FORCELOCATION );	break;
+		"trueobjtype":	mobile.trueobjtype	:= amount;		break;
+		"color": 	mobile.color		:= amount;		break;
+		"truecolor":	mobile.truecolor	:= amount;		break;
+		"facing": 	mobile.facing		:= amount;		break;
+		"name":		mobile.name		:= amount_str;		break;
+		"warmode":	mobile.warmode		:= amount;		break;
+		"gender":	mobile.gender		:= amount;		break;
+		"hp":		ret := SetHp(mobile,amount);			break;
+		"mana":		ret := SetMana(mobile,amount);			break;
+		"stamina":	ret := SetStamina(mobile,amount);		break;
+		"strength":	ret := SetBaseStrength(mobile,amount);		break;
+		"dexterity":	ret := SetBaseDexterity(mobile,amount);		break;
+		"intelligence":	ret := SetBaseIntelligence(mobile,amount);	break;
+		"strmod":	ret := SetStrengthMod(mobile,amount);		break;
+		"intmod":	ret := SetIntelligenceMod(mobile,amount);	break;
+		"dexmod":	ret := SetDexterityMod(mobile,amount);		break;
+		"armod":	mobile.ar_mod		:= amount;		break;
+		"graphic":	mobile.graphic		:= amount;		break;
+		"hidden":	mobile.hidden		:= amount;		break;
+		"concealed":	mobile.concealed	:= amount;		break;
+		"frozen":	mobile.frozen		:= amount;		break;
+		"stealthsteps":	mobile.stealthsteps	:= amount;		break;
+//		"poisoned":	mobile.SetPoisoned(amount);			break;
+		"paralyzed":	mobile.SetParalyzed(amount);			break;
+		"squelched":	mobile.Squelch(amount);				break;
+		"criminal":	mobile.SetCriminal(amount);			break;
+		"murderer":	mobile.SetMurderer(amount);			break;
+		"title_guild":	mobile.title_guild	:= amount_str;		break;
+		"title_prefix":	mobile.title_prefix	:= amount_str;		break;
+		"title_suffix":	mobile.title_suffix	:= amount_str;		break;
+		"title_race":	mobile.title_race	:= amount_str;		break;
+		"lightlevel":	amount_str := SplitWords(amount_str);
+				mobile.SetLightLevel( Cint(amount_str[1]), Cint(amount_str[2]) );
+				break;
+		default:	ret := error;
+	endcase
+
+	return ret;
+
+endfunction
+
+
+function GetItemProp( item, propname )
+
+	var retstr;
+	case( propname )
+		"x": 		retstr := item.x;		break;
+		"y": 		retstr := item.y;		break;
+		"z": 		retstr := item.z;		break;
+		"color": 	retstr := item.color;		break;
+		"facing": 	retstr := item.facing;		break;
+		"name":		retstr := item.name;		break;
+		"desc":		retstr := item.desc;		break;
+		"hp":		retstr := item.hp;		break;
+		"ar_mod":	retstr := item.ar_mod;		break;
+		"graphic":	retstr := item.graphic;		break;
+		"usescript":	retstr := item.usescript;	break;
+		"equipscript":	retstr := item.equipscript;	break;
+		"unequipscript": retstr := item.unequipscript;	break;
+		"newbie":	retstr := item.newbie;		break;
+		"movable":	retstr := item.movable;		break;
+		"decayat":	retstr := item.decayat;		break;
+		"maxhp_mod":	retstr := item.maxhp_mod;	break;
+		"quality":	retstr := item.quality;		break;
+		"ar_base":	retstr := item.ar_base;		break;
+		"hitscript":	retstr := item.hitscript;	break;
+		"dmg_mod":	retstr := item.dmg_mod;		break;
+		"controlscript": retstr := item.controlscript;	break;
+		"walkonscript":	retstr := item.walkonscript;	break;
+		"invisible":	retstr := item.invisible;	break;
+		"buyprice":	retstr := item.buyprice;	break;
+		default:	retstr := error;
+	endcase
+
+	if( retstr != error )
+		return Cstr(retstr);
+	else
+		return retstr;
+	endif
+
+endfunction
+
+
+function SetItemProp( item, propname, amount, amount_str )
+
+	var ret := 1;
+	case( propname )
+		"x": 		ret := MoveObjectToLocation( item, amount, item.y, item.z, item.realm, MOVEOBJECT_FORCELOCATION );	break;
+		"y": 		ret := MoveObjectToLocation( item, item.x, amount, item.z, item.realm, MOVEOBJECT_FORCELOCATION );	break;
+		"z": 		ret := MoveObjectToLocation( item, item.x, item.y, amount, item.realm, MOVEOBJECT_FORCELOCATION );	break;
+		"color": 	item.color		:= amount;		break;
+		"facing": 	item.facing		:= amount;		break;
+		"name":		item.name		:= amount;		break;
+		"desc":		item.desc		:= amount;		break;
+		"hp":		item.hp			:= amount;		break;
+		"ar_mod":	item.ar_mod		:= amount;		break;
+		"graphic":	item.graphic		:= amount;		break;
+		"newbie":	item.newbie		:= amount;		break;
+		"movable":	item.movable		:= amount;		break;
+		"decayat":	item.decayat		:= amount;		break;
+		"maxhp_mod":	item.maxhp_mod		:= amount;		break;
+		"ar_base":	item.ar_base		:= amount;		break;
+		"dmg_mod":	item.dmg_mod		:= amount;		break;
+		"invisible":	item.invisible		:= amount;		break;
+		"buyprice":	item.buyprice		:= amount;		break;
+		"hitscript":	item.hitscript		:= amount_str;		break;
+		"usescript":	item.usescript		:= amount_str;		break;
+		"equipscript":	item.equipscript	:= amount_str;		break;
+		"walkonscript":	item.walkonscript	:= amount_str;		break;
+		"unequipscript": item.unequipscript	:= amount_str;		break;
+		"controlscript": item.controlscript	:= amount_str;		break;
+		"quality":	amount_str := SplitWords(amount_str);
+				amount	   := Cdbl(amount_str[1]);
+				if( amount > 0.0 )
+					item.quality	:= amount;
+				endif
+				break;
+		default:	ret := error;
+	endcase
+
+	if( ret != error )
+		return Cstr(ret);
+	else
+		return ret;
+	endif
+
+endfunction

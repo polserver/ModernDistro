@@ -1,0 +1,8 @@
+use uo;
+use os;
+
+program sysbook_onCreate(book)
+
+        book.name := book.GetTitle();
+
+endprogram

@@ -1,0 +1,33 @@
+use uo;
+use os;
+use util;
+
+include "include/client";
+include ":attributes:attributes";
+include ":poisonwatcher:poisons";
+include ":damage:damage";
+
+program poisondamage (passparms)
+  var who      := passparms[1];
+  var attacker := passparms[2];
+  var weapon   := passparms[3];
+  var level    := passparms[4];
+  var pfield   := Cint(passparms[5]);
+  if(who.npctemplate)
+//    var npccfg := ReadConfigFile("::npcdesc");
+    if(who.npctemplate == "bladespirit")
+      return;
+    endif
+  elseif(who.cmdlevel > 1)
+    return;
+  endif
+  AddPoison(who, "defaultPoison", 120, attacker, level);
+  if(pfield == 1)
+    PrintTextAbovePrivate(who, "You choke on the noxious fumes!", who);
+//    var dmg := Resisted(5, attacker, who, CInt(GetAttribute(attacker, "magery") / 25));
+	// We now do a resisting spells check in damage.inc
+    var dmg := CInt(GetAttribute(attacker, "magery") / 25);
+    ApplyRawSpellDamageEX(who, dmg, DMG_POISON, attacker, 5);
+  endif
+endprogram
+

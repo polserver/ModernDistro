@@ -1,0 +1,143 @@
+use uo;
+use os;
+use cfgfile;
+include ":combat:hitScriptInc";
+include ":attributes:attributes";
+include ":damage:damage";
+
+var speech;
+
+program MainHitScript(attacker, defender, weapon, armor, basedamage, rawdamage)
+
+	var bloodoath := GetObjProperty(defender, "bloodoath");
+	if(bloodoath)
+		if(bloodoath  == defender.serial)
+			rawdamage := rawdamage * 0.9;
+			PlayObjectCenteredEffect(attacker, 0x374a, 20,15 );
+			PlayObjectCenteredEffect( defender, 0x374a, 20,15 );
+			ApplyDamageEX(attacker, rawdamage, DMG_FORCED);
+		endif
+	endif
+	var attune := getobjproperty(defender, "#attune");
+	if(attune)
+		rawdamage := rawdamage * 0.85;
+		PlayObjectCenteredEffect(attacker, 0x374a, 20,15 );
+		PlayObjectCenteredEffect( defender, 0x374a, 20,15 );
+	endif
+	var wraithform := GetObjProperty(defender, "wraith");
+	if(wraithform)
+		rawdamage := rawdamage * 1.2;
+	endif
+
+
+
+	if (!CheckLineOfSight(attacker, defender) )
+		return 0;
+	endif
+
+	if (defender.isA(POLCLASS_NPC))
+		basedamage := CInt(basedamage * 1.3);
+		rawdamage := rawdamage * 1.3;
+		rawdamage := CInt(rawdamage * ( AdjustDamageFactor(weapon, defender, attacker) ) );
+		if (rawdamage == 0)
+			return 0;
+		endif
+	endif
+
+
+
+	if (GetObjProperty(defender, "#BLINKING") != error )
+		if ( (GetObjProperty(defender, "#BLINKING") <= ReadGameClock() ) && (RandomInt(2) == 1) )
+			PrintTextAbove(defender, CStr(defender.name) + " evades the attack!");
+			return 0;
+		endif
+	endif
+
+        var x := CheckTempProtections(attacker, defender, rawdamage);
+	if (x == 0)
+		return 0;
+	else
+		rawdamage := x;
+	endif
+
+	SetObjProperty(defender, "LastHit", {attacker.name, attacker.serial, weapon });
+
+	var armorhit;
+	if ( (armor == 0) || (!armor) )
+	  armorhit := GetObjProperty(defender, "OnArmorHit");
+	else
+	  armorhit := GetObjProperty(armor, "OnHit");
+	endif
+
+	var weaponhit := GetObjProperty(weapon, "OnHit");
+	if (!weaponhit)
+		weaponhit := GetObjProperty(attacker, "OnHit");
+	endif
+
+	var gloves := GetEquipmentByLayer(attacker, 0x07);
+	var gloves_hit := 0;
+	if (gloves)
+		gloves_hit := GetObjProperty(gloves, "OnHit");
+	endif
+
+	if (armorhit)
+	    SetObjProperty(defender, "TempDamage", rawdamage);
+		foreach x in armorhit
+		  Detach();
+		  run_script_to_completion(x, { attacker, defender, weapon, armor, basedamage, rawdamage } );
+		  rawdamage := CInt(GetObjProperty(defender, "TempDamage") );
+		endforeach
+		EraseObjProperty(defender, "TempDamage");
+		if (rawdamage > 0)
+		  DealDamage(defender, attacker, rawdamage);
+		  return;
+		else
+		  return;
+		endif
+	endif
+
+	if (!weaponhit)
+		if (!gloves_hit)
+			DealDamage(defender, attacker, rawdamage);
+			return;
+		else
+		  foreach x in gloves_hit
+			Detach();
+			run_script_to_completion(CStr(x), { attacker, defender, gloves, armor, basedamage, rawdamage } );
+			rawdamage := GetObjProperty(gloves, "TempDamage");
+		  endforeach
+		  EraseObjProperty(weapon, "TempDamage");
+		  if (rawdamage < 1)
+        		rawdamage := 1;
+		  endif
+  	  	  DealDamage(defender, attacker, rawdamage);
+		  return;
+		endif
+	else
+	  foreach x in weaponhit
+		Detach();
+		run_script_to_completion(CStr(x), { attacker, defender, weapon, armor, basedamage, rawdamage } );
+		rawdamage := GetObjProperty(weapon, "TempDamage");
+	  endforeach
+	  EraseObjProperty(weapon, "TempDamage");
+	  if (rawdamage < 1)
+            rawdamage := 1;
+          endif
+	        if (!gloves_hit)
+			DealDamage(defender, attacker, rawdamage);
+			return;
+		else
+		  foreach x in gloves_hit
+			Detach();
+			run_script_to_completion(CStr(x), { attacker, defender, gloves, armor, basedamage, rawdamage } );
+			rawdamage := GetObjProperty(gloves, "TempDamage");
+		  endforeach
+		  EraseObjProperty(weapon, "TempDamage");
+		  if (rawdamage < 1)
+        		rawdamage := 1;
+		  endif
+		endif
+		DealDamage(defender, attacker, rawdamage);
+	  return;
+	endif
+endprogram

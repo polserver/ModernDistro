@@ -1,0 +1,293 @@
+/*
+ * $Id: spellStarter.src 525 2006-07-01 02:36:26Z tekproxy $
+ *
+ */
+
+use uo;
+use os;
+use cfgfile;
+
+include ":attributes:attributes";
+include ":magery:spells";
+
+include "include/containers";
+include "include/itemdesc";
+include "include/client";
+include "include/sounds";
+
+program SpellStarter(params)
+	var mobile := params[1]; // Caster
+	var spell_id := params[2]; // Id # of the spell
+	var scroll := params[3]; // Scroll ObjType being used
+	var targ := params[4]; // NPC target used if NPC is casting the spell
+//        targ := targ; // stop compiler unused warning
+        if (scroll == 1)
+        endif
+	if ( !Attach(mobile) )
+		SendSysMessage(mobile, "You are already doing something.");
+		return 0;
+	endif
+
+	var spell_elem := MS_GetSpellsCfgElem(spell_id);
+	var manacost := CInt(spell_elem.ManaCost);
+	// If spell is set to 'TestOnly 1', then it requires cmdlevel or #SpellTester CProp before it can be used.
+	if ( spell_elem.TestOnly and !mobile.cmdlevel )
+		// TestOnly spell, check for #SpellTester
+		if ( !GetObjProperty(mobile, "#SpellTester") )
+			SendSysMessage(mobile, "This spell has been temporarily disabled.");
+			FailSpell(mobile);
+			return 0;
+		endif
+	elseif ( spell_elem.NPCOnly && !mobile.npctemplate )
+		PrintTextAbove(mobile, "Unable to cast - NPC only spell.");
+		return 0;
+	endif
+
+	// Perform various checks to see if mobile can perform the spell
+	var requires_mana := 1;
+	var requires_regs := 1;
+	var settings_elem := MS_GetSettingsCfgElem("Settings");
+	if (scroll)
+		requires_regs := 0;
+	endif
+
+	if ( !mobile.IsA(POLCLASS_NPC) && (mobile.cmdlevel >= settings_elem.StaffCmdLvl) )
+		requires_mana := CInt(settings_elem.StaffRequiresMana);
+		requires_regs := CInt(settings_elem.StaffRequiresReagents);
+	else
+		requires_regs := 0;
+		requires_mana := 1;
+	endif
+
+	if ( GetObjProperty(mobile, "#Casting") )
+		SendSysMessage(mobile, "You cannot cast right now.", color := 33);
+		return 0;
+	elseif ( mobile.squelched && !mobile.npctemplate )
+		SendSysMessage(mobile, "Something prevents you from casting.", color := 33);
+		FailSpell(mobile);
+		return 0;
+	elseif ( !EquipmentCheck(mobile) )
+		SendSysMessage(mobile, "Your hands must be free to cast spells.", color := 33);
+		FailSpell(mobile);
+		return 0;
+	elseif ( mobile.frozen )
+		SendSysMessage(mobile, "You cannot cast a spell while frozen.", color := 33);
+		FailSpell(mobile);
+		return 0;
+	endif
+
+	if ( requires_mana )
+	// Added to support necro spell mind rot.
+		if(GetObjProperty(mobile, "#mindrot"))
+			if(mobile.isA(POLCLASS_NPC))
+				manacost := manacost * 2;
+			else
+				manacost := manacost * 1.25;
+			endif
+		endif
+		if ( !AP_ConsumeVital(mobile, VITALID_MANA, manacost) )
+			SendSysMessage(mobile, "You don't have enough mana to cast that spell!");
+			FailSpell(mobile);
+			return 0;
+		endif
+	endif
+
+	if ( requires_regs )
+		if ( !CheckReagents(mobile, spell_elem, scroll) )
+			SendSysMessage(mobile, "You don't have the proper reagents.", color := 33);
+			FailSpell(mobile);
+			return 0;
+		endif
+	endif
+
+	// might want to send events to this script
+	SetObjProperty(mobile, "#Casting", GetPid());
+	mobile.frozen := 1;
+	mobile.hidden := 0;
+	EraseObjProperty(mobile, "#Medding");
+	SpeakPowerWords(mobile, spell_id);
+
+	// Perform casting animation
+        var circ := spell_elem.Circle + 1; // adding one to circle to get cast repetitions.
+        var rep;
+        circ := CInt(circ/2);
+
+        for (rep := 1; rep <= circ; rep := rep + 1)
+            case ( Lower(spell_elem.Target) )
+                    "none":
+                    "direct":
+                            PerformAction(mobile, ANIM_CAST_DIR);
+                            break;
+                    "area":
+                    "summon":
+                            PerformAction(mobile, ANIM_CAST_AREA);
+                            break;
+                    default:
+                            PerformAction(mobile, ANIM_CAST_DIR);
+            endcase
+            Sleepms (2000);
+        endfor
+
+
+	var orig_hp := AP_GetVital(mobile, "Hits");
+	var delay := spell_elem.Delay;
+	var protection := GetObjProperty(mobile, "Protection");
+        // Added to work around a problem with mages being unable to cast while under the influence of 
+        // strength mods.
+//	if ( AP_GetStatMod(mobile, ATTRIBUTEID_STRENGTH) )
+//		protection := 1;
+//	endif
+
+	while ( delay > 0 )
+		if ( !protection )
+			// There is a small chance, perhaps, that the mobile is damaged and then regens
+			// or is healed enough in the ~50ms delay between checking. It could be more
+			// accurate to grab the pid from ApplyDamageEX and send a damaged event to this
+			// script, on top of also checking the health.
+			if ( orig_hp > AP_GetVital(mobile, "Hits")  )
+				SendSysMessage(mobile, "Your concentration is disturbed, thus ruining thy spell.", color := 33);
+				FailSpell(mobile);
+				PlaySoundEffect(mobile, SFX_SPELL_FAIL);
+				PlayObjectCenteredEffect(mobile, FX_SPELL_FAIL, 5, 50);
+				return 0;
+			endif
+		endif
+// This was commented out /////////////////////////////
+		if ( delay % 50 )
+				SleepMS(delay % 50);
+				delay := delay - (delay % 50);
+		else
+				SleepMS(50);
+				delay := delay - 50;
+		endif
+
+
+	endwhile
+////////////////////////////////////////////////////
+	
+	var attribute := Lower(spell_elem.Attribute);
+
+	if ( !attribute )
+		attribute := MAGERY;
+	endif
+
+	var difficulty := CInt(spell_elem.Difficulty);
+
+	if ( !difficulty )
+		difficulty := -1;
+	endif
+		
+//	var skill_check := SkillCheck(mobile, attribute, difficulty, 50);
+	var skill_check := SkillCheck(mobile, attribute, difficulty, 30);
+
+	// Added to support necro wraith form can recall regardless of their magery skill level.
+	if(GetObjProperty(mobile, "wraith") && spell_id == 32)
+		skill_check := 1;
+	endif
+	mobile.frozen := 0;
+        
+	// skill_check > 0 on success
+	if ( skill_check)
+		var info := struct;
+		info.+script := spell_elem.script;
+		info.+attribute := attribute;
+		info.+skill_check := skill_check;
+		info.+targ := targ;
+		info.+pid := GetPid();
+		info.+spellId := spell_id;
+		info.+circle := spell_elem.Circle;
+		info.+spell_config := spell_elem;
+		info.+damage_typ := spell_elem.DamageType;
+
+		var script := Start_Script(spell_elem.SpellScript, {mobile, info, spell_id, targ});
+		Detach();
+		EraseObjProperty(mobile, "#Casting");
+
+		if ( script.errortext )
+			Broadcast("Unable to start ["+spell_elem.SpellScript+"] -> "+script.errortext);
+		endif
+
+		var ev;
+
+		while ( script.pid && !ev )
+			ev := wait_for_event(1);
+		endwhile
+	else
+	// Plan to add chaoseffects here.
+		PlaySoundEffect(mobile, SFX_SPELL_FAIL);
+		SendSysMessage(mobile, "The spell fizzles.", color := 33);
+	endif
+
+//	MS_SpellDebug(mobile, "Spell starter completed.");
+	EraseObjProperty(mobile, "#Casting");
+
+	return 1;
+endprogram
+
+function EquipmentCheck(mobile)
+	var hand1 := GetEquipmentByLayer(mobile, LAYER_HAND1);
+	var hand2 := GetEquipmentByLayer(mobile, LAYER_HAND2);
+	
+	// On OSI there are spell weaving weapons that mages can hold while casting spells
+	// But they are not implemented yet. Maybe later.
+	if ( (hand2 && !hand1.IsA(POLCLASS_SPELLBOOK)) || (hand2 && !hand2.IsA(POLCLASS_SPELLBOOK)) )
+		return 0;
+	endif
+
+	return 1;
+endfunction
+
+function CheckReagents(mobile, byref spell_elem, scroll)
+	if ( mobile.npctemplate )
+		// NPCs don't need reagents to cast.
+		return 1;
+	elseif ( scroll.IsA(POLCLASS_ITEM) )
+		return SubtractAmount(scroll, 1);
+	elseif ( scroll == 1 )
+		// Scroll == 1 when called from runebooks, wands, etc to bypass reg requirements
+		return 1;
+	endif
+
+	var reg_cost := GetConfigStringDictionary(spell_elem, "RegCost");
+
+	// Before consuming, verify that there are enough regs.
+	foreach amount in (reg_cost)
+		amount := CInt(amount);
+		if ( !amount )
+			amount := 1;
+		endif
+
+		var objtype := GetObjTypeByName(_amount_iter);
+		if(!objtype)
+			objtype := CInt(_amount_iter);
+		endif
+		var properties := dictionary{"objtype"->objtype};
+		
+		if ( AmountInContainer(mobile.backpack, properties) < amount )
+			if ( mobile.cmdlevel )
+				SendSysMessage(mobile, "You do not have enough "+GetObjTypeDesc(objtype, (amount>1))+".");
+			endif
+			return 0;
+		endif
+
+		SleepMS(2);
+	endforeach
+	// Consume reagents - CInt() and < 1 checks already done in previous loop.
+	// Foreach is a pointer!
+	foreach amount in (reg_cost)
+		ConsumeSubstance(mobile.backpack, GetObjTypeByName(lower(_amount_iter)), amount);
+		SleepMS(2);
+	endforeach
+
+	return 1;
+endfunction
+
+function FailSpell(mobile)
+	mobile.frozen := 0;
+	EraseObjProperty(mobile, "#Medding");
+	EraseObjProperty(mobile, "#Casting");
+
+	// The fizzle GFX is not suposed to play unless interrupted
+	PlaySoundEffect(mobile, SFX_SPELL_FAIL);
+	return 1;
+endfunction

@@ -1,0 +1,72 @@
+use uo;
+use os;
+use util;
+
+const EVID_CHECK_SPOT := 0x123456;
+const OC_PID := "#orecore";
+
+var oretable := GetGlobalProperty("orelist");
+if(!oretable)
+  oretable := dictionary;
+endif
+var ev;
+var ed := dictionary;
+var ttime := ReadGameClock();
+
+program ore_server()
+  print("Starting Ore Server.");
+  SetGlobalProperty(OC_PID, getpid());
+  while(1)
+	ev := wait_for_event(20);
+	case(ev.type)
+	  EVID_CHECK_SPOT: CheckSpot();
+	endcase
+	if(ttime + 300 < ReadGameClock())
+	  SetGlobalProperty("orelist", oretable);
+	  ttime := ReadGameClock();
+	endif
+  endwhile
+endprogram
+
+function CheckSpot()
+  var src := ev.source;
+  var x := CInt(ev.x/3);
+  var y := CInt(ev.y/3);
+  if(!oretable.exists(x))
+    NewSpot(0,y);
+  elseif(!oretable[x].exists(y))
+    NewSpot(x,y);
+  endif
+  src.sendevent(oretable[x][y]);
+endfunction
+
+function NewSpot(x:=0,y)
+  if( x == 0)
+ 	oretable.insert(CInt(ev.x/3),ed);
+  endif
+  var ore := GenerateNewOreType();
+  oretable[CInt(ev.x/3)].insert(y,ore);
+endfunction
+
+function GenerateNewOreType()
+  var val := RandomInt(999) + 1;
+  if((val >= 1) && (val <= 496))
+    return 1;  //"iron"
+  elseif((val >= 497) && (val <= 608))
+    return 2;  //"dull copper"
+  elseif((val >= 609) && (val <= 706))
+    return 3;  //"shadow"
+  elseif((val >= 707) && (val <= 790))
+    return 4;  //"copper"
+  elseif((val >= 791) && (val <= 860))
+    return 5;  //"bronze"
+  elseif((val >= 861) && (val <= 916))
+    return 6;  //"golden"
+  elseif((val >= 917) && (val <= 958))
+    return 7;  //"agapite"
+  elseif((val >= 959) && (val <= 985))
+    return 8;  //"verite"
+  elseif((val >= 986) && (val <= 1000))
+    return 9;  //"valorite"
+  endif
+endfunction

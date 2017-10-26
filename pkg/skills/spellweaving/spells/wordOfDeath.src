@@ -1,0 +1,71 @@
+use uo;
+use vitals;
+
+include "include/spellRestrictions";
+
+program chrcast_wdeath( parms )
+  var circle := 6;
+  var delivery := "direct";
+  var noto := "harmful";
+  var result := maincast(parms, delivery, circle, noto, 614);
+
+  if(result == 0)
+    return 0;
+  endif
+
+  var caster := result[1];
+  var cast_on := result[2];
+
+
+var dru := Cint(GetEffectiveSkill(caster, SPELLWEAVING));
+var alore := Cint(GetEffectiveSkill(caster, SKILLID_ANIMALLORE));
+var int := GetIntelligence(caster);
+
+var bonus := 0;
+
+if(caster.ip)
+bonus := Cint(int/50);
+endif
+
+
+var dmg := (dru/5) + (alore/5) + bonus;
+var chance := ((dru + alore + bonus)*5)/100; //(10% + bonus od inta, za kazde 50 inta +1%)
+var makshp := (WezMaxHp(cast_on)*30)/100;
+var hapek := WezHp(cast_on);
+
+
+PlaySoundEffect(caster, 0x20D);
+if(cast_on.npctemplate)
+
+    if(chance > (RandomInt(100)) + 1) // 10% szansy
+        
+        if(hapek < makshp) // sprawdza czy koles ma mniej niz 30% hape
+        SendSysMessage(caster, cast_on.name + " przegral ze smiercia!",3,66);
+        ApplyRawDamage(cast_on, WezMaxHp(cast_on)+100);
+        else
+        SendSysMessage(caster, cast_on.name + " ma za duzo Hp. Minimum 30% maksymalnej wartosci.",3,40);
+        endif
+    else
+        SendSysMessage(caster, cast_on.name + " wygral ze smiercia!",3,40);
+       
+        PlayObjectCenteredEffect( cast_on, 0x37c3, 0x0a,0x1e);
+        ApplyRawDamage(cast_on, Resisted(circle, caster, cast_on, dmg));
+    endif
+
+else
+        PlayObjectCenteredEffect( cast_on, 0x37c3, 0x0a,0x1e);
+        ApplyRawDamage(cast_on, Resisted(circle, caster, cast_on, dmg));
+endif
+
+
+
+endprogram
+
+function WezMaxHp(who)
+  return Cint(GetVitalMaximumValue(who, VITALID_LIFE)/ 100);
+endfunction
+
+function WezHp(who)
+  return Cint(GetVital(who, VITALID_LIFE)/ 100);
+endfunction 
+

@@ -1,0 +1,102 @@
+use uo;
+use os;
+
+include "include/client";
+include "include/utility";
+
+program textcmd_disarm(me, text)
+
+	if (lower(text) == "bag")
+		SetDisarmBag(me);
+	endif
+
+	set_critical(1);
+
+	var mypack := me.backpack;
+	if ( GetObjProperty(me,"disarmbag") )
+		var bagserial := GetObjProperty(me,"disarmbag");
+		foreach item in EnumerateItemsInContainer(me.backpack)
+			if ( item.serial == bagserial )
+				mypack := item;
+				break;
+			endif
+		endforeach
+	endif
+
+	if (mypack == me.backpack)
+		EraseObjProperty(me,"disarmbag");
+	endif
+
+	if (me.dead)
+		return;
+	endif
+
+	var weaponone := GetEquipmentByLayer( me,  LAYER_HAND1 );
+	var weapontwo := GetEquipmentByLayer( me,  LAYER_HAND2 );
+
+	if (weaponone)
+		MoveItemToContainer(weaponone, mypack );
+	endif
+	if (weapontwo)
+		MoveItemToContainer(weapontwo, mypack );
+	endif
+
+	var weapon := {};
+		weapon[1] := 0;
+		weapon[2] := 0;
+		weapon[3] := 0;
+		weapon[4] := 0;
+		weapon[5] := 0;
+		weapon[6] := 0;
+
+	if ( GetObjProperty(me,"weapon") )
+		weapon := GetObjProperty(me,"weapon");
+	endif
+
+	if (CInt(text)==1)
+		weapon[1] := 0;
+		weapon[2] := 0;
+		if (weaponone)
+			weapon[1] := weaponone.serial;
+		endif
+		if (weapontwo)
+			weapon[2] := weapontwo.serial;
+		endif
+		SetObjProperty(me,"weapon", weapon);
+	elseif (CInt(text)==2)
+		weapon[3] := 0;
+		weapon[4] := 0;
+		if (weaponone)
+			weapon[3] := weaponone.serial;
+		endif
+		if (weapontwo)
+			weapon[4] := weapontwo.serial;
+		endif
+		SetObjProperty(me,"weapon", weapon);
+	elseif (CInt(text)==3)
+		weapon[5] := 0;
+		weapon[6] := 0;
+		if (weaponone)
+			weapon[5] := weaponone.serial;
+		endif
+		if (weapontwo)
+			weapon[6] := weapontwo.serial;
+		endif
+		SetObjProperty(me,"weapon", weapon);
+	endif
+
+endprogram
+
+function SetDisarmBag(me)
+
+	SendSysMessage(me,"Select a container");
+	var bag := Target(me);
+
+	if (!InInventory(me.backpack, bag) )
+		SendSysMessage(me,"That is not in your inventory.");
+		return;
+	endif
+
+	SetObjProperty(me,"disarmbag",bag.serial);
+
+endfunction

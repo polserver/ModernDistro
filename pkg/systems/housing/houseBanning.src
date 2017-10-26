@@ -1,0 +1,64 @@
+use cfgfile;
+use os;
+use uo;
+
+
+include ":housing:housing_settings";
+
+program walk_on_bantile(who, tile)
+	var hserial := GetObjProperty(tile, "signserial");
+	var house := SystemFindObjectBySerial( CInt(hserial) );
+	var sign := house;
+	var owneracct := GetObjProperty(sign,"owneracct");
+	var	coownerinfo := GetObjProperty(sign,"coowners");
+	var indc;
+	
+	if(owneracct == who.acctname)
+		SetObjProperty(sign,"decay", (ReadGameClock() + get_abandon_time()));
+	else
+		coownerinfo := GetObjProperty(sign,"coowners");
+		indc := returnindex(coownerinfo, who.serial);
+		if(indc > 0)
+			SetObjProperty(sign,"decay", (ReadGameClock() + get_abandon_time()));
+		endif
+	endif
+
+	if(!sign)
+		var signarray := {0x0bd1, 0x0bd2, 0x0bcf, 0x0bd0};
+		foreach thing in (house.components)
+			if(thing.objtype in signarray)
+				sign := thing;
+				SetObjProperty(house, "signserial", sign.serial);
+				break;
+			endif
+		endforeach
+	endif
+	var banlist := GetObjProperty(house, "banlist");
+	if(!banlist)
+		return;
+	endif
+	if(who.serial in banlist)
+		var signarray2 := {0x0bd1, 0x0bd2, 0x0bcf, 0x0bd0};
+		foreach thing in (house.components)
+			if(thing.objtype in signarray2)
+				sign := thing;
+				break;
+			endif
+		endforeach
+
+		MoveObjectToLocation( who, sign.x, sign.y, sign.z, sign.realm, MOVEOBJECT_FORCELOCATION );
+		SendSysMessage(who, "You are banned from that house and cannot enter it!");
+		endif
+endprogram
+
+function returnindex(info, information)
+  var i;
+  for (i := 0; i <= len(info); i := i + 1)
+    if (info[i] == information)
+      return i;
+    endif
+  endfor
+  return 0;
+endfunction
+
+

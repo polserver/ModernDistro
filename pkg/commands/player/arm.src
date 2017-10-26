@@ -1,0 +1,76 @@
+use uo;
+use os;
+
+include "include/client";
+
+program textcmd_arm(me, text)
+
+	set_critical(1);
+
+	if (me.dead)
+		return;
+	endif
+
+	if (!GetObjProperty(me,"#arm"))
+		SetObjProperty(me,"#arm",ReadGameClock()+3);
+	elseif ( GetObjProperty(me,"#arm") > ReadGameClock() );
+		return;
+	else
+		SetObjProperty(me,"#arm",ReadGameClock()+3);
+	endif
+	if (!me.concealed)
+		PlaySoundEffect(me, 0x0057);
+	endif
+
+   if ( GetObjProperty(me,"weapon") )
+
+	var weapon := GetObjProperty(me,"weapon");
+
+	var lefthand := weapon[1];
+	var righthand := weapon[2];
+	if (CInt(text)==2)
+		lefthand := weapon[3];
+		righthand := weapon[4];
+	elseif (CInt(text)==3)
+		lefthand := weapon[5];
+		righthand := weapon[6];
+	endif
+
+	var weaponone := 0;
+	var weapontwo := 0;
+	if (lefthand)
+		weaponone := FindInInventory( lefthand, me );
+		if ( weaponone )
+			EquipItem(me,weaponone);
+		endif
+	endif
+	if (righthand)
+		weapontwo := FindInInventory( righthand, me );
+		if ( weapontwo )
+			EquipItem(me,weapontwo);
+		endif
+	endif
+
+	return;
+
+   endif
+
+   SendSysMessage(me,"Equip a weapon and use .DISARM 1 2 or 3");
+
+	Detach();
+	sleep(3);
+	EraseObjProperty(me,"#arm");
+
+endprogram
+
+function FindInInventory(thing, me)
+
+	foreach item in EnumerateItemsInContainer(me.backpack)
+		if ( item.serial == thing )
+			return item;
+		endif
+        sleepms(1);
+	endforeach
+	return 0;
+
+endfunction

@@ -1,0 +1,31 @@
+use uo;
+use os;
+
+program can_remove(who, backpack, item, movetype)
+  set_critical(1);
+  var vendorserial := GetObjProperty(backpack,"Vendored");
+  if(!vendorserial)
+    var ownerserial := GetObjProperty(backpack, "Owner");
+    if(ownerserial)
+      if(who.serial != ownerserial)
+        if(who.cmdlevel >= 3)
+          return 1;
+        endif
+        SendSysMessage(who, "You cannot move that");
+        return 0;
+      else
+        return 1;
+      endif
+    else
+      return 1;
+    endif
+  endif
+  var vendor := SystemFindObjectBySerial(vendorserial);
+  if(GetObjProperty(backpack, "Master") == who.serial)
+    return 1;
+  else
+    PrintTextAbovePrivate(vendor, "IF you want to buy something, just say so.", who);
+    return 0;
+  endif
+  set_critical(0);
+endprogram

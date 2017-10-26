@@ -1,0 +1,19 @@
+use uo;
+use os;
+
+//if inserttype == INSERT_INCREASE_STACK, adding_item is uninit
+//if inserttype == INSERT_ADD_ITEM, existing_stack and amt_to_add are uninit
+program on_insert(who, container, movetype, inserttype, adding_item, existing_stack, amt_to_add )
+  var item;
+  if(inserttype == INSERT_INCREASE_STACK)
+    item := existing_stack;
+  else
+  	item := adding_item;
+  endif
+  var amt := CInt(item.amount);
+  if(amt > 1)
+    if(SubtractAmount(item, (amt - 1)))
+      CreateItemInContainer(who.backpack, item.objtype, (amt - 1));
+    endif
+  endif
+endprogram

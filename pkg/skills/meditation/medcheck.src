@@ -1,0 +1,62 @@
+use uo;
+use os;
+use cfgfile;
+
+include "include/client";
+include ":attributes:attributes";
+
+program medcheck(who)
+  var skill,waittime,loss;
+  while(GetObjProperty(who,"LoggedIn"))
+    skill := 0;
+    waittime := 0;
+    loss := 0;
+    if(GetObjProperty(who, "IsMeditating"))
+      skill:=CInt((GetAttribute(who,MEDITATION)*100)/2);
+      loss := manaloss(who);
+      if(loss == "nomed")
+        loss := 7000;
+      endif
+      waittime:=((6000-skill)+ loss);
+      if(waittime > 7000)
+        waittime := 7000;
+      endif
+	  sleepms(waittime);
+    else
+      skill:= (CInt((GetAttribute(who,MEDITATION)*100)/2) / 2);
+      loss := manaloss(who);
+      if(loss == "nomed")
+        loss := 7000;
+      endif
+      waittime:=((6000-skill)+ loss);
+      if(waittime > 7000)
+        waittime := 7000;
+      endif
+	  sleepms(waittime);
+    endif
+    if(GetMana(who) < GetIntelligence(who))
+      SetMana(who, GetMana(who) + 1);
+    endif
+    if(GetMana(who) > GetIntelligence(who))
+      SetMana(who, who.intelligence);
+    endif
+  endwhile
+endprogram
+
+function manaloss(who)
+//  var medit := GetAttribute(who,MEDITATION);
+  var combatcfg := ReadConfigFile(":*:itemdesc");
+  var elem;
+  var loss := 0;
+  var value := 0;
+  foreach thing in ListEquippedItems(who)
+    elem := FindConfigElem(combatcfg, thing.objtype);
+    loss := GetConfigString(elem, "medloss");
+    if(!loss)
+      loss := 0;
+    endif
+    value := value + CInt(loss);
+    loss := 0;
+  endforeach
+  return value;
+endfunction

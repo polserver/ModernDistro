@@ -1,0 +1,116 @@
+////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////
+//
+//  TILE.SRC - ingame command
+//
+//  This is a "fastbuild" command you supply itemnumber and Z height as
+//  arguments. If Z is left out it takes the first coordinates Z as
+//  the Z to be built on. This command is great for putting down floors
+//  etc.
+//
+//  Todo:
+//   Clean up the code when abs() is avail. and C-style for loops
+//   don't require initialization.
+//
+//  Author: ens 1999/01/02
+//
+//  Recent Modifications:
+//      1999/01/25 Ignatius Created the command.
+//
+////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////
+
+
+
+use uo;
+
+
+
+program textcmd_tile( who, input )
+
+
+
+    if ( ! input )
+        SendSysMessage( who, "No arguments supplied. Usage: .tile [item] ([z]).", color := 33 );
+        return;
+    endif
+
+    var argarray := SplitWords( input ); // split the arguments.
+    var tileitem  := CInt( argarray[ 1 ] );
+    var tilez     := CInt( argarray[ 2 ] );
+    var zvalid := 1;  // assume z is correct for now.
+
+    if ( ! tilez )
+        SendSysMessage( who, "No Z supplied. Using target #1 Z instead.", 88 );
+        zvalid := 0;
+    else
+        if ( ( tilez  < -127 ) || ( tilez > 128 ) ) // check the bounds.
+            SendSysMessage( who, "Z is out of bounds. Using target #1 Z instead.", color := 88 );
+            zvalid := 0;
+        endif
+    endif
+
+    SendSysMessage( who, "Select upper left (top) corner: ", color := 88 );
+
+    var coordstructone := TargetCoordinates( who );
+
+    SendSysMessage( who, "Select lower right (bottom) corner: ", color := 88 );
+
+    var coordstructtwo := TargetCoordinates( who );
+
+    if ( ( ! coordstructone ) || ( ! coordstructtwo ) ) // check that we got two valid coordstructs.
+        SendSysMessage( who, "Cancelled", color := 33 );
+        return;
+    endif
+
+    if ( ! zvalid ) // if we are to use the coord #1 Z, check it out.
+        if ( coordstructone.z < -127 || coordstructone.z > 128 )
+            SendSysMessage( who, "Z is out of bounds. Aborting.", color := 33 );
+            return;
+        endif
+    endif
+
+    if ( ! zvalid )
+        tilez := coordstructone.z;
+    endif
+
+    // dummy variables, won't be needed after rewrite of command.
+    var startx;
+    var starty;
+    var endx;
+    var endy;
+
+    if ( coordstructone.x <= coordstructtwo.x )
+        startx  := coordstructone.x;
+        endx    := coordstructtwo.x;
+    else
+        startx  := coordstructtwo.x;
+        endx    := coordstructone.x;
+    endif
+
+    if ( coordstructone.y <= coordstructtwo.y )
+        starty  := coordstructone.y;
+        endy    := coordstructtwo.y;
+    else
+        starty  := coordstructtwo.y;
+        endy    := coordstructone.y;
+    endif
+
+    var fooy := starty; // store the original startY for use after each iteration.
+    while ( startx <= endx )
+        while ( starty <= endy )
+           CreateItemAtLocation( startx, starty, tilez, tileitem, 1, who.realm );
+           starty := starty + 1;
+        endwhile
+        starty := fooy;
+        startx := startx + 1;
+    endwhile
+
+    SendSysMessage( who, "Command completed.", color := 66 );
+endprogram
+
+
+
+

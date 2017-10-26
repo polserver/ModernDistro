@@ -1,0 +1,43 @@
+// reactivearmorhit
+//
+// This script fires when the armor his hit by a weapon.
+
+
+use uo;
+use util;
+use vitals;
+use os;
+
+
+program reactivearmourhit(param)
+
+	var attacker := param[1];
+	var defender := param[2];
+	var weapon := param[3];
+	var armor := param[4];
+	var basedamage := param[5];
+	var rawdamage := param[6];
+        
+        rawdamage := rawdamage;
+        basedamage := basedamage;
+        armor := armor;
+        weapon := weapon;
+
+
+	if (attacker.dead)
+		return 0;
+	endif
+
+	var diceroll := CInt(GetObjProperty(armor, "ReactiveDamage") );
+	if (!diceroll)
+		diceroll := "2d6";
+	else
+		diceroll := CStr(diceroll) + "d6";
+	endif
+
+	PlayObjectCenteredEffect(attacker, 0x36cb, 7, 0x10);
+	PlaySoundEffect(attacker, 0x208);
+	ApplyRawDamage(attacker, (RandomDiceRoll(diceroll) ) );
+	SetObjProperty(defender, "TempDamage", rawdamage);
+
+endprogram

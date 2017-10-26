@@ -1,0 +1,54 @@
+use npc;
+use os;
+use uo;
+use cfgfile;
+
+include "include/eventID";
+include ":attributes:attributes";
+include "include/sysEvent";
+include "include/randName";
+include "include/vetement";
+include "include/NPCUtil";
+include "include/objtype";
+include "include/dist";
+include "include/anchors";
+include "ai/main/killPCsLoop";
+include "ai/combat/fight";
+include "ai/combat/defaultCombatEvent";
+include "ai/setup/killPCsSetup";
+include "ai/main/loot";
+include "ai/main/sleepMode";
+
+
+const HALT_THRESHOLD := 8; // how close before he attacks?
+var npccfgfile := ReadConfigFile( "npcdesc" );
+var idlesnd1 := CInt(npccfgfile[me.npctemplate].idlesound1);
+var idlesnd2 := CInt(npccfgfile[me.npctemplate].idlesound2);
+
+program KillPlayers()
+
+    	SetWarMode( 0 );
+    	main_AI_loop();
+
+endprogram
+
+function CloseDistance( opponent )
+
+var sleepdelay := 400 - (CInt(GetDexterity(me)) * 1.5);
+
+	if (sleepdelay < 0)
+		sleepdelay := 0;
+	endif
+
+
+    case (Distance( me, opponent ))
+        1:              // the most likely, so first
+        0:
+            return 1;
+        default:
+            RunToward( opponent );
+		sleepms(sleepdelay);
+            return 0;
+    endcase
+
+endfunction

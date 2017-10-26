@@ -1,0 +1,12 @@
+use uo;
+
+program textcmd_unlock( who )
+
+    SendSysMessage( who, "What do you wish to unlock?" );
+
+    var what := Target( who );
+    if (what)
+        what.locked := 0;
+    endif
+
+endprogram

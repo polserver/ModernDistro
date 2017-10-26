@@ -1,0 +1,60 @@
+/////////////////////////////////////////////////////////////////////////////
+//
+// .writequip [tag] - save a targetted character's equipment 
+//                    to EQUIP.CFG for later
+//
+// 
+// TODO: validate tag doesn't exist already inequip.cfg
+//
+/////////////////////////////////////////////////////////////////////////////
+
+use cfgfile;
+use uo;
+
+program textcmd_writequip( who, tag )
+    if (!tag)
+        SendSysMessage( who, "Usage: .writequip [equiptag]" );
+        return;
+    endif
+
+    // TODO: validate 'tag' doesn't already exist as a key in equip.cfg
+   
+    SendSysMessage( who, "Target the person to write the equipment of" );
+    SendSysMessage( who, "Equipment will be tagged '" + tag + "'" );
+    var whom := Target( who );
+
+    if (whom)
+        var props := array;
+        var prop := struct;
+        prop.+name;
+        prop.+value;
+       
+        var propcount := 0;
+
+        foreach eqitem in ListEquippedItems( whom )
+			prop.name := "Equip";
+			prop.value := Hex(eqitem.objtype);
+			if (eqitem.color)
+				prop.value := prop.value + " " + Hex( eqitem.color );
+			endif
+			prop.value := PadStr( prop.value, 16 );
+			prop.value := prop.value + "// " + eqitem.desc;
+
+			propcount := propcount + 1;
+			props[ propcount ] := prop;
+        endforeach
+
+        AppendConfigFileElem( "equip", "Equipment", tag, props );
+    endif
+endprogram
+
+function PadStr( str, newlen )
+	print( "PadStr in: '" + str + "'" );
+    var addcount := newlen - len(str);
+	while (addcount > 0)
+		str := str + " ";
+		addcount := addcount - 1;
+	endwhile
+	print( "PadStr out: '" + str + "'" );
+	return str;
+endfunction

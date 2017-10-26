@@ -1,0 +1,9 @@
+use os;
+use uo;
+
+program my_form( who )
+
+	who.graphic := CInt(GetObjProperty(who, "MyForm"));
+	EraseObjProperty(who, "MyForm");
+
+endprogram

@@ -1,0 +1,46 @@
+use uo;
+use os;
+
+include "include/canAccess";
+
+const LOGOUT_WAIT := 30;
+const UOBJECT_CAMPFIRE := 0xde3;
+
+program use_bedroll( who, bedroll )
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  if(!can_access(who, bedroll))
+    return;
+  endif
+  if(bedroll.movable == 0)
+    SendSysMessage(who, "You cannot use that.");
+    return;
+  endif
+   var items := ListItemsNearLocationOfType( who.x,who.y,who.z, 2, UOBJECT_CAMPFIRE, who.realm );
+   if( len(items) == 0 )
+      SendSysMessage( who, "You must have a campfire nearby to use this." );
+      return;
+   else
+      SendSysMessage( who, "You must stand still to prepare your camp." );
+   endif
+
+   var x := who.x;
+   var y := who.y;
+   var z := who.z;
+
+   var ttl := LOGOUT_WAIT;
+
+   while( ttl > 0 )
+      if( (who.x != x) || (who.y != y) || (who.z != z) )
+         SendSysMessage( who, "You abandon your preparations to camp.");
+         return;
+      endif
+      SendSysMessage( who, "You must wait " + ttl + " more seconds to log out." );
+      ttl := ttl - 5;
+      sleep(5);
+   endwhile
+
+   SetObjProperty(who,"#camped",1);
+   DisconnectClient( who );
+
+endprogram

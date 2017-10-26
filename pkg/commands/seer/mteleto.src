@@ -1,0 +1,29 @@
+use uo;
+use os;
+
+program teleto(who)
+  SendSysMessage(who, "Move Who?");
+  var what := Target(who);
+  SendSysMessage(who, "Move where?");
+  var where := TargetCoordinates(who);
+  var chk := 0;
+  while(chk == 0)
+    if(what.isa(POLCLASS_MOBILE))
+      what.facing := who.facing;
+    else
+      SendSysMessage(who, "Cancelled");
+      chk := 1;
+    endif
+    MoveObjectToLocation(what, where.x, where.y, where.z, what.realm, MOVEOBJECT_FORCELOCATION);
+    SendSysMessage(who, "Move Who?");
+    what := Target(who);
+    if(!what)
+      chk := 1;
+    endif
+    SendSysMessage(who, "Move where?");
+    where := TargetCoordinates(who);
+    if(!where)
+      chk := 1;
+    endif
+  endwhile
+endprogram

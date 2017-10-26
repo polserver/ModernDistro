@@ -1,0 +1,21 @@
+use uo;
+use os;
+use polsys;
+
+include ":chat:chatIO";
+include ":chat:packets";
+include ":chat:functions";
+include ":chat:settings";
+
+program GrantSpeakingPrivs(params)
+	var character := params[1];
+	var packet := params[2];
+	params := "";
+
+	if ( CH_CheckDebug() )
+		Print("SpeakingPrivs: "+character.name+" "+packet);
+	endif
+
+	// 1 = grant, 2 = remove
+	return 1;
+endprogram

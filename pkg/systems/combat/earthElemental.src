@@ -1,0 +1,35 @@
+use uo;
+use util;
+use os;
+include ":attributes:attributes";
+
+program macehit(param)
+  var attacker := param[1];
+  var defender := param[2];
+  var weapon := param[3];
+  var armor := param[4];
+  var basedamage := param[5];
+  var rawdamage := param[6];
+  SetObjProperty(defender, "TempDamage", rawdamage);
+  if((attacker.dead) || (defender.dead))
+    return;
+  endif
+  if(armor)
+    if(RandomInt(50) > 35)
+      var admg := RandomInt(2) + 1;
+      if(armor.hp >admg)
+        armor.hp := armor.hp - admg;
+      else
+        DestroyItem(armor);
+      endif
+    endif
+  endif
+  var sdr := RandomInt(3) + 3;
+  if(GetStamina(defender) >= sdr)
+    SetStamina(defender, GetStamina(defender) - sdr);
+  else
+    SetStamina(defender, 0);
+  endif
+endprogram
+
+   

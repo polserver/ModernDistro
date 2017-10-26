@@ -1,0 +1,23 @@
+use os;
+use uo;
+
+program record_throughput()
+    var results := {};
+    var system := polcore();
+    var last_received := system.bytes_received;
+    var last_sent := system.bytes_sent;
+    var this_received, this_sent;
+    var delta_received, delta_sent;
+
+    set_critical(1);
+    while (1)
+        sleep( 60 );
+        this_received := system.bytes_received;
+        this_sent := system.bytes_sent;   
+        results.insert( 1, { this_received-last_received,this_sent-last_sent } );
+        results.erase( 11 );
+        last_received := this_received;
+        last_sent := this_sent;
+        SetGlobalProperty( "#:servperf:bandwidth", results );
+    endwhile    
+endprogram

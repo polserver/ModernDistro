@@ -1,0 +1,18 @@
+use uo;
+include "include/canAccess";
+
+program dblclick_rune(who, rune)
+  if(!can_access(who, rune))
+    return;
+  endif
+  if(GetObjProperty(rune, "x") == error)
+    SendSysMessage(who, "That rune is not marked.");
+    return;
+  endif
+  var runedescription := RequestInput(who, rune, "Please enter a description for this rune.");
+//  var descriptionlen := len(runedescription);
+  if(runedescription)
+	rune.name := "A recall rune for " + runedescription;
+	SendSysMessage(who, "Rune is renamed.");
+  endif
+endprogram

@@ -1,0 +1,57 @@
+use uo;
+use os;
+use util;
+
+include "include/client";
+include "include/objtype";
+include "include/skillPoints";
+include "include/bard";
+include "include/eventID";
+
+program enticement(who)
+  var subject := Target(who, TGTOPT_NOCHECK_LOS );
+  if ((!subject) || (!subject.npctemplate))
+    SendSysMessage(who, "Cancelled.");
+    return;
+  endif
+  if(subject.script == ":musicianship:enticedAI")
+    SendSysMessage(who, "Seems already under influence.");
+    return;
+  endif
+  var cfg := ReadConfigFile("::npcdesc");
+  var diff := Cint(cfg[subject.npctemplate]."provoke");
+  if(!diff)
+    SendSysMessage(who, "You can't entice him!");
+    return;
+  endif
+  var instrument := findinstrument(who);
+  if(!instrument)
+    SendSysMessage(who, "You don't have an instrument to play!");
+    return;
+  endif
+  var success := play(who, diff, instrument, SKILLID_DISCORDANCE);
+  if(success)
+    var ev := array;
+    ev.+type := EVID_ALL_FOLLOW_CMD;
+    ev.+source := who;
+    ev.+x := who.x;
+    ev.+y := who.y;
+    SetObjProperty( subject, "oldai", subject.script);
+    subject.script := ":musicianship:enticedAI";
+    RestartScript(subject);
+    SendEvent(subject, ev);
+    PrintTextAbove(subject, subject.name+" seems enticed by the music");
+  else
+    PrintTextAbovePrivate(subject, "Your music doesnt seem to have any effect.", who);
+    if ((Randomint(10)+1)<= 3)
+      var ev := {};
+        ev.+source := who;
+        ev.+type := EVID_PEACEMADE;
+      SendEvent(subject,ev);
+      ev.type := EVID_DAMAGED;
+      SendEvent(subject, ev);
+      PrintTextAbove(subject, subject.name+" is irritated by the music of "+who.name);
+    endif
+  endif
+endprogram
+

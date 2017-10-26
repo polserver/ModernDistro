@@ -1,0 +1,16 @@
+use uo;
+
+
+program textcmd_setusescript( who, text )
+
+	SendSysMessage(who, "Select target.");
+	var targ := Target(who);
+
+	if (!targ)
+		SendSysMessage(who, "Aborted.");
+		return;
+	endif
+
+	targ.usescript := text;
+   
+endprogram

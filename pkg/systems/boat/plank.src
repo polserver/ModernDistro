@@ -1,0 +1,75 @@
+use os;
+use uo;
+
+include "include/utility";
+include "include/objtype";
+include ":boat:plankUtil";
+//include "../pkg/world/weather/weather";
+
+program useplank (mob, plank)
+	set_critical(1); 
+
+	if (mob.multi == plank.multi)
+		TimedOpenClose (plank);
+	elseif ( (FindKey (mob, plank)) or (!plank.locked) )
+		if (!IsExtended (plank))	// plank is closed, so open it.
+			TimedOpenClose (plank);
+		else
+			YankOntoBoat (mob, plank);// plank is open, so grab 'em
+		endif
+	else
+		//they're on shore with no key and the plank is locked
+		PrintTextAbovePrivate( plank, "That is locked.", mob );
+	endif
+	set_critical (0); 
+endprogram
+
+
+
+
+///////////////////
+//  Open the plank for a while, and then close it, or just close it if its already open.
+///////////////////
+
+function TimedOpenClose (plank)
+	if (IsExtended (plank))
+		if (!IsPlankOccupied (plank))
+			Retract (plank);
+			EraseObjProperty (plank, "#WhenOpened");
+		endif
+	else
+		var whenopened := ReadGameClock();
+		SetObjProperty (plank, "#WhenOpened", whenopened);
+		Extend (plank);
+
+		repeat
+			sleep (6);
+			if (!plank)
+				return;
+			endif
+		until (!IsPlankOccupied (plank));
+
+		if (GetObjProperty( plank, "#WhenOpened" ) == whenopened)
+			Retract (plank);
+			EraseObjProperty (plank, "#WhenOpened");
+		endif
+	endif
+endfunction
+
+
+
+
+///////////////////
+//  If the plank is extended, move the mob onto the boat
+///////////////////
+
+function YankOntoBoat (mob, plank)
+	var sh := GetStandingHeight (plank.x, plank.y, plank.z, plank.realm);
+	if (sh)
+		var nx := (plank.x + plank.multi.x) / 2;
+		var ny := (plank.y + plank.multi.y) / 2;
+		MoveObjectToLocation( mob, nx, ny, plank.z, plank.realm, MOVEOBJECT_NORMAL );
+//		SetWeatherForPlayer (mob);
+		return;
+	endif
+endfunction

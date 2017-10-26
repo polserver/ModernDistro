@@ -1,0 +1,189 @@
+use uo;
+use os;
+use math;
+use cliloc;
+
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+include ":runicatlas:runicAtlasFunctions";
+include ":runicatlas:customSpells";
+include "include/itemUtil";
+
+program use_Runebook( who, book )
+	if( !useItem_check( who, book, DEFAULT_ITEM ))
+		return 0;
+	endif
+	
+	var charge_prop := GetObjProperty( book, "%Charges%" );
+	if( TypeOf( charge_prop ) != "Dictionary" )
+		charge_prop := dictionary { "charges" -> 0, "max_charges" -> 5 };
+		SetObjProperty(book, "%Charges%", charge_prop);
+	endif
+ 
+	var charges := charge_prop["charges"];
+	if( !charges )
+		charges := 0;
+	endif
+
+	var max_charges := charge_prop["max_charges"];
+	if( !max_charges )
+		max_charges := 50;
+	endif
+	DisplayRunicAtlasGump ( who, book, charges );
+
+endprogram
+
+function DisplayRunicAtlasGump ( who, book, charges )
+	var input := CreateRunicAtlasGump ( who, book );
+	input := input[0];
+	if ( !input || input[0] == 0 )
+		return 0;
+	elseif ( input[0] >= 1 && input[0] <= 100 )
+		book.SetSelection ( who, input[0] );
+		return DisplayRunicAtlasGump ( who, book, charges );
+	elseif ( input[0] == 101 )
+		SetBookName( book, who, 0 );
+		//return 1;
+	elseif ( input[0] == 102 )
+		var selected_rune := book.GetSelection ( who );
+		book.SetDefault( who, selected_rune.selected );
+	elseif ( input[0] == 103 )
+		if ( book.movable == 0 )
+			SendSysMessageCL ( who, 502413, color := 0x21 ); // That cannot be done while the book is locked down.
+			return 0;
+		else
+			var selected_rune := book.GetSelection ( who );
+			var rune_info := book.GetRuneDetails ( selected_rune.selected );
+			var rune := CreateItemInBackpack ( who, 0x1F14 );
+			if ( rune )
+				SetName ( rune, rune_info.name );
+				SetObjProperty ( rune, "Destination", rune_info );
+				rune.color := rune_info.color;
+				book.DeleteRune ( selected_rune.selected );
+				book.EraseSelection ( who );
+				SendSysMessageCL ( who, 502421, color := 0x42 ); // You have removed the rune.
+				return 1;
+			else
+				SendSysMessageCL ( who, 502420, color := 0x21 ); // You have no room for a rune in your backpack.
+				return 0;
+			endif
+		endif
+	elseif ( input[0] == 104 )
+		var selected_rune := book.GetSelection ( who );
+		var rune_info := book.GetRuneDetails( selected_rune.selected );
+		runebookRecall( who, rune_info, book, charges );
+		book.EraseSelection ( who );
+		return 1;
+	elseif ( input[0] == 105 )
+		if( charges < 1 )
+			SendSysMessageCL ( who, 502412, color := 0x21 ); // There are no charges left on that item.
+			return 0;
+		endif
+  
+		var selected_rune := book.GetSelection ( who );
+		var rune_info := book.GetRuneDetails ( selected_rune.selected );
+		if( !rune_info )
+			return 0;
+		endif
+  
+		runebookRecall( who, rune_info, book, charges, 1 );
+		book.EraseSelection ( who );
+		return 1;
+	elseif ( input[0] == 106 )
+		var selected_rune := book.GetSelection ( who );
+		var rune_info := book.GetRuneDetails( selected_rune.selected );
+		runebookGate( who, rune_info, book );
+		book.EraseSelection ( who );
+		return 1;
+	elseif ( input[0] == 107 )
+		SendSysMessageCL ( who, 1153203, color := 0x21 ); // This function has not been implemented yet.
+	endif
+	return DisplayRunicAtlasGump ( who, book, charges );
+endfunction
+
+function CreateRunicAtlasGump( who, book )
+	var rune_list := book.GetRuneList();
+	if( TypeOf( rune_list ) != "Array" )
+		rune_list := array{};
+		SetObjProperty( book, "%RuneList%", rune_list );
+	endif
+	
+	var charge_prop := GetObjProperty( book, "%Charges%" );
+	var charges := charge_prop["charges"];
+	if( !charges )
+		charges := 0;
+	endif
+
+	var max_charges := charge_prop["max_charges"];
+	if( !max_charges )
+		max_charges := 50;
+	endif
+
+	var selected := book.GetSelection ( who );
+	var rune_entry := Array;
+	var mapcolor := 0;
+	var ra_gump := GFCreateGump( 150, 200 );
+	var latlong1;
+	var latlong2;
+	
+	GFPage ( ra_gump, 0 );
+	GFGumpPic ( ra_gump, 0, 0, 39923, 0 );
+	GFHTMLArea ( ra_gump, 60, 8, 180, 16, "Charges: "+charges+" / "+max_charges ); // charges: ~1_val~ / ~2_val~
+	GFAddHTMLLocalized ( ra_gump, 265, 8, 130, 16, 1011299, 0, 0 ); // rename book
+	GFAddButton ( ra_gump, 250, 12, 2103, 2104, GF_CLOSE_BTN, 101 );
+
+	GFAddHTMLLocalized ( ra_gump, 280, 286, 100, 16, 1077595, 0, 0 ); // Recall (Spell)
+	GFAddButton ( ra_gump, 265, 290, 2103, 2104, GF_CLOSE_BTN, 104 );
+	GFAddHTMLLocalized ( ra_gump, 280, 303, 100, 16, 1077594, 0, 0 ); // Recall (Charge)
+	GFAddButton ( ra_gump, 265, 307, 2103, 2104, GF_CLOSE_BTN, 105 );
+	GFAddHTMLLocalized ( ra_gump, 280, 320, 100, 16, 1015214, 0, 0 ); // Gate Travel
+	GFAddButton ( ra_gump, 265, 324, 2103, 2104, GF_CLOSE_BTN, 106 );
+	GFAddHTMLLocalized ( ra_gump, 280, 337, 100, 16, 1060502, 0, 0 ); // Sacred Journey
+	GFAddButton ( ra_gump, 265, 341, 2103, 2104, GF_CLOSE_BTN, 107 );
+
+	if ( selected.serial == book.serial )
+		rune_entry := book.GetRuneDetails( selected.selected );
+		latlong1 := ConvertLatLong( rune_entry.x, rune_entry.y, 1 );
+		latlong2 := ConvertLatLong( rune_entry.x, rune_entry.y, 2 );
+		GFTextCrop ( ra_gump, 60, 250, 135, 16, 0x0, latlong1+", "+latlong2 ); // Coordinates
+		GFAddHTMLLocalized ( ra_gump, 70, 291, 130, 16, 1011300, 0, 0 ); // Set default
+		GFAddButton ( ra_gump, 45, 295, 2103, 2104, GF_CLOSE_BTN, 102 );
+		GFAddHTMLLocalized ( ra_gump, 70, 311, 130, 16, 1011298, 0, 0 ); // drop rune
+		GFAddButton ( ra_gump, 45, 315, 2103, 2104, GF_CLOSE_BTN, 103 );
+		GFHTMLArea ( ra_gump, 25, 345, 180, 16, "<center>"+rune_entry.name+"</center>", 0, 0 ); // Rune Description
+	endif
+
+	var i;
+	var index := 0;
+	GFPage( ra_gump, 1 );
+	for( i:=1; i<=rune_list.Size(); i+=1 )
+		if ( index >= 16 )
+			index := 0;
+			GFAddButton( ra_gump, 374, 3, 2206, 2206, GF_PAGE_BTN, ra_gump.cur_page+1 );
+			GFPage( ra_gump, ra_gump.cur_page+1 );
+			GFAddButton( ra_gump, 23, 5, 2205, 2205, GF_PAGE_BTN, ra_gump.cur_page-1 );
+		endif	
+
+		if ( rune_list[i].name )
+			case ( rune_list[i].realm )  
+				"britannia":		mapcolor := 0x51;
+				"britannia_alt":	mapcolor := 0xA;
+				"ilshenar":			mapcolor := 0x501;
+				"malas":			mapcolor := 0x44E;
+				"tokuno":			mapcolor := 0x482;
+				"termur":			mapcolor := 0x66D;		
+				default:			mapcolor := 0x0;
+			endcase
+			if ( i == selected.selected && selected.serial == book.serial )
+				GFAddButton ( ra_gump, 45 + ((index / 8) * 205), 54 + ((index % 8) * 20), 2104, 2103, GF_CLOSE_BTN, i );
+				GFTextCrop( ra_gump, 60 + ((index / 8) * 205), 50 + ((index % 8) * 20), 115, 17, 0x90, rune_list[i].name );
+			else
+				GFAddButton ( ra_gump, 45 + ((index / 8) * 205), 54 + ((index % 8) * 20), 2103, 2104, GF_CLOSE_BTN, i );
+				GFTextCrop( ra_gump, 60 + ((index / 8) * 205), 50 + ((index % 8) * 20), 115, 17, mapcolor, rune_list[i].name );
+			endif
+			index += 1;
+			sleepms(3);
+		endif
+	endfor
+  return GFSendGump ( who, ra_gump );
+endfunction

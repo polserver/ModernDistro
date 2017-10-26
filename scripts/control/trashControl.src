@@ -1,0 +1,19 @@
+use uo;
+use os;
+
+program trash(item)
+  var count := 0;
+  while(item)
+    foreach trashitem in EnumerateItemsInContainer(item)
+      if(GetObjProperty(trashitem, "#DestroyAt") <= ReadGameClock())
+        count := count + 1;
+        DestroyItem(trashitem);
+      endif
+    endforeach
+    if(count)
+      PrintTextAbove(item, "Destroying items in trash");
+    endif
+    count := 0;
+    sleep(120);
+  endwhile
+endprogram

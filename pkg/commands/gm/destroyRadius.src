@@ -1,0 +1,23 @@
+//
+// Destroy an item
+//
+
+use uo;
+
+program textcmd_destroyRadius( who, range )
+
+    if (!range)
+        range := 1;
+    endif
+    range := CInt(range);
+    if (range > 8)
+        SendSysMessage (who, "Sorry but you must not spcify a range larger than 8");
+        return;
+    endif
+    var tgt := ListItemsNearLocation(who.x, who.y, who.z, range, who.realm );
+    foreach x in tgt
+		if(!GetObjProperty(x, "Permanent"))
+            DestroyItem( x );
+		endif
+    endforeach
+endprogram

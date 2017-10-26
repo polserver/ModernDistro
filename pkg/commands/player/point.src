@@ -1,0 +1,53 @@
+use uo;
+use os;
+
+include "include/client";
+include "include/yesNo";
+
+program point (who)
+	if (who.concealed)
+		SendSysMessage (who, "Are you really sure you want to do that?");
+		SendSysMessage (who, "Players will be able to see.");
+		if (!yesno (who, "Continue?"))
+			return;
+		endif
+	endif
+
+	SendSysMessage (who, "Point at what?");
+	var targetted := TargetCoordinates (who);
+	if (!targetted)
+		SendSysMessage (who, "Canceled.");
+		return;
+	endif
+
+	var targettedesc;
+	if (targetted.mobile)
+		targettedesc := targetted.mobile.name;
+		targetted := targetted.mobile;
+	elseif (targetted.item)
+		targettedesc := targetted.item.desc;
+		targetted := targetted.item;
+	elseif (targetted.desc)
+		targettedesc := targetted.desc;
+	else
+		targetted := CreateItemAtLocation (targetted.x, targetted.y, targetted.z, 0x706c, 1, who.realm);
+		targetted.graphic := 0x206e;
+		targetted.movable := 0;
+		targetted.name := "location marker";
+		SetObjProperty (targetted, "destroyme", 1);
+		targettedesc := "that spot";
+	endif
+
+	PerformAction (who, ANIM_SALUTE);
+	PrintTextAbove (who, "*points at " + targettedesc + "*", FONT_NORMAL, 55);
+	sleepms (500);
+	if (!targetted.container)
+		PrintTextAbove (targetted, "*" + who.name + " points here*", FONT_NORMAL, 55);
+	endif
+	sleep (2);
+	if (targetted.objtype == 0x706c)
+		if (GetObjProperty (targetted, "destroyme"))
+			DestroyItem (targetted);
+		endif
+	endif
+endprogram

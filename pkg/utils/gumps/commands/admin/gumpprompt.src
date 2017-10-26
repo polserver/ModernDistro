@@ -1,0 +1,13 @@
+use uo;
+
+include ":gumps:include/gumps";
+include ":gumps:include/gumps_ex";
+include ":gumps:include/gumpPrompt";
+
+program PromptDemo(who, text)
+	if ( !text )
+		text := "Hey, you didn't enter any text to go with the command!";
+	endif
+	
+	GumpPrompt(who, text);
+endprogram

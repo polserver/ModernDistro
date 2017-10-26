@@ -1,0 +1,462 @@
+use os;
+use uo;
+use util;
+
+include "include/client";
+include "include/yesNo";
+// include "include/skills";
+include ":attributes:attributes";
+
+Const JOBS_AVAILABLE_PER_MERCHANT		:= 5;
+Const MERCHANT_JOB_ERASE_TIMER		:= 1800;
+Const PLAYER_MAX_JOBVALUE_PER_DAY		:= 5000;
+
+program job (parms)
+	var player := parms[1];
+	var merchant := parms[2];
+	if (!player or !merchant)
+		return;
+	endif
+
+	//Figure out if they're already working on something else
+	set_critical (1);
+	if (GetObjProperty (player, "#workingonajob"))
+		if (GetProcess (GetObjProperty (player, "#workingonajob")))
+			PrintTextAbovePrivate (merchant, "You're already working on something.", player, color := 33);
+			return;
+		endif
+	endif
+	SetObjProperty (player, "#workingonajob", GetPid ());
+	set_critical (0);
+	
+	//Check to see if the merchant has any jobs available
+	var merchantjobs := GetObjProperty (merchant, "#jobsgiven");
+	if (!merchantjobs)
+		merchantjobs := dictionary;
+	endif
+	foreach key in (merchantjobs.keys())
+		if (key + MERCHANT_JOB_ERASE_TIMER < ReadGameClock())
+			merchantjobs.erase (key);
+		endif
+	endforeach
+	SetObjProperty (merchant, "#jobsgiven", merchantjobs);
+	if (len (merchantjobs.keys()) >= JOBS_AVAILABLE_PER_MERCHANT)
+		PrintTextAbovePrivate(merchant, "I don't have any work available right now, I'm afraid", player, color := 33);
+		return;
+	endif
+	
+	//Now check to see if the player can do any more jobs today
+	var playerjobs := GetGlobalProperty ("#jobs_for_account_"+player.acctname);
+	if (!playerjobs)
+		playerjobs := dictionary;
+	endif
+	var playerjobvalue := 0;
+	foreach key in (playerjobs.keys())
+		if (key + 86400 < ReadGameClock())
+			playerjobs.erase (key);
+		else
+			playerjobvalue := playerjobvalue + playerjobs[key];
+		endif
+	endforeach
+	SetGlobalProperty ("#jobs_for_account_"+player.acctname, playerjobs);
+	
+	if (playerjobvalue >= PLAYER_MAX_JOBVALUE_PER_DAY)
+  		PrintTextAbovePrivate(merchant, "I don't have any work for you.  Come back tomorrow.", player, color := 33);
+		return;
+	endif
+
+	var jobtype := GetJobType (player, merchant);
+	if (jobtype == -1)
+		PrintTextAbovePrivate(merchant, "I don't think there's anything you can help me with right now.", player, color := 33);
+		EraseObjProperty (player, "#workingonajob");
+		return;
+	endif
+
+	var itemtype := GetItemTypeByJobType (jobtype);
+	if (!itemtype)
+		PrintTextAbovePrivate (merchant, "I don't think there's anything you can help me with right now.", player, color := 33);
+		EraseObjProperty (player, "#workingonajob");
+		return;
+	endif
+
+	var itemname := GetItemNameByItemType (itemtype);
+	var amount := RandomInt(10)+10;
+	var endtime := ReadGameClock() + 300;
+
+	PrintTextAbovePrivate (merchant, "If you will make " + amount + " " + itemname + ", I will pay you for them.", player, color := 88);
+	if (!YesNo (player,"Accept?") )
+		PrintTextAbovePrivate (merchant, "Very well.", player, color := 33);
+		EraseObjProperty (player, "#workingonajob");
+		return;
+	endif
+	
+	merchantjobs.insert (ReadGameClock(), 1);
+	SetObjProperty (merchant, "#jobsgiven", merchantjobs);
+
+	var bag := CreateItemInContainer (player.backpack, "bag");
+	if (!bag)
+		PrintTextAbovePrivate (player, "*Your backpack is full!*", player, color := 33);
+		EraseObjProperty (player, "#workingonajob");
+		return;
+	endif
+
+	bag.name := "a bag for " + merchant.name + "'s request for " + amount + " " + itemname;
+	bag.color := 1154;
+	SetObjProperty (player, "job", bag.serial);
+	SetObjProperty (bag, "itemtype", itemtype);
+	SetObjProperty (bag, "amount", amount);
+	SetObjProperty (bag, "endtime", endtime);
+	SetObjProperty (bag, "merchant", merchant.serial);
+	SetObjProperty (bag, "jobtype", jobtype);
+
+	PrintTextAbovePrivate (merchant, "Just hand me the bag when you are done.", player, color := 88);
+
+	var worknoise := GetWorkNoise (jobtype);
+	var workaction := GetWorkAction (jobtype);
+
+	SendSysMessage (player, "You begin working", color := 66);
+	while (amount)
+		DoWorkNoiseAndAction (player, worknoise, workaction);
+		var it := CreateItemInContainer (bag, 0xF021, 1);
+		if (it)
+			it.graphic := itemtype;
+			it.movable := 0;
+			SetObjProperty (it, "job", bag.serial);
+			SetObjProperty (it, "ownerserial", merchant.serial);
+			SetObjProperty (it, "ownername", merchant.name);
+			var total_made := GetObjProperty (bag, "amount") - amount + 1;
+			PrintTextAbovePrivate (bag, "*"+total_made+"*", player);
+			AwardRawSkillPoints (player, jobtype, 12);
+		endif
+		amount := amount - 1;
+		if (bag.container != player.backpack)
+			DestroyItem(bag);
+		endif
+		if (	(!player) or (!bag) or (!it) or (player.dead) or (distance(player,merchant) > 5) or (ReadGameClock() > endtime) )
+			SendSysMessage (player, "You stop working.", color := 33);
+			EraseObjProperty (player, "#workingonajob");
+			return;
+		endif
+	endwhile
+
+	if (player)
+		SendSysMessage (player, "You finish working", color := 66);
+		if (!amount)
+			EraseObjProperty (player, "bag");
+		endif
+	endif
+	EraseObjProperty (player, "#workingonajob");
+endprogram
+
+
+
+
+///////////////////
+//  plays sound effects based on the skill being used
+///////////////////
+
+function DoWorkNoiseAndAction (byref who, worknoise, workaction )
+
+	for workloop := 1 to 3
+		if (worknoise) PlaySoundEffectPrivate(who, worknoise, who); endif
+		if (workaction) PerformAction(who, workaction); endif
+		sleep(2);
+	endfor
+
+endfunction
+
+
+
+
+///////////////////
+//  figures out what type of job the merchant should give
+///////////////////
+
+function GetJobType (byref player, byref merchant)
+// The following mods were added by Yukiko on 04-Oct-2006 to make this a general purpose "job" system.
+
+    var tradelist := {};
+
+    tradelist := {34, 37, 7, 11, 13, 23, 12, 44, 45, 18};
+    var index:= RandomInt(9) +1;
+    return tradelist[index];
+
+endfunction
+
+function GetItemTypeByJobType (jobtype)
+
+	case (jobtype)
+		SKILLID_TAILORING:
+			case ( randomint (10) )
+				0: return 0x1517;	// Shirt
+				1: return 0x1F01;	// Plain Dress
+				2: return 0x1515;	// Cloak
+				3: return 0x152E;	// Short pants
+				4: return 0x1537;	// Kilt
+				5: return 0x153F;	// Bandana
+				6: return 0x1543;	// Skullcap
+				7: return 0x1715;	// Cap
+				8: return 0x1541;	// Body Sash
+				9: return 0x153B;	// Half Apron
+			endcase
+
+		SKILLID_BLACKSMITHY:
+			case( randomint (10) )
+				0: return 0x1b73;	//Buckler
+				1: return 0x1b72;	//Bronze Shield
+				2: return 0x1b7b;	//Metal Shield
+				3: return 0x0f51;	//Dagger
+				4: return 0x0f43;	//Hatchet
+				5: return 0x0f5c;	//Mace
+				6: return 0x140a;	//Helmet
+				7: return 0x140c;	//Bascinet
+				8: return 0x13f2;	//Ringmail Gloves
+				9: return 0x13bb;	//Chainmail Coif
+			endcase
+
+		SKILLID_CARPENTRY:
+			case ( randomint (12) )
+				0:  return 0X0B2C;	//Bench
+				1:  return 0X0B56;	//Chair
+				2:  return 0X0B53;	//CushionedChair
+				3:  return 0X0B2F;	//NiceChair
+				4:  return 0X0B5A;	//SimpleChair
+				5:  return 0X0A2A;	//Stool
+				6:  return 0X0B34;	//SmallTable
+				7:  return 0x104e;	//Clock Frame
+				8:  return 0x0e81;	//Shepherd's Crook
+				9:  return 0x13B2;	//Bow
+				10: return 0x0f4f;	//Crossbow
+				11: return 0x13fd;	//Heavy Crossbow
+			endcase
+
+		SKILLID_COOKING:
+			case ( randomint (10) )
+				0: return 0x09d8;	//plate of food
+				1: return 0x09d9;	//plate of food
+				2: return 0x09db;	//plate of food
+				3: return 0x09e9;	//cake
+				4: return 0x1041;	//pie
+				5: return 0x103f;	//cookie mix
+				6: return 0x15f9;	//bowl of carrots
+				7: return 0x15fa;	//bown of corn
+				8: return 0x1606;	//tomato soup
+				9: return 0x160c;	//plate of cookies
+			endcase
+
+		SKILLID_INSCRIPTION:
+			case ( randomint(10) )
+				0: return 0x1f2d;	//reactivearmorscroll
+				1: return 0x1f2e;	//clumsyscroll
+				2: return 0x1f2f;	//createfoodscroll
+				3: return 0x1f30;	//feeblemindscroll
+				4: return 0x1f31;	//healscroll
+				5: return 0x1f32;	//magicarrowscroll
+				6: return 0x1f33;	//nightsightscroll
+				7: return 0x1f34;	//weakenscroll
+				8: return 0x1f35;	//agilityscroll
+				9: return 0x1f36;	//cunningscroll
+			endcase
+
+		SKILLID_TINKERING:
+			case (randomint (10))
+				0: return 0x09b3;	//goblet
+				1: return 0x1053;	//Gears
+				2: return 0x1059;	//Sextantparts
+				3: return 0x1055;	//Hinge
+				4: return 0x0995;	//mug
+				5: return 0x09d7;	//plate
+				6: return 0x105b;	//axle
+				7: return 0X1088;	//necklace
+				8: return 0X1086;	//bracelet
+				9: return 0X105D;	//springs
+			endcase
+
+		SKILLID_CARTOGRAPHY:
+			return 0x14eb;//map
+
+		SKILLID_LUMBERJACKING:
+			case ( randomint (4) )
+				0: return 0x1BDE;	//small pile of logs
+				1: return 0x1BDF;	//large pile of logs
+				2: return 0x1BD8;	//small pile of boards
+				3: return 0x1BD9;	//large pile of boards
+			endcase
+
+		SKILLID_MINING:
+			case ( randomint (4) )
+				0: return 0x1BE4;	//copper ingots
+				1: return 0x1BEA;	//gold ingots
+				2: return 0x1BF1;	//iron ingots
+				3: return 0x1BFA;	//silver ingots
+			endcase
+
+		SKILLID_FISHING:
+			case ( randomint(6) )
+				0: return 0x0DD0;	//fishing net
+				1: return 0x1E62;	//trophy fish
+				2: return 0x1E16;	//cleaned fish
+				3: return 0x14F3;	//ship model
+				4: return 0x0FD2;	//string of shells
+				5: return 0x0DCC;	//fishing weight
+			endcase
+
+		default:
+			return 0;
+	endcase
+
+endfunction
+
+
+
+
+///////////////////
+//  figures out the name of the item based on the passed itemtype
+///////////////////
+
+function GetItemNameByItemType ( itemtype )
+	case (itemtype)
+		0x1517: return "Shirts";
+		0x1F01: return "Plain Dresses";
+		0x1515: return "Cloaks";
+		0x152E: return "Short pants";
+		0x1537: return "Kilts";
+		0x153F: return "Bandanas";
+		0x1543: return "Skullcaps";
+		0x1715: return "Caps";
+		0x1541: return "Body Sashes";
+		0x153B: return "Half Aprons";
+
+		0x1b73: return "Bucklers";
+		0x1b72: return "Bronze Shields";
+		0x1b7b: return "Metal Shields";
+		0x0f51: return "Daggers";
+		0x0f43: return "Hatchets";
+		0x0f5c: return "Maces";
+		0x140a: return "Helmets";
+		0x140c: return "Bascinets";
+		0x13f2: return "Ringmail Gloves";
+		0x13bb: return "Chainmail Coifs";
+
+		0X0B2C: return "Benches";
+		0X0B56: return "Chairs";
+		0X0B53: return "Cushioned Chairs";
+		0X0B2F: return "Nice Chairs";
+		0X0B5A: return "Simple Chairs";
+		0X0A2A: return "Stools";
+		0X0B34: return "Small Tables";
+		0x104e: return "Clock Frames";
+		0x0e81: return "Shepherd's Crooks";
+		0x13b3: return "Clubs";
+		0x13B2: return "Bows";
+		0x0f4f: return "Crossbows";
+		0x13fd: return "Heavy Crossbows";
+
+		0x9d8: return "breakfast plates";
+		0x9d9: return "lunch plates";
+		0x9db: return "dinner plates";
+		0x9e9: return "cakes";
+		0x1041: return "pies";
+		0x103f: return "bowls of cookie mix";
+		0x15f9: return "bowls of boiled carrots";
+		0x15fa: return "bowls of steamed corn";
+		0x1606: return "bowls of tomato soup";
+		0x160c: return "plates of cookies";
+
+		0x1f2d: return "reactive armor scrolls";
+		0x1f2e: return "clumsy scrolls";
+		0x1f2f: return "create food scrolls";
+		0x1f30: return "feeblemind scrolls";
+		0x1f31: return "heal scrolls";
+		0x1f32: return "magicarrow scrolls";
+		0x1f33: return "nightsight scrolls";
+		0x1f34: return "weaken scrolls";
+		0x1f35: return "agility scrolls";
+		0x1f36: return "cunning scrolls";
+
+		0x09b3: return "goblets";
+		0x1053: return "Gears";
+		0x1059: return "Sextantparts";
+		0x1055: return "Hinges";
+		0x0995: return "mugs";
+		0x09d7: return "plates";
+		0x105b: return "axles";
+		0X1088: return "necklaces";
+		0X1086: return "bracelets";
+		0X105D: return "springs";
+
+		0x14eb: return "maps";
+
+		0x1BDE: return "small piles of firewood";
+		0x1BDF: return "piles of firewood";
+		0x1BD8: return "small stacks of boards";
+		0x1BD9: return "stacks of boards";
+
+		0x1BE4: return "stacks of copper ingots";
+		0x1BEA: return "stacks of gold ingots";
+		0x1BF1: return "stacks of iron ingots";
+		0x1BFA: return "stacks of silver ingots";
+
+		0xDD0: return "fishing nets";
+		0x1E62: return "fishing trophies";
+		0x1E16: return "cleaned fish";
+		0x14F3: return "ship models";
+		0xFD2: return "strings of shells";
+		0xDCC: return "fishing weights";
+	endcase
+
+endfunction
+
+
+
+
+///////////////////
+//  figures out if the passed skill is a crafting skill
+///////////////////
+
+function IsACraftSkill ( skillid )
+
+	case (skillid)
+		SKILLID_TAILORING:
+		SKILLID_BLACKSMITHY:
+		SKILLID_CARPENTRY:
+		SKILLID_COOKING:
+		SKILLID_INSCRIPTION:
+		SKILLID_TINKERING:
+		SKILLID_CARTOGRAPHY:
+		SKILLID_LUMBERJACKING:
+		SKILLID_MINING:
+		SKILLID_FISHING:
+			return 1;
+		default:
+			return 0;
+	endcase
+
+endfunction
+
+function GetWorkNoise( jobtype )
+
+	case (jobtype)
+	34: return 0x0249;//tailoring
+	37: return SFX_ANVIL;//tinkering
+	7: return SFX_ANVIL;//blacksmithy
+	11: return SFX_HAMMER;//carpentry
+	13: return 0x248;//cooking
+	23: return 0x50;//inscription
+	12: return 0x50;//cartography
+	44: return SFX_SKILL_LUMBERJACK;//lumberjacking
+	45: return 0x226;//smelting
+	18: return 0x50;//fishing
+	default: return 0;
+	endcase
+
+endfunction
+
+function GetWorkAction( jobtype )
+
+	case (jobtype)
+	44: return 0x0D;//lumberjacking
+	default: return ANIM_SALUTE;
+	endcase
+
+endfunction

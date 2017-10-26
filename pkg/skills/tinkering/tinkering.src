@@ -1,0 +1,1139 @@
+use uo;
+use cfgfile;
+use os;
+use util;
+
+include ":attributes:attributes";
+include "include/client";
+include "include/objtype";
+include "include/skillPoints";
+include "util/key";
+include "include/canAccess";
+include "include/toolWear";
+include ":oldstyle-gumps:gumps";
+include "include/noto";
+include ":damage:damage";
+
+var keys := {0x100e, 0x100f, 0x100f, 0x1012, 0x1013};
+var tinker_cfg:= ReadConfigFile("tinker");
+var itemcfg := ReadConfigFile("itemdesc");
+
+program MakeTinkerItems(who, item)
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  if(!can_access(who, item))
+    return;
+  endif
+  if(item.movable == 0)
+    SendSysMessage(who, "You cannot use that.");
+    return;
+  endif
+  SendSysMessage( who, "Select your material.");
+  var trg := Target(who);
+  if(!trg)
+    SendSysMessage( who, "Targetting cancelled" );
+    return;
+  endif
+  if(!can_access(who, trg))
+    return;
+  endif
+  if (!Accessible( who, trg))
+    SendSysMessage( who, "You can't reach that!" );
+    return;
+  endif
+  if (!ReserveItem(trg))
+    SendSysMessage(who,"You can't use that!");
+    return;
+  endif
+  if(trg.movable == 0)
+    SendSysMessage(who, "You cannot use that.");
+    return;
+  endif
+  GFInitGump(0, 0);
+  GFNoDispose();
+  GFNoClose();
+  GFPage(0);
+  GFResizePic(0, 60, 2600, 500, 400);
+  GFGumpPic( 20, 120, 5100);
+  GFGumpPic( 28, 120, 5101);
+  GFGumpPic(118, 120, 5101);
+  GFGumpPic(208, 120, 5101);
+  GFGumpPic(298, 120, 5101);
+  GFGumpPic(370, 120, 5101);
+  GFGumpPic(460, 120, 5102);
+  GFGumpPic( 20, 128, 5103);
+  GFGumpPic( 28, 128, 5104);
+  GFGumpPic(118, 128, 5104);
+  GFGumpPic(208, 128, 5104);
+  GFGumpPic(298, 128, 5104);
+  GFGumpPic(370, 128, 5104);
+  GFGumpPic(460, 128, 5105);
+  GFGumpPic( 20, 136, 5058);
+  GFGumpPic(118, 136, 5058);
+  GFGumpPic(232, 136, 5058);
+  GFGumpPic(350, 136, 5058);
+  GFGumpPic( 20, 136, 5106);
+  GFGumpPic( 28, 136, 5107);
+  GFGumpPic(118, 136, 5107);
+  GFGumpPic(208, 136, 5107);
+  GFGumpPic(298, 136, 5107);
+  GFGumpPic(370, 136, 5107);
+  GFGumpPic(460, 136, 5108);
+  GFGumpPic( 28, 278, 5104);
+  GFGumpPic(118, 278, 5104);
+  GFGumpPic(208, 278, 5104);
+  GFGumpPic(298, 278, 5104);
+  GFGumpPic(368, 278, 5104);
+  GFGumpPic( 20, 278, 5103);
+  GFGumpPic(460, 278, 5105);
+  GFGumpPic( 20, 226, 5058);
+  GFGumpPic(118, 226, 5058);
+  GFGumpPic(232, 226, 5058);
+  GFGumpPic(350, 226, 5058);
+  GFGumpPic( 20, 366, 5106);
+  GFGumpPic( 28, 366, 5107);
+  GFGumpPic(118, 366, 5107);
+  GFGumpPic(208, 366, 5107);
+  GFGumpPic(298, 366, 5107);
+  GFGumpPic(370, 366, 5107);
+  GFGumpPic(460, 366, 5108);
+  GFGumpPic( 20, 350, 5100);
+  GFGumpPic( 28, 350, 5101);
+  GFGumpPic(118, 350, 5101);
+  GFGumpPic(208, 350, 5101);
+  GFGumpPic(298, 350, 5101);
+  GFGumpPic(370, 350, 5101);
+  GFGumpPic(460, 350, 5102);
+  GFTextLine( 90, 380, 900, "Make Last");
+  GFTextLine(300, 420, 900, "How Many?");
+  GFGumpPic(390, 417, 2443);
+  var sa := GetObjProperty(who, "#TinkerAmt");
+  if(!sa)
+    sa := 1;
+  endif
+  var ct := GFTextEntry(400, 420, 100, 30, 0, sa);
+  var lastitm := GFButtonID( 70, 384,   3, 4, 99);
+  var close   := GFButtonID(410, 380, 242, 241, 1);
+  if((trg.objtype == 0x1bd7) || (trg.objtype == 0x1bdd))
+    GFTextLine(110,  80, 900, "WOOD SELECTION MENU");
+    var num := 2;
+    var skill := (AP_GetSkill(who, TINKERING) + 20);
+    var color := 0;
+    if(skill >= Cint(tinker_cfg[4144]."skill"))
+      color := 900;
+      GFButtonIDC(120, 180, 210, 211, 1, 4144);
+    endif
+    GFTextLine( 70, 150, color, "Jointing Plane");
+    GFTilePic( 80, 180, 4144);
+    color := 0;
+    if(skill >= Cint(tinker_cfg[4140]."skill"))
+      color := 900;
+      GFButtonIDC(260, 180, 210, 211, 1, 4140);
+    endif
+    GFTextLine(190, 150, color, "Moulding Plane");
+    GFTilePic(210, 180, 4140);
+    color := 0;
+    if(skill >= Cint(tinker_cfg[4146]."skill"))
+      color := 900;
+      GFButtonIDC(390, 180, 210, 211, 1, 4146);
+    endif
+    GFTextLine(350, 150, color, "Smoothing Plane");
+    GFTilePic(350, 180, 4146);
+    color := 0;
+    if(skill >= Cint(tinker_cfg[4173]."skill"))
+      color := 900;
+      GFButtonIDC(120, 240, 210, 211, 1, 4173);
+    endif
+    GFTextLine( 70, 210, color, "Clock Frame");
+    GFTilePic( 80, 240, 4173);
+    color := 0;
+    if(skill >= Cint(tinker_cfg[4187]."skill"))
+      color := 900;
+      GFButtonIDC(260, 240, 210, 211, 1, 4187);
+    endif
+    GFTextLine(220, 210, color, "Axle");
+    GFTilePic(210, 240, 4187);
+    color := 0;
+  elseif((trg.objtype >= 0x6309) and (trg.objtype <= 0x6311))
+    GFTextLine(110,  80, 900, "TINKERING SELECTION MENU");
+    GFTextLine( 30, 121,   0, "Traps");
+    GFTextLine(150, 121,   0, "Tools");
+    GFTextLine(260, 121,   0, "Parts");
+    GFTextLine(370, 121,   0, "Utensils");
+    GFTextLine( 30, 351,   0, "Jewelry");
+    GFTextLine(160, 351,   0, "Miscellaneous");
+    GFTextLine(335, 351,   0, "More Parts");
+//  GFTextLine(320, 380, 900, "Repair Item");
+//  var repair  := GFButtonID(300, 384,   3, 4, 97);
+    GFButtonPage(110, 123, 5209, 5209, 2);
+    GFButtonPage(230, 123, 5209, 5209, 3);
+    GFButtonPage(340, 123, 5209, 5209, 4);
+    GFButtonPage(435, 123, 5209, 5209, 5);
+    GFButtonPage( 90, 353, 5209, 5209, 6);
+    GFButtonPage(260, 353, 5209, 5209, 7);
+    GFButtonPage(430, 353, 5209, 5209, 8);
+    ComposeSubMenu(who);
+  else
+    SendSysMessage(who, "You cannot make anything out of that.");
+    return;
+  endif
+  var res := GFSendGump(who);
+  var split := SplitWords(res[ct.keyid]);
+  ct := split[2];
+  SetObjProperty(who, "#TinkerAmt", Cint(ct));
+  if((res[0] == 999) || (res[0] == 0) || (res[0] == close.keyid))
+    SendSysMessage(who, "Cancelled");
+    return;
+  endif
+  var objtype := CInt(res[0]);
+  var jarray := { 4234, 4233, 4239, 4231, 4232, 4230};
+  var tarray := { 4402, 4414, 4345};
+  var lstitm := GetObjProperty(who, "LastTinkerItem");
+  if(res[lastitm.keyid])
+    if(lstitm in jarray)
+      make_jewelry(who, item, trg, lstitm, ct);
+    elseif(lstitm in tarray)
+      make_trap(who, item, lstitm, trg, ct);
+    else
+      make_something(who, item, lstitm, trg, ct);
+    endif
+  elseif((objtype == 0x10f9) || (objtype == 0x113e) || (objtype == 0x1132))
+    make_trap(who, item, objtype, trg, ct);
+  elseif(objtype in jarray)
+    make_jewelry(who, item, trg, objtype, ct);
+  else
+    make_something(who, item, objtype, trg, ct);
+  endif
+endprogram
+
+function GFButtonIDC(x, y, release, press, close, retval)
+    var line := "button " + CStr(gfref.x + Cint(x)) + " " + CStr(gfref.y + Cint(y));
+    line := line + " " + CStr(Cint(release)) + " " + CStr(Cint(press)) + " ";
+    line := line + "1 0 ";
+    line := line + CStr(retval);
+    gflayout.append( line );
+endfunction
+
+function ComposeSubMenu(who)
+  var num := 2;
+  var skill := (AP_GetSkill(who, TINKERING) + 20);
+  var color := 0;
+  while(num < 9)
+    case(num)
+       2: GFPage(2);        // Page 2
+          if(skill >= Cint(tinker_cfg[4402]."skill"))
+            color := 900;
+            GFButtonIDC(120, 220, 210, 211, 1, 4402);
+          endif
+          GFTextLine( 70, 180, color, "Dart Trap");
+          GFTilePic( 80, 210, 7164);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[4414]."skill"))
+            color := 900;
+            GFButtonIDC(260, 220, 210, 211, 1, 4414);
+          endif
+          GFTextLine(200, 180, color, "Poison Trap");
+          GFTilePic(210, 210, 4414);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[4345]."skill"))
+            color := 900;
+            GFButtonIDC(400, 220, 210, 211, 1, 4345);
+          endif
+          GFTextLine(330, 180, color, "Explosion Trap");
+          GFTilePic(340, 120, 14093);
+          color := 0;
+       3: GFPage(3);        // Page 3
+          if(skill >= Cint(tinker_cfg[4325]."skill"))
+            color := 900;
+            GFButtonIDC(120, 180, 210, 211, 1, 4325);
+          endif
+          GFTextLine( 70, 150, color, "Froe");
+          GFTilePic( 80, 180, 4325);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[4027]."skill"))
+            color := 900;
+            GFButtonIDC(260, 180, 210, 211, 1, 4027);
+          endif
+          GFTextLine(190, 150, color, "Tongs");
+          GFTilePic(210, 180, 4028);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[3897]."skill"))
+            color := 900;
+            GFButtonIDC(400, 180, 210, 211, 1, 3897);
+          endif
+          GFTextLine(370, 150, color, "Shovel");
+          GFTilePic(290, 180, 3898);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[4138]."skill"))
+            color := 900;
+            GFButtonIDC(120, 240, 210, 211, 1, 4138);
+          endif
+          GFTextLine( 70, 210, color, "Hammer");
+          GFTilePic( 80, 240, 4138);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[5091]."skill"))
+            color := 900;
+            GFButtonIDC(260, 240, 210, 211, 1, 5091);
+          endif
+          GFTextLine(200, 210, color, "Smith's Hammer");
+          GFTilePic(210, 240, 5091);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[4020]."skill"))
+            color := 900;
+            GFButtonIDC(400, 240, 210, 211, 1, 4020);
+          endif
+          GFTextLine(350, 210, color, "Sledge Hammer");
+          GFTilePic(350, 240, 4021);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[4326]."skill"))
+            color := 900;
+            GFButtonIDC(120, 310, 210, 211, 1, 4326);
+          endif
+          GFTextLine( 70, 280, color, "Inshave");
+          GFTilePic( 80, 310, 4326);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[3717]."skill"))
+            color := 900;
+            GFButtonIDC(260, 310, 210, 211, 1, 3717);
+          endif
+          GFTextLine(220, 280, color, "Pickaxe");
+          GFTilePic(210, 310, 3718);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[5371]."skill"))
+            color := 900;
+            GFButtonIDC(400, 310, 210, 211, 1, 5371);
+          endif
+          GFTextLine(370, 280, color, "Lockpick");
+          GFTilePic(350, 310, 5371);
+          color := 0;
+       4: GFPage(4);        // Page 4
+          if(skill >= Cint(tinker_cfg[4179]."skill"))
+            color := 900;
+            GFButtonIDC(120, 180, 210, 211, 1, 4179);
+          endif
+          GFTextLine( 70, 150, color, "Gears");
+          GFTilePic( 80, 180, 4179);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[4175]."skill"))
+            color := 900;
+            GFButtonIDC(260, 180, 210, 211, 1, 4175);
+          endif
+          GFTextLine(190, 150, color, "Clock Parts");
+          GFTilePic(210, 180, 4175);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[4100]."skill"))
+            color := 900;
+            GFButtonIDC(400, 180, 210, 211, 1, 4100);
+          endif
+          GFTextLine(370, 150, color, "Keg Tap");
+          GFTilePic(350, 180, 4100);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[4189]."skill"))
+            color := 900;
+            GFButtonIDC(120, 240, 210, 211, 1, 4189);
+          endif
+          GFTextLine( 70, 210, color, "springs");
+          GFTilePic( 80, 240, 4189);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[4185]."skill"))
+            color := 900;
+            GFButtonIDC(260, 240, 210, 211, 1, 4185);
+          endif
+          GFTextLine(200, 210, color, "Sextant Parts");
+          GFTilePic(210, 240, 4185);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[4321]."skill"))
+            color := 900;
+            GFButtonIDC(400, 240, 210, 211, 1, 4321);
+          endif
+          GFTextLine(350, 210, color, "Barrel Hoops");
+          GFTilePic(350, 240, 4321);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[4181]."skill"))
+            color := 900;
+            GFButtonIDC(120, 310, 210, 211, 1, 4181);
+          endif
+          GFTextLine( 90, 280, color, "Hinge");
+          GFTilePic( 80, 310, 4181);
+          color := 0;
+       5: GFPage(5);        //Page 5
+          if(skill >= Cint(tinker_cfg[5110]."skill"))
+            color := 900;
+            GFButtonIDC(120, 180, 210, 211, 1, 5110);
+          endif
+          GFTextLine( 70, 150, color, "Butcher Knife");
+          GFTilePic( 80, 180, 5110);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[2553]."skill"))
+            color := 900;
+            GFButtonIDC(200, 180, 210, 211, 1, 2553);
+            GFButtonIDC(260, 180, 210, 211, 1, 2552);
+          endif
+          GFTextLine(220, 150, color, "Spoons");
+          GFTilePic(238, 180, 2552);
+          GFTilePic(198, 180, 2553);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[2519]."skill"))
+            color := 900;
+            GFButtonIDC(400, 180, 210, 211, 1, 2519);
+          endif
+          GFTextLine(370, 150, color, "Plate");
+          GFTilePic(350, 180, 2519);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[3781]."skill"))
+            color := 900;
+            GFButtonIDC(120, 240, 210, 211, 1, 3781);
+          endif
+          GFTextLine( 70, 210, color, "Skinning Knife");
+          GFTilePic( 80, 240, 3781);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[2549]."skill"))
+            color := 900;
+            GFButtonIDC(200, 240, 210, 211, 1, 2549);
+            GFButtonIDC(260, 240, 210, 211, 1, 2548);
+          endif
+          GFTextLine(220, 210, color, "Forks");
+          GFTilePic(220, 240, 2548);
+          GFTilePic(210, 240, 2549);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[2458]."skill"))
+            color := 900;
+            GFButtonIDC(400, 240, 210, 211, 1, 2458);
+          endif
+          GFTextLine(370, 210, color, "Goblet");
+          GFTilePic(350, 240, 2458);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[3778]."skill"))
+            color := 900;
+            GFButtonIDC(120, 310, 210, 211, 1, 3778);
+          endif
+          GFTextLine( 70, 280, color, "Cleaver");
+          GFTilePic( 80, 310, 3778);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[2551]."skill"))
+            color := 900;
+            GFButtonIDC(200, 310, 210, 211, 1, 2551);
+            GFButtonIDC(260, 310, 210, 211, 1, 2550);
+          endif
+          GFTextLine(220, 280, color, "Knives");
+          GFTilePic(205, 310, 2551);
+          GFTilePic(235, 310, 2550);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[4096]."skill"))
+            color := 900;
+            GFButtonIDC(400, 310, 210, 211, 1, 4096);
+          endif
+          GFTextLine(370, 280, color, "Pewter Mug");
+          GFTilePic(350, 310, 4096);
+          color := 0;
+       6: GFPage(6);        //Page 6
+          if(skill >= Cint(tinker_cfg[4234]."skill"))
+            color := 900;
+            GFButtonIDC(120, 180, 210, 211, 1, 4234);
+          endif
+          GFTextLine( 70, 150, color, "Ring");
+          GFTilePic( 80, 180, 4234);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[4233]."skill"))
+            color := 900;
+            GFButtonIDC(260, 180, 210, 211, 1, 4233);
+          endif
+          GFTextLine(190, 150, color, "Necklace");
+          GFTilePic(210, 180, 4233);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[4239]."skill"))
+            color := 900;
+            GFButtonIDC(400, 180, 210, 211, 1, 4239);
+          endif
+          GFTextLine(370, 150, color, "Necklace");
+          GFTilePic(350, 180, 4229);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[4231]."skill"))
+            color := 900;
+            GFButtonIDC(120, 240, 210, 211, 1, 4231);
+          endif
+          GFTextLine( 70, 210, color, "Earrings");
+          GFTilePic( 80, 240, 4231);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[4232]."skill"))
+            color := 900;
+            GFButtonIDC(260, 240, 210, 211, 1, 4232);
+          endif
+          GFTextLine(220, 210, color, "Necklace");
+          GFTilePic(210, 240, 4232);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[4230]."skill"))
+            color := 900;
+            GFButtonIDC(400, 240, 210, 211, 1, 4230);
+          endif
+          GFTextLine(370, 210, color, "Bracelet");
+          GFTilePic(350, 240, 4230);
+          color := 0;
+       7: GFPage(7);        //Page 7
+          if(skill >= Cint(tinker_cfg[4113]."skill"))
+            color := 900;
+            GFButtonIDC(120, 180, 210, 211, 1, 4113);
+          endif
+          GFTextLine( 70, 150, color, "Keyring");
+          GFTilePic( 80, 180, 4113);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[2599]."skill"))
+            color := 900;
+            GFButtonIDC(260, 180, 210, 211, 1, 2599);
+          endif
+          GFTextLine(190, 150, color, "Candelabra");
+          GFTilePic(210, 180, 2599);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[6225]."skill"))
+            color := 900;
+            GFButtonIDC(400, 180, 210, 211, 1, 6225);
+          endif
+          GFTextLine(370, 150, color, "Scales");
+          GFTilePic(350, 180, 6225);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[4112]."skill"))
+            color := 900;
+            GFButtonIDC(120, 240, 210, 211, 1, 4112);
+          endif
+          GFTextLine( 70, 210, color, "Iron Key");
+          GFTilePic( 80, 240, 4112);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[4167]."skill"))
+            color := 900;
+            GFButtonIDC(260, 240, 210, 211, 1, 4167);
+          endif
+          GFTextLine(220, 210, color, "Globe");
+          GFTilePic(210, 240, 4167);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[5365]."skill"))
+            color := 900;
+            GFButtonIDC(400, 240, 210, 211, 1, 5365);
+          endif
+          GFTextLine(370, 210, color, "Spy Glass");
+          GFTilePic(350, 240, 5365);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[2597]."skill"))
+            color := 900;
+            GFButtonIDC(120, 310, 210, 211, 1, 2597);
+          endif
+          GFTextLine( 70, 280, color, "Lantern");
+          GFTilePic( 80, 310, 2584);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[6217]."skill"))
+            color := 900;
+            GFButtonIDC(260, 310, 210, 211, 1, 6217);
+          endif
+          GFTextLine(220, 280, color, "Heating Stand");
+          GFTilePic(210, 310, 6217);
+          color := 0;
+       8: GFPage(8);        //Page 8
+          if(skill >= Cint(tinker_cfg[3998]."skill"))
+            color := 900;
+            GFButtonIDC(120, 180, 210, 211, 1, 3998);
+          endif
+          GFTextLine( 70, 150, color, "Scissors");
+          GFTilePic( 80, 180, 3998);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[3739]."skill"))
+            color := 900;
+            GFButtonIDC(260, 180, 210, 211, 1, 3739);
+          endif
+          GFTextLine(190, 150, color, "Mortar & Pestle");
+          GFTilePic(210, 180, 3739);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[4327]."skill"))
+            color := 900;
+            GFButtonIDC(400, 180, 210, 211, 1, 4327);
+          endif
+          GFTextLine(370, 150, color, "Scorp");
+          GFTilePic(350, 180, 4327);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[7865]."skill"))
+            color := 900;
+            GFButtonIDC(120, 240, 210, 211, 1, 7865);
+          endif
+          GFTextLine( 70, 210, color, "Tinker's Tools");
+          GFTilePic( 80, 240, 7865);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[3907]."skill"))
+            color := 900;
+            GFButtonIDC(260, 240, 210, 211, 1, 3907);
+          endif
+          GFTextLine(220, 210, color, "Hatchet");
+          GFTilePic(210, 240, 3907);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[4324]."skill"))
+            color := 900;
+            GFButtonIDC(400, 240, 210, 211, 1, 4324);
+          endif
+          GFTextLine(370, 210, color, "Draw Knife");
+          GFTilePic(350, 240, 4324);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[3997]."skill"))
+            color := 900;
+            GFButtonIDC(120, 310, 210, 211, 1, 3997);
+          endif
+          GFTextLine( 70, 280, color, "Sewing Kit");
+          GFTilePic( 80, 310, 3997);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[4148]."skill"))
+            color := 900;
+            GFButtonIDC(260, 310, 210, 211, 1, 4148);
+          endif
+          GFTextLine(220, 280, color, "Saw");
+          GFTilePic(210, 310, 4148);
+          color := 0;
+          if(skill >= Cint(tinker_cfg[4136]."skill"))
+            color := 900;
+            GFButtonIDC(400, 310, 210, 211, 1, 4136);
+          endif
+          GFTextLine(370, 280, color, "Dovetail Saw");
+          GFTilePic(350, 310, 4136);
+          color := 0;
+    endcase
+    num := num + 1;
+  endwhile
+  return;
+endfunction
+
+function make_something( who, item, what, use_on, ct)
+  ct := Cint(ct);
+  SetObjProperty(who, "LastTinkerItem", what);
+  var type      := tinker_cfg[what].type;
+  var material  := CInt(tinker_cfg[what].material);
+  var skill     := CInt(tinker_cfg[what].skill);
+  var itemname  := tinker_cfg[what].Name;
+  var thepoints := CInt(skill * 2);
+  var exchk     := tinker_cfg[what].exchk;
+  var myskill := CInt(AP_GetSkill(who, TINKERING));
+  var counter := 0;
+  var x := who.x;
+  var y := who.y;
+  var theitem, lockid, thekey;
+  while(counter < ct)
+    if((who.x != x) || (who.y != y))
+      SendSysMessage(who, "You stop Tinkering.");
+      break;
+    endif
+    if(!item)
+      break;
+    endif
+    if((use_on.amount < material) or (!resourcecheck(who, use_on, type)))
+      SendSysMessage(who, "You don't have enough material to make this!");
+      break;
+    endif
+    PlaySoundEffect(who, 0x22d);
+    sleep(2);
+    PlaySoundEffect(who, 0x22d);
+    sleep(2);
+    PlaySoundEffect(who, 0x22d);
+    sleep(2);
+    if(SkillCheck(who, TINKERING, skill, thepoints))
+      if(!SubtractAmount(use_on, material))
+        sendsysmessage(who, "Cancelled.");
+        break;
+      endif
+      theitem := CreateItemInContainer(who.backpack, CInt(what), 1);
+      CheckToolWear (who, item, TINKERING);
+      theitem.movable := 1;
+      var modpts := 0;
+      if(myskill >=  skill)
+        modpts := (myskill - skill);
+      endif
+      var rint := RandomInt(100);
+      if(modpts >= rint)
+        ExceptionalFameMod(who, myskill, skill, thepoints);
+        if(exchk)
+          theitem.quality := 1.2;
+          theitem.hp := theitem.maxhp;
+          if(AP_GetSkill(who, TINKERING) >= 99)
+            SetName(theitem, "an exceptional " + itemname + " [crafted by " + who.name + "]");
+          else
+            SetName(theitem, "an exceptional " + itemname);
+          endif
+          SendSysMessage(who, "You make an exceptional item and put it in your pack");
+        endif
+      else
+        var fq :=  RandomInt(myskill);
+        if(skill > 20)
+          skill := skill - 20;
+        else
+          skill := 3;
+        endif
+        if((myskill < skill) and (exchk))
+          SendSysMessage( who, "You create the item, but it's quality is below average." );
+          var val := RandomInt(2) + 1;
+          case(val)
+            1: theitem.quality := 0.7;
+            2: theitem.quality := 0.8;
+            3: theitem.quality := 0.9;
+          endcase
+          theitem.hp := theitem.maxhp;
+        else
+          SendSysMessage( who, "You create the item and place it in your pack." );
+        endif
+        SetName(theitem, itemname );
+      endif
+      if((theitem.graphic in array(0x9a8, 0x9a9, 0x9aa, 0x9ab, 0xa2c, 0xa30, 0xa34, 0xa38, 0xa4d, 0xa4f,
+        0xa51, 0xa53, 0xe3c, 0xe3d, 0xe3e, 0xe3f, 0xe40, 0xe41, 0xe42, 0xe43, 0xe7c, 0xe7d, 0xe7e, 0xe80)))
+        if(RandomInt(AP_GetSkill(who, TINKERING)) > 40)
+          SetObjProperty(theitem, "lockable", "1");
+          lockid := AllocLockId();
+          theitem.locked := 0;
+          thekey := CreateItemInBackpack(who, UOBJ_COPPER_KEY, 1);
+          SetObjProperty(thekey, "lockid", lockid);
+          SetObjProperty(theitem,"lockid", lockid);
+          SetObjProperty(theitem,"LockPickDiff", (AP_GetSkill(who, TINKERING) + 10));
+          SendSysMessage(who, "You will find the key in your backpack.");
+        endif
+      endif
+    else
+      SubtractAmount(use_on, CInt(material/2));
+      SendSysMessage(who, "You destroy some material.");
+    endif
+    counter := counter + 1;
+  endwhile
+endfunction
+
+function make_jewelry(who, item, stuff, what, ct)
+  ct := Cint(ct);
+  SetObjProperty(who, "LastTinkerItem", what);
+  var type      := tinker_cfg[what].type;
+  var material  := tinker_cfg[what].material;
+  var skill     := tinker_cfg[what].skill;
+  var itemname  := tinker_cfg[what].Name;
+  var thepoints := CInt(skill * 2);
+  var counter := 0;
+  var x := who.x;
+  var y := who.y;
+  var theitem;
+  SendSysMessage(who, "Select the gems you wish to work with");
+  var thegem := Target(who);
+  if(!thegem)
+    SendSysMessage(who, "Targetting cancelled.");
+    return;
+  endif
+  if(!can_access(who, thegem))
+    return;
+  endif
+  if((thegem.objtype >= 0x0f0f) && (thegem.objtype <= 0x0f30))
+    if(!ReserveItem(thegem))
+      SendSysMessage(who,"that gem is not accessible");
+      return;
+    endif
+  else
+    SendSysMessage(who, "That is not a gem!");
+    return;
+  endif
+  if(!Accessible(who, thegem))
+    SendSysMessage(who, "You can't reach that!");
+    return;
+  endif
+  var myskill := CInt(AP_GetSkill(who, TINKERING));
+  while(counter < ct)
+    if((who.x != x) || (who.y != y))
+      SendSysMessage(who, "You stop Tinkering.");
+      break;
+    endif
+    if(stuff.amount < material)
+      SendSysMessage(who, "You don't have enough material to make this!");
+      break;
+    endif
+    PlaySoundEffect(who, 0x22d);
+    sleep(2);
+    PlaySoundEffect(who, 0x22d);
+    sleep(2);
+    PlaySoundEffect(who, 0x22d);
+    sleep(2);
+    if(stuff.amount > material)
+      if(!SubtractAmount(thegem, 1))
+        break;
+      endif
+      if(SkillCheck(who, TINKERING, skill, thepoints))
+        if(!SubtractAmount(stuff, material))
+          break;
+        endif
+        theitem := CreateItemInBackpack(who, CInt(what), 1);
+        CheckToolWear (who, item, TINKERING);
+        var modpts := 0;
+        if(myskill >=  skill)
+          modpts := (myskill - skill);
+        endif
+        var rint := RandomInt(100);
+        if(modpts >= rint)
+          ExceptionalFameMod(who, myskill, skill, thepoints);
+          SetName(theitem, itemname);
+          SendSysMessage(who, "You create the item and place it in your pack.");
+        endif
+      else
+        SubtractAmount(stuff, CInt(material/2) );
+        SendSysMessage(who, "You destroy some material.");
+      endif
+    else
+      SendSysMessage(who, "You don't have enough material!");
+    endif
+    counter := counter + 1;
+  endwhile
+endfunction
+
+function make_trap(who, item, traptype, ingot, ct)
+  if(!resourcecheck(who, ingot, "metal"))
+    return;
+  endif
+  ct := Cint(ct);
+  case(traptype)
+    4345:  SetObjProperty(who, "LastTinkerItem", 4345);
+             explosion_trap(who, item, ingot, ct);
+    4414:  SetObjProperty(who, "LastTinkerItem", 4414);
+             poison_trap(who, item, ingot, ct);
+    4402:  SetObjProperty(who, "LastTinkerItem", 4402);
+             dart_trap(who, item, ingot, ct);
+  endcase
+endfunction
+
+function dart_trap(who, item, ingot, ct)
+  var counter := 0;
+  var x := who.x;
+  var y := who.y;
+  var theitem;
+  while(counter < 1)
+    SendSysMessage(who,"select the container you wish to place a trap on");
+    var chest := Target(who);
+    if(!chest)
+      SendSysMessage(who,"canceled");
+      break;
+    endif
+    if(!can_access(who, chest))
+      break;
+    endif
+    if(!Accessible(who, chest))
+      SendSysMessage(who, "You can't reach that!");
+      break;
+    endif
+    if(!ReserveItem(chest))
+      SendSysMessage(who,"you cant trap that");
+      break;
+    endif
+    if((chest.objtype != 0x09aa) && (chest.objtype != 0x09a9) && (chest.objtype != 0x0e3c) && (chest.objtype != 0x0e3f) && (chest.objtype != 0x0e42))
+      SendSysMessage(who, "You can only trap boxes.");
+      return;
+    endif
+    if(GetObjProperty(chest, "trap_type"))
+      SendSysMessage(who, "That chest is already trapped.");
+      break;
+    endif
+    var resource_check := 0;
+    foreach item in EnumerateItemsInContainer(who.backpack)
+      if(item.graphic == 0x1bfb)
+        if(ReserveItem(item))
+          SubtractAmount(item, 1);
+          resource_check := 1;
+          break;
+        endif
+      endif
+    endforeach
+    if(resource_check == 0)
+      SendSysMessage(who,"you dont have any bolts.");
+      break;
+    endif
+    if(!SubtractAmount(ingot, 1))
+      break;
+    endif
+    var myskill := AP_GetSkill(who, TINKERING);
+    sleep(2);
+    if(SkillCheck(who, TINKERING, -1, Cint(myskill / 2)))
+      var modpts := 10;
+      var rint := RandomInt(100);
+      if(modpts >= rint)
+        ExceptionalFameMod(who, myskill, myskill, Cint(myskill / 2));
+        SetObjProperty(chest, "trap_strength", Cint((myskill / 3) + 10));
+      else
+        SetObjProperty(chest, "trap_strength", Cint(myskill / 3));
+      endif
+      SetObjProperty(chest, "trap_type", "1");
+      SetObjProperty(chest, "oldscript", chest.usescript);
+      SendSysMessage(who, "You carefully place the trap on the container");
+      chest.usescript := ":tinkering:tinkerTraps";
+      SetObjProperty(chest, "trapper", who.serial);
+      CheckToolWear (who, item, TINKERING);
+    else
+      var results := RandomInt(9) + 1;
+      if(results == 1)
+        var the_damage := (RandomInt(19) + 1) + RandomInt(myskill + 10);
+        SendSysMessage(who, "You fail and set off the trap!", 1, 33);
+        PlaySoundEffect(who, SFX_225);
+        ApplyDamageEX(who, the_damage, DMG_PHYSICAL);
+      else
+        SendSysMessage(who, "You failed to properly place the trap");
+      endif
+    endif
+    counter := counter + 1;
+  endwhile
+endfunction
+
+function poison_trap(who, item, ingot, ct)
+  var counter := 0;
+  var x := who.x;
+  var y := who.y;
+  var theitem, chest, resource_check, points, strngth, results, plevel, passparms;
+  while(counter < 1)
+    SendSysMessage(who,"select the container you wish to place a trap on");
+    chest := Target(who);
+    if(!chest)
+      SendSysMessage(who,"canceled");
+      break;
+    endif
+    if(!can_access(who, chest))
+      break;
+    endif
+    if(!Accessible(who, chest))
+      SendSysMessage(who, "You can't reach that!");
+      break;
+    endif
+    if(!ReserveItem(chest))
+      SendSysMessage(who,"you cant trap that");
+      break;
+    endif
+    if((chest.objtype != 0x09aa) && (chest.objtype != 0x09a9) && (chest.objtype != 0x0e3c) && (chest.objtype != 0x0e3f) && (chest.objtype != 0x0e42))
+      SendSysMessage(who, "You can only trap boxes.");
+      return;
+    endif
+    if(GetObjProperty(chest, "trap_type"))
+      SendSysMessage(who, "That chest is already trapped.");
+      break;
+    endif
+    resource_check := 0;
+    foreach item in EnumerateItemsInContainer(who.backpack)
+      if(item.graphic == 0xf0a)
+        if(ReserveItem(item))
+          SubtractAmount(item, 1);
+          resource_check := 1;
+          break;
+        endif
+      endif
+    endforeach
+    if(resource_check == 0)
+      SendSysMessage(who,"you dont have a poison potion.");
+      break;
+    endif
+    if(!SubtractAmount(ingot, 1))
+      break;
+    endif
+    var myskill := CInt(AP_GetSkill(who, TINKERING));
+    if(myskill <= 20)
+      strngth := 1;
+    elseif(myskill <= 40)
+      strngth := 2;
+    elseif(myskill <= 60)
+      strngth := 3;
+    elseif(myskill <= 60)
+      strngth := 4;
+    else
+      strngth := 5;
+    endif
+    if(SkillCheck(who, TINKERING, -1, myskill))
+      var modpts := 10;
+      var rint := RandomInt(100);
+      if(modpts >= rint)
+        ExceptionalFameMod(who, myskill, myskill, Cint(myskill / 2));
+        if(strngth < 5)
+          strngth := strngth + 1;
+        else
+          strngth := 5;
+        endif
+        SetObjProperty(chest, "trap_strength", strngth);
+      else
+        SetObjProperty(chest, "trap_strength", strngth);
+      endif
+      SetObjProperty(chest, "trap_type", "2");
+      SetObjProperty(chest, "oldscript", chest.usescript);
+      SendSysMessage(who, "The carefully place the trap on the container");
+      chest.usescript := ":tinkering:tinkerTraps";
+      SetObjProperty(chest, "trapper", who.serial);
+      CheckToolWear (who, item, TINKERING);
+    else
+      results := RandomInt(9) + 1;
+      if (results == 1)
+        SendSysMessage(who, "You fail, and poison yourself!");
+        start_script(":spells:poisonDamage", {who, who, "poison trap", strngth});
+        break;
+      else
+        SendSysMessage(who,"You fail to properly place the trap.");
+      endif
+    endif
+    counter := counter + 1;
+  endwhile
+endfunction
+
+function explosion_trap(who, item,  ingot, ct)
+  var counter := 0;
+  var x := who.x;
+  var y := who.y;
+  var chest, resource_check, results, the_damage;
+  while(counter < 1)
+    SendSysMessage(who,"select the container you wish to place a trap on");
+    chest := Target(who);
+    if (!chest)
+      SendSysMessage(who,"canceled");
+      return;
+    endif
+    if(!can_access(who, chest))
+      return;
+    endif
+    if (!Accessible(who, chest))
+      SendSysMessage(who, "You can't reach that!");
+      return;
+    endif
+    if (!ReserveItem(chest))
+      SendSysMessage(who,"you cant trap that");
+      return;
+    endif
+    if((chest.objtype != 0x09aa) && (chest.objtype != 0x09a9) && (chest.objtype != 0x0e3c) && (chest.objtype != 0x0e3f) && (chest.objtype != 0x0e42))
+      SendSysMessage(who, "You can only trap boxes.");
+      return;
+    endif
+    if(GetObjProperty(chest, "trap_type"))
+      SendSysMessage(who, "That chest is already trapped.");
+      return;
+    endif
+    resource_check := 0;
+    foreach item in EnumerateItemsInContainer(who.backpack)
+      if (item.graphic == 0xf0d)
+        if (ReserveItem(item))
+          SubtractAmount(item, 1);
+          resource_check := 1;
+          break;
+        endif
+      endif
+    endforeach
+    if (resource_check == 0)
+      SendSysMessage(who,"you dont have an explosion potion.");
+      return;
+    endif
+    SubtractAmount(ingot, 1);
+    var myskill := CInt(AP_GetSkill(who, TINKERING));
+    if (SkillCheck( who, TINKERING, -1, myskill*2 ))
+      var modpts := 10;
+      var rint := RandomInt(100);
+      if(modpts >= rint)
+        ExceptionalFameMod(who, myskill, myskill, Cint(myskill / 2));
+        SetObjProperty(chest, "trap_strength", Cint(myskill + 20));
+      else
+        rint := RandomInt(100);
+        if(modpts >= rint)
+          SetObjProperty(chest, "trap_strength", Cint(myskill / 2));
+        else
+          SetObjProperty(chest, "trap_strength", Cint(myskill));
+        endif
+      endif
+      SetObjProperty(chest, "trap_type", "3");
+      SetObjProperty(chest, "oldscript", chest.usescript);
+      SendSysMessage(who, "The carefully place the trap on the container");
+      chest.usescript := ":tinkering:tinkerTraps";
+      SetObjProperty(chest, "trapper", who.serial);
+      CheckToolWear (who, item, TINKERING);
+    else
+      results := RandomInt(9) + 1;
+      if (results == 1)
+        the_damage := (RandomInt(19) + 1) + RandomInt(myskill + 10);
+        SendSysMessage(who, "You fail, and set off the explosion!");
+        PlayObjectCenteredEffect( who,  0x36b0,5,0 );
+        PlaySoundEffect( who, 0x0208);
+        ApplyDamageEX(who, the_damage, DMG_PHYSICAL);
+      else
+        SendSysMessage(who, "You failed to properly place the trap");
+      endif
+    endif
+    counter := counter + 1;
+  endwhile
+endfunction
+
+function resourcecheck(who, use_on, type)
+  var the_type;
+  case(use_on.objtype)
+    0x1bd7: the_type := "wood";
+    0x1bdd: the_type := "wood";
+    0x6309: the_type := "metal";
+    0x630a: the_type := "metal";
+    0x630b: the_type := "metal";
+    0x630c: the_type := "metal";
+    0x630d: the_type := "metal";
+    0x630e: the_type := "metal";
+    0x630f: the_type := "metal";
+    0x6310: the_type := "metal";
+    0x6311: the_type := "metal";
+  endcase
+  if(the_type == type)
+    return 1;
+  else
+    if(type == "wood")
+      SendSysMessage(who, "You cannot make wooden items out of metal.");
+    elseif(type == "metal")
+      SendSysMessage(who, "You cannot make metal items out of wood.");
+    endif
+    return 0;
+  endif
+endfunction
+
+function ExceptionalFameMod(who, skill, diff, points)
+  if(skill > diff - 20)
+    diff := diff + 20;
+    if((skill - diff) <= 5)
+      points := points;
+    elseif((skill - diff) <= 10)
+      points := (points * 3) / 4;
+    elseif((skill - diff) <= 15)
+      points := points / 2;
+    elseif((skill - diff) <= 20)
+      points := points / 4;
+    else
+      points := 0;
+    endif
+    points := Cint(points);
+    var fame := Cint(GetObjProperty(who, "Fame"));
+    var famegain := fame + points;
+    SetObjProperty(who, "Fame", famegain);
+    var msgtext := "You have ";
+    if(points < 0)
+      msgtext := msgtext + "lost ";
+      points := Abs(points);
+    else
+      msgtext := msgtext + "gained ";
+    endif
+    if(points > 150)
+      msgtext := msgtext + "a great amount of ";
+    elseif(points > 125)
+      msgtext := msgtext + "alot of ";
+    elseif(points > 75)
+      msgtext := msgtext + "a good amount of ";
+    elseif(points > 30)
+      msgtext := msgtext + "some ";
+    elseif(points > 0)
+      msgtext := msgtext + "a little ";
+    else
+      return 0;
+    endif
+    msgtext := msgtext + "Fame.";
+    SendSysMessage(who, msgtext);
+    var karma := Cint(GetObjProperty(who, "Karma"));
+    var kmod := GetKarmaLevel(karma);
+    var fmod := GetFameLevel(famegain);
+    var newtitle := nototitles[ (kmod) ];
+    newtitle := "The " + CStr(newtitle[fmod]) + " ";
+    if(newtitle["None"])
+      newtitle := "";
+    endif
+    if(fmod == 5)
+      if(who.gender == 1)
+        newtitle := newtitle + "Lady ";
+      else
+        newtitle := newtitle + "Lord ";
+      endif
+    endif
+    if(newtitle != who.title_prefix)
+      who.title_prefix := newtitle;
+      SendSysMessage(who, "you are now known as " + newtitle + who.name);
+    endif
+    SetNotoTitle(who, karma, fame);
+  endif
+endfunction

@@ -1,0 +1,19 @@
+use uo;
+
+include "include/res";
+include "include/client";
+include "include/resPenalty";
+
+program textcmd_res(speaker)
+  var tgt := TargetCoordinates(speaker);
+  if(tgt.mobile)
+    if(tgt.mobile.dead)
+	  if(ResNow(tgt.mobile)==1)
+        Resurrect(tgt.mobile);
+    	ResPenalties(tgt.mobile);
+      endif
+    else
+      SendSysMessage(speaker, "But that's not dead!");
+    endif
+  endif
+endprogram

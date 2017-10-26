@@ -1,0 +1,56 @@
+use uo;
+use os;
+use util;
+
+include "include/eventID";
+
+program on_insert(who, backpack, item, amtadded, movetype)
+  set_critical(1);
+  var vendorserial := GetObjProperty(backpack,"Vendored");
+  if(!vendorserial)
+    var ownerserial := GetObjProperty(backpack, "Owner");
+    if(item.isa(POLCLASS_CONTAINER) && ownerserial)
+      SetObjProperty(item, "Owner", ownerserial);
+    endif
+  else
+    var vendor := SystemFindObjectBySerial(vendorserial);
+    var ev := array;
+    ev.+ type;
+    ev.+ source;
+    ev.+ item;
+    ev.+ vendor;
+    ev.type := EVID_ITEM_GIVEN;
+    ev.source := who;
+    ev.item := item;
+    ev.vendor := 1;
+    SendEvent(vendor, ev);
+  endif
+  if(backpack.item_count == 1)
+    case(item.graphic)
+      0xa97: backpack.graphic := 0xa9d;
+      0xa98: backpack.graphic := 0xa9d;
+      0xa9b: backpack.graphic := 0xa9d;
+      0xa99: backpack.graphic := 0xa9e;
+      0xa9a: backpack.graphic := 0xa9e;
+      0xa9c: backpack.graphic := 0xa9e;
+    endcase
+  else
+    if(backpack.graphic == 0xa9d)
+      var rint := RandomInt(3)+1;
+      case(rint)
+        1: backpack.graphic := 0xa97;
+        2: backpack.graphic := 0xa98;
+        3: backpack.graphic := 0xa9b;
+      endcase
+    elseif(backpack.graphic == 0xa9e)
+      var rint := RandomInt(3)+1;
+      case(rint)
+        1: backpack.graphic := 0xa99;
+        2: backpack.graphic := 0xa9a;
+        3: backpack.graphic := 0xa9c;
+      endcase
+    endif
+  endif
+  return 1;
+  set_critical(0);
+endprogram

@@ -1,0 +1,59 @@
+use uo;
+use vitals;
+
+include ":damage:damage";
+
+program evil_omen( params )
+	var caster := params[1];
+	var info := params[2]; // Struct containing additional info about the spell.
+	var spellID := params[3];
+
+	SendSysMessage(caster, "Select your victim:", 1, 88);
+	var cast_on := Target(caster);
+	
+
+	var duration := 20;
+	info := info;
+	spellID := spellID;
+	if(Reflected(cast_on))
+		cast_on := caster;
+	endif
+
+	if(!cast_on.isa(POLCLASS_MOBILE))
+		SendSysMessage(caster, "You can not use this spell on items.",3,40);
+		return 0;
+	endif
+
+	var cast_onrs := GetAttribute(cast_on, RESISTING_SPELLS);
+	var modrs := cast_onrs / 50 * -1;
+	modrs := modrs * 10;
+	
+	detach();
+	PlayObjectCenteredEffectEx( cast_on, 0x3779, 1, 15, 9502, 67, 0, 7 );
+	PlaySoundEffect(cast_on, 0xFC);
+	Sleep(1);
+	PlayObjectCenteredEffectEx( cast_on, 0x3728, 1, 13, 9912, 1150, 0, 7 );
+	Setobjproperty(cast_on, "evilomen", 1);
+	ModifyResistance(cast_on, DMG_PHYSICAL, -20);
+	SetAttributeTemporaryMod( cast_on, RESISTING_SPELLS, GetAttributeTemporaryMod(cast_on, RESISTING_SPELLS) + modrs );
+	
+	Sleep(duration);
+	
+	PlayObjectCenteredEffectEx( cast_on, 0x3779, 1, 15, 9502, 67, 0, 7 );
+	PlaySoundEffect(cast_on, 0xFC);
+	Sleep(1);
+	PlayObjectCenteredEffectEx( cast_on, 0x3728, 1, 13, 9912, 1150, 0, 7 );
+	Eraseobjproperty(cast_on, "evilomen");
+	ModifyResistance(cast_on, DMG_PHYSICAL, 20);
+	SetAttributeTemporaryMod( cast_on, RESISTING_SPELLS, GetAttributeTemporaryMod(cast_on, RESISTING_SPELLS) - modrs );
+	
+endprogram
+
+/*
+What this spell is supposed to do not what this implentation does:
+Be it a strike from a sword or the sting of a spell, the next bad thing that happens to the receiver of this curse will be worse. The player affected by this spell:
+
+    Will receive a +25% increase from the next source of damage.
+    Will receive a +1 boost to the level of poison the next time they are poisoned.
+    Will only have 50% of their Resisting Spells skill the next time they try to resist a spell.
+*/

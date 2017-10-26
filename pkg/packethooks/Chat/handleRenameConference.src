@@ -1,0 +1,20 @@
+use uo;
+use os;
+use polsys;
+
+include ":chat:chatIO";
+include ":chat:packets";
+include ":chat:functions";
+include ":chat:settings";
+
+program RenameConference(params)
+	var character := params[1];
+	var packet := params[2];
+	params := "";
+
+	if ( CH_CheckDebug() )
+		Print("RenameConference: "+character.name+" "+packet);
+	endif
+
+	return 1;
+endprogram

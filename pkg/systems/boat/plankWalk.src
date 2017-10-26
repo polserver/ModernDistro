@@ -1,0 +1,180 @@
+use os;
+use uo;
+
+include "include/client";
+include "include/objtype";
+include "include/utility";
+include ":boat:plankUtil";
+// include "../pkg/world/weather/weather";
+
+/*
+ * the searchoffset matrix is for an east-facing plank.
+ * these will have to be rotated for the other positions
+ *   P is the plank, N is where you can't step (otherwise
+ *    this teleportation stuff wouldn't be necessary)
+ *
+ *        13 12 11
+ *        14  5  4
+ *        15  6  2
+ *        16  7  1 N P
+ *        17  8  3
+ *        18  9 10 
+ *        19 20 21
+ *
+ */
+
+var searchoffset := array{
+   array{ -2,  0 },          //  1
+   array{ -2, -1 },
+   array{ -2, +1 },
+   array{ -2, -2 },
+   array{ -3, -2 },          //  5
+   array{ -3, -1 },
+   array{ -3,  0 },
+   array{ -3, +1 },
+   array{ -3, +2 },
+   array{ -2, +2 },          // 10
+   array{ -2, -3 },
+   array{ -3, -3 },
+   array{ -4, -3 },
+   array{ -4, -2 },
+   array{ -4, -1 },          // 15
+   array{ -4,  0 },
+   array{ -4, +1 },
+   array{ -4, +2 },
+   array{ -4, +3 },
+   array{ -3, +3 },          // 20
+   array{ -2, +3 },
+   array{ -5,  0 },
+   array{ -5, +2 },
+   array{ -5, +3 },
+   array{ -5, +4 },
+   array{ -4, +4 },          // 20
+   array{ -3, +4 },
+   array{ -6,  0 },
+   array{ -6, +3 },
+   array{ -6, +4 },
+   array{ -6, +5 },
+   array{ -5, +5 },          // 20
+   array{ -4, +5 }
+};
+
+program plankwalk( who, plank, lastx, lasty, lastz )
+    // print( "plankwalk last=(" + lastx + "," + lasty + "," + lastz + ")" );
+
+    
+        //
+        // see if someone is walking onto a locked plank from off the boat
+        // if so, bounce them.
+        //
+        // it would be nice if core had a "canwalk" script capability, so
+        // this code could just tell core to reject the walk in the first place.
+        //
+    if (!FindKey( who, plank ))
+        if (plank.locked)
+            var sh := GetStandingHeight( lastx, lasty, lastz, plank.realm );
+            if (!sh or !sh.multi or sh.multi.serial != plank.multi.serial)
+				MoveObjectToLocation( who, lastx, lasty, lastz, plank.realm, MOVEOBJECT_FORCELOCATION );
+//			SetWeatherForPlayer (who);
+                return;
+            endif
+        endif
+    endif
+    
+	if (ListMobilesNearLocation( plank.x, plank.y, plank.z, 0, plank.realm ).size() > 1)
+		MoveObjectToLocation( who, lastx, lasty, lastz, plank.realm, MOVEOBJECT_FORCELOCATION );
+//		SetWeatherForPlayer (who);
+		return;
+	endif
+
+    var xidx, yidx, xmul, ymul;
+
+    case (plank.graphic)
+        GID_PLANK_EXTENDED_FACING_WEST:
+            if (! (who.facing in { DIR_W, DIR_NW, DIR_SW }))
+                return;
+            endif
+            xidx := 1;
+            yidx := 2;
+            xmul := 1;
+            ymul := 1;
+        
+        GID_PLANK_EXTENDED_FACING_EAST:
+            if (! (who.facing in { DIR_E, DIR_NE, DIR_SE }))
+                return;
+            endif
+            xidx := 1;
+            yidx := 2;
+            xmul := -1; // flip across x-axis
+            ymul := 1;
+
+        GID_PLANK_EXTENDED_FACING_NORTH:
+            if (! (who.facing in { DIR_N, DIR_NE, DIR_NW }))
+                return;
+            endif
+            xidx := 2;
+            yidx := 1;
+            xmul := 1;
+            ymul := +1;
+           
+        GID_PLANK_EXTENDED_FACING_SOUTH:
+            if (! (who.facing in { DIR_S, DIR_SE, DIR_SW }))
+                return;
+            endif
+            xidx := 2;
+            yidx := 1;
+            xmul := 1;
+            ymul := -1; // flip across y-axis
+        
+        default: 
+            print( "unrecognized plank type" );
+            return;
+    endcase
+
+    // If the walker can stand one square past the plank, there's no need
+    // to teleport.
+    if (CanMove( who,
+                 searchoffset[1][xidx] * xmul / 2,
+                 searchoffset[1][yidx] * ymul / 2 ))
+        return;                     // doesn't need our help!
+    endif
+
+
+    foreach offset in searchoffset
+        if (TryMove( who, offset[xidx] * xmul, offset[yidx] * ymul ))
+            return;
+        endif        
+    endforeach
+
+    // gah, can't get off the ship!
+endprogram
+
+function TryMove( who, dx, dy )
+    var res := 0;
+    set_critical( 1 );
+
+    var tryx := who.x + dx;
+    var tryy := who.y + dy;
+    // print( "Trying (" + tryx + "," + tryy + ")" );
+    var h := GetStandingHeight( tryx, tryy, who.z, who.realm );
+    if (h and (not h.multi)) // CHECKME should check line of sight?
+		MoveObjectToLocation( who, tryx, tryy, h.z, who.realm, flags := MOVEOBJECT_FORCELOCATION );
+//		SetWeatherForPlayer (who);
+        res := 1;
+    endif
+
+    set_critical(0);
+    return res;
+endfunction
+
+function CanMove( who, dx, dy )
+    var tryx := who.x + dx;
+    var tryy := who.y + dy;
+    // print( "CanMove: (" + tryx + "," + tryy + ") ?" );
+    var h := GetStandingHeight( tryx, tryy, who.z, who.realm );
+    if (h)
+        return 1;
+    else
+        return 0;
+    endif
+endfunction

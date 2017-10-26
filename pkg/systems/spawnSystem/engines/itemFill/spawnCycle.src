@@ -1,0 +1,102 @@
+/*
+
+	spawnSystem originally created by Austin for the 0.97 Distro
+	
+	Bugs fixed by Edwards
+	
+	Adapted for the Basic Distro by Yukiko 10-Sep-2015
+
+
+*/
+use uo;
+use os;
+
+include ":spawnsystem:groups";
+include ":spawnsystem:regions";
+include ":spawnsystem:settings";
+include ":spawnsystem:spawnerUtil";
+
+program SpawnCycle( params )
+
+	//var engine_name	:= params[1];
+	var realm_name	:= params[2];
+	var region_name	:= params[3];
+	var group_name	:= params[4];
+	params := 0; // Not needed anymore.
+
+	ValidateSpawns( region_name, group_name );
+
+	var group_settings := SS_GetGroupInRegion( region_name, group_name ),
+ 	    max_amt := CInt( group_settings.max_amt ),
+	    cur_amount := CInt( SS_GetSpawnsInRegionGroup( region_name, group_name ).Size() );
+
+        if( CInt( group_settings.enabled ) != 1 )
+                return 0;
+        elseif( cur_amount >= max_amt )
+                return 0;
+        endif
+
+        var cfg_file := SS_GetSettingsCfgFile(),
+            glob_settings := SS_GetSettingsCfgElem( cfg_file, "Globals" ),
+            num_retries := CInt( glob_settings.SpawnRetries ),
+            spawn_coords;
+
+        if( !num_retries )
+                num_retries := 10;
+        endif
+
+        var coords := SS_GetRegionCoordinates( region_name ),
+            must_check := 1,
+            i;
+
+        for( i:=0; i<=num_retries; i+=1 )
+                spawn_coords := SS_GetSpawnCoords( coords, realm_name );
+                if( SS_ItemValidLocation( spawn_coords ))
+                        must_check := 0;
+                        break;
+                endif
+                SleepMS(10);
+        endfor
+
+        if( must_check )
+                // var must_check saves a lot of process for this check...
+		if( !SS_ItemValidLocation( spawn_coords ))
+                        //SS_ReportText( "Error: Unable to get coords in region ("+region_name+") for spawning.", SPAWN_REPORT_SYSLOG );
+                        return 0;
+                endif
+        endif
+
+	var group_entries := SS_GetEntriesInGroup( group_name ).Keys(),
+	    spawn_object := group_entries.RandomEntry();
+
+        var created := CreateItemAtLocation( spawn_coords.x, spawn_coords.y, spawn_coords.z, spawn_object, 1, realm_name );
+        if( created.errortext )
+                //SS_ReportText( "Error: Unable to create ("+spawn_object+") for group ("+group_name+") in region ("+region_name+"). ->"+created.errortext, SPAWN_REPORT_SYSLOG );
+                return 0;
+        endif
+
+        created.movable := 1;
+        SS_AddSpawnToRegion( region_name, group_name, created );
+
+	return 1;
+endprogram
+
+function ValidateSpawns( region_name, group_name )
+
+	var spawns := SS_GetSpawnsInRegionGroup( region_name, group_name );
+	foreach serial in ( spawns.Keys() )
+		SleepMS(10);
+
+		var object := SystemFindObjectBySerial( serial );
+		if( object.IsA( POLCLASS_ITEM ))
+			var orig_spot := spawns[serial].orig_coords;
+                        if( orig_spot.x == object.x || orig_spot.y == object.y )
+				continue;
+                        endif
+		endif
+
+                SS_RemoveSpawnFromRegion( region_name, group_name, serial );
+	endforeach
+
+	return 1;
+endfunction

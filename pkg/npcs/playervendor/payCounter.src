@@ -1,0 +1,35 @@
+use uo;
+use os;
+
+include "include/utility";
+
+program paycounter(me)
+  var gold, rsrv, tax;
+  var mypay := 50;
+  var fees := 0;
+  sleep(30);
+  while(me)
+    sleep(7200);
+    fees := 0;
+    gold := CInt(GetObjProperty(me, "g"));
+    rsrv := CInt(GetObjProperty(me, "r"));
+    tax := gold / 100;
+    foreach item in EnumerateItemsInContainer(me.backpack)
+      fees := fees + CInt(GetObjProperty(item,"price"));
+    endforeach
+    mypay := mypay + (fees / 100) + tax;
+    if(gold >= mypay)
+      gold := gold - mypay;
+      SetObjProperty(me, "g", gold);
+    else
+      mypay := mypay - gold;
+      SetObjProperty(me, "g", 0);
+      if(rsrv >= mypay)
+        rsrv := rsrv - mypay;
+        SetObjProperty(me, "r", rsrv);
+      else
+        SetObjProperty(me, "deadbeat", 1);
+      endif
+    endif
+  endwhile
+endprogram

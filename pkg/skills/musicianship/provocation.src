@@ -1,0 +1,93 @@
+use uo;
+use os;
+use util;
+use cfgfile;
+
+include "include/client";
+include "include/objtype";
+include "include/skillPoints";
+include "include/bard";
+include "include/eventID";
+include "include/dist";
+
+program bard_provoke(who)
+  EraseObjProperty(who, "IsMeditating");
+    if(Cint(GetObjProperty(who, "LastProvoke")) > ReadGameClock())
+    SendSysMessage(who, "You must wait a moment before playing again.");
+    return;
+  endif
+  SetObjProperty(who, "LastProvoke", Cint(ReadGameClock() + 2));
+  var instrument := findinstrument(who);
+  if(!instrument)
+    SendSysMessage(who, "You don't have an instrument!");
+    return;
+  endif
+  if(!ReserveItem(instrument))
+    return;
+  endif
+  SendSysMessage(who, "Select the creature to provoke.");
+  var thetarg := Target(who, TGTOPT_HARMFUL);
+  if((!thetarg) || (!thetarg.npctemplate))
+    SendSysMessage(who, "Targetting cancelled.");
+    return;
+  endif
+  if(dist(who, thetarg) > 10)
+    SendSysMessage(who, "The target is too far away.");
+    return;
+  endif
+  var configfile := ReadConfigFile("::npcdesc");
+  var theobj:= thetarg.npctemplate;
+  var elem := FindConfigElem(configfile, theobj);
+  var difficulty;
+  if(elem)
+	difficulty := elem.provoke;
+  else
+    SendSysMessage(who, "You cannot provoke that!");
+    return;
+  endif
+  if(!difficulty)
+	difficulty := 100;
+  endif
+  var ev := array;
+  ev.+ type;
+  ev.+ source;
+  if(difficulty < 1)
+	difficulty := 0;
+  elseif(difficulty > 100)
+	difficulty := 110;
+  endif
+  if(play(who, difficulty, instrument, SKILLID_PROVOCATION))
+	SendSysMessage(who, "Select a target to provoke this onto.");
+	var newtarg := Target(who, (TGTOPT_NOCHECK_LOS + TGTOPT_HARMFUL) );
+        if(newtarg == thetarg)
+          SendSysMessage(who, "You can't provoke something onto itself!");
+          return;
+        endif
+	if((dist(thetarg, newtarg) > 10) || (dist(who, newtarg) > 10))
+	  SendSysMessage(who, "The target is too far away.");
+	  return;
+	endif
+	SendSysMessage(who, "You provoke " + thetarg.name + " to attack " + newtarg.name + "!");
+	ev.source := newtarg;
+	if(newtarg.warmode)
+	  ev.type := EVID_PEACEMADE;
+	  SendEvent(thetarg, ev);
+	  SendEvent(newtarg, ev);
+	  sleep(1);
+	endif
+	ev.type := EVID_DAMAGED;
+	SendEvent(thetarg, ev);
+	ev.source := thetarg;
+	SendEvent(newtarg, ev);
+  else
+	ev.source := who;
+	if(thetarg.warmode)
+	  ev.type := EVID_PEACEMADE;
+	  SendEvent(thetarg, ev);
+	  sleep(1);
+	endif
+	ev.type := EVID_DAMAGED;
+	PrintTextAbovePrivate(thetarg, "You enrage " + thetarg.name + "!", who);
+    SendEvent(thetarg, ev);
+  endif
+endprogram

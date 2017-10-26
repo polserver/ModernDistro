@@ -1,0 +1,20 @@
+use os;
+use uo;
+
+include "include/client";
+include ":attributes:attributes";
+
+program textcmd_setskill( who )
+var Skill_List := List_of_Skills;
+var i;
+for (i := 0; i <= Skill_List.size(); i := i + 1)
+
+        print( "Setting Skill " + i + " to 0" );
+        var res := AP_SetTrueSkill( who, Skill_List[i], 0 );
+        if (res == error)
+            SendSysMessage( who, "Unable to set skill: " + res.errortext );
+        else
+            SendSysMessage( who, "New Effective Skill: " + AP_GetSkill(who,Skill_List[i]) );
+        endif
+    endfor
+endprogram

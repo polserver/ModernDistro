@@ -1,0 +1,51 @@
+use uo;
+use os;
+
+
+program can_insert( who, runebook, movetype, inserttype, item, existing_stack, amt_to_add )
+	
+	if( !ReserveItem( runebook ) )
+		return 0;
+	endif
+	
+	if( item.objtype == 0x1f14 )
+		var tox := Cint(GetObjProperty( item, "x" ));
+		var toy := Cint(GetObjProperty( item, "y" ));
+		var toz := Cint(GetObjProperty( item, "z" ));
+		if( !tox and !toy and !toz )
+			SendSysMessage( who, "You can only put marked recall runes in runebooks." );
+			return 0;
+		else
+			var runes_in := GetObjProperty( runebook, "RuneDefs" );
+			if( !runes_in )
+				return 1;
+			elseif( runes_in.size() < 16 )
+				return 1;
+			else
+				SendSysMessage( who, "You can't put any more runes in this runebook." );
+				return 0;
+			endif
+		endif
+		
+	elseif( item.objtype == 0x1f4c )
+		var charges	 := Cint( GetObjProperty( runebook, "charges" ) );
+		var maxcharges := Cint( GetObjProperty( runebook, "maxcharges" ) );
+		if( !maxcharges )
+			maxcharges := 5;
+		endif
+		
+		if( charges >= maxcharges )
+			SendSysMessage( who, "This runebook is already fully charged." );
+			return 0;
+		else
+			return 1;
+		endif
+		
+	else
+		SendSysMessage( who, "You can only put marked recall runes or recall scrolls in runebooks." );
+		return 0;
+	endif
+	
+endprogram
+	
+	

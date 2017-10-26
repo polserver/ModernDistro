@@ -1,0 +1,13 @@
+use uo;
+
+program hideme( gm )
+    SendSysMessage( gm, "Who do you wish to freeze?" );
+    var res := TargetCoordinates( gm );
+    if (res.mobile)
+        res.mobile.frozen := 1;
+	SetObjProperty(res.mobile,"frozen",1);
+        PrintTextAbovePrivate( res.mobile, res.mobile.name + " is now frozen", gm );
+    else
+        SendSysMessage( gm, "Cancelled" );
+    endif
+endprogram

@@ -1,0 +1,64 @@
+use uo;
+use os;
+
+include "include/client";
+include "include/objtype";
+include "include/canAccess";
+
+const uobj_wheel_start := 0x1015;
+const uobj_wheel_end := 0x101e;
+
+program use_wool(who, wool)
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  if(!can_access(who, wool))
+    return;
+  endif
+  if(wool.movable == 0)
+    SendSysMessage(who, "You cannot use that.");
+    return;
+  endif
+  if(!ReserveItem(wool))
+    return;
+  endif
+  SendSysMessage( who, "Select the spinning wheel to use that on" );
+  var use_on := Target(who);
+  if (!use_on)
+    SendSysMessage(who,"cancelled");
+    return;
+  endif
+  var obj := use_on.objtype;
+  if (((obj >= uobj_wheel_start) && (obj <= uobj_wheel_end)) || ((obj >= 0x10a4) && (obj <= 0x10a6)))
+    var gfx;
+    case(obj)
+      4117:   gfx := 0x1016;
+      4119:   gfx := 0x1016;
+      4121:   gfx := 0x101a;
+      4123:   gfx := 0x101a;
+      4124:   gfx := 0x101d;
+      4126:   gfx := 0x101d;
+      4260:   gfx := 0x10a5;
+      4262:   gfx := 0x10a5;
+    endcase
+	use_on.graphic := gfx;
+    Detach();
+	sleep(3);
+	use_on.graphic := use_on.objtype;
+    Makeyarn(who, wool);
+  else
+    SendSysMessage(who, "You can only use wool on a spinning wheel");
+  endif
+endprogram
+
+function Makeyarn(who, item)
+  if (not Accessible(who, item))
+    SendSysMessage(who, "You don't have any wool!");
+    return;
+  endif
+  if(SubtractAmount(item, 1))
+    var yarn := CreateItemInBackpack(who, 0xe1f, 3);
+    SendSysMessage(who, "You spin some wool and create some yarn");
+  else
+    SendSysMessage(who, "You don't have enough wool for the ball of yarn.");
+  endif
+endfunction

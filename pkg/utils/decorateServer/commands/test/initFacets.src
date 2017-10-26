@@ -1,0 +1,323 @@
+use uo;
+use cfgfile;
+use os;
+use basic;
+use file;
+
+include ":clilocs:clilocs";
+
+program targetbug(who, text)
+
+	text := text;
+	var things := {};			// Holds the array of keys (ObjTypes) of the items to be placed.
+	var places :={};			// Holds the list of locations to place an item
+	var element := "";			// Holds a cfg file element reference
+	var object := 0;			// The integer value of the items ObjType
+	var map := "";				// The realm to place the item
+	var fontcolour := 88;		// Used to highlight the filename based  on the realm
+	
+	// These things must be cleared for each new object
+	var itemname := "";			// Holds the items name if specified.
+	var labelnum := 0;			// A cliloc reference that will be used to assign a name to an item if specified.
+	var clilocnum := 0;			// A liloc ref to a failure message that will be sent upon failure of an event.
+	var hue := 0;				// The color to be assigned to an item if specified.
+	var bookspawn := 0;			// If set adds the book shelf to the global book spawn system.
+	var itemamount := 1;		// Where more than 1 we need to create a stack.
+	/////////////////////////////////////////////////////////////////////
+	var itemsthere := {};		// Holder for anything at the location where the item is being placed.
+	var locxyz := {};			// The coords where an item is to be placed.
+	var dynamics := {};			// Array to hold results of ListItemsAtLocation.
+	var statics := {};			// Array to hold results of ListStaticsAtLocation
+	var createdthing := 0;		// The objref to the item when created
+	var createtheitem := 1;		// Flag used with duplicate statics check.
+	var files := {};			// The array that holds the file list for a directory
+	var decorations := 0;		// The variable that holds the reference to the contents of the cfg files.
+	var itemx, itemy, itemz, container, graphic;
+	
+	
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This section initialises items, some are missing statics like the centre tiles of some of the
+// marked teleporter sites, and decorations in the different facets (realms). I have taken some
+// care not to duplicate items but there could be the possibility of two of the same it being
+// placed at the same location.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////
+	SendSysMessage(who, "Initialising the facets (realms) for Mondain's Legacy maps.", 2, 88);
+	var directories := ListDirectory( ":DecorateServer:config/", LISTDIR_NO_FILES, LISTDIR_LIST_DIRS );
+	foreach directory in directories
+		SendSysMessage(who, "Processing directory: " + directory, 2, 56);
+		files := ListDirectory( ":DecorateServer:decorations/" + directory, LISTDIR_ALL_FILES, LISTDIR_DONT_LIST_DIRS );
+		foreach fileref in files
+			fileref := fileref[1, Len(fileref) - 4];
+			decorations := UnloadConfigFile(":decorateServer:config/" + directory + "/" + fileref);
+			decorations := ReadConfigFile(":decorateServer:config/" + directory + "/" + fileref);
+			if(decorations.errortext)
+				SendSysMessage(who, decorations.errortext, 2, 33);
+				return 0;
+			endif
+			element := FindConfigElem( decorations, "Realm" );
+			map := GetConfigString(element, "Map");
+			
+			case(map)
+				"britannia":		fontcolour := 88;
+				"britannia_alt":	fontcolour := 66;
+				"malas":			fontcolour := 1;
+				"ilshenar":			fontcolour := 20;
+				"tokuno":			fontcolour := 53;
+				"termur":			fontcolour := 46;
+			endcase
+			SendSysMessage(who, "Processing file: " + fileref, 2, fontcolour);
+
+			///////////////////////////////////////////////////////////////////////////////
+			things := GetConfigStringKeys( decorations );
+			foreach thing in things
+				element := FindConfigElem( decorations, thing );
+				object := CInt(thing);
+				
+				itemname := "";
+				labelnum := 0;
+				bookspawn := 0;
+				hue := 0;
+				clilocnum := 0;
+
+				itemname := GetConfigString(element, "Name");
+				hue := CInt(GetConfigString(element, "Hue"));
+				labelnum := GetConfigString(element, "LabelNumber");
+				bookspawn := CInt(GetConfigString(element, "BookSpawn"));
+				itemamount := CInt(GetConfigString(element, "Amount"));
+				places := GetConfigStringArray( element, "Location" );
+				foreach place in places
+					locxyz := SplitWords(place);
+					
+					// Don't place an item if there's a matching dynamic or static item already there.
+					// Preset the flag to create the item.
+					createtheitem := 1;
+					dynamics := ListItemsAtLocation( CInt(locxyz[1]), CInt(locxyz[2]), CInt(locxyz[3]), map );
+					foreach item in dynamics
+						if(CInt(object) == item.objtype)
+							createtheitem := 0;
+						endif
+					endforeach
+					statics := ListStaticsAtLocation( CInt(locxyz[1]), CInt(locxyz[2]), CInt(locxyz[3]),  ITEMS_IGNORE_MULTIS, map );
+					if(Len(statics))
+						foreach static in statics
+							if(object == static.objtype)
+//								SendSysMessage(who, "There's already a static item at " + locxyz[1] + " " + locxyz[2] + " " + locxyz[3], 2, 33);
+								createtheitem := 0;
+							endif
+						endforeach
+					endif
+						if(createtheitem)
+							if(!itemamount)
+								itemamount := 1;
+							endif
+							createdthing := CreateItemAtLocation(CInt(locxyz[1]), CInt(locxyz[2]), CInt(locxyz[3]), object, itemamount, map);
+							
+							
+							if(hue)
+								createdthing.color := hue;
+							endif
+							if(itemname)
+								createdthing.name := itemname;
+							endif
+							if(labelnum)
+								createdthing.name := CL_GetCliloc(labelnum);
+							endif
+							///////////////////////////////////////////////////////////////////////////////
+							// Needed for book shelves that spawn books
+							// Any bookcase that was named LibraryBookcase by ServUO was given
+							// the BookSpawn member in the cfg files.
+							//
+							// Commented out do to control script causing excess server load.
+							// Shard devs can decide if they want all book shelves that are 
+							// the full shelf graphic to spawn books or they can use the command
+							// spawnshelf to set certain shelves with the full book graphic to spawn.
+							//if(bookspawn)
+							//	SetObjProperty(createdthing, "Spawn", "Yes");
+							//endif
+							///////////////////////////////////////////////////////////////////////////////
+							SetObjProperty(createdthing, "Permanent", 1);
+							createdthing.movable := 0;
+						endif
+						sleepms(5);
+				endforeach
+				Sleepms(5);
+			endforeach
+			sleepms(5);
+		endforeach
+		sleepms(5);
+	endforeach
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This section initialises doors, lights, and signs in Ilshenar, Malas, Tokuno, and Termur from
+// the config files xilshenar.cfg, xmalas.cfg, xtokuno.cfg, and xtermur.cfg.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////
+	SendSysMessage(who, "Phase 2...", 2, 88);
+
+	files := {"doorsInit", "signsInit", "lightsInit"};
+	foreach fileref in files
+		decorations := UnloadConfigFile(":decorateServer:" + fileref);
+		decorations := ReadConfigFile(":decorateServer:" + fileref);
+		if(decorations.errortext)
+			SendSysMessage(who, CStr(fileref) + ": " + decorations.errortext, 2, 33);
+			return 0;
+		endif
+
+		things := GetConfigIntKeys( decorations );
+		foreach thing in things
+			element := FindConfigElem( decorations, thing );
+			object := Hex(CInt(GetConfigString(element, "ID")));
+			container := GetConfigString(element, "X");
+			itemx := GetConfigString(element, "X");
+			itemy := GetConfigString(element, "Y");
+			itemz := GetConfigString(element, "Z");
+			map := Lower(GetConfigString(element, "REALM"));
+			case(map)
+				"felucca":	map := "britannia";
+				"trammel":	map := "britannia_alt";
+			endcase
+			sleepms(5);
+			itemname := "";
+			hue := 0;
+
+			itemname := GetConfigString(element, "NAME");
+
+			hue := CInt(GetConfigString(element, "COLOR"));
+			createtheitem := 1;
+			// If the item already exists then we don't want to place a second item there.
+			itemsthere := ListItemsAtLocation( CInt(itemx), CInt(itemy), CInt(itemz), map );
+			foreach item in itemsthere
+				if(CInt(object) == item.objtype)
+					createtheitem := 0;
+				endif
+			endforeach
+			// We don't want to create any custom objects.
+			if(CInt(object) > 0x3FFF)
+				createtheitem := 0;
+			endif
+			if(createtheitem)
+				if(!itemamount)
+					itemamount := 1;
+				endif
+				createdthing := CreateItemAtLocation(CInt(itemx), CInt(itemy), CInt(itemz), CInt(object), itemamount, map);
+				if(!createdthing)
+					SendSysMessage(who, "Couldn't create the item" + CStr(object) +" " +  CStr(itemx) + " " + CStr(itemy) + " " +CStr(itemz), 2, 33);
+					SendSysMessage(who, createdthing.errortext, 2, 33);
+					return;
+				endif
+				
+				if(hue)
+					createdthing.color := hue;
+				endif
+				if(itemname)
+					createdthing.name := CL_GetCliloc(itemname);
+				endif
+				SetObjProperty(createdthing, "Permanent", 1);
+				createdthing.movable := 0;
+			endif
+			sleepms(5);
+		endforeach
+	endforeach
+
+///////////////////////////////////////////////////////////////////////////////////
+//
+// This section initialises Felucca (britannia) and Trammel (britannia_alt) from
+// the files Felucca.cfg and Trammel.cfg.
+//
+////////////////////////////////////////////////////////////////////////////////////
+
+	files := {"xfelucca", "xtrammel"};
+	foreach fileref in files
+		decorations := UnloadConfigFile(":decorateServer:" + fileref);
+		decorations := ReadConfigFile(":decorateServer:" + fileref);
+		if(decorations.errortext)
+			SendSysMessage(who, decorations.errortext, 2, 33);
+			return 0;
+		endif
+		element := FindConfigElem( decorations, "Realm" );
+		map := GetConfigString(element, "Map");
+		
+		case(map)
+			"britannia":		fontcolour := 88;
+			"britannia_alt":	fontcolour := 66;
+		endcase
+		SendSysMessage(who, "Processing realm: " + map, 2, fontcolour);
+
+		things := GetConfigIntKeys( decorations );
+		foreach thing in things
+			element := FindConfigElem( decorations, thing );
+			object := CInt(GetConfigString(element, "ObjType"));
+			itemx := GetConfigString(element, "X");
+			itemy := GetConfigString(element, "Y");
+			itemz := GetConfigString(element, "Z");
+			sleepms(5);
+			itemname := "";
+			hue := 0;
+
+			itemname := GetConfigString(element, "Name");
+			hue := CInt(GetConfigString(element, "Color"));
+			graphic := CInt(GetConfigString(element, "Graphic"));
+			// Left over items in containers have to be scrapped.
+			// I didn't scrub them from the items.txt file.
+			container := GetConfigInt(element, "Container");
+			createtheitem := 1;
+			// If the item already exists then we don't want to place a second item there.
+			itemsthere := ListItemsAtLocation( CInt(itemx), CInt(itemy), LIST_IGNORE_Z, map );
+			foreach item in itemsthere
+				if(CInt(object) == item.objtype)
+					createtheitem := 0;
+				endif
+			endforeach
+			// This to prevent lamp posts being duplicated nearby.
+			itemsthere := ListItemsNearLocationOfType( CInt(itemx), CInt(itemy), LIST_IGNORE_Z, 2, 0xB20, map );
+			foreach item in itemsthere
+				if(CInt(object) == item)
+					createtheitem := 0;
+				endif
+			endforeach
+			// Leave out book shelves
+			if(CInt(object) in {0xA97, 0xA98, 0xA99, 0xA9A, 0xA9B, 0xA9C, 0xA9D, 0xA9E} )
+				createtheitem := 0;
+			endif
+			
+			// We don't want to create any custom objects or anything in a container.
+			if(CInt(object) > 0x3FFF || container)
+				createtheitem := 0;
+			endif
+			if(createtheitem)
+				if(!itemamount)
+					itemamount := 1;
+				endif
+				createdthing := CreateItemAtLocation(CInt(itemx), CInt(itemy), CInt(itemz), CInt(object), itemamount, map);
+				if(!createdthing)
+					SendSysMessage(who, "Couldn't create the item" + CStr(object) +" " +  CStr(itemx) + " " + CStr(itemy) + " " +CStr(itemz), 2, 33);
+					SendSysMessage(who, createdthing.errortext, 2, 33);
+					return;
+				endif
+				
+				if(graphic)
+					createdthing.graphic := CInt(graphic);
+				endif
+				if(hue)
+					createdthing.color := hue;
+				endif
+				if(itemname)
+					createdthing.name := itemname;
+				endif
+				SetObjProperty(createdthing, "Permanent", 1);
+				createdthing.movable := 0;
+			endif
+			sleepms(5);
+		endforeach
+	endforeach
+
+
+
+
+	SendSysMessage(who, "Finished initialising the facets.", 2, 88);
+
+endprogram

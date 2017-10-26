@@ -1,0 +1,121 @@
+use uo;
+use basic;
+use os;
+
+include "include/client";
+include ":attributes:attributes";
+
+program track(who)
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  UnloadConfigFile(":tracking:tracking");
+//  if(SkillCheck(who, TRACKING, -1, (AP_GetSkill(who, TRACKING) + 30)))
+  if(SkillCheck(who, TRACKING, -1, (AP_GetSkill(who, TRACKING))))
+    var tracker := ReadGameClock();
+    SetObjProperty(who, "TrackingCounter", tracker);
+    var range := CInt((AP_GetSkill(who, TRACKING)/3));
+    var nearby := ListMobilesNearLocation(who.x,who.y, who.z, range, who.realm);
+    if(len(nearby) == 1)
+      SendSysMessage(who, "There don't seem to be any creatures nearby");
+      return;
+    endif
+    var track_list := CreateMenu("Select a category.");
+    var track_menu := CreateMenu("Select a creature.");
+    var critter_ids := array;
+    var menucount := 0;
+    var config := ReadConfigFile("tracking");
+//    var typearray := {};
+    var animal, creature, person, tiletype;
+    foreach mobile in nearby
+      if((mobile != who) && (!mobile.dead))
+        var elem := FindConfigElem(config, mobile.graphic);
+        if(elem)
+          tiletype := GetConfigString(elem, "type");
+          case(tiletype)
+            "Animal"  : animal   := 1;
+            "Monster" : creature := 1;
+            "Person"  : person   := 1;
+          endcase
+        endif
+      endif
+    endforeach
+    if(animal == 1)
+      AddMenuItem(track_list, 0x20cf, "Animals");
+    endif
+    if(creature == 1)
+      AddMenuItem(track_list, 0x20d9, "Creatures");
+    endif
+    if(person == 1)
+      AddMenuItem(track_list, 0x2106, "People");
+    endif
+    var thetarget := SelectMenuItem2(who, track_list);
+    var listtype := {};
+    case(thetarget[1])
+      8454: listtype := "Person";
+      8399: listtype := "Animal";
+      8409: listtype := "Monster";
+    endcase
+    var ttype;
+    foreach mobile in nearby
+      if((mobile != who) && (!mobile.dead))
+        var elem := FindConfigElem(config, mobile.graphic);
+        if(elem)
+          ttype := GetConfigString(elem, "type");
+          if(ttype == listtype)
+            menucount := menucount + 1;
+            critter_ids[menucount] := mobile;
+            tiletype := GetConfigInt(elem, "tile");
+            AddMenuItem(track_menu, tiletype, mobile.name);
+          endif
+        endif
+      endif
+    endforeach
+    if(menucount > 0)
+      thetarget := SelectMenuItem2(who, track_menu);
+      if(!thetarget)
+        SendSysMessage(who, "Targetting cancelled.");
+        return;
+      endif
+      var critter := critter_ids[thetarget.index];
+      SetObjProperty( who, "#trackingtimeout", ReadGameClock()+40 );
+      Detach();
+      var timer := 0;
+      while((Distance(who, critter) <= range) && (critter.dead == 0) && (timer <= 12)&& (tracker == GetObjProperty(who,"TrackingCounter")))
+        timer := timer + 1;
+        var dir := Get_direction(who, critter);
+        if(dir == "nearby")
+          SendSysMessage(who, critter.name + " is " + dir);
+        else
+          SendSysMessage(who, critter.name + " is to the " + dir);
+        endif
+        sleep(5);
+      endwhile
+      SendSysMessage(who, "You have lost your quarry.");
+      EraseObjProperty(who, "#trackingtimeout");
+    endif
+  else
+    SendSysMessage(who, "You fail to find any creatures nearby");
+  endif
+endprogram
+
+function Get_direction(who, critter)
+  var ns_desc := "";
+  var ew_desc := "";
+  var thedesc;
+  if(critter.y < who.y)
+    ns_desc := "north";
+  elseif(critter.y > who.y)
+    ns_desc := "south";
+  endif
+  if(critter.x < who.x)
+    ew_desc := "west";
+  elseif(critter.x > who.x)
+    ew_desc := "east";
+  endif
+  if(ns_desc == "" && ew_desc == "")
+    thedesc := "nearby";
+  else
+    thedesc := ns_desc + ew_desc;
+  endif
+  return thedesc;
+endfunction

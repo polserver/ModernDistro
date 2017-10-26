@@ -1,0 +1,89 @@
+// Deviates from the official spell
+
+use uo;
+use vitals;
+
+include ":attributes:attributes";
+include ":damage:damage";
+
+var npcfg := ReadConfigFile("::npcdesc");
+
+program strangle( params )
+	var caster := params[1];
+	var info := params[2]; // Struct containing additional info about the spell.
+	var spellID := params[3];
+
+	SendSysMessage(caster, "Select your victim:", 1, 88);
+	var cast_on := Target(caster);
+	
+
+	
+	var sspeak := Cint(AP_GetSkill(caster, SPIRITSPEAK));
+	var int := GetIntelligence(caster);
+	var daemon := Cint(GetObjProperty(cast_on, "#Daemon"));
+	var daemonqual := daemon * 0.01;
+
+	var bonus := 0;
+	
+	if(caster.ip)
+		bonus := int/5;
+	endif
+	
+	if(Reflected(cast_on))
+		cast_on := caster;
+	endif
+	
+	if(Cint(GetObjProperty(cast_on, "strangle")))
+		SendSysMessage(caster, "Your victim is under the influence of the spell.");
+		EraseObjProperty (caster, "casting");
+		return 0;
+	endif
+	
+	var dmg := cint (sspeak + bonus )/ 20;
+
+	if(daemon == 0)
+		EraseObjProperty(cast_on, "#Daemon");
+	endif
+	
+	if(daemon)
+		dmg := dmg - (daemonqual*100);
+	endif
+
+	var waittime := 5;
+	var rounds := cint(AP_GetSkill(caster, SPIRITSPEAK) / 30);
+	var x := 1, dmg2;
+
+	Detach();
+	SetObjProperty(cast_on, "strangle", 1);
+	var damaged_sound;
+	for( x := 1; x <= rounds; x := x + 1)
+	
+		if ( cast_on.npctemplate )
+			damaged_sound := npcfg[cast_on.npctemplate].damagedsound;		
+		else
+			damaged_sound := 0x421;
+		endif
+		
+		PlaySoundEffect(cast_on, 0x22F);
+		PlayObjectCenteredEffectEx( cast_on, 0x36CB, 1, 9, 9911, 5, 0, 67 );
+		PlayObjectCenteredEffectEx( cast_on, 0x374A, 1, 17, 9502, 4, 255, 1108 );
+		dmg2 := cint (dmg * (5 - (Getvital(cast_on, "Stamina") / Getvitalmaximumvalue(cast_on, "Stamina")) * 2));
+		
+		if(GetObjProperty(cast_on, "LastHit")[2] != caster.serial)
+			SetObjProperty(cast_on, "LastHit", {caster.name, caster.serial, "strangle" });
+		endif
+		
+		ApplyRawDamageEX(cast_on, Resisted(CInt(info.circle), caster, cast_on, dmg2), DMG_PHYSICAL, caster);
+		sleep(waittime);
+		
+		if(cast_on.dead)
+			break;
+		endif
+		
+		if(waittime > 1)
+			waittime := waittime - 1;
+		endif
+		
+	endfor
+	EraseObjProperty(cast_on, "strangle");
+endprogram

@@ -1,0 +1,133 @@
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// PKG: housing                                                                                                 //
+// version: 1.97                                                                                                 //
+// Maintainer: Yukiko                                                                                           //
+// email: hopelives@outlook.com                                                                            //
+//                                                                                                              //
+// notes:                                                                                                       //
+//   this housing package includes static housing as well as the typical multi type housing.                    //
+//                                                                                                              //
+// known issues:                                                                                                //
+//  stacking "solid" objects causes some wierdness with the multi.items list, and as a result a player may      //
+//  not be able to lock down items on tables within their homes.. when a fix or workaround becomes available    //
+//  I will update this script accordingly...                                                                    //
+//                                                                                                              //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+use uo;
+use os;
+use cfgfile;
+
+include ":housing:housing_settings";
+include "include/yesNo";
+include ":gumps:gumpPrompt";
+include "util/bank";
+include "util/key";
+
+const UOBJECT_BRASS_SIGN := 0x0bd2;
+const UOBJECT_WOOD_SIGN := 0x0bd0;
+
+program ChangeHouseOwner(who, deed)
+  var infoarr      := GetObjProperty( deed, "homeinfo" );
+  var nwx        := infoarr[1];
+  var nwy        := infoarr[2];
+  var sex        := infoarr[3];
+  var sey        := infoarr[4];
+  var signserial := infoarr[5];
+  var nwz        := infoarr[6];
+  var sez        := infoarr[7];
+  sez := sez;
+  nwz := nwz;
+  var sign       := SystemFindObjectBySerial(signserial );
+  var signinfo     := GetObjProperty( sign, "homeinfo" );
+  var owner      := signinfo[1];
+  var buyerpack := EnumerateItemsInContainer(who.backpack);
+  var tileflag := 0;
+  var inpack := 0;
+    foreach item in buyerpack
+		if (item.serial == deed.serial)
+		  inpack := 1;
+		endif
+	endforeach
+  if (inpack == 0)
+    SendSysMessage(who,"You must have the deed in your backpack to take possession of this house", color := 33);
+    return;
+  endif
+
+  
+	if (owner == who.serial)
+		SendSysMessage(who, "you already own this house!");
+		return;
+	endif
+    if ( !sign )
+		SendSysMessage( who, "Deed points to an invalid sign!" );
+		return;
+    endif
+    var bankbox := FindBankBox( who );
+    
+    var packkey := CreateItemInBackpack( who, UOBJ_GOLD_KEY );
+    if (!packkey)
+		GumpPrompt(who, "I couldn't create the key in your backpack. It might be full. The transfer has been aborted until you have room for the key.", hue := 33);
+        return 0;
+    endif
+    var bankkey := CreateItemInContainer( bankbox, UOBJ_GOLD_KEY );
+    if (!bankkey)
+		GumpPrompt(who, "I couldn't create the spare key in your bankbox. It might be full. You will need to make a spare key as soon as possible.", hue := 33);
+    endif
+	if(!MoveItemToContainer( deed, bankbox, x := -1, y := -1 ))
+		GumpPrompt(who, "I could not move the deed to your bankbox. It might be full. You need to make room for it in your bank.", hue := 33);
+	endif
+    var lockid := AllocLockId();
+    SetObjProperty( packkey, "lockid", lockid );
+    SetObjProperty( bankkey, "lockid", lockid );
+    var box := ListObjectsInBox( nwx, nwy, -50, sex, sey, 50, sign.realm );
+//    var doorcfg := ReadConfigFile("::doordesc");
+//    var doorcfg := ReadConfigFile(":doors:itemdesc");
+//	if (doorcfg.errortext)
+//		Print ("Doorcfg = " + doorcfg.errortext);
+//	endif
+    foreach item in box
+		if(item.objtype := 0x18889)
+			SetObjProperty(item,"signserial", signserial);
+			tileflag := 1;
+		endif
+			
+		if((item.objtype == UOBJECT_BRASS_SIGN) || (item.objtype == UOBJECT_WOOD_SIGN))
+			SetObjProperty(item, "lockid", lockid);
+		elseif(item.IsA(POLCLASS_DOOR))
+			item.locked := 1;
+			SetObjProperty(item, "lockid", lockid);
+			if(!tileflag)
+				var tile :=CreateItemAtLocation(item.x, item.y, item.z, 0x18889, 1, item.realm);
+				SetObjProperty(tile,"signserial", signserial);
+			endif
+			SetObjProperty(item, "lockid", lockid);
+		endif
+	//        endforeach
+    endforeach
+ 	var newsigninfo := { };
+    newsigninfo[1]  := who.serial;
+    newsigninfo[2]  := infoarr[1];
+    newsigninfo[3]  := infoarr[2];
+    newsigninfo[4]  := infoarr[3];
+    newsigninfo[5]  := infoarr[4];
+    newsigninfo[6]  := infoarr[6];
+    newsigninfo[7]  := infoarr[7];
+    newsigninfo[8]  := infoarr[8];
+    newsigninfo[9]  := infoarr[9];
+  SetObjProperty(sign,"homeinfo",    newsigninfo);
+  if (!GetObjProperty(sign,"numlockdowns"))
+    SetObjProperty(sign,"numlockdowns", infoarr[8]);
+  endif
+  if (!GetObjProperty(sign,"numsecure"))
+    SetObjProperty(sign,"numsecure",    infoarr[9]);
+  endif
+  SetObjProperty(sign, "builtdeed", deed.serial);
+  EraseObjProperty(sign, "friends");
+  EraseObjProperty(sign, "coowners");
+  EraseObjProperty(sign, "enemies");
+  SetObjProperty(sign,"owneracct", (who.acctname));
+  SetObjProperty(sign,"decay", (ReadGameClock() + get_abandon_time()));
+  SendSysMessage( who, "You have taken ownership of the house.", color := 66);
+  GumpPrompt(who, "A key has been placed in your backpack. The deed is in your bank box along with a spare key.");
+  Sign.name := "A house sign";
+endprogram

@@ -1,0 +1,22 @@
+use uo;
+use os;
+
+//include "../pkg/world/weather/weather";
+
+program textcmd_moveitem( who )
+    SendSysMessage( who, "Select an npc to move." );
+    var what := Target( who );
+    if (what)
+            SendSysMessage( who, "Now select a location on the ground." );
+            var where := TargetCoordinates( who );
+            if (where)
+                var result := MoveObjectToLocation( what, where.x, where.y, where.z, who.realm, MOVEOBJECT_FORCELOCATION );
+                if (result)
+                    PrintTextAbovePrivate( what, "Done!", who );
+                else
+                    SendSysMessage( who, "Unable to move npc: " + result.errortext, color := 33 );
+                endif
+            endif
+    endif
+//    CheckWeather ( what );
+endprogram

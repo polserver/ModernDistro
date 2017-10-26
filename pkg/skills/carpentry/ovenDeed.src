@@ -1,0 +1,160 @@
+use uo;
+use os;
+use cfgfile;
+
+include "util/key";
+include ":attributes:attributes";
+include "include/objtype";
+include "include/yesNo";
+
+const UOBJECT_DOORS_START   := 0x0675;
+const UOBJECT_DOORS_END     := 0x06f4;
+const CANCEL_ID         := 9999;
+
+program place_deed(who, deed)
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  if(!Accessible(who, deed))
+    SendSysMessage(who, "You can't reach that.");
+    return;
+  endif
+  if(!ReserveItem(deed))
+    return;
+  endif
+  var cfg := ReadConfigFile(":carpentry:itemdesc");
+  var element := FindConfigElem(cfg, deed.objtype);
+  if(!element)
+    SendSysMessage(who, "You can't make anything out of this deed.");
+    return;
+  endif
+  var items := SplitWords(element.ObjList);
+  var items2 := SplitWords(element.ObjList2);
+  if(!len(items))
+    SendSysMessage(who, "You can't make anything out of this deed.");
+    return;
+  endif
+  SendSysMessage(who, "Where do you want to create the item?");
+  var start := TargetCoordinates(who);
+  if(!CheckLosAt(who, CInt(start.x), CInt(start.y), CInt(start.z)))
+    SendSysMessage(who, "You can't see that.");
+    return;
+  endif
+  if((!who.multi) && (who.cmdlevel < 2))
+    SendSysMessage(who, "You have to be in your house to place this item.");
+    return;
+  endif
+  if(GetObjProperty(who.multi, "owneracct") != who.acctname)
+    var house := who.multi;
+    var co_owners := GetObjProperty(house, "coownlist");
+    if((!(who.serial in co_owners)) and (who.cmdlevel < 2))
+      SendSysMessage(who, "You can only place this item if you own or co-own the house!");
+      return;
+    endif
+  endif
+  var objlist2   := element.ObjList2;
+  var created    := {};
+  var itemname   := GetObjProperty(deed, "ItemBaseName");
+  var menu := CreateMenu("Choose an orientation");
+  if(deed.objtype == 0xb011)
+    AddMenuItem(menu, Cint(items[1]), "south");
+    if(objlist2)
+      AddMenuItem(menu, Cint(items2[1]), "east");
+    endif
+  else
+    AddMenuItem(menu, Cint(items[2]), "south");
+    if(objlist2)
+      AddMenuItem(menu, Cint(items2[1]), "east");
+    endif
+  endif
+  var choice := SelectMenuItem2(who, menu).index;
+  if(!choice)
+    return;
+  endif
+  var xmods, ymods;
+  var failed := 0;
+  var holder := {};
+  var tmp;
+  case(choice)
+    1: tmp    := items;
+       xmods  := SplitWords(element.ObjXMod);
+       ymods  := SplitWords(element.ObjYMod);
+    2: tmp    := items2;
+       xmods  := SplitWords(element.ObjXMod2);
+       ymods  := SplitWords(element.ObjYMod2);
+  endcase
+  holder.append(Cint(tmp[1]));
+  holder.append(Cint(tmp[2]));
+  holder.append(Cint(tmp[3]));
+  holder.append(Cint(tmp[4]));
+  var obj, x_mod, y_mod, the_item;
+  var i := 1;
+  foreach thing in holder
+    if(Cint(thing))
+    obj := thing;
+    x_mod := CInt(xmods[i]);
+    y_mod := CInt(ymods[i]);
+    i := i + 1;
+    the_item := CreateItemAtLocation(5886, 1179, 0, obj, 1, who.realm);
+    the_item.movable := 1;
+    the_item.graphic := 1;
+    if(!MoveObjectToLocation(the_item, start.x + x_mod, start.y + y_mod, start.z, who.realm, MOVEOBJECT_NORMAL))
+      foreach thing in created
+        DestroyItem(thing);
+      endforeach
+      DestroyItem(the_item);
+      failed := 1;
+      break;
+    endif
+    if((the_item.multi.serial != who.multi.serial) and (who.cmdlevel < 2))
+      foreach thing in created
+        DestroyItem(thing);
+      endforeach
+      DestroyItem(the_item);
+      failed := 2;
+      break;
+    endif
+    the_item.color   := deed.color;
+    if(itemname)
+      SetName(the_item, itemname);
+      SetObjProperty(the_item, "BaseName", itemname);
+    endif
+    if((obj == Cint(holder[3])) or (obj == Cint(holder[4])))
+      MoveObjectToLocation(the_item, the_item.x, the_item.y, the_item.z + 20, who.realm, MOVEOBJECT_FORCELOCATION);
+    endif
+    the_item.movable := 0;
+    created.append(the_item);
+    endif
+  endforeach
+  if(failed == 1)
+    SendSysMessage(who, "Could not build that there");
+    return;
+  elseif(failed == 2)
+    SendSysMessage(who, "You may only place this in a house you own");
+    return;
+  endif
+  foreach thing in created
+    thing.graphic := thing.objtype;
+  endforeach
+  var deed_objtype := deed.objtype;
+  if(DestroyItem(deed))
+    if(YesNo(who, "Placed well?"))
+      var the_serials := {};
+      foreach part in created
+        the_serials.append(part.serial);
+      endforeach
+      foreach part in created
+        if(part.objtype != UOBJ_COPPER_KEY)
+          SetObjProperty(part, "DeedOwnerSerial", who.serial);
+          SetObjProperty(part, "ItemsCreatedSerials", the_serials);
+          SetObjProperty(part, "FromDeed", deed_objtype);
+        endif
+      endforeach
+    else
+      foreach part in created
+        DestroyItem(part);
+      endforeach
+      SendSysMessage(who, "Cancelled.");
+      CreateItemInContainer(who.backpack, deed_objtype, 1);
+    endif
+  endif
+endprogram

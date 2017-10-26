@@ -1,0 +1,52 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+
+program cast_heal( parms )
+    var caster := parms[1];
+    var info := parms[2];
+    var cast_on;
+    cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_HELPFUL);
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+    if ( !MS_MobileCheck(caster, cast_on) )
+        return 0;
+    endif
+    
+	// Amount healed: 40% Magery + (1 to 10)
+	var points := CInt(AP_GetSkill(caster, MAGERY) * 0.4) + RandomDiceRoll("1d10");
+	
+	var healed := AP_GetVital(cast_on, HITS);
+	HealDamage(cast_on, points);
+	healed := AP_GetVital(cast_on, HITS) - healed;
+	
+	SendSysMessage(caster, "You healed "+healed+" hit points of damage.");
+	
+	if ( caster.serial != cast_on.serial )
+		SendSysMessage(cast_on, "You have had "+healed+" hit points of damage healed.");
+	endif
+	
+	return 1;
+/*
+  var healed := RandomDiceRoll("1d3");
+  healed := CInt(GetAttribute(caster, MAGERY)/2) + healed;
+  SendSysMessage(caster, "You healed " + healed + " damage.");
+  if(cast_on.isA(POLCLASS_NPC))
+    healed := healed * 2;
+  endif
+  HealDamage(cast_on, healed);
+  */
+  PlayObjectCenteredEffect( cast_on, FX_SPARK_EFFECT, 7, 0x10 );
+  PlaySoundEffect( cast_on, SFX_SPELL_GREATER_HEAL );
+  
+endprogram

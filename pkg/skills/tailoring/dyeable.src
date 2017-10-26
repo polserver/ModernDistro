@@ -1,0 +1,59 @@
+use os;
+use uo;
+use cfgfile;
+
+include "include/canAccess";
+
+var cfg  := ReadConfigFile( ":*:itemdesc" );
+
+program dyeable(who, dyetub)
+  if(who.cmdlevel >= 2)
+    var item := Target(who);
+    if(!item)
+      SendSysMessage(who, "Cancelled");
+      return;
+    endif
+    item.color := dyetub.color;
+    PlaySoundEffect(who, 0x23f);
+    return;
+  endif
+  if((dyetub.color > 1001) || (dyetub.color == 1))
+    dyetub.color := 38;
+  endif
+  if(!can_access(who, dyetub))
+    return;
+  endif
+  if(!ReserveItem(dyetub))
+	return;
+  endif
+  SendSysMessage(who, "Select an item to dye");
+  var item := Target(who);
+  if(!item)
+    SendSysMessage(who, "Cancelled");
+    return;
+  endif
+  if(!can_access(who, item))
+    return;
+  endif
+  if(!ReserveItem(item))
+    SendSysMessage(who, "You cant use that!");
+    return;
+  elseif(!Accessible(who, item))
+    SendSysMessage(who, "You cant reach that!");
+    return;
+  endif
+  var element  := FindConfigElem(cfg,  item.objtype);
+  var dyeable  := GetConfigInt(element, "dyeable");
+  if(dyeable == 1)
+    if((item.objtype == 0xfab) and (dyetub.color == 1))
+      SendSysMessage(who, "You cannot duplicate black dye tubs");
+      return;
+    else
+      item.color := dyetub.color;
+      PlaySoundEffect(who, 0x23f);
+    endif
+  else
+    SendSysMessage( who, "that item cannot be dyed");
+    return;
+  endif
+endprogram

@@ -1,0 +1,85 @@
+use vitals;
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include "include/spellAttack";
+include ":damage:damage";
+
+
+program cast_chainlightning( parms )
+  var caster := parms[1];
+  var info := parms[2];
+  var cast_on := MS_TargetCoordinates(caster, info.targ, "Select a target.");
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+  if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+        return 0;
+  endif
+/////////////////////// Distro 0.97 stuff here /////////////////////////////////  
+
+	// Base damage is a decimal number in between min and max damage
+	var min_damage := CInt(GetConfigInt(info.spell_config, "MinBaseDamage"));
+	var max_damage := CInt(GetConfigInt(info.spell_config, "MaxBaseDamage"));
+	var base_damage := min_damage + (CDbl(RandomInt(CInt((max_damage - min_damage) * 10)) + 1) / 10);
+	var damage;
+
+	// Get all targets in area excluding party and self. Damaged is divided by number of valid targets.
+	var area_size := CInt(GetConfigInt(info.spell_config, "AreaSize"));
+	var exclude := GetObjProperty(caster, "#Party");
+	exclude.Append(caster.serial);
+	var targs := MS_GetVaildTargets(caster, area_size, 1, exclude);
+
+	foreach vtarg in targs
+                if((CheckLineOfSight(vtarg, caster)) and (vtarg.cmdlevel < 2))
+                    SetObjProperty(vtarg, "LastHit", {caster.name, caster.serial, "chain lightning"});
+                        if(Reflected(vtarg))
+                            SendSysMessage (caster, "The spell was reflected back onto you!!!", color := 33);
+                            vtarg := caster;
+                        endif
+
+                    damage := MS_GetSpellDamage(caster, vtarg, base_damage) / targs.Size();
+                    SetObjProperty(vtarg, "LastHit", {caster.name, caster.serial, "chain lightning"});
+                    PlayLightningBoltEffect( vtarg );
+                    PlaySoundEffect(vtarg, SFX_SPELL_LIGHTNING);
+                    ApplyRawSpellDamageEX(vtarg, damage, info.damage_type, caster);
+                    sleepms(600);
+                endif
+	endforeach
+
+	return 1;
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*  var dmg;
+  var range := 2;
+  var victims := ListMobilesNearLocationEx( cast_on.x, cast_on.y, cast_on.z, range, 0x03, caster.realm);
+  Detach();
+  foreach mobile in victims
+    if((CheckLineOfSight(mobile, caster)) and (mobile.cmdlevel < 2))
+      SetObjProperty(mobile, "LastHit", {caster.name, caster.serial, "chain lightning"});
+      if(Reflected(mobile))
+        mobile := caster;
+      endif
+      dmg := RandomDiceRoll("6d8");
+      send_attack(mobile,caster, 49);
+      PlayLightningBoltEffect( mobile );
+      PlaySoundEffect(mobile, SFX_SPELL_LIGHTNING);
+      if(mobile.isA(POLCLASS_NPC))
+        dmg := dmg * 2;
+      endif
+      ApplyRawDamage( mobile, Resisted(info.circle,caster,mobile,dmg) );
+      sleepms(600);
+    endif
+  endforeach
+  */
+endprogram

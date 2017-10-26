@@ -1,0 +1,15 @@
+use uo;
+use basic;
+
+program textcmd_getstatic(who)
+
+SendSysMessage(who, "Select coordinates.");
+
+	var targ := TargetCoordinates(who);
+	if (!targ.objtype)
+		SendSysMessage(who, "Invalid selection.");
+		return 0;
+	endif
+	SendSysMessage(who, "ObjType: " + CStr( Hex(targ.objtype) ) );
+
+endprogram

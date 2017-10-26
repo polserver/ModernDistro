@@ -1,0 +1,47 @@
+use uo;
+use vitals;
+use attributes;
+
+include "include/spellRestrictions";
+
+program chrcast_glife( parms )
+  var circle := 7;
+  var delivery := "notarget";
+  var noto := "heplful";
+  var result := maincast(parms, delivery, circle, noto, 615);
+
+  if(result == 0)
+    return 0;
+  endif
+
+  var caster := result[1];
+
+
+var dru := Cint(GetEffectiveSkill(caster, SPELLWEAVING));
+var alore := Cint(GetEffectiveSkill(caster, SKILLID_ANIMALLORE));
+var int := GetIntelligence(caster);
+
+var bonus := 0;
+
+if(caster.ip)
+bonus := int/5;
+endif
+
+if(Cint(GetObjProperty(caster, "#glife")))
+SendSysMessage(caster, "Juz jestes pod wplywem tego czaru.",3,40);
+return 0;
+endif
+
+
+var duration := ((dru + alore)*2) + bonus;
+
+SetObjProperty(caster, "#glife", 1);
+Detach();
+sleep(duration);
+PlaySoundEffect(caster, SFX_SPELL_BLESS);
+PlayObjectCenteredEffect( caster, 0x3779, 10,45 );
+SendSysMessage(caster, "Czar Gift Of Life zakonczyl swoje dzialanie.",3,40);
+EraseObjProperty(caster, "#glife");
+
+endprogram
+

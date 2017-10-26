@@ -1,0 +1,20 @@
+use uo;
+
+include "include/startEqp";
+include "util/bank";
+
+program ondelete(who)
+  var created := GetObjProperty(who, "OnCreate");
+  if(!created)
+    created := 0;
+  endif
+  if((ReadGameClock() - created) >= 604800)
+    print("deleting char");
+    WipeBankBox( who );
+    WipeBankBox( who, "magicbag_" );
+    return 1;
+  else
+    print("too young");
+    return 0;
+  endif
+endprogram

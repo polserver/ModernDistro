@@ -1,0 +1,218 @@
+use uo;
+use os;
+use util;
+
+include "include/client";
+include "include/eventID";
+include "include/utility";
+include ":attributes:attributes";
+
+var spawnmsg := "";
+var spawnname := "";
+
+program troll_for_sea_creatures (parms)
+	var player := parms[1];
+	var tillerman := parms[2];
+
+	if (!IsDeepWater (player)) 
+		PrintTextAbove (tillerman, "We do be too close to land to catch anything of interest, I think.");
+		return;
+	endif
+
+	SetObjProperty (tillerman, "#trolling", ReadGameClock() + 120);
+	PrintTextAbove (tillerman, "What would ya be wanting to use as bait?");
+	var targetted := Target (player);
+	if (!targetted)
+		PrintTextAbove (tillerman, "How do ya be expecting to catch anything with that!?");
+		EraseObjProperty (tillerman, "#trolling");
+		return;
+	endif
+
+	if (!InInventory (player.backpack, targetted) )
+		PrintTextAbove (tillerman, "You dinna even have that!");
+		EraseObjProperty (tillerman, "#trolling");
+		return;
+	endif
+	
+	var spawnstrength := 0;
+	case (targetted.objtype)
+		0x0dd9:
+			spawnstrength := 8;
+		0x0dd8:
+			spawnstrength := 7;
+		0x0dd7:
+			spawnstrength := 6;
+		0x0dd6:
+			spawnstrength := 5;
+		0x09cf:
+			spawnstrength := 4;
+		0x09ce:
+			spawnstrength := 3;
+		0x09cd:
+			spawnstrength := 2;
+		0x09cc:
+			spawnstrength := 1;
+		default:
+			PrintTextAbove (tillerman, "How do ya be expecting to catch anything with that!?");
+			EraseObjProperty (tillerman, "#trolling");
+			return;
+	endcase
+
+	SubtractAmount (targetted, 1);
+	PrintTextAbove (tillerman, "Let'us see wha' we git...");
+	
+	var skill := GetAttribute (player, FISHING);
+	var timedelay := 60 - CINT (skill/2);
+	if (timedelay < 10)
+		timedelay := 10;
+	endif
+	sleep (timedelay);
+	
+	var npctemplate := getnastycritter (spawnstrength);
+	if (!SpawnNastyCreature (player, npctemplate))
+		PrintTextAbove (tillerman, "Dinna look like there be anything here.");
+	elseif (spawnmsg)
+		PrintTextAbove (tillerman, spawnmsg);
+	endif
+	EraseObjProperty (tillerman, "#trolling");
+	return;
+endprogram
+
+
+
+
+function getnastycritter (spawnstrength)
+	var rndcritter;
+
+	case (spawnstrength)
+		1:	rndcritter := randomint (8);
+		2:	rndcritter := randomint (10);
+		3:	rndcritter := randomint (14) + 4;
+		4:	rndcritter := randomint (12) + 6;
+		5:	rndcritter := randomint (10) + 8;
+		6:	rndcritter := randomint (8) + 10;
+		7:	rndcritter := randomint (6) + 12;
+		8:	rndcritter := randomint (4) + 14;
+		default:
+			rndcritter := 0;
+	endcase
+
+	case (rndcritter)
+		0:	spawnmsg := "Bah, what a disappointment.";
+			return ":wild_animals:walrus";
+		1:	spawnmsg := "All this way fer that...";
+			return ":wild_animals:walrus";
+		2:	spawnmsg := "They do be cute, but not o' much use, I dinna think.";
+			return ":wild_animals:dolphin";
+		3:	spawnmsg := "What a waste 'o a perfectly good fish...";
+			return ":wild_animals:dolphin";
+		4:	spawnmsg := "Ah, I could use a new belt...";
+			return ":wild_animals:alligator";
+		5:	spawnmsg := "Bah, what a disappointment.";
+			return ":wild_animals:alligator";
+		6:	spawnmsg := "Blasted creatures are everywhere, it seems.";
+			return ":elementals:waterelemental";
+		7:	spawnmsg := "The great sea mother dinna seem to like what ya be doing.";
+			return ":elementals:waterelemental";
+		8:	spawnmsg := "It be blowing up a storm, it be.";
+			return ":elementals:airelemental";
+		9:	spawnmsg := "The tempest come to blow ye away, it does.";
+			return ":elementals:airelemental";
+		10:	spawnmsg := "Perhaps ye better throw that one back?";
+			return ":dragons:seaserpent";
+		11:	spawnmsg := "That be a rather large one...";
+			return ":dragons:seaserpent";
+		12:	spawnmsg := "Ach, what did ye drag up now?";
+			return ":elementals:djinni";
+		13:	spawnmsg := "Ach, now ye did it!";
+			return ":undead:pirateghost";
+		14:	spawnmsg := "Ech, it gives me the willies, it does!";
+			return ":dragons:tentaclebeast";
+		15:	spawnmsg := "What a horrrrible creature!";
+			return ":dragons:tentaclebeast";
+		16:	spawnmsg := "What ha' you unleashed on us, man!?";
+			return ":diablo:blackwisp";
+		17:	spawnmsg := "It be the big one!";
+			return ":dragons:leviathan";
+	endcase
+endfunction
+
+
+
+
+function SpawnNastyCreature (player, npctemplate)
+	var x := randomint(9)-5;
+	var y := randomint(9)-5;
+	x := x + player.x;
+	y := y + player.y;
+
+	if (x > player.x)
+		x := x + 4;
+	else
+		x := x - 4;
+	endif
+
+	if ( y > player.y )
+		y := y + 4;
+	else
+		y := y - 4;
+	endif
+
+	var z := GetMapInfo ( x, y, player.realm ).z;
+	if (z >= player.z)
+		return;
+	endif
+
+	var it := createnpcfromtemplate (npctemplate, x, y, z, 0, player.realm);
+	if (it)
+		var ev := struct;
+		ev.+type := EVID_ENTEREDAREA;
+		ev.+source := player;
+		SendEvent (it, ev);
+		setobjproperty  (it, "boatspawn", 1);
+		return 1;
+	endif
+	return 0;
+endfunction
+
+
+
+
+///////////////////
+//  determines if the targetted location is a deep water tile that we can use the net on
+///////////////////
+
+function IsDeepWater (player)
+	//Have to mark off some docks that would otherwise count as deep water
+	//Magincia
+	if (player.x > 3640 and player.x < 3700 and player.y > 2250 and player.y < 2310)
+		return 0;
+	endif
+
+	var info := GetMapInfo (player.x, player.y, player.realm);
+	if ((info.landtile < 168) or (info.landtile > 171))
+		return 0;
+	endif
+
+	info := GetMapInfo (player.x + 25, player.y, player.realm);
+	if ((info.landtile < 168) or (info.landtile > 171))
+		return 0;
+	endif
+
+	info := GetMapInfo (player.x, player.y + 25, player.realm);
+	if ((info.landtile < 168) or (info.landtile > 171))
+		return 0;
+	endif
+
+	info := GetMapInfo (player.x - 25, player.y, player.realm);
+	if ((info.landtile < 168) or (info.landtile > 171))
+		return 0;
+	endif
+
+	info := GetMapInfo (player.x, player.y - 25, player.realm);
+	if ((info.landtile < 168) or (info.landtile > 171))
+		return 0;
+	endif
+
+	return 1;
+endfunction

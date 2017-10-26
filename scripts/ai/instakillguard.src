@@ -1,0 +1,150 @@
+use vitals;
+use npc;
+use os;
+use uo;
+use cfgfile;
+
+include "include/eventID";
+include "include/randName";
+include "include/client";
+//include "include/spawnnet";
+include "include/vetement";
+var me := Self();
+// replykey(me);// From spawn net inc
+
+var configfile := ReadConfigFile("::npcdesc");
+var idlesnd1 := CInt(configfile[me.npctemplate].idlesound1);
+var idlesnd2 := CInt(configfile[me.npctemplate].idlesound2);
+var wpncfg := ReadConfigFile(":combat:itemdesc");
+
+var equipt := GetObjProperty(me, "Equipt");
+  if(me.name["<random>"])
+    if((me.graphic == 0x190) || (me.graphic == 0x191))
+      case( RandomInt(2) )
+        0: me.graphic := 0x190;
+           equipt := equipt + "M";
+        1: me.graphic := 0x191;
+           equipt := equipt + "F";
+      endcase
+      SetObjProperty(me, "Graphic", me.graphic);
+    endif
+    SetName(me, RandomName(me));
+    Habille(me, equipt);
+    EraseObjProperty(me, "Equipt");
+  endif
+sleepms(1);
+
+program Instakill_guards()
+  var targ := GetObjProperty(me,"target");
+  DisableEvents(EVID_SPEECH);
+  targ := SystemFindObjectBySerial(targ);
+  if(!targ)
+	ClearGuard();
+	syslog("logouted dood");
+	return;
+  endif
+  if(Distance(me, targ) < 6)
+	say("Thou shall pay for thine swine actions");
+  endif
+  SetOpponent(targ);
+  Fight(targ);
+  var i;
+  for(i:=0;i<6;i:=i+1)
+	wander();
+	sleep(2);
+    look_around();
+  endfor
+  ClearGuard();
+endprogram
+
+function look_around()
+  var cfgfile := ReadConfigFile("::gzone");
+  var entries := GetConfigStringKeys(cfgfile);
+  var element;
+  var range;
+  var guardzone := 0;
+  foreach listing in entries
+    element :=  cfgfile[listing];
+    range := element.range;
+    range := SplitWords(range);
+    if((me.x >= CInt(range[1])) && (me.x <= CInt(range[3])) && (me.y >= CInt(range[2])) && (me.y <= CInt(range[4])))
+      guardzone := 1;
+      break;
+    endif
+  endforeach
+  foreach trg in ListMobilesNearLocation(me.x, me.y, me.z, 15, realm := me.realm)
+    if(guardzone == 1)
+      if ((trg.npctemplate) && (trg.script != "tamed") )
+        if((!configfile[trg.npctemplate].guardignore) && (trg.script != "tamed") && (trg.script != "light"))
+		  say("Ah ha! " + trg.name);
+          SetOpponent(trg);
+          SetObjProperty(me, "target", trg.serial);
+          SetObjProperty(trg, "guardkill", 1);
+          Fight(trg);
+        endif
+	  else
+	    CheckForCriminals(trg);
+      endif
+    endif
+  endforeach
+endfunction
+
+function CheckForCriminals(trg)
+  if (trg.dead)
+	return;
+  endif
+  if (trg.criminal)
+	say("Stop Criminal!");
+    SetOpponent(trg);
+	Fight(trg);
+  endif
+endfunction
+
+function Fight(targ)
+  if ((targ.npctemplate) && (targ.script != "tamed") )
+    SetObjProperty(targ, "guardkill", 1);
+  endif
+  set_priority(50);
+  EnableEvents(EVID_OPPONENT_MOVED, 15);
+  EnableEvents(EVID_OPPONENT_MOVED);
+  var ev;
+  while(targ &&  (!targ.dead || targ.hidden || targ.consealed) )
+	ev := wait_for_event( Closedistance(targ)*10 );
+	repeat
+	case(ev.type)
+	  EVID_OPPONENT_MOVED: Closedistance(targ);
+	  EVID_PEACEMADE:      targ := 0;
+				           break;
+    endcase
+	until (!(ev := wait_for_event(0)));
+  endwhile
+  look_around();
+  set_priority(20);
+  SetWarMode(0);
+endfunction
+
+function ClearGuard()
+  me.hidden := 1;
+  SetProperty("guardkill", 1);
+  PlaySoundEffect(me, 0x1ff);
+  PlayStationaryEffect( me.x, me.y, me.z, FX_SMOKE, speed:=0xa, loop:=0xa, realm := me.realm );
+  MoveObjectToLocation(me, 5283,1184,0);
+  ApplyRawDamage(me, 510);
+endfunction
+
+function Closedistance(targ)
+  if(Distance( me, targ ) >= 12)
+	PlayStationaryEffect( me.x, me.y, me.z, FX_SMOKE, speed:=0xa, loop:=0xa, realm := me.realm);
+	MoveObjectToLocation(me, targ.x, targ.y, targ.z);
+	PlayStationaryEffect( me.x, me.y, me.z, FX_SMOKE, speed:=0xa, loop:=0xa, realm := me.realm );
+  endif
+  case (Distance( me, targ ))
+	1: return 1;
+    2: WalkToward( targ );
+ 	   return 0;
+	0: return 1;
+	default: RunToward(targ);
+             return 0;
+  endcase
+endfunction
+

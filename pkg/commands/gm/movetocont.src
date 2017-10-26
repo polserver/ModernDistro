@@ -1,0 +1,26 @@
+use uo;
+
+program textcmd_moveitem( who )
+    SendSysMessage( who, "Select an item to move." );
+    var what := TargetCoordinates( who );
+    if (what)
+        if (what.item)
+            SendSysMessage( who, "Now select a container." );
+            var cont := TargetCoordinates( who );
+            if (cont.item)
+                    // note that the x/y from TargetCoordinates is the position
+                    // of the container in the world.  We'll let MoveItemToContainer
+                    // decide a random location within the container
+                    // (by leaving parameters 2 and 3 default)
+                var result := MoveItemToContainer( what.item, cont.item );
+                if (result)
+                    PrintTextAbovePrivate( what.item, "Done!", who );
+                else
+                    SendSysMessage( who, "Unable to move item: " + result.errortext );
+                endif
+            endif
+        else
+            SendSysMessage( who, "This command only works on items." );
+        endif
+    endif
+endprogram

@@ -1,0 +1,181 @@
+//
+// Last updated: 26-11-03
+// Revised by Infusion (dcrofts@fastmail.com.au)
+
+use uo;
+use unicode;
+
+include ":attributes:attributes";
+include "include/trainingskill";
+
+program Anatomy(who)
+        var data := {};
+        data[1] := "anatomy";
+        data[2] := ReadGameClock();
+        data[3] := CStr(1);
+        SetObjProperty(who, "LastUsedSkill", data );
+        TrainingSkill(who, data[3]);
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  SendSysMessageUC(who, CAscZ("Whom shall I examine?"), "ENG");
+  var subject := Target(who);
+  // target checks begin here
+  if(!subject)
+    return;
+  elseif(subject.serial == who.serial)
+    PrintTextAbovePrivateUC(who, CAscZ("You know yourself quite well enough already."), "ENG", who);
+    return;
+  elseif(subject.graphic == 0x2006)
+    SendSysMessageUC(who, CAscZ("Looks pretty dead to you."), "ENG");
+    return;
+  elseif(!subject.isA(POLCLASS_MOBILE))
+    SendSysMessageUC(who, CAscZ("That cannot be inspected."), "ENG");
+    return;
+  elseif(Distance(who, subject) > 3)
+		    SendSysMessage(who, "Your subject is too far away", color := 33);
+		    return 0;
+  endif
+  // variables for sys messages
+  var streng := getStreng(GetStrength(subject), subject.graphic, subject.gender);
+  var dext := getDext(GetDexterity(subject), subject.graphic, subject.gender);
+  var endur := getEnd(CInt(CInt(GetStamina(subject))/CDbl(GetMaxStamina(subject))*100));
+  var skill := GetAttribute(who, ANATOMY);
+  // adjust succeed and fail msgs here
+  var strMsg, strFail;
+  if(subject.graphic != 0x190 && subject.graphic != 0x191)
+    strMsg := "That creature";
+    strFail := "that creature's physical characteristics.";
+  else
+    strMsg := subject.name;
+    if(upper(subject.name[len(subject.name)]) != "S" || lower(subject.name[len(subject.name)]) != "s" ) 
+      strFail := subject.name + "'s physical characteristics.";  
+    else 
+      strFail := subject.name + "' physical characteristics."; 
+    endif
+  endif
+  var pts := CInt(GetAttribute(who, ANATOMY)+ 15);
+  if(CInt(pts < 30))
+	  pts := 30;
+  endif
+  if(SkillCheck(who,ANATOMY, -1, pts/3))
+    PrintTextAbovePrivateUC(subject, CAscZ(strMsg + " looks " + streng + " and " + dext + "."), "ENG", who);
+    // player's anatomy skill equal/greater than 65 can get endurance info
+    if(skill >= 65)
+      PrintTextAbovePrivateUC(subject, CAscZ(strMsg + " is at " + endur + " endurance."), "ENG", who);
+    endif
+  else
+    PrintTextAbovePrivateUC(subject, CAscZ("You cannot quite get a sense of " + strFail), "ENG", who);
+  endif
+endprogram
+
+// strength
+function getStreng(subject, graphic, gender)
+  // fix sys msgs
+  var strSuper, strType, strGender;
+  if(graphic != 0x190 && graphic != 0x191)
+    strSuper := "supernaturally";
+    strType := "creatures";
+    strGender := "it";
+  else
+    strSuper := "superhumanly";
+    strType := "people";
+    if(gender == 0)
+      strGender := "he";
+    elseif(gender == 1)
+      strGender := "she";
+    endif
+  endif
+  if(subject >= 100)
+    return strSuper + " strong";
+  elseif(subject >= 99)
+    return "like one of the strongest " + strType + " you have ever seen";
+  elseif(subject >= 89)
+    return "strong as an ox";
+  elseif(subject >= 79)
+    return "extraordinarily strong";
+  elseif(subject >= 69)
+    return "extremely strong";
+  elseif(subject >= 59)
+    return "very strong";
+  elseif(subject >= 49)
+    return "somewhat strong";
+  elseif(subject >= 39)
+    return "to be of normal strength";
+  elseif(subject >= 29)
+    return "somewhat weak";
+  elseif(subject >= 19)
+    return "rather feeble";
+  else
+    return "like " + strGender + " would have trouble lifting small objects";
+  endif
+endfunction
+
+// dexterity
+function getDext(subject, graphic, gender)
+  // fix sys msgs
+  var strSuper, strType, strGender;
+  if(graphic != 0x190 && graphic != 0x191)
+    strSuper := "supernaturally";
+    strType := "creatures";
+    strGender := "it";
+  else
+    strSuper := "superhumanly";
+    strType := "people";
+	// Determine the proper pronoun for later use in messages.
+    if(gender == 0)
+      strGender := "he";
+    elseif(gender == 1)
+      strGender := "she";
+    endif
+  endif
+  if(subject >= 100)
+    return "also looks " + strSuper + " agile";
+  elseif(subject >= 99)
+    return "like one of the fastest " + strType + " you have ever seen";
+  elseif(subject >= 89)
+    return "moves like quicksilver";
+  elseif(subject >= 79)
+    return "extraordinarily agile";
+  elseif(subject >= 69)
+    return "extremely agile";
+  elseif(subject >= 59)
+    return "very agile";
+  elseif(subject >= 49)
+    return "somewhat agile";
+  elseif(subject >= 39)
+    return "moderately dextrous";
+  elseif(subject >= 29)
+    return "somewhat uncoordinated";
+  elseif(subject >= 19)
+    return "very clumsy";
+  else
+    return "like " + strGender + " can barely manage to stay standing";
+  endif
+endfunction
+
+// endurance
+function getEnd(subject)
+  if(subject >= 100)
+    return "one-hundred percent";
+  elseif(subject >= 90)
+    return "ninety percent";
+  elseif(subject >= 80)
+    return "eighty percent";
+  elseif(subject >= 70)
+    return "seventy percent";
+  elseif(subject >= 60)
+    return "sixty percent";
+  elseif(subject >= 50)
+    return "fifty percent";
+  elseif(subject >= 40)
+    return "forty percent";
+  elseif(subject >= 30)
+    return "thirty percent";
+  elseif(subject >= 20)
+    return "twenty percent";
+  elseif(subject >= 10)
+    return "low";
+  else
+    return "very low";
+  endif
+endfunction

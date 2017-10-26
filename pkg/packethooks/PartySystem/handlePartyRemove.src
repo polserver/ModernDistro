@@ -1,0 +1,117 @@
+/* $Id: handlePartyRemove.src 749 2006-08-25 04:18:26Z tekproxy $
+ *
+ */
+
+use uo;
+use os;
+use polsys;
+
+include ":partySystem:config";
+include ":partySystem:packetInfo";
+include ":partySystem:messages";
+
+program HandlePartyRemove(params)
+	Set_Critical(DEBUG_SET_CRITICAL);
+
+	var character := params[1];
+	var kicked_id := params[2];
+	var newparty := array{};
+	var kicked_member, party, member;
+	
+	// No kicked_id, so character must be using /rem client command
+	if ( !kicked_id )
+		SendSysMessage(character, "Who would you like to remove from your party?");
+		kicked_member := Target(character);
+		party := GetObjProperty(character, PARTY_PROP);
+		
+		if ( !kicked_member )
+			SendSysMessage(character, "Cancelled.");
+			return 0;
+		endif
+		
+		// Target checks
+		if ( !kicked_member.IsA(POLCLASS_MOBILE) || !kicked_member.acctname || !(kicked_member.serial in party) )
+			return 0;
+		endif
+	else
+		// param[3] is set to PARTY_PROP when called from logoff, so search offline mobiles as well
+		if ( !params[3] )
+			kicked_member := SystemFindObjectBySerial(kicked_id);
+			party := GetObjProperty(character, PARTY_PROP);
+		else
+			kicked_member := SystemFindObjectBySerial(kicked_id, SYSFIND_SEARCH_OFFLINE_MOBILES);
+			party := params[3];
+		endif
+	endif
+
+	if ( Lower(TypeOf(party)) != "array" || party.Size() < 1 || !party[1] )
+		EraseObjProperty(character, PARTY_PROP);
+		EraseObjProperty(character, PARTY_JOINING_PROP);
+		return 0;
+	endif
+
+	// kicked_member is removing themselves OR is removing someone in the party and is the leader
+	if ( kicked_member.serial == character.serial || (character.serial == party[1] && (kicked_member.serial in party)) ) 
+		// Remove PARTY_PROP from kicked_member's character
+		EraseObjProperty(kicked_member, PARTY_PROP);
+
+		// Send remove packet
+		SendRemovePacket(kicked_member, kicked_id);
+
+		// If kicked_member is the party leader
+		if ( kicked_member.serial == party[1] )
+			// Send everyone the packet to disband
+			foreach member_id in (party)
+				member := SystemFindObjectBySerial(member_id, SYSFIND_SEARCH_OFFLINE_MOBILES);
+
+				SendRemovePacket(member, member.serial);
+				EraseObjProperty(member, PARTY_PROP);
+
+				if ( member.connected )
+					if ( member_id != kicked_member.serial )
+						SendSysMessage(member, "Party disbanded.");
+					else
+						SendSysMessage(kicked_member, "You have disbanded the party.");
+					endif
+				endif
+				SleepMS(2);
+			endforeach
+		else
+			// Build newparty array
+			for i := 1 to (party.Size())
+				if ( party[i] != kicked_member.serial )
+					newparty.Append(party[i]);
+				endif
+				SleepMS(2);
+			endfor
+
+			SendPartyMessage(newparty, kicked_member, "has left the party.", 1);
+			
+			// Send the same packet to everyone else, unless it's a 2-person party, then send a different packet
+			foreach member_id in (newparty)
+				member := SystemFindObjectBySerial(member_id, SYSFIND_SEARCH_OFFLINE_MOBILES);
+
+				if ( newparty.Size() > 1 )
+					SendRemovePacket(member, kicked_id, newparty);
+					SetObjProperty(member, PARTY_PROP, newparty);
+				else
+					SendRemovePacket(member, member.serial);
+					EraseObjProperty(member, PARTY_PROP);
+					
+					if ( member.connected )
+						SendSysMessage(member, "Party disbanded.");
+					endif
+				endif
+				SleepMS(2);
+			endforeach
+			
+			if ( kicked_member.connected )
+				SendSysMessage(kicked_member, "You have been removed from the party.");
+			endif
+		endif
+	else
+		SendSysMessage(character, "You must be the leader of the party to remove members.");
+	endif
+
+	return 1;
+endprogram

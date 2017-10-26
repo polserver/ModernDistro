@@ -1,0 +1,93 @@
+/* $Id: docs.css 375 2006-06-17 19:26:32Z austinheilman $
+ *
+ * Purpose
+ * Provide constant look to all .html docs
+ * Melanius ownz Nitsa!
+ *
+ */
+
+body {
+	background: #FFFFFF;
+	color: #000000;
+	font: 9pt, verdana, sans-serif;
+}
+
+#container {
+	margin: 1em;
+}
+
+#header {
+	text-align: right;
+}
+
+#menu {
+	background: #ededed;
+	border: 1px solid #969696;
+	padding: 1em;
+}
+
+#menu ul {
+	list-style-type: none;
+	margin-left: .1em;
+	margin-bottom: 3em;
+	padding: .1em;
+}
+#menu li.header {
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+
+#content {
+	background: #ededed;
+	border: 1px solid #969696;
+	margin: 3em 1em 1em 1em;
+	padding: 1em;
+}
+
+#content p {
+	text-indent: 1em;
+}
+
+#content hr {
+	margin-bottom: 2em;
+}
+
+#content a:link {
+	font-weight: bold;
+	text-decoration: none;
+}
+#content a:visited {
+	font-weight: bold;
+	text-decoration: none;
+}
+#content a:hover {
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+#table {
+	background: #bcbcbc;
+	border: 1px solid #969696;
+}
+#table p {
+	text-indent: .5em;
+}
+#table h3 {
+	font: 11pt bold verdana, sans-serif;
+	background: #777777;
+	font-weight: bold;
+	margin: 0em;
+	padding: .5em;
+}
+#table pre {
+	margin: 0em 0em 3em 0em;
+	padding: .5em;
+}
+
+
+#footer {
+	text-align: center;
+	padding: 1em;
+}
+

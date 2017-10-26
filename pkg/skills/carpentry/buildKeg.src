@@ -1,0 +1,175 @@
+use uo;
+use os;
+
+include "include/client";
+include ":attributes:attributes";
+include "include/canAccess";
+
+var layout := array(
+"page 0",
+"gumppic   0  50 0206             ",
+"gumppic  40  50 0201             ",
+"gumppic 460  50 0207             ",
+"gumppic   0  94 0202             ",
+"gumppic  40  94 2604             ",
+"gumppic 460  94 2605             ",
+"gumppic   0 410 2606             ",
+"gumppic  40 410 2607             ",
+"gumppic 460 410 2608             ",
+"gumppic  20 120 5100             ",
+"gumppic  28 120 5101             ",
+"gumppic 118 120 5101             ",
+"gumppic 208 120 5101             ",
+"gumppic 298 120 5101             ",
+"gumppic 370 120 5101             ",
+"gumppic 460 120 5102             ",
+"gumppic  20 128 5103             ",
+"gumppic  28 128 5104             ",
+"gumppic 118 128 5104             ",
+"gumppic 208 128 5104             ",
+"gumppic 298 128 5104             ",
+"gumppic 370 128 5104             ",
+"gumppic 460 128 5105             ",
+"gumppic  20 136 5058             ",
+"gumppic 118 136 5058             ",
+"gumppic 232 136 5058             ",
+"gumppic 350 136 5058             ",
+"gumppic  20 136 5106             ",
+"gumppic  28 136 5107             ",
+"gumppic 118 136 5107             ",
+"gumppic 208 136 5107             ",
+"gumppic 298 136 5107             ",
+"gumppic 370 136 5107             ",
+"gumppic 460 136 5108             ",
+"gumppic  28 308 5104             ",
+"gumppic 118 308 5104             ",
+"gumppic 208 308 5104             ",
+"gumppic 298 308 5104             ",
+"gumppic 368 308 5104             ",
+"gumppic  20 308 5103             ",
+"gumppic 460 308 5105             ",
+"gumppic  20 256 5058             ",
+"gumppic 118 256 5058             ",
+"gumppic 232 256 5058             ",
+"gumppic 350 256 5058             ",
+"gumppic  20 396 5106             ",
+"gumppic  28 396 5107             ",
+"gumppic 118 396 5107             ",
+"gumppic 208 396 5107             ",
+"gumppic 298 396 5107             ",
+"gumppic 370 396 5107             ",
+"gumppic 460 396 5108             ",
+"gumppic  20 380 5100             ",
+"gumppic  28 380 5101             ",
+"gumppic 118 380 5101             ",
+"gumppic 208 380 5101             ",
+"gumppic 298 380 5101             ",
+"gumppic 370 380 5101             ",
+"gumppic 460 380 5102             ",
+"button  320 410  241  242 1 0 999",
+"text    110  80  900    0        ",
+"text     50 160  900    1        ",
+"text    160 160  900    2        ",
+"text    350 160  900    3        ",
+"text     40 301  900    4        ",
+"text    220 301  900    5        ",
+"text    290 301  900    6        ",
+"text    360 301  900    7        ",
+"text     90 420  900    8        ",
+"tilepic  50 330 6464             ",
+"tilepic 220 330 7608             ",
+"tilepic 295 330 4100             ",
+"tilepic 380 330 3854             ",
+"button  100 333  210  211 1  0 10",
+"button   70 424    3    4 1  0 10"
+);
+
+var data := {
+  "KEG TINKERING MENU",              // 0
+  "ITEM",                            // 1
+  "COMPONENTS",                      // 2
+  "LINING",                          // 3
+  "Potion Keg",                      // 4
+  "Lid",                             // 5
+  "Tap",                             // 6
+  "Bottles(10)",                     // 7
+  "Make Last"                        // 8
+};
+
+program buildkeg(who, item)
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  if(!can_access(who, item))
+    return;
+  endif
+  var res := SendDialogGump(who, layout, data);
+  if((res[0] == 0) || (res[0] == 999))
+    SendSysMessage(who, "Cancelled");
+    return;
+  endif
+  var bottlecounter := 0;
+  var tapcounter := 0;
+  var lidcounter := 0;
+  var bottles := 0;
+  var lid := 0;
+  var tap := 0;
+  foreach thing in EnumerateItemsInContainer(who.backpack)
+    if(thing.objtype == 0xf0e)
+      if(bottlecounter == 0)
+        if(thing.amount >= 10)
+          if(ReserveItem(thing))
+            bottles := thing;
+            bottlecounter := bottlecounter + 1;
+          endif
+        endif
+      endif
+    elseif(thing.objtype == 0x1db8)
+      if(lidcounter == 0)
+        if(ReserveItem(thing))
+          lid := thing;
+          lidcounter := lidcounter + 1;
+        endif
+      endif
+    elseif(thing.objtype == 0x1004)
+      if(tapcounter == 0)
+        if(ReserveItem(thing))
+          tap := thing;
+          tapcounter := tapcounter + 1;
+        endif
+      endif
+    endif
+    if((bottlecounter == 1) && (tapcounter == 1) && (lidcounter == 1))
+      break;
+    endif
+  endforeach
+  if((bottlecounter == 0) || (tapcounter == 0) || (lidcounter == 0))
+    SendSysMessage(who, "you do not have all the required pieces");
+    return;
+  endif
+  if(SkillCheck(who, TINKERING, 52, AP_GetSkill(who, TINKERING)))
+    var checker := 0;
+    if(!SubtractAmount(bottles, 10))
+      checker := 1;
+    endif
+    if(!DestroyItem(tap))
+      checker := 1;
+    endif
+    if(!DestroyItem(lid))
+      checker := 1;
+    endif
+    if(!DestroyItem(item))
+      checker := 1;
+    endif
+    if(checker == 1)
+      SendSysMessage(who, "Error: could not find all the parts.");
+      return;
+    endif
+    var theitem := CreateItemInBackpack(who, 0x1940, 1);
+      if(!theitem)
+        SendSysMessage(who, "Error: could not create barrel.");
+        return;
+      endif
+      theitem.movable := 1;
+      SendSysMessage( who, "You made the item and put it in your pack.");
+    endif
+endprogram

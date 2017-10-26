@@ -1,0 +1,25 @@
+use uo;
+
+include ":poisonwatcher:poisons";
+
+program CmdCurePoison(who, text)
+	text := splitwords(text);
+	var pname := text[1];
+	var amount := CInt(text[2]);
+	var level := Cint(text[3]);
+
+	if (!amount)
+		Sendsysmessage(who, "Usage: .curepoison poison_name amount [level]");
+	endif
+
+	if (!level)
+		level := 1;
+	endif
+
+	SendSysMessage(who, "Who do you want to cure?");
+	var targ := target(who);
+	
+	if ( targ )
+		CurePoison(targ, amount, pname, level);
+	endif
+endprogram

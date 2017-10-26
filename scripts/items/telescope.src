@@ -1,0 +1,27 @@
+use uo;
+use cfgfile;
+use os;
+use util;
+
+
+
+const UOBJECT_GOLD := 0x0eed;
+
+program use_telescope(character)
+  SendSysMessage( character, "Select an object to use this on" );
+  var use_on := TargetCoordinates( character);
+  if(!use_on)
+    return;
+  endif
+  if(use_on.objtype)
+	SendSysMessage(character, "Objtype " + CStr(use_on.objtype));
+  elseif(use_on.item.objtype)
+	SendSysMessage(character, "Objtype " + CStr(use_on.item.objtype));
+  endif
+  SendSysMessage(character, "dead: " + CStr(use_on.dead));
+  SendSysMessage(character, "corpsetype:  " + CStr(use_on.corpseType));
+  CreateItemInBackpack(use_on, UOBJECT_GOLD, 500);
+  sleep(1);
+  SendSysMessage(character, "position (XYZ) is (" + use_on.x + "," + use_on.y + "," + use_on.z+ ")");
+endprogram
+

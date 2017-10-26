@@ -1,0 +1,79 @@
+use npc;
+use os;
+use uo;
+use cfgfile;
+use util;
+
+include "util/bank";
+include "include/eventID";
+include "include/sysEvent";
+include "include/client";
+include "include/anchors";
+include "include/dist";
+include "include/begging";
+
+var bank;
+var me := Self();
+var npccfg := ReadConfigFile("npcdesc");
+
+program banker();
+  start_script("NPCKeeper", me);
+  var next_wander := ReadGameClock() + 10;
+  var myanchor := GetObjProperty(me, "Anchor");
+  if(myanchor)
+    MoveObjectToLocation(me, myanchor[1], myanchor[2], myanchor[3], me.realm, MOVEOBJECT_FORCELOCATION);
+  endif
+  drop_anchor();
+  myanchor := GetObjProperty(me, "Anchor");
+  EnableEvents(EVID_NODE);
+  DisableEvents(SYSEVENT_SPEECH);
+  while(1)
+    var ev;
+    ev := os::wait_for_event(120);
+    if(ev.type == EVID_NODE)
+      if(ev.text["bank"])
+        OpenBank(ev.source);
+      elseif(ev.text["balance"])
+        var bankbox := FindBankBox(ev.source);
+        var contents := EnumerateItemsInContainer(bankbox);
+        var amt := 0;
+        foreach item in contents
+          if(item.objtype == 0xeed)
+            amt := (amt + item.amount);
+          endif
+        endforeach
+        if(amt == 1)
+          PrintTextAbove(me,"" + ev.source.name + ", Your bank box holds " + amt + " gold coin.");
+        else
+          PrintTextAbove(me,"" + ev.source.name + ", Your bank box holds " + amt + " gold coins.");
+        endif
+      endif
+    endif
+	if(ReadGameClock() >= next_wander)
+	  begpurse(me);
+      wander();
+      if(coordist(me.x, me.y, myanchor[1], myanchor[2]) > 5)
+        MoveObjectToLocation(me, myanchor[1], myanchor[2], myanchor[3], me.realm, MOVEOBJECT_FORCELOCATION);
+      endif
+      next_wander := ReadGameClock() + (RandomInt(9) + 21);
+    endif
+  endwhile
+endprogram
+
+function OpenBank(you)
+  TurnToward(you);
+  var bankbox := FindBankBox(you);
+  if(bankbox)
+    var contents := EnumerateItemsInContainer(bankbox);
+    var amt := 0;
+    foreach item in contents
+      if((item.container.objtype != 0xefa) && (item.container.objtype != 0xe3b))
+        amt := (amt + 1);
+      endif
+    endforeach
+    printtextaboveprivate(me, "Your bank box holds " + amt + " items", you);
+    SendOpenSpecialContainer(you, bankbox);
+  else
+    say("You don't seem to have a bank box, "+ you.name);
+  endif
+endfunction

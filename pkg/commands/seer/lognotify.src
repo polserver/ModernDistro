@@ -1,0 +1,15 @@
+use uo;
+
+program textcmd_lognotify(who)
+
+	var notostatus := CInt(GetObjProperty(who, "LogNotify") );
+
+	if (notostatus == 1)
+		SendSysMessage(who, "You will no longer be notified when players log in.");
+		EraseObjProperty(who, "LogNotify");
+	else
+		SendSysMessage(who, "You will now be notified when players log in.");
+		SetObjProperty(who, "LogNotify", 1);
+	endif
+
+endprogram

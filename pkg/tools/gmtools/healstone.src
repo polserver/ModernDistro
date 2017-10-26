@@ -1,0 +1,12 @@
+use uo;
+use os;
+include ":attributes:attributes";
+
+program healstone(item)
+  while(item)
+    foreach critter in ListMobilesNearLocation(item.x, item.y, item.z, 5, item.realm)
+      SetHp(critter, critter.strength);
+    endforeach
+    sleep(60);
+  endwhile
+endprogram

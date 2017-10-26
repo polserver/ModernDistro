@@ -1,0 +1,18 @@
+/* $Id: logoff.src 523 2006-06-30 17:36:14Z tekproxy $
+ *
+ */
+
+use uo;
+use os;
+
+include ":partySystem:config";
+
+program LogOff(character)
+	var party := GetObjProperty(character, PARTY_PROP);
+	
+	if ( party )
+		Start_Script("handlePartyRemove", array{character, character.serial, party});
+	endif
+
+	return 1;
+endprogram

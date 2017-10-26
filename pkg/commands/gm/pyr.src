@@ -1,0 +1,12 @@
+
+
+use uo;
+include ":attributes:attributes";
+include "include/client";
+
+program pyrotechnics (who)
+            var place := TargetCoordinates( who );
+  PlaySoundEffect( who, SFX_SPELL_EXPLOSION );
+//  PlayStationaryEffect( place.x,place.y,place.z, FX_EXPLODE_3, 7, 0x10 );
+  PlayStationaryEffect( place.x,place.y,place.z, FX_EXPLODE_2, 7, 0x10, 0, who.realm );
+endprogram

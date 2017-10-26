@@ -1,0 +1,6 @@
+use polsys;
+
+program reloadConfig()
+    print( "Reloading configuration." );      
+    ReloadConfiguration();
+endprogram

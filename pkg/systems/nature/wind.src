@@ -1,0 +1,45 @@
+
+use uo;
+use cfgfile;
+use util;
+
+include ":nature:nature";
+
+program wind()
+  var timer;
+  var chance;
+  if (1)
+    var cfg := ReadConfigFile("nature");
+    var elem := FindConfigElem(cfg, "wind");
+    timer := GetConfigInt(elem, "frequency");
+    chance := GetConfigInt(elem, "chance");
+  endif
+  var nature := GetGlobalProperty("Nature");
+  if (!nature[WINDDIR])
+    nature[WINDDIR] := "1";  // 1 = north, 2 = NE, etc.
+    nature[WINDSTR] := "0";  // 0=calm,1=light,2=strong,3=heavy,4=gale.
+  endif
+  var rannum;
+  while(1)
+    rannum := RandomInt(100);
+    if (rannum < chance)
+      rannum := RandomInt(8);
+      if (rannum > 5)
+        case (nature[WINDSTR])
+          1:   nature[WINDSTR] := 2;
+          2:
+          default:
+            nature[WINDSTR] := 1;
+        endcase
+      else
+        rannum := rannum-3;
+        nature[WINDDIR] := nature[WINDDIR] + rannum;
+        if (nature[WINDDIR] > 8)
+          nature[WINDDIR] := nature[WINDDIR] - 8;
+        elseif (nature[WINDDIR] < 1)
+          nature[WINDDIR] := nature[WINDDIR] + 8;
+        endif
+      endif
+    endif
+  endwhile
+endprogram

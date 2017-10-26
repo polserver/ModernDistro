@@ -1,0 +1,13 @@
+use uo;
+use os;
+
+program trash(who, item)
+  while(1)
+    foreach trashitem in EnumerateItemsInContainer(item)
+      if(trashitem.container == item)
+        DestroyItem(trashitem);
+      endif
+    endforeach
+  sleep(300);
+  endwhile
+endprogram

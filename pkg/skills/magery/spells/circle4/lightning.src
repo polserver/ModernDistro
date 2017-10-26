@@ -1,0 +1,59 @@
+use uo;
+use util;
+use os;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":damage:damage";
+
+program cast_lightning( parms )
+    var caster := parms[1];
+    var info := parms[2];
+    var cast_on;
+    cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_HARMFUL);
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+    if ( !MS_MobileCheck(caster, cast_on) )
+        return 0;
+    endif
+  PlaySoundEffect(cast_on, SFX_SPELL_LIGHTNING);
+  PlayLightningBoltEffect( cast_on);
+  SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "lightning bolt"});
+    
+	// Base damage is a decimal number in between min and max damage
+	var min_damage := CInt(GetConfigInt(info.spell_config, "MinBaseDamage"));
+	var max_damage := CInt(GetConfigInt(info.spell_config, "MaxBaseDamage"));
+	var base_damage := min_damage + (CDbl(RandomInt(CInt((max_damage - min_damage) * 10)) + 1) / 10);
+	var damage := MS_GetSpellDamage(caster, cast_on, base_damage);
+        if(Reflected(cast_on))
+            SendSysMessage (caster, "The spell was reflected back onto you!!!", color := 33);
+            cast_on := caster;
+            PlaySoundEffect(cast_on, SFX_SPELL_LIGHTNING);
+            PlayLightningBoltEffect( cast_on);
+        endif
+	ApplyRawSpellDamageEX(cast_on, damage, info.damage_type, caster, info.Circle);
+
+	return 1;
+/*
+  var dmg := RandomDiceRoll("3d7");
+  if (dmg < 1)
+	dmg := 1;
+  endif
+  if(Reflected(cast_on))
+	cast_on := caster;
+    PlaySoundEffect(cast_on, SFX_SPELL_LIGHTNING);
+    PlayLightningBoltEffect( cast_on);
+  endif
+  if(cast_on.isA(POLCLASS_NPC))
+    dmg := dmg * 2;
+  endif
+  ApplyRawDamage(cast_on, Resisted(info.circle,caster,cast_on,dmg));
+  */
+endprogram

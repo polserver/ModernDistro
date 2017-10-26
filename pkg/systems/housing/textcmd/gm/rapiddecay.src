@@ -1,0 +1,17 @@
+////////////////////////////////////////////////////
+// Advances the decay timer to cause the house
+// to become abandoned 20 seconds after the
+// command is used.
+////////////////////////////////////////////////////
+
+
+use uo;
+use os;
+
+program rapiddecay( who)
+  SendSysMessage(who,"Target the house sign you wish to become abandoned:", color := 88);
+  var targ := Target(who);
+  GetObjProperty(targ,"decay");
+  SetObjProperty(targ,"decay", (ReadGameClock() + 20));
+  SendSysMessage(who,"Done! The house will become abandoned soon.", color := 66);
+endprogram

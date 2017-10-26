@@ -1,0 +1,658 @@
+use uo;
+use os;
+use math;
+use basic;
+
+include ":oldrunebook:customSpells";
+include ":attributes:attributes";
+
+
+const RENAME_BOOK		:= 0x01;
+const RECALL_WITH_CHARGES	:= 0x10;
+const RECALL_WITHOUT_CHARGES	:= 0x20;
+const GATE_WITHOUT_CHARGES	:= 0x30;
+const SET_DEFAULT_LOCATION	:= 0x40;
+const RESET_DEFAULT_LOCATION	:= 0x50;
+const DROP_RUNE			:= 0x60;
+
+
+program open_runebook( who, runebook )
+
+	if( !Accessible( who, runebook ) )
+		SendSysMessage( who , "You can't reach that.", color := 33 );
+		return 0;
+	endif
+	
+	if( !ReserveItem( runebook ) )
+		return 0;
+	endif
+
+	var x;
+	var y;
+	var msg;
+	var ret;
+	var info;
+	var name;
+	var type;
+	var index;
+	var rune_count;
+	var page_count;
+	var defloc	 := 0;
+	var charges	 := Cint( GetObjProperty( runebook, "charges" ) );
+	var maxcharges := Cint( GetObjProperty( runebook, "maxcharges" ) );
+	if( !maxcharges )
+		maxcharges := 5;
+	endif
+	
+	var runes_def	 := GetObjProperty( runebook, "RuneDefs" );
+	if( !runes_def )
+		runes_def := array;
+	endif
+	
+	var max_page	 := Cint( (runes_def.size()+1) / 2 );
+
+	var layout := { "page 0",
+			  "nodispose",
+			  "gumppic 30   5 2200",
+			  "gumppic 55  45 57",
+			  "gumppic 75  45 58",
+			  "gumppic 90  45 58",
+			  "gumppic 105 45 58",
+			  "gumppic 120 45 58",
+			  "gumppic 135 45 58",
+			  "gumppic 150 45 58",
+			  "gumppic 165 45 59",
+			  "gumppic 218 45 57",
+			  "gumppic 233 45 58",
+			  "gumppic 248 45 58",
+			  "gumppic 263 45 58",
+			  "gumppic 278 45 58",
+			  "gumppic 293 45 58",
+			  "gumppic 308 45 58",
+			  "gumppic 323 45 59",
+			  
+			  "text 90  35 0 0",
+			  "text 228 35 0 1"};
+		  
+			  
+	var data := { "Charges: " + charges,		// 0 Charges
+			"Max Charges:" + maxcharges,	// 1 Max Charges
+			"Rename Book",			// 2 Rename Book
+			"Set default",			// 3 Set default
+			"Drop rune" };			// 4 Drop rune
+			
+
+	case( max_page )
+		0:	break;
+	
+		1:	layout.append( "button 60  182 2225 2225 0 2" );
+		
+		2:	layout.append( "button 60  182 2225 2225 0 2" );
+			layout.append( "button 95  182 2226 2226 0 3" );
+		
+		3:	layout.append( "button 60  182 2225 2225 0 2" );
+			layout.append( "button 95  182 2226 2226 0 3" );
+			layout.append( "button 130 182 2227 2227 0 4" );
+			
+		4:	layout.append( "button 60  182 2225 2225 0 2" );
+			layout.append( "button 95  182 2226 2226 0 3" );
+			layout.append( "button 130 182 2227 2227 0 4" );
+			layout.append( "button 165 182 2228 2228 0 5" );
+			
+		5:	layout.append( "button 60  182 2225 2225 0 2" );
+			layout.append( "button 95  182 2226 2226 0 3" );
+			layout.append( "button 130 182 2227 2227 0 4" );
+			layout.append( "button 165 182 2228 2228 0 5" );
+			layout.append( "button 230 182 2229 2229 0 6" );
+			
+		6:	layout.append( "button 60  182 2225 2225 0 2" );
+			layout.append( "button 95  182 2226 2226 0 3" );
+			layout.append( "button 130 182 2227 2227 0 4" );
+			layout.append( "button 165 182 2228 2228 0 5" );
+			layout.append( "button 230 182 2229 2229 0 6" );
+			layout.append( "button 265 182 2230 2230 0 7" );
+			
+		7:	layout.append( "button 60  182 2225 2225 0 2" );
+			layout.append( "button 95  182 2226 2226 0 3" );
+			layout.append( "button 130 182 2227 2227 0 4" );
+			layout.append( "button 165 182 2228 2228 0 5" );
+			layout.append( "button 230 182 2229 2229 0 6" );
+			layout.append( "button 265 182 2230 2230 0 7" );
+			layout.append( "button 300 182 2231 2231 0 8" );
+			
+		8:	layout.append( "button 60  182 2225 2225 0 2" );
+			layout.append( "button 95  182 2226 2226 0 3" );
+			layout.append( "button 130 182 2227 2227 0 4" );
+			layout.append( "button 165 182 2228 2228 0 5" );
+			layout.append( "button 230 182 2229 2229 0 6" );
+			layout.append( "button 265 182 2230 2230 0 7" );
+			layout.append( "button 300 182 2231 2231 0 8" );
+			layout.append( "button 335 182 2232 2232 0 9" );
+	endcase
+	
+	// Main Page
+	layout.append( "page 1" );
+	layout.append( "text 90 17 0 2" );
+	layout.append( "button 60  15 2472 2473 1 0 " + Cint(RENAME_BOOK) );
+	
+	if( runes_def.size() )
+		layout.append( "button 324 9 2206 2206 0 2" );
+	endif
+
+	x := 60;
+	y := 56;
+	for( rune_count := 1; rune_count <= runes_def.size(); rune_count := rune_count + 1 )
+		if( runes_def[rune_count] )
+			runes_def[rune_count].dtindex	:= data.size();
+			
+			if( runes_def[rune_count].defloc )
+				if( !defloc )
+					defloc := rune_count;
+				else
+					SetDefaultLocation( runebook, runes_def, defloc, rune_count );
+				endif
+			endif
+			
+			if( rune_count== 9 )
+				x := 219;
+				y := 56;
+			endif
+			
+			name := runes_def[rune_count].name;
+			if( name["A recall rune for "] )
+				name := name - "A recall rune for ";
+				runes_def[rune_count].name := name;
+			elseif( name["A recall rune for"] )
+				name := name - "A recall rune for";
+				runes_def[rune_count].name := name;
+			endif
+			
+			if( !name )
+				name := "A marked rune";
+				runes_def[rune_count].name := name;
+			
+			elseif( len(name) > 15 )
+				name := TruncName( name );
+			endif
+			
+			data.append( name );
+			layout.append( "text " + (x+15) + " " + y + " 0 " + runes_def[rune_count].dtindex );
+			layout.append( "button " + x + " " + (y+5) + " 2103 2104 1 0 " + Cint(RECALL_WITH_CHARGES+rune_count-1) );
+			y := y + 15;
+		else
+			break;
+		endif
+	endfor
+	
+	// Other pages
+	rune_count := 1;
+	for( page_count := 2; page_count <= (max_page+1); page_count := page_count+1 )
+		layout.append( "page " + page_count );
+		layout.append( "button 53  9 2205 2205 0 " + Cint(page_count-1) );
+		
+		if( page_count < (max_page+1) )
+			layout.append( "button 325 9 2206 2206 0 " + Cint(page_count+1) );
+		endif
+		
+		if( rune_count <= runes_def.size() )
+			info := runes_def[rune_count];
+			if( info )
+				if( info.defloc )
+					layout.append( "button 90 15 2360 2360 1 0 " + Cint(RESET_DEFAULT_LOCATION+rune_count-1) );
+				else
+					layout.append( "button 90 15 2361 2361 1 0 " + Cint(SET_DEFAULT_LOCATION+rune_count-1) );
+				endif
+			
+				layout.append( "text 65 76 0 " + data.size() );
+				data.append( GetSextantLatitude( info.toy ) );
+				layout.append( "text 65 91 0 " + data.size() );
+				data.append( GetSextantLongitude( info.tox ) );
+			
+				layout.append( "text 105  10 0 3" );
+				layout.append( "text 80  110 0 4" );
+				layout.append( "text 75   56 0 " + info.dtindex );
+				layout.append( "button 60  61  2103 2104 1 0 " + Cint(RECALL_WITH_CHARGES+rune_count-1) );
+				layout.append( "button 65  115 2437 2438 1 0 " + Cint(DROP_RUNE+rune_count-1) );
+				layout.append( "button 65  135 2271 2271 1 0 " + Cint(RECALL_WITHOUT_CHARGES+rune_count-1) );
+				layout.append( "button 135 135 2291 2291 1 0 " + Cint(GATE_WITHOUT_CHARGES+rune_count-1) );
+				rune_count := rune_count + 1;
+			endif
+		else
+			break;
+		endif
+		
+		if( rune_count <= runes_def.size() )
+			info	   := runes_def[rune_count];
+			if( info )
+				if( info.defloc )
+					layout.append( "button 230 15 2360 2360 1 0 " + Cint(RESET_DEFAULT_LOCATION+rune_count-1) );
+				else
+					layout.append( "button 230 15 2361 2361 1 0 " + Cint(SET_DEFAULT_LOCATION+rune_count-1) );
+				endif
+			
+				layout.append( "text 225 76 0 " + data.size() );
+				data.append( GetSextantLatitude( info.toy ) );
+				layout.append( "text 225 91 0 " + data.size() );
+				data.append( GetSextantLongitude( info.tox ) );
+				
+				layout.append( "text 245  10 0 3" );
+				layout.append( "text 240 110 0 4" );
+				layout.append( "text 234  56 0 " + info.dtindex );
+				layout.append( "button 219 61  2103 2104 1 0 " + Cint(RECALL_WITH_CHARGES+rune_count-1) );
+				layout.append( "button 225 115 2437 2438 1 0 " + Cint(DROP_RUNE+rune_count-1) );
+				layout.append( "button 225 135 2271 2271 1 0 " + Cint(RECALL_WITHOUT_CHARGES+rune_count-1) );
+				layout.append( "button 295 135 2291 2291 1 0 " + Cint(GATE_WITHOUT_CHARGES+rune_count-1) );
+				rune_count := rune_count + 1;
+			endif
+		else
+			break;
+		endif
+	endfor
+	
+	ret := SendDialogGump( who, layout, data );
+	if( !ret[0] )
+		return;
+	endif
+	
+	ret   := Cint( ret[0] );
+	type  := Cint( ret/0x10 );
+	index := Cint(ret - Cint((type*0x10))+1);
+
+	case( type )
+		0:	if( RenameBook( who, runebook ) )
+				SendSysMessage( who, "The runebook was successfuly renamed to " + Cstr( GetObjProperty( runebook, "name" ) ), color := 66);
+			endif
+			break;
+			
+		1:	if( !RecallWithCharges( who, runebook, charges, runes_def, index ) )
+				SendSysmessage( who, "Recall Failed.", color := 33 );
+			endif
+			break;
+			
+		2:	if( !RecallWithoutCharges( who, runebook, runes_def, index ) )
+				SendSysmessage( who, "Recall Failed.", color := 33 );
+			endif
+			break;
+			
+		3:	ReleaseItem( runebook );
+			if( !GateWithoutCharges( who, runebook, runes_def, index ) )
+				SendSysmessage( who, "Gate Failed.", color := 33 );
+			endif
+			break;
+			
+		4:	if( SetDefaultLocation( runebook, runes_def, index, defloc ) )
+				SendSysMessage( who, "Rune " + runes_def[index].name + " was successfuly set as default location.", color := 66);
+			endif
+			break;
+			
+		5:	if( ResetDefaultLocation( runebook, runes_def, index ) )
+				SendSysMessage( who, "Default local " + runes_def[index].name + " was successfuly reset.", color := 66);
+			endif
+			break;
+			
+		6:	if( !DropRune( who, runebook, runes_def, index ) )
+				SendSysMessage( who, "Couldn't drop the rune.", color := 33);
+			endif
+			break;
+	endcase
+	
+	SetObjProperty( runebook, "RuneDefs", runes_def );
+	
+	if( msg )
+		SendSysMessage( who, msg );
+	endif
+	
+	UpdateName( runebook, charges );
+	
+endprogram
+
+
+function UpdateName( runebook, charges )
+
+	set_critical(1);
+	
+	var name := GetObjProperty( runebook, "name" );
+	if( !name )
+		name := "Runebook";
+	endif
+	
+	runebook.name := name + " [charges: " + charges + "]";
+
+endfunction
+	
+
+function RenameBook( who, runebook )
+
+	var name := SendTextEntryGump( who, "Enter the new name of the runebook. ", TE_CANCEL_ENABLE, TE_STYLE_NORMAL );
+	if( name )
+		SetObjProperty( runebook, "name", name );
+		return 1;
+	else
+		return 0;
+	endif
+	
+endfunction
+
+
+function RecallWithCharges( who, runebook, byref charges, byref runes_def, index )
+
+	if( !runes_def[index] )
+		SendSysMessage( who, "Something is wrong. I couldn't find the rune.", color := 33 );
+		return 0;
+	endif
+	
+	var new_charges := Cint( GetObjProperty( runebook, "charges" ) );
+	
+	if( new_charges < 1 )
+		SendSysMessage( who, "The runebook is out of charges.", color := 33);
+		SetObjProperty( runebook, "charges", 0 );
+	else
+		var tox := Cint(runes_def[index].tox);
+		var toy := Cint(runes_def[index].toy);
+		var toz := Cint(runes_def[index].toz);
+		var tor := runes_def[index].tor;
+		if(!tor)
+		    tor := "britannia";
+		endif
+		
+		if( !tox and !toy and !toz )
+			SendSysMessage( who, "That rune is not marked!", color := 33 );
+			DestroyRune( runebook, runes_def, index );
+			return 0;
+		endif
+		
+		new_charges := new_charges - 1;
+		SetObjProperty( runebook, "charges", new_charges );
+		charges	:= new_charges;
+		
+		if( !CustomRecall( who, tox, toy, toz, tor, 1 ) )
+			return 0;
+		endif
+	endif
+	
+	return 1;
+	
+endfunction
+
+
+function RecallWithoutCharges( who, runebook, byref runes_def, index )
+
+	if( !runes_def[index] )
+		SendSysMessage( who, "Something is wrong. I couldn't find the rune.", color := 33 );
+		return 0;
+	endif
+	
+	var tox := Cint(runes_def[index].tox);
+	var toy := Cint(runes_def[index].toy);
+	var toz := Cint(runes_def[index].toz);
+	var tor := runes_def[index].tor;
+	if(!tor)
+	    tor := "britannia";
+	endif
+	
+	if( !tox and !toy and !toz )
+		SendSysMessage( who, "That rune is blank!", color := 33 );
+		DestroyRune( runebook, runes_def, index );
+		return 0;
+	endif
+		
+	if( !CustomRecall( who, tox, toy, toz, tor ) )
+		return 0;
+	endif
+	
+	return 1;
+
+endfunction
+
+
+function GateWithoutCharges( who, runebook, byref runes_def, index )
+
+	if( !runes_def[index] )
+		SendSysMessage( who, "Something is wrong. I couldn't find the rune.", color := 33 );
+		return 0;
+	endif
+	
+	var tox := Cint(runes_def[index].tox);
+	var toy := Cint(runes_def[index].toy);
+	var toz := Cint(runes_def[index].toz);
+	var tor := runes_def[index].tor;
+	if(!tor)
+	    tor := "britannia";
+	endif
+	
+	if( !tox and !toy and !toz )
+		SendSysMessage( who, "The rune is blank!", color := 33 );
+		DestroyRune( runebook, runes_def, index );
+		return 0;
+	endif
+
+	if( !CustomGate( who, tox, toy, toz, tor ) )
+		return 0;
+	endif
+	
+	return 1;
+
+endfunction
+
+
+function SetDefaultLocation( runebook, byref runes_def, index, defloc := 0 )
+
+	set_critical(1);
+	
+	if( !runes_def[index] )
+		return 0;
+	endif
+
+	var tox := Cint(runes_def[index].tox);
+	var toy := Cint(runes_def[index].toy);
+	var toz := Cint(runes_def[index].toz);
+	var tor := runes_def[index].tor;
+	if(!tor)
+	    tor := "britannia";
+	endif
+
+	
+	if( !tox and !toy and !toz )
+		DestroyRune( runebook, runes_def, index );
+		return 0;
+	endif
+
+	if( runes_def[defloc] )
+		if( !ResetDefaultLocation( runebook, runes_def, defloc ) )
+			return 0;
+		endif
+	endif
+	
+	SetObjProperty( runebook, "x", tox );
+	SetObjProperty( runebook, "y", toy );
+	SetObjProperty( runebook, "z", toz );
+	SetObjProperty( runebook, "realm", tor);
+	
+	runes_def[index].defloc := 1;
+
+	return 1;
+
+endfunction
+
+
+function ResetDefaultLocation( runebook, byref runes_def, index )
+	
+	set_critical(1);
+	
+	if( !runes_def[index] )
+		return 0;
+	endif
+	
+	EraseObjProperty( runebook, "x" );
+	EraseObjProperty( runebook, "y" );
+	EraseObjProperty( runebook, "z" );
+	EraseObjProperty( runebook, "realm");
+	
+	runes_def[index].defloc := 0;
+	
+	return 1;
+	
+endfunction
+
+
+function DropRune( who, runebook, byref runes_def, index )
+
+	set_critical(1);
+	
+	if( !runes_def[index] )
+		SendSysMessage( who, "Something is wrong. I couldn't find the rune.", color := 33 );
+		return 0;
+	endif
+	
+	if( runes_def[index].defloc )
+		ResetDefaultLocation( runebook, runes_def, index );
+	endif
+
+	var rune := CreateItemInContainer( who.backpack, 0x1f14 );
+	if( !rune )
+		SendSysMessage( who, "Your backpack is full.", color := 33 );
+		return 0;
+	endif
+	
+	var name := runes_def[index].name;
+	var tox  := Cint(runes_def[index].tox);
+	var toy  := Cint(runes_def[index].toy);
+	var toz  := Cint(runes_def[index].toz);
+	var tor  := runes_def[index].tor;
+	if(!tor)
+	    tor := "britannia";
+	endif
+
+	var i;
+	var new_array := array;
+	for( i := 1; i <= runes_def.size(); i := i + 1 )
+		if( i != index and (runes_def[i].tox or runes_def[i].toy) )
+			new_array.append( runes_def[i] );
+		endif
+	endfor
+
+	if( !tox and !toy and !toz )
+		SendSysMessage( who, "Error 3: Blank rune!" );
+		DestroyItem( rune );
+		return 0;
+	endif
+	
+	if( !name )
+		name := "A marked rune";
+	else
+		var splited := SplitWords( name );
+		name := "A recall rune for";
+		foreach part in splited
+			name := name + " " + part;
+		endforeach
+	endif
+
+	if( !SetObjProperty( rune, "x", tox ) and
+	    !SetObjProperty( rune, "y", toy ) and
+	    !SetObjProperty( rune, "z", toz ) and
+	    !SetObjProperty( rune, "realm", tor) )
+	    	SendSysMessage( who, "Error 4: Couldn't copy the destination data on the rune!", color := 33 );
+	    	DestroyItem( rune );
+		return 0;
+	endif
+	
+	SendSysMessage( who, "Rune " + name + " was successfuly dropped in your backpack.", color := 66 );
+	
+	rune.name := name;
+	runes_def := new_array;
+	
+	return 1;
+	
+endfunction
+
+
+function DestroyRune( runebook, byref runes_def, index )
+
+	runebook := runebook;
+	
+	set_critical(1);
+	
+	if( !runes_def[index] )
+		set_critical(0);
+		return 0;
+	endif
+
+	var i;
+	var new_array := array;
+	for( i := 1; i <= runes_def.size(); i := i + 1 )
+		if( i != index and (runes_def[i].tox or runes_def[i].toy) )
+			new_array.append( runes_def[i] );
+		endif
+	endfor
+	
+	runes_def := new_array;
+	
+	return 1;
+	
+endfunction
+
+
+function GetSextantLatitude( y )
+
+	var degrees := (y-1624) * 0.087890625;
+	var minutes;
+	var direction;
+	
+	if( degrees < 0 )
+		direction := "N";
+	else
+		direction := "S";
+	endif
+	
+	degrees := Abs( degrees );
+	minutes := CInt((CInt((degrees-Floor(degrees))*100)*60)/100);
+	
+	return (Floor(degrees) + "o" + minutes + "'" + direction);
+	
+endfunction
+
+
+function GetSextantLongitude( x )
+
+	var degrees := (x-1323) * 0.0703125;
+	var minutes;
+	var direction;
+	
+	if( degrees < 0 )
+		direction := "W";
+	else
+		direction := "E";
+	endif
+
+	degrees := Abs( degrees );
+	minutes := CInt((CInt((degrees-Floor(degrees))*100)*60)/100);
+	
+	return (Floor(degrees) + "o" + minutes + "'" + direction);
+
+endfunction
+
+
+function TruncName( name )
+	
+	var the_name	:= "";
+	var splited	:= SplitWords( name );
+	
+	foreach word in splited
+		if( (len(word) + len(the_name)) < 15 )
+			if( the_name== "" )
+				the_name := word;
+			else
+				the_name := the_name + " " + word;
+			endif
+		else
+			break;
+		endif
+	endforeach
+	
+	if( the_name== "" )
+		the_name := name[1,16];
+	endif
+	
+	return the_name;
+	
+endfunction

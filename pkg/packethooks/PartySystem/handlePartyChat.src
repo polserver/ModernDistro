@@ -1,0 +1,23 @@
+/* $Id: handlePartyChat.src 523 2006-06-30 17:36:14Z tekproxy $
+ *
+ */
+
+use uo;
+use os;
+use unicode;
+
+include ":partySystem:config";
+include ":partySystem:messages";
+
+program handlePartyChat(params)
+	Set_Critical(DEBUG_SET_CRITICAL);
+
+	var character := params[1];
+	var ucmsg := params[2];
+	var party := GetObjProperty(character, PARTY_PROP);
+
+	// Send message to every memeber in party
+	SendPartyMessage(party, character, ucmsg, 1);
+	
+	return 1;
+endprogram

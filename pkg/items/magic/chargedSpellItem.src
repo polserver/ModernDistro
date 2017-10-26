@@ -1,0 +1,31 @@
+use uo;
+use os;
+
+include "include/client";
+include ":magic:getSpellID";
+include "include/canAccess";
+
+program use_chargedspellitem( who, item )
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  if(!can_access(who, item))
+    return;
+  endif
+  if(item.movable == 0)
+    SendSysMessage(who, "You cannot use that.");
+    return;
+  endif
+    var charges := CInt(GetObjProperty(item, "charges"));
+
+    if (charges)
+        charges := charges - 1;
+        SetObjProperty(item, "charges", charges);
+
+        var spellid := GetSpellId( item );
+        Detach();
+        StartSpellEffect( who, spellid );
+    else
+        PrintTextAbovePrivate( item, "That is out of charges", who );
+    endif
+
+endprogram

@@ -1,0 +1,134 @@
+/*
+ *   Author: Unreal (MontuZ@Gmail.com) April 28, 2006.
+ *   Version: 1.0
+ *   Core: 096
+ *   Description: Auto Account Creator. Just like many of you know this is a RunUO/SphereServer
+ *   feature and now a POL feature. What it does exactly is when a person trys to login with
+ *   an unknown(non-existant) account. This script creates the account and logs them in.
+ *   Bugs: There shouldn't be any, but you never really know. So if a bug does come up
+ *   please send me an email or post on the forum where you got this(polserver.com)
+ *
+ */
+
+use uo;
+use os;
+use polsys;
+
+include ":accounts:settings";
+include ":accounts:accounts";
+
+CONST OFFSET_ACCOUNT_NAME	:= 0x01;
+CONST OFFSET_ACCOUNT_PASS	:= 0x1F;
+CONST INFO_LEN			:= 30;
+
+enum THEFT_LEVELS
+	ACCT_NOT_EXIST		:= 0,
+	ACCT_LOGIN_OKAY		:= 1,
+	ACCT_LOGIN_FAIL		:= 2,
+	ACCT_LOGIN_HACK		:= 3,
+endenum
+
+Program Install()
+	Print( "INSTALLING: Auto Account/Theft Prevention PH..." );
+	Return 1;
+Endprogram
+
+exported function LoginHook(who, byref packet)
+	who := who; // Avoid compiler warnings.
+
+	var username := Packet.GetString(OFFSET_ACCOUNT_NAME, INFO_LEN);
+	var password := Packet.GetString(OFFSET_ACCOUNT_PASS, INFO_LEN);
+
+	if ( !username )
+		SysLog( "Account/GetString Error: "+username.errortext );
+		return 0;
+	elseif ( !password )
+		SysLog( "Password/GetString Error: "+password.errortext );
+		return 0;
+	endif
+
+	var theft_level := AcctHackChecks(username, password);
+	case ( theft_level )
+		ACCT_NOT_EXIST:	 // Account doesn't yet exist.
+			break; 
+		ACCT_LOGIN_OKAY: // Account credentials are valid.
+			return 0;
+			break;
+		ACCT_LOGIN_FAIL: // Account credentials are invalid.
+			return 0; 
+			break;
+		ACCT_LOGIN_HACK: // Too many invalid logins. Leave user hanging.
+			return 1;
+			break;
+	endcase
+	
+	var settings := ACCT_GetSettingsCfgElem("Settings");
+	if ( !settings.AllowAutoAccounts )
+		// Automatic account creation is disabled.
+		return 0;
+	endif
+	
+	var account := CreateNewAccount(username, password, 0, settings.DefaultExpansion);
+	// In theory this should only return an error saying "Invalid parameter type".
+	// Should never return "Account already exists" because we already looked for the
+	// account and let pol handle it. And when it does return "Invalid parameter type"
+	// we don't have to worry, pol will do the right job for us and just say that account
+	// does not exist.
+	if ( account.errortext )
+		SysLog("CreateAccount() Error: "+account.errortext);
+		return 0;
+	endif
+		
+	SysLog( "AutoAccount Created: "+username );
+
+	return 0;
+
+endfunction
+
+function AcctHackChecks(username, password)
+	/*
+	 * This is just a little password protection, so someone doesn't go around
+	 * trying to steal peoples accounts trying 100's of passwords. It doesn't
+	 * really stop someone, but it slows them down a lot and may lead them off
+	 * from trying to steal the account.
+	 * This is currently UNTESTED, in theory it should work. Any problems, again
+	 * please send me an email to MontuZ@Gmail.com or post on the polserver.com's
+	 * forum.
+	 *
+	 */
+
+	/*  [Password Protection]  */
+	var account := FindAccount(username);
+	if ( !account )
+		// Account doesn't even exist.
+		return ACCT_NOT_EXIST;
+	elseif ( !account.CheckPassword(password) )
+		var failed_login := account.GetProp("#FailedLogin");
+		// First attempt at failing the password check.
+		if ( !failed_login )
+			account.SetProp( "#FailedLogin", {1, POLCore().systime});
+			return ACCT_LOGIN_FAIL; // Let pol tell the user it's an incorrect password.
+		else
+			if ( failed_login[1] >= 5 && ( failed_login[2] >> POLCore().systime ) )
+		  		// Incorrect password for the 5th time.
+		 		// Leave the user hanging at login for the next 10 minutes.
+		 		account.SetProp("#FailedLogin", {failed_login[1]+1, POLCore().systime+600});
+		  		return ACCT_LOGIN_HACK; // Leave user hanging.
+		 	
+		 	elseif ( failed_login[1] >= 5 && ( failed_login[2] << POLCore().systime ) )
+		  		// User attempted to login with the wrong password after 10 minutes.
+		 		// Reset user's wait time.
+		 		account.EraseProp("#FailedLogin");
+		  		return ACCT_LOGIN_FAIL; // Let pol tell the user it's an incorrect password.
+		 	
+		 	elseif ( failed_login[1] << 5 )
+		 		// Let pol tell user it's an incorrect password.
+		  		account.SetProp("#FailedLogin", {failed_login[1]+1, POLCore().systime+10});
+		  		return ACCT_LOGIN_FAIL;
+		 	endif
+		endif
+	else
+		// Passed password check, let user login.
+		return ACCT_LOGIN_OKAY;
+	endif
+endfunction

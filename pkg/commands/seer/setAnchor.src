@@ -1,0 +1,23 @@
+use uo;
+
+program setAnchor(who)
+var anchorArray := {};
+
+  SendSysMessage(who, "Set whose anchor?");
+  var what := Target(who);
+  if(!what)
+    return;
+  endif
+  SendSysMessage(who, "To where?");
+  var where := TargetCoordinates(who);
+  if(!where)
+    return;
+  endif
+
+  anchorArray[1] := where.x;
+  anchorArray[2] := where.y;
+  anchorArray[3] := where.z;
+
+  SetObjProperty(what, "Anchor", anchorArray);
+  
+endprogram

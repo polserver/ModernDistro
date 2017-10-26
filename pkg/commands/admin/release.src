@@ -1,0 +1,68 @@
+use uo;
+use os;
+
+
+program textcmd_release( who)
+  var house := who.multi;
+  var lists := GetObjProperty(house, "footage");
+  var itemlist := {};
+  var holder := 0;
+  if(lists)
+    foreach thing in lists
+      holder := ListObjectsInBox(thing[1], thing[2], thing[3], thing[4], thing[5],thing[6], who.realm);
+      foreach thing in holder
+        itemlist.append(thing);
+      endforeach
+    endforeach
+  endif
+  foreach thing in (house.items)
+    itemlist.append(thing);
+  endforeach
+  case(house.objtype)
+    0x16060: CreateItemInBackpack(who,0x16019,1); //smallstoneandplasterhouse
+    0x16061: CreateItemInBackpack(who,0x1601a,1); //smallstonehouse
+    0x16062: CreateItemInBackpack(who,0x1601b,1); //smallwoodenhouse
+    0x16063: CreateItemInBackpack(who,0x1601c,1); //smallplasterhouse
+    0x16064: CreateItemInBackpack(who,0x1601d,1); //smallwoodandstrawhouse
+    0x16073: CreateItemInBackpack(who,0x1601e,1); //smallbrickhouse
+    0x16065: CreateItemInBackpack(who,0x16020,1); //largebrickhouse
+    0x16072: CreateItemInBackpack(who,0x16026,1); //largepatiohouse
+    0x16066: CreateItemInBackpack(who,0x16021,1); //twostorywoodandplasterhouse
+    0x16068: CreateItemInBackpack(who,0x16022,1); //twostorystoneandplasterhouse
+    0x16069: CreateItemInBackpack(who,0x16023,1); //tower
+    0x16070: CreateItemInBackpack(who,0x16024,1); //keep
+    0x16071: CreateItemInBackpack(who,0x16025,1); //castle
+    0x16072: CreateItemInBackpack(who,0x16026,1); //largepatiohousedeed
+    0x16074: CreateItemInBackpack(who,0x1602D,1); //largemarblepatiohousedeed
+    0x16075: CreateItemInBackpack(who,0x1602E,1); //smalltowerdeed
+    0x16076: CreateItemInBackpack(who,0x1602F,1); //logcabindeed
+    0x16077: CreateItemInBackpack(who,0x16030,1); //sandstonepatiohousedeed
+    0x16078: CreateItemInBackpack(who,0x16031,1); //twostoryvilladeed
+    0x16079: CreateItemInBackpack(who,0x16032,1); //smallstoneworkshopdeed
+    0x1607A: CreateItemInBackpack(who,0x16033,1); //smallmarbleworkshopdeed
+  endcase
+  var tilelist := GetObjProperty(house, "bantiles");
+  if(tilelist)
+    foreach thing in tilelist
+      DestroyItem(SystemFindObjectBySerial(thing));
+    endforeach
+  endif
+  foreach thing in itemlist
+    if((GetObjProperty(thing,"secure") == 1) && (thing.movable == 0))
+      EraseObjProperty(thing,"secure");
+      if(GetObjProperty(thing, "houseserial" ) == house.serial)
+        var oldscript := GetObjProperty(thing, "oldscript");
+        if (oldscript == error)
+          oldscript := "";
+        endif
+        thing.usescript := oldscript;
+        thing.movable := 1;
+        EraseObjProperty(thing, "houseserial" );
+        EraseObjProperty(thing, "oldscript" );
+      endif
+    elseif ((GetObjProperty(thing, "lockeddown" ) == 1) && (thing.movable == 0))               //item is locked down in the house
+      thing.movable := 1;
+      EraseObjProperty(thing, "lockeddown");
+    endif
+  endforeach
+endprogram

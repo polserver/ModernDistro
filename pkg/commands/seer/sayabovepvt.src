@@ -1,0 +1,10 @@
+use uo;
+
+program textcmd_sayabovepvt( who, text )
+    SendSysMessage( who, "Say above what or whom?" );
+
+    var what := Target( who );
+    if (what)
+        PrintTextAbovePrivate( what, text, who );
+    endif
+endprogram

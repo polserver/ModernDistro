@@ -1,0 +1,115 @@
+use uo;
+use util;
+use os;
+
+include ":attributes:attributes";
+include "include/dist";
+include "include/client";
+include ":poisonwatcher:poisons";
+include "include/canAccess";
+include ":damage:damage";
+
+const FX_POISON_GAS := 0x113a;
+
+program open_trapped_item(who, item)
+  if(!item)
+    item := who[2];
+    who := who[1];
+  endif
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  if(!can_access(who, item, "unmovable distance"))
+    return;
+  endif
+  var traptype      := Cint(GetObjProperty(item,"trap_type"));
+  var trapstrength  := GetObjProperty(item,"trap_strength");
+  var trapperserial := CInt(GetObjProperty(item, "trapper"));
+  var oldscript     := GetObjProperty(item, "oldscript");
+  if(!oldscript)
+    oldscript := "";
+  endif
+  var trapper;
+  foreach chr in EnumerateOnlineCharacters()
+    if(chr.serial == trapperserial)
+      trapper := chr;
+      break;
+    endif
+  endforeach
+  if(!trapper)
+    trapper := SystemFindObjectBySerial(trapperserial, SYSFIND_SEARCH_OFFLINE_MOBILES);
+  endif
+  if(trapper)
+    SetObjProperty(who, "LastHit", {trapper.name, trapper.serial, "trapped chest" });
+    SetScriptController(trapper);
+  endif
+  case(traptype)
+    1: PlaySoundEffect(who, SFX_224);
+       var dmg :=(RandomInt(20) + CInt(trapstrength));
+       SendSysMessage(who, "You set off a needle trap!");
+       PlayMovingEffect(item, who, 7166, 5, 1);
+       ApplyDamageEX(who, dmg, DMG_PHYSICAL);
+       item.usescript := oldscript;
+       EraseObjProperty(item, "trap_type");
+       EraseObjProperty(item, "trap_strength");
+    2: PlaySoundEffect(who, SFX_232);
+       PrintTextAbovePrivate(who, "You set off a poison trap!", who);
+       if(dist(who, item) < 3)
+         PlayObjectCenteredEffect(who, FX_POISON_GAS, 10,10);
+         var passparms := {who, who, "poison trap", trapstrength};
+         start_script(":spells:poisonDamage", passparms);
+       else
+         PlayStationaryEffect(item.x, item.y, item.z, FX_POISON_GAS, 10,10, 0, item.realm);
+       endif
+       item.usescript := oldscript;
+       EraseObjProperty(item, "trap_type");
+       EraseObjProperty(item, "trap_strength");
+    3: PlaySoundEffect(who, SFX_208);
+       SendSysMessage(who, "You set off an explosion trap!");
+       if(dist(who, item) < 3)
+         PlayObjectCenteredEffect(who, FX_EXPLODE_3, 10,10);
+         var dmg :=(RandomInt(20) + CInt(trapstrength));
+         ApplyDamageEX(who, dmg, DMG_FIRE);
+       else
+         PlayStationaryEffect(item.x, item.y, item.z, FX_EXPLODE_3, 10,10, 0, item.realm);
+       endif
+       PlayObjectCenteredEffect(who, FX_EXPLODE_3, 10,10);
+       var dmg :=(RandomInt(20) + CInt(trapstrength));
+       ApplyRawDamage(who, dmg);
+       item.usescript := oldscript;
+       EraseObjProperty(item, "trap_type");
+       EraseObjProperty(item, "trap_strength");
+    4: PlaySoundEffect(who, SFX_208);
+       var oldstrength := GetObjProperty(item, "oldstrength");
+       var oldtype := GetObjProperty(item, "oldtype");
+       SendSysMessage(who, "You set off an explosion trap!");
+       if(dist(who, item) < 3)
+         PlayObjectCenteredEffect(who, FX_EXPLODE_3, 10,10);
+         var dmg := Resist(who, (RandomInt(20) + trapstrength));
+         ApplyRawDamageEX(who, dmg, DMG_FIRE);
+       else
+         PlayStationaryEffect(item.x, item.y, item.z, FX_EXPLODE_3, 10,10, 0, item.realm);
+       endif
+       item.usescript := oldscript;
+       SetObjProperty(item, "trap_type", oldtype);
+       SetObjProperty(item, "trap_strength", oldstrength);
+       EraseObjProperty(item, "oldscript");
+       EraseObjProperty(item, "oldtype");
+       EraseObjProperty(item, "oldstrength");
+    default: SendSysMessage(who, "You narrowly avoid the trap!");
+  endcase
+endprogram
+
+function Resist(cast_on, amt)
+  if(cast_on.dead)
+    return 0;
+  endif
+  if(SkillCheck(cast_on, RESISTING_SPELLS, amt, (amt * 2)))
+    SendSysMessage(cast_on, "You feel yourself resisting magical energy!");
+    PlaySoundEffect(cast_on, SFX_SPELL_WEAKEN);
+    PlayObjectCenteredEffect(cast_on, FX_CURSE_EFFECT, 5,5);
+    amt := amt / 2;
+    return amt;
+  else
+    return amt;
+  endif
+endfunction  

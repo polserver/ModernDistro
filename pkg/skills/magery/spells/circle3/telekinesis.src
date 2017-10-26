@@ -1,0 +1,52 @@
+use uo;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":damage:damage";
+
+program telekinesis(parms)
+    var caster := parms[1];
+    var info := parms[2];
+    var cast_on;
+    cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_NEUTRAL);
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+    
+
+  PlaySoundEffect( caster, SFX_SPELL_TELEKINESIS );
+  if( cast_on.npctemplate || cast_on.acctname )
+    SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "telekenesis" });
+    if(Reflected(cast_on))
+      cast_on := caster;
+    endif
+    PlaySoundEffect(cast_on, 0x144);
+    PlayObjectCenteredEffect(cast_on, 0x37b9,0x03, 0x0a);
+    var dmg := RandomInt(AP_GetSkill(caster, MAGERY) / 10);
+    ApplyRawSpellDamageEX(cast_on, dmg, DMG_ENERGY, caster, info.Circle);
+    if((cast_on.graphic  == 0x190) or (cast_on.graphic == 0x191))
+      PerformAction(cast_on, 20);
+    endif
+  elseif(cast_on.multi.serial)
+    SendSysMessage(caster, "You cannot use that on items inside houses.");
+    return;
+  elseif(cast_on.container.serial)
+    SendSysMessage(caster, "You cannot use that on items inside containers.");
+    return;
+  elseif((cast_on.isa(POLCLASS_CONTAINER)) and (GetObjProperty(cast_on, "trap_type")))
+    var parms := array(caster, cast_on);
+    start_script(":tinkering:tinkerTraps", parms);
+  else
+        if(MoveItemToContainer( cast_on, caster.backpack, x := -1, y := -1 ))
+            PrintTextAbovePrivate(caster, "You pick up the item with your mind.", caster);
+        else
+            PrintTextAbovePrivate(caster, "You cannot will it to move.", caster);
+        endif
+  endif
+endprogram

@@ -1,0 +1,27 @@
+use vitals;
+use uo;
+use os;
+use cfgfile;
+
+include "include/mrcSpawn";
+
+program destroy(item)
+  set_critical(1);
+  foreach thing in GetObjProperty(item, "NpcList")
+    var npc := SystemFindObjectBySerial(Cint(thing));
+    if(npc)
+      RevokePrivilege(npc, "invul");
+      SetObjProperty(npc, "guardkill", 1);
+      ApplyRawDamage(npc, GetHP(npc) + 100);
+    endif
+  endforeach
+  var type := GetObjProperty(item, "Type");
+  if(GetObjProperty(item, "Template") == 1)
+    foreach thing in type
+      var anchor := thing[2];
+      Destroy_Node_Merc(FindMerchantType(thing[1]) + " " + anchor[1] + " " + anchor[2] + " " + anchor[3]);
+    endforeach
+  endif
+  set_critical(0);
+  return 1;
+endprogram

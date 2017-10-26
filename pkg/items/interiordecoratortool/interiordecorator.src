@@ -1,0 +1,339 @@
+use uo;
+use os;
+
+include ":gumps:old/old-gumps";
+include "include/client";
+
+const CMD_LEVEL_OVERRIDE := 2;
+
+program use_decorator(who, theDecorator)
+var doMultiCheck := !(who.cmdlevel >= CMD_LEVEL_OVERRIDE);
+var theManipulation := GetObjProperty(theDecorator, "Manipulation");
+var theTarget;
+var origLoc := {};
+
+  if (theManipulation == error)
+    theManipulation := "up";
+  endif
+
+  SendSysMessage(who, "What do you want to manipulate?");
+  theTarget := Target(who, TGTOPT_NOCHECK_LOS);
+
+  if ((theTarget == error) || (!theTarget))
+    SendSysMessage(who, "Cancelled.");
+    return;
+  endif
+  
+  if (theTarget.serial == theDecorator.serial)
+    ChangeManipulation(who, theDecorator, theManipulation);
+    return;
+  endif
+  
+  if (doMultiCheck)
+    if (who.multi == error)
+      SendSysMessage(who, "You aren't in a house!");
+      return;
+    endif
+    if (!inOwnedMulti(who, theTarget))
+      SendSysMessage(who, "That isn't in something you own!");
+      return;
+    endif
+  endif
+
+  if (theTarget.movable == 1)
+    SendSysMessage(who, "Target not locked down!");
+    return;
+  endif
+
+  origLoc := {theTarget.x, theTarget.y, theTarget.z};
+
+  DoManipulation(who, theDecorator, theTarget);
+  
+  if (doMultiCheck)
+    if (who.multi == error)
+      SendSysMessage(who, "You aren't in a house!");
+      theTarget.movable := 1;
+      MoveObjectToLocation(theTarget, origLoc[1], origLoc[2], origLoc[3], who.realm, MOVEOBJECT_FORCELOCATION);
+      theTarget.movable := 0;
+      return;
+    endif
+    if (!inOwnedMulti(who, theTarget))
+      SendSysMessage(who, "That isn't in something you own!");
+      theTarget.movable := 1;
+      MoveObjectToLocation(theTarget, origLoc[1], origLoc[2], origLoc[3], who.realm, MOVEOBJECT_FORCELOCATION);
+      theTarget.movable := 0;
+      return;
+    endif
+  endif
+
+endprogram
+
+function DoManipulation(who, theDecorator, theTarget)
+var theManipulation := GetObjProperty(theDecorator, "Manipulation");
+
+  if (theManipulation == error)
+    SendSysMessage(who, "Must set decorator first.");
+    return;
+  endif
+
+  theTarget.movable := 1;
+
+  case (theManipulation)
+    "up"    : if ((theTarget.z+1) > (who.z+20))
+                SendSysMessage(who, "Can't move that high.");
+                theTarget.movable := 0;
+                return;
+              endif
+              MoveObjectToLocation(theTarget, theTarget.x, theTarget.y, theTarget.z+1, who.realm, MOVEOBJECT_FORCELOCATION);
+    "down"  : if ((theTarget.z-1) < (who.z-5))
+                SendSysMessage(who, "Can't move that low.");
+                theTarget.movable := 0;
+                return;
+              endif
+              MoveObjectToLocation(theTarget, theTarget.x, theTarget.y, theTarget.z-1, who.realm, MOVEOBJECT_FORCELOCATION);
+    "north" : MoveObjectToLocation(theTarget, theTarget.x, theTarget.y-1, theTarget.z, who.realm, MOVEOBJECT_FORCELOCATION);
+    "south" : MoveObjectToLocation(theTarget, theTarget.x, theTarget.y+1, theTarget.z, who.realm, MOVEOBJECT_FORCELOCATION);
+    "west"  : MoveObjectToLocation(theTarget, theTarget.x-1, theTarget.y, theTarget.z, who.realm, MOVEOBJECT_FORCELOCATION);
+    "east"  : MoveObjectToLocation(theTarget, theTarget.x+1, theTarget.y, theTarget.z, who.realm, MOVEOBJECT_FORCELOCATION);
+    "flip"  : DoFlip(who, theTarget);
+  endcase
+
+  theTarget.movable := 0;
+
+endfunction
+
+function DoFlip(who, theItem)
+
+    case (theItem.graphic)
+        0xa97:
+            theItem.graphic := 0xa9a;   // bookshelves
+        0xa9a:
+            theItem.graphic := 0xa97;
+        0xa98:
+            theItem.graphic := 0xa99;
+        0xa99:
+            theItem.graphic := 0xa98;
+        0xa9b:
+            theItem.graphic := 0xa9c;
+        0xa9c:
+            theItem.graphic := 0xa9b;
+        0xa9d:
+            theItem.graphic := 0xa9e;
+        0xa9e:
+            theItem.graphic := 0xa9d;
+        0xe3c:
+            theItem.graphic := 0xe3d;   // Large crate
+        0xe3d:
+            theItem.graphic := 0xe3c;
+        0xe3e:
+            theItem.graphic := 0xe3f;   // Medium crate
+        0xe3f:
+            theItem.graphic := 0xe3e;
+        0x9a9:
+            theItem.graphic := 0xe7e;   // Small crate
+        0xe7e:
+            theItem.graphic := 0x9a9;
+        0x9a8:
+            theItem.graphic := 0xe80;   // Metal box
+        0xe80:
+            theItem.graphic := 0x9a8;
+        0x9aa:
+            theItem.graphic := 0xe7d;   // Wooden box
+        0xe7d:
+            theItem.graphic := 0x9aa;
+        0x9ab:
+            theItem.graphic := 0xe7c;   // Metal chest, plain
+        0xe7c:
+            theItem.graphic := 0x9ab;
+        0xe40:
+            theItem.graphic := 0xe41;   // Metal chest, gold lining
+        0xe41:
+            theItem.graphic := 0xe40;
+        0xe42:
+            theItem.graphic := 0xe43;   // Wooden chest
+        0xe43:
+            theItem.graphic := 0xe42;
+        0x9b2:
+            theItem.graphic := 0xe75;   // Backpack
+        0xe75:
+            theItem.graphic := 0x9b2;
+        0x9b0:
+            theItem.graphic := 0xe79;   // Beltpouch
+        0xe79:
+            theItem.graphic := 0x9b0;
+        0xb7d:
+            theItem.graphic := 0xb90;   // Plank table
+        0xb90:
+            theItem.graphic := 0xb7d;
+        0xb7c:
+            theItem.graphic := 0xb8f;   // fancy table
+        0xb8f:
+            theItem.graphic := 0xb7c;
+        0xb2c:
+            theItem.graphic := 0xb2d;   // Bench
+        0xb2d:
+            theItem.graphic := 0xb2c;
+        0xb5b:
+            theItem.graphic := 0xb5a;   // Poor chair
+        0xb5a:
+            theItem.graphic := 0xb5c;
+        0xb5c:
+            theItem.graphic := 0xb5d;
+        0xb5d:
+            theItem.graphic := 0xb5b;
+        0xb57:
+            theItem.graphic := 0xb56;   // Chair
+        0xb56:
+            theItem.graphic := 0xb58;
+        0xb58:
+            theItem.graphic := 0xb59;
+        0xb59:
+            theItem.graphic := 0xb57;
+        0xb4f:
+            theItem.graphic := 0xb4e;   // Fancy Chair
+        0xb4e:
+            theItem.graphic := 0xb50;
+        0xb50:
+            theItem.graphic := 0xb51;
+        0xb51:
+            theItem.graphic := 0xb4f;
+        0xb2e:
+            theItem.graphic := 0xb2f;   // Throne
+        0xb2f:
+            theItem.graphic := 0xb30;
+        0xb30:
+            theItem.graphic := 0xb31;
+        0xb31:
+            theItem.graphic := 0xb2e;
+        0xb32:
+            theItem.graphic := 0xb33;   // Magician's Throne
+        0xb33:
+            theItem.graphic := 0xb32;
+        0xa4f:
+            theItem.graphic := 0xa53;  // Armoire
+        0xa53:
+            theItem.graphic := 0xa4f;
+        0xa4d:
+            theItem.graphic := 0xa51;  // Cherry wood armoire
+        0xa51:
+            theItem.graphic := 0xa4d;
+        0xa2c:
+            theItem.graphic := 0xa34;  // Dressor
+        0xa34:
+            theItem.graphic := 0xa2c;
+        0xa30:
+            theItem.graphic := 0xa38;  // Dressor, bright handles
+        0xa38:
+            theItem.graphic := 0xa30;
+        0xec6:
+            theItem.graphic := 0xec7;  // Dress form
+        0xec7:
+            theItem.graphic := 0xec6;
+        default:
+            SendSysMessage(who, "That item cannot be reoriented.");
+    endcase
+
+
+
+endfunction
+
+function ChangeManipulation(who, theDecorator, currManipulation)
+var theCancelButton;
+var theOkButton;
+var retKey;
+var theRadioButtons := array;
+var i;
+
+  GFInitGump(0,0);
+  GFPage(0);
+  GFResizePic(0,0,BKGND_STONE,400,400);
+
+  theRadioButtons[1] := GFRadioButton( 50, 50, 0xD0, 0xD1, currManipulation == "up");
+  GFTextLine(75, 50, COLOR_RED, "Nudge Up");
+  theRadioButtons[2] := GFRadioButton( 50, 75, 0xD0, 0xD1, currManipulation == "down");
+  GFTextLine(75, 75, COLOR_RED, "Nudge Down");
+  GFGumpPic(175,175,0x9E1);
+  theRadioButtons[3] := GFRadioButton( 188, 150, 0xD0, 0xD1, currManipulation == "north");
+  theRadioButtons[4] := GFRadioButton( 188, 230, 0xD0, 0xD1, currManipulation == "south");
+  theRadioButtons[5] := GFRadioButton( 155, 194, 0xD0, 0xD1, currManipulation == "west");
+  theRadioButtons[6] := GFRadioButton( 220, 194, 0xD0, 0xD1, currManipulation == "east");
+
+  theRadiobuttons[7] := GFRadioButton( 200, 50, 0xD0, 0xD1, currManipulation == "flip");
+  GFTextLine(225, 50, COLOR_RED, "Flip");
+
+  theCancelButton := GFButtonID(200, 350, 0x996, 0x995, 1);
+  theOkButton := GFButtonID(150, 350, 0x994, 0x993, 1);
+
+  retKey := GFSendGump(who);
+  
+  if (retKey[theOkButton.keyid] == 1)
+    for (i:=1; i<=7; i:=i+1)
+      if (retKey[theRadioButtons[i].keyid] == 1)
+        break;
+      endif
+    endfor
+    
+    if ((i <= 7) && (i>0))
+      case (i)
+        1: SetObjProperty(theDecorator, "Manipulation", "up");
+        2: SetObjProperty(theDecorator, "Manipulation", "down");
+        3: SetObjProperty(theDecorator, "Manipulation", "north");
+        4: SetObjProperty(theDecorator, "Manipulation", "south");
+        5: SetObjProperty(theDecorator, "Manipulation", "west");
+        6: SetObjProperty(theDecorator, "Manipulation", "east");
+        7: SetObjProperty(theDecorator, "Manipulation", "flip");
+      endcase
+    endif
+  endif
+
+endfunction
+
+function inOwnedMulti(who, theItem)
+var theHouse := theItem.multi;
+var theSign := GetHouseSign(theHouse);
+
+  if (theSign == error)
+    SendSysMessage(who, "Can't find house sign!");
+    return 0;
+  endif
+
+  if (!isCoOwner(who, theHouse))
+    SendSysMessage(who, "You aren't a co-owner here.");
+    return 0;
+  endif
+  
+  return 1;
+
+endfunction
+
+function isCoOwner(who, house)
+var ownerAcct := GetObjProperty(house, "owneracct");
+var coOwnList := GetObjProperty(house, "coownlist");
+
+  if (who.acctname == ownerAcct)
+    return 1;
+  endif
+  
+  if (who.serial in coOwnList)
+    return 1;
+  endif
+
+  return 0;
+
+endfunction
+
+function GetHouseSign(theMulti)
+var components := theMulti.components;
+
+  foreach component in components
+    case (component.objtype)
+      0xbcf:
+      0xbd0:
+      0xbd1:
+      0xbd2: return component;
+    endcase
+  endforeach
+
+  return error;
+endfunction
+

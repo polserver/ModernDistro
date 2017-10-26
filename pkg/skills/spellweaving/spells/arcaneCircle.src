@@ -1,0 +1,89 @@
+use uo;
+use cliloc;
+
+
+include ":attributes:attributes";
+include "include/sounds";
+
+CONST MIN_ARCANIST_REQ := 2;
+CONST MAX_ARCANIST_ALLOWED := 4;
+
+program spell_ArcaneCircle( params )
+
+  var mobile := params[1];
+  var info := params[2];
+  params := 0;
+
+
+  //Check that the standing location is on a pentagram
+  if( !IsValidTile(mobile) )
+    SendSysMessageCL(mobile, 1072705); // You must be standing on an arcane circle, pentagram or abbatoir to use this spell.
+    return 0;
+  endif
+
+  //Check that the minimum number of arcanists are also on the pentagram
+  var number_of_arcanists := GetArcanists(mobile);
+  if( number_of_arcanists < MIN_ARCANIST_REQ )
+    SendSysMessageCL(mobile, 1080452); //There are not enough spellweavers present to create an Arcane Focus.
+    return 0;
+  endif
+
+  //Skill check and then create the arcane focus crystal
+  if( SkillCheck(mobile, SPELLWEAVING, 10, 30) )
+    SendSysMessageCL(mobile, 1072740); // An arcane focus appears in your backpack.
+    PlaySoundEffect(mobile, SFX_ARCANE_CIRCLE); // ServUO suggests sound should be 0x5C0
+    PlayStationaryEffect( mobile.x, mobile.y, mobile.z, 0x3779, 1 );
+    CreateArcaneFocus(mobile, number_of_arcanists);
+  else
+    PlayStationaryEffect( mobile.x, mobile.y, mobile.z, FX_SMOKE, 1 ); //Graphic needs to be confirmed and updated
+    PlaySoundEffect(mobile, SFX_SPELL_FAIL);
+    SendSysMessage(mobile, "You fail to create an Arcane Focus.");
+    return 0;
+  endif
+  return 1;
+endprogram
+
+function IsValidTile(mobile)
+// Pentagram center, Abbatoir center, Arcane Circle Center, Bloody Pentagram has 4 tiles at center
+
+  var itemID;
+  //First check for static items that might be pentagrams.
+  foreach item in ListStaticsNearLocation( mobile.x, mobile.y, mobile.z, 0, 0, mobile.realm )
+    itemID := item.objtype;
+    if( itemID == 0xFEA || itemID == 0x1216 || itemID == 0x307F || itemID == 0x1D10 || itemID == 0x1D0F || itemID == 0x1D1F || itemID == 0x1D12 )
+      return 1;
+    endif
+  endforeach
+
+  //Second check for dynamic items that might be pentagrams.
+  foreach item in ListItemsAtLocation( mobile.x, mobile.y, mobile.z, mobile.realm )
+    itemID := item.objtype;
+    if( itemID == 0xFEA || itemID == 0x1216 || itemID == 0x307F || itemID == 0x1D10 || itemID == 0x1D0F || itemID == 0x1D1F || itemID == 0x1D12 )
+      return 1;
+    endif
+  endforeach
+
+  return 0;
+endfunction
+
+function GetArcanists(mobile)
+  var count := 0;
+  foreach other in ListMobilesNearLocation( mobile.x, mobile.y, mobile.z, 1, mobile.realm )
+    if( SkillCheck( other, SPELLWEAVING, -1, 0 ) )
+      count+= 1;
+    endif
+    if( count == MAX_ARCANIST_ALLOWED )
+      return count;
+    endif
+  endforeach
+  return count;
+endfunction
+
+function CreateArcaneFocus(mobile, number_of_arcanists)
+
+  SendSysMessageCL(mobile, 1072740); // An arcane focus appears in your backpack.
+  
+  SendSysMessageCL(mobile, 1072828);  // Your arcane focus is renewed.
+  
+
+endfunction

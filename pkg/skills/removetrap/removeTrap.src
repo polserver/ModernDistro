@@ -1,0 +1,73 @@
+use uo;
+use os;
+use util;
+use attributes;
+use vitals;
+
+include "include/client";
+include "include/canAccess";
+include ":attributes:attributes";
+include ":damage:damage";
+
+const FX_POISON_GAS := 0x113a;
+
+program remove_trap(who)
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  var thepoints := 25;
+  SendSysMessage(who, "Select Target.");
+  var item := Target(who);
+  if(!item)
+    SendSysMessage(who, "Cancelled.");
+    return;
+  endif
+  if(!can_access(who, item))
+    return;
+  endif
+     if( GetObjProperty(item,"trap_type") )
+// Didn't mess with the skill gains here until we see how it pans out 08-05-2011
+        if( SkillCheck( who, REMOVETRAP, -1, thepoints ) )
+           EraseObjProperty( item, "trap_type" );
+           EraseObjProperty( item, "trap_strength" );
+           item.usescript := "";
+	       SendSysMessage( who, "You sucessfully disarmed the trap." );
+        else
+          var results := RandomInt(9) + 1;
+          if (results < 4) // critical failure
+            var traptype := GetObjProperty(item,"trap_type");
+            var trapstrength := GetObjProperty(item,"trap_strength");
+            case (traptype)
+              "1" :   PlaySoundEffect(who, SFX_224);
+                      var dmg := (RandomInt(20) + CInt(trapstrength));
+                      SendSysMessage(who, "You set off a needle trap!");
+                      ApplyDamageEX(who, dmg, DMG_FORCED, 0);
+                      item.usescript := "";
+		              EraseObjProperty( item, "trap_type" );
+		              EraseObjProperty( item, "trap_strength" );
+              "2" :   start_script(":traps:poisonTrapTriggered", {who, item, "You set off a poison trap!", trapstrength});
+
+              "3" :   PlaySoundEffect(who, SFX_208);
+                      SendSysMessage(who, "You set off an explosion trap!");
+                      PlayObjectCenteredEffect( who, FX_EXPLODE_3, 10,10);
+                      var dmg := (RandomInt(20) + CInt(trapstrength));
+                      ApplyRawDamageEX(who, dmg, DMG_FORCED, 0);
+                      item.usescript := "";
+		              EraseObjProperty( item, "trap_type" );
+		              EraseObjProperty( item, "trap_strength" );
+                      default: SendSysMessage(who, "You narrowly avoid the trap!");
+            endcase
+          else
+            SendSysMessage( who, "You failed to disarm the trap." );
+          endif
+        endif
+      elseif( (GetObjProperty(item,"trapped") == 1) )
+        if( SkillCheck( who, REMOVETRAP, -1, 40 ) )
+           DestroyItem( item );
+	       SendSysMessage( who, "You sucessfully removed the trap." );
+        else
+           SendSysMessage( who, "That may not be trapped" );
+        endif
+     else
+        SendSysMessage( who, "That may not be trapped" );
+     endif
+endprogram

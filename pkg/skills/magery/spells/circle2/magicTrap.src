@@ -1,0 +1,50 @@
+use os;
+use uo;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include "include/findCity";
+
+program cast_strength(parms)
+  var caster := parms[1];
+  var info := parms[2];
+  
+  var cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_NEUTRAL);
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+
+  if((cast_on.isa(POLCLASS_DOOR)) || (cast_on.objtype == 0xe79) || ((cast_on.graphic<=0x9ab) &&(cast_on.graphic>=0x9a8)) ||((cast_on.graphic<=0xe43) &&(cast_on.graphic>=0xe3c)) ||((cast_on.graphic<=0xe80) &&(cast_on.graphic>=0xe7c)))
+    var magery := GetAttribute(caster, MAGERY);
+    var trapstr := CInt(magery/5);
+    /* Will add this later. Assume crim if cast within a city.
+    if(findcity(cast_on) != "no city")
+      caster.setCriminal(1);
+    endif
+    if(findcity(caster) != "no city")
+      caster.setCriminal(1);
+    endif
+    */
+    if(trapstr<1)
+      trapstr:=1;
+    endif
+    if(trapstr>5)
+      trapstr:=5;
+    endif
+    PlaySoundEffect(caster, SFX_SPELL_MAGIC_TRAP);
+    PlayStationaryEffect(cast_on.x, cast_on.y, cast_on.z, 0x376a, 30, 30, 0, cast_on.realm);
+    SetObjProperty(cast_on, "trap_strength", trapstr);
+    SetObjProperty(cast_on, "trap_type", 4);
+    SetObjProperty(cast_on, "oldscript", cast_on.usescript);
+    cast_on.usescript := ":tinkering:tinkerTraps";
+  else
+    SendSysMessage(caster, "That cannot be magic trapped!");
+  endif
+endprogram

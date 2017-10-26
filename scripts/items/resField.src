@@ -1,0 +1,19 @@
+use os;
+use uo;
+
+include "include/res";
+include "include/resPenalty";
+include ":poisonwatcher:poisons";
+
+const EFFECT_SPARKLE := 0x373a;
+const SOUND_EFFECT_RES := 0x215;
+
+program resfield(mobile)
+  set_critical(1);
+  if(mobile.dead)
+    start_script("itemRes", mobile);
+    return;
+  else
+    SendSysMessage(mobile,"You are at peace...");
+  endif
+endprogram

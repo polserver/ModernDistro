@@ -1,0 +1,210 @@
+use uo;
+use os;
+use cfgfile;
+
+include "util/key";
+include ":attributes:attributes";
+include "include/objtype";
+include "include/yesNo";
+
+const UOBJECT_DOORS_START   := 0x0675;
+const UOBJECT_DOORS_END     := 0x06f4;
+const CANCEL_ID         := 9999;
+
+var permuting := 0;
+var opposing  := 0;
+
+program place_deed(who, deed)
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  if(!Accessible(who, deed))
+    SendSysMessage(who, "You can't reach that.");
+    return;
+  endif
+  if(!ReserveItem(deed))
+    return;
+  endif
+  var cfg := ReadConfigFile(":carpentry:itemdesc");
+  var element := FindConfigElem(cfg, deed.objtype);
+  if(!element)
+    SendSysMessage(who, "You can't make anything out of this deed.");
+    return;
+  endif
+  var items := SplitWords(element.ObjList);
+  if(!len(items))
+    SendSysMessage(who, "You can't make anything out of this deed.");
+    return;
+  endif
+  SendSysMessage(who, "Where do you want to create the item?");
+  var start := TargetCoordinates(who);
+  if(!CheckLosAt(who, CInt(start.x), CInt(start.y), CInt(start.z)))
+    SendSysMessage(who, "You can't see that.");
+    return;
+  endif
+  var in_house := element.InHouse;
+  if(in_house)
+    if(!who.multi)
+      SendSysMessage(who, "You have to be in your house to place this item.");
+      return;
+    endif
+    if(GetObjProperty(who.multi, "ownerserial") != who.serial)
+      var house := who.multi;
+      var sign;
+      foreach thing in (house.components)
+        if((thing.objtype == 0x0bd2) || (thing.objtype == 0x0bd0))
+          sign := thing;
+          break;
+        endif
+      endforeach
+      var co_owners := GetObjProperty(sign, "coowners");
+      if(!(who.serial in co_owners))
+        SendSysMessage(who, "You can only place this item if you own or co-own the house!");
+        return;
+      endif
+    endif
+  endif
+  var movable    := element.ObjMovable;
+  var mult_ori   := element.MultOrientation;
+  var created    := {};
+  var objtypemod := 0;
+  var itemname   := GetObjProperty(deed, "ItemBaseName");
+  var itemqual   := GetObjProperty(deed, "ItemQuality" );
+  var lockable   := GetObjProperty(deed, "ItemIsLockable");
+  var is_except  := GetObjProperty(deed, "ItemIsExceptional");
+  var i;
+  if(mult_ori)
+    var the_ids := SplitWords(element.OrientationId);
+    objtypemod := MakeAndProcessMenu(who, the_ids, items[1]);
+    if(objtypemod == CANCEL_ID)
+      return;
+    endif
+  endif
+  var x_mods;
+  var y_mods;
+  if(!permuting)
+    x_mods := SplitWords(element.ObjXMod);
+    y_mods := SplitWords(element.ObjYMod);
+  else
+    x_mods := SplitWords(element.ObjYMod);
+    y_mods := SplitWords(element.ObjXMod);
+  endif
+  var failed := 0;
+  for(i := 1; i <= len(items); i := i + 1)
+    var obj   := CInt( items[i]) + objtypemod;
+    var x_mod := CInt(x_mods[i]);
+    var y_mod := CInt(y_mods[i]);
+    if(opposing)
+      x_mod := 0 - x_mod;
+      y_mod := 0 - y_mod;
+    endif
+    var the_item := CreateItemAtLocation(5886, 1179, 0, obj, 1, who.realm);
+    the_item.movable := 1;
+    the_item.graphic := 1;
+    if(!MoveObjectToLocation(the_item, start.x + x_mod, start.y + y_mod, start.z, who.realm, MOVEOBJECT_NORMAL))
+      foreach thing in created
+        DestroyItem(thing);
+      endforeach
+      DestroyItem(the_item);
+      failed := 1;
+      break;
+    endif
+    if((the_item.multi).serial != (who.multi).serial)
+      foreach thing in created
+        DestroyItem(thing);
+      endforeach
+      DestroyItem(the_item);
+      failed := 2;
+      break;
+    endif
+    the_item.color   := deed.color;
+    if(itemname)
+      SetName(the_item, itemname);
+      SetObjProperty(the_item, "BaseName", itemname);
+    endif
+    if(the_item.quality)
+      the_item.quality := itemqual;
+    endif
+    if(is_except)
+      SetObjProperty(the_item, "IsExceptional", 1);
+    endif
+    if(!movable)
+      the_item.movable := 0;
+      the_item.decayAt := 0;
+    else
+      the_item.movable := 1;
+    endif
+    if(lockable)
+      SetObjProperty(the_item, "lockable", "1");
+      var lockid := AllocLockId();
+      the_item.locked := 1;
+      var thekey := CreateItemInBackpack(who, UOBJ_COPPER_KEY);
+      SetObjProperty(thekey,  "lockid", lockid);
+      SetObjProperty(the_item, "lockid", lockid);
+      SendSysMessage(who, "You will find the key in your backpack.");
+      created.append(thekey);
+    endif
+    the_item.hp := the_item.maxhp;
+    created.append(the_item);
+  endfor
+  if(failed == 1)
+    SendSysMessage(who, "Could not build that there");
+    return;
+  elseif(failed == 2)
+    SendSysMessage(who, "You may only place this in a house you own");
+    return;
+  endif
+  foreach thing in created
+    thing.graphic := thing.objtype;
+  endforeach
+  var deed_objtype := deed.objtype;
+  if(YesNo(who, "Placed well?"))
+    if(DestroyItem(deed))
+      var the_serials := {};
+      foreach part in created
+        the_serials.append(part.serial);
+      endforeach
+      foreach part in created
+        if(part.objtype != UOBJ_COPPER_KEY)
+          SetObjProperty(part, "DeedOwnerSerial", who.serial);
+          SetObjProperty(part, "ItemsCreatedSerials", the_serials);
+          SetObjProperty(part, "FromDeed", deed_objtype);
+        endif
+      endforeach
+    endif
+  else
+    foreach part in created
+      DestroyItem(part);
+    endforeach
+    SendSysMessage(who, "Cancelled.");
+  endif
+endprogram
+
+function MakeAndProcessMenu(who, ids, base_objtype)
+  var menu := CreateMenu("Choose an orientation");
+  var i;
+  for(i := 1; i <= len(ids); i := i + 1)
+    var label := "";
+    if(len(ids) <= 4)
+      case(i)
+        1:  label := "South";
+            break;
+
+        2:  label := "West";
+            break;
+      endcase
+    endif
+    AddMenuItem(menu, CInt(base_objtype) + CInt(ids[i]), label);
+  endfor
+  var choice := SelectMenuItem2(who, menu).index;
+  if(!choice)
+    return CANCEL_ID;
+  endif
+  if(choice == 1)
+    permuting := 0;
+    opposing := 0;
+  elseif(choice == 2)
+    permuting := 1;
+    opposing := 1;
+  endif
+  return CInt(ids[choice]);
+endfunction

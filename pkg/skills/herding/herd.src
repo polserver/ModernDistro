@@ -1,0 +1,69 @@
+use os;
+use uo;
+use cfgfile;
+
+include "include/client";
+include "include/eventID";
+include ":attributes:attributes";
+
+program herd(who)
+        SendSysMessage(who, "What would you like to herd?");
+        var npc := Target(who);
+        if (!npc)
+                SendSysMessage(who, "Cancelled!");
+                return;
+        endif
+/*      if(who.cmdlevel >= 2)
+                var location := TargetCoordinates(who);
+                if(!CheckLosAt(npc, location.x, location.y, location.z))
+                        SendSysMessage(who, npc.name + " can't see that location!");
+                        return;
+                endif
+                var holder := {};
+                holder.append(location.x);
+                holder.append(location.y);
+                var ev := struct;
+                ev.+type := EVID_HERDING;
+                ev.+data := holder;
+                SendEvent(npc, ev);
+                return;
+        endif */
+        if(!CheckLineOfSight(who, npc))
+                SendSysMessage(who, "You can't see that!");
+        endif
+        var cfg := ReadConfigFile("::npcdesc");
+        var herdskill := CInt( cfg[npc.npctemplate]."herdskill" * 3 );
+        var chk := 0;
+        case(npc.script)
+                "tamed":    chk := 1;
+                "worker":   chk := 1;
+                "employed": chk := 1;
+        endcase
+        if((chk == 1) or (!herdskill))
+                SendSysMessage(who, "You can't herd that!");
+                return;
+        endif
+		var pts := CInt(GetAttribute(who, HERDING) / 10) + 15;
+		if(pts > 35)
+			pts := 35;
+		endif
+		if(SkillCheck(who,HERDING, herdskill, pts/3))
+
+                SendSysMessage(who, "Where do you want to move "+ npc.name +" to?");
+                var location := TargetCoordinates(who);
+                if (!CheckLosAt(npc, location.x, location.y, location.z))
+                        SendSysMessage(who, npc.name + " can't see that location!");
+                        return;
+                endif
+                var holder := {};
+                holder.append(location.x);
+                holder.append(location.y);
+                var ev := struct;
+                ev.+type := EVID_HERDING;
+                ev.+data := holder;
+                SendEvent(npc, ev);
+        else
+                SendSysMessage(who, "You cant seem to convince " + npc.name + " to move");
+                return;
+        endif
+endprogram

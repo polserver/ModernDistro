@@ -1,0 +1,10 @@
+use uo;
+program StopTrueSight(params)
+	var who := params[1];
+	
+	who.Disable("seeghosts");
+	RevokePrivilege(who, "seeghosts");	
+
+	who.Disable("seehidden");
+	RevokePrivilege(who, "seehidden");	
+endprogram

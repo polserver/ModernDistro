@@ -1,0 +1,18 @@
+use uo;
+
+include ":gumps:include/gumps";
+include ":gumps:include/gumps_ex";
+include ":gumps:include/requestGump";
+
+program PromptDemo(who)
+	var question := "Type in something that is on your mind. I will try to guess what it is!";
+	var option := "Random 'urhgbvfs9' works too!";
+	var pre_val := "Enter your text here";
+	
+	var input := RequestGump(who, question, option, pre_val, 1);
+	if ( input == error )
+		SendSysMessage(who, "You clicked 'CANCEL'");
+	else
+		SendSysMessage(who, "You typed ->"+input);
+	endif
+endprogram

@@ -1,0 +1,41 @@
+use uo;
+use vitals;
+use util;
+
+include "include/spellRestrictions";
+include "misc/chrdeath";
+
+program chrcast_rcurse( parms )
+	var caster := params[1];
+	var info := params[2]; // Struct containing additional info about the spell.
+	var spellID := params[3];
+	
+  var cast_on := result[2];
+
+	var pal := Cint(AP_GetSkill(caster, CHIVALRY));
+	  
+	  
+	if(RandomInt(100) < 30 - (pal/10)) //20% A chance at 100% chivalry will not come out
+		SendSysMessage(caster, "You fail to remove the curse.",3,40);
+		return 0;
+	endif
+
+	PlaySoundEffect(cast_on, SFX_SPELL_CUNNING);
+	PlayObjectCenteredEffect( cast_on, FX_BLESS_EFFECT, 7,7);
+
+    
+    if(GetIntelligenceMod(cast_on) < 0)
+        EraseModProp(cast_on, "int");
+    endif
+    if(GetDexterityMod(cast_on) < 0)
+        EraseModProp(cast_on, "dex");                
+    endif
+    if(GetStrengthMod(cast_on) < 0)
+        EraseModProp(cast_on, "str");
+    endif
+
+	Eraseobjproperty(cast_on, "bloodoath");
+	Eraseobjproperty(cast_on, "evilomen");
+	Eraseobjproperty(cast_on, "#mindrot");
+
+endprogram

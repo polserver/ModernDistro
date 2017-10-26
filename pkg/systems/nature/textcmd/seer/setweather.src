@@ -1,0 +1,16 @@
+
+use uo;
+
+program setweather(who, text)
+
+	text := CInt(text);
+	
+	if (text)
+		SetGlobalProperty("#setweather", text);
+		SendSysMessage(who, "Weather will change by " + text + " next time it changes.");
+	else
+		EraseGlobalProperty("#setweather");
+		SendSysMessage(who, "Weather will resume its normal course.");
+	endif
+
+endprogram

@@ -1,0 +1,35 @@
+/////////////////////////////////////////////////////////////
+// setmurder.src                                           //
+//                                                         //
+// Author: olor                                            //
+// Date: 22.04.2001                                        //
+//														   //
+// Updated: Yukiko										   //
+// Date: 10-Jan-2016									   //
+//														   //
+// Description: Either sets or clears the murder flag.     //
+//														   //
+// Usage: .setmurder <0 or 1>							   //
+// 0 = clears murder flag and sets the alignment as good   //
+// 1 = sets the murder flag and sets the alignment to evil //
+/////////////////////////////////////////////////////////////
+
+use uo;
+
+program textcmd_murder(who, val)
+  SendSysMessage(who, "Whom do you want to make a murderer?", color := 88);
+  var victim :=  Target(who, TGTOPT_NOCHECK_LOS );
+  if((!victim) || (!victim.acctname))
+	SendSysMessage( who, "Error: " + victim.errortext );
+    return;
+  endif
+  if(CInt(val) == 1)
+    victim.setMurderer(1);
+    victim.alignment := "evil";
+    SendSysMessage(who, victim.name + " is now red as hell.");
+  else
+    victim.setMurderer(0);
+    victim.alignment := "good";
+    SendSysMessage(who, victim.name + " is now blue.");
+  endif
+endprogram

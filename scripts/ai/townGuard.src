@@ -1,0 +1,376 @@
+use npc;
+use os;
+use uo;
+use cfgfile;
+use math;
+
+include "include/speech";
+include "include/client";
+include "include/eventID";
+include "include/randName";
+include "include/dist";
+include "include/anchors";
+include "ai/main/loot";
+include "ai/combat/defaultCombatEvent";
+include "include/vetement";
+
+
+var currentopponent := 0;
+
+var flee_point := 0;
+var npccfg := ReadConfigFile("::npcdesc");
+const UACTION_LOOK_AROUND   := 0x05;
+const UACTION_SALUTE        := 0x21;
+
+const HALT_THRESHOLD := 10; // how close before he barks?
+var speech := 99;
+var me := Self();
+var home := {me.x, me.y, me.z};
+
+var equipt := GetObjProperty(me, "Equipt");
+  if(me.name["<random>"])
+    if((me.graphic == 0x190) || (me.graphic == 0x191))
+      case( RandomInt(2) )
+        0: me.graphic := 0x190;
+           equipt := equipt + "M";
+        1: me.graphic := 0x191;
+           equipt := equipt + "F";
+      endcase
+      SetObjProperty(me, "Graphic", me.graphic);
+    endif
+    SetName(me, RandomName(me));
+    Habille(me, equipt);
+    EraseObjProperty(me, "Equipt");
+  endif
+
+program CastleGuard()
+
+  var speechelem := npccfg[me.npctemplate];
+  speech := GetConfigString(speechelem, "speech");
+  EnableEvents( EVID_ENGAGED + EVID_DISENGAGED + EVID_DAMAGED );
+  EnableEvents( EVID_ENTEREDAREA + EVID_LEFTAREA, HALT_THRESHOLD );
+  EnableEvents( EVID_OPPONENT_MOVED );
+  EnableEvents( EVID_ITEM_GIVEN );
+  EnableEvents( EVID_SPEECH, 4);
+  SetWarMode( 0 );
+  set_priority(100);
+  var ev;
+  var evtext;
+  var next_wander := ReadGameClock() + 10;
+  var wanders := 9;
+  while (1)
+    ev := os::wait_for_event(60);
+	if (ev)
+	  case (ev.type)
+          EVID_SPEECH:     wanders := 0;
+		                 next_wander := ReadGameClock()+60;
+		                 evtext := lower(ev.text);
+		                 if ( (evtext["guards"]) || (evtext["guards!"]) )
+			               look_around();
+		                 endif
+                         check_speech(ev.text, ev.source);
+          EVID_ENGAGED:
+          EVID_DAMAGED:     wanders := 0;
+		                  next_wander := ReadGameClock()+60;
+                          if ( (ev.source) && (!ev.source.dead) )
+		                    say("Die " + ev.source.name + "!" );
+		                    AddToHateList( ev.source );
+                            Fight( ev.source );
+                          endif
+	  EVID_ENTEREDAREA: wanders := 0;
+                          PerformAction( me, UACTION_LOOK_AROUND );
+		                  look_around();
+          EVID_ITEM_GIVEN:  wanders := 0;
+		                  next_wander := ReadGameClock()+60;
+		                  TakeItem(ev.source,ev.item);
+	  endcase
+	else
+		if ( (Abs(me.x - home[1]) >= 15) || (Abs(me.y - home[2]) >= 15) )
+			MoveObjectToLocation(me, home[1], home[2], home[3], me.realm, MOVEOBJECT_FORCELOCATION);
+		endif
+	endif
+    if (ReadGameClock() >= next_wander)
+	  wanders:=wanders+1;
+	  wander();
+      next_wander := ReadGameClock() + 10;
+	  if (wanders>10)
+		sleepmode();
+		wanders := 0;
+	  endif
+    endif
+
+	   if(CInt(GetObjProperty(me,"poison_level")) > 1)
+	      say("An Nox");
+	      sleep(2);
+		EraseObjProperty(me,"poison_level");
+	   endif
+    lookiehere(me);
+  endwhile
+endprogram
+
+function CloseDistance( opponent )
+  case (Distance( me, opponent ))
+    1:
+    0:       return 1;
+    default: RunToward( opponent );
+             return 0;
+  endcase
+endfunction
+
+function look_around()
+	foreach critter in ListMobilesNearLocation(me.x, me.y, me.z, 15, me.realm)
+		if ((critter.npctemplate) && (critter.script != "tamed") )
+			if (critter.murderer)
+				Fight(critter);
+			endif
+		else
+			CheckForCriminals(critter);
+		endif
+	endforeach
+endfunction
+
+function lookiehere(who)
+  var mobiles := ListMobilesNearLocation(who.x, who.y, who.z, 15, me.realm);
+  var guard, num, i, hogcall, guardzone, element, range, timer, elem;
+  var cfgfile := ReadConfigFile("::gzone");
+  var entries := GetConfigStringKeys(cfgfile);
+  foreach listing in entries
+    element :=  cfgfile[listing];
+    range := element.range;
+    range := SplitWords(range);
+    if((who.x >= CInt(range[1])) && (who.x <= CInt(range[3])) && (who.y >= CInt(range[2])) && (who.y <= CInt(range[4])))
+      guardzone := 1;
+      break;
+    endif
+  endforeach
+  foreach npc in mobiles
+	if(!npc.acctname)
+	  elem := FindConfigElem(npccfg, npc.npctemplate);
+	  if(!elem.guardignore && !GetObjProperty(npc, "called"));
+		if((npc) && (npc.script != "tamed") && (npc.script != "light"))
+         
+          if(guardzone == 1)
+		SetObjProperty(npc, "called", 1);
+		foreach mobile in ListMobilesNearLocation(me.x, me.y, me.z, 15, me.realm)
+			if(mobile.npctemplate == "townguard")
+		        	var ev := array;
+				ev.+ type;
+				ev.+ source;
+				ev.source := npc;
+				ev.type := EVID_ENGAGED;
+				SendEvent(mobile, ev);
+				SetObjProperty(npc, "guardkill", 1);
+              		endif
+		endforeach
+	  endif
+		endif
+	  endif
+    else
+	  timer := GetObjProperty(npc, "guardstimer");
+	  if(npc.criminal && (timer < ReadGameClock() || timer.errortext))
+        foreach mobile in ListMobilesNearLocation(me.x, me.y, me.z, 15, me.realm)
+		  if(mobile.npctemplate == "townguard")
+		    var ev := array;
+            ev.+ type;
+            ev.+ source;
+            ev.type := EVID_PEACEMADE;
+            ev.source := npc;
+            SendEvent(mobile, ev);
+            ev.type := EVID_ENGAGED;
+            SendEvent(mobile, ev);
+          endif
+        endforeach
+        SetObjProperty(npc, "guardstimer", ReadGameClock()+60);
+	  endif
+	endif
+  endforeach
+  sleep(1);
+endfunction
+
+function sleepmode()
+	foreach critter in ListMobilesNearLocation( me.x,me.y,me.z, 32, me.realm )
+          if (!critter.isA(POLCLASS_NPC))
+		return 0;
+          endif
+	endforeach
+	var ev;
+    var parms array;
+    parms[1] := "#MOB";
+    parms[2] := me;
+    parms[3] := me;
+	while (1)
+	   if(CInt(GetObjProperty(me,"poison_level")) > 1)
+	      say("An Nox");
+	      start_script( ":spells:cure", parms );
+	      sleep(2);
+	   endif
+		ev := os::wait_for_event( 120 );
+		repeat
+		if (ev)
+		case (ev.type)
+                	EVID_ENGAGED:
+			EVID_DAMAGED:
+			EVID_ENTEREDAREA:
+				if (!ev.source.isA(POLCLASS_NPC))
+					CheckForCriminals(ev.source);
+					return 0;
+				else
+				  look_around();
+				endif
+		endcase
+		endif
+		until (! (ev := os::wait_for_event(120)) );
+	endwhile
+endfunction
+
+function CheckForCriminals(jerk)
+	if (jerk.dead)
+		return;
+	endif
+	if (jerk.criminal)
+		say("Stop Criminal!");
+		AddToHateList( jerk );
+		Fight(jerk);
+	elseif ( CheckHateList(jerk) )
+		say("You're not welcome in this town, "+ jerk.name );
+		Fight(jerk);
+	endif
+endfunction
+
+function AddToHateList(crim)
+	if (crim.isA(POLCLASS_NPC))
+		return;
+	endif
+	var crooks := { };
+	if (!GetObjProperty(me,"#Criminals") )
+		crooks[1] := crim.serial;
+		SetObjProperty(me,"#Criminals",crooks);
+		return;
+	else
+		crooks := GetObjProperty(me,"#Criminals");
+	endif
+	var i;
+	foreach crook in crooks;
+		if ( crook == crim.serial )
+			return;//already hate him.
+		endif
+	endforeach
+	if (len(crooks)>3)
+		crooks[ RandomInt(3)+1 ] := crim.serial;
+	else
+		crooks[ len(crooks)+1 ] := crim.serial;
+	endif
+	SetObjProperty(me,"#Criminals",crooks);
+endfunction
+
+function CheckHateList( you )
+	if (you.isA(POLCLASS_NPC))
+		return;
+	endif
+	var crooks := { };
+	if (!GetObjProperty(me,"#Criminals") )
+		return 0;//can't be on my list cause I don't have one
+	else
+		crooks := GetObjProperty(me,"#Criminals");
+	endif
+	var i;
+	foreach crook in crooks;
+		if ( crook == you.serial )
+			return 1;//hate you.
+		endif
+	endforeach
+	return 0;
+endfunction
+
+function cleareventque()
+	var ev;
+	repeat
+	until (! (ev := os::wait_for_event(0)) );
+endfunction
+
+function EnableMainEvents()
+    cleareventque();
+    DisableEvents( EVID_SPEECH + EVID_LEFTAREA + EVID_DISENGAGED + EVID_OPPONENT_MOVED );
+    EnableEvents( EVID_SPEECH + EVID_ENGAGED + EVID_DAMAGED, HALT_THRESHOLD );
+    EnableEvents(EVID_ITEM_GIVEN);
+endfunction
+
+function DisableMainEvents()
+    cleareventque();
+    DisableEvents( EVID_SPEECH + EVID_ENGAGED + EVID_DAMAGED );
+    DisableEvents(EVID_ITEM_GIVEN);
+endfunction
+
+function Fight( opponent )
+	if (!CheckLineOfSight(me, opponent) )
+		return 1;
+	endif
+
+  if (opponent.isA(POLCLASS_NPC))
+	SetObjProperty(opponent, "guardkill", 1);
+  endif
+  if ((opponent.cmdlevel > 0) || (opponent.serial == me.serial))
+    SetWarMode(0);
+    opponent := 0;
+	return;
+  endif
+  if (opponent.multi.serial)
+	if (me.multi.serial != opponent.multi.serial)
+	  flee(opponent);
+	  return;
+	endif
+  endif
+ 
+	foreach mobile in ListMobilesNearLocation(me.x, me.y, me.z, 20, me.realm)
+		if(mobile.npctemplate == "townguard")
+			var ev := array;
+			ev.+ type;
+			ev.+ source;
+			ev.source := opponent;
+			ev.type := EVID_ENGAGED;
+			SendEvent(mobile, ev);
+		endif
+	endforeach
+
+  var oldprio := set_priority(50);
+  SetOpponent( opponent );
+  prepare_for_fight( opponent );
+  TurnToward( opponent );
+  var loops := 0;
+  var ev;
+  var waittime := 0;
+  while((opponent) && (!opponent.dead) && (!opponent.hidden) && (!opponent.concealed) && (dist(me,opponent) < 20))
+	if(!CloseDistance( opponent ))
+	  loops := loops + 1;
+	  waittime := 0;
+	else
+	  loops := 0;
+	  waittime := 1;
+	endif
+	in_combat_event_loop(opponent, loops);
+	ev := wait_for_event( waittime );
+  endwhile
+  post_combat();
+endfunction
+
+function EnableCombatEvents()
+    EnableEvents( EVID_ENGAGED + EVID_DAMAGED + EVID_PEACEMADE );
+endfunction
+
+function DisableCombatEvents()
+    DisableEvents( EVID_ENGAGED + EVID_DAMAGED + EVID_PEACEMADE );
+endfunction
+
+function flee(opponent)
+	if ( (me.script == "immobile") || (me.script == "immobilespell") )
+		sleep(2);
+		return;
+	endif
+	var runs := 0;
+	while ( (Distance(me, opponent) < 20) && (runs < 50) )
+		RunAwayFrom(opponent);
+		runs := runs +1;
+		wait_for_event(0);
+	endwhile
+	RestartScript( me );
+endfunction

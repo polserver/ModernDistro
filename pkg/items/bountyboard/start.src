@@ -1,0 +1,4 @@
+use os;
+use uo;
+
+start_script("bountyWatcher");

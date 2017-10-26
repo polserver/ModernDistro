@@ -1,0 +1,68 @@
+// Script for use under POL v0.95
+// Copyright (C) 2003 Jacobo Lata Fernández
+// choofi@infoactiva.net
+//
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+//
+// Originally created for the Gallaecia Shard - http://gallaecia.infoactiva.net
+//
+//
+// /pkg/systems/pushthrough/pushhook.src
+//
+// Script that controls collisions between mobiles
+
+
+use uo;
+
+include ":attributes:attributes";
+
+program pushthroughhook()
+	// 0: deactivate hook
+	// 1: activate hook
+	return 1;
+endprogram
+
+exported function pushthrough( who , obstacles )
+
+	// Added for necros in wraith form.
+	if(GetObjProperty(who, "wraith"))
+		return 1;
+	endif
+	if( len( obstacles > 1 ) )
+		return 0;
+	endif
+	var mobile := obstacles[1];
+	var str_walker, str_obstacle;
+	var mount1 := GetEquipmentByLayer( who , 25 );
+	if( mount1 )
+		str_walker := GetStrength( mount1 );
+	else
+		str_walker := GetStrength( who );
+	endif
+	var mount2 := GetEquipmentByLayer( mobile , 25 );
+	if( mount2 )
+		str_obstacle := GetStrength( mount2 );
+	else
+		str_obstacle := GetStrength( mobile );
+	endif
+	if( str_walker < str_obstacle )
+		return 0;
+	else
+		SendSysMessage( who , "You shove " + mobile.name + " out of your way" );
+		return 1;
+	endif
+endfunction

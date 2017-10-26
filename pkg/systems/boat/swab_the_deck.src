@@ -1,0 +1,23 @@
+use uo;
+use os;
+use util;
+
+include "include/client";
+include ":gumps:yesNo";
+
+program swab_the_deck (parms)
+	var player := parms[1];
+	var tillerman := parms[2];
+	var boat := parms[3];
+
+	PrintTextAbovePrivate (tillerman, "Are ye sure ye want to be doing that, capt'n?", player);
+	if (!YesNo (player, "Swab deck?"))
+		return;
+	endif
+	
+	PrintTextAbovePrivate (tillerman, "Aye, captain.  As ye want", player);
+	foreach item in (boat.items)
+		DestroyItem (item);
+	endforeach
+endprogram
+

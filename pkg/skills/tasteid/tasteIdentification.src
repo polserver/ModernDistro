@@ -1,0 +1,128 @@
+
+use uo;
+use cfgfile;
+
+include "include/client";
+include "include/trainingskill";
+include ":attributes:attributes";
+// include "include/skillpoints"; used to find default points for skillcheck
+
+const UOBJECT_FLASK_EMPTY:= 0x1832;
+const UOBJECT_FLASK_FULL := 0x1834;
+const UOBJECT_FLASK_HEATED := 0x1833;
+
+program do_tasteid( character )
+    var thepoints := 10;
+    var the_item;
+    var contents;
+    var poison_level;
+    var poison_descr;
+    var content_descr;
+    var alchemcfg := ReadConfigFile(":adval:itemdesc");
+    // The following six lines are for the <dot> lastskill command.
+    var data := {};
+    data[1] := "tasteid";
+    data[2] := ReadGameClock();
+    data[3] := 36;
+    SetObjProperty(character, "LastUsedSkill", data );
+    TrainingSkill(character, data[3]);
+    
+    EraseObjProperty(character, "IsMeditating");
+    EraseObjProperty(character, "HealTimer");
+
+   
+    SendSysMessage( character, "Select an object to taste." );
+    the_item := Target(character, "");
+    if (!the_item)
+        SendSysMessage(character, "Targetting cancelled.");
+        return;
+    endif
+   
+    content_descr := "";
+
+    if (SkillCheck(character, TASTE_IDENTIFICATION, -1, thepoints ))
+   
+		var itemdesc := alchemcfg[the_item.objtype].sname;   
+		if (itemdesc)
+			SendSysMessage(character, "It seems to be " + itemdesc);
+			SetName(the_item, itemdesc);
+		endif
+	
+		if (GetObjProperty(the_item, "potionname") )
+			itemdesc := GetObjProperty(the_item, "potionname");
+			SendSysMessage(character, "This seems to be a potion of " + itemdesc + ".");
+			SetName(the_item, ("a potion of " + itemdesc) );
+		endif
+	
+		case(the_item.objtype)
+			0x1DC04: poison_descr := "a lesser poison.";
+			0x1DC05: poison_descr := "a regular poison.";
+			0x1DC06: poison_descr := "a greater poison.";
+			0x1DC17: poison_descr := "a deadly poison.";
+			default: poison_descr := "nothing out of the ordinary.";
+		endcase
+	else
+		poison_descr := "nothing out of the ordinary.";
+    endif
+   
+    if (content_descr == "")
+            SendSysMessage(character, "This contains " + poison_descr);
+    endif
+     
+endprogram
+
+
+
+
+
+/*
+old alchemy system
+use uo;
+use cfgfile;
+
+include "include/client";
+include ":attributes:attributes";
+include "include/trainingskill";
+
+const UOBJECT_FLASK_EMPTY:= 0x1832;
+const UOBJECT_FLASK_FULL := 0x1834;
+const UOBJECT_FLASK_HEATED := 0x1833;
+
+
+program do_tasteid(who)
+        var data := {};
+        data[1] := "tasteid";
+        data[2] := ReadGameClock();
+        data[3] := 36;
+        SetObjProperty(who, "LastUsedSkill", data );
+        TrainingSkill(who, data[3]);
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  var poison_descr;
+  var alchemcfg := ReadConfigFile("::itemdesc");
+  SendSysMessage(who, "Select an object to taste.");
+  var the_item := Target(who);
+  if(!the_item)
+    SendSysMessage(who, "Targetting cancelled.");
+    return;
+  endif
+  var content_descr := "";
+  if(SkillCheck(who, TASTE_IDENTIFICATION, -1, CInt(GetAttribute(who, TASTE_IDENTIFICATION))))
+    case(the_item.objtype)
+      0x1DC04: poison_descr := "a lesser poison.";
+      0x1DC05: poison_descr := "a regular poison.";
+      0x1DC06: poison_descr := "a greater poison.";
+      0x1DC17: poison_descr := "a deadly poison.";
+      default: poison_descr := "nothing out of the ordinary.";
+    endcase
+    var itemdesc := alchemcfg[the_item.objtype].sname;
+    if(itemdesc)
+      SendSysMessage(who, "It seems to be " + itemdesc);
+      SetName(the_item, itemdesc);
+    endif
+    SendSysMessage(who, "This contains " + poison_descr);
+  else
+    SendSysMessage(who,"You cant tell anything about this item.");
+  endif
+endprogram
+*/

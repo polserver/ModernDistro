@@ -1,0 +1,76 @@
+use uo;
+use os;
+
+include "include/client";
+include "include/objtype";
+include "include/canAccess";
+include ":attributes:attributes";
+
+program smelt_that_ore (who, ore)
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  if(!can_access(who, ore))
+    return;
+  endif
+  if(ore.movable == 0)
+    SendSysMessage(who, "You cannot smelt that.");
+    return;
+  endif
+  case(ore.objtype)
+    0x16300:  SmeltOre(who, ore, 0x16309,  15);
+    0x16301:  SmeltOre(who, ore, 0x1630a,  65);
+    0x16302:  SmeltOre(who, ore, 0x1630b,  70);
+    0x16303:  SmeltOre(who, ore, 0x1630c,  75);
+    0x16304:  SmeltOre(who, ore, 0x1630d,  80);
+    0x16305:  SmeltOre(who, ore, 0x1630e,  85);
+    0x16306:  SmeltOre(who, ore, 0x1630f,  90);
+    0x16307:  SmeltOre(who, ore, 0x16310,  95);
+    0x16308:  SmeltOre(who, ore, 0x16311,  99);
+    default: SendSysMessage(who,"You can't smelt that.");
+  endcase
+endprogram
+
+function SmeltOre(who, ore, ingot, difficulty)
+  if(!ReserveItem(ore))
+    return;
+  endif
+  if(!Accessible(who, ore))
+    SendSysMessage(who,"You can't reach that.");
+    return;
+  endif
+  var forge := Target(who);
+  if((forge.objtype == 0xfb1) || ((forge.objtype >= 0x197a) && (forge.objtype <= 0x19a9)))
+    if(!CheckLineOfSight(who, forge))
+      SendSysMessage(who,"you cant see that");
+      return;
+    endif
+    if(Distance(who, forge) > 2)
+      SendSysMessage(who,"that is too far away.");
+      return;
+    endif
+    if(Distance(who, ore) > 2)
+      SendSysMessage(who,"that is too far away.");
+      return;
+    endif
+    if(SkillCheck(who, MINING, difficulty, ((difficulty / 2) + 10)))
+      var ingots := CreateItemInBackpack(who, ingot, (GetAmount(ore) * 2));
+      ReserveItem(ingots);
+      if(ingots)
+        if(DestroyItem(ore))
+          PlaySoundEffect(forge, 0x22);
+          sleep(2);
+          SendSysMessage(who,"You create some ingots and place them in your pack.");
+	      return;
+        else
+          DestroyItem(ingots);
+        endif
+      endif
+    else
+      SubtractAmount(ore, 1);
+	  SendSysMessage(who, "You destroy some ore.");
+      return;
+    endif
+  else
+    SendSysMessage(who, "That is not a forge.");
+  endif
+endfunction

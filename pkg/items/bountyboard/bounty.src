@@ -1,0 +1,84 @@
+use uo;
+use os;
+
+include "include/bounty";
+include ":datafile:datafile";
+include "util/bank";
+include ":gumps:old/old-gumps";
+include "include/client";
+
+program Assign_Bounty(parms)
+  var who := parms[1];
+  var data := parms[2];
+  var bank := FindBankBox(who);
+  foreach id in data
+    var holder := FindMyGold(bank);
+	var mygold := Cint(holder[1]);
+	var goldpiles := holder[2];
+	if(mygold)
+	  var mob := SystemFindObjectBySerial(id, SYSFIND_SEARCH_OFFLINE_MOBILES);
+	  var bounty := GetBountyAmount(who, mygold, mob.name);
+	  if((bounty) and (bounty <= mygold))
+        AddBounty(mob, bounty);
+        foreach thing in goldpiles
+	      if(thing.amount < bounty)
+	        bounty := bounty - thing.amount;
+	        DestroyItem(thing);
+	      elseif(thing.amount >= bounty)
+	        SubtractAmount(thing, bounty);
+	        break;
+	      endif
+	      if(bounty <= 0)
+	        break;
+	      endif
+	    endforeach
+	  elseif(bounty > mygold)
+	    SendSysMessage(who, "You do not have that much gold.", 3, 40);
+	  else
+	    SendSysMessage(who, "You have declined to place a bounty on " + mob.killer.name + "'s head");
+	  endif
+	else
+	  SendSysMessage(who, "You have no gold in your bank from which to place a bounty.", 3, 40);
+	endif
+  endforeach
+endprogram
+
+function GetBountyAmount(who, mygold, name)
+  GFInitGump();
+  GFPage(0);
+  GFResizePic(50,  50, 5120, 500, 200);
+  GFResizePic(60,  60, 5054, 480, 180);
+  GFTextLine(247,  68, 0, "Bounty Menu");
+  GFTextLine(250,  70, COLOR_YELLOW, "Bounty Menu");
+  GFTextLine( 80, 120, 0, "Your bank box contains " + mygold + " gold coins from which you");
+  GFTextLine( 80, 140, 0, "may place a bounty on " + name + "'s head.");
+  GFTextLine( 80, 160, 0, "Simply enter the bounty amount you wish to place below.");
+  GFResizePic(90, 185, 2620, 120, 30);
+  var amt := GFTextEntry( 100, 190, 100, 20, 900, "0");
+  GFButtonID(380, 190, 2121, 2120, 0);
+  GFButtonID(440, 190, 2130, 2129, 1, 1);
+  var ret := GFSendGump(who);
+  if(ret[0] == 1)
+    amt := Cint(SplitWords(ret[amt.keyid])[2]);
+  else
+    SendSysMessage(who, "Cancelled.", 3, 40);
+    amt := 0;
+  endif
+  return amt;
+endfunction
+
+function FindMyGold(box)
+  var amt := 0;
+  var piles := array;
+  foreach item in EnumerateItemsInContainer(box)
+    if(item.objtype == 0xeed)
+      amt := amt + item.amount;
+      piles.append(item);
+    endif
+  endforeach
+  var holder := array;
+  holder.append(amt);
+  holder.append(piles);
+  print(holder);
+  return holder;
+endfunction

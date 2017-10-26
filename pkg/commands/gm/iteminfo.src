@@ -1,0 +1,426 @@
+/*
+ * $Id: iteminfo.src 539 2006-07-03 21:18:36Z austinheilman $
+ *
+ * Purpose
+ *
+ * Presents information about an item.
+ *
+ */
+
+use uo;
+use os;
+
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+include ":gumps:gumpPrompt";
+include ":gumps:requestGump";
+include ":gumps:yesNo";
+include "include/weaponInfo";
+include "include/uo_extend";
+
+CONST START_Y	:= 55;   // These are to track the display area height.
+CONST END_Y	:= 410;  // These are to track the display area height.
+CONST MENU_BTN	:= 0xF000; // Value of the first menu button.
+
+// Storing these globally just makes the script easier to use...
+var info_cfg;			// info.cfg
+var index_list; 		// info.cfg "Index" lines from Settings elem
+var template;			// Template gump (so it doesn't need to be rebuilt)
+
+var btn_list := array{};	// Stores button information for the current gump (since its so dynamic)
+var btn_info := struct{"editFunc", "name"}; // Individual button tracking that goes into the btn_list array.
+
+program textcmd_Info(who, serial)
+	if ( Lower(TypeOf(who)) == "array" )
+		serial := who[2];
+		who := who[1];
+	endif
+
+	info_cfg := ReadConfigFile(":commands:itemInfo");
+	if ( !info_cfg )
+		SendSysMessage(who, "Error reading in iteminfo.cfg ->"+info_cfg);
+		return 0;
+	else
+		index_list := GetConfigStringArray(info_cfg["Index"], "Index");
+	endif
+
+	var targ;
+	if ( serial )
+		targ := SystemFindObjectBySerial(CInt(serial));
+	else
+		targ := Target(who);
+	endif
+	if ( !targ.IsA(POLCLASS_ITEM) )
+		SendSysMessage(who, "Cancelled.");
+		return 0;
+	endif
+
+	template := GumpTemplate(targ);
+	var cur_gump := 3;
+
+	while ( 1 )
+		var gump := BuildGump(targ, cur_gump);
+		var input := GFSendGump(who, gump);
+		input := input[0];
+
+		if ( input >= MENU_BTN )
+			cur_gump := input - MENU_BTN;
+			btn_list.Shrink(0); // New panel, reset button tracking.
+		elseif ( input > 0 )
+			ProcessInput(who, targ, input);
+		endif
+
+		if ( !input )
+			break;
+		elseif ( !who.connected )
+			break;
+		elseif ( !cur_gump )
+			break;
+		endif
+	endwhile
+endprogram
+
+function BuildGump(targ, index_num)
+	var index := index_list[index_num];
+	var gump := template;
+	var cfg_elem := info_cfg["Index-"+index];
+	var groups := GetConfigStringArray(cfg_elem, "Group");
+	var y_pos := START_Y;
+	BuildEntries(targ, gump, cfg_elem, y_pos);
+
+	foreach group in ( groups )
+		var group_elem := info_cfg[group];
+		BuildEntries(targ, gump, group_elem, y_pos);
+		SleepMS(2);
+	endforeach
+
+	return gump;
+endfunction
+
+function BuildEntries(targ, byref gump, byref cfg_elem, byref y_pos)
+	var entries := GetConfigStringArray(cfg_elem, "Entry");
+	if ( entries.Size() < 1 )
+		return 0;
+	endif
+
+	if ( cfg_elem.AutoBox )
+		var num_entries := entries.Size();
+		GFResizePic(gump, 145, y_pos, GetCfgConst("Defaults", "ForeGround"), 340, (num_entries*20));
+	endif
+
+	foreach entry in ( entries )
+		entry := SplitWords(entry, " ");
+		case ( Lower(entry[1]) )
+			"member": "custom":
+				DisplayMember(targ, gump, entry, y_pos);
+				break;
+			"text":
+				var text := "";
+				entry.Erase(1);
+				foreach line in ( entry )
+					text := text+" "+line;
+					SleepMS(2);
+				endforeach
+				GFTextLine(gump, 175, y_pos, 2100, text);
+				y_pos := y_pos + 20;
+				break;
+			"displaygeneral":
+				DisplayGeneral(targ, gump);
+				break;
+			"blank":
+				var buffer := CInt(entry[2]);
+				if ( !buffer )
+					buffer := 20;
+				endif
+				y_pos := y_pos+buffer;
+				break;
+			default:
+				GFTextLine(gump, 175, y_pos, 32, entry);
+				y_pos := y_pos + 20;
+				break;
+		endcase
+		SleepMS(2);
+	endforeach
+	y_pos := y_pos+5;
+
+	return 1;
+endfunction
+
+function DisplayMember(targ, byref gump, byref entry, byref y_pos)
+	if ( entry[5] )
+		var btn_id := GFAddButton(gump, 150, (y_pos+3), 2117, 2118, GF_CLOSE_BTN);
+		RegisterButton(btn_id, entry[3], entry[5]);
+	endif
+
+	GFTextLine(gump, 175, y_pos, 2100, ParseEntryName(entry[2]));
+
+	var value := "";
+	if ( Lower(entry[1]) == "member" )
+		value := ParseMembers(targ, entry[3]);
+	else
+		value := GetCustom(targ, entry[2]);
+	endif
+	if ( value == error )
+		value := "None";
+	endif
+
+	case ( Lower(entry[4]) )
+		"hex":
+// Uncomment to have gump show Inside UO colour numbers.
+/*			if(entry[3] == "color")
+			    value := value -2;
+			endif
+*/
+			value := Hex(value);
+			break;
+		"binary":
+			value := Bin(CInt(value));
+			break;
+		"script":
+			value := ParseScriptName(value);
+			break;
+	endcase
+	GFTextRight(gump, 480, y_pos, 2100, value);
+
+	y_pos := y_pos + 20;
+	return 1;
+endfunction
+
+function DisplayWeaponInfo(targ, byref gump, byref entry, byref y_pos)
+	var weapon := targ.weapon;
+
+	case ( Lower(entry[1]) )
+		"weaponspeed":
+		"damagedice":
+		"averagedamage":
+	endcase
+
+	y_pos += 20;
+
+	return 1;
+endfunction
+
+function DisplayGeneral(targ, byref gump)
+	GFResizePic(gump, 145, 55, GetCfgConst("Defaults", "ForeGround"), 340, 240);
+	var isa_types := GetIsAType(targ, ISA_GET_ALL);
+	isa_types.Reverse();
+	GFTextLine(gump, 155, 60, 2100, "ISA TREE");
+	var y_pos := 85;
+	foreach type in ( isa_types )
+		type := GetIsAName(type);
+		GFTextLine(gump, 155+(_type_iter*5), y_pos, 2100, type);
+		y_pos := y_pos + 20;
+		SleepMS(2);
+	endforeach
+
+	GFResizePic(gump, 145, 300, GetCfgConst("BackGrounds", "GOLDTRIM"), 340, 165);
+	GFTilePic(gump, 290, 355, targ.graphic, targ.color);
+
+	return 1;
+endfunction
+
+function ParseEntryName(entry_name)
+	while ( entry_name["_"] )
+		entry_name["_"] := " ";
+		SleepMS(2);
+	endwhile
+
+	return entry_name;
+endfunction
+
+function ParseMembers(targ, members, new_val:=error)
+	members := SplitWords(members, ".");
+	var result := targ;
+	foreach member in ( members )
+		var temp := result.Get_Member(member);
+
+		if ( new_val != error && _member_iter == members.Size() )
+			var old_type := Lower(TypeOf(temp));
+			if ( new_val == "NULL" )
+				new_val := "";
+			endif
+			case ( old_type )
+				"integer"	: new_val := CInt(new_val); break;
+				"string"	: new_val := CStr(new_val); break;
+				"double"	: new_val := CDbl(new_val); break;
+				default:
+					return error{"errortext":="'"+old_type+"' is not a supported data type."};
+			endcase
+
+			return result.Set_Member(member, new_val);
+		elseif ( temp == error )
+			return error;
+		else
+			result := temp;
+		endif
+
+		SleepMS(2);
+	endforeach
+
+	return result;
+endfunction
+
+function GetCustom(targ, property)
+	case ( Lower(property) )
+		"weapon_speed":
+			return CS_GetWeaponInfo(targ, "Speed");
+		"damage_dice":
+			return CS_GetWeaponInfo(targ, "Damage");
+		"average_damage":
+			return CS_GetAverageDamage(targ);
+	endcase
+
+	return "Unknown custom type!";
+endfunction
+
+function ParseScriptName(path)
+	while ( path["/"] )
+		// Breaks it down to just the file name.
+		var pos := Find(path, "/", 1);
+		path[1, pos] := "";
+		SleepMS(2);
+	endwhile
+
+	return path;
+endfunction
+
+function GumpTemplate(targ)
+	var gump := GFCreateGump();
+	GFPage(gump, 0);
+	GFResizePic(gump, 0, 0, GetCfgConst("Defaults", "BackGround"), 500, 480);
+
+	GFResizePic(gump, 15, 15, GetCfgConst("Defaults", "ForeGround"), 470, 35);
+	GFTextLine(gump, 25, 22, 2100, "Info on "+targ.desc);
+
+	GFTextRight(gump, 475, 22, 2100, "["+GetIsAName(GetIsAType(targ))+"]");
+
+	GFResizePic(gump, 15, START_Y, GetCfgConst("Defaults", "ForeGround"), 125, END_Y);
+
+	var y_pos := 60;
+	foreach entry in ( index_list )
+		GFAddButton(gump, 20, (y_pos+3), 2117, 2118, GF_CLOSE_BTN, (MENU_BTN+_entry_iter));
+		GFTextLine(gump, 40, y_pos, 2100, entry);
+		y_pos := y_pos + 20;
+		SleepMS(2);
+	endforeach
+	GFPage(gump, 1);
+
+	return gump;
+endfunction
+
+function RegisterButton(btn_id, name, edit_function)
+	btn_info.editFunc := edit_function;
+	btn_info.name := name;
+	btn_list[btn_id] := btn_info;
+
+	return 1;
+endfunction
+
+function ProcessInput(who, targ, input)
+	var input_info := btn_list[input];
+
+	case ( Lower(CStr(input_info.editFunc)) )
+		"propedit":
+			PropEdit(who, targ, input_info);
+			break;
+		"coordedit":
+			CoordEdit(who, targ, input_info);
+			break;
+		"methodedit":
+			MethodEdit(who, targ, input_info);
+			break;
+		"amountedit":
+			AmountEdit(who, targ, input_info);
+			break;
+		default:
+			GumpPrompt(who, "Dont know what to do with edit function type '"+input_info.editFunc+"'");
+			break;
+	endcase
+
+	return 0;
+endfunction
+
+function PropEdit(who, targ, input_info)
+	var value := ParseMembers(targ, input_info.name);
+
+	var change := RequestGump(who, "New value to assign "+input_info.name+" to.", "'NULL' to set as non-value.", CStr(value), CANCEL_BTN_ON);
+	if ( change != error )
+		ParseMembers(targ, input_info.name, change);
+	endif
+
+	return 1;
+endfunction
+
+function CoordEdit(who, targ, input_info)
+	var value := ParseMembers(targ, input_info.name);
+
+	var change := RequestGump(who, "New value to assign "+input_info.name+" to.", "", CStr(value), CANCEL_BTN_ON);
+	if ( change == error )
+		return 0;
+	endif
+
+	var x := targ.x;
+	var y := targ.y;
+	var z := targ.z;
+	var realm := targ.realm;
+	var movable := targ.movable;
+	targ.movable := 1;
+	case ( Lower(input_info.name) )
+		"x":
+			x := CInt(change);
+			break;
+		"y":
+			y := CInt(change);
+			break;
+		"z":
+			z := CInt(change);
+			break;
+		"realm" :
+			realm := CStr(change);
+			break;
+	endcase
+
+	var result := MoveObjectToLocation(targ, x, y, z, realm, MOVEOBJECT_FORCELOCATION);
+	targ.movable := movable;
+	if ( result.errortext )
+		GumpPrompt(who, "Movement Error [P] "+result);
+	endif
+
+	return 1;
+endfunction
+
+function MethodEdit(who, targ, input_info)
+	var value := ParseMembers(targ, input_info.name);
+
+	var change := RequestGump(who, "New value to assign "+input_info.name+" to.", "", CStr(value), CANCEL_BTN_ON);
+	if ( change == error )
+		return 0;
+	endif
+
+	case ( Lower(input_info.name) )
+		0: // Just to remove compiler warnings until real cases are needed.
+		default:
+			GumpPrompt(who, "Dont know how to handle method '"+input_info.name+"'");
+			break;
+	endcase
+
+	return 1;
+endfunction
+
+function AmountEdit(who, targ, input_info)
+	var value := ParseMembers(targ, input_info.name);
+
+	var change := RequestGump(who, "New value to assign "+input_info.name+" to.", "", CStr(value), CANCEL_BTN_ON);
+	if ( !change )
+		SendSysMessage(who, "Cancelled.");
+		return;
+	endif
+	change := CInt(change);
+	if ( change > targ.amount )
+		AddAmount(targ, change-targ.amount);
+	else
+		SubtractAmount(targ, targ.amount-change);
+	endif
+
+	return 1;
+endfunction

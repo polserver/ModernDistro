@@ -1,0 +1,27 @@
+/////////////////////////////////////////////////////////////////////////////
+//
+//  ".goxyz x y [z]" - jump to a location, specifying coordinates.
+//
+//  If Z is not specified, map data will be read.  Note statics and dynamic
+//  items won't be taken into account, except insofar as
+//  MoveObjectToLocation does automatically.
+//
+//  Last Modified: 1999/02/06 Syzygy
+//
+/////////////////////////////////////////////////////////////////////////////
+
+
+use uo;
+
+program textcmd_goxyz( who, text )
+	var params := SplitWords( text );
+    if (len(params) < 3) // didn't pass Z
+        params[3] := GetMapInfo( CInt(params[1]), CInt(params[2]), who.realm ).z;
+    endif
+
+	var res := MoveObjectToLocation( who, CInt(params[1]), CInt(params[2]), CInt(params[3]), who.realm, MOVEOBJECT_FORCELOCATION );
+
+    if (!res)
+        SendSysMessage( who, "Unable to go there: " + res.errortext );
+    endif
+endprogram

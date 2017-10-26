@@ -1,0 +1,42 @@
+use uo;
+use os;
+
+var data := { };
+var layout := {
+
+"resizepic 0 0 5054 530 417",
+"page 0",
+// gumppictiled x y sx sy gumpid
+// I believe these commands draw the boxes within the gump
+"gumppictiled 10 105 10 22 2624",      // ?? Seems to do nothing
+"gumppictiled 10 292 150 45 2624",     // Draws "Notices" box
+"gumppictiled 165 292 355 45 2624",    // Draws box to right of "Notices"
+"gumppictiled 10 342 510 65 2624",     // Draws bottommost box w/black bkground
+"gumppictiled 10 37 200 250 2624",     // Draws "Categories" box
+"gumppictiled 215 37 305 250 2624",    // Draws "Selections" box
+"xmfhtmlgumpcolor 10 12 510 20 1044009 0 0 16777215",
+"xmfhtmlgumpcolor 10 302 150 25 1044012 0 0 16777215",
+"xmfhtmlgumpcolor 50 385 150 18 1011441 0 0 16777215",
+"xmfhtmlgumpcolor 305 385 150 18 1044013 0 0 16777215",
+"xmfhtmlgumpcolor 10 37 200 22 1044010 0 0 16777215",
+"xmfhtmlgumpcolor 50 60 150 18 1044014 0 0 16777215",
+"xmfhtmlgumpcolor 215 37 305 22 1044011 0 0 16777215",
+"xmfhtmlgumpcolor 50 83 150 18 1044369 0 0 16777215",
+"xmfhtmlgumpcolor 50 103 150 18 1044370 0 0 16777215",
+"xmfhtmlgumpcolor 50 123 150 18 1044371 0 0 16777215",
+"xmfhtmlgumpcolor 50 143 150 18 1044372 0 0 16777215",
+"xmfhtmlgumpcolor 50 163 150 18 1044373 0 0 16777215",
+"xmfhtmlgumpcolor 50 183 150 18 1044374 0 0 16777215",
+"xmfhtmlgumpcolor 50 203 150 18 1044375 0 0 16777215",
+"xmfhtmlgumpcolor 50 223 150 18 1044376 0 0 16777215",
+"xmfhtmlgumpcolor 50 103 150 18 1044370 0 0 16777215",
+"checkertrans 10 10 510 397"
+};
+
+program testtrans(who)
+
+	var box := SendDialogGump( who, layout, data );
+	SendSysMessage(who, "TransGump closed (retv: " + CStr(box[0]) + ")");
+
+endprogram
+

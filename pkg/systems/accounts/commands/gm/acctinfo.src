@@ -1,0 +1,403 @@
+/* $Id: acctinfo.src 375 2006-06-17 19:26:32Z austinheilman $
+ *
+ */
+
+use uo;
+use os;
+
+include ":timeutils:time";
+include ":accounts:settings";
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+include ":gumps:gumpPrompt";
+include ":gumps:requestGump";
+include ":gumps:yesNo";
+
+CONST EXPANSION_START	:= 0xB0000;
+CONST CHAR_INFO_START	:= 0xC0000;
+
+CONST CANCEL_BTN	:= 0xA0000;
+CONST OKAY_BTN		:= 0xA0001;
+CONST BAN_BTN		:= 0xA0002;
+CONST DISABLE_BTN	:= 0xA0003;
+CONST UPDATE_NOTES_BTN	:= 0xA0004;
+CONST EXPANSION_BTN	:= 0xA0005;
+CONST DEF_CMDLEVEL_BTN	:= 0xA0006;
+CONST CHANGE_EMAIL	:= 0xA0007;
+CONST CHANGE_ACCTNAME	:= 0xA0008;
+
+var msg_array := array{};
+
+program textcmd_AccountInfo(who, acctname)
+	if ( !acctname )
+		SendSysMessage(who, "Select a player.");
+		var targ := Target(who);
+		if ( !targ.acctname )
+			SendSysMessage(who, "Cancelled.");
+			return 0;
+		else
+			acctname := targ.acctname;
+		endif
+	endif
+	if ( !acctname )
+		acctname := RequestGump(who, "Enter the account name you want to look up.", "", "", CANCEL_BTN_ON);
+		if ( !acctname )
+			SendSysMessage(who, "Cancelled.");
+			return 0;
+		endif
+	endif
+	
+	var account := FindAccount(acctname);
+	if ( account.errortext )
+		GumpPrompt(who, "Error with account name "+acctname+" [P] "+acctname.errortext);
+		return 0;
+	endif
+	
+	var input;
+	repeat
+		input := AcctGump(who, account);
+	until ( !ProcessInput(who, account, input) );
+endprogram
+
+function AcctGump(who, account)
+	var gump := GFCreateGump();
+	GFResizePic(gump, 0, 0, GetCfgConst("Defaults", "BackGround"), 640, 480);
+	GFResizePic(gump, 15, 15, GetCfgConst("Defaults", "ForeGround"), 610, 30);
+	
+	GFTextLine(gump, 20, 20, 2100, "Account Name:  "+account.name);
+	var status;
+	if ( account.banned )
+		status := "Banned";
+	elseif ( !account.enabled )
+		status := "Disabled";
+	else
+		status := "Active";
+	endif
+	GFTextRight(gump, 605, 20, 2100, "Account Status:  "+status);
+	
+	GFPage(gump, 1);
+	CharListGump(account, gump);
+	GeneralInfoGump(account, gump);
+	GFPage(gump, 2);
+	NotesGump(account, gump);
+	
+	var input := GFSendGump(who, gump);
+	return input;
+endfunction
+
+function CharListGump(account, byref gump)
+	GFResizePic(gump, 15, 50, GetCfgConst("Defaults", "ForeGround"), 270, 140);
+	var y_pos := 55;
+	var i := 1;
+	for ( i; i<=5; i:=i+1 )
+		GFTextLine(gump, 20, y_pos+6, 2100, "Character "+i);
+		var name := account.GetCharacter(i).name;
+		if ( name )
+			GFAddButton(gump, 110, y_pos+3, 2440, 2440, GF_CLOSE_BTN, CHAR_INFO_START+i);
+			GFTextLine(gump, 115, y_pos+5, 2100, CStr(name));
+		else
+			GFGumpPic(gump, 110, y_pos+3, 2440);
+		endif
+		y_pos := y_pos+25;
+	endfor
+endfunction
+
+function GeneralInfoGump(account, byref gump)
+	//////
+	// Top Right Buttons
+	/////
+	GFResizePic(gump, 290, 50, GetCfgConst("Defaults", "ForeGround"), 335, 140);
+	if ( !account.banned )
+		GFAddButton(gump, 295, 55, 4017, 4018, GF_CLOSE_BTN, BAN_BTN);
+		GFTextLine(gump, 330, 55, 32, "Ban Account");
+	else
+		GFAddButton(gump, 295, 55, 4017, 4018, GF_CLOSE_BTN, BAN_BTN);
+		GFTextLine(gump, 330, 55, 32, "Lift Account Ban");
+	endif
+
+	if ( !account.GetProp("ReleaseTime") )
+		GFAddButton(gump, 295, 85, 4020, 4021, GF_CLOSE_BTN, DISABLE_BTN);
+		GFTextLine(gump, 330, 85, 2100, "Disable/Jail Account");
+	else
+		GFTextLine(gump, 295, 85, 2100, "Account is disabled for");
+		GFAddButton(gump, 465, 85, 4020, 4021, GF_CLOSE_BTN, DISABLE_BTN);
+		GFResizePic(gump, 460, 80, 2620, 40, 30);
+		GFTextMid(gump, 460, 85, 40, 2100, CStr(GetNumJailDays(account)));
+		GFTextLine(gump, 505, 85, 2100, "days.");
+	endif
+	GFAddButton(gump, 295, 130, 4005, 4006, GF_PAGE_BTN, 2);
+	GFTextLine(gump, 330, 130, 2100, "Account Notes");
+
+	//////
+	// Lower Left Buttons
+	/////
+	GFResizePic(gump, 15, 195, GetCfgConst("Defaults", "ForeGround"), 185, 270);
+	GFTextLine(gump, 25, 205, 2100, "Default CmdLevel:");
+	GFAddButton(gump, 155, 205, 4023, 4024, GF_CLOSE_BTN, DEF_CMDLEVEL_BTN);
+	GFResizePic(gump, 155, 201, 2620, 30, 30);
+	GFTextLine(gump, 165, 206, 2100, account.defaultcmdlevel);
+
+	GFTextLine(gump, 25, 240, 2100, "Expansion:");
+	GFAddButton(gump, 150, 240, 4023, 4024, GF_CLOSE_BTN, EXPANSION_BTN);
+	GFResizePic(gump, 140, 236, 2620, 50, 30);
+	GFTextMid(gump, 140, 241, 60, 2100, account.uo_expansion);
+
+	//////
+	// Mid-Right Buttons
+	/////
+	GFResizePic(gump, 205, 195, GetCfgConst("Defaults", "ForeGround"), 420, 90);
+	var email := account.GetProp("Email");
+	if ( !email )
+		email := "Not Set";
+	endif
+	GFTextRight(gump, 345, 208, 2100, "Email");
+	GFAddButton(gump, 350, 205, 0x476, 0x476, GF_CLOSE_BTN, CHANGE_EMAIL);
+	GFTextMid(gump, 350, 208, 260, 2100, email);
+
+	var ip := account.GetProp("IP");
+	if ( !ip )
+		ip := "";
+	endif
+	GFTextLine(gump, 220, 238, 2100, "Signup IP: "+ip);
+	var host := account.GetProp("Host");
+	if ( !host )
+		host := "";
+	endif
+	GFTextLine(gump, 220, 258, 2100, "Signup Host: "+host);
+	
+	//////
+	// Lower-Right Buttons
+	/////
+	GFResizePic(gump, 205, 290, GetCfgConst("Defaults", "ForeGround"), 420, 175);
+	GFAddButton(gump, 210, 298, 2117, 2118, GF_CLOSE_BTN, CHANGE_ACCTNAME);
+	GFTextLine(gump, 230, 295, 2100, "Change Account Name");
+	
+	return 1;
+endfunction
+
+function NotesGump(account, byref gump)
+	msg_array.Shrink(0);
+	
+	GFResizePic(gump, 15, 50, 2620, 610, 380);
+	var acct_notes := account.GetProp("notes");
+	
+	var num_lines := acct_notes.Size();
+	if ( num_lines < 19 )
+		//Makes sure that 'off the gump' notes dont get removed.
+		num_lines := 19;
+	endif
+	
+	var y_pos := 55;
+	var i;
+	for ( i:=1; i<=num_lines; i:=i+1 )
+		var line := acct_notes[i];
+		if ( line == error )
+			line := "";
+		endif
+		msg_array.Append(GFTextEntry(gump, 20, y_pos, 595, 20, 2100, line));
+		y_pos := y_pos+19;
+	endfor
+
+	GFResizePic(gump, 15, 435, GetCfgConst("Defaults", "ForeGround"), 610, 30);
+
+	GFAddButton(gump, 20, 440, 4014, 4015, GF_PAGE_BTN, 1);
+	GFTextLine(gump, 55, 440, 2100, "Back");
+
+	GFAddButton(gump, 585, 440, 4011, 4030, GF_CLOSE_BTN, UPDATE_NOTES_BTN);
+	GFTextLine(gump, 425, 440, 2100, "Update Account Notes");
+	
+	return 1;
+endfunction
+
+
+function AccountBanner(who, account)
+	if ( account.banned )
+		if ( YesNo(who, "Are you sure you want to unban this account?") )
+			account.UnBan();
+			return 1;
+		endif
+	else
+		if ( YesNo(who, "Are you sure you want to ban this account?") )
+			account.Ban();
+			return 1;
+		endif
+	endif
+
+	SendSysMessage(who, "Cancelled");
+	return 0;
+endfunction
+
+function SuspendAccount(who, account)
+	var jail_time := RequestGump(who, "How many days do you want to disable this account?","", CStr(GetNumJailDays(account)), 1);
+	if ( jail_time == error )
+		SendSysMessage(who, "Cancelled");
+		return 0;
+	else
+		jail_time := CInt(jail_time);
+	endif
+
+	if ( jail_time == 0 )
+		account.EraseProp("ReleaseTime");
+		account.Enable();
+	else
+		if ( jail_time > 0 )
+			jail_time := jail_time * SECONDS_IN_DAY;
+			account.SetProp("ReleaseTime", POLCore().systime+jail_time);
+		endif
+		account.Disable();
+	endif
+	
+	return 1;
+endfunction
+
+function GetNumJailDays(account)
+	var seconds := account.GetProp("ReleaseTime");
+	if ( !seconds )
+		return 0;
+	endif
+	var num_days := CInt((seconds-POLCore().systime) / SECONDS_IN_DAY)+1;
+	return num_days;
+endfunction
+
+function UpdateNotes(who, account, input)
+	var i;
+	for ( i:=1; i<=msg_array.Size(); i:=i+1 )
+		var line := GFExtractData(input, msg_array[i]);
+		if ( line )
+			msg_array[i] := line;
+		else
+			msg_array[i] := "";
+		endif
+	endfor
+	
+	//Clear off empty lines.
+	for ( i:=msg_array.Size(); i>=1; i:=i-1 )
+		if ( Len(msg_array[i]) <= 0 )
+			msg_array.Erase(i);
+		endif
+		SleepMS(2);
+	endfor
+	if ( msg_array.Size() < 1 )
+		account.EraseProp("notes");
+	else
+		account.SetProp("notes", msg_array);
+	endif
+	
+	SendSysMessage(who, "Writing to account notes... done!");
+	
+	return 1;
+endfunction
+
+function SetDefaultCmdLevel(who, account)
+	var input := RequestGump(who, "What do you want to sent this account's default cmdlevel to?","", account.defaultcmdlevel, CANCEL_BTN_ON);
+	if ( input != error )
+		input := CInt(input);
+		if ( input > who.cmdlevel )
+			input := who.cmdlevel;
+		endif
+		
+		account.SetDefaultCmdLevel(input);
+		SendSysMessage(who, "Account default command level updated.");
+	else
+		SendSysMessage(who, "Cancelled");
+	endif
+	
+	return 1;
+endfunction
+
+function ChangeEmail(who, account)
+	var email := account.GetProp("Email");
+	if ( !email )
+		email := "";
+	endif
+	var input := RequestGump(who, "What do you want to set the new email address for this account to?","", CStr(email), CANCEL_BTN_ON);
+	if ( input == error )
+		SendSysMessage(who, "Cancelled");
+		return 0;
+	else
+		account.SetProp("Email", input);
+	endif
+	
+	return 1;
+endfunction
+
+function ChangeAcctName(who, account)
+	var name := account.name;
+	
+	var input := RequestGump(who, "What do you want to change this account's name to?", "", CStr(name), 1);
+	if ( input == error )
+		SendSysMessage(who, "Cancelled");
+		return 0;
+	else
+		var res := account.SetName(input);
+		if ( res.errortext )
+			SendSysMessage(who, "Error: Could not set new account name ->"+res.errortext);
+		endif
+	endif
+	
+	return 1;
+endfunction
+
+function SetUOExpansion(who, account)
+	var gump := GFCreateGump();
+	GFMovable(gump, 0);
+	GFResizePic(gump, 0, 0, GetCfgConst("Defaults", "BackGround"), 360, 320);
+	GFResizePic(gump, 15, 15, GetCfgConst("Defaults", "ForeGround"), 330, 290);
+	GFTextMid(gump, 15, 20, 330, 2100, "Select UO Expansion");
+	
+	var expansions := ACCT_GetSettingsCfgElem("Expansions");
+	expansions := GetConfigStringDictionary(expansions, "Expansion");
+	var y_pos := 50;
+	foreach key in ( expansions.keys() )
+		GFRadioButton(gump, 20, y_pos, 210, 211, (key==account.uo_expansion), EXPANSION_START+_key_iter);
+		GFTextLine(gump, 45, y_pos, 2100, expansions[key]);
+		y_pos := y_pos+20;
+		SleepMS(2);
+	endforeach
+	
+	GFAddButton(gump, 50, 260, 2128, 2129, GF_CLOSE_BTN, OKAY_BTN);
+	GFAddButton(gump, 245, 260, 2119, 2120, GF_CLOSE_BTN, CANCEL_BTN);
+	
+	var input := GFSendGump(who, gump);
+	if ( input[OKAY_BTN] )
+		var expansion;
+		foreach key in ( input.keys )
+			if ( key >= EXPANSION_START )
+				expansion := expansions.Keys()[key-EXPANSION_START];
+				break;
+			endif
+			SleepMS(2);
+		endforeach
+		if ( expansion )
+			account.Set_UO_Expansion(expansion);
+		endif
+	endif
+	return 1;
+endfunction
+
+function ProcessInput(who, account, input)
+	if ( input[0] > CHAR_INFO_START )
+		input := (input[0] - CHAR_INFO_START);
+		var char := account.GetCharacter(input).serial;
+		Start_Script(":commands:gm/info", {who, char});
+	elseif ( input[BAN_BTN] )
+		AccountBanner(who, account);
+	elseif ( input[DISABLE_BTN] )
+		SuspendAccount(who, account);
+	elseif ( input[UPDATE_NOTES_BTN] )
+		UpdateNotes(who, account, input);
+	elseif ( input[DEF_CMDLEVEL_BTN] )
+		SetDefaultCmdLevel(who, account);
+	elseif ( input[EXPANSION_BTN] )
+		SetUOExpansion(who, account);
+	elseif ( input[CHANGE_EMAIL] )
+		ChangeEmail(who, account);
+	elseif ( input[CHANGE_ACCTNAME] )
+		ChangeAcctName(who, account);
+	else
+		SendSysMessage(who, "Cancelled");
+		return 0;
+	endif
+	
+	return 1;
+endfunction

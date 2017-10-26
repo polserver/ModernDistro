@@ -1,0 +1,30 @@
+use uo;
+
+include "include/client";
+
+program Shave( who, text )
+
+        if ((text == "") or (!text))
+          SendSysMessage( who, "Please, define which part do you wish to shave (Head, Face)." );
+          return;
+        endif
+
+   if ( text == "face" )
+   SendSysMessage( who, "Whose face should I shave?" );
+   var guy := Target( who, "" );
+
+   var hair := GetEquipmentByLayer( guy, LAYER_BEARD );
+
+   DestroyItem( hair );
+
+   elseif ( text == "head" )
+   SendSysMessage( who, "Whose head should I shave?" );
+   var baldy := Target( who, "" );
+
+   var hair := GetEquipmentByLayer( baldy, LAYER_HAIR );
+
+   DestroyItem( hair );
+
+   endif
+
+endprogram

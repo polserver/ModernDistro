@@ -1,0 +1,31 @@
+//
+// created by Zulu  zuluhotel@home.com
+// made Jan 15, 2000 - updated Jan 17, 2000
+//
+//   elem.change     #	(decimal)
+//   elem.changesnd  #	(decimal)
+//   elem.originsnd  #	(decimal)
+//   elem.staff	     #	(1-4)
+//
+
+use uo;
+use cfgfile;
+
+program change(who, item )
+  var cfg := ReadConfigFile(":*:itemdesc");
+  var elem := FindConfigElem(cfg, item.objtype);
+  if(elem.staff > who.cmdlevel)
+    return;
+  endif
+  if(item.graphic == item.objtype)
+    if(elem.changesnd)
+      PlaySoundEffect(who, elem.changesnd);
+    endif
+    item.graphic := elem.change;
+  else
+    if(elem.originsnd)
+      PlaySoundEffect(who, elem.originsnd );
+    endif
+    item.graphic := item.objtype;
+  endif
+endprogram

@@ -1,0 +1,51 @@
+// Deviates from official spell.
+
+use uo;
+use vitals;
+
+include ":attributes:attributes";
+include ":damage:damage";
+
+program poison_strike( params )
+	var caster := params[1];
+	var info := params[2]; // Struct containing additional info about the spell.
+	var spellID := params[3];
+
+	SendSysMessage(caster, "Select your victim:", 1, 88);
+	var cast_on := Target(caster);
+	
+
+	var necroskill := Cint(AP_GetSkill(caster, NECROMANCY));
+	var sspeak := Cint(AP_GetSkill(caster, SPIRITSPEAK));
+	var int := GetIntelligence(caster);
+
+	var bonus := 0;
+	
+	if(caster.ip)
+		bonus := int/5;
+	endif
+	
+	if(Reflected(cast_on))
+		cast_on := caster;
+	endif
+
+	PlaySoundEffect(cast_on, 0x229);
+	PlayObjectCenteredEffectEx( cast_on, 0x36B0, 1, 14, 9915, 7, 0, 7 );
+	var poziom := (necroskill / 33) + 1;
+	var plevel := Resisted(6, caster, cast_on, poziom);
+	var persons := Listmobilesnearlocationex(cast_on.x , cast_on.y , cast_on.z, 2, LISTEX_FLAG_NORMAL + LISTEX_FLAG_HIDDEN );
+	
+	foreach person in persons
+	
+		if(GetObjProperty(person, "LastHit")[2] != caster.serial)
+			SetObjProperty(person, "LastHit", {caster.name, caster.serial, "poisonstrike" });
+		endif
+		
+		var dmg := (necroskill + sspeak + bonus)/10;
+		ApplyRawDamage(person, Resisted(CInt(info.circle), caster, person, dmg / (Distance(person, cast_on) + 1)), DMG_POISON, caster);
+		var passparms := { person, caster, "poison spell", cint(plevel / (Distance(person, cast_on) + 1))};
+		start_script(":spells:poisonDamage", passparms);
+		sleepms(2);
+	endforeach
+
+endprogram

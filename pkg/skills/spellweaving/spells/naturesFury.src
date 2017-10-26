@@ -1,0 +1,44 @@
+use uo;
+use vitals;
+
+include "include/spellRestrictions";
+
+program chrcast_nfury( parms )
+  var circle := 2;
+  var delivery := "direct";
+  var noto := "harmful";
+  var result := maincast(parms, delivery, circle, noto, 606);
+
+  if(result == 0)
+    return 0;
+  endif
+
+  var caster := result[1];
+  var cast_on := result[2];
+var dru := Cint(GetEffectiveSkill(caster, SPELLWEAVING));
+var alore := Cint(GetEffectiveSkill(caster, SKILLID_ANIMALLORE));
+var int := GetIntelligence(caster);
+
+var bonus := 0;
+
+if(caster.ip)
+bonus := int/5;
+endif
+
+
+var dmg := Cint((dru/12) + (alore/12) + bonus);
+var level := Cint(dru/50);
+  
+  SetObjProperty(cast_on, "LastHit", {caster.name, caster.serial, "insect"});
+  
+  PlayMovingEffect(caster, cast_on, 0x091b, 5, 1);
+  PlaySoundEffect(cast_on, 0x5CC);
+
+  var passparms := { cast_on, caster, "poison spell", level};
+  start_script(":spells:poisonDamage", passparms);
+  ApplyRawDamage(cast_on, Resisted(circle, caster, cast_on, dmg));
+
+
+
+
+endprogram

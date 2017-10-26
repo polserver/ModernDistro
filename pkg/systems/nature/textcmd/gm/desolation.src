@@ -1,0 +1,72 @@
+
+
+use uo;
+use cfgfile;
+include "include/std";
+include "../../nature";
+
+program desolation(who, text)
+
+	if (text == "on")
+           var everyone := EnumerateOnlineCharacters();
+           foreach dude in everyone
+                Season(dude, SEASON_FELUCCA);
+           endforeach
+	   SetGlobalProperty("Desolation", 1);
+	elseif (text == "off")
+	 if (GetGlobalProperty("Desolation"))
+	  var calendar := GetGlobalProperty("Calendar");
+
+	  var cfg := ReadConfigFile("nature");
+	  var elem := FindConfigElem(cfg, "seasons");
+	  var seasons := GetConfigInt(elem, "seasonal");
+	  UnloadConfigFile(cfg);
+
+          case (calendar[MONTH])
+           
+             3:
+             4:
+             5: 
+                if (seasons)
+                     var everyone := EnumerateOnlineCharacters();
+                     foreach dude in everyone
+                         Season(dude, SEASON_SPRING);
+                     endforeach
+                endif
+             6: 
+             7:
+             8:
+                if (seasons)
+                     var everyone := EnumerateOnlineCharacters();
+                     foreach dude in everyone
+                         Season(dude, SEASON_SUMMER);
+                     endforeach
+                endif
+             9:
+             10:
+             11:
+                if (seasons)
+                     var everyone := EnumerateOnlineCharacters();
+                     foreach dude in everyone
+                         Season(dude, SEASON_FALL);
+                     endforeach
+                endif
+             12:
+             1:
+             2:
+                if (seasons)
+                     var everyone := EnumerateOnlineCharacters();
+                     foreach dude in everyone
+                         Season(dude, SEASON_WINTER);
+                     endforeach
+                endif
+             default:
+          endcase
+
+	  EraseGlobalProperty("Desolation");
+	 endif
+	else
+	  PrintTextAbovePrivate(who, "The correct usage is either '.desolation on' or '.desolation off'.", who);
+	endif
+
+endprogram

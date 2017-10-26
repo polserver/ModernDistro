@@ -1,0 +1,20 @@
+use uo;
+use os;
+
+include "include/client";
+
+
+program xferptod(who, textline)
+
+    while(1)
+	var item := target(who);
+        if (!item)
+            SendSysMessage(who, "Cancelled.", color := 33);
+            return;
+        endif
+        item.name := item.GetTitle();
+	SendSysMessage(who, item.GetTitle());
+    endwhile
+        
+
+endprogram

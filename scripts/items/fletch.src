@@ -1,0 +1,73 @@
+use uo;
+
+include "include/client";
+include ":attributes:attributes";
+include "include/objtype";
+include "include/utility";
+include "include/canAccess";
+
+program on_fletch(who, shafts)
+  EraseObjProperty(who, "IsMeditating");
+    EraseObjProperty(who, "HealTimer");
+  if(!can_access(who, shafts))
+    return;
+  endif
+  var thepoints := GetAttribute(who, BOWCRAFT) / 2;
+  if(thepoints < 10)
+    thepoints := 10;
+  endif
+  if(shafts.objtype == 0x1BD4)
+    SendSysMessage(who, "Select feathers to use.");
+  else
+    SendSysMessage(who, "Select shafts to use.");
+  endif
+  var feathers := Target(who);
+  if(!feathers)
+    SendSysMessage(who, "Cancelled.");
+    return;
+  endif
+  if(!can_access(who, feathers))
+    return;
+  endif
+  if(shafts.objtype == 0x1bd1)
+    if(GetObjType(feathers) != 0x1bd4)
+      SendSysMessage(who, "You can only make arrows from shafts and feathers.");
+      return;
+    endif
+  elseif(shafts.objtype == 0x1bd4)
+    if(GetObjType(feathers) != 0x1bd1)
+      SendSysMessage(who, "You can only make arrows from shafts and feathers.");
+      return;
+    endif
+  else
+    SendSysMessage(who, "You can only make arrows from shafts and feathers.");
+  endif
+  var choice := SelectMenuItem2(who, "fletching");
+  if(!Accessible(who, shafts))
+    SendSysMessage(who, "You cant use those shafts.");
+    return;
+  endif
+  if(!Accessible(who, feathers))
+    SendSysMessage(who, "You cant use those feathers.");
+    return;
+  endif
+  if(choice == 0)
+    SendSysMessage(who, "Cancelled");
+    return;
+  endif
+  if(SkillCheck(who, BOWCRAFT, -1, thepoints))
+    var num_to_make := Min(GetAmount(shafts), GetAmount(feathers));
+    if((SubtractAmount(shafts, num_to_make)) && (SubtractAmount(feathers, num_to_make)))
+      var arrows := CreateItemInBackpack(who, choice.objtype, num_to_make);
+      if (arrows)
+        SendSysMessage(who, "You create some arrows and put them in your pack.");
+      else
+        SendSysMessage(who, "You were unable to find anywhere to put the arrows.");
+      endif
+    endif
+  else
+    SubtractAmount(shafts, 1);
+    SubtractAmount(feathers, 1);
+    SendSysMessage(who, "You destroy some materials.");
+  endif
+endprogram

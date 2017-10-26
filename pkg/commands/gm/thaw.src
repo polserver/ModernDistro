@@ -1,0 +1,17 @@
+use uo;
+
+program hideme( gm )
+    SendSysMessage( gm, "Who do you wish to thaw?" );
+    var res := TargetCoordinates( gm );
+    if (res.mobile)
+        res.mobile.frozen := 0;
+	if (GetObjProperty(res.mobile, "frozen"))
+		EraseObjProperty(res.mobile,"frozen");
+	else
+		SendSysMessage( gm, "that wasn't frozen");
+	endif
+        PrintTextAbovePrivate( res.mobile, res.mobile.name + " has been thawed", gm );
+    else
+        SendSysMessage( gm, "Cancelled" );
+    endif
+endprogram

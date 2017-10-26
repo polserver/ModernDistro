@@ -1,0 +1,18 @@
+use vitals;
+use uo;
+use os;
+use util;
+
+include ":damage:damage";
+
+program flamestriketrap(who, item)
+  Detach();
+  if (who.dead || who.cmdlevel >0)
+    return;
+  endif
+  PlayStationaryEffect(item.x, item.y, item.z, 0x3709, 0x0a, 0x1e, 0, item.realm);
+  PlaySoundEffect(item, 0x226);
+  var dmg := RandomInt(20) + 30;
+  ApplyRawDamageEX(who, dmg, DMG_FIRE, 0);
+
+endprogram

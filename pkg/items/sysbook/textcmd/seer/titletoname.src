@@ -1,0 +1,23 @@
+use uo;
+use os;
+
+include "include/client";
+
+/////////////////////////////////
+// Copies the title of a book
+// to its name.
+/////////////////////////////////
+program copy_title_to_name(who, textline)
+
+    while(1)
+	var item := target(who);
+        if (!item)
+            SendSysMessage(who, "Cancelled.", color := 33);
+            return;
+        endif
+        item.name := item.GetTitle();
+	SendSysMessage(who, item.GetTitle());
+    endwhile
+        
+
+endprogram

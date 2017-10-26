@@ -1,0 +1,39 @@
+use uo;
+use os;
+include ":attributes:attributes";
+
+program happycounter(parms)
+  var me := parms[1];
+  var timer := parms[2];
+  var happiness;
+  while((GetHp(me) > 0) && (me.script == "tamed"))
+    if(GetObjProperty(me,"countercheck") != timer)
+      break;
+    endif
+    if(GetObjProperty(me,"stabled"))
+      while(GetObjProperty(me,"stabled"))
+        if(GetObjProperty(me,"countercheck") != timer)
+          break;
+        endif
+        sleep(600);
+      endwhile
+    elseif(GetObjProperty(me,"onhold"))
+      while(GetObjProperty(me,"onhold"))
+        if(GetObjProperty(me,"countercheck") != timer)
+          break;
+        endif
+        sleep(120);
+      endwhile
+    else
+      while((!GetObjProperty(me, "stabled")) && (!GetObjProperty(me, "onhold")))
+       if(GetObjProperty(me,"countercheck") != timer)
+         break;
+       endif
+        happiness := GetObjProperty(me,"happiness");
+        happiness := happiness - 1;
+        SetObjProperty(me,"happiness", happiness);
+        sleep(60);
+      endwhile
+    endif
+  endwhile
+endprogram

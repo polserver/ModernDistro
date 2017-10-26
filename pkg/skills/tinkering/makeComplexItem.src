@@ -1,0 +1,125 @@
+
+include ":attributes:attributes";
+include "include/canAccess";
+
+var tinker_cfg:= ReadConfigFile("tinker");
+var itemcfg := ReadConfigFile("itemdesc");
+
+program make_complex_items(who, item)
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  if(!can_access(who, item))
+    return;
+  endif
+  if(item.movable == 0)
+    SendSysMessage(who, "You cannot use that.");
+    return;
+  endif
+  if (!ReserveItem(item))
+    SendSysMessage(who, "Someone else is using that!");
+    return;
+  endif
+  case(item.objtype)
+    0x105b:  make_complex_thing(who, 0x1051, item, 0x1053);     // axle + gear = axle&gear
+    0x1053:  make_complex_thing(who, 0x1051, item, 0x105b);     // gear + axle = axle&gear
+    0x104d:  make_complex_thing(who, 0x104c, item, 0x104f);     // clock frame + parts = clock
+    0x104f:  make_complex_thing(who, 0x104c, item, 0x104d);     // clock parts + frame = clock
+    0x1051:  make_complex_thing(who, 0x104f, item, "special");  // axle&gears + springs = clock parts, axle&gears+hinges=sextant parts
+    0x105d:  make_complex_thing(who, 0x104f, item, 0x1051);     // springs + axle&gears = clock parts
+    0x1059:  make_sextant(who, item);                           // sextent parts = sextant
+    0x1055:  make_complex_thing(who, 0x1059, item, 0x1051);     // hinge + axle&gears = sextant parts
+    default:
+  endcase
+endprogram
+  
+  
+function make_complex_thing(who, desired_item, clicked_part, required_part)
+    var skill     := tinker_cfg[desired_item].skill;
+    var itemname  := tinker_cfg[desired_item].Name;
+    var thepoints := skill*2;
+    var canexceptional := tinker_cfg[desired_item].exch;
+    SendSysMessage(who, "Select something to use that on.");
+    var use_on := Target(who, "");
+    if (!use_on)
+      SendSysMessage(who, "Targetting cancelled.");
+      return;
+    endif
+    if(!can_access(who, use_on))
+      return;
+    endif
+    if (!Accessible(who, use_on))
+      SendSysMessage(who, "You can't reach that!");
+      return;
+    endif
+    if (!ReserveItem(use_on))
+      SendSysMessage(who, "That item is already in use!");
+      return;
+    endif
+    if(use_on.movable == 0)
+      SendSysMessage(who, "You cannot use that.");
+      return;
+    endif
+    if (required_part != "special")
+      if (use_on.objtype != required_part)
+        SendSysMessage(who, "You cannot think of a way to put those things together.");
+        return;
+      endif
+    else
+      if ((use_on.objtype != 0x105d) and (use_on.objtype != 0x1055))
+        SendSysMessage(who, "You cannot think of a way to put those things together.");
+        return;
+      elseif (use_on.objtype == 0x105d)
+        desired_item := 0x104f;
+      else
+        desired_item := 0x1059;
+      endif
+    endif
+    if(use_on.amount  >= 1)
+      if(SkillCheck(who, TINKERING, skill,  thepoints))
+        set_critical(1);
+        SubtractAmount(use_on, 1 );
+        SubtractAmount(clicked_part, 1 );
+        set_critical(0);
+        var theitem := CreateItemInBackpack( who, desired_item, 1 );
+        if (theitem)
+          if (canexceptional and (SkillCheck(who, TINKERING, 90, thepoints)))
+            theitem.quality := 1.2;
+            theitem.hp := theitem.maxhp;
+            SendSysMessage(who, "You make an exceptional item and put it in your pack");
+          else
+            SetName(theitem, itemname );
+            SendSysMessage( who, "You create the item and place it in your pack." );
+          endif
+        endif
+      else
+        SubtractAmount(use_on, 1 );
+        SubtractAmount(clicked_part, 1 );
+        SendSysMessage(who, "You destroy some material." );
+      endif
+    else
+      SendSysMessage(who, "You don't have enough material!");
+    endif
+endfunction
+
+function make_sextant(who, sextant_parts)
+    var skill     := tinker_cfg[0x1057].skill;
+    var itemname  := tinker_cfg[0x1057].Name;
+    var thepoints := skill*2;
+    if(SkillCheck(who, TINKERING, skill,  thepoints))
+      SubtractAmount(sextant_parts, 1 );
+      var theitem := CreateItemInBackpack( who, 0x1057, 1 );
+      if (theitem)
+        if (SkillCheck(who, TINKERING, 90, thepoints))
+          theitem.quality := 1.2;
+          theitem.hp := theitem.maxhp;
+          SendSysMessage(who, "You make an exceptional item and put it in your pack");
+        else
+          SetName(theitem, itemname );
+          SendSysMessage( who, "You create the item and place it in your pack." );
+        endif
+      endif
+    else
+      SubtractAmount(sextant_parts, 1 );
+      SendSysMessage(who, "You destroy some material." );
+    endif
+endfunction

@@ -1,0 +1,52 @@
+/* $Id: attributeCache.src 510 2006-06-30 00:30:35Z austinheilman $
+ *
+ * Purpose
+ * There are a lot of attributes in attributes.cfg
+ * Some are stats, some are skills, some are other.
+ * They all have a category and to get all of the skills in a category
+ * would require iterating over the entire config file every time and
+ * checking all the categories and building a list...
+ *
+ * What this does is build a ready-to-go list for faster retrieval of all
+ * skills in a category.
+ *
+ */
+
+use uo;
+use os;
+
+include ":attributes:attributes";
+
+Program attributeCache()
+	Set_Script_Option(SCRIPTOPT_NO_RUNAWAY, 1);
+	Set_Priority(255);
+	
+	var data_elem := AP_GetAttributeDataElem("Categories");
+	
+	// Clear out old cache
+	foreach prop_name in ( DFGetElemProps(data_elem) )
+		data_elem.EraseProp(prop_name);
+	endforeach
+	
+	var cfg_file := AP_GetAttributesCfgFile();
+	foreach elem_name in ( GetConfigStringKeys(cfg_file) )
+		var cfg_elem := AP_GetAttributeCfgElem(elem_name, cfg_file);
+		var type_name := Lower(cfg_elem.AttributeType);
+		if ( !type_name )
+			type_name := "unknown";
+		endif
+		
+		var type_list := data_elem.GetProp(type_name);
+		if ( !type_list )
+			type_list := array;
+		endif
+		
+		type_list.Append(elem_name);
+		
+		data_elem.SetProp(type_name, type_list);
+	endforeach
+	
+	return 1;
+endprogram
+	
+

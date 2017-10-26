@@ -1,0 +1,16 @@
+use uo;
+
+program dot_props( who )
+    var what := Target( who );
+    if (what)
+        var names := what.propnames();
+        if (names.size() != 0)
+            foreach propname in names
+                SendSysMessage( who, propname + ": " + what.getprop( propname ) );
+            endforeach
+        else
+            SendSysMessage( who, "No properties." );
+        endif
+    endif
+
+endprogram

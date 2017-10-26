@@ -1,0 +1,104 @@
+use uo;
+use os;
+use datafile;
+
+include ":datafile:datafile";
+include "include/sorting";
+include "include/client";
+include "include/bounty";
+include ":gumps:old/old-gumps";
+
+var loop := 1;
+
+program board(who) //(who, board) <-- 'board' wasn't used
+  while(loop == 1)
+    GenerateBoard(who);
+  endwhile
+endprogram
+
+function generateBoard(byref who)
+  GFInitGump();
+  GFPage(0);
+  GfGumpPic(0, 0, 2170);
+  GFTextLine(197, 38, 0, "Bounty Board");
+  GFTextLine(200, 40, COLOR_YELLOW, "Bounty Board");
+  var data := ComposeBountyBoard();
+  data.reverse();
+  var count := 0, page := 2, ct := 0;
+  var ymod  := 160;
+  GFPage(1);
+  GFTextLine(130, 345, 0, "Page: 1");
+  foreach thing in data
+    if(ct >= 10)
+      ct := 0;
+      GFButtonPage(354, 319, 2085, 2085, page);
+      GFPage(page);
+      GFTextLine(130, 345, 0, "Page: " + page);
+      GFButtonPage(355, 144, 2084, 2084, page-1);
+      ymod := 160;
+      page := page + 1;
+    endif
+    if(count >= 50)
+      break;
+    else
+      GFButtonID(110, ymod+3, 0x1523, 0x1523, 1, thing[2]);
+      GFTextLine(130, ymod, 0, thing[1] + ":   " + thing[3] + " gold");
+      count := count + 1;
+      ct := ct + 1;
+      ymod := ymod + 16;
+    endif
+  endforeach
+  var ret := GFSendGump(who);
+  if(ret[0]);
+    loop := 1;
+    ComposeDetailPage(who, ret[0]);
+  else
+    loop := 0;
+    return;
+  endif
+endfunction
+
+function ComposeDetailPage(byref who, serial)
+  GFInitGump();
+  GFPage(0);
+  GFGumpPic(83,  63, 0x820);
+  GFGumpPic(100, 100, 0x821);
+  GFGumpPic(100, 170, 0x822);
+  GFGumpPic(100, 240, 0x821);
+  GFGumpPic(100, 310, 0x822);
+  GFGumpPic(100, 380, 0x823);
+  GFGumpPic(120, 100, 0x82b);
+  GFGumpPic(120, 365, 0x82b);
+  GFGumpPic(120, 170, 0x39);
+  GFGumpPic(150, 170, 0x3a);
+  GFGumpPic(165, 170, 0x3a);
+  GFGumpPic(180, 170, 0x3a);
+  GFGumpPic(195, 170, 0x3a);
+  GFGumpPic(210, 170, 0x3a);
+  GFGumpPic(225, 170, 0x3a);
+  GFGumpPic(240, 170, 0x3a);
+  GFGumpPic(255, 170, 0x3a);
+  GFGumpPic(270, 170, 0x3a);
+  GFGumpPic(285, 170, 0x3a);
+  GFGumpPic(300, 170, 0x3b);
+  var elem := DFFindElement(bountyfile, Cstr(serial));
+  var name   := DFGetProp(elem, "Name");
+  var murder := DFGetProp(elem, "Murders");
+  var bounty := DFGetProp(elem, "Bounty");
+  GFTextLine(110, 110, 0, "Name:    " + name);
+  GFTextLine(110, 130, 0, "Murders: " + murder);
+  GFTextLine(110, 150, 0, "Bounty:  " + bounty);
+  GFTextLine(110, 190, 0, "The foul scum known as");
+  GFTextLine(110, 210, 0, name + " cannot continue");
+  GFTextLine(110, 230, 0, "to kill! For he is responsible");
+  if(murder == 1)
+    GFTextLine(110, 250, 0, "for 1 murder. Lord British's");
+  else
+    GFTextLine(110, 250, 0, "for " + murder + " murders. Lord British's");
+  endif
+  GFTextLine(110, 270, 0, "bounty of " + bounty + " gold pieces");
+  GFTextLine(110, 290, 0, "will be rewarded to the first");
+  GFTextLine(110, 310, 0, "citizen to bring his head to");
+  GFTextLine(110, 330, 0, "any of the city guards.");
+  GFSendGump(who);
+endfunction

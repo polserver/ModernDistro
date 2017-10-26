@@ -1,0 +1,70 @@
+use uo;
+use vitals;
+
+include "include/spellRestrictions";
+
+program chrcast_thunderstorm( parms )
+  var circle := 6;
+  var delivery := "indirect";
+  var noto := "harmful";
+  var result := maincast(parms, delivery, circle, noto, 610);
+
+  if(result == 0)
+    return 0;
+  endif
+
+  var caster := result[1];
+  var cast_on := result[2];
+
+var dru := Cint(GetEffectiveSkill(caster, SPELLWEAVING));
+var alore := Cint(GetEffectiveSkill(caster, SKILLID_ANIMALLORE));
+var int := GetIntelligence(caster);
+
+var bonus := 0;
+
+if(caster.ip)
+bonus := int/5;
+endif
+
+  
+var dmg := Cint((dru/13) + (alore/13) + bonus);
+var duration := (dru + alore) / 50;
+var obszar := Cint(dru/20)-2;
+  
+  
+
+
+
+
+PlayMovingEffectXYZ( caster.x, caster.y, caster.z, cast_on.x, cast_on.y, cast_on.z, 0x36d4, 1);
+
+var licz := 0;
+var iks;
+var ygrek;
+
+Detach();
+for( licz := 0 ; licz <= duration ; licz := licz + 1)
+
+
+
+for( iks:= cast_on.x - 1 ; iks <= cast_on.x + obszar ; iks := iks + 1)
+    for( ygrek:= cast_on.y - 1 ; ygrek <= cast_on.y + obszar ; ygrek := ygrek + 1)
+    PlayStationaryEffect(  iks, ygrek, cast_on.z, 0x3709, 1,15 );
+    endfor
+endfor
+
+var osoby := Listmobilesnearlocationex(cast_on.x , cast_on.y , cast_on.z, obszar+1, LISTEX_FLAG_NORMAL + LISTEX_FLAG_HIDDEN );
+PlaySoundEffect(caster, 0x5D0);
+
+  foreach osoba in osoby
+      SetObjProperty(osoba, "LastHit", {caster.name, caster.serial, "wfire" });
+      ApplyRawDamage(osoba, Resisted(circle, caster, osoba, dmg));
+      dmg := dmg /2; // ponizej applyrawdamage poniewaz zmniejsza dmg o polowe dopiero po 1 mobie
+  endforeach
+
+sleep(1);
+endfor
+
+
+
+endprogram

@@ -1,0 +1,30 @@
+use uo;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+
+program cast_nightsight(parms)
+    var caster := parms[1];
+    var info := parms[2];
+    var cast_on;
+    cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_HELPFUL);
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+    if ( !MS_MobileCheck(caster, cast_on) )
+        return 0;
+    endif
+    
+
+  PlaySoundEffect(cast_on, SFX_SPELL_NIGHT_SIGHT );
+  var magery := GetAttribute(caster, MAGERY);
+  cast_on.setlightlevel( 0, magery * 60 );
+  PlayObjectCenteredEffect( cast_on, FX_BLESS_EFFECT, 10,10);
+endprogram
