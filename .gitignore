@@ -94,3 +94,4 @@ scripts/ecompile.cfg.example
 scripts/modules/*
 Realm funcs.txt
 *.session
+original*.zip
