@@ -1,0 +1,45 @@
+/* $Id: method.src 762 2006-08-28 02:22:55Z AustinHeilman $
+ *
+ */
+
+include ":itemutils:itemdesc";
+
+program Install()
+	return 1;
+endprogram
+
+exported function IsGraveStone(gstone)
+	gstone := gstone; // Stop compiler warnings
+
+	return 1;
+endfunction
+
+exported function GetText(gstone)
+	var text := GetObjProperty(gstone, "Text");
+	if ( text )
+		return text;
+	elseif ( gstone.name )
+		return gstone.name;
+	else
+		return gstone.desc;
+	endif
+endfunction
+
+exported function GetGumpPic(gstone)
+	var cfg_info := GetItemDescInfo(gstone.objtype);
+	var pic := CInt(cfg_info.GumpPic);
+	if ( pic )
+		return pic;
+	else
+		return 102; // Square grave stone
+	endif
+endfunction
+
+exported function GetTextColor(gstone)
+	var color := CInt(GetObjProperty(gstone, "TextColor"));
+	if ( color )
+		return color;
+	else
+		return 2100;
+	endif
+endfunction

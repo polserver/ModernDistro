@@ -1,0 +1,79 @@
+use cfgfile;
+use uo;
+use basic;
+
+include "include/client";
+include ":attributes:attributes";
+include "include/trainingskill";
+
+
+program do_armslore( who )
+        var data := {};
+        data[1] := "armslore";
+        data[2] := ReadGameClock();
+        data[3] := 4;
+        SetObjProperty(who, "LastUsedSkill", data );
+        TrainingSkill(who, data[3]);
+
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  var quality_descr, damage_descr;
+  SendSysMessage(who, "Select an object to evaluate.");
+  var the_item := Target(who, TGTOPT_CHECK_LOS);
+  if(!the_item)
+    SendSysMessage(who, "Targetting cancelled.");
+    return;
+  endif
+  var cfg := ReadConfigFile(":combat:itemdesc");
+  var entry := cfg[the_item.objtype];
+  if(!entry)
+    SendSysMessage(who, "You can only use this skill on weapons or armor!");
+    return;
+  endif
+  var pts := CInt(GetAttribute(who, ARMSLORE)) + 15;
+  if(SkillCheck(who,ARMSLORE, -1, pts/3))
+    var item_max_hp := the_item.maxhp;
+    var max_hp := item_max_hp;
+    var hp := the_item.hp;
+    if(hp == 0)
+      hp := 1;
+    endif
+    if(max_hp == 0)
+       max_hp := 1;
+    endif
+    if(item_max_hp == 0)
+      item_max_hp := 1;
+    endif
+    var damage_real := (hp  * 100) / max_hp;
+    var damage_nbr := CInt(damage_real);
+    var quality_real :=  (the_item.quality  * 100);
+    var quality_nbr := CInt(quality_real);
+    if(damage_nbr > 90)
+      damage_descr := "good";
+    elseif (damage_nbr >= 60)
+      damage_descr := "acceptable";
+    elseif (damage_nbr >= 40)
+      damage_descr := "fair";
+    else
+      damage_descr := "poor";
+    endif
+    if(quality_nbr > 100)
+      quality_descr := "exceptional";
+    elseif (quality_nbr >= 80)
+      quality_descr := "excellent";
+    elseif (quality_nbr >= 60)
+      quality_descr := "decent";
+    elseif (quality_nbr >= 40)
+      quality_descr := "moderate";
+    else
+      quality_descr := "low";
+    endif
+    SendSysMessage(who, "This item is of " + quality_descr + " quality, and is in " + damage_descr + " condition.");
+  else
+    SendSysMessage(who, "I can't quite tell . . .");
+  endif
+endprogram
+
+
+
+

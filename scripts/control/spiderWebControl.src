@@ -1,0 +1,9 @@
+use uo;
+use os;
+// Thanks to Menace from the TUS dev team for letting me borrow his idea!
+program spiderwebctl(web)
+
+sleep(120);
+DestroyItem(web);
+
+endprogram

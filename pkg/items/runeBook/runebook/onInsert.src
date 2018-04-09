@@ -1,0 +1,99 @@
+use uo;
+use os;
+use cliloc;
+
+include ":runebook:runebookFunctions";
+include "include/itemUtil";
+
+program on_insert( who, book, movetype, inserttype, item, existing_stack, amt );
+
+	// Next 4 lines used to fix the "unused variable" report
+	amt            := amt;
+	existing_stack := existing_stack;
+	movetype       := movetype;
+	inserttype     := inserttype;
+
+       	if( !useItem_check( who, book, ITEM_INCONTAINER ))
+                MoveItemToContainer( item, who.backpack );
+		return 0;
+	endif
+
+	if( item.objtype == 0x1F4C ); //Recall Scrolls
+		return recharge_book( who, book, item );
+	elseif( item.IsRecallRune() )
+		return addRune( who, book, item );
+	endif
+
+        MoveItemToContainer( item, who.backpack );
+        
+	return 0;
+endprogram
+
+function recharge_book( who, book, scrolls )
+
+	var charge_prop := GetObjProperty( book, "%Charges%" );
+	var charges := charge_prop["charges"];
+	if( !charges )
+		charges := 0;
+	endif
+ 
+	var max_charges := charge_prop["max_charges"];
+	if( !max_charges )
+		max_charges := 5;
+	endif
+ 
+	var max_amount := CInt( max_charges - charges );
+	var amount := CInt( scrolls.amount );
+ 
+	if( max_amount <= 0 )
+		SendSysMessageCL( who, 502410, color := 0x21 ); // This book already has the maximum amount of charges.
+		MoveItemToContainer( scrolls, who.backpack );
+		return 0;
+	elseif( amount >= max_amount )
+		var to_substract := max_amount;
+		if( SubtractAmount( scrolls, to_substract ))
+			charges := max_charges;
+		endif
+		MoveItemToContainer( scrolls, who.backpack );
+	elseif( DestroyItem( scrolls ))
+		charges := charges + amount;
+	endif
+ 
+	PlaySoundEffect( who, 0x1F1 );
+	PlayObjectCenteredEffect( who, 0x375A, 7, 0x10 );
+ 
+	SetCharges( book, who, charges );
+	SetBookName( book, who, 1 );
+
+	return 1;
+endfunction
+
+function addRune( who, book, rune )
+
+	var rune_list := GetRuneList( book );
+	if( rune_list.Size() > 15 )
+		SendSysMessageCL( who, 502401, color := 0x21 ); // This runebook is full.
+		MoveItemToContainer( rune, who.backpack );
+		return 0;
+	elseif( !GetObjProperty( rune, "Destination" ))
+		SendSysMessageCL( who, 502409, color := 0x21 ); // This rune does not have a marked location.
+		MoveItemToContainer( rune, who.backpack );
+		return 0;
+	endif
+
+	var temp := GetObjProperty( rune, "Destination" );
+	temp.+name := rune.name;
+	if( !rune.color )
+		temp.+color := 0;
+	else
+		temp.+color := CInt( rune.color );
+	endif
+ 
+	rune_list.Append( temp );
+
+	SetObjProperty( book, "%RuneList%", rune_list );
+
+	DestroyItem( rune );
+
+	return 1;
+endfunction

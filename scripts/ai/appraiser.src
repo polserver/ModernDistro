@@ -1,0 +1,165 @@
+use npc;
+use basic;
+use os;
+use uo;
+
+include "include/eventID";
+include "include/sysEvent";
+include "include/randName";
+include "include/utility";
+include "include/client";
+include "include/vetement";
+include "include/NPCBackpacks";
+include "util/bank";
+include "include/anchors";
+include "include/dist";
+include "include/skillLists";
+include "include/begging";
+
+const MAX_SKILLS      := 48;     // There are currently 48 Skills.
+const UOBJ_GOLDCOIN   := 0x0eed; // A gold coin
+const UOBJ_METALCHEST := 0x0e7c; // A Metal Chest
+const REACT_THRESHOLD := 2;
+
+set_priority( 50 );
+
+var me := Self();
+var inv_rs, inv_fs, inv_pb, inv_1c;
+var player, counter;
+
+program appraiser()
+  start_script("NPCKeeper", me);
+  EnableEvents(SYSEVENT_ITEM_GIVEN);
+  EnableEvents(EVID_NODE);
+  var myanchor := GetObjProperty(me, "Anchor");
+  if(myanchor)
+    MoveObjectToLocation(me, myanchor[1], myanchor[2], myanchor[3], me.realm, MOVEOBJECT_FORCELOCATION);
+  endif
+  drop_anchor();
+  var next_wander := ReadGameClock() + 10;
+  var ev;
+  var txt;
+  while (1)
+    ev := os::wait_for_event(120);
+    if(ev)
+      case(ev.type)
+        EVID_NODE: txt := lower(ev.text);
+		  if(txt["appraise"])
+		    TurnToward(ev.source);
+		    appraise(ev.source);
+		  elseif((txt["buy"]) || (txt["sell"]))
+		    PrintTextAbovePrivate(me, "I'm sorry, but you must go elsewhere to buy or sell.", ev.source);
+		  endif
+        SYSEVENT_ITEM_GIVEN:  processdeedsale(ev.source, ev.item);
+      endcase
+    endif
+	if(ReadGameClock() >= next_wander)
+	  begpurse(me);
+      wander();
+      if(coordist(me.x, me.y, myanchor[1], myanchor[2]) > 5)
+        MoveObjectToLocation(me, myanchor[1], myanchor[2], myanchor[3], me.realm, MOVEOBJECT_FORCELOCATION);
+      endif
+      next_wander := ReadGameClock() + 30;
+    endif
+  endwhile
+endprogram
+
+function appraise(who)
+  PrintTextAbovePrivate(me, "Target the item you want me to appraise", who);
+  var trg := Target(who);
+  if(!trg)
+    PrintTextAbovePrivate(me, "changed your mind?", who);
+    return;
+  endif
+  var checker := 0;
+  foreach thing in EnumerateItemsInContainer(who.backpack)
+    if(thing == trg)
+      checker := 1;
+      break;
+    endif
+  endforeach
+  if(checker == 0)
+    PrintTextAbovePrivate(me, "But you dont own that!", who);
+    return;
+  endif
+  checker := 0;
+  var deedarray := { 0x16019, 0x1601a, 0x1601b, 0x1601c, 0x1601d, 0x1601e, 0x16020, 0x16021, 0x16022, 0x16023, 0x16024, 0x16025, 0x16026 };
+  if(trg.objtype in deedarray)
+    checker := 1;
+  endif
+  if(checker == 0)
+    PrintTextAbovePrivate(me, "Im not interested in that!", who);
+    return;
+  endif
+  var bankbox := FindBankBox(who);
+  if(!bankbox)
+    PrintTextAbove(me, "I cannot seem to find your bankbox!", who);
+    return;
+  endif
+  var cnfg := ReadConfigFile(":housing:itemdesc");
+  var amt := cnfg[trg.objtype].VendorSellsFor;
+  PrintTextAbovePrivate(me,"I will give you " + amt + " gold coins for that deed.", who);
+endfunction
+
+function processdeedsale(who, trg)
+  var checker := 0;
+  var deedarray := { 0x16019, 0x1601a, 0x1601b, 0x1601c, 0x1601d, 0x1601e, 0x16020, 0x16021, 0x16022, 0x16023, 0x16024, 0x16025, 0x16026 };
+  if(trg.objtype in deedarray)
+    checker := 1;
+  endif
+  if(checker == 0)
+    PrintTextAbovePrivate(me, "Im not interested in that!", who);
+    MoveItemToContainer(trg, who.backpack);
+    return;
+  endif
+  var bankbox := FindBankBox(who);
+  if(!bankbox)
+    PrintTextAbovePrivate(me, "I cannot seem to find your bankbox!", who);
+    MoveItemToContainer(trg, who.backpack);
+    return;
+  endif
+  var cnfg := ReadConfigFile(":housing:itemdesc");
+  var amt := cnfg[trg.objtype].VendorSellsFor;
+  var holder;
+  var goldarray := {};
+  var chk := 0;
+  while(amt > 0)
+     holder := 0;
+     if(amt > 60000)
+       holder := CreateItemInContainer(bankbox, 0xeed, 60000);
+       if(holder)
+         goldarray.append(holder);
+         amt := amt - 60000;
+       else
+         foreach thing in goldarray
+           DestroyItem(thing);
+         endforeach
+         chk := 1;
+         PrintTextAbovePrivate(me, "Your bank box is too full!", who);
+         break;
+      endif
+    else
+       holder := CreateItemInContainer(bankbox, 0xeed, amt);
+       if(holder)
+         if(!DestroyItem(trg))
+           foreach thing in goldarray
+             DestroyItem(thing);
+           endforeach
+           chk := 1;
+           PrintTextAbovePrivate(me, "Your bank box is too full!", who);
+         endif
+         break;
+       else
+         foreach thing in goldarray
+           DestroyItem(thing);
+         endforeach
+         chk := 1;
+         PrintTextAbovePrivate(me, "Your bank box is too full!", who);
+         break;
+       endif
+    endif
+  endwhile
+  if(chk == 0)
+    PrintTextAbovePrivate(me, "The funds have been deposited in your bank box.", who);
+  endif
+endfunction

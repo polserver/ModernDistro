@@ -1,0 +1,160 @@
+/////////////////////////////////////////////////////////////////////////////
+//
+//  killpcs.src: Kill player-characters
+//
+//  TODO: Some server support for only paying attention to 'enteredarea'
+//        and 'leftarea' events from PCs would be nice.
+//        we just use the graphic at the moment, so we'd fight
+//        NPCs too.  Oh well.
+//
+//  Author: ENS
+//
+//  Created: 4/98
+//
+//  Modified week of 6/15/99 by DW to allow speech and ranged attacks
+//
+/////////////////////////////////////////////////////////////////////////////
+
+use npc;
+use os;
+use uo;
+use cfgfile;
+
+include "include/eventID";
+include "include/sysEvent";
+include "include/randName";
+include "include/NPCUtil";
+include "include/objtype";
+include "include/speech";
+include "include/dist";
+include "include/anchors";
+include "ai/main/mainLoopMeek";
+include "ai/combat/fight";
+include "ai/combat/defaultCombatEvent";
+include "ai/setup/setup";
+include "ai/main/loot";
+include "ai/main/sleepMode";
+
+
+const HALT_THRESHOLD := 5; // how close before he attacks?
+var npccfgfile := ReadConfigFile( "npcdesc" );
+var idlesnd1 := CInt(npccfgfile[me.npctemplate].idlesound1);
+var idlesnd2 := CInt(npccfgfile[me.npctemplate].idlesound2);
+
+program KillPlayers()
+
+    	SetWarMode( 0 );
+
+    	main_AI_loop();
+
+endprogram
+
+function CloseDistance( opponent )
+
+    case (Distance( me, opponent ))
+        1:              // the most likely, so first
+        0:
+            return 1;
+        default:
+            RunToward( opponent );
+            return 0;
+    endcase
+
+endfunction
+
+function Run( opponent )
+
+    TurnAwayFrom( opponent );
+
+    DisableEvents( SYSEVENT_SPEECH );
+    DisableEvents( SYSEVENT_ITEM_GIVEN );
+
+    EnableEvents( SYSEVENT_DISENGAGED );
+
+    var waittime;
+    var loops := 0;
+
+    outer:
+    while (opponent && !opponent.dead)
+	loops := loops + 1;
+        waittime := OpenDistance( opponent ) * 15;
+
+	if ( waittime )
+		break outer;
+	endif
+
+        var ev := wait_for_event( waittime );
+        case (ev.type)
+            SYSEVENT_DISENGAGED:
+                if (ev.source.serial == opponent.serial)
+                    say( "Whew!" );
+                    break outer;
+                endif
+            SYSEVENT_ENGAGED:
+            SYSEVENT_DAMAGED:
+		Spout();
+        endcase
+
+	if ( loops > 100 )
+		Fight(opponent);
+	endif
+
+    endwhile
+
+    DisableEvents( SYSEVENT_DISENGAGED );
+    EnableEvents( SYSEVENT_ITEM_GIVEN );
+    EnableEvents( SYSEVENT_SPEECH, 2);
+
+    SetWarMode( 0 );
+
+endfunction
+
+function Spout()
+
+	case (RandomInt(60))
+	0:	say( "Ack! Leave me alone!" );
+	1:	say( "Pick on someone your own size!" );
+	2:	say( "Why are you doing this?  WHY?!" );
+	3:	say( "Leave me be!  I've done you no harm!" );
+	4:	say( "Kal Ort Por" );
+		say( "Damn! No regs...");
+	5:	say( "Ah!  But I'm too young to die!" );
+	6:	say( "Brute!  Fiend!  Aaaah!" );
+	7:	say( "He who runs and runs away, lives to run another day!" );
+	8:	say( "So... wanna fight eh?  Fight someone else!" );
+	9:	say( "Aaahh!  NPCK!!" );
+	10:	say( "I'm going to get help!" );
+	11:	say( "Ouch!  Help!!" );
+	12:	say( "Bet I can outrun you!" );
+	13:	say( "Stop!  I'm serious!  Just stop!" );
+	14:	say( "Aaah!  Spare me!  Please, Spare me!" );
+	15:	say( "Ack!  I'm innocent I tell you!" );
+	16:	say( "Find a more worthy opponent!" );
+	17:	say( "I'm not prepared to meet my maker!" );
+	18:	say( "Wait!  Stop!  I'm a BLEEDER!" );
+	19:	say( "My family will have vengeance!" );
+	20:	say( "Look behind you!  What is that terrible thing!?" );
+	21:	say( "Not in the face!  Not in the face!" );
+	22:	say( "Aaahhh! Help! Help!  I'm dying!");
+	23:	say( "By the virtues! Why? WHY??" );
+	24:	say( "Perhaps it will help to confuse you if I run away some more..." );
+	25:	say( "Run!  Hide!  We're all gonna die!" );
+	default:	return;
+	endcase
+
+	return;
+
+endfunction
+
+function OpenDistance( opponent )
+
+    case (Distance( me, opponent ))
+        20:
+            return 1;
+
+        default:
+            RunAwayFrom( opponent );
+            return 0;
+    endcase
+
+endfunction

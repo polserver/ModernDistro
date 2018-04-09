@@ -1,0 +1,22 @@
+/*
+        Maintened by *Edwards
+
+        2009-10-21
+*/
+use os;
+use uo;
+
+program OnRemove( character, container, item, item_amount, movetype )
+
+	// Prevent compiler warnings about not being used.
+	character := character;
+	container := container;
+	item_amount := item_amount;
+	movetype := movetype;
+	
+	var pid := GetObjProperty( item, "#pid" );
+	var process := GetProcess( pid );
+	process.SendEvent(1);
+	
+	return 1;
+endprogram

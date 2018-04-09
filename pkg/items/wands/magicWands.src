@@ -1,0 +1,378 @@
+use uo;
+use os;
+use cfgfile;
+
+include "include/client";
+include ":attributes:attributes";
+include "include/statMod";
+include "include/canAccess";
+include ":damage:damage";
+include":magery:spells";
+
+
+program magicwands(who, item)
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  if(!can_access(who, item))
+    return;
+  endif
+  if(!ReserveItem(item))
+    return;
+  endif
+  if(!IsWandEquipped(who, item))
+    SendSysMessage(who,"You need to equip that to use it.");
+    return;
+  endif
+  var charges := CInt(GetObjProperty(item, "charges"));
+  var spellid := CInt(GetObjProperty(item, "SpellId"));
+  if(!spellid)
+    SendSysMessage(who, "This wand is broken");
+    return;
+  endif
+  if(charges)
+    if(spellid == 65)
+      identifyit(who, item);
+    else
+      Detach();
+      StartEffect(who, spellid, item);
+    endif
+  else
+    SendSysMessage(who, "That item is out of charges.");
+  endif
+endprogram
+
+function StartEffect(who, spellid, item)
+  SendSysMessage(who, "Select a target.");
+  var trg := Target(who);
+  if(!trg)
+    SendSysMessage(who, "Canceled.");
+    return;
+  endif
+  var charges := CInt(GetObjProperty(item, "charges"));
+  charges := charges - 1;
+  SetObjProperty(item, "charges", charges);
+  if(charges == 0)
+    PrintTextAbovePrivate(item, "That is out of charges", who);
+  endif
+  if(!CheckLineOfSight(who, trg))
+    SendSysMessage(who, "You cant see that");
+    return;
+  endif
+  if(!GetHp(trg))
+    SendSysMessage(who, "You can only use that on living things.");
+    return;
+  endif
+  if(trg.dead)
+    SendSysMessage(who, "You cant cast that on ghosts.");
+    return;
+  endif
+  case(spellid)
+    1: cast_clumsy(who, trg);
+    3: cast_feeblemind(who, trg);
+    4: cast_heal(who, trg);
+    8: cast_weaken(who, trg);
+   12: cast_harm(who, trg);
+   18: cast_fireball(who, trg);
+   29: cast_greatheal(who, trg);
+   30: cast_lightning(who, trg);
+   31: cast_manadrain(who, trg);
+  endcase
+endfunction
+
+function cast_clumsy(caster, cast_on)
+  SetObjProperty(cast_on, "LastHit", {caster.name, caster.serial, "clumsy"});
+  if(MWReflected(cast_on))
+    cast_on := caster;
+  endif
+  PlaySoundEffect(cast_on, SFX_SPELL_CURE);
+  PlayObjectCenteredEffect(cast_on, FX_CURSE_EFFECT, 7,7);
+  if(!CanMod(cast_on, "dex"))
+    SendSysMessage(caster,"Already under the influence!");
+    return;
+  endif
+  var magery := 20;
+  var mod_amount := MWresisted(10, cast_on, (GetModAmount(magery)));
+  var duration := GetModDuration(magery);
+  DoTempMod(cast_on, "dex", 0 - mod_amount, duration);
+endfunction
+
+function cast_feeblemind(caster, cast_on)
+  SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "feeblemind" });
+  if (MWReflected(cast_on))
+    cast_on := caster;
+  endif
+  PlaySoundEffect(cast_on, SFX_SPELL_FEEBLEMIND);
+  PlayObjectCenteredEffect( cast_on, FX_CURSE_EFFECT, 7, 7 );
+  if (!CanMod(cast_on, "int"))
+    SendSysMessage(caster,"Already under the influence!");
+    return;
+  endif
+  var magery := 20;
+  var mod_amount := MWresisted(20, cast_on, (GetModAmount(magery)));
+  var duration := GetModDuration(magery);
+  DoTempMod(cast_on, "int", 0 - mod_amount, duration);
+endfunction
+
+function cast_heal(caster, cast_on)
+  caster := caster; // stops ecompile "not used" warning
+  var healed := RandomDiceRoll("3d2");
+  healed := 6 + healed;
+  if(cast_on.isA(POLCLASS_NPC))
+    healed := healed * 2;
+  endif
+  HealDamage(cast_on, healed);
+  PlayObjectCenteredEffect(cast_on, FX_SPARK_EFFECT, 7, 0x10);
+  PlaySoundEffect(cast_on, SFX_SPELL_GREATER_HEAL);
+endfunction
+
+function cast_weaken(caster, cast_on)
+  SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "weaken" });
+  if(MWReflected(cast_on))
+    cast_on := caster;
+  endif
+  PlaySoundEffect(cast_on, SFX_SPELL_WEAKEN);
+  PlayObjectCenteredEffect( cast_on, FX_CURSE_EFFECT, 7,7);
+  if(!CanMod(cast_on, "str"))
+    return;
+  endif
+  var magery := 20;
+  var mod_amount := MWresisted(20, cast_on, (GetModAmount(magery)));
+  var duration := GetModDuration(magery);
+  DoTempMod(cast_on, "str", 0 - mod_amount, duration);
+endfunction
+
+function cast_harm(caster, cast_on)
+  var dmg := MWCalcSpellDamage(2, 20,cast_on);
+  SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "harm"});
+  if (MWReflected(cast_on))
+    cast_on := caster;
+  endif
+  PlaySoundEffect(cast_on, SFX_SPELL_HARM);
+  PlayObjectCenteredEffect(cast_on, FX_GLOW_SPIKE, 0x0a,0x1e);
+  if(GetHp(cast_on) >= 1)
+    if(cast_on.npctemplate)
+      dmg := dmg * 2;
+    endif
+    ApplyRawSpellDamageEX(cast_on, dmg, DMG_COLD, caster, 20);
+  endif
+endfunction
+
+function cast_fireball(caster, cast_on)
+  var dmg := MWCalcSpellDamage(3, 30,cast_on);
+  SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "harm"});
+  if (MWReflected(cast_on))
+    cast_on := caster;
+  endif
+  PlayMovingEffect( caster, cast_on, FX_FIREBALL, 5, 1 );
+  PlaySoundEffect( caster, 0x15f);
+  if(GetHp(cast_on) >= 1)
+    if(cast_on.npctemplate)
+      dmg := dmg * 2;
+    endif
+    ApplySpellDamageEX(cast_on, dmg, DMG_FIRE, caster, 3);
+  endif
+endfunction
+
+function cast_greatheal(caster, cast_on)
+  caster := caster; // stops ecompile "not used" warning
+  var healed := RandomDiceRoll("2d6");
+  healed := 30 + (4 + healed);
+  if(cast_on.isA(POLCLASS_NPC))
+    healed := healed * 2;
+  endif
+  HealDamage(cast_on, healed);
+  PlayObjectCenteredEffect(cast_on, FX_SPARK_EFFECT, 7, 0x10);
+  PlaySoundEffect(cast_on, SFX_SPELL_GREATER_HEAL);
+endfunction
+
+function cast_lightning(caster, cast_on)
+  SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "lightning bolt"});
+  var bdmg := RandomDiceRoll("4d4");
+  var dmg := MWresisted(40, cast_on, bdmg);
+  if (dmg < 1)
+    dmg := 1;
+  endif
+  if(MWReflected(cast_on))
+    cast_on := caster;
+  endif
+  PlaySoundEffect(cast_on, SFX_SPELL_LIGHTNING);
+  PlayLightningBoltEffect(cast_on);
+  if(cast_on.isA(POLCLASS_NPC))
+    dmg := dmg * 2;
+  endif
+  ApplySpellDamageEX(cast_on, dmg, DMG_ENERGY, caster, 4);
+endfunction
+
+function cast_manadrain(caster, cast_on)
+  SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "mana drain" });
+  if (MWReflected(cast_on))
+    var tmp := cast_on;
+    cast_on := caster;
+    caster := tmp;
+  endif
+  //var target_resist := GetAttribute(cast_on, RESISTING_SPELLS); // uncomment if needed
+  var diff := MWresisted(40, cast_on, (RandomInt(30)));
+  if(diff > 0)
+    if(diff > GetMaxMana(cast_on))
+      diff := GetMaxMana(cast_on);
+    endif
+    PlaySoundEffect(caster, SFX_SPELL_MANA_DRAIN);
+    PlayObjectCenteredEffect(cast_on, FX_HEAL_EFFECT, 7, 0x10);
+    if((GetMana(cast_on) - diff) < 0)
+      diff := GetMana(cast_on);
+    endif
+    SetMana(cast_on, (GetMana(cast_on) - diff));
+  endif
+endfunction
+
+function MWReflected(cast_on)
+  var reflect := Cint(GetObjProperty(cast_on, "mr"));
+  if(reflect == 1)
+    sleepms(500);
+    PlaySoundEffect(cast_on, SFX_SPELL_MAGIC_REFLECTION);
+    PlayObjectCenteredEffect( cast_on, FX_CURSE_EFFECT, 10,10);
+    SendSysMessage(cast_on, "Your magic reflect spell saved you!");
+    EraseObjProperty(cast_on, "mr");
+    return 1;
+  elseif(reflect == 2)
+    var holder, pid;
+    var eqp := GetObjProperty(cast_on, "EquipTimers");
+    foreach thing in ListEquippedItems(cast_on)
+      foreach entry in eqp
+        if((thing.serial == entry[1]) and (entry[2] == "ref"))
+          holder := GetObjProperty(thing, "pid");
+          break;
+        endif
+      endforeach
+    endforeach
+    pid := getprocess(holder);
+    if(pid)
+      var k := struct;
+      k.+type := EVID_DISCHARGE;
+      pid.sendevent(k);
+    else
+      EraseObjProperty(cast_on, "mr");
+    endif
+  endif
+  return 0;
+endfunction
+
+function MWCalcSpellDamage(circle, caster, cast_on)
+  cast_on := cast_on; // stops ecompile "not used" warning
+  var die_string := circle+"d8";
+  var dmg := RandomDiceRoll(die_string);
+  dmg := dmg + (CInt(caster) / 10);
+  if(dmg > (circle * 8))
+    dmg := circle * 8;
+  endif
+  return dmg;
+endfunction
+
+function MWResisted(magery, cast_on, amt)
+  var halfamt := amt/2;
+  if(cast_on.dead)
+    return 0;
+  endif
+  if(SkillCheck(cast_on, RESISTING_SPELLS, magery, (magery * 2)))
+    SendSysMessage(cast_on, "You feel yourself resisting magical energy!");
+    PlaySoundEffect(cast_on, SFX_SPELL_WEAKEN);
+    PlayObjectCenteredEffect( cast_on, FX_CURSE_EFFECT, 5,5);
+    amt := halfamt;
+    return amt;
+  else
+    return amt;
+  endif
+endfunction
+
+function IsWandEquipped(who,wand)
+  if((!Accessible(who,wand)) || (Distance(who, wand) > 1))
+    return 0;
+  endif
+  foreach item in ListEquippedItems(who)
+    if(wand.serial == item.serial)
+      return 1;
+    endif
+  endforeach
+  return 0;
+endfunction
+
+function identifyit(who, item)
+  EraseObjProperty(who, "IsMeditating");
+  var charges := CInt(GetObjProperty(item, "charges"));
+  var the_item, ncharges;
+  SendSysMessage(who, "Select an object to identify.");
+  the_item := Target(who, TGTOPT_CHECK_LOS);
+  if(!the_item)
+    SendSysMessage(who, "Targetting cancelled.");
+    return;
+  endif
+  charges := charges - 1;
+  SetObjProperty(item, "charges", charges);
+  if(charges == 0)
+    PrintTextAbovePrivate(item, "That is out of charges", who);
+  endif
+  if(the_item.isA(POLCLASS_MOBILE))
+    SendSysMessage(who, "That's not an item!");
+    return;
+  endif
+  var name := "";
+  var itsname := the_item.desc;
+  if(GetObjProperty(the_item, "silvermod"))
+    name :=  "silver" + name;
+  endif
+  if(GetObjProperty(the_item, "durability"))
+    name := name + " " + GetObjProperty(the_item, "durability");
+  endif
+  if(GetObjProperty(the_item, "accuracy"))
+    name := name + " " + GetObjProperty(the_item, "accuracy");
+  endif
+  itsname["a "] := "";
+  itsname["an "] := "";
+  itsname["magic "] := "";
+  name := name + " " + itsname;
+  if(GetObjProperty(the_item, "damagemod"))
+    name := name + " " + GetObjProperty(the_item, "damagemod");
+  endif
+  name.erase(1);
+  if((!GetObjProperty(the_item, "IDed")) and (name != ""))
+    SetName(the_item, name);
+  endif
+  var msg := "It appears to be";
+  itsname := the_item.desc;
+  if(itsname[1] == " ")
+    if(Cint(itsname[2]) == 0)
+      case(Cstr(itsname[2]))
+        "a": msg := msg + " an";
+        "e": msg := msg + " an";
+        "i": msg := msg + " an";
+        "o": msg := msg + " an";
+        "u": msg := msg + " an";
+      endcase
+    endif
+  else
+    msg := msg + " ";
+    if(Cint(itsname[1]) == 0)
+      case(Cstr(itsname[1]))
+        "a": msg := msg + " an ";
+        "e": msg := msg + " an ";
+        "i": msg := msg + " an ";
+        "o": msg := msg + " an ";
+        "u": msg := msg + " an ";
+      endcase
+    endif
+  endif
+  msg := msg + itsname;
+  SendSysMessage( who, msg);
+  SetObjProperty( the_item, "IDed", 1 );
+  if(GetObjProperty(the_item, "charges") )
+    ncharges := CStr(GetObjProperty(the_item, "charges") );
+    if(ncharges)
+      SendSysMessage(who, "It has " + ncharges + " charges.");
+    endif
+  endif
+  if(GetObjProperty(the_item, "type") == "cursed")
+    if(SkillCheck(who, ITEM_IDENTIFICATION, 65, 0) )
+      SendSysMessage(who, "* This item is cursed! *");
+    endif
+  endif
+endfunction

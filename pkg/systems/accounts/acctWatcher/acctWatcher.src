@@ -1,0 +1,91 @@
+/*
+ * $Id: acctWatcher.src 375 2006-06-17 19:26:32Z austinheilman $
+ *
+ */
+use uo;
+use os;
+
+include ":datafile:datafile";
+include ":accounts:accounts";
+include ":accounts:settings";
+include ":accounts:report";
+include ":timeutils:time";
+
+program GlobalControl()
+	SetGlobalProperty("#AcctWatcherPId", GetPid());
+	Set_Priority(1);
+
+	ACCT_ReportText("---=[ ACCOUNT WATCHER HAS STARTED UP ]=---", ACCT_REPORT_SYSLOG);
+	
+	Sleep(5);
+	
+	var settings := ACCT_GetSettingsCfgElem("Settings");
+
+	while( 1 )
+		foreach acct_name in ( ListAccounts() )
+			var account := FindAccount(acct_name);
+			if ( CheckForDeletion(account, settings) )
+				continue;
+			endif
+
+			CheckSuspension(account);
+			Sleep(1);
+		endforeach
+
+		Sleep(SECONDS_IN_HOUR);
+	endwhile
+
+	return 1;
+endprogram
+
+function CheckForDeletion(account, settings)
+	var max_idle_time := CInt(settings.MaxIdleTime);
+	if ( !max_idle_time )
+		return 0;
+	elseif ( settings.OnlyAutoDeleteEmpties )
+		if ( ACCT_GetNumCharacters(account) > 0 )
+			return 0;
+		endif
+	endif
+
+	var last_used := ACCT_GetLastLogin(account);
+	if ( !last_used )
+		ACCT_ReportText("Account ("+account.name+") has no last login time... it has been set now though.", ACCT_REPORT_SYSLOG);
+		ACCT_SetLastLogin(account);
+	endif
+	
+	var deletion_time := POLCore().systime - (max_idle_time * SECONDS_IN_DAY);
+
+	if ( deletion_time > last_used )
+		ACCT_ReportText("Account ("+account.name+") has not been used in "+max_idle_time+" days. Account is being deleted.", ACCT_REPORT_SYSLOG);
+		
+		var result := ACCT_DeleteAccount(account);
+		if ( result.errortext )
+			ACCT_ReportText("Unable to delete account ("+account.name+"). Error: "+result.errortext, ACCT_REPORT_SYSLOG);
+			return 0;
+		else
+			ACCT_ReportText("Account ("+account.name+") was successfully deleted.", ACCT_REPORT_SYSLOG);
+			return 1;
+		endif
+	endif
+
+	return 0;
+endfunction
+
+function CheckSuspension(account)
+	if ( account.enabled )
+		return 1;
+	endif
+
+	var release_time := CInt(account.GetProp("ReleaseTime"));
+	if ( !release_time )
+		return 1;
+	elseif ( POLCore().systime > release_time )
+		account.EraseProp("ReleaseTime");
+		account.Enable();
+		ACCT_ReportText("Account ("+account.name+") has been unsuspended.", ACCT_REPORT_SYSLOG);
+		return 1;
+	endif
+
+	return 0;
+endfunction

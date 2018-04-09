@@ -1,0 +1,8 @@
+use os;
+
+var script := Start_Script( "spawnSystem" );
+if( script.errortext )
+	SysLog( "Error starting spawn system ->"+script.errortext );
+else
+	Print( "Starting spawn system... OK." );
+endif

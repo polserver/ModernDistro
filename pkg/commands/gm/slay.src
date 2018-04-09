@@ -1,0 +1,24 @@
+use os;
+use uo;
+use boat;
+include ":attributes:attributes";
+
+program textcmd_kill( who )
+
+	var mob := Target( who, TGTOPT_NOCHECK_LOS );
+	if (mob)
+
+		if((mob.cmdlevel) && mob.cmdlevel > who.cmdlevel)
+			RevokePrivilege( who, "invul" );
+			ApplyDamage( who, GetHp(who) + 100 );
+			return;
+		endif
+
+		if (!mob.dead)
+			RevokePrivilege( mob, "invul" );
+			ApplyDamage( mob, GetHp(mob) + 100 );
+		endif
+
+	endif
+
+endprogram

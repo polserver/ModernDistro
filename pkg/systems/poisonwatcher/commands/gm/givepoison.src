@@ -1,0 +1,26 @@
+use uo;
+include ":poisonwatcher:poisons";
+
+program CmdAddPoison(who, text)
+	text := SplitWords(text);
+	
+	var p_name := text[1];
+	var amount := cint(text[2]);
+	var level := cint(text[3]);
+
+	if (!level)
+		level := 1;
+	endif
+	
+	if ( !p_name || !amount )
+		SendSysMessage(who, "Syntax: .givepoison <poison name> <amount> (<level>)");
+		return;
+	endif
+	
+	SendSysMessage(who, "Who do you want to infect?");
+	var targ := target(who);
+	
+	if ( targ.IsA(POLCLASS_MOBILE) )
+		AddPoison(targ, p_name, amount, who, level);
+	endif
+endprogram

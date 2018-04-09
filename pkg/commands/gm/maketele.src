@@ -1,0 +1,61 @@
+use os;
+use uo;
+
+include "include/client";
+include "include/objtype";
+
+program make_a_tele( seer )
+
+    SendSysMessage( seer, "Select a rune to gate from." );
+
+    var rune := Target( seer, TGTOPT_NOCHECK_LOS );
+
+    if (!rune)
+            SendSysMessage(seer, "Targetting cancelled.");
+            return;
+    endif
+
+    if (rune.objtype != UOBJ_RUNE)
+            SendSysMessage(seer, "You can only use this on a rune!");
+            return;
+    endif
+
+	var tox := CInt(GetObjProperty( rune, "x" ));
+	var toy := CInt(GetObjProperty( rune, "y" ));
+	var toz := CInt(GetObjProperty( rune, "z" ));
+        var torealm := GetObjProperty ( rune, "realm" );
+        if (!torealm)
+            torealm := "britannia";
+        endif
+	set_critical( 1 );
+	var gate1 := CreateItemAtLocation( seer.x, seer.y, seer.z, 0x16203, 1, seer.realm );
+	gate1.facing := 29;
+	var gate2 := CreateItemAtLocation( tox, toy, toz, 0x16203, 1, seer.realm );
+	gate2.facing := 29;
+	if (!gate1 || !gate2)
+		DestroyItem(gate1);
+		DestroyItem(gate2);
+		return;
+	endif
+
+	SetObjProperty( gate1, "DestX", gate2.x );
+	SetObjProperty( gate1, "DestY", gate2.y );
+	SetObjProperty( gate1, "DestZ", gate2.z );
+	SetObjProperty( gate1, "DestRealm", gate2.realm );
+	SetObjProperty( gate2, "DestX", gate1.x );
+	SetObjProperty( gate2, "DestY", gate1.y );
+	SetObjProperty( gate2, "DestZ", gate1.z );
+	SetObjProperty( gate2, "DestRealm", gate1.realm );
+
+	Detach();
+
+	set_critical( 0 );
+
+	sleep(30);
+   
+	set_critical(1);
+	gate1.graphic := 1;
+	gate2.graphic := 1;
+	set_critical(0);
+
+endprogram

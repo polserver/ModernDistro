@@ -1,0 +1,70 @@
+/* $Id$
+ *
+ */
+use uo;
+use os;
+
+include ":attributes:attributes";
+
+program PoisonScript(params)
+	var mobile := params[1];
+	
+	var duration := CInt(GetObjProperty(mobile, "DarkBorer"));
+	if ( !duration )
+		duration := 90;
+	endif
+	
+	do
+		Sleep(60);
+		duration := CInt(GetObjProperty(mobile, "DarkBorer"));
+		if ( duration == error )
+			duration := 90;
+		endif
+		
+		if ( mobile.dead )
+			continue; // Ghosts cant have birth!
+		else
+			duration -= 1;
+			SetObjProperty(mobile, "DarkBorer", duration);
+		endif
+		
+		case ( duration )
+			89: SendSysMessage(mobile, "You have a sore stomach."); break;
+			60: SendSysMessage(mobile, "You feel a knot in your stomach."); break;
+			50: SendSysMessage(mobile, "Your stomach size begins to expand outward."); break;
+			40: SendSysMessage(mobile, "You feel sharp stomach pains."); break;
+			35: SendSysMessage(mobile, "You feel sharp stomach pains."); break;
+			25: SendSysMessage(mobile, "You feel something sharp poking at your innards."); break;
+			15: SendSysMessage(mobile, "You feel intensely sharp pains coming from all over the inside of your torso."); break;
+			10: SendSysMessage(mobile, "You feel your innards being shreaded to bits!"); break;
+			1: SendSysMessage(mobile, "You feel something preparing to burst out of your body!"); break;
+		endcase
+	dowhile( duration > 0 );
+
+	PrintTextAbove(mobile, "*A dark borer that was incubating in "+mobile.name+"'s stomach rips its way out!*", 3, 55);
+	var baby := CreateNPCFromTemplate(":brainai:darkborer", mobile.x, mobile.y, mobile.z, 0, mobile.realm);
+	ApplyRawDamage(mobile, CInt(AP_GetVitalMaximumValue(mobile, HITS))+1);
+
+	SleepMS(100);
+	if ( mobile.acctname && mobile.dead )
+		sleepms(100);
+		var corpse := mobile.GetCorpse();
+		
+		var tries := 10;
+		while ( !corpse )
+			SleepMS(10);
+			corpse := mobile.GetCorpse();
+			tries -= 1;
+			if ( tries == 0 )
+				break;
+			endif
+		endwhile
+		SleepMS(20);
+		
+		if ( corpse )
+			corpse.Gibbify(10);
+		endif
+	endif
+	
+	return 1;
+endprogram

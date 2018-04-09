@@ -1,0 +1,256 @@
+use uo;
+use os;
+
+include "include/help";
+include "include/eventID";
+var layout := {
+
+"resizepic 0 0 2600 600 450",
+"resizepic 40 45 2620 175 315",
+"page 0",
+"gumppic 40 125 12",
+"gumppic 40 125 50987 hue=88",
+"text 60 50 95 0",
+"text 55 65 995 1",
+"text 52 80 995 2",
+"text 64 95 995 3",
+"text 64 110 995 4",
+"text 80 125 995 5",
+"text 67 140 995 6",
+"text 80 155 995 7",
+"text 180 17 995 28",
+"text 40 365 995 29",
+"text 40 380 995 30",
+"text 120 415 995 31",
+"button 485 415 243 241 1 0 0",
+"page 1",
+"text 240 40 995 8",
+"button 220 42 210 211 0 2 1",
+"text 240 55 0 9",
+"text 240 70 0 10",
+"text 240 85 0 11",
+"text 240 105 995 12",
+"button 220 107 210 211 1 0 2",
+"text 240 120 995 13",
+"text 240 135 0 14",
+"text 240 150 0 15",
+"text 240 170 995 16",
+"button 220 172 210 211 1 0 3",
+"text 240 185 0 17",
+"text 240 200 0 18",
+"text 240 215 0 19",
+"text 240 230 0 20",
+"text 240 245 0 21",
+"text 240 265 995 22",
+"button 220 267 208 208 1 0 3",
+"text 240 280 0 23",
+"text 240 295 0 24",
+"text 240 310 0 25",
+"text 240 325 0 26",
+"text 240 340 0 27",
+"page 2",
+"text 240 40 995 32",
+"button 220 42 208 208 0 2 5",
+"text 240 55 0 33",
+"text 240 70 0 34",
+"text 240 85 0 35",
+"text 240 100 0 36",
+"text 240 120 995 37",
+"button 220 122 208 208 0 2 6",
+"text 240 135 0 38",
+"text 240 150 0 39",
+"text 240 165 0 40",
+"text 240 180 0 41",
+"text 240 200 995 42",
+"button 220 202 210 211 1 2 7",
+"text 240 215 0 43",
+"text 240 230 0 44",
+"text 240 245 0 45",
+"text 240 260 0 46",
+"text 240 275 0 47",
+"text 240 290 0 48",
+"text 240 305 0 49",
+"text 240 320 0 50",
+"text 240 340 995 51",
+"button 220 342 210 211 0 1 8"
+};
+
+var data := {
+
+"Greetings, traveler!",
+"This menu will help",
+"guide you to the best",
+"place for answers",
+"about [Shard Name].",
+"Please choose",
+"from the options",
+"on the right.",
+"General questions about [Shard Name].",
+"Select this option if you are having difficulties",
+"learning to use a skill, if you are lost, or if",
+"you have a general gameplay question.",
+"My character is physically stuck or cannot",
+"continue to play.",
+"This choice covers cases where your character is",
+"in a location they cannot move out of.",
+"Another player is harassing me.",
+"Another player is harassing your character, be",
+"it by verbal or physical means, or is breaking",
+"the Terms of Service Agreement. To see what",
+"constitutes harassment, please visit",
+"[Shard Website]",
+"Other",
+"If you are experiencing a problem in the game",
+"that does not fall into one of the other",
+"categories or is not addressed on the Support",
+"web page and requires in-game assistance, ",
+"choose this option",
+"Help Menu",
+"If you cannot find the help you require on this list, please visit our webpage",
+"at [Shard Website] for more information.",
+//** the follow line must remain **
+"© 2000 Zulu Hotel - zuluhotel@hotmail.com",
+//** the above line must stay **
+"Visit the [Shard Name] website.",
+"You can find detailed answers to many of the",
+"most frequently asked questions on our shard",
+"website. You will need to browse to:",
+"[URL]",
+"Report a bug to the [Shard name] staff.",
+"email bugs to: [Shard Admin].",
+"It will be read by our support staff.",
+"We apologize for not being able to reply to",
+"individual reports.",
+"Contact a Counselor.",
+"A Counselor is an experienced [Shard Name]",
+"player who has volunteered their time to help",
+"answer general questions. Selecting this option",
+"will let you send a message to a Counselor.",
+"Please remember that Counselors are volunteers",
+"and may not be available at all times, so",
+"please be patient and remember to check the",
+"website for additional help.",
+"Back to the first page."
+
+};
+
+var gmpages := GetGlobalProperty("gmpages");
+var cnpages := GetGlobalProperty("counpages");
+
+program help(who2)
+  var who := who2[1];
+  var box := SendDialogGump( who, layout, data );
+  case (box[0])
+        2: stuckpage(who); //stuck
+        3: mainpagegm(who);
+        7: mainpagecoun(who);
+        default: SendSysMessage( who,  "Cancelled");
+  endcase
+endprogram
+
+function mainpagecoun(who)
+  if(len(onlinecounselors) == 0)
+    SendSysMessage( who, "Sorry, there are no counselors online now, try again later.");
+    return;
+  endif
+  var thepage := CStr(RequestInput( who, who.backpack, "Write down your question:" ));
+  if(thepage=="0")
+    SendSysMessage(who, "Cancelled");
+    return;
+  endif
+  counpage(who, thepage);
+  EraseObjProperty( who, "canpage" );
+  SendSysMessage( who, "The counselors have received your message and will soon reply.");
+  pagewarning(2, thepage, who);
+endfunction
+
+function stuckpage(who)
+  if(len(onlinestaff) == 0)
+    SendSysMessage( who, "Sorry, there are no staff online, try again later.");
+    return;
+  endif
+  var thepage := "I'm stuck and cannot move, please help.";
+  gmpage(who, thepage);
+  pagewarning(2, thepage, who);
+  EraseObjProperty( who, "canpage" );
+  SendSysMessage( who, "Staff has received your message and will soon reply.");
+endfunction
+
+function mainpagegm(who)
+  if(len(onlinestaff) == 0)
+    SendSysMessage( who, "Sorry, there are no GM's online now, try again later.");
+    return;
+  endif
+  var thepage := CStr(RequestInput( who, who.backpack, "Write down your problem:" ));
+  if(thepage == "0")
+    SendSysMessage(who, "Cancelled");
+    return;
+  endif
+  gmpage(who, thepage);
+  EraseObjProperty( who, "canpage" );
+  SendSysMessage( who, "GM's have received your message and will soon reply.");
+  pagewarning(1, thepage, who);
+endfunction
+
+function counpage(who, thepage)
+  if(!cnpages)
+    cnpages := {};
+  endif
+  while(1)
+    if (!Icanpage(who))
+      sleep(1);
+    else
+      break;
+    endif
+  endwhile
+  foreach thing in cnpages
+    if(thing[3] == who.serial)
+      SendSysMessage(who, "Your new page overrides your old one and has been placed at the end of the queu.");
+      cnpages := RemoveElement(cnpages, thing);
+      break;
+    endif
+  endforeach
+  var newarry := {};
+  newarry.append(who.name);
+  newarry.append(thepage);
+  newarry.append(who.serial);
+  cnpages.append(newarry);
+  SetGlobalProperty("counpages", cnpages);
+endfunction
+
+function gmpage(who, thepage)
+  if(!gmpages)
+    gmpages := {};
+  endif
+  while(1)
+    if (!Icanpage(who))
+      sleep(1);
+    else
+      break;
+    endif
+  endwhile
+  foreach thing in gmpages
+    if(thing[3] == who.serial)
+      SendSysMessage(who, "Your new page overrides your old one and has been placed at the end of the queu.");
+      gmpages := RemoveElement(gmpages, thing);
+      break;
+    endif
+  endforeach
+  var newarry := {};
+  newarry.append(who.name);
+  newarry.append(thepage);
+  newarry.append(who.serial);
+  gmpages.append(newarry);
+  SendSysMessage(who, "Your page is number " + gmpages.size() + " in the queu");
+  SetGlobalProperty("gmpages", gmpages);
+endfunction
+
+function RemoveElement(arry, position)
+  var newarray := { };
+  foreach thing in arry
+    if(thing != position)
+      newarray.append(thing);
+    endif
+  endforeach
+  return newarray;
+endfunction

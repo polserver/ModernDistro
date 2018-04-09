@@ -1,0 +1,44 @@
+
+use cfgfile;
+use uo;
+use os;
+
+include "include/client";
+
+program close_door(door)
+  var doordesc := ReadConfigFile("itemdesc");
+  var xmod := CInt(doordesc[door.objtype].xmod);
+  var ymod := CInt(doordesc[door.objtype].ymod);
+  var newx := (door.x - xmod);
+  var newy := (door.y - ymod);
+  var newz := (door.z);
+  var closesound;
+  var opensound;
+  case(doordesc[door.objtype].doortype)
+    "stone":  opensound := SFX_OPEN_METAL_DOOR;
+              closesound := SFX_CLOSE_METAL_DOOR;
+     "wood":  opensound := SFX_OPEN_WOODEN_DOOR;
+              closesound := SFX_CLOSE_WOODEN_DOOR;
+     "metal": opensound := SFX_OPEN_METAL_DOOR;
+              closesound := SFX_CLOSE_METAL_DOOR;
+  endcase
+  while(1);
+    if (!GetObjProperty( door, "WhenOpened"))
+      return;
+    endif
+    var people := len(ListMobilesNearLocation( newx, newy, newz, 0, door.realm));
+    var hidden := len(ListMobilesNearLocationEx(newx, newy, newz, 0, LISTEX_FLAG_HIDDEN, door.realm));
+    if((people == 0) && (hidden == 0));
+      set_critical(1);
+      PlaySoundEffect( door, closesound );
+      door.graphic := door.objtype;
+      door.movable := 1;
+      MoveObjectToLocation(door, newx, newy, newz, door.realm, MOVEOBJECT_FORCELOCATION);
+      door.movable := 0;
+      EraseObjProperty( door, "WhenOpened" );
+      set_critical(0);
+      break;
+    endif
+    sleep(1);
+  endwhile
+endprogram

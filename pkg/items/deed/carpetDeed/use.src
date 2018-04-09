@@ -1,0 +1,172 @@
+use uo;
+use os;
+
+include ":deed:carpet";
+include ":gumps:gumps";
+include ":housing:housing";
+
+program gump_CarpetSelection(who, carpet_deed)
+//Check house junk such as "is in house" and "lockdowns"
+	var lockdowns, sign := FindHouseSign (who);
+	//var sign := FindHouseForLocation (who.x, who.y, who.realm);
+	
+	if (!IsInsideTheHouse (who, sign))
+		SendSysMessage (who, "You must be in your house to use this!");
+	return;
+	else
+	lockdowns := GetObjProperty(sign, "numlockdowns");
+		if (lockdowns <= 0)
+			SendSysMessage(who, "You do not have encough lockdowns for this to be placed.");
+		return;
+		endif
+	endif
+	if(!ReserveItem(carpet_deed))
+		SendSysMessage(who, "That item is already in use.");
+	return;
+	endif
+	ReserveItem(carpet_deed);
+//if deed is dyable, this will color the carpets with the color in the gump,
+//changeable in the itemdesc file that defines the deed as an item.
+	var hue := carpet_deed.color;
+
+	var gump := GFCreateGump();
+	
+	GFPage(gump, 0);
+	GFResizePic(gump, 0, 0, 9250, 390, 265);
+	GFPicTiled(gump, 15, 35, 360, 215, 2624);
+	GFAddAlphaRegion(gump, 15, 35, 360, 215);
+	GFTextLine(gump, 15, 12, 1915, "Select Carpet Style:");
+	GFAddButton(gump, 20, 42, 2328, 2329, GF_CLOSE_BTN, 1);
+	GFTilePic(gump, 36, 49, 16136, hue);
+	GFAddButton(gump, 110, 42, 2328, 2329, GF_CLOSE_BTN, 2);
+	GFTilePic(gump, 126, 49, 16137, hue);
+	GFAddButton(gump, 200, 42, 2328, 2329, GF_CLOSE_BTN, 3);
+	GFTilePic(gump, 216, 49, 16138, hue);
+	GFAddButton(gump, 290, 42, 2328, 2329, GF_CLOSE_BTN, 4);
+	GFTilePic(gump, 306, 49, 2750, 0);
+	GFAddButton(gump, 20, 112, 2328, 2329, GF_CLOSE_BTN, 5);
+	GFTilePic(gump, 36, 119, 16141, hue);
+	GFAddButton(gump, 110, 112, 2328, 2329, GF_CLOSE_BTN, 6);
+	GFTilePic(gump, 126, 119, 16145, hue);
+	GFAddButton(gump, 200, 112, 2328, 2329, GF_CLOSE_BTN, 7);
+	GFTilePic(gump, 216, 119, 16151, hue);
+	GFAddButton(gump, 290, 112, 2328, 2329, GF_CLOSE_BTN, 8);
+	GFTilePic(gump, 306, 119, 16152, hue);
+	GFAddButton(gump, 20, 182, 2328, 2329, GF_CLOSE_BTN, 9);
+	GFTilePic(gump, 36, 189, 2760, hue);
+	GFAddButton(gump, 110, 182, 2328, 2329, GF_CLOSE_BTN, 10);
+	GFTilePic(gump, 126, 189, 4248, hue);
+	GFAddButton(gump, 200, 182, 2328, 2329, GF_CLOSE_BTN, 11);
+	GFTilePic(gump, 216, 189, 2729, hue);
+	GFAddButton(gump, 290, 182, 2328, 2329, GF_CLOSE_BTN, 12);
+	GFTilePic(gump, 306, 189, 2739, hue);
+	
+	var carpet_selection := GFSendGump(who, gump);
+	
+	var buttons := carpet_selection.keys;
+//Let's determine what button was selected, oh the drudgery
+	var menu_choice;
+	foreach button in buttons 
+		menu_choice := button;
+	endforeach	
+	
+//gump closed	
+	if (!carpet_selection)
+		SendSysMessage(who, "Cancelled.");
+	return;
+	endif
+
+//Northwest Corner Selection
+    SendSysMessage( who, "Select northwest corner of area to be carpeted.");
+    var target_one := TargetCoordinates(who);
+
+    if ( !target_one )
+        SendSysMessage(who, "Cancelled.");
+    return;
+    endif
+	
+	if (!CheckLosAt(who, target_one.x, target_one.y, target_one.z))
+		SendSysMessage(who, "Target not within line of sight.");
+	return;
+	endif
+    
+    if (!IsLocationWithinHouseSign(sign, target_one.x, target_one.y, target_one.z))
+        SendSysMessage(who, "Location out of house borders.");
+	return;
+    endif
+
+//Southeast Corner Selection
+    SendSysMessage(who, "Select southeast corner of area to be carpeted.");
+    var target_two := TargetCoordinates(who);
+
+    if ( !target_two )
+        SendSysMessage(who, "Cancelled.");
+    return;
+    endif
+
+	if (!CheckLosAt(who, target_two.x, target_two.y, target_two.z))
+		SendSysMessage(who, "Target not within line of sight.");
+	return;
+	endif
+	
+    if ( !IsLocationWithinHouseSign(sign, target_two.x, target_two.y, target_two.z) )
+        SendSysMessage(who, "Location out of house borders.");
+	return;
+    endif
+	
+//LOS Check between both targets, using player's current realm for confirmation, is this proper? Who knows?
+	var LOSCheck := CheckLosBetween(target_one.x, target_one.y, target_one.z, target_two.x, target_two.y, target_two.z, who.realm);
+	if (!LOSCheck)
+		SendSysMessage(who, "Your carpeted area must be within line of sight.");
+	return;
+	endif
+
+//Check target_one.z & target_two.z level so they match
+    if ( target_one.z != target_two.z )
+        SendSysMessage(who, "Both corners must be at same height.");
+    return;
+    endif
+    var carpet_z := target_one.z;
+
+//In the event the player does something wacky and targets the opposite corners than he ought to,
+//why can't the children follow directions?
+    var x1;
+    var y1;
+    var x2;
+    var y2;
+
+    if ( target_one.x <= target_two.x )
+        x1 := target_one.x;
+        x2 := target_two.x;
+    else
+        x1 := target_two.x;
+        x2 := target_one.x;
+    endif
+
+    if ( target_one.y <= target_two.y )
+        y1 := target_one.y;
+        y2 := target_two.y;
+    else
+        y1 := target_two.y;
+        y2 := target_one.y;
+    endif
+
+//Carpet size check
+	var X_Axis := x2 - x1;
+	var Y_Axis := y2 - y1;
+    if ((X_Axis == 0) || (Y_Axis == 0))
+        SendSysMessage(who, "Carpet area too small.");
+    return;
+    endif	
+    if ((X_Axis > 8) || (Y_Axis > 8))
+        SendSysMessage(who, "Carpet area too big, can only be 8 tiles in each direction.");
+    return;
+    endif	
+
+//Determine lockdowns consumed by placed carpet
+	var carpet_tiles := ((X_Axis + Y_Axis) / 2);
+
+//Build me a carpet puease
+CreateCarpet(who, x1, y1, x2, y2, carpet_z, hue, menu_choice, carpet_deed, sign, carpet_tiles);
+DestroyItem(carpet_deed);
+endprogram

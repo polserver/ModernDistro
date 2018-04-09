@@ -1,0 +1,12 @@
+use uo;
+
+program toggleops(who, item)
+print("toggleops");
+  if(who.cmdlevel > 0)
+	who.cmdlevel := 0;
+	SendSysMessage(who, "You're a player.");
+  else
+	who.cmdlevel := 5;
+	SendSysMessage(who, "You're an admin.");
+  endif
+endprogram

@@ -1,0 +1,75 @@
+
+use cfgfile;
+use uo;
+use os;
+
+include ":nature:nature";
+include "include/std";
+
+program nature_logon(who)
+
+  var cfg := ReadConfigFile("nature");
+  var elem := FindConfigElem(cfg, "seasons");
+  var seasons := GetConfigInt(elem, "seasonal");
+  elem := FindConfigElem(cfg, "clienttype");
+  var client := GetConfigInt(elem, "client");
+  UnloadConfigFile("nature");
+
+  if (DEBUG)
+    syslog("Seasons: " +seasons + "   Client: " + client);
+  endif
+
+  if (!GetGlobalProperty("Desolation"))
+    if (seasons and (client == 2))
+      var calendar := GetGlobalProperty("Calendar");
+      case (calendar[MONTH])
+        12:
+        1:
+        2:
+           if (seasons == 1)
+             Season(who, SEASON_WINTER);
+             if (DEBUG)
+               syslog("Sending WINTER to " + who.name);
+             endif
+           elseif (seasons == 2)
+             Season(who, SEASON_FALL);
+             if (DEBUG)
+               syslog("Sending FALL to " + who.name);
+             endif
+           elseif (seasons == 3)
+             Season(who, SEASON_FELUCCA);
+             if (DEBUG)
+               syslog("Sending FELUCCA to " + who.name);
+             endif
+           endif
+        3:
+        4:
+        5:
+           Season(who, SEASON_SPRING);
+           if (DEBUG)
+             syslog("Sending SPRING to " + who.name);
+           endif
+        6:
+        7:
+        8:
+           Season(who, SEASON_SUMMER);
+           if (DEBUG)
+             syslog("Sending SUMMER to " + who.name);
+           endif
+        9:
+        10:
+        11:
+           Season(who, SEASON_FALL);
+           if (DEBUG)
+             syslog("Sending FALL to " + who.name);
+           endif
+	default:
+	   syslog("Error, no Calendar exists.");
+      endcase
+      if (DEBUG)
+        syslog("Character " + who.name + " has been sent season info.");
+      endif
+    endif
+  endif
+	
+endprogram

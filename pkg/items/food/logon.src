@@ -1,0 +1,9 @@
+
+use os;
+
+program hunger_logon(who)
+
+   Start_Script("hunger", who);
+
+endprogram
+

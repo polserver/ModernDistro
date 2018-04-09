@@ -1,0 +1,15 @@
+
+use uo;
+
+include "../../nature";
+
+program resetCalendar(who)
+
+	var calendar := GetGlobalProperty("Calendar");
+	calendar[YEAR] := 1;
+	calendar[MONTH] := 1;
+	calendar[DAY] := 1;
+	SetGlobalProperty("Calendar", calendar);
+	PrintTextAbovePrivate(who, "Calendar reset.", who);
+
+endprogram

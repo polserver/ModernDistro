@@ -1,0 +1,65 @@
+use uo;
+use cfgfile;
+
+include "include/eventID";
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":poisonwatcher:poisons";
+include ":damage:damage";
+
+var npccfg := ReadConfigFile("npcdesc");
+
+
+program cast_archcure(parms)
+    var caster := parms[1];
+    var info := parms[2];
+    var cast_on;
+    cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_HELPFUL);
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+    if ( !MS_MobileCheck(caster, cast_on) )
+        return 0;
+    endif
+    
+
+  PlaySoundEffect(caster, SFX_SPELL_ARCH_CURE);
+  var magery := GetAttribute(caster, MAGERY);
+  var potency := CInt(GetAttribute( caster, MAGERY ) /33)+1;
+  foreach cast_on in ListMobilesNearLocation( cast_on.x, cast_on.y, cast_on.z, CInt(magery/15), caster.realm );
+    if((CheckLineOfSight(cast_on, caster)) and (cast_on.cmdlevel < 2))
+	  PlayObjectCenteredEffect( cast_on, FX_BLESS_EFFECT, 10,10);
+      if(cast_on.isA(POLCLASS_NPC))
+        var element := npccfg[cast_on.npctemplate].elemental;
+        if(element == "poison")
+          var ev := array;
+          ev.+ type;
+          ev.+ source;
+          ev.type := EVID_PEACEMADE;
+          SendEvent(cast_on, ev);
+          ev.source := caster;
+          SendEvent(cast_on, ev);
+          ev.type := EVID_ENGAGED;
+          SendEvent(cast_on, ev);
+          ApplyRawSpellDamageEX(cast_on, potency, DMG_POISON, caster, info.Circle);
+        endif
+      endif
+      if (ListPoisonsByType(cast_on, "defaultPoison").size() > 0)
+        CurePoison(cast_on, 180, "defaultPoison", potency);
+        if (ListPoisonsByType(cast_on, "defaultPoison").size() > 0)
+          SendSysMessage(caster, "You cure some poison.");  
+          SendSysMessage(cast_on, caster.name + " has partially cured you!");
+        else
+          SendSysMessage(caster, cast_on.name + " cured.");
+          SendSysMessage(cast_on, caster.name + " has cured you completely!");
+        endif
+      endif
+    endif
+  endforeach
+endprogram

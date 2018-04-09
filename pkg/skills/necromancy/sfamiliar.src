@@ -1,0 +1,34 @@
+// Deviates from official spell
+
+
+include ":magery:summon";
+
+
+program chrcast_sfamiliar( params )
+	var caster := params[1];
+	var info := params[2]; // Struct containing additional info about the spell.
+	var spellID := params[3];
+	var targ := params[4]; // Target of spell if required.
+	
+	var familiar :=systemfindobjectbyserial(Cint(getobjproperty(caster, "familiar")));
+	
+	if(familiar)
+		MoveObjectToLocation(familiar,10,10,10, familiar.realm,MOVEOBJECT_FORCELOCATION);
+		ApplyRawDamage(familiar, GetHp(familiar) + 10);
+		eraseobjproperty(caster, "familiar");
+	endif
+	
+	var wisp := Createnpcfromtemplate("shadowwisp", caster.x, caster.y, caster.z, 0, caster.realm);
+	// Should play the idle sound of the familiar being summoned. Also should display a gump with
+	// up to five different familiars that can be summoned, dependent on skill.
+	//playsoundeffect(wisp, 534);
+	PlayObjectCenteredEffectEx( wisp, 0x3728, 1, 10, 9910, 0, 0 );
+	wisp.setmaster(caster);
+	setobjproperty(wisp, "master", caster.serial);
+	SetObjProperty(wisp, "summoned",1);
+	setobjproperty(wisp, "familiar", 1);
+	setobjproperty(wisp, "shadowwisp", 1);
+	setobjproperty(caster, "familiar", wisp.serial);
+	wisp.script:= "familiar";
+	restartscript(wisp);
+endprogram

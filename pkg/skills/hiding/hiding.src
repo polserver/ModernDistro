@@ -1,0 +1,59 @@
+use uo;
+
+include "include/client";
+include ":attributes:attributes";
+include "include/trainingskill";
+
+program skill_hide(who)
+        var data := {};
+        data[1] := "hiding";
+        data[2] := ReadGameClock();
+        data[3] := 21;
+        SetObjProperty(who, "LastUsedSkill", data );
+        TrainingSkill(who, data[3]);
+
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+//  var pts := CInt(GetAttribute(who, HIDING) / 10) + 15;
+  var pts := CInt(GetAttribute(who, HIDING)) + 15;
+//  if(pts > 35)
+//    pts := 35;
+//  endif
+  if(who.warmode)
+    PrintTextAbovePrivate(who, "You cannot hide while in War Mode.", who);
+    return 0;
+  endif
+  var range := getwhorange(GetAttribute(who, HIDING));
+  var bystanders := ListHostiles(who, range, LH_FLAG_LOS);
+  if(len(bystanders) > 0)
+    PrintTextAbovePrivate(who, "You cannot hide as there are hostiles in view!", who);
+    return 0;
+  endif
+  if(SkillCheck(who,HIDING, -1, pts/3))
+    who.hidden := 1;
+    PrintTextAbovePrivate(who, "You have hidden yourself well", who);
+  else
+    PrintTextAbovePrivate(who, "You can't seem to hide here", who);
+    who.hidden := 0;
+  endif
+endprogram
+
+function getwhorange( skill )
+  if( skill >= 100 )
+    return 4;
+  elseif( skill >= 90 )
+    return 5;
+  elseif( skill >= 80 )
+    return 6;
+  elseif( skill >= 70 )
+    return 7;
+  elseif( skill >= 60 )
+    return 8;
+  elseif( skill >= 50 )
+    return 9;
+  elseif( skill >= 30 )
+    return 10;
+  else
+    return 15;
+  endif
+endfunction

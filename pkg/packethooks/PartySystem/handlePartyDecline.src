@@ -1,0 +1,31 @@
+/* $Id: handlePartyDecline.src 749 2006-08-25 04:18:26Z tekproxy $
+ *
+ */
+
+use uo;
+use os;
+use polsys;
+
+include ":partySystem:config";
+include ":partySystem:messages";
+
+program handlePartyDecline(params)
+	Set_Critical(DEBUG_SET_CRITICAL);
+
+	var invitee := params[1];
+	var leader := SystemFindObjectBySerial(params[2]);
+
+	// Remove them from the party
+	SendRemovePacket(invitee, invitee.serial);
+	
+	EraseObjProperty(invitee, PARTY_JOINING_PROP);
+	SetObjProperty(leader, "#PartyCanidates", CInt(GetObjProperty(leader, "#PartyCanidates")) - 1);
+
+	if ( leader != error )
+		// Not sure if OSI sends this message to every party member
+		SendPartyMessage(leader, invitee, "Does not wish to join the party.");
+		SendSysMessage(invitee, "You notify them that you do not wish to join the party.");
+	endif
+
+	return 1;
+endprogram

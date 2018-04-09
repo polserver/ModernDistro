@@ -1,0 +1,28 @@
+/*
+        Maintened by *Edwards
+
+        2009-10-21
+*/
+use uo;
+
+program OnRemove( who, keyring, item )
+
+        //Avoid compiler warnings
+        who := who;
+        item := item;
+        
+	var numkeys := EnumerateItemsInContainer( keyring ).Size() - 1;
+	if( !numkeys )
+		keyring.graphic := 0x1011;
+	elseif( numkeys == 1 )
+		keyring.graphic := 5993;
+	elseif( numkeys >= 2 && numkeys <= 4 )
+		keyring.graphic := 5994;
+	elseif( numkeys >= 5 )
+		keyring.graphic := 5995;
+	endif
+ 
+        EraseObjProperty( item, "CantSteal" );
+	
+	return 1;
+endprogram

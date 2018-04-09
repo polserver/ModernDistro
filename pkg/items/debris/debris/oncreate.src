@@ -1,0 +1,16 @@
+/*
+        Maintened by *Edwards
+
+        2010-01-03
+*/
+use uo;
+use util;
+
+program OnCreate_Debris( debris )
+
+        var debris_graphics := array(3117, 3118, 3119, 3120);
+        
+	debris.graphic := debris_graphics.RandomEntry();
+	
+	return 1;
+endprogram

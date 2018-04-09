@@ -1,0 +1,17 @@
+use uo;
+
+include "include/client";
+
+program textcmd_gmtalk (character, text)
+
+if (!text)
+      SendSysMessage(character, "This command broadcasts a message to all online GM's.  Usage: gmtalk <message>");
+      return;
+else
+      foreach gm in EnumerateOnlineCharacters()
+             if(gm.cmdlevel > 2)
+               SendSysMessage(gm, character.name + ": " + text, FONT_NORMAL, COLOR_BLUE);
+             endif
+      endforeach
+endif
+endprogram

@@ -1,0 +1,43 @@
+use os;
+use uo;
+
+include "include/canAccess";
+
+program dyecheck( who, dyetub )
+  EraseObjProperty(who, "IsMeditating");
+  if(!can_access(who, dyetub))
+    return;
+  endif
+  ReserveItem(dyetub);
+  SendSysMessage(who, "Select something to dye");
+  var item := Target(who, TGTOPT_NOCHECK_LOS );
+  if(!ReserveItem(item))
+    return;
+  endif
+  if(!item)
+    SendSysMessage(who, "Cancelled");
+    return;
+  endif
+  if(!can_access(who, item))
+    return;
+  endif
+  if(!who.multi)
+	SendSysMessage(who, "You must be inside a house to dye furniture!");
+	return;
+  endif
+  if(GetObjProperty((who.multi),"ownerserial")!=who.serial)
+	SendSysMessage(who, "You are not the owner of this house!");
+    return;
+  endif
+  if(item.movable > 0)
+     SendSysMessage(who, "That item is not locked down.");
+     return;
+  endif
+  var allowdye := GetObjProperty(item, "furniture");
+  if(allowdye == 1)
+    item.color := dyetub.color;
+    return;
+  else
+    SendSysMessage(who, item.desc + " cannot be colored");
+  endif
+endprogram

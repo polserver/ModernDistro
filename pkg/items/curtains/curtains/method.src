@@ -1,0 +1,18 @@
+use uo;
+use os;
+
+program Install()
+
+	return 1;
+endprogram
+
+exported function IsCurtain ( item )
+
+        item := item; //Avoid compiler warnings
+        
+	return 1;
+endfunction
+
+exported function CloseOpenCurtains ( curtain )
+
+endfunction

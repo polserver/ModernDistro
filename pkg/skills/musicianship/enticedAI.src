@@ -1,0 +1,57 @@
+use npc;
+use os;
+use uo;
+
+include "include/eventID";
+include "include/sysEvent";
+
+const HALT_THRESHOLD := 15;
+const ENTICE_TIMEOUT := 15;
+
+var me := Self();
+
+program enticedai()
+  DisableEvents( EVID_ENTEREDAREA + SYSEVENT_SPEECH + EVID_LEFTAREA + EVID_DISENGAGED + EVID_OPPONENT_MOVED);
+  EnableEvents( EVID_ENGAGED + EVID_DAMAGED + EVID_ALL_FOLLOW_CMD, HALT_THRESHOLD );
+  var ev;
+  var timeout := ReadGameClock()+ ENTICE_TIMEOUT;
+  while (ReadGameClock() <= timeout)
+    ev := os::wait_for_event( 2 );
+    if (ev)
+      case (ev.type)
+        EVID_DAMAGED:
+        EVID_ENGAGED:        unentice(me, ev);
+                             return;
+        EVID_ALL_FOLLOW_CMD: repeat
+                               WalkTowardLocation( ev.x, ev.y );
+                               var evn := os::wait_for_event( 1);
+                               if (evn)
+                                 case (evn.type)
+                                   EVID_DAMAGED:
+                                   EVID_ENGAGED: unentice(me, evn);
+                                   return;
+                                 endcase
+                               endif
+                             until ( ((me.x==ev.x) && (me.y==ev.y)) || ((ReadGameClock() > timeout)) );
+                             unentice(me);
+                             return;
+      endcase
+    endif
+  endwhile
+  unentice(me);
+  return;
+endprogram
+
+function unentice(me, ev :=0)
+  var oldscript := GetObjProperty( me, "oldai");
+  if(!oldscript)
+    return;
+  endif
+  me.script := oldscript;
+  RestartScript(me);
+  if (ev)
+    sleepms(500);
+    SendEvent(me, ev);
+  endif
+  return;
+endfunction

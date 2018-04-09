@@ -1,0 +1,48 @@
+use uo;
+use util;
+use cfgfile;
+
+include ":gems:settings";
+
+program OnCreate ( gem )
+	
+	var settings := Gems_GetSettingsCfgElem( "Settings" );
+	if ( settings.RandomGradeGem )
+		var gem_cfg := ReadConfigFile(":gems:gems");
+		var graphic_elem, graphics;
+		if ( gem.IsAmber() )
+			graphic_elem := gem_cfg["Amber"];
+			graphics := GetConfigStringArray(graphic_elem, "Graphic");
+		elseif ( gem.IsAmethyst() )
+			graphic_elem := gem_cfg["Amethyst"];
+			graphics := GetConfigStringArray(graphic_elem, "Graphic");
+		elseif ( gem.IsCitrine() )
+			graphic_elem := gem_cfg["Citrine"];
+			graphics := GetConfigStringArray(graphic_elem, "Graphic");
+		elseif ( gem.IsDiamond() )
+			graphic_elem := gem_cfg["Diamond"];
+			graphics := GetConfigStringArray(graphic_elem, "Graphic");
+		elseif ( gem.IsEmerald() )
+			graphic_elem := gem_cfg["Emerald"];
+			graphics := GetConfigStringArray(graphic_elem, "Graphic");
+		elseif ( gem.IsRuby() )
+			graphic_elem := gem_cfg["Ruby"];
+			graphics := GetConfigStringArray(graphic_elem, "Graphic");
+		elseif ( gem.IsSapphire() )
+			graphic_elem := gem_cfg["Sapphire"];
+			graphics := GetConfigStringArray(graphic_elem, "Graphic");
+		elseif ( gem.IsStarSapphire() )
+			graphic_elem := gem_cfg["StarSapphire"];
+			graphics := GetConfigStringArray(graphic_elem, "Graphic");
+		elseif ( gem.IsTourmaline() )
+			graphic_elem := gem_cfg["Tourmaline"];
+			graphics := GetConfigStringArray(graphic_elem, "Graphic");
+		endif		
+		
+		if ( graphics.Size() > 0 )
+			gem.graphic := CInt(graphics[RandomInt(graphics.Size())+1]);
+		endif
+	endif
+	
+	return 1;
+endprogram

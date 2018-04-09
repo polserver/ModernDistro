@@ -1,0 +1,63 @@
+use uo;
+use os;
+use guilds;
+
+include "include/canAccess";
+
+program packed_stone(who,stone)
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  if(!can_access(who, stone))
+    return;
+  elseif(!ReserveItem(stone))
+    return;
+  elseif(!Accessible(who,stone))
+    SendSysMessage(who,"You cannot access that item!");
+    return;
+  endif
+  var guild_id := GetObjProperty(stone,"guild_id");
+  var guild := FindGuild(guild_id);
+  var gm := stone.FindGM(guild);
+  if(gm[2] != who.serial)
+    SendSysMessage(who, "Only the Guild Master can place the stone.");
+    return;
+  endif
+  var house := who.multi;
+  var owner := GetObjProperty(house, "owneracct");
+  var coowners := GetObjProperty(house, "coownlist");
+  if((owner != who.acctname) and (!(who.serial in coowners)))
+    SendSysMessage(who, "You must be the owner or a co-owner of the house to place a guildstone.");
+    return;
+  endif
+  var chk := 0;
+  foreach item in ListItemsNearLocation(who.x, who.y, who.z, 1, who.realm)
+    if((item.objtype >= 0x0675) && (item.objtype <= 0x06f4))
+      if((((item.x == who.x+1) || (item.x == who.x-1)) && (item.y == who.y)) || (((item.y == who.y+1) || (item.y == who.y-1)) && (item.x == who.x)))
+        chk := 1;
+        break;
+      endif
+    endif
+  endforeach
+  if(chk == 1)
+    SendSysMessage(who, "This is too close to the door.");
+    return;
+  endif
+  chk := 0;
+  foreach item in (house.items)
+    if(item.objtype == 0x1A390)
+      chk := 1;
+      break;
+    endif
+  endforeach
+  if(chk == 1)
+    SendSysMessage(who, "Only one guildstone can be placed in a house.");
+    return;
+  else
+    stone.movable := 1;
+    MoveObjectToLocation(stone, who.x, who.y, who.z, who.realm, MOVEOBJECT_FORCELOCATION);
+    stone.movable := 0;
+    stone.graphic := 0x0ed4;
+    stone.usescript := "";
+    SetObjProperty(stone, "houseserial", house.serial);
+  endif
+endprogram

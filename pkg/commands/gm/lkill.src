@@ -1,0 +1,18 @@
+use os;
+use uo;
+use boat;
+include "include/client";
+include ":attributes:attributes";
+program textcmd_kill( who )
+    var tgt := Target( who );
+   
+        PlayLightningBoltEffect( tgt);
+        PlaySoundEffect( tgt, SFX_SPELL_LIGHTNING  );
+
+ 
+            RevokePrivilege( tgt, "invul" );
+            SetObjProperty(tgt, "guardkill", 1);
+            ApplyRawDamage( tgt, GetMaxHp(tgt) );
+
+
+endprogram

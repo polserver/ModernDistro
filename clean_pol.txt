@@ -1,0 +1,29 @@
+#
+#  Created by Version: 99.0.1 Break Everything Even Rudder
+#  Mobiles:		 696
+#  Top-level Items: 291
+#
+
+System
+{
+	CoreVersion	99
+	CoreVersionString	99.0.1 Break Everything Even Rudder
+	CompileDate	Jan  8 2018
+	CompileTime	00:43:19
+	LastItemSerialNumber	1073741824
+	LastCharSerialNumber	1
+}
+
+GlobalProperties
+{
+	CProp	DayPhase sDay
+	CProp	MaxPlayers i1
+	CProp	MaxUptime i0
+	CProp	NewDay i1
+	CProp	ShardDate i1
+	CProp	gameclock s1
+	CProp	nextlockid i1
+	CProp	orelist d0:
+	CProp	storagestart i1
+}
+

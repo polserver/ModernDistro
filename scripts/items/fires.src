@@ -1,0 +1,51 @@
+use uo;
+use cfgfile;
+
+include ":attributes:attributes";
+//include "include/spellRestrictions";
+include "include/client";
+//include "include/spellAttack";
+include ":magery:spells";
+include ":damage:damage";
+
+const EFFECT_SPARKLE := 0x373a;
+const SOUND_EFFECT_RES := 0x215;
+
+program mfirefield( character, item )
+  if((GetHp(character) < 1) || (character.cmdlevel > 2))
+    return;
+  endif
+  var magic;
+  var creater := GetObjProperty(item, "creater");
+  magic := GetObjProperty(item, "Magic");
+  if (!magic)
+      magic := 0;
+  endif
+
+  var fieldstrength;
+  var online := EnumerateOnlineCharacters();
+  var boss;
+  foreach char in online
+    if(creater == char.serial)
+      boss := char;
+      break;
+    endif
+  endforeach
+  if(!boss)
+    boss := SystemFindObjectBySerial(creater, SYSFIND_SEARCH_OFFLINE_MOBILES);
+  endif
+  SetScriptController(boss);
+  send_attack(character, boss, 46);
+  ApplyRawDamage(character, 1);
+  HealDamage(character, 1);
+  var dmg := CInt(GetAttribute(boss, MAGERY)/10);
+  fieldstrength := RandomInt(dmg);
+  PlaySoundEffect(character, 0x209);
+  if(!character.dead)
+    if(magic)
+        ApplyRawSpellDamageEX(character, fieldstrength, "Fire", boss, magic);
+    else
+        ApplyRawDamageEX(character, fieldstrength, "Fire", boss);
+    endif
+  endif
+endprogram

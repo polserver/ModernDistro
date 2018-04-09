@@ -1,0 +1,89 @@
+/* $Id: bladed.old 745 2006-08-25 03:49:56Z AustinHeilman $
+ *
+ */
+
+use cfgfile;
+use uo;
+use os;
+use util;
+
+include "include/client";
+include "include/sounds";
+include "include/string";
+include ":attributes:attributes";
+include ":containers:corpse/corpseFunctions";
+include ":itemutils:canAccess";
+include ":itemutils:objtype";
+include ":itemutils:toolWear";
+
+var bowcraftconfigfile := ReadConfigFile(":bowcraft:bowcraft");
+
+program use_blade(who, blade )
+
+	EraseObjProperty(who, "IsMeditating");
+	EraseObjProperty(who, "HealTimer");
+
+	if ( !can_access(who, blade) )
+		return 0;
+	endif
+	if ( !ReserveItem(blade) )
+		return 0;
+	endif
+
+	SendSysMessage(who, "What would you like to use that on?");
+	var use_on := TargetCoordinates(who);
+	if ( !use_on )
+		return 0;
+	endif
+	if ( use_on.item )
+		if ( !can_access(who, use_on.item, "unmovable") )
+			return 0;
+		endif
+	endif
+	var checkme := use_on.item.objtype;
+	if ( use_on.mobile.npctemplate == "sheep" )
+		process_wool(who, blade, use_on.mobile);
+	elseif ( use_on.item.objtype == UOBJ_CORPSE )
+		ReleaseItem(blade);
+		Carve_Corpse(who, use_on.item);
+	elseif ( is_fish(checkme) )
+		CarveFish(who, blade, use_on.item);
+	elseif ( is_tree(use_on.objtype ) )
+		CarveTree(who, blade, use_on.item);
+	else
+		SendSysMessage(who, "I don't know how to use those items together.");
+	endif
+
+endprogram
+
+
+function is_tree(theobj )
+
+	if ( (theobj == 0x0c9e) || (theobj == 0x0ca8) || (theobj == 0x0caa) )
+		return 1;
+	elseif (theobj == 0x0cab )
+		return 1;
+	elseif ((theobj >= 0x0c99) && (theobj <= 0x0cea) )
+		return 1;
+	elseif ((theobj >= 0x0cf3) && (theobj <= 0x0d03) )
+		return 1;
+	elseif ((theobj >= 0x0d41) && (theobj <= 0x0dab) )
+		return 1;
+	else
+		return 0;
+	endif
+
+endfunction
+
+
+function CarveTree(who, blade, use_on )
+
+	if ( Distance(who, use_on) > 2 )
+		SendSysMessage(who, "You cannot use that");
+		return 0;
+	endif
+	CreateItemInBackpack(who, UOBJ_KINDLING, 1);
+	DestroyItem(use_on);
+	SendSysMessage(who, "You chip off some kindling and put it in your backpack.");
+
+endfunction

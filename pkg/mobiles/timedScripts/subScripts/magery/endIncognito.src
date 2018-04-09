@@ -1,0 +1,40 @@
+/*
+ * $Id: endIncognito.src 1013 2007-03-05 22:46:11Z tekproxy $
+ *
+ */
+use uo;
+use os;
+
+include ":attributes:attributes";
+include "include/client";
+
+program TimedScript_EndIncognito(params)
+	var mobile := params[1];
+	var original := GetObjProperty(mobile, "Incognito");
+
+	// If mobile was originally a male and is a male now, restore original beard
+	if ( original.gender == 0 && mobile.gender == 0 )
+		DestroyItem(GetEquipmentByLayer(mobile, LAYER_BEARD));
+		var orig_beard := CreateItemInBackpack(mobile, original.beard);
+		orig_beard.color := original.beard_color;
+		EquipItem(mobile, orig_beard);
+	endif
+
+	// Restore original name, gender, color and title
+	SetName(mobile, original.name);
+	mobile.gender := original.gender;
+	mobile.truecolor := original.truecolor;
+	mobile.title_prefix := original.title_prefix;
+	mobile.title_suffix := original.title_suffix;
+	//mobile.title_guild := original.title_guild;
+	//mobile.title_race := original.title_race;
+
+	// Restore original hair and hair color
+	DestroyItem(GetEquipmentByLayer(mobile, LAYER_HAIR));
+	var orig_hair := CreateItemInBackpack(mobile, original.hair);
+	orig_hair.color := original.hair_color;
+	EquipItem(mobile, orig_hair);
+
+	return 1;
+endprogram
+

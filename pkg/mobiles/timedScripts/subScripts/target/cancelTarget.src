@@ -1,0 +1,14 @@
+/* $Id: cancelTarget.src 1079 2007-10-12 07:49:44Z sroyalty $
+ *
+ */
+
+use uo;
+use os;
+
+program TimedScript_EndScript(params)
+	var mobile := params[1];
+
+	CancelTarget(mobile);
+
+	return 1;
+endprogram

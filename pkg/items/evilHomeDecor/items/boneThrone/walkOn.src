@@ -1,0 +1,15 @@
+use uo;
+use os;
+use util;
+
+include ":itemutils:itemdesc";
+
+program BoneThrone_WalkOn ( who, throne )
+	who := who; // Avoid Compiler Warnings
+	var sounds := GetObjTypeArray ( throne.graphic, "Sounds" );
+	
+	var playsound := sounds.randomentry();
+	
+	PlaySoundEffect ( throne, CInt ( playsound ) );
+	return 1;
+endprogram

@@ -1,0 +1,33 @@
+/* $Id: magicTrap.src 744 2006-08-25 03:47:07Z AustinHeilman $
+ *
+ */
+
+use uo;
+use util;
+
+include "include/client";
+include ":damage:damage";
+
+program trapScript(params)
+	var mobile := params[1];
+	//var object := params[2];
+	var trap_info := params[3];
+	//var trap_index := params[4];
+	params := 0; // Not needed anymore.
+	
+	SendSysMessage(mobile, "You set off a trap!");
+	PlayObjectCenteredEffect(mobile, FX_EXPLODE_3, 10, 10);
+	
+	if ( trap_info.Strength )
+		if ( trap_info.Strength["d"] )
+			ApplyRawDamageEX(mobile, RandomDiceRoll(trap_info.Strength));
+		else
+			ApplyRawDamageEX(mobile, RandomDiceRoll(CInt(trap_info.Strength)));
+		endif
+	else
+		ApplyRawDamageEX(mobile, RandomDiceRoll("10d5"));
+	endif
+	
+	return 1;
+
+endprogram

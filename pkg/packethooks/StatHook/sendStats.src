@@ -1,0 +1,358 @@
+/* $Id: sendStats.src 1099 2007-10-28 18:12:22Z sroyalty $
+ *
+ */
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  name:    Send Stats Packet Hook
+//  version: 1.1a
+//  author:  MuadDib
+//
+//  Purpose:  This hooks the core 0x11 stats packet, and rewrites it for sending the char all the
+//            extended stats for Age of Shadows like Pet Count, Min/Max Damage, statcap, etc. 2
+//            Flags used per a CONST in order to decide which of the type to send.
+//
+//  Notes:    This is done only for example functionality. Pet Count, Damage Reports, etc is NOT
+//            implemented into anything nor is the resists and luck. You can also change the global
+//            var STATCAP to be a variable if required for special rising stat cap systems.
+//
+// CONST settings:
+// BIT_MASK  = 0x00000003 DO NOT CHANGE!
+//
+// Global Variables:
+// STATCAP = Set this to your shard's Stat Cap. If based on age, race, etc, just add a function
+//           at the beginning of the exported function to check and set the statcap variable.
+//           Otherwise use the new UOClient.cfg statcap entry for a static amount.
+// VAR_STATCAP = If your statcap is not static, set this to 1. This will require you to populate
+//               the GetStatCap() function to build the statcap amount based on your customs.
+// MODE = The mode of the Status Packet. Populated by the Settings Configuration file in the pkg.
+//        This is used to know how to edit the packet for AOS extended stuff.
+// STATLOCK = If Statelock is enabled. sends the Stat Lock feature to the client. Requires
+//            another package to handle recieving the statlock packets back from client.
+//
+///////////////////////////////////////////////////////////////////////////////////////////////
+use polsys;
+
+// include ":attributes:attributeConstants";
+include ":attributes:attributes";
+include ":packetconfig:settings";
+include "include/client";
+include ":damage:damage";
+
+program sendStats()
+	Print( "INSTALLING: Outgoing Status PH..." );
+	return 1;
+endprogram
+
+CONST BIT_MASK := 0x00000003;
+
+var StatInfo := AP_GetSettingsCfgElem("Stats");
+var TotalStatCap := CInt(StatInfo.TotalCap);
+var STATCAP     := TotalStatCap;
+var VAR_STATCAP := 0;
+var MODE        := 0;
+var STATLOCK    := 0;
+
+exported function HandleSendStats( character, byref packet )
+	var enabled := QueryConfigInt("Enabled", ":packetconfig:packetconfig", "StatusBar");
+	if ( !enabled )
+		return 0;
+	endif
+	MODE := QueryConfigInt("Mode", ":packetconfig:packetconfig", "StatusBar");
+	STATLOCK := QueryConfigInt("Statlock", ":packetconfig:packetconfig", "StatusBar");
+
+	// Easiest method to decide which way to handle the packet. We could do this based on
+	// a Client version check too, but that would not be recommended since versions can be
+	// spoofed with software.
+	case ( MODE )
+		0: return 0;
+		3: HandleStatPet(character, packet); if ( STATLOCK ) SendStatLock(character); endif
+		4: HandleExtended(character, packet); if ( STATLOCK ) SendStatLock(character); endif
+		default: return 0;
+	endcase
+
+	return 0;
+endfunction
+
+// If (MODE == 3)
+//   BYTE[2]  statcap
+//   BYTE pets current
+//   BYTE pets max
+// Total increase in size, 4.
+// Increase Packet Size, change the MODE in the packet string, and add the information.
+// Position 42 (0 Indexed) is for the MODE. If MODE in packet is already 01, sending the
+// Stat info etc, then do this, otherwise simply ignore.
+function HandleStatPet(character, byref packet)
+
+	// Increase by 4 for the new info to be added
+	packet.SetSize(((packet.GetSize())+4));
+	// We do this to make sure it is the correct packet form. Otherwise it is for someone else
+	// and there is no need to send the additional info.
+	var packet_mode := packet.GetInt8(42);
+	var chk := 0;
+	case ( packet_mode )
+		0: return 0;    // Base packet, so not needed
+		1:
+		3: 
+		4:
+		5: chk := 1; // Continue processing! At this time 5 is not used, but it may in the future! Thanks OSI!
+		default: return 0;   // OHHHH, mommy :o
+	endcase
+
+	if ( chk )
+		// I do not recommend pet count stuff. Should just change code
+		// to always send 0 for them, useless unless you have some form
+		// of Pet control system on your shard.
+
+		// We use the #temp cprop type, because if you implement pet counts on
+		// worldly existing (not stabled) pets, then you should always double check
+		// at logon/reconnect, and logoff. Would be wise to also set it in the tamed ai
+		// script too when they go tamed, and when they disband. It may even be advisable
+		// to use a cprop that is a Struct. Using the serials of each pet, and just counting
+		// the struct. OHHHHHH the options.
+		var petcnt := GetObjProperty(character, "#PetCount");
+		if ( !petcnt )
+			petcnt := 0;
+		endif
+		// Change this to your liking. This is what decides how many pets they can have
+		// at one time unstabled.
+		var petmax := AP_GetSkill(character, TAMING)/15;
+		// May want higher, if you have horses and llamas counting as more than 1. That way they
+		// can always at least have a horse or llama.
+		if ( !petmax )
+			petmax := 1;
+		endif
+		// Sets the packet to MODE 3
+		packet.SetInt8(42, 3);
+		// Done this way due to reverse padding expected by the client
+		// Due to some backward settings, this check is required to set the Statcap
+		// in the packet.
+		if ( VAR_STATCAP )
+			GetStatCap( STATCAP );
+			if ( STATCAP <= 255 )
+				// Set the STATCAP in the packet
+				packet.SetInt8(67, STATCAP);
+			else
+				// Set the STATCAP in the packet
+				packet.SetInt16(66, STATCAP);
+			endif
+		endif
+		// Sets their current pet count
+		packet.SetInt8(68, petcnt);
+		// Sets their current pet max count based on taming
+		packet.SetInt8(69, petmax);
+	endif
+
+	return 0;
+endfunction
+
+
+//  If (MODE==4 )
+//    BYTE[2]  statcap
+//    BYTE     pets current
+//    BYTE     pets max
+//    BYTE[2]  fireresist
+//    BYTE[2]  coldresist
+//    BYTE[2]  poisonresist
+//    BYTE[2]  energyresist
+//    BYTE[2]  luck
+//    BYTE[2]  damage max
+//    BYTE[2]  damage min
+//    BYTE[4]  titching points
+function HandleExtended(character, byref packet)
+	// Increase by 22 for the new info to be added
+	packet.SetSize(((packet.GetSize())+22));
+	// We do this to make sure it is the correct packet form. Otherwise it is for someone else
+	// and there is no need to send the additional info.
+	var packet_mode := packet.GetInt8(42);
+	var chk := 0;
+	case ( packet_mode )
+		0: return 0;    // Base packet, so not needed
+		1:
+		3: 
+		4:
+		5: chk := 1; // Continue processing! At this time 5 is not used, but it may in the future! Thanks OSI!
+		default: return 0;   // OHHHH, mommy :o
+	endcase
+
+	if ( chk )
+		// I do not recommend pet count stuff. Should just change code
+		// to always send 0 for them, useless unless you have some form
+		// of Pet control system on your shard.
+
+		// We use the #temp cprop type, because if you implement pet counts on
+		// worldly existing (not stabled) pets, then you should always double check
+		// at logon/reconnect, and logoff. Would be wise to also set it in the tamed ai
+		// script too when they go tamed, and when they disband. It may even be advisable
+		// to use a cprop that is a Struct. Using the serials of each pet, and just counting
+		// the struct. OHHHHHH the options.
+		var petcnt := GetObjProperty(character, "#PetCount");
+		if ( !petcnt )
+			petcnt := 0;
+		endif
+		
+		// Change this to your liking. This is what decides how many pets they can have
+		// at one time unstabled.
+		var petmax := AP_GetSkill(character, TAMING)/15;
+		// May want higher, if you have horses and llamas counting as more than 1. That way they
+		// can always at least have a horse or llama.
+		if ( !petmax )
+			petmax := 1;
+		endif
+		// Sets it to MODE 4
+		packet.SetInt8(42, 4);
+		// Done this way due to reverse padding expected by the client
+		// Due to some backward settings, this check is required to set the Statcap
+		// in the packet.
+		if ( VAR_STATCAP )
+			GetStatCap( STATCAP );
+			if ( STATCAP <= 255 )
+				// Set the STATCAP in the packet
+				packet.SetInt8(67, STATCAP);
+			else
+				// Set the STATCAP in the packet
+				packet.SetInt16(66, STATCAP);
+			endif
+		endif
+
+		// Sets their current pet count in packet
+		packet.SetInt8(68, petcnt);
+		// Sets their current pet max count based on taming in packet
+		packet.SetInt8(69, petmax);
+
+		// Set the resistances
+		// If negative, it's 65536 plus the resistance. -10 would be 65536 + -10
+		// tekproxy: It would be nice if a few packet guides actually mentioned this...
+		var resistances := GetResistance(character);
+		
+		if ( CInt(resistances[DMG_FIRE]) > 0 )
+			packet.SetInt16(70, CInt(resistances[DMG_FIRE])); 
+		else
+			packet.SetInt16(70, 0x10000 + CInt(resistances[DMG_FIRE]));
+		endif
+		
+		if ( CInt(resistances[DMG_COLD]) > 0 )
+			packet.SetInt16(72, CInt(resistances[DMG_COLD])); 
+		else
+			packet.SetInt16(72, 0x10000 + CInt(resistances[DMG_COLD]));
+		endif
+		
+		if ( CInt(resistances[DMG_POISON]) > 0 )
+			packet.SetInt16(74, CInt(resistances[DMG_POISON])); 
+		else
+			packet.SetInt16(74, 0x10000 + CInt(resistances[DMG_POISON]));
+		endif
+
+		if ( CInt(resistances[DMG_ENERGY]) > 0 )
+			packet.SetInt16(76, CInt(resistances[DMG_ENERGY])); 
+		else
+			packet.SetInt16(76, 0x10000 + CInt(resistances[DMG_ENERGY]));
+		endif
+
+
+		// Distro doesn't handle luck and tithing yet.
+		// NOTE**** Just like the statcap, if it is over 255, have the if check statcap uses!!
+		// Set the luck in the packet
+		var luck := 0;
+		if ( luck > 0 )
+			packet.SetInt16(78, luck);
+		else
+			packet.SetInt16(78, 0x10000 + luck);
+		endif
+		
+		// Set the tithing points in the packet
+		var tithing := 0;
+		if ( tithing > 0 )
+			packet.SetInt16(86, tithing);
+		else
+			packet.SetInt16(86, 0x10000 + tithing);
+		endif
+
+
+		// Now let's set up the Max and Min damage entries of the packet.
+		var min_dmg := 0, max_dmg := 0;
+		var descriptor := GetItemDescriptor((character.weapon).objtype);
+		if ( descriptor )
+			min_dmg := CInt(descriptor.MinDamage);
+			max_dmg := CInt(descriptor.MaxDamage);
+		endif
+
+		// Set the min damage in the packet
+		packet.SetInt8(81, min_dmg);
+		// Set the max damage in the packet
+		packet.SetInt8(83, max_dmg);
+	endif
+
+	return 0;
+endfunction
+
+
+//  Packet 0xBF
+//  General Info (5 bytes, plus specific message)
+//    BYTE[1]     cmd
+//    BYTE[2]     len
+//    BYTE[2]     subcmd
+//    BYTE[len-5] submessage
+//
+//  Subcommand: 0x19: Extended stats
+//    BYTE[1] type - always 2 ? never seen other value
+//    BYTE[4] serial
+//    BYTE[1] unknown - always 0. why?
+//    BYTE[1] lockBits - Bits: XXSS DDII (s=strength, d=dex, i=int), 0 = up, 1 = down, 2 = locked
+// Bits explanation and help from Folko, since I knew zero about working with the bit
+// format the packet requires. lsh function by folko since EScript lacks the >> and << abilities.
+// For this to work correctly, You will also need a hook for the 0xBF packet and the 0x19 Sub to
+// accept the state changes of the locks.
+// To get the proper lock status for each stat use the following table
+//					Strength		Dexterity		Intelligence
+// AND with hex		0x30			0x0C			0x03
+// AND with	decimal	48				12				3
+// Return values based on stat locks for each stat
+// raise (hex)		0x00			0x00			0x00
+// raise (dec)		0				0				0
+//
+// lower (hex)		0x10			0x04			0x01
+// lower (dec)		16				4				1
+//
+// locked (hex)		0x20			0x08			0x02
+// locked (dec)		32				8				2
+// The first line for each status value is hex and the second line is the decimal value
+
+function SendStatLock(character)
+	if ( CInt(character.clientversion[1]) < 3 )
+		return 0;
+	endif
+	// Let's create the new packet to send them. This is to send the command that will make the
+	// locks show up on the status bar. Even though the packet is variable length, the command we
+	// are sending is always 12, so let's just make it that length to shorten the code.
+	var newpacket := CreatePacket(0xBF, 12);
+	// Sets the length of the packet.
+	newpacket.SetInt8(2, 0x0C);
+	// Subcmd for the packet
+	newpacket.SetInt8(4, 0x19);
+	// 02 - Is always this, never changes
+	newpacket.setInt8(5, 2);
+	// The person's Serial gets added also.
+	newpacket.setInt32(6, (character.serial));
+	// Now let's read off the stat lock cprop and set those in the packet
+	var statBit := GetObjProperty( character, "%StatLock%" );
+	// If it doesn't exist, it makes the bit 0, means nothing locked or down.
+	// Then records it on the player.
+	if ( (statbit.errortext) )
+		statBit := 0;
+		SetObjProperty(character, "%StatLock%", statBit);
+	endif
+
+	// Inserts the stat lock states into the packet, which are stored on the character
+	// already converted to Bit form, see the NewCommand pkg for info.
+	newpacket.setInt16(10, statBit);
+	// Sends the new packet to the character.
+	newpacket.SendPacket(character);
+
+	return 1;
+endfunction
+
+// Change this if you use a custom Statcap system that changes with age.
+// Since this is a ByRef, no need to do a return unless there is an error.
+function GetStatCap(byref STATCAP)
+	STATCAP := STATCAP;
+endfunction

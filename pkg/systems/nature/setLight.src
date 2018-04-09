@@ -1,0 +1,67 @@
+
+use uo;
+use os;
+include ":nature:nature";
+
+program setLight()
+  set_critical(1);
+  var wstuff := GetGlobalProperty("Nature");
+  var nightlevel := (NIGHTLIGHT-((FindLight(wstuff[TRAMMEL])+FindLight(wstuff[FELUCCA]))/2));
+  if (DEBUG)
+    syslog("Nightlevel = " + nightlevel);
+  endif
+     
+  case (wstuff[DAY])
+    0: 
+    2:
+      return;
+    1:
+      case (wstuff[CURRENTWEATHER])
+        0:
+        1:
+          default:
+          wstuff[CURRENTLIGHT] := 0;
+        2:
+          wstuff[CURRENTLIGHT] := 1;
+        3:
+          wstuff[CURRENTLIGHT] := 3;
+        4:
+          wstuff[CURRENTLIGHT] := 6;
+        5:
+          wstuff[CURRENTLIGHT] := 9;                     
+      endcase
+      SetGlobalProperty("Nature", wstuff);
+      var test := SetRegionLightLevel("Background", wstuff[CURRENTLIGHT]);
+      if (DEBUG)
+        syslog("Set light level to : " + wstuff[CURRENTLIGHT]);
+        syslog("SetRegionLightLevel returned : " + test);
+      endif
+      return;
+    3:
+      case (wstuff[CURRENTWEATHER])
+        0:
+        1:
+        default:
+          wstuff[CURRENTLIGHT] := nightlevel;
+        2:
+          wstuff[CURRENTLIGHT] := nightlevel + 1;
+        3:
+          wstuff[CURRENTLIGHT] := nightlevel + 2;
+        4:
+          wstuff[CURRENTLIGHT] := nightlevel +4;
+        5:
+          wstuff[CURRENTLIGHT] := nightlevel +5;
+      endcase
+      if (wstuff[CURRENTLIGHT] > NIGHTLIGHT) 
+        wstuff[CURRENTLIGHT] := NIGHTLIGHT;
+      endif
+      SetGlobalProperty("Nature", wstuff);
+      var test := SetRegionLightLevel("Background", wstuff[CURRENTLIGHT]);
+      if (DEBUG)
+        syslog("Set light level to : " + wstuff[CURRENTLIGHT]);
+        syslog("SetRegionLightLevel returned : " + test);
+      endif
+      return;
+  endcase    
+endprogram
+             

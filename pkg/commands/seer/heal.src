@@ -1,0 +1,17 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include "include/client";
+
+program heal(who, amount)
+  var targ :=  Target( who, TGTOPT_NOCHECK_LOS );
+  amount := CInt(amount);
+  if(!amount)
+    amount := 100;
+  endif
+  HealDamage(targ, amount);
+  PlayObjectCenteredEffect(targ, FX_SPARK_EFFECT, 7, 0x10);
+  PlaySoundEffect(targ, SFX_SPELL_HEAL);
+endprogram

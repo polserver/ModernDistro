@@ -1,0 +1,17 @@
+/*
+ * $Id: reconnect.src 373 2006-06-17 18:27:33Z austinheilman $
+ *
+ */
+ 
+use uo;
+use os;
+
+include ":timedscripts:timedScripts";
+
+
+program reconnect(who)
+	TS_StartController(who);
+
+	return 1;
+endprogram
+

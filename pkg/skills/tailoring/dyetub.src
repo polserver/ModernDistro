@@ -1,0 +1,398 @@
+use uo;
+use os;
+use cfgfile;
+
+include "include/client";
+include ":attributes:attributes";
+include "include/objtype";
+include "include/utility";
+
+var layout := {
+	"nodispose",
+	"page 0",
+	"resizepic 30 30 83 280 260",
+	"button 50 70 2104 2103 1 0 1101",
+	"button 50 90 2104 2103 1 0 1201",
+	"button 50 110 2104 2103 1 0 1301",
+	"button 50 130 2104 2103 1 0 1401",
+	"button 50 150 2104 2103 1 0 1501",
+	"button 50 170 2104 2103 1 0 1601",
+	"button 130 70 2104 2103 1 0 1701",
+	"button 130 90 2104 2103 1 0 1801",
+	"button 130 110 2104 2103 1 0 1001",
+	"button 130 130 2104 2103 1 0 901",
+	"button 130 150 2104 2103 1 0 801",
+	"button 130 170 2104 2103 1 0 701",
+	"button 210 70 2104 2103 1 0 601",
+	"button 210 90 2104 2103 1 0 752",
+	"button 210 110 2104 2103 1 0 852",
+	"button 210 130 2104 2103 1 0 252",
+	"button 210 150 2104 2103 1 0 152",
+	"button 210 170 2104 2103 1 0 2000",
+	"button 60 200 2104 2103 1 0 1",
+	"button 60 220 2104 2103 1 0 2",
+	"button 60 240 2104 2103 1 0 3",
+	"text 50 42 1 0",
+	"text 70 65 1121 1",
+	"text 70 85 1221 2",
+	"text 70 105 1321 3",
+	"text 70 125 1421 4",
+	"text 70 145 1521 5",
+	"text 70 165 1621 6",
+	"text 150 65 1721 7",
+	"text 150 85 1821 8",
+	"text 150 105 1021 9",
+	"text 150 125 921 10",
+	"text 150 145 821 11",
+	"text 150 165 721 12",
+	"text 230 65 621 13",
+	"text 230 85 752 14",
+	"text 230 105 852 15",
+	"text 230 125 272 16",
+	"text 230 145 152 17",
+	"text 230 165 2000 18",
+	"text 80 195 0 19",
+	"text 80 215 0 20",
+	"text 80 235 0 21"
+};
+
+var data := {
+	"Select a color range:",
+	"One",
+	"Two",
+	"Three",
+	"Four",
+	"Five",
+	"Six",
+	"Seven",
+	"Eight",
+	"Nine",
+	"Ten",
+	"Eleven",
+	"Twelve",
+	"Thirteen",
+	"Fourteen",
+	"Fifteen",
+	"Sixteen",
+	"Seventeen",
+	"Eighteen",
+	"Use basic colors",
+	"Use current color",
+	"Make current color permanent"
+};
+
+var layout2 := {
+	"nodispose",
+	"page 0",
+	"gumppic 0 50 2620",
+	"gumppic 20 50 2621",
+	"gumppic 290 50 2622",
+	"gumppic 0 68 2623",
+	"gumppic 22 68 2624",
+	"gumppic 288 68 2625",
+	"gumppic 0 272 2623",
+	"gumppic 22 272 2624",
+	"gumppic 288 272 2625",
+	"gumppic 0 476 2626",
+	"gumppic 20 476 2627",
+	"gumppic 290 476 2628",
+	"text 20 62 1102 0"
+};
+
+var data2 := {
+	"Select a color:",
+	"Color1",
+	"Color2",
+	"Color3",
+	"Color4",
+	"Color5",
+	"Color6",
+	"Color7",
+	"Color8",
+	"Color9",
+	"Color10",
+	"Color11",
+	"Color12",
+	"Color13",
+	"Color14",
+	"Color15",
+	"Color16",
+	"Color17",
+	"Color18",
+	"Color19",
+	"Color20",
+	"Color21",
+	"Color22",
+	"Color23",
+	"Color24",
+	"Color25",
+	"Color26",
+	"Color27",
+	"Color28",
+	"Color29",
+	"Color30",
+	"Color31",
+	"Color32",
+	"Color33",
+	"Color34",
+	"Color35",
+	"Color36",
+	"Color37",
+	"Color38",
+	"Color39",
+	"Color40",
+	"Color41",
+	"Color42",
+	"Color43",
+	"Color44",
+	"Color45",
+	"Color46",
+	"Color47",
+	"Color48",
+	"Color49",
+	"Color50",
+	"Color51",
+	"Color52"
+};
+
+
+program use_dyetub (character, dyetub)
+	if (dyetub.color == 1)
+		dyetub.color := 1109;
+	endif
+
+	if (GetObjProperty(dyetub, "fixedcolor"))
+		if (!character.cmdlevel && GetAttribute(character, TAILORING) < 70 && dyetub.color > 52)
+			SendSysMessage(character, "You are unable to make a decent color.");
+			return;
+		else
+			DyeItems(character, dyetub);
+			return;
+		endif
+	endif
+
+	var i;
+	var textline;
+	var maxcolor := 52;
+	var firstrow := 20;
+	var secondrow := 40;
+	var newcolor := 0;
+	var res := SendDialogGump(character, layout, data);
+	var basecolor := res[0];
+
+	if (!basecolor)
+		SendSysMessage(character, "Canceled.");
+		return;
+	elseif (basecolor == 1101)
+		maxcolor := 47;
+	elseif (basecolor == 2000)
+		maxcolor := 18;
+		firstrow := 18;
+		secondrow := 18;
+
+	//the ugly colors option
+	elseif (basecolor == 1)
+		basecolor := 1;
+
+	//the current color option
+	elseif (basecolor == 2)
+		if (!character.cmdlevel && GetAttribute(character, TAILORING) < 70 && dyetub.color > 52)
+			SendSysMessage(character, "You're unable to make a decent color.");
+			return;
+		else
+			DyeItems(character, dyetub);
+			return;
+		endif
+
+	//set the dyetub color permanently
+	elseif (basecolor == 3)
+		SendSysMessage(character, "The tub is now permanently this color!");
+		SetObjProperty(dyetub, "fixedcolor", 1);
+		return;
+	endif
+
+	//display the second level of the menu
+	if (!character.cmdlevel && GetAttribute(character, TAILORING) < 70)
+		SendSysMessage(character, "You are unable make a decent color.");
+		basecolor := 1;
+	endif
+
+	for (i :=1; i <= firstrow; i := i +1 )
+		textline := "button 20 " + CStr(65+(20*i)) + " 2104 2103 1 0 " + CStr(basecolor+i);
+		layout2[ CInt(len(layout2)+1) ] := textline;
+	endfor
+	for (i :=21; i <= secondrow; i := i +1 )
+		textline := "button 100 " + CStr(65+(20*(i-20))) + " 2104 2103 1 0 " + CStr(basecolor+i);
+		layout2[ CInt(len(layout2)+1) ] := textline;
+	endfor
+	for (i :=41; i <= maxcolor; i := i +1 )
+		textline := "button 180 " + CStr(65+(20*(i-40))) + " 2104 2103 1 0 " + CStr(basecolor+i);
+		layout2[ CInt(len(layout2)+1) ] := textline;
+	endfor
+
+	basecolor := basecolor -1;
+	for (i :=1; i <= firstrow; i := i +1 )
+		textline := "text 40 " + CStr(60+(20*i)) + " " + CStr(basecolor + i) + " " + CStr(i);
+		layout2[ CInt(len(layout2)+1) ] := textline;
+	endfor
+	for (i :=21; i <= secondrow; i := i +1 )
+		textline := "text 120 " + CStr(60+(20*(i-20))) + " " + CStr(basecolor + i) + " " + CStr(i);
+		layout2[ CInt(len(layout2)+1) ] := textline;
+	endfor
+	for (i :=41; i <= maxcolor; i := i +1 )
+		textline := "text 200 " + CStr(60+(20*(i-40))) + " " + CStr(basecolor + i) + " " + CStr(i);
+		layout2[ CInt(len(layout2)+1) ] := textline;
+	endfor
+
+	layout2[ len(layout2)+1 ] := "button 220 440 2119 2120 1 0 0";
+		res := SendDialogGump(character, layout2, data2);
+	newcolor := res[0];
+	if (!newcolor)
+		SendSysMessage(character, "Canceled.");
+		return;
+	else
+		dyetub.color := newcolor;
+	endif
+
+	DyeItems(character, dyetub);
+
+endprogram
+
+
+
+
+///////////////////
+//  does the actual dying of items
+///////////////////
+
+function DyeItems(character, dyetub)
+
+	SendSysMessage(character, "Dye What?");
+	var what := Target(character, TGTOPT_NOCHECK_LOS);
+	if (!what)
+		SendSysMessage(character, "Canceled.");
+		return;
+	endif
+
+	if (!CanReachItem(character, what) )
+		SendSysMessage(character, "You can't reach that!");
+		return;
+	endif
+
+	if (!IsDyableItem(character, what))
+		SendSysMessage(character, "You can't dye that!");
+		return;
+	endif
+
+	if (IsContainer(what) && (what != character.backpack) )
+		foreach item in ListRootItemsInContainer(what)
+			if ( IsDyableItem(character, item))
+				item.color := dyetub.color;
+				PlaySoundEffect(character, 0x023f);
+				sleep(2);
+			else
+				SendSysMessage(character, "Can't dye "+item.desc);
+			endif
+		endforeach
+	endif
+
+	what.color := dyetub.color;
+	PlaySoundEffect(character, 0x023f);
+
+endfunction
+
+
+
+
+///////////////////
+//  determines if the character can reach the item they're trying to dye
+///////////////////
+
+function CanReachItem(character, item)
+	if (character.cmdlevel)
+		return 1;
+	endif
+	if (InInventory(character.backpack, item))
+		return 1;
+	endif
+	if (item == character.backpack )
+		return 1;
+	endif
+
+	if (Distance(character, item) > 2)
+		return 0;
+	endif
+
+	//banners
+	if (item.objtype >= 0x1586 && item.objtype <= 0x15f5)
+		return 1;
+	elseif (item.objtype >= 0x160f && item.objtype <= 0x1633)
+		return 1;
+	endif
+
+	return 0;
+endfunction
+
+
+
+
+///////////////////
+//  Determines if the item passed is dyable
+///////////////////
+
+function IsDyableItem(character, item)
+	if (character.cmdlevel)
+		return 1;
+	endif
+
+	if (item.objtype >= UOBJ_BOLT_START && item.objtype <= UOBJ_BOLT_END)
+		return 1;
+	elseif (item.objtype >= UOBJ_CLOTH_START && item.objtype <= UOBJ_CLOTH_END)
+		return 1;
+	endif
+
+	//banners
+	if (item.objtype >= 0x1586 && item.objtype <= 0x15f5)
+		return 1;
+	elseif (item.objtype >= 0x160f && item.objtype <= 0x1633)
+		return 1;
+	endif
+
+	var cloth_items_cfg_file := ReadConfigFile("cloth_items");
+	if ( FindConfigElem(cloth_items_cfg_file, item.graphic) )
+		return 1;
+	endif
+
+	case (item.objtype)
+		UOBJ_BACKPACK:
+		UOBJ_BAG:
+		UOBJ_RECALL_RUNE:
+		UOBJ_RUNEBOOK:
+		UOBJ_SANDALS:
+		UOBJ_SHOES:
+		UOBJ_BOOTS:
+		UOBJ_THIGH_BOOTS:
+		0x1b74:	//kite shield
+		0x1b75:	//kite shield
+		0x09b5:	//eggs
+		0x204e:	//death shroud
+		0x0df2:	//wand
+		0x0df3:	//wand
+		0x0df4:	//wand
+		0x0df5:	//wand
+			return 1;
+	endcase;
+
+	//pillows
+	if (item.objtype >= 0x13a4 && item.objtype <= 0x13ae)
+		return 1;
+	endif
+
+	//curtains
+	if (item.objtype == 0x12db)
+		return 1;
+	endif
+
+	return 0;
+
+endfunction

@@ -1,0 +1,37 @@
+use uo;
+use os;
+use polsys;
+
+include ":chat:chatIO";
+include ":chat:packets";
+include ":chat:functions";
+include ":chat:settings";
+
+program CloseChat(params)
+	var character := params[1];
+	var packet := params[2];
+	params := "";
+
+	if ( CH_CheckDebug() )
+		Print("CloseChat: "+character.name+" "+packet);
+	endif
+	
+	// Leave conference ?
+	
+	var new_packet := CreatePacket(0xB2, 13);
+	new_packet.SetInt16(1, 13); // packet size
+	new_packet.SetInt16(3, 0x03EC); // close chat
+	new_packet.SendPacket(character);
+	
+	var chat_name := GetObjProperty(character, "ChatName");
+	new_packet := CreatePacket(0xB2, 9 + (Len(chat_name) * 2));
+	new_packet.SetInt16(1, 9 + (Len(chat_name) * 2)); // packet size
+	new_packet.SetInt16(3, 0x03EF); // remove player
+	
+	CH_RemovePlayerFromChat(character.serial);
+	
+	// Maybe only send to others in conference
+	SendChatPacket(new_packet);
+	
+	return 1;
+endprogram

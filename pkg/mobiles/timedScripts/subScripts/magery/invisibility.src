@@ -1,0 +1,35 @@
+/*
+ * $Id: invisibility.src 1028 2007-03-25 19:06:41Z tekproxy $
+ *
+ */
+use uo;
+use os;
+
+include ":attributes:attributes";
+include ":timedScripts:timedScripts";
+
+program TimedScript_Invisiblity(params)
+	var defender := params[1];
+	var attacker := params[2];
+	params := 0;
+	
+	// To tell the difference between magery-made invisiblity and skill-made invisibility
+	if ( GetObjProperty(defender, "Invisible") )
+		return 0;
+	endif
+	
+	SetObjProperty(defender, "Invisible", 1);
+	defender.hidden := 1;
+	
+	while ( defender.hidden == 1 )
+		SleepMS(100);
+	endwhile
+	
+	// This is my attempt to keep defender from becoming visible again
+	// wandering around and possibly hiding before the Invisibility completes.
+	// As soon as defender is no longer hidden, end it.
+	TS_LowerDuration(defender, "Invisibility", -1);
+	
+	return 1;
+endprogram
+

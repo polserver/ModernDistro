@@ -1,0 +1,66 @@
+// $Id: makeBolt.src 1266 2008-09-04 00:23:03Z AustinHeilman $
+
+use uo;
+use cfgfile;
+use util;
+
+include ":attributes:attributes";
+include ":crafting:toolWear";
+
+CONST UOBJ_LOOM_START		:= 0x105f;
+CONST UOBJ_LOOM_END			:= 0x1066;
+CONST UOBJ_BOLT					:= 0xf95;
+
+var item_config := ReadConfigFile(":*:itemdesc");
+
+program make_Bolt(who, thread)
+	if ( !ReserveItem(thread) )
+		SendSysMessage(who, "That is already in use.");
+		return 0;
+	elseif ( (!thread.movable) || !ReserveItem(thread) )
+		SendSysMessage(who, "You cannot use that");
+		return 0;
+	elseif ( !(thread in EnumerateItemsInContainer(who.backpack)) )
+		SendSysMessage(who, "That item is not in your backpack.");
+		return 0;
+	endif
+
+	EraseObjProperty(who, "#IsMeditating");
+	EraseObjProperty(who, "#HealTimer");
+	
+	SendSysMessage(who, "Select the Loom to use.");
+
+	var tool := Target(who);
+	if ( !tool )
+		SendSysMessage(who, "Cancelled.");
+		return;
+	endif
+
+	if ( (tool.objtype < UOBJ_LOOM_START) || (tool.objtype > UOBJ_LOOM_END))
+		SendSysMessage(who, "You can only use that on a loom.");
+		return;
+	else
+		makeBolt(who, thread);
+	endif
+endprogram
+
+function makeBolt(who, item)
+	if ( item.amount <= 0 )
+		SendSysMessage(who, "You don't have any thread!");
+		return;
+	endif
+
+	if ( ( item.amount > 0 ) && ( item.amount <= 4 ) )
+		SendSysMessage(who, "You don't have enough thread to create a bolt.");
+		return;
+	endif
+
+	if ( SubtractAmount(item, 5) )
+		var bolt := CreateItemInBackpack(who, UOBJ_BOLT, 1);
+		if ( !bolt )
+			SendSysMessage(who, "You fail to create the bolt of cloth.");
+		else
+			SendSysMessage(who, "You work at the loom and create bolts.");
+		endif
+	endif
+endfunction

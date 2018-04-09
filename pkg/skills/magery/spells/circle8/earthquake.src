@@ -1,0 +1,75 @@
+use vitals;
+use uo;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/spellAttack";
+include ":damage:damage";
+
+program earthquake( parms )
+  var caster := parms[1];
+  var info := parms[2];
+//  var cast_on := caster;
+
+/////////////////////// 0.97 Distro stuff starts here ////////////////////////
+	// TODO: Should not have LOS if targ is hidden, but not sure
+	
+	var base_damage;
+	var damage;
+        PlaySoundEffect( caster, SFX_220 );
+	
+	// Get all targets in area excluding party and self. Damaged is divided by number of valid targets.
+	var area_size := CInt(GetConfigInt(info.spell_config, "AreaSize"));
+	var exclude := GetObjProperty(caster, "#Party");
+	exclude.Append(caster.serial);
+	var targs := MS_GetVaildTargets(caster, area_size, 1, exclude);
+
+	foreach vtarg in targs
+		base_damage := (CDbl(AP_GetVital(vtarg, HITS)) / 3);
+		damage := MS_GetSpellDamage(caster, vtarg, base_damage);
+			
+		// Min and max damage for NPCs is 10 and 100
+		if ( vtarg.npctemplate )
+			if ( damage < 10 )
+				damage := 10;
+			elseif ( damage > 100 )
+				damage := 100;
+			endif
+		endif
+
+                PlaySoundEffect( vtarg, SFX_SPELL_EARTHQUAKE );
+                PlayObjectCenteredEffect( vtarg, FX_SMOKE, 7, 7);
+		ApplyRawSpellDamageEX(vtarg, damage, info.damage_type, caster, info.circle);
+	endforeach
+
+	return 1;
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+/*
+  var magery := GetAttribute(caster, MAGERY);
+  var range := 12;
+  var victims := ListMobilesNearLocationEx( caster.x, caster.y, caster.z, range, LISTEX_FLAG_NORMAL + LISTEX_FLAG_HIDDEN, caster.realm );
+  var dmg;
+  PlaySoundEffect( caster, SFX_220 );
+  foreach mobile in victims
+    if((mobile.serial != caster.serial) and (mobile.cmdlevel < 2))
+      SetObjProperty(mobile, "LastHit", {caster.name,caster.serial, "earthquake" });
+      send_attack(mobile,caster, 57);
+      dmg := RandomDiceRoll("7d7");
+	  PrintTextAbovePrivate( mobile,"You are tossed about as the earth trembles below your feet!", mobile );
+      PlaySoundEffect( mobile, SFX_SPELL_EARTHQUAKE );
+	  PlayObjectCenteredEffect( mobile, FX_SMOKE, 7, 7);
+      if(mobile.isA(POLCLASS_NPC))
+        dmg := dmg * 2;
+      endif
+	  ApplyRawDamage( mobile, Resisted(info.circle,caster,mobile,dmg) );
+    endif
+  endforeach
+  sleep(2);
+  PlaySoundEffect( caster, SFX_223 );
+  */
+endprogram

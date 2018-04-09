@@ -1,0 +1,30 @@
+use uo;
+use os;
+use cfgfile;
+
+program jailkeeper()
+  var relday;
+  var elem;
+  var act;
+  var ppl;
+  while(1)
+    ppl := EnumerateOnlineCharacters();
+    var accounts := ListAccounts();
+    foreach account in accounts
+      act := FindAccount(account);
+      relday := act.getprop("releaseday");
+      if (relday)
+        if (ReadGameClock() >= CInt(relday))
+          foreach person in ppl
+            if (person.cmdlevel > 0)
+              SendSysMessage(person, "releasing account " + account + " from jail!");
+            endif
+          endforeach
+          act.enable();
+          act.setprop("releaseday", 0);
+        endif
+      endif
+    endforeach
+    sleep(3600);
+  endwhile
+endprogram

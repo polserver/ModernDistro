@@ -1,0 +1,49 @@
+use uo;
+use os;
+
+include "include/client";
+include ":attributes:attributes";
+include "include/objtype";
+include "include/spellAttack";
+
+program paracontrol(field)
+  var creater := GetObjProperty(field, "creater");
+  var online := EnumerateOnlineCharacters();
+  var boss;
+  foreach char in online
+    if(creater == char.serial)
+      boss := char;
+      break;
+    endif
+  endforeach
+  if(!boss)
+    boss := SystemFindObjectBySerial(creater, SYSFIND_SEARCH_OFFLINE_MOBILES);
+  endif
+  SetScriptController(boss);
+  var parms := {};
+  while(field)
+    foreach cast_on in ListMobilesNearLocation(field.x, field.y, field.z, 0, field.realm)
+      if((GetHp(cast_on) > 1) && (cast_on.cmdlevel < 2))
+        SetScriptController(boss);
+        send_attack(cast_on, boss, 46);
+        ApplyRawDamage(cast_on, 1);
+        HealDamage(cast_on, 1);
+        send_attack(cast_on, boss, 46);
+        if(!GetObjProperty(cast_on,"#pfield"))
+          if(SkillCheck(cast_on, RESISTING_SPELLS, 40, 40))
+            PrintTextAbovePrivate(cast_on, "You resist the spell", cast_on);
+	        PlaySoundEffect(cast_on, SFX_SPELL_WEAKEN);
+	        PlayObjectCenteredEffect( cast_on, FX_CURSE_EFFECT, 5,5);
+          else
+            parms[1] := cast_on;
+            parms[2] := boss;
+            Detach();
+            start_script(":spells:pField", parms);
+          endif
+        endif
+      endif
+    endforeach
+    sleepms(500);
+  endwhile
+endprogram
+

@@ -1,0 +1,218 @@
+// $Id: carpentry.src 1473 2009-03-12 01:26:41Z muaddib_pol $
+
+// TODO: set up for locks to work in carpentry. Find where austin
+//       moved that setup too!!
+use cfgfile;
+use util;
+
+include ":attributes:attributes";
+include ":containers:containers";
+include ":crafting:crafting";
+include ":crafting:craftingRepair";
+include ":crafting:toolWear";
+
+CONST CARP_WOOD_SOUND := 0x23e;
+
+var item_config     := ReadConfigFile(":*:itemdesc");
+var craft_config    := ReadConfigFile(":carpentry:carpentry");
+
+program use_carptool(who, tool)
+
+	if ( !ReserveItem(tool) )
+		SendSysMessage(who, "That is already in use.");
+		return 0;
+	elseif( (!tool.movable) || !ReserveItem(tool) )
+		SendSysMessage(who, "You cannot use that");
+		return 0;
+	elseif( !(tool in EnumerateItemsInContainer(who.backpack)) )
+		SendSysMessage(who, "That item is not in your backpack.");
+		return 0;
+	endif
+
+	EraseObjProperty(who, "#IsMeditating");
+	EraseObjProperty(who, "#HealTimer");
+
+	var rinfo := sendCraftGump(who, CARPENTRY);
+
+	// OK was pressed, close it on out
+	if(rinfo == 0)
+		return 0;
+	endif
+
+	var the_objtype := rinfo[1];
+	var amt         := rinfo[2];
+	var repairit    := rinfo[3];
+	if(repairit)
+		repair_this(who, craft_skill);
+		return 0;
+	endif
+
+	if(craft_config[Hex(the_objtype)].assemble == 1)
+		AssembleParts(who, tool, the_objtype, amt);
+	else
+		CarpentryItems(who, tool, the_objtype, amt);
+	endif
+
+endprogram
+
+function AssembleParts(who, tool, objtype, amt)
+
+	case(objtype)
+		0x1bd7:		CreateBoards(who, tool, objtype); return 1;
+		default:	CraftAssembly(who, craft_skill, tool, objtype, amt); return 1;
+	endcase
+
+endfunction
+
+function CreateBoards(who, tool, objtype)
+
+	// Wood is sent for the ResourceList entry type.
+	var itemchk := MaterialSelection(who, craft_skill, lower(craft_config[objtype].type));
+	if( !itemchk )
+		return 0;
+	endif
+	var item1 := itemchk[1];
+	var item1objtype := itemchk[2];
+	var ptmod := itemchk[3];
+
+	if( CInt(item1.objtype) == CInt(objtype) )
+		return 0;
+	endif
+
+	sleep(2);
+	var theitem := 0;
+	if( SkillCheck(who, craft_skill, 0, (ptmod/2)) > 0 )
+		var amt := item1.amount;
+		if( SubtractAmount(item1, 1) )
+			var ret := GetItemDescriptor(0x1bd7);
+			ret.Color := resource_config[item1objtype].Color;
+			ret.CProps.insert(lower(craft_config[objtype].type), item1objtype); //assuming the existing stack have this color and cprop
+			theitem := CreateItemInBackpack(who, ret, 1);
+			if( TypeOf(theitem) == "ItemRef" )
+				set_critical(1);
+				SubtractAmount(item1, (amt - 1));
+				if( resource_config[item1objtype].Name != "plain" )
+					var tempname := (resource_config[item1objtype].Name) + " " + "board";
+					SetName(theitem, tempname);
+				endif
+				AddAmount(theitem, (amt - 1));
+				set_critical(0);
+				CheckToolWear (who, tool, craft_skill);
+			else
+				SendSysMessage(who, "You don't have enough room in your backpack!");
+				return 0;
+			endif
+		endif
+	endif
+
+	return 1;
+
+endfunction
+
+function CarpentryItems(who, tool, objtype, amt)
+
+	var itemchk := MaterialSelection(who, craft_skill, lower(craft_config[objtype].Type));
+	if( !itemchk )
+		return 0;
+	endif
+	var item1 := itemchk[1];
+	var item1objtype := itemchk[2];
+	var ptmod := itemchk[3];
+	var x := who.x, y := who.y, item2 := 0;
+	var material2obj := craft_config[objtype].material2obj;
+	if( TypeOf(material2obj) == "String" )
+		// Let's now select the secondary material. Chk is not passed, as currently
+		// ingots do not hold a cprop to know which type they was originally like boards
+		// or cut leather.
+		itemchk := MaterialSelection(who, craft_skill, lower(material2obj));
+		if( !itemchk )
+			return 0;
+		endif
+		item2 := itemchk[1];
+		ptmod := ptmod + CInt(itemchk[3]);
+	endif
+
+	var theitem;
+	var itemname  := craft_config[objtype].name;
+	var material  := Cint(craft_config[objtype].material);
+	var material2 := Cint(craft_config[objtype].material2);
+	var reqd      := Cint(craft_config[objtype].skill);
+	var skillid2  := craft_config[objtype].skillID;
+	var skill2    := Cint(craft_config[objtype].skill2);
+	var diff      := Cint(craft_config[objtype].difficulty);
+	var pts       := Cint(craft_config[objtype].points);
+	pts           := CInt(pts + ptmod);
+	var counter := 0;
+
+	if( skillid2 )
+		if( (skill2 >= AP_GetSkill(who, skillid2)) )
+			SendSysMessage(who, "You do not have the required skill.");
+			return 0;
+		endif
+	endif
+
+	while(counter < amt)
+		if((who.x != x) || (who.y != y))
+			SendSysMessage(who, "You stop woodworking.");
+			break;
+		endif
+
+		if( !tool )
+			break;
+		endif
+
+		if( GetAmount(item1) >= material )
+			if( item2 != 0 && GetAmount(item2) < material2 )
+				SendSysMessage(who, "You do not have enough materials.");
+				return 0;
+			endif
+			if( CraftCheckSkill(who, craft_skill, diff, pts) > 0 )
+				if( TypeOf(item2) == "ItemRef" )
+					if( !SubtractAmount(item2, material2) )
+						SendSysMessage(who, "You do not have enough materials.");
+						return 0;
+					endif
+				endif
+				theitem := CreateCraftItem(who, craft_skill, item1, item1objtype, objtype, material, itemname, reqd);
+				if( TypeOf(theitem) == "ItemRef" )
+					theitem.movable := 1;
+					if( craft_config[theitem.objtype].lockable )
+						if( SkillCheck(who, TINKERING, 40, 40) > 0 )
+							SetObjProperty(theitem, "Lockable","1");
+							var lockid := CreateLockID();
+							var thekey := CreateItemInContainer(theitem, 0x100E, 1 );
+							SetObjProperty(thekey, "LockId", lockid);
+							SetObjProperty(theitem,"LockId", lockid);
+							SetObjProperty(theitem,"LockPickDiff", AP_GetSkill(who, TINKERING));
+							SendSysMessage(who, "Your tinker skill was sufficient to make the item lockable.");
+						endif
+					endif
+				endif
+			else
+				var num := CInt(RandomInt(material)/2) + 1;
+				if(!SubtractAmount(item1, num))
+					SendSysMessage(who, "You do not have enough materials.");
+					return 0;
+				endif
+				if( material2 )
+					num := CInt(RandomInt(material2)/2) + 1;
+					if( !SubtractAmount(item2, num) )
+						SendSysMessage(who, "You do not have enough materials.");
+						return 0;
+					endif
+				endif
+				SendSysMessage(who, "You failed to create the item, and some of your materials are lost.");
+				counter := counter + 1;
+				continue;
+			endif
+			CheckToolWear (who, tool, craft_skill);
+		else
+			SendSysMessage(who, "You do not have enough materials.");
+			return 0;
+		endif
+		counter := counter + 1;
+	endwhile
+
+	return 1;
+
+endfunction

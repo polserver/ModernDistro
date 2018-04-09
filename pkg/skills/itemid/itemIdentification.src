@@ -1,0 +1,104 @@
+use uo;
+use os;
+use basic;
+use cfgfile;
+
+include "include/client";
+include "include/skillPoints";
+include "include/trainingskill";
+include ":attributes:attributes";
+
+
+program do_itemid( who )
+        var data := {};
+        data[1] := "itemid";
+        data[2] := ReadGameClock();
+        data[3] := 3;
+        SetObjProperty(who, "LastUsedSkill", data );
+        TrainingSkill(who, data[3]);
+
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  var thepoints := get_default_points(SKILLID_ITEM_IDENTIFICATION);
+  var the_item;
+  var ncharges;
+  SendSysMessage( who, "Select an object to identify." );
+  the_item := Target(who, TGTOPT_CHECK_LOS);
+  if(!the_item)
+    SendSysMessage(who, "Targetting cancelled.");
+    return;
+  endif
+  if(the_item.isA(POLCLASS_MOBILE))
+    SendSysMessage(who, "That's not an item!");
+    return;
+  endif
+  if(SkillCheck(who,ITEM_IDENTIFICATION, -1, thepoints))
+    var name := "";
+    var itsname := the_item.name;
+    if (!itsname)
+	    var cfgfile := ReadConfigFile(":*:itemdesc");
+    	var elem := FindConfigElem(cfgfile, the_item.objtype);
+    	itsname := elem.desc;
+    endif
+    if(GetObjProperty(the_item, "silvermod"))
+      name :=  "silver" + name;
+    endif
+    if(GetObjProperty(the_item, "durability"))
+      name := name + " " + GetObjProperty(the_item, "durability");
+    endif
+    if(GetObjProperty(the_item, "accuracy"))
+      name := name + " " + GetObjProperty(the_item, "accuracy");
+    endif
+    itsname["a "] := "";
+    itsname["an "] := "";
+    itsname["magic "] := "";
+    name := name + " " + itsname;
+    if(GetObjProperty(the_item, "damagemod"))
+      name := name + " " + GetObjProperty(the_item, "damagemod");
+    endif
+    name.erase(1);
+    if((!GetObjProperty(the_item, "IDed")) and (name != ""))
+      SetName(the_item, name);
+    endif
+    var msg := "It appears to be";
+    itsname := the_item.desc;
+    if(itsname[1] == " ")
+      if(Cint(itsname[2]) == 0)
+        case(Cstr(itsname[2]))
+          "a": msg := msg + " an";
+          "e": msg := msg + " an";
+          "i": msg := msg + " an";
+          "o": msg := msg + " an";
+          "u": msg := msg + " an";
+        endcase
+      endif
+    else
+      msg := msg + " ";
+      if(Cint(itsname[1]) == 0)
+        case(Cstr(itsname[1]))
+          "a": msg := msg + " an ";
+          "e": msg := msg + " an ";
+          "i": msg := msg + " an ";
+          "o": msg := msg + " an ";
+          "u": msg := msg + " an ";
+        endcase
+      endif
+    endif
+    msg := msg + itsname;
+    SendSysMessage( who, msg);
+    SetObjProperty( the_item, "IDed", 1 );
+    if(GetObjProperty(the_item, "charges") )
+	  ncharges := CStr(GetObjProperty(the_item, "charges") );
+	  if(ncharges)
+	    SendSysMessage(who, "It has " + ncharges + " charges.");
+  	  endif
+    endif
+    if(GetObjProperty(the_item, "type") == "cursed")
+	  if(SkillCheck(who,ITEM_IDENTIFICATION, 65, 0) )
+	    SendSysMessage(who, "* This item is cursed! *");
+	  endif
+    endif
+  else
+    SendSysMessage(who, "I'm not sure . . .");
+  endif
+endprogram

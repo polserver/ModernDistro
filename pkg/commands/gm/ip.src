@@ -1,0 +1,15 @@
+use uo;
+
+program textcmd_ip(who)
+
+	SendSysMessage(who, "Select target.");
+	var victim := Target(who);
+
+	if (!victim.ip)
+		SendSysMessage(who, "Invalid target.");
+		return;
+	endif
+
+	SendSysMessage(who, "IP: " + CStr(victim.ip) );
+
+endprogram

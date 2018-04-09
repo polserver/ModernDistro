@@ -1,0 +1,40 @@
+/*
+        Maintened by *Edwards
+
+        Last Modifications 2009-05-30
+*/
+use uo;
+
+include "include/security";
+
+program textcmd_Equip( speaker )
+
+        if( !AuthorizationCode( speaker ))
+                SendSysMessage( speaker, "Cancelled." );
+                return 0;
+        endif
+
+	SendSysMessage( speaker, "What shall be equipped?" );
+	var what := TargetCoordinates( speaker );
+	if( !what )
+		return 0;
+	endif
+
+	SendSysMessage( speaker, "On whom shall "+what.desc+" be equipped?" );
+	var who := Target( speaker, TGTOPT_NOCHECK_LOS );
+	if( !who )
+		return 0;
+        elseif( !who.IsA( POLCLASS_MOBILE ))
+                SendSysMessage( speaker, "You must select a player or npc." );
+                return 0;
+	endif
+
+	var res := EquipItem( who, what.item );
+	if( res )
+		SendSysMessage( speaker, "Done!" );
+	else
+		SendSysMessage( speaker, "Unable to equip item: "+res.errortext );
+	endif
+
+	return 1;
+endprogram

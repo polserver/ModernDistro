@@ -1,0 +1,30 @@
+use uo;
+use os;
+use guilds;
+
+program gc(who, text)
+  var guildid := GetObjProperty(who, "guild_id");
+  if(!guildid)
+    return;
+  endif
+	var guild_pid := GetGlobalProperty(CStr("#Guild" + guildid));
+	if(!guild_pid)
+	  return;
+	endif
+	var guild_proc := GetProcess(guild_pid);
+	if(text == "off")
+	  SetObjProperty(who,"gc_off", 1);
+	  SendSysMessage(who, "You will no longer receive messages from other guild members.", 3, 40);
+	elseif( text == "on" )
+	  EraseObjProperty(who, "gc_off");
+	  SendSysMessage(who, "You will now receive messages from other guild members.");
+	else
+	  var evnt      := struct;
+	  evnt.+who     := who;
+	  evnt.+message := text;
+	  evnt.+type    := "gc";
+	  evnt.+status  := 0;
+	  guild_proc.sendevent(evnt);
+	Endif
+endprogram
+

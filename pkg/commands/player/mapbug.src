@@ -1,0 +1,41 @@
+use uo;
+use os;
+use cfgfile;
+
+include ":gumps:requestGump";
+include ":timeutils:time";
+
+
+program textcmd_blooper( who )
+
+
+    var prop1 := {};
+    var log1 := {};
+    var w1, description, elemkey;
+	var time := FormatTime(GetTimeStruct(GetTime()), "<HH>:<MM>:<SS> on <DAY>-<MON>-<YY>");
+
+    SendSysMessage (who, "Target a location near or at the problem area.", color := 66);
+    w1 := TargetCoordinates(who);
+    
+        if (!w1)
+            SendSysMessage (who, "Cancelled.", color := 33);
+            return;
+        endif
+        
+    SendSysMessage( who, "X=" + w1.x + ", Y=" + w1.y + ", Z=" + w1.z + ", Realm: " +  w1.realm, color := 88 );
+    description := RequestGump2(who, "Enter a description of the problem:", "", "", 1);
+
+	if(description == error)
+		SendSysMessage(who, "Cancelled.", color := 33);
+		return 0;
+	endif
+	
+    prop1 .+ pname := "Date and time: " + time + " - " + w1.x + " " + w1.y + " " + w1.z;
+        prop1 .+ pvalue := w1.realm + " - Player Account: " + who.acctname;
+
+    elemkey := description;
+    log1[1] := prop1;
+    AppendConfigFileElem( "map_issues", "Location: ", elemkey, log1 );
+    UnloadConfigFile("map_issues");
+
+endprogram

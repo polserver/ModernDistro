@@ -1,0 +1,13 @@
+use uo;
+use os;
+
+program chair_WalkOn( who, chair )
+
+	ReserveItem	( chair );
+	while ( who.x == chair.x && who.y == chair.y && who.z == chair.z )
+		SleepMS(500);
+	endwhile
+	ReleaseItem ( chair );
+	return 1;
+	
+endprogram

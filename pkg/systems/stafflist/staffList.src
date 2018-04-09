@@ -1,0 +1,168 @@
+use os;
+use util;
+use uo;
+
+include "include/math";
+include "include/eventID";
+var stff := {};
+var players := {};
+var coun := {};
+var gm := {};
+
+program online_server()
+  stff := {};
+  while(1)
+	var ev := wait_for_event(3600);
+	if(ev)
+	  case(ev.type)
+	    EVID_STAFF_LOGIN:   staff(ev);
+	    EVID_PLAYER_LOGIN:  login(ev);
+	    EVID_PLAYER_LOGOFF: logoff(ev);
+	    EVID_PLAYER_DELAY:  pdelay(ev);
+	    EVID_FIND_COUN:     Reportcounselors(ev);
+	    EVID_FIND_GM:       Reportgamemasters(ev);
+	    "gmbcast":          GMBcast(ev);
+	  endcase
+	endif
+  endwhile
+endprogram
+
+function GMBcast(ev)
+  var msg := ev.msg;
+  if(ev.src == "ScriptManager")
+    foreach x in gm
+      SendSysMessage(x, msg, 0, 52);
+    endforeach
+  else
+    var source := ev.source;
+    foreach x in gm
+      SendSysMessage(x, source.name + ": " + msg, 0, 87);
+    endforeach
+  endif
+endfunction
+
+function Reportcounselors(ev)
+  var sender := GetProcess(ev.pid);
+  var k := struct;
+  k.+type  := EVID_FIND_COUN;
+  k.+data := coun;
+  sender.sendevent(k);
+endfunction
+
+function Reportgamemasters(ev)
+  var sender := GetProcess(ev.pid);
+  var k := struct;
+  k.+type  := EVID_FIND_GM;
+  k.+data  := gm;
+  sender.sendevent(k);
+endfunction
+
+function login(ev)
+  var who := ev.player;
+  foreach person in stff
+    if(CInt(GetObjProperty(person, "LogNotify")) == 1)
+      SendSysMessage(person, who.name + " (Account name: " + who.acctname + ") has logged on.  IP: " + who.ip);
+    endif
+  endforeach
+endfunction
+
+function logoff(ev)
+  var who := ev.player;
+  var lastlogon := CInt(ReadGameClock()) - CInt(GetObjProperty(who, "LastLog"));
+  if(!lastlogon)
+    lastlogon := "unknown";
+  else
+    var s := Mod(lastlogon, 60);
+	var m := CInt(lastlogon/60);
+	m := Mod(m, 60);
+	var h := CInt(m / 60);
+	if (s < 10)
+	  s := "0" + CStr(s);
+	endif
+	if (m < 10)
+	  m := "0" + CStr(m);
+	endif
+	lastlogon := CStr(h) + ":" + CStr(m) + ":" + CStr(s);
+  endif
+  SetObjProperty(who, "LastLog", ReadGameClock());
+  if(who.cmdlevel >= 1)
+    var holder := {};
+    foreach thing in stff
+      if(thing != who)
+        holder.append(thing);
+      endif
+    endforeach
+    stff := holder;
+    holder := {};
+    if(who.cmdlevel == 1)
+      foreach thing in coun
+        if(thing != who)
+          holder.append(thing);
+        endif
+      endforeach
+      coun := holder;
+    elseif(who.cmdlevel > 1)
+      foreach thing in gm
+        if(thing != who)
+          holder.append(thing);
+        endif
+      endforeach
+      gm := holder;
+    endif
+  endif
+  if(GetObjProperty(who, "StealthLogin"))
+	return;
+  else
+    foreach person in stff
+      if(CInt(GetObjProperty(person, "LogNotify")) == 1)
+        SendSysMessage(person, who.name + " (Account name: " + who.acctname + ") has logged off.  IP: " + who.ip + "   Time on- " + lastlogon);
+      endif
+    endforeach
+  endif
+endfunction
+
+function staff(ev)
+  var who := ev.player;
+  stff.append(who);
+  if((who.cmdlevel >= 1) and (who.cmdlevel < 3))
+    coun.append(who);
+  elseif(who.cmdlevel >= 3)
+    gm.append(who);
+  endif
+  SendSysMessage(Who, "Welcome, there are currently " + len(stff) + " staff online");
+  foreach thing in stff
+    if(thing != who)
+      var msg := "Staff Member";
+      case(thing.cmdlevel)
+        0: msg := "Player";
+        1: msg := "Counselor";
+        2: msg := "Seer";
+        3: msg := "GM";
+        4: msg := "Admin";
+        5: msg := "Developer";
+      endcase
+      SendSysMessage(who, msg + " " + thing.name + " is online");
+      if(!GetObjProperty(who, "StealthLogin"))
+        SendSysMessage(thing, who.name + " (Account name: " + who.acctname + ") has logged on.  IP: " + who.ip);
+      endif
+    else
+      if(CInt(GetObjProperty(thing, "LogNotify")) == 1)
+        SendSysMessage(thing, who.name + " (Account name: " + who.acctname + ") has logged on.  IP: " + who.ip);
+      endif
+    endif
+    sleep(1);
+  endforeach
+endfunction
+
+function pdelay(ev)
+  var who := ev.player;
+  if(GetObjProperty(who, "StealthLogin"))
+	return;
+  else
+    foreach person in stff
+      if(CInt(GetObjProperty(person, "LogNotify")) == 1)
+        SendSysMessage(person, who.name + " (Account name: " + who.acctname + ") has been set to delayed log out.  IP: " + who.ip);
+      endif
+    endforeach
+  endif
+endfunction

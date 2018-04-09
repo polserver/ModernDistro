@@ -1,0 +1,48 @@
+/*
+        Maintened by *Edwards
+
+        2009-10-20
+*/
+use uo;
+use cliloc;
+
+include ":containers:checks";
+include ":containers:canRemove";
+include ":housing:housing";
+
+program canRemove( mobile, container, item, move_type )
+
+        //Avoid compiler warnings
+        item := item;
+
+        if( !Anti_Fast_Loot( mobile ))
+                return 0;
+        endif
+        
+	if( mobile.cmdlevel >= 2 )
+		return 1;
+	elseif( move_type == MOVETYPE_COREMOVE )
+		return 1;
+	elseif( CP_IsLocked( container ))
+		SendSysMessage( mobile, "You can't remove items from locked containers." );
+		return 0;
+	elseif( ContainerIsSecured( mobile, container ) )
+		SendSysMessageCL ( mobile, 503301, color := 33 ); // You don't have permission to do that.
+		return 0;
+	endif
+ 
+	return 1;
+endprogram
+
+function ContainerIsSecured( mobile, container )
+
+	var sign := FindHouseSign ( mobile );
+	if ( !container.IsSecured() )
+		// Nothing to worry about.
+		return 0;
+	elseif ( sign.IsAffiliated( mobile ) >= container.GetSecureLevel() )
+		return 0;
+	else
+		return 1;
+	endif
+endfunction

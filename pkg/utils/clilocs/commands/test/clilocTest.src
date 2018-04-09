@@ -1,0 +1,20 @@
+use uo;
+use cfgfile;
+use basic;
+
+include ":clilocs:clilocs";
+
+program testcliloc(who, text)
+text := text;
+//var clilocs := CL_GetClilocsCfgElem("clilocs");
+var clilocs := CL_GetCliloc(text);
+// SendSysMessage(who, clilocs.text, 1, 88);
+var orig := " curtsey";
+SendSysMessage(who, clilocs, 1, 88);
+SendSysMessage(who, text, 1, 88);
+SendSysMessage(who, CStr(Len(orig)), 1, 88);
+
+endprogram
+// Original
+//SubStr(clilocs, Len(clilocs) - 10, 10)
+//SubStrReplace(str, replace_with, start, length:=0)

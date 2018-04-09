@@ -1,0 +1,95 @@
+use uo;
+use os;
+use util;
+use datafile;
+
+program shelfstock();
+  var globalshelves;
+  var shelf;
+  print("Book Spawner is running.");
+  sleep(3);
+  var newarray := array{};
+  while(1)
+    if(!GetGlobalProperty("BookSpawnPause"))
+      globalshelves := GetGlobalProperty("shelves");
+      foreach thing in globalshelves
+        shelf := SystemFindObjectBySerial(thing);
+        if(shelf)
+          newarray.append(thing);
+          addbooks(shelf);
+        endif
+        sleep(10);
+      endforeach
+      SetGlobalProperty("shelves", newarray);
+      sleep(61);
+    else
+      print("Book Spawner is Paused.");
+      print("To unpause book spawner erase global property:");
+      print("BookSpawnPause");
+      sleep(60);
+    endif
+  endwhile
+endprogram
+
+function addbooks(bookcase)
+  var count := 0;
+//  var junk;
+  var books := EnumerateItemsInContainer(bookcase);
+  var max := GetObjProperty(bookcase, "MaxBooks");
+  if((!max) or (max > 7))
+    max := RandomDiceRoll("1d5+2");
+    SetObjProperty(bookcase, "MaxBooks", max);
+  endif
+
+  if(books.size()!= 0)
+    foreach book in books
+     if(book.objtype == 0xfef)
+        count := count + 1;
+      endif
+    endforeach
+  endif
+  while(count < max)
+//    if((RandomInt(5) + 1) > 3)
+      SpecialBook(bookcase);
+/*    else
+      junk := CreateItemInContainer(bookcase, 0xfef, 1);
+      if (!junk)
+	  Broadcast("Spawnbook error = " + junk.errortext, color := 88);
+      endif
+    endif */
+    count := count + 1;
+  endwhile
+endfunction
+
+function SpecialBook(bookcase)
+  var book := CreateItemInContainer(bookcase, 0xfef, 1);
+  case(RandomInt(4)+1)
+    1: book.graphic := 4079;
+    2: book.graphic := 4080;
+    3: book.graphic := 4081;
+    4: book.graphic := 4082;
+  endcase
+  var rint := CInt(RandomInt(30) + 1);
+  var title := GetTitle(rint);
+  book.setprop("contents", GetContents(rint));
+  book.setprop("title",    title);
+  book.setprop("author",   GetAuthor(rint));
+  book.name := title;
+endfunction
+
+function GetBookElem(bookid)
+  var df := OpenDataFile("staticbooks");
+  return df.FindElement(bookid);
+endfunction
+
+function GetContents(rint)
+  return GetBookElem(rint).getprop("contents");
+endfunction
+
+function GetTitle(rint)
+  return GetBookElem(rint).getprop("title");
+endfunction
+
+function GetAuthor(rint)
+  return GetBookElem(rint).getprop("author");
+endfunction

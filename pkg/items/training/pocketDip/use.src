@@ -1,0 +1,75 @@
+/*
+        Maintened by *Edwards
+
+        2009-08-29
+*/
+use uo;
+use os;
+
+include ":attributes:attributes";
+include ":weapons:weaponInfo";
+include ":training:training";
+include ":itemutils:itemUtil";
+
+CONST SUCCESS_SOUND := 0x58;
+CONST FAIL_SOUND := 0x41;
+
+program PocketDip( who, dummy )
+        
+	if( dummy.container )
+		return 0;
+	elseif( Distance( who, dummy ) > 2 )
+		SendSysMessage( who, "You are too far away." );
+		return 0;
+	elseif( !useItem_check( who, dummy, DEFAULT_ITEM ))
+		return 0;
+        elseif( !HasThiefGloves( who ))
+                SendSysMessage( who, "You need to equip thief gloves to do that!" );
+		return 0;
+	elseif( SkillCheck( who, "Stealing", -1, TP_CanAdvance( who, "Stealing" )) > 0 )
+		PlaySoundEffect( who, SUCCESS_SOUND );
+		SendSysMessage( who, "You successfully slip your hand into the bag." );
+		ReleaseItem( dummy );
+		SleepMS(3600);
+		return 1;
+	else
+		SendSysMessage( who, "You foolishly grip the bag." );
+		PlaySoundEffect( who, FAIL_SOUND );
+
+		DummyRock( dummy );
+                return 1;
+	endif
+ 
+        return 1;
+endprogram
+
+function DummyRock( dummy )
+
+	case( dummy.graphic )
+		7872:
+			dummy.graphic := 7873;
+			SleepMS(3600);
+			dummy.graphic := 7872;
+			break;
+
+		7875:
+			dummy.graphic := 7876;
+			SleepMS(3600);
+			dummy.graphic := 7875;
+			break;
+	endcase
+
+	return 1;
+endfunction
+
+function HasThiefGloves( mobile )
+
+        foreach item in ListEquippedItems( mobile )
+                if( item.IsThiefGloves() )
+                	return 1;
+                endif
+                SleepMS(5);
+        endforeach
+
+        return 0;
+endfunction

@@ -1,0 +1,66 @@
+use uo;
+use os;
+use cfgfile;
+
+program textcmd_grabnodes(who)
+  var x := 0;
+  var y := 0;
+  foreach thing in ListObjectsInBox(0, 0, -100, 6143, 4095, 100, who.realm)
+    if(thing.objtype == 0x1887a)
+      var data := array;
+      var holder := array;
+      holder.+pname  := "x";
+      holder.+pvalue := thing.x;
+      data.append(holder);
+      holder.pname  := "y";
+      holder.pvalue := thing.y;
+      data.append(holder);
+      holder.pname  := "z";
+      holder.pvalue := thing.z;
+      data.append(holder);
+      var tmp := array;
+      foreach entry in (thing.PropNames())
+        if(!entry["#"])
+          var t := array;
+          t.append(entry);
+          t.append(GetObjProperty(thing, entry));
+          tmp.append(t);
+        endif
+      endforeach    
+      holder.pname  := "data";
+      holder.pvalue := pack(tmp);
+      data.append(holder);
+      AppendConfigFileElem("packedNodes", "MERCHANT", "merchant" + x, data);
+      x := x + 1;
+      DestroyItem(thing);
+    elseif(thing.objtype == 0x1887b)
+      var data := array;
+      var holder := array;
+      holder.+pname  := "x";
+      holder.+pvalue := thing.x;
+      data.append(holder);
+      holder.pname  := "y";
+      holder.pvalue := thing.y;
+      data.append(holder);
+      holder.pname  := "z";
+      holder.pvalue := thing.z;
+      data.append(holder);
+      var tmp := array;
+      foreach entry in (thing.PropNames())
+        if((!entry["#"]) and (entry != "Children"))
+          var t := array;
+          t.append(entry);
+          t.append(GetObjProperty(thing, entry));
+          tmp.append(t);
+        endif
+      endforeach   
+      holder.pname  := "data";
+      holder.pvalue := pack(tmp);
+      data.append(holder);
+      AppendConfigFileElem( "packedNodes", "GUARD", "guard" + y, data);
+      y := y + 1;
+      DestroyItem(thing);
+    endif
+  endforeach
+  SendSysMessage(who, "Finished Packing Nodes to Config file.");
+endprogram

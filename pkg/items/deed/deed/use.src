@@ -1,0 +1,258 @@
+use uo;
+use os;
+use cfgfile;
+use cliloc;
+
+include ":itemutils:itemUtil";
+include "include/string";
+include ":containers:containers";
+include ":housing:housing";
+//include ":staticHousing:houseItem";
+include ":gumps:yesNo";
+include ":keys:key";
+
+const CANCEL_ID := 999;
+
+var permuting := 0;
+var opposing  := 0;
+
+//1062201 //Only the owner, ~1_NAME~, can use this deed.
+//500270 //You cannot build that there.
+//500272 //You cannot build near the stairs.
+program Place_Deeded_Item ( who, deed )
+
+	var sign := FindHouseForLocation (who.x, who.y, who.z, who.realm);
+	if(who.cmdlevel <= 2)
+		//Sign stuff
+		if ( !sign )
+			SendSysMessageCL(who, 500275, color := 33); // You can only build this in a house.
+		return 0;
+		endif	
+		
+		if ( !sign.IsCoOwnerOrOwner( who ) )
+			SendSysMessageCL(who, 1152907, color := 33); // You must be owner or co-owner of a house to place addons in it.
+		return 0;
+		endif
+	endif
+	
+	var InBackpack := useItem_check ( who, deed, ITEM_INCONTAINER );
+	if(!InBackpack)
+		return 0;
+	endif
+
+	if ( !ReserveItem ( deed ) )
+		SendSysMessageCL(who, 1042009, color := 33); // You cannot use this deed at this time.
+		return 0;
+	endif
+	
+	foreach item in ListItemsNearLocation (who.x, who.y, who.z, 1, who.realm)
+ 		if (item.IsDoor())
+			SendSysMessageCL(who, 500271, color := 33); // You cannot build near the door.
+			return;
+  		endif
+	endforeach
+	
+	SendSysMessageCL( who, 1049780, color := 66 ); // Where would you like to place this decoration?
+	var start := TargetCoordinates( who );
+	if( !start )
+		SendSysMessageCL( who, 1042021, color := 33 ); // Cancelled
+		return 0;
+	elseif( !CheckLosAt( who, CInt( start.x ), CInt( start.y ), CInt( start.z )))
+		SendSysMessageCL( who, 500950, color := 33 ); // You cannot see that.
+		return 0;
+	elseif( !IsLocationWithinHouseSign (sign, start.x, start.y, start.z) )
+		SendSysMessageCL( who, 500275, color := 33); // You can only build this in a house.
+		return 0;
+	endif
+	
+	BuildandSendOrientGump(who, deed, sign, start);
+endprogram
+
+function BuildandSendOrientGump ( who, deed, sign, targ )
+//	var item_cfg := ReadConfigFile ( ":deed:itemdesc" );
+//    if ( item_cfg.errortext )
+//        SendSysMessage ( who, "Error reading config :deed:itemdesc -->"+item_cfg.errortext );
+//    return 0;
+//    endif
+	
+	var cfg_info := GetItemDescInfo( deed.objtype ),
+	buildCFG := CStr ( cfg_info.BuildCFG ),
+	RetainColor := CInt ( cfg_info.RetainColor );
+	//var element := FindConfigElem ( item_cfg, deed.objtype ),
+	//	buildCFG := GetConfigString ( element, "BuildCFG" );
+		
+	if(!BuildCFG)
+		SendSysMessageCL ( who, 500273, color := 33); // This add-on deed is blank.
+	return 0;
+	endif
+
+	var cfg	:= ReadConfigFile ( buildCFG );
+    if ( cfg.errortext )
+        SendSysMessage ( who, "Error reading config Build CFG -->"+cfg.errortext );
+    return 0;
+    endif
+
+	var cfg_elem := GetConfigIntKeys ( cfg );
+	var num_elem := CInt ( cfg_elem.Size() );
+	if ( num_elem == 1 )
+		BuildItem(who, deed, sign, targ, buildCFG, RetainColor, 1);
+	return 1;
+	endif
+		
+	var multiplier, ItemY, intorient;
+	var gump := GFCreateGump(30, 50);
+	GFPage(gump, 0);
+	GFResizePic ( gump, 0, 0, 9200, 220, 235 );
+	GFResizePic ( gump, 10, 10, 3000, 200, 215 );
+	GFResizePic ( gump, 20, 20, 3000, 180, 80 );
+	GFHTMLArea ( gump, 24, 24, 170, 70, "Select the item's orientation in which it will be placed." );
+
+	foreach entry in ( cfg_elem )
+		intorient := CInt ( entry );
+		multiplier := CInt ( _entry_iter - 1 );
+		ItemY := Cint ( 105 + ( 30 * ( multiplier % 4 ) ) );
+		GFAddButton ( gump, 20, ItemY, 4005, 4007, GF_CLOSE_BTN, intorient );
+		GFAddHTMLLocalized ( gump, 55, ItemY, 150, 20, intorient );
+		SleepMS( 2 );
+	endforeach
+
+	var input := GFSendGump ( who, gump );
+	
+	if( !input )
+		SendSysMessageCL ( who, 1042021, color := 33 ); // Cancelled
+	return 0;
+	endif	
+	input := input[0];
+	BuildItem ( who, deed, sign, targ, buildCFG, RetainColor, input );
+endfunction
+
+function BuildItem ( who, deed, sign, targ, buildCFG, RetainColor, direction )
+	var created := {},
+	    the_serials	:= {};
+	var cfg	:= ReadConfigFile ( buildCFG );
+    if ( cfg.errortext )
+        SendSysMessage ( who, "Error reading config Build CFG -->"+cfg.errortext );
+    return 0;
+    endif
+	var cfg_elem := FindConfigElem ( cfg, direction ); 
+	var component := GetConfigStringArray ( cfg_elem, "Component" );
+	var zed := GetHouseZoneBaseZLevel ( targ, sign );
+	var broken, newx, newy, newz, founddoor := 0, founditem := 0, outside := 0;
+	//Let's check to ensure that this deed is placed properly, ensuring that the item does not
+	//pop out of the house, that there are no doors being blocked, no items other than carpets/rugs
+	//below the item. 
+	//ToDo: Check for static items at the item's location
+	foreach item in ( component )
+		broken := SplitWords(item);
+		newx := targ.x + CInt(broken[2]);
+		newy := targ.y + CInt(broken[3]);
+		newz := targ.z + CInt(broken[4]);
+		if ( !IsLocationWithinHouseSign ( sign, newx, newy, newz ) )
+			outside := 1;
+		endif
+		
+		foreach possitem in ListItemsAtLocation ( newx, newy, zed, targ.realm )
+			if( !possitem.IsCarpet () )
+				founditem := 1;
+			endif
+		endforeach
+		
+		foreach possdoor in ListItemsNearLocation ( newx, newy, zed, 1, targ.realm )
+			if (possdoor.IsDoor () )
+				founddoor := 1;
+			endif
+		endforeach
+	endforeach
+	
+	var the_item, failed := 0;
+	if (outside == 0 && founddoor == 0 && founditem == 0 )
+		foreach item in ( component )
+			broken := SplitWords ( item );
+			the_item := CreateItemAtLocation ( targ.x + CInt(broken[2]), targ.y + CInt(broken[3]), CInt(zed), CInt(broken[1]), 1, targ.realm );
+			the_item.movable := 0;
+			if ( RetainColor )
+				the_item.color := deed.color;
+			endif
+			if ( !the_item )
+				failed := 1;
+				break;
+			endif
+				
+			created.Append ( the_item );
+			the_serials.Append ( the_item.serial );			
+		endforeach
+	elseif ( failed == 1 )
+		foreach thing in created
+			if ( thing.serial in the_serials )
+				DestroyItem ( thing );
+				SleepMS ( 5 );
+			endif
+		endforeach
+		DestroyItem ( the_item );
+	return 0;
+	elseif ( outside == 1 )
+		SendSysMessageCL ( who, 500275, color := 33 ); // You can only build this in a house.
+		return 0;
+	elseif ( founddoor == 1 )
+		SendSysMessageCL ( who, 500271, color := 33 ); // You cannot build near the door.
+		return 0;
+	elseif ( founditem == 1 )  
+		SendSysMessageCL ( who, 1156219, color := 33 ); // You cannot place this there!
+		return 0;
+	endif
+		
+	if(PlacedWell(who))
+		var created_size := CInt ( created.Size() );
+		foreach part in created
+			if ( part.IsKey() )
+				continue;
+			endif
+			SetObjProperty ( part, "DeedObjType", deed.objtype );
+			SetObjProperty ( part, "DeedColor", deed.color );
+			SetObjProperty ( part, "DeedOwnerSerial", who.serial );
+			SetObjProperty ( part, "OtherItems", the_serials );
+	//	Let's place the lockdown property on only the last item placed by the deed
+	//	which is a "cheat" to only have deeded items take up one lockdown.
+			if ( _part_iter == created_size )
+				SetLockdownInfo( sign, who, part, "lockeddown" ); 
+			endif
+			SleepMS(5);
+		endforeach
+		DestroyItem ( deed );
+	else
+		destroy_parts ( created );
+		SendSysMessageCL ( who, 1042021, color := 33 ); // Cancelled
+	endif
+	return 1;
+endfunction
+
+function destroy_parts( created )
+
+	foreach part in created
+		DestroyItem ( part );
+		SleepMS(5);
+	endforeach
+ 
+        return 1;
+endfunction
+
+function PlacedWell(who)
+	var gump := GFCreateGump ( 30, 50 );
+	GFClosable ( gump, 0 );
+	GFPage ( gump, 0 );
+	GFResizePic ( gump, 0, 0, 9200, 250, 180 );
+	GFResizePic ( gump, 10, 10, 3000, 230, 160 );
+	GFHTMLArea ( gump, 20, 20, 210, 80, "Is this item placed to your liking?", 1, 0 );
+	GFAddButton ( gump, 20, 105, 4005, 4007, GF_CLOSE_BTN, 0x1 );
+	GFAddHTMLLocalized ( gump, 50, 105, 180, 20, 1046363 ); //No
+	GFAddButton ( gump, 20, 135, 4005, 4007, GF_CLOSE_BTN, 0 );
+	GFAddHTMLLocalized ( gump, 50, 135, 180, 20, 1046362 ); //Yes
+	
+	var input := GFSendGump ( who, gump );
+	input := input[0];
+	if ( input == 0x1 )
+		return 0;
+	else
+		return 1;
+	endif 
+endfunction

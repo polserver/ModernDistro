@@ -1,0 +1,10 @@
+use uo;
+
+program textcmd_bcast( who, text )
+  var ppl := EnumerateOnlineCharacters();
+  foreach x in ppl
+    if (x.cmdlevel > 0)
+      SendSysMessage(x, "GM Broadcast from " + who.name + ": " + text);
+    endif
+  endforeach
+endprogram

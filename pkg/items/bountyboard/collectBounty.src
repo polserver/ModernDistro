@@ -1,0 +1,36 @@
+use uo;
+use os;
+use datafile;
+
+include ":datafile:datafile";
+include "include/bounty";
+include "util/bank";
+
+program collectBounty(parms)
+  print("P: " + parms);
+  var me   := parms[1];
+  var who  := parms[2];
+  var item := parms[3];
+  if(!ReserveItem(item))
+    print("!");
+    return;
+  endif
+  var serial := GetObjProperty(item, "serial");
+  var bounty := FindBounty(who, serial);
+  if(!bounty)
+    PrintTextAbove(me, "I'm sorry, but there doesnt seem to be a bounty on that head.");
+    DestroyItem(item);
+    return;
+  else
+    PrintTextAbove(me, "You have brought in the head of " + bounty[1] + ". That fiend was responsible for " + bounty[3] + " murders.");
+    PrintTextAbove(me, "Lord British has offered a reward of " + bounty[2] + " gold pieces, which I shall place in your bankbox.");
+    var gold := Cint(bounty[2]);
+    var bank := FindBankBox(who);
+    while(gold >= 60000)
+      gold := gold - 60000;
+      CreateItemInContainer(bank, 0xeed, 60000);
+    endwhile
+    CreateItemInContainer(bank, 0xeed, gold);
+    DestroyItem(item);
+  endif
+endprogram

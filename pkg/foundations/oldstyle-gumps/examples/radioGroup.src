@@ -1,0 +1,91 @@
+//
+// Example program for the "gumps.inc" include file
+//
+// What it does:
+//	Shows a gump with 2 groups of radio buttons and an Okay button
+//	Also shows how a gump can be built with "loops".
+//
+// Where it goes:
+//	scripts/textcmd/test
+//
+// Author:
+//	Myrathi <tjh@myrathi.co.uk>
+//
+// Created  (for v1.0): 25-Jan-2000
+// Modified (for v2.0): 06-Feb-2000
+// Updated  (for v2.2): 15-Aug-2001
+//
+use uo;
+
+include "../gumps";
+
+program textcmd_radiogroup( who )
+
+	var f := 0x138a;
+	var n := 0x138b;
+
+	var loop, state;
+
+	var radgrp1 := { };
+	var radgrp2 := { };
+
+	GFInitGump( 100, 100 );
+	GFNoClose();
+
+	GFResizePic( 0, 0, 0x13EC, 95, 120 ); // Grey marble
+
+	state := 1;
+	GFSetRefRel( 20, 0 );
+	GFSetRadioGroup( 1 );
+	for( loop := 20 ; loop < 61 ; loop := loop + 20 )
+		var radret := GFRadioButton( 0, loop, f, n, state );
+		radgrp1.append( radret.keyid );
+		state := 0;
+	endfor
+
+	state := 1;
+	GFSetRefRel( 40, 0 );
+	GFSetRadioGroup( 2 );
+	for( loop := 20 ; loop < 61 ; loop := loop + 20 )
+		var radret := GFRadioButton( 0, loop, f, n, state );
+		radgrp2.append( radret.keyid );
+		state := 0;
+	endfor
+
+	GFSetRefRel( -35, 85 );
+	GFButtonID( 0, 0, 0x81c, 0x81b, 1 );
+
+	var keys := GFSendGump( who );
+
+	foreach key in (keys.keys)
+		if ( key in radgrp1 )
+			SendSysMessage( who, "Group one: " + whichindex( radgrp1, key ) );
+		elseif ( key in radgrp2 )
+			SendSysMessage( who, "Group two: " + whichindex( radgrp2, key ) );
+		endif
+	endforeach
+
+endprogram
+
+function whichindex( arr, value )
+
+// only works on arrays that go from '1 to x'
+// not on config files.
+
+	var index := 1;
+
+	if ( arr.size() == 0 || !(value in arr) )
+		return 0;
+	endif
+
+	foreach member in arr
+		if ( member == value )
+			return index;
+		else
+			index := index + 1;
+		endif
+	endforeach
+
+	return 0;
+
+endfunction

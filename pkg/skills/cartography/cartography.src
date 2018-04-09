@@ -1,0 +1,80 @@
+use uo;
+use os;
+use attributes;
+
+include "include/objtype";
+include "include/client";
+include "include/canAccess";
+include ":attributes:attributes";
+
+program go_go_gadget_map(who)
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  var blank := Target(who);
+  if(!blank)
+    SendSysMessage(who, "Cancelled.");
+    return;
+  endif
+  if(blank.objtype != UOBJ_MAP1 || GetObjProperty(blank, "decoder"))
+    SendSysMessage(who, "You can only scribe blank maps.");
+    return;
+  endif
+  if(!can_access(who, blank))
+    return;
+  endif
+  if((who.x > 5120) && (who.y < 2304))
+    SendSysMessage(who, "You cannot chart dungeons.");
+    return;
+  endif
+  var choice := SelectMenuItem2(who, "Cartography");
+  if(!choice)
+	SendSysMessage(who, "Cancelled");
+    return;
+  endif
+  var props;
+  case(choice.index)
+	1: if(SkillCheck(who, CARTOGRAPHY, 20, 70))
+	     props := array("local", who.x - 265, who.y - 260, who.x + 265, who.y + 260, 200, 200);
+		 makemap(who, props, blank);
+	   else
+         SendSysMessage(who, "You are not familiar enough with the area to draw the map");
+	     DestroyItem(blank);
+	   endif
+	2: if(SkillCheck(who, CARTOGRAPHY, 50, 100))
+		 props := array("regional", who.x - 850, who.y - 800, who.x + 850, who.y + 800, 400, 400);
+	     makemap(who, props, blank);
+	   else
+		 SendSysMessage(who, "You are not familiar enough with the area to draw the map");
+	   	 DestroyItem(blank);
+	   endif
+	3: if(SkillCheck(who, CARTOGRAPHY, 80, 150))
+	   	 props := array("world", 0, 0, 5119, 4095, 500, 400);
+		 makemap(who, props, blank);
+	   else
+		 SendSysMessage(who, "You are not familiar enough with the area to draw the map");
+	     DestroyItem(blank);
+		 endif
+  endcase
+endprogram
+
+function makemap(who, mapdef, mapitem)
+  set_critical(1);
+   releaseitem(mapitem);
+   DestroyItem (mapitem);
+   var map := CreateItemInBackpack( who, UOBJ_MAP2 );   
+  set_critical(0);   
+  SetName( map , ("a completed " + mapdef[1] + " map") );
+  if(mapdef[2] < 0)
+    mapdef[2] := 0;
+  endif
+  if(mapdef[3] < 0)
+    mapdef[3] := 0;
+  endif
+  map.xwest := mapdef[2];
+  map.ynorth := mapdef[3];
+  map.xeast := mapdef[4];
+  map.ysouth := mapdef[5];
+  map.gumpwidth := mapdef[6];
+  map.gumpheight := mapdef[7];
+  SendSysMessage(who, "You successfully scribe the map.");
+endfunction

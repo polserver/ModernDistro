@@ -1,0 +1,51 @@
+/* $Id: alcohol.src 503 2006-06-29 15:14:30Z austinheilman $
+ *
+ */
+
+use uo;
+use os;
+use util;
+
+include "include/client";
+include ":timedscripts:timedScripts";
+
+program TimedScript_Alcohol(params)
+	var mobile := params[1];
+
+	var cycle := 0;
+	while ( 1 )
+		cycle += 1;
+		if  ( cycle == 1 )
+			SendSysMessage(mobile, "You feel no effects from the alcohol.");
+		elseif ( cycle == 5 )
+			SendSysMessage(mobile, "You think you might get drunk if you have anymore alcohol.");
+		elseif ( cycle == 8 )
+			SendSysMessage(mobile, "You begin to feel a little buzzed.");
+		elseif ( cycle == 13 )
+			SendSysMessage(mobile, "You become drunk and stumble about.");
+		elseif ( cycle == 20 )
+			SendSysMessage(mobile, "You begin to feel ill from the alcohol.");
+		endif
+
+		var roll := RandomInt(10);
+		if ( cycle >= 13 )
+			mobile.facing := RandomInt(8);
+			PrintTextAbove(mobile, "*Hic!*");
+
+			if ( roll < 7 )
+				PerformAction(mobile, ANIM_BOW);
+			endif
+		endif
+
+		if ( cycle > 25 ) // Boy this person is wasted.
+			PerformAction(mobile, 32);
+			if ( roll < 3 )
+				CreateItemAtLocation(mobile.x, mobile.y, mobile.z, "vomit", 1, mobile.realm);
+			endif
+		endif
+		
+		Sleep(RandomInt(4)+3);
+	endwhile
+	
+	return 1;
+endprogram

@@ -1,0 +1,42 @@
+use uo;
+use os;
+use cfgfile;
+
+include ":itemutils:itemdesc";
+
+program Install()
+
+	return 1;
+endprogram
+
+exported function GetDropSound ( item )
+	
+	if ( item.Amount <= 1 )
+		return 0x2E2;
+	elseif ( item.Amount <= 50 )
+		return 0x2E3;
+	else
+		return 0x2E4;
+	endif
+	
+endfunction
+
+exported function GetGemGrade ( item )
+	var cfg_info := GetItemDescInfo( item.graphic );
+	
+	return CInt( cfg_info.Grade );
+endfunction
+
+exported function IsAmethyst( item )
+
+	item := item; // Avoid compiler warnings.
+
+	return 1;
+endfunction
+
+exported function IsGem( item )
+
+	item := item; // Avoid compiler warnings.
+
+	return 1;
+endfunction

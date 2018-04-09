@@ -1,0 +1,111 @@
+/*
+        Maintened by POL Distro Team
+
+
+*/
+// Commented code out due to
+
+
+use uo;
+use os;
+use polsys;
+
+include ":containers:storageAreas";
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+
+program command_StorageAreas( mobile )
+
+	var area_name := AreaNamesGump( mobile );
+	if( !area_name )
+		SendSysMessage( mobile, "Cancelled." );
+		return 0;
+	endif
+
+	var container := RootContainersGump( mobile, area_name );
+	if( !container )
+		SendSysMessage( mobile, "Cancelled." );
+		return 0;
+	else
+		SendSysMessage( mobile, "Opening..." );
+		SendOpenSpecialContainer( mobile, container );
+	endif
+
+	return 1;
+endprogram
+
+function AreaNamesGump( mobile )
+
+	var name_list := CP_GetStorageAreaNames();
+
+	var gump := GFCreateGump();
+ 
+	GFPage( gump, 0 );
+	GFResizePic( gump, 0, 0, GFGetCfgConst( "Defaults", "BackGround" ), 300, 480 );
+	GFResizePic( gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 270, 450 );
+ 
+	var y_pos := 40;
+	var counter := 1;
+ 
+	GFTextMid( gump, 10, 15, 280, 2100, "Storage Areas" );
+ 
+	foreach area_name in ( name_list )
+		GFAddButton( gump, 20, y_pos+3, 2117, 2118, GF_CLOSE_BTN, _area_name_iter );
+		GFTextLine( gump, 40, y_pos, 2100, area_name );
+
+		counter += 1;
+		y_pos += 20;
+  
+		if( counter > 21 )
+			counter := 1;
+			y_pos := 40;
+			GFAddButton( gump, 265, 445, 2648, 2649, GF_PAGE_BTN, gump.cur_page+1 );
+			GFPage( gump, gump.cur_page+1 );
+			GFAddButton( gump, 265, 15, 2650, 2651, GF_PAGE_BTN, gump.cur_page-1 );
+		endif
+		SleepMS(2);
+	endforeach
+
+	var input := GFSendGump( mobile, gump );
+	input := input[0];
+ 
+	return name_list[input];
+endfunction
+
+function RootContainersGump( mobile, area_name )
+
+	var root_containers := CP_GetRootContainersInStorageArea( area_name );
+
+	var gump := GFCreateGump();
+ 
+	GFPage( gump, 0 );
+	GFResizePic( gump, 0, 0, GFGetCfgConst( "Defaults", "BackGround" ), 300, 480 );
+	GFResizePic( gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 270, 450 );
+ 
+	var y_pos := 40;
+	var counter := 1;
+ 
+	GFTextMid( gump, 10, 15, 280, 2100, "Root Containers ["+area_name+"]" );
+ 
+	foreach container in ( root_containers )
+		GFAddButton( gump, 20, y_pos+3, 2117, 2118, GF_CLOSE_BTN, _container_iter );
+		GFTextLine( gump, 40, y_pos, 2100, container.desc );
+
+		y_pos += 20;
+		counter += 1;
+  
+		if( counter > 21 )
+			counter := 1;
+			y_pos := 40;
+			GFAddButton( gump, 265, 445, 2648, 2649, GF_PAGE_BTN, gump.cur_page+1 );
+			GFPage( gump, gump.cur_page+1 );
+			GFAddButton( gump, 265, 15, 2650, 2651, GF_PAGE_BTN, gump.cur_page-1 );
+		endif
+		SleepMS(2);
+	endforeach
+
+	var input := GFSendGump( mobile, gump );
+	input := input[0];
+
+	return root_containers[input];
+endfunction

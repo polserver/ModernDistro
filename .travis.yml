@@ -1,0 +1,42 @@
+language: cpp
+sudo: false
+git:
+  depth: 1
+
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-7']
+      env: CXX_P=g++-7 CC_P=gcc-7
+
+before_script:
+  - echo 'Configure...' && echo -en 'travis_fold:start:script.configure\\r'
+  - wget https://github.com/polserver/polserver/archive/master.zip
+  - unzip master.zip
+  - cd polserver-master/pol-core/bin-build
+  - export CXX=$CXX_P
+  - export CC=$CC_P
+  - cmake -DBUILD_ALL=OFF -DONLY_ECOMPILE=ON ../..
+  - make -j 2
+  - cp ../bin/ecompile ../../../scripts/
+  - cp ../support/scripts/*.em ../../../scripts/
+  - cd ../../../
+  - echo "ModuleDirectory=scripts" >>scripts/ecompile.cfg
+  - echo "IncludeDirectory=scripts" >>scripts/ecompile.cfg
+  - echo "PolScriptRoot=scripts" >>scripts/ecompile.cfg
+  - echo "PackageRoot=pkg" >>scripts/ecompile.cfg
+  - echo -en 'travis_fold:end:script.configure\\r'
+
+script:
+  - echo 'Build...' && echo -en 'travis_fold:start:script.build\\r'
+  - scripts/ecompile -AT
+  - echo -en 'travis_fold:end:script.build\\r'
+
+
+notifications:
+  email:
+    #    - polteam@polserver.com

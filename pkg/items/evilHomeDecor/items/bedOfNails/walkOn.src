@@ -1,0 +1,41 @@
+use uo;
+use os;
+use util;
+
+program BedOfNails_WalkOn ( who, bed, lastx, lasty, lastz )
+	var bloodcoordinatemodifier := array { -1, 0, 1 };
+	var malesoundarray := array { 1342, 1343, 1344 };
+	var femalesoundarray := array { 1339, 1340, 1341 };
+	var randbloodmodx := CInt ( RandomDiceRoll ( "1d3" ) );
+	var randbloodmody := Cint ( RandomDiceRoll ( "1d3" ) );
+	var amountofblood := RandomInt ( 8 );
+	
+	if ( who.gender == 0 )
+		PlaySoundEffect ( who, CInt(malesoundarray[Cint(randbloodmodx)]) );
+	else
+		PlaySoundEffect ( who, CInt(femalesoundarray[Cint(randbloodmody)]) );
+	endif
+	/*
+	SendSysMessage ( who, "I am getting here." );
+	var i;
+	for ( i:=0; i < amountofblood; i+=1 )
+		var x := CInt ( bed.X + bloodcoordinatemodifier[randbloodmodx] );
+		var y := CInt ( bed.Y + bloodcoordinatemodifier[randbloodmody] );
+		var z := CInt ( GetWorldHeight ( x, y, bed.realm ) );
+		
+		if ( !CheckLosAt ( who, x, y, z ) )
+			SendSysMessage ( who, "I is Here!" );
+			continue;
+		endif
+		
+		var blood := CreateItemAtLocation ( x, y, z, 0x122A, 1, bed.realm );
+		if ( blood.errortext )
+			SendSysMessage ( who, "item creation errortext: "+blood.errortext );
+		endif
+		
+		blood.movable := 0;
+	endfor
+	*/
+	SendSysMessage ( who, "I am also getting here." );
+	return 1;
+endprogram

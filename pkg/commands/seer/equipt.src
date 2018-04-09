@@ -1,0 +1,16 @@
+//
+// Equip yourself from a NPCs Equip emplate
+//
+
+use uo;
+
+include "include/vetement";
+
+
+program textcmd_action( who, template )
+
+    Habille (who, template);
+
+
+
+endprogram

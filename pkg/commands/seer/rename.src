@@ -1,0 +1,9 @@
+use os;
+use uo;
+
+program textcmd_rename( speaker, newname )
+    var thetarg := Target(speaker);
+    if (thetarg)
+        SetName(thetarg, newname);
+    endif
+endprogram

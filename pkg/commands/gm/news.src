@@ -1,0 +1,68 @@
+use uo;
+use os;
+
+program textcmd_news( me, cmd )
+
+	if (!cmd)
+		SendSysMessage(me, "Usage: [read] [write] or [delete]");
+		return;
+	endif
+
+	if ( lower(cmd) == "delete" )
+		SendSysMessage(me, "News deleted!");
+		EraseGlobalProperty("news");
+	elseif ( lower(cmd) == "read" )
+		ReadNews(me);
+	elseif ( lower(cmd) == "write" )
+		WriteNews(me);
+	else
+		SendSysMessage(me, "Usage: [read] [write] or [delete]");
+		return;
+	endif
+
+endprogram
+
+function WriteNews(me)
+
+	var news := { };
+	var newsline := "";
+	var prompt;
+        
+	newsline := SendTextEntryGump( me, "NEWS: ", TE_CANCEL_DISABLE,TE_STYLE_NORMAL, 80);
+	prompt := newsline;
+	if (!prompt)
+		SendSysMessage(me,"Canceled");
+		return;
+	endif
+
+	news[ 1 ] := newsline;
+	repeat
+		newsline := SendTextEntryGump( me, "Line: "+len(news)+" "+prompt,TE_CANCEL_DISABLE,TE_STYLE_NORMAL, 80);
+
+
+		if(newsline)
+			news[ len(news)+1 ] := newsline;
+			prompt := newsline;
+		endif
+	until (!newsline);
+	SetGlobalProperty("news",news);
+	SendSysMessage(me,"News written!");
+	ReadNews(me);
+
+endfunction
+
+function ReadNews(me)
+
+	var news := GetGlobalProperty("news");
+	if (!news)
+		SendSysMessage(me,"No news is good news.");
+		return;
+	endif
+
+	var i;
+	for (i := 1; i <= len(news); i := i + 1)
+		SendSysMessage(me,news[i]);
+		sleepms(250);
+	endfor
+
+endfunction

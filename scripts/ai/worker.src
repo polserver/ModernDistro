@@ -1,0 +1,334 @@
+use npc;
+use os;
+use uo;
+
+include "include/eventID";
+include ":attributes:attributes";
+include "include/sysEvent";
+include "include/randName";
+include "include/speech";
+include "include/anchors";
+include "include/dist";
+include "ai/main/mainLoopGood";
+include "ai/combat/warriorCombatEvent";
+include "ai/combat/fight";
+include "ai/main/loot";
+include "include/vetement";
+include "include/NPCUtil";
+include "include/objtype";
+include "ai/main/sleepMode";
+include "include/skillLists";
+include "include/begging";
+
+const HALT_THRESHOLD := 2;
+
+var cost;
+var following;
+var waittime;
+var escortee;
+var next_wander := ReadGameClock() + 10;
+var ev;
+var txt;
+var killtime := 0;
+var master;
+var spells := {};
+var me := Self();
+var cast_pct;
+var num_casts;
+var count_casts;
+var summons := 3;
+var graphics;
+var num_changes;
+var will_cast;
+var will_breathe;
+var flee_point;
+
+var npccfg := ReadConfigFile("npcdesc");
+var speechelem := npccfg[me.npctemplate];
+spells := GetConfigStringArray(speechelem, "spell");
+cast_pct := speechelem.cast_pct;
+num_casts  := speechelem.num_casts;
+count_casts  := speechelem.count_casts;
+if(!cast_pct)
+  cast_pct := 10;
+endif
+flee_point := speechelem.flee_point;
+if(!flee_point)
+  flee_point := 10;
+endif
+
+program worker()
+  run_script_to_completion("NPCKeeper", me);
+  drop_anchor();
+  EnableEvents(SYSEVENT_SPEECH, 3);
+  EnableEvents(SYSEVENT_ENGAGED + SYSEVENT_DISENGAGED + SYSEVENT_DAMAGED);
+  EnableEvents(SYSEVENT_ENTEREDAREA + SYSEVENT_LEFTAREA, HALT_THRESHOLD);
+  EnableEvents(SYSEVENT_OPPONENT_MOVED + SYSEVENT_ITEM_GIVEN);
+  if(GetObjProperty(me, "frozen"))
+	me.frozen := 1;
+  endif
+  SetWarMode( 0 );
+  set_priority(10);
+//  var ev;
+  var looter := GetObjProperty( me, "looter");
+  next_wander := ReadGameClock() + 10;
+  var ph := SplitWords(me.name);
+  var myname := lower(ph[1]);
+  cost := GetObjProperty(me, "HireCost");
+  var tspeech;
+  while (1)
+    ev := os::wait_for_event(120);
+    case(ev.type)
+      SYSEVENT_SPEECH:  tspeech := process_text(ev.text, "default","default");
+                        txt := lower(ev.text);
+                        if(tspeech)
+                          PrintTextAbove(me, tspeech, color := 71);
+                        //  say(tspeech);
+                        elseif(txt[myname] && (txt["train"] || txt["teach"]))
+                          TurnToward(ev.source);
+                          MerchantTrain(me, ev.source, ev.text);
+                        elseif(txt[myname] && (txt["hire"] || txt["work"] || txt["mercenary"] || txt["servant"]))
+                          TurnToward(ev.source);
+                          SetObjProperty(ev.source, "Hire", me.serial);
+                          say("I am available for hire for " + cost + " gold coins per day.");
+                        endif
+      SYSEVENT_ENGAGED:     Fight(ev.source);
+      SYSEVENT_DAMAGED:     if(ev.source)
+                          Fight(ev.source);
+                        else
+                          say("What sinister force is this!");
+                        endif
+      SYSEVENT_ITEM_GIVEN:  TrainSkill(me, ev.source, ev.item);
+      SYSEVENT_ENTEREDAREA:
+      SYSEVENT_LEFTAREA:
+    endcase
+	if(ReadGameClock() >= next_wander)
+	  begpurse(me);
+      wander();
+	  if(looter)
+		grabloot();
+	  endif
+      next_wander := ReadGameClock() + 10;
+    endif
+  endwhile
+endprogram
+
+function CloseDistance( opponent )
+  case (Distance( me, opponent ))
+    1:
+    0:       return 1;
+    default: RunToward( opponent );
+             return 0;
+  endcase
+endfunction
+
+function hireme(me, who, item)
+  var amt := item.amount;
+  if(amt < cost)
+    say("I will not work for any less than " + cost + " gold coins per day.");
+    MoveItemToContainer(item, who.backpack);
+  else
+    EraseObjProperty(who, "Hire");
+    var days := amt / cost;
+    say("I will work for you for " + days + " days.");
+    DestroyItem(item);
+    SetObjProperty(me, "master", who.serial);
+    SetObjProperty(me,"script", me.script);
+    days := days * 10800;
+    SetObjProperty(me, "Timer", (ReadGameClock() + days));
+    me.script := "employed";
+    RestartScript(me);
+    return;
+  endif
+endfunction
+
+function MerchantTrain(me, who, text)
+  var words := SplitWords(text);
+  var skill := words[3];
+  if(!skill)
+    var trainable := "";
+    var holder := "";
+    var myskill, pskill;
+    var totaltrain := 0;
+    foreach thing in getskilllist(me)
+      myskill := CInt(GetObjProperty(me, thing));
+      if(!myskill)
+        myskill := 25 + RandomInt(10);
+        SetObjProperty(me, thing, myskill);
+      endif
+      pskill := AP_GetSkill(who, AP_SkillIDToAttributeName(FindSkillId(thing)));
+      if(pskill < myskill)
+        if(holder == "")
+          holder := thing;
+        else
+          holder := holder + ", " + thing;
+        endif
+        totaltrain := totaltrain + 1;
+      endif
+    endforeach
+    trainable  := trainable + holder;
+    if(totaltrain > 0)
+      say("I can train thee in the following skills:");
+      say(trainable);
+    else
+      say("I can not train thee.");
+    endif
+  else
+    skill := lower(skill);
+    var npclevel := 0;
+    var pclevel;
+    var holder;
+    foreach thing in getskilllist(me)
+      if(lower(thing) == skill)
+        npclevel := CInt(GetObjProperty(me, thing));
+        holder := FindSkillId(thing);
+        pclevel := AP_GetSkill(who, AP_SkillIDToAttributeName(holder));
+        if(pclevel >= npclevel)
+          say("I cannot teach you anymore.");
+          return;
+        else
+          var trainmaxcost := GoldForSkillGain(npclevel, pclevel, holder);
+          say("I will train thee " + thing + " for " + trainmaxcost + " gold.");
+          SetObjProperty(who, "TrainMaxCost", trainmaxcost);
+          SetObjProperty(who, "TrainSkillID", thing);
+          return;
+        endif
+      endif
+    endforeach
+    say("I know not of that skill.");
+  endif
+endfunction
+
+function TrainSkill(me, who, item)
+  var variance := 0;
+  var npc_level := 0;
+  var pc_level := 0;
+  var goldreceived := 0;
+  var new_level := 0;
+  var currentnpccost := 0;
+  if((item.objtype == 0xeed) && (GetObjProperty(who, "Hire") == me.serial))
+    hireme(me, who, item);
+    return;
+  endif
+  if((item.objtype == 0xeed) && (item.amount != 0))
+    var trainmaxcost := GetObjProperty(who, "TrainMaxCost");
+    var trainskillname := GetObjProperty(who, "TrainSkillID");
+    var trainskillid := FindSkillId(trainskillname);
+    if((!trainmaxcost || !trainskillid) && trainskillid != 0)
+      say("I don't know what this is for, but thanks!");
+      DestroyItem(item);
+      return;
+    endif
+    npc_level    := CInt(GetObjProperty(me, trainskillname));
+    pc_level     := AP_GetSkill(who, AP_SkillIDToAttributeName(trainskillid));
+    goldreceived := item.amount;
+    variance     := npc_level - pc_level;
+    currentnpccost := GoldForSkillGain(npc_level, pc_level, trainskillid);
+    if(pc_level < npc_level)
+      if(currentnpccost != trainmaxcost)
+        if(currentnpccost > trainmaxcost)
+          npc_level := SkillGainForGold(npc_level, pc_level, trainskillid, trainmaxcost);
+          variance  := npc_level - pc_level;
+        else
+          if(goldreceived > currentnpccost)
+            say("I can not train thee to that level.");
+            MoveItemToContainer(item, who.backpack);
+            return;
+          else
+            trainmaxcost := currentnpccost;
+          endif
+        endif
+      endif
+      if(trainmaxcost <= goldreceived)
+        new_level := (npc_level * 10);
+        EraseObjProperty( who, "TrainMaxCost" );
+        EraseObjProperty( who, "TrainSkillID" );
+      else
+        new_level := ((pc_level + CInt((CDbl(variance) * (CDbl(goldreceived) / CDbl(trainmaxcost))))) * 10);
+        SetObjProperty( who, "TrainMaxCost", trainmaxcost-goldreceived );
+      endif
+      say("Let me show you how it's done.");
+      SetBaseSkillBaseValue(who, trainskillid, new_level);
+      var skillarray := GetObjProperty(who,"SkillArray");
+      if(!skillarray)
+        skillarray := {};
+        skillarray.append(trainskillid);
+        foreach thing in GetSkillIds()
+          if(GetBaseSkill(who, thing) > 0)
+            skillarray.append(thing);
+          endif
+        endforeach
+        SetObjProperty(who,"SkillArray", skillarray);
+      else
+        var holder := {};
+        holder.append(trainskillid);
+        foreach thing in skillarray
+          if((thing != trainskillid) and (GetBaseSkill(who, thing) > 0))
+            holder.append(thing);
+          endif
+        endforeach
+        skillarray := holder;
+        SetObjProperty(who,"SkillArray", skillarray);
+      endif
+      DestroyItem(item);
+      SendSysMessage(who, "Your skill increases.");
+    else
+      say("I'm not as good as thee.  Please find another to train thee.");
+      MoveItemToContainer(item, who.backpack);
+    endif
+  else
+    say("Bah, I have no use for this. Be off with ye.");
+    MoveItemToContainer(item, who.backpack);
+  endif
+endfunction
+
+function GoldForSkillGain(npc_skill, pc_skill, skillid)
+  skillid := skillid;
+  var maxskill := npc_skill - pc_skill;
+  return maxskill*10;
+endfunction
+
+function SkillGainForGold(npc_level, pc_level, trainskillid, goldreceived)
+  trainskillid := trainskillid;
+  npc_level := npc_level;
+  return (goldreceived/10) + pc_level;
+endfunction
+
+function Herd(ev)
+  var holder := ev.data;
+  var lx := holder[1];
+  var ly := holder[2];
+  var loops := 0;
+  var opponent;
+  var hwaittime := 0;
+  while(1)
+	if(!CloseIn(me, lx, ly))
+	  loops := loops + 1;
+	  hwaittime := 0;
+	else
+	  loops := 0;
+	  hwaittime := 1;
+	endif
+	if((loops >= 30) or (coordist(me.x, me.y, lx, ly) <= 1))
+	  break;
+	endif
+	ev := wait_for_event(hwaittime);
+	case (ev.type)
+      SYSEVENT_DAMAGED: opponent := ev.source;
+			  		    SetOpponent(opponent);
+					    TurnToward(opponent);
+	  SYSEVENT_ENGAGED: opponent := ev.source;
+			  		    SetOpponent(opponent);
+					    TurnToward(opponent);
+	endcase
+  endwhile
+  Return;
+endfunction
+
+function CloseIn(me, lx, ly)
+  case (coordist(me.x, me.y, lx, ly))
+    0:       return 1;
+    default: WalkTowardLocation(lx, ly);
+             return 0;
+  endcase
+endfunction

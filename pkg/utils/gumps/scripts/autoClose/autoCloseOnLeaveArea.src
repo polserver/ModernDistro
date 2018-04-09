@@ -1,0 +1,30 @@
+include ":gumps:gumps";
+
+program autoCloseGumpOnMovedDistance(params)
+	var mobile			:= params[1];
+	var x_1				:= params[2];
+	var y_1				:= params[3];	
+	var x_2				:= params[4];
+	var y_2				:= params[5];
+	var pid				:= params[6];
+	var ret_val			:= params[7];
+	
+	if ( x_1 > x_2 )
+		var temp_x := x_2;
+		x_2 := x_1;
+		x_1 := temp_x;
+	endif
+	
+	if ( y_1 > y_2 )
+		var temp_y := y_2;
+		y_2 := y_1;
+		y_1 := temp_y;
+	endif
+	
+	while ( GetProcess ( pid ) )
+		if ( mobile.x <= x_1 || mobile.x >= x_2 || mobile.y <= y_1 || mobile.y >= y_2  )
+			return GFCloseGump(mobile, pid, ret_val);
+		endif
+		SleepMS ( 50 );
+	endwhile
+endprogram

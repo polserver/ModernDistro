@@ -1,0 +1,100 @@
+/* $Id: handlePartyAdd.src 749 2006-08-25 04:18:26Z tekproxy $
+ *
+ */
+
+use uo;
+use os;
+use polsys;
+
+include ":partySystem:config";
+include ":partySystem:packetInfo";
+include ":partySystem:messages";
+
+CONST OFFSET_PARTY_INVITE_PLAYERID := 6;
+
+program handlePartyAdd(character)
+	Set_Critical(DEBUG_SET_CRITICAL);
+
+	var party := GetObjProperty(character, PARTY_PROP);
+
+	// Check to see if character is the leader of their party and the party size
+	if ( Lower(TypeOf(party)) == "array" )
+		if ( party[1] != character.serial )
+			SendSysMessage(character, "You may only add members to the party if you are the leader.");
+			return 0;
+		endif
+
+		if ( party.Size() + CInt(GetObjProperty(character, "#PartyCanidates")) > PARTY_MAX_SIZE )
+			SendSysMessage(character, "You may only have "+PARTY_MAX_SIZE+" in your party (this includes candidates).");
+			return 0;
+		endif
+	endif
+
+	SendSysMessage(character, "Who would you like to add to your party?");
+	var targ := Target(character);
+
+	// Do target checks
+	if ( targ == error )
+		SendSysMessage(character, "Cancelled.", color := 33);
+	elseif ( !targ.IsA(POLCLASS_MOBILE) )
+		SendSysMessage(character, "You may only add living things to your party!", color := 33);
+		return 0;
+	elseif ( targ.IsA(POLCLASS_NPC) )
+		SendSysMessage(character, "The creature ignores your offer.", color := 33);
+		return 0;
+	elseif ( targ.acctname )
+		if ( targ.serial == character.serial )
+			SendSysMessage(character, "You cannot add yourself to a party.", color := 33);
+			return 0;
+		elseif ( GetObjProperty(targ, PARTY_JOINING_PROP) )
+			SendSysMessage(character, "That person is already considering joining a party.", color := 33);
+			return 0;
+		elseif ( targ.serial in (party) )
+			SendSysMessage(character, "This person is already in your party!", color := 33);
+			return 0;
+		elseif ( GetObjProperty(targ, PARTY_PROP) )
+			SendSysMessage(character, "This person is already in a party!", color := 33);
+			return 0;
+		endif
+	endif
+	
+	// Valid target, so set the PARTY_JOINING_PROP on targ with character.serial
+	SetObjProperty(targ, PARTY_JOINING_PROP, CInt(character.serial));
+	
+	// Increase canidate count on party leader
+	SetObjProperty(character, "#PartyCanidates", CInt(GetObjProperty(character, "#PartyCanidates"))+1);
+
+	// Build Invite subsubcmd packet and send to targ
+	var packet := CreatePacket(MSGTYPE_PARTY, 10);
+	packet.SetInt16(OFFSET_PARTY_MSGLEN, 10); // Set packet length
+	packet.SetInt16(OFFSET_PARTY_SUBCMD, SUBCMD_PARTY); // Set subcmd to Party
+	packet.SetInt8(OFFSET_PARTY_SUBSUBCMD, 7); // Set subsubcmd to Invite
+	packet.SetInt32(OFFSET_PARTY_INVITE_PLAYERID, character.serial); // Set leader's serial
+	packet.SendPacket(targ); // Send the invite packet to the target
+
+	SendSysMessage(character, "You have invited them to join the party.", color := 56);
+	SendSysMessage(targ, "You are invited to join the party. Type /accept to join or /decline to decline the offer.", color := 56);
+
+	Detach();
+
+	// Loop here for PARTY_INVITE_TIMEOUT seconds, checking if the user has accepted each second
+	for i := 1 to (PARTY_INVITE_TIMEOUT)
+		Sleep(1);
+
+		// If targ is in a party, not considering joining a party, doesn't exist or is dead, return 0
+		if ( GetObjProperty(targ, PARTY_PROP) || !GetObjProperty(targ, PARTY_JOINING_PROP) || !targ || targ.dead )
+			return 0;
+		endif
+	endfor
+
+	// No response, so automatic decline
+	// NOTE: This is NOT the correct way to decline an invite. No packet guide even documents
+	//       the invite packet that I make use of so I'm pretty sure no packet guide mentions
+	//       a cancel invite packet. I tried using the invite packet again (subsubcmd 7) with
+	//       targ.serial instead of character.serial, and 0, but neither worked. If you have an
+	//       OSI account and can log traffic when a party invite times out and send it to me
+	//       I'd appreciate it.
+	Start_Script("handlePartyDecline", array{targ, character.serial});
+
+	return 1;
+endprogram

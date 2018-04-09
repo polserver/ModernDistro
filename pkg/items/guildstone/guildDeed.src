@@ -1,0 +1,124 @@
+use uo;
+use os;
+use guilds;
+
+include "include/canAccess";
+include "guildData";
+
+program use_guild_deed(who, deed)
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  if(!can_access(who, deed))
+    return;
+  elseif(!Accessible(who,deed))
+    SendSysMessage(who, "You cannot access that item!");
+    return;
+  elseif(!ReserveItem(deed))
+    return;
+  elseif(GetObjProperty(who, "guild_id"))
+    SendSysMessage(who, "You are already a member of a Guild.");
+    return;
+  endif
+  var house := who.multi;
+  var owner := GetObjProperty(house, "owneracct");
+  var coowners := GetObjProperty(house, "coownlist");
+  if((owner != who.acctname) and (!(who.serial in coowners)))
+    SendSysMessage(who, "You must be the owner or a co-owner of the house to place a guildstone.");
+    return;
+  endif
+  var chk := 0;
+  foreach item in ListItemsNearLocation(who.x, who.y, who.z, 1, who.realm)
+    if((item.objtype >= 0x0675) && (item.objtype <= 0x06f4))
+      if((((item.x == who.x+1) || (item.x == who.x-1)) && (item.y == who.y)) || (((item.y == who.y+1) || (item.y == who.y-1)) && (item.x == who.x)))
+        chk := 1;
+        break;
+      endif
+    endif
+  endforeach
+  if(chk == 1)
+    SendSysMessage(who, "This is too close to the door.");
+    return;
+  endif
+  chk := 0;
+  foreach item in (house.items)
+    if(item.objtype == 0x1A390)
+      chk := 1;
+      break;
+    endif
+  endforeach
+  if(chk == 1)
+    SendSysMessage(who, "Only one guildstone can be placed in a house.");
+    return;
+  else
+    var pos  := GetStandingHeight(who.x, who.y, who.z, who.realm);
+    var item := CreateItemAtLocation(who.x, who.y, pos.z, 0x1A390, 1, who.realm);
+    if(item)
+      if(setupguild(who, item) == 0)
+        DestroyItem(item);
+        return;
+      endif
+      DestroyItem(deed);
+      SetObjProperty(item, "houseserial", house.serial);
+    endif
+  endif
+endprogram
+
+function setupguild(who, stone)
+  var gname := SendTextEntryGump(who, "What is the guild name?", 0, 1, 30, "Type the name.");
+  if(gname == error)
+    return 0;
+  endif
+  if(len(gname) > 30)
+    SendSysMessage(who, "Guild name can't have more than 30 characters.", 3, 34);
+    return 0;
+  endif
+  if(!stone.Character_Validation(gname))
+    SendSysMessage(who, "You are using invalid characters", 3, 34);
+    return 0;
+  endif
+  if(!stone.Name_Validation(gname))
+    PrintTextAbovePrivate(stone, "That guild name is already taken.", who);
+    return 0;
+  endif
+  var aname := SendTextEntryGump(who, "What's the new guild's abbreviation?", 0, 1, 4, "Type the abrev");
+  if(!aname)
+    return 0;
+  elseif(len(aname) > 4)
+    SendSysMessage(who, "Abbreviation can't have more than 4 characters.", 3, 40);
+    return 0;
+  endif
+  if(!stone.Abreviation_Validation(aname))
+    PrintTextAbovePrivate(stone, "That abbreviation is already taken.", who, 3, 40);
+    return 0;
+  elseif(!stone.Character_Validation(aname))
+    SendSysMessage(who, "You are using invalid characters.", 3, 40);
+    return 0;
+  else
+    var dupe := {"NONE"};
+    var guild    := CreateGuild();
+    var guild_id := guild.guildid;
+    guild.setprop("guildname", gname);
+    guild.setprop("guildabv",  aname);
+    guild.setprop("gm", who.serial);
+    guild.setprop("gc", dupe);
+    guild.setprop("recruits", dupe);
+    guild.setprop("movetime", ReadGameClock()+ 10);
+    guild.setprop("nametime", ReadGameClock()+ 10);
+    guild.setprop("abrvtime", ReadGameClock() + 10);
+    stone.name := "Guildstone for " + gname;
+    SetObjProperty(stone, "guild_id", guild_id);
+    guild.addmember(who);
+    SetObjProperty(who, "guild_id", guild_id);
+    SetObjProperty(who, "fealty", who.serial);
+    who.title_guild := "Guild Master, [" + aname + "]";
+    SetObjProperty(who, "abv", "1");
+    SetObjProperty(who, "guildtitle", "Guild Master");
+    var ev := struct;
+    ev.+type := "created";
+    ev.+name := gname;
+    ev.+abbv := aname;
+    var guildmanager := GetProcess(GetGlobalProperty("#GuildManager"));
+    guildmanager.SendEvent(ev);
+    return 1;
+  endif
+endfunction

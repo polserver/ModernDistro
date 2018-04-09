@@ -1,0 +1,51 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":damage:damage";
+
+program exploder(parms)
+  var potion := parms[1];
+  var who := parms[2];
+  var thecenter := potion;
+  while(thecenter.container)
+    thecenter := thecenter.container;
+  endwhile
+  SetScriptController(who);
+  var dmg := 3;
+  
+  // creating a location variable to store the item data so we can destroy the item.
+  var location := struct;
+  location.+x := thecenter.x;
+  location.+y := thecenter.y;
+  location.+z := thecenter.z;
+  location.+objtype := potion.objtype;
+  
+  // and it goes out in a bang!
+  PlayStationaryEffect( potion.x, potion.y, potion.z, 0x36b0, 7, 10, 1, potion.realm);
+  PlaySoundEffect(potion, 0x208);
+  DestroyItem(potion);
+
+  // It damages everything near it.
+  foreach critter in ListMobilesNearLocationEx( location.x, location.y, location.z, 1, LISTEX_FLAG_NORMAL + LISTEX_FLAG_HIDDEN, location.realm );
+    PlayObjectCenteredEffect( critter, 0x36b0, 7, 0x10 );
+    PlaySoundEffect( critter, 0x208);
+    case(location.objtype)
+      0x1DC08: dmg := (RandomInt(4) + 1 );
+      0x1DC09: dmg := (RandomInt(4) + 6 );
+      0x1DC07: dmg := (RandomInt(9) + 11 );
+    endcase
+    ApplyDamageEX(critter, dmg, DMG_PHYSICAL);
+  endforeach
+
+  // Then everything near it goes out in a bang
+  var potions := {0x1DC08, 0x1DC09, 0x1DC07};
+  foreach item in ListItemsNearLocation(location.x, location.y, location.z, 1, location.realm)
+    if(item.objtype in potions)
+      var passparms := {item, who};
+      sleep(1); // Makes the cascading effect more dramatic and less instantaneous
+      start_script(":alchemy:exploder", passparms);
+     endif
+  endforeach
+endprogram

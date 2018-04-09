@@ -1,0 +1,17 @@
+/*
+        Maintened by *Edwards
+        
+        2009-10-20
+*/
+use uo;
+use file;
+
+include ":containers:storageAreas";
+
+program OnDelete( who, container )
+
+        who := who; //Avoid ecompile warning.
+	container.usescript := ":containers:container/use";
+
+	return 1;
+endprogram

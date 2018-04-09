@@ -1,0 +1,25 @@
+use uo;
+
+
+
+program dumppack(who)
+	SendSysMessage(who, "Which container?", color := 66);
+	var holder := Target(who);
+	if (!holder)
+		SendSysMessage(who, "No container targetted. Selecting equipped backpack.", color := 56);
+		holder := who.backpack;
+	endif
+
+	SendSysMessage(who, "Where?", color := 66);
+	var where := TargetCoordinates(who);
+	if (!where)
+		SendSysMessage(who, "Cancelled", color := 33);
+		return;
+	endif
+
+	var contents := EnumerateItemsInContainer(holder, 0);
+	foreach thing in contents
+		MoveObjectToLocation(thing, where.x, where.y, where.z, where.realm);
+	endforeach
+
+endprogram

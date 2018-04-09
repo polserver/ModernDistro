@@ -1,0 +1,98 @@
+/////////////////////////////////////////////////////////////////////////////
+//
+//  killpcs.src: Kill player-characters
+//
+//  TODO: Some server support for only paying attention to 'enteredarea'
+//        and 'leftarea' events from PCs would be nice.
+//        we just use the graphic at the moment, so we'd fight
+//        NPCs too.  Oh well.
+//
+//  Author: ENS
+//
+//  Created: 4/98
+//
+//  Modified week of 6/15/99 by DW to allow speech and ranged attacks
+//
+/////////////////////////////////////////////////////////////////////////////
+
+use npc;
+use os;
+use uo;
+use cfgfile;
+
+include "include/eventID";
+include "include/sysEvent";
+include "include/randName";
+include "include/NPCUtil";
+include "include/objtype";
+include "include/anchors";
+include "include/dist";
+include "ai/main/mainLoopKillAny";
+include "ai/combat/fight";
+include "ai/main/defaultNonCombatEvent";
+include "ai/combat/defaultCombatEvent";
+include "ai/main/setup";
+include "ai/main/loot";
+include "ai/main/sleepMode";
+
+
+const HALT_THRESHOLD := 10; // how close before he attacks?
+var npccfgfile := ReadConfigFile( "npcdesc" );
+var idlesnd1 := CInt(npccfgfile[me.npctemplate].idlesound1);
+var idlesnd2 := CInt(npccfgfile[me.npctemplate].idlesound2);
+
+program KillPlayers()
+    
+    drop_anchor();
+
+    EnableEvents( SYSEVENT_ENGAGED );
+    EnableEvents( SYSEVENT_DISENGAGED );
+    EnableEvents( SYSEVENT_DAMAGED );
+    EnableEvents( SYSEVENT_ENTEREDAREA + SYSEVENT_LEFTAREA, HALT_THRESHOLD );
+    EnableEvents( SYSEVENT_OPPONENT_MOVED );
+
+    SetWarMode( 0 );
+
+	if (GetObjProperty(me, "frozen"))
+		me.frozen := 1;
+	endif
+
+    main_AI_loop();
+
+endprogram
+
+/////////////////////////////////////////////////////////////////////////////
+//
+//  These types fight singlemindedly, until the quarry is dead.
+//  There is no way out but death.
+//
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+//  CloseDistance - close the distance between self and an opponent.
+//  Returns: 1 if distance is 0 or 1 (no move necessary)
+//           0 if distance is >= 2 (may still need to move)
+//
+//  This is a .EM-file candidate.
+//
+/////////////////////////////////////////////////////////////////////////////
+function CloseDistance( opponent )
+
+
+    case (Distance( me, opponent ))
+        1:              // the most likely, so first
+        0:
+            return 1;
+        default:
+            RunToward( opponent );
+		sleepms(500);
+            return 0;
+    endcase
+
+endfunction
+
+
+// Look around me for humans to fight.

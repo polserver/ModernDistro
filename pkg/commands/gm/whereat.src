@@ -1,0 +1,19 @@
+use uo;
+
+
+program textcmd_whereat( who )
+
+//    if( who.cmdlevel >= 1)
+    SendSysMessage (who, "Target a spot to get it's coordinates. Press <esc> when you are done.", color := 66);
+        var where;
+        while (1)
+            where := TargetCoordinates(who);
+            if (!where)
+                SendSysMessage (who, "Cancelled.", color := 33);
+                return;
+            endif
+           SendSysMessage( who, "X=" + where.x + ", Y=" + where.y + ", Z=" + where.z + ", Realm: " +  who.realm, color := 88 );
+        endwhile
+//    endif
+
+endprogram

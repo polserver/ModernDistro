@@ -1,0 +1,36 @@
+use npc;
+use os;
+use uo;
+use cfgfile;
+
+include "include/eventID";
+include "include/sysEvent";
+include "include/randName";
+include "include/NPCUtil";
+include "include/objtype";
+include "include/dist";
+include "include/anchors";
+include "ai/main/mainLoopSheep";
+include "ai/combat/fight";
+include "ai/combat/defaultCombatEvent";
+include "ai/setup/sheepSetup";
+include "ai/main/sleepModeSheep";
+
+
+const HALT_THRESHOLD := 5; // how close before he attacks?
+var npccfgfile := ReadConfigFile( "npcdesc" );
+var idlesnd1 := CInt(npccfgfile[me.npctemplate].idlesound1);
+var idlesnd2 := CInt(npccfgfile[me.npctemplate].idlesound2);
+
+program KillPlayers()
+  SetWarMode( 0 );
+  main_AI_loop();
+endprogram
+
+function CloseDistance( opponent )
+  case (Distance( me, opponent ))
+    1:
+    0: return 1;
+    default: WalkToward(opponent);  return 0;
+  endcase
+endfunction

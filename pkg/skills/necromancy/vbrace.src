@@ -1,0 +1,90 @@
+// Deviates from official spell.
+
+use uo;
+
+include ":attributes:attributes";
+include ":damage:damage";
+
+
+program vampiric_embrace( params )
+	var caster := params[1];
+	var info := params[2]; // Struct containing additional info about the spell.
+	var spellID := params[3];
+	var cast_on := params[4]; // Target of spell if required.
+
+	if (Getobjproperty(caster, "poly")  == 1)
+		SendSysMessage(caster,"You are already under the influence of the spell!");
+		return 0;
+
+	elseif(Getobjproperty(caster, "poly") != 2)
+		SetObjProperty (caster, "oldname", caster.name);
+		SetObjProperty (caster, "oldprefix", caster.title_prefix);
+		SetObjProperty (caster, "oldsuffix", caster.title_suffix);
+		SetObjProperty (caster, "oldguild", caster.title_guild);
+		SetObjProperty (caster, "oldrace", caster.title_race);
+		SetObjProperty (caster, "oldmurderer", caster.murderer);
+	elseif(Getobjproperty(caster, "poly") == 2)
+
+		if(Getobjproperty(caster, "vampire"))
+			EraseObjProperty(caster,"vampire");
+			EraseObjProperty(caster,"NewRegenRateForStamina");
+			EraseObjProperty(caster,"NewRegenRateForMana");
+			var vampresist := Cint(GetObjProperty(caster, "vampiric_resist"));
+			if(Cint(GetObjProperty(caster, "vampiric_resist")))
+			SetAttributeBaseValue(caster, RESISTING_SPELLS, vampresist * 10);
+			EraseObjProperty(caster, "vampiric_resist");
+			endif
+			
+			RecalcVitals(caster);
+			PlaySoundEffect(caster, 0x4B1);
+			PlayObjectCenteredEffectEx( caster, 0x373A, 1, 17, 9914, 7, 0, 1108 );
+			PlayObjectCenteredEffectEx( caster, 0x376A, 1, 22, 9502, 7, 255, 67 );
+			caster.graphic := caster.trueobjtype;
+			caster.color := caster.truecolor;
+			caster.name := GetObjProperty (caster, "oldname");
+			caster.title_prefix := GetObjProperty (caster, "oldprefix");
+			caster.title_suffix := GetObjProperty (caster, "oldsuffix");
+			caster.title_guild := GetObjProperty (caster, "oldguild");
+			caster.title_race := GetObjProperty (caster, "oldrace");
+			caster.murderer := GetObjProperty (caster, "oldmurderer");
+			EraseObjProperty (caster, "oldname");
+			EraseObjProperty (caster, "oldprefix");
+			EraseObjProperty (caster, "oldsuffix");
+			EraseObjProperty (caster, "oldguild");
+			EraseObjProperty (caster, "oldrace");
+			EraseObjProperty (caster, "oldmurderer");
+			EraseObjProperty (caster, "poly");
+			ModifyResistance(cast_on, DMG_FIRE, 25);
+			return 0;
+		endif
+		
+		if(getobjproperty(caster, "wraith") && !caster.cmdlevel)
+			RevokePrivilege(caster, "freemove");
+			caster.ar_mod := caster.ar_mod - getobjproperty(caster, "wraith");
+		endif
+		
+		EraseObjProperty(caster,"horrificbeast");
+		EraseObjProperty(caster,"wraith");
+		EraseObjProperty(caster,"lichform");
+		EraseObjProperty(caster,"NewRegenRateForLife");
+		EraseObjProperty(caster,"NewRegenRateForMana");
+		EraseObjProperty(caster,"NewRegenRateForStamina");
+		RecalcVitals(caster);
+
+	endif
+
+	caster.color := 0x847E;
+	caster.murderer :=1;
+	PlaySoundEffect(caster, 0x4B1);
+	PlayObjectCenteredEffectEx( caster, 0x373A, 1, 17, 9914, 7, 0, 1108 );
+	PlayObjectCenteredEffectEx( caster, 0x376A, 1, 22, 9502, 7, 255, 67 );
+	Setobjproperty(caster, "NewRegenRateForStamina",  10000);
+	Setobjproperty(caster, "NewRegenRateForMana", 10000);
+	Setobjproperty(caster, "vampire", 1);
+	Setobjproperty(caster, "poly", 2);
+	SetObjProperty(caster, "vampiric_resist", AP_GetSkill(caster, RESISTING_SPELLS));
+	SetAttributeBaseValue(caster, RESISTING_SPELLS, 0);
+	ModifyResistance(cast_on, DMG_FIRE, -25);
+	RecalcVitals(caster);
+
+endprogram

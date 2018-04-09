@@ -1,0 +1,55 @@
+/*
+ * $Id: muadDice.src 1109 2008-01-07 04:10:37Z AustinHeilman $
+ *
+ * Purpose
+ * Get dice strings.
+ * 
+ * Examples:
+ * 7 7 = 7d1
+ * 5 25 = 5d5
+ * 1 11 = 1d11
+ * 3 14 = 1d12+2 or 3d5-1
+ * 13 55 = 
+ */
+
+use uo;
+use os;
+use math;
+use file;
+
+program command_IWantADiceString(who, text)
+	text := SplitWords(text);
+	
+	var min_val := CInt(text[1]);
+	var max_val := CInt(text[2]);
+	if ( min_val < 0 )
+		SendSysMessage(who, "Error - min_val value is <= 0. Must be 1 or higher.");
+		return 0;
+	elseif ( max_val < min_val )
+		SendSysMessage(who, "Error - Max value must be greater than the min_val value.");
+		return 0;
+	endif
+	
+	DieOutputInfo(who, "Generating dice. Min='"+min_val+"' Max='"+max_val+"'");
+	var difference := CDbl(max_val-min_val);
+	var division := CDbl(CDbl(max_val) / CDbl(min_val));
+	var floor_val := Floor(division); // Turns something like 44.5 to 44.0 78.3333 to 78.0
+	
+	if ( difference == 0.0 )
+		DieOutputInfo(who, min_val+"d1");
+		return 1;
+	elseif ( floor_val == division ) // Perfect roll
+		DieOutputInfo(who, min_val+"d"+max_val);
+		return 1;
+	else
+		DieOutputInfo(who, "I hate you!");
+		return 0;
+	endif	
+endprogram
+
+function DieOutputInfo(who, text)
+	SendSysMessage(who, ""+text);
+	LogToFile("::log/muadDice.log", ""+text);
+	
+	return 1;
+endfunction

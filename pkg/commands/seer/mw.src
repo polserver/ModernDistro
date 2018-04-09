@@ -1,0 +1,18 @@
+use uo;
+
+program  textcmd_Move_West(who, howfar)
+  var what := Target(who, TGTOPT_NOCHECK_LOS);
+  if(!what)
+    return;
+  endif
+  var tdist;
+  if(howfar == "")
+    tdist := 1;
+  else
+    tdist := CInt(howfar);
+  endif
+  while(what)
+    MoveObjectToLocation(what, what.x - tdist, what.y, what.z, what.realm, MOVEOBJECT_FORCELOCATION);
+    what := Target(who, TGTOPT_NOCHECK_LOS);
+  endwhile
+endprogram

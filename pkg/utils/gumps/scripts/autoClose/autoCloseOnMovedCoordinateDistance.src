@@ -1,0 +1,24 @@
+include ":gumps:gumps";
+
+program CloseGumpEx(params)
+	var mobile		:= params[1];
+	var pid			:= params[2];
+	var variance	:= params[3];
+	var ret_val		:= params[4];
+	params := 0; // Not needed anymore.
+	
+	var moved_distance := 0, move_x := mobile.x, move_y := mobile.y;
+	var counter := 0;
+	while ( GetProcess( pid ) )
+		moved_distance := CoordinateDistance ( move_x, move_y, mobile.x, mobile.y );
+		if ( moved_distance > 0 )
+			counter += moved_distance;
+			move_x := mobile.x;
+			move_y := mobile.y;
+			if ( counter > variance )
+				return GFCloseGump(mobile, pid, ret_val);
+			endif
+		endif
+		SleepMS ( 5 );
+	endwhile
+endprogram

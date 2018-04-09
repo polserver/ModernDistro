@@ -1,0 +1,19 @@
+/* $Id: skillwin.src 1176 2008-02-06 04:02:01Z AustinHeilman $
+ *
+ * Purpose
+ * This script is called when a player clicks the skill button in his paperdoll.
+ *
+ * Parameters
+ * who:     Reference to the character who clicked the skill button
+ *
+ * Return value: Ignored
+ *
+ */
+use uo;
+
+
+program core_skillWin(mobile)
+	SendSkillWindow(mobile, mobile);
+
+	return 0;
+endprogram

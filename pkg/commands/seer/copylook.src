@@ -1,0 +1,55 @@
+use uo;
+
+program textcmd_copylook(who)
+
+	SendSysMessage(who, "Select target.");
+	var newlook := Target(who);
+	if (!newlook.isA(POLCLASS_MOBILE))
+		SendSysMessage(who, "Aborted.");
+		return;
+	endif
+
+	SendSysMessage(who, "Select NPC to copy.");
+	var oldlook := Target(who);
+	if (!oldlook.isA(POLCLASS_MOBILE))
+		SendSysMessage(who, "Aborted.");
+		return;
+	endif
+
+	var mypack := GetEquipmentByLayer(newlook, 0x15);
+	if (!mypack)
+		mypack := CreateItemAtLocation(newlook.x, newlook.y, newlook.z, 0xe75, 1, who.realm);
+	else
+		MoveObjectToLocation(mypack, newlook.x, newlook.y, newlook.z, who.realm, MOVEOBJECT_FORCELOCATION);
+	endif
+
+	var itemlist := ListEquippedItems(newlook);
+	var y;
+
+
+	foreach x in itemlist
+		MoveItemToContainer(x, mypack);
+	endforeach
+
+	itemlist := ListEquippedItems(oldlook);
+	foreach x in itemlist
+		y := CreateItemInContainer(mypack, x.objtype);
+		y.color := x.color;
+		y.name := x.name;
+		y.desc := x.desc;
+		EquipItem(newlook, y);
+	endforeach
+
+	newlook.gender := oldlook.gender;
+	newlook.graphic := oldlook.graphic;
+	newlook.color := oldlook.color;
+	newlook.name := oldlook.name;
+
+	var newpack := GetEquipmentByLayer(newlook, 0x15);
+	if (newpack)
+		DestroyItem(newpack);
+	endif
+
+	EquipItem(newlook, mypack);
+
+endprogram

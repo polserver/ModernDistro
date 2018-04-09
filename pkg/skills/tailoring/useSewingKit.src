@@ -1,0 +1,154 @@
+// $Id: useSewingKit.src 1266 2008-09-04 00:23:03Z AustinHeilman $
+
+use cfgfile;
+use util;
+
+include ":attributes:attributes";
+include ":crafting:crafting";
+include ":crafting:craftingRepair";
+include ":crafting:toolWear";
+
+var item_config  := ReadConfigFile(":*:itemdesc");
+var craft_config := ReadConfigFile(":tailoring:tailoring");
+
+program use_SewingKit(who, tool)
+
+	if ( !ReserveItem(tool) || !tool.movable )
+		SendSysMessage(who, "You cannot use that.");
+		return 0;
+	elseif ( !(tool in EnumerateItemsInContainer(who.backpack)) )
+		SendSysMessage(who, "That item is not in your backpack.");
+		return 0;
+	endif
+
+	EraseObjProperty(who, "#IsMeditating");
+	EraseObjProperty(who, "#HealTimer");
+
+	var rinfo := sendCraftGump(who, TAILORING);
+
+	// OK was pressed, close it on out
+	if ( rinfo == 0 )
+		return 0;
+	endif
+
+	var the_objtype := rinfo[1];
+	var amt		:= rinfo[2];
+	var repairit	:= rinfo[3];
+
+	if (repairit)
+		repair_this(who, craft_skill);
+		return 0;
+	endif
+
+	if(craft_config[Hex(the_objtype)].assemble == 1)
+		CraftAssembly(who, TAILORING, tool, the_objtype, amt);
+	else
+		makeTailoringItems(who, the_objtype, amt, tool);
+	endif
+	
+endprogram
+
+function makeTailoringItems(who, what, amt, tool)
+
+	if(!what)
+		SendSysMessage(who, "Cancelled");
+		return 0;
+	endif
+	
+	// ResourceList entry type.	
+	var itemchk := MaterialSelection(who, craft_skill, lower(craft_config[what].type));
+	if (!itemchk) 
+		return 0;
+	endif
+	var item1 := itemchk[1];
+	var item1objtype := itemchk[2];
+	var ptmod := itemchk[3];
+	
+	var x := who.x, y := who.y, item2 := 0;
+	var material2obj := craft_config[what].material2obj;
+	if (TypeOf(material2obj) == "String")
+		// Let's now select the secondary material. Chk is not passed, as currently
+		// ingots do not hold a cprop to know which type they was originally like boards
+		// or cut leather.
+		itemchk := MaterialSelection(who, craft_skill, lower(material2obj));
+		if ( !itemchk )
+			return 0;
+		endif
+		item2 := itemchk[1];
+		ptmod := ptmod + CInt(itemchk[3]);
+	endif
+
+	var theitem;
+	var itemname	 := craft_config[what].name;
+	var material	 := CInt(craft_config[what].material);
+	var material2	 := CInt(craft_config[what].material2);
+	var reqd 	 := CInt(craft_config[what].skill);
+	var skillid2 	 := craft_config[what].skillID;
+	var skill2 	 := CInt(craft_config[what].skill2);
+	var diff 	 := CInt(craft_config[what].difficulty);
+	var pts		 := CInt(craft_config[what].points);
+	pts		 := CInt(pts + ptmod);
+
+	var counter := 0;
+
+	while ( counter < amt )
+		if ( (who.x != x) || (who.y != y) )
+			SendSysMessage(who, "You stop sewing.");
+			break;
+		endif
+		if ( !tool )
+			break;
+		endif
+		Sleep(2);
+		if ( GetAmount(item1) >= material )
+			if ( item2 != 0 && GetAmount(item2) < material2 )
+				SendSysMessage(who, "You do not have enough materials.");
+				return 0;
+			endif
+			if ( CraftCheckSkill(who, craft_skill, diff, pts) > 0 )
+				if ( skillid2 )
+					if ( (skill2 <= AP_GetSkill(who, skillid2)) )
+						theitem := CreateCraftItem(who, craft_skill, item1, item1objtype, what, material, itemname, reqd);
+					else
+						SendSysMessage(who, "You do not have the required skill.");
+						return 0;
+					endif
+				else
+					theitem := CreateCraftItem(who, craft_skill, item1, item1objtype, what, material, itemname, reqd);
+					if( theitem && theitem != 0 && !theitem.errortext )
+						if ( item2 != 0 )
+							if ( !SubtractAmount(item2, material2) )
+								DestroyItem(theitem);
+								SendSysMessage(who, "You do not have enough materials.");
+								return 0;
+							endif
+						else
+							SkillCheck(who, TAILORING, diff);
+						endif
+					else
+						SubtractAmount(item1, Ceil(material / 2));
+						if ( material2 )
+							if ( !SubtractAmount(item2, Ceil(material2 / 2)) )
+								SendSysMessage(who, "You do not have enough materials.");
+								return 0;
+							endif
+						endif
+						SendSysMessage(who, "You failed to create the item, and some of your materials are lost.");
+						SkillCheck(who, TAILORING, diff);
+						counter := counter + 1;
+						continue;
+					endif
+				endif
+			endif
+			CheckToolWear (who, tool, craft_skill);
+		else
+			SendSysMessage(who, "You do not have enough materials.");
+			return 0;
+		endif
+
+		theitem.movable := 1;
+		counter := counter + 1;
+	endwhile
+
+	return 1;
+endfunction

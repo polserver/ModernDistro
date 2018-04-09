@@ -1,0 +1,27 @@
+/*
+ * $Id: clumsy.src 921 2006-12-20 23:27:45Z tekproxy $
+ *
+ */
+ 
+use uo;
+use os;
+
+include ":attributes:attributes";
+
+program TimedScript_Clumsy(params)
+	var defender := params[1];
+	var attacker := params[2];
+	var points := params[3];
+	params := 0;
+	
+	// Prevents mod from being applied twice.
+	if ( GetObjProperty(defender, "ClumsyMod") )
+		return 0;
+	endif
+  	
+	SetObjProperty(defender, "ClumsyMod", points);
+	AP_ModifyStatMod(defender, DEXTERITY, -(points));
+	
+	return 1;
+endprogram
+

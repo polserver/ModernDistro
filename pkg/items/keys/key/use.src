@@ -1,0 +1,79 @@
+/*
+        Maintened by *Edwards
+
+        2009-08-29
+*/
+use uo;
+
+include ":keys:key";
+include ":gumps:requestGump";
+include "include/string";
+include ":itemutils:itemUtil";
+
+program UseKey( who, key )
+
+	if( !useItem_check( who, key, ITEM_INCONTAINER ))
+		return 0;
+	endif
+
+	SendSysMessage( who, "What do you want to use this on?" );
+	var targ := Target( who );
+        if( !targ )
+                SendSysMessage( who, "Cancelled." );
+                return 0;
+	elseif( targ == key )
+		RenameKey( who, key );
+		return 1;
+	elseif( targ.IsKey() )
+		CopyKey( who, key, targ );
+		return 1;
+	elseif( !KP_IsLockable( targ ))
+		SendSysMessage( who, "That is not lockable." );
+		return 0;
+	endif
+	
+	if( key.KeyMatchesLock( targ ))
+		KP_ToggleLock( targ, who );
+	else
+		SendSysMessage( who, "This key does not match that lock." );
+	endif
+	
+	return 1;
+endprogram
+
+function RenameKey( who, key )
+
+	var new_name := RequestGump( who, "Enter a name for this key", "Maximum length is 20 characters.", key.desc, CANCEL_BTN_ON );
+	var name_len := Len( new_name );
+	
+	if( !new_name )
+		SendSysMessage( who, "Cancelled." );
+		return 0;
+	elseif( name_len > 20 )
+		SendSysMessage( who, "Name is too long." );
+		return 0;
+	elseif( name_len < 1 )
+		SendSysMessage( who, "Name is too short." );
+		return 0;
+	elseif( new_name )
+		SetName( key, new_name );
+		return 1;
+	endif
+endfunction
+
+function CopyKey( who, key, targ )
+	
+	var key_id := key.GetLockId();
+	if( !key_id )
+		SendSysMessage( who, "You can not copy a blank key." );
+		return 0;
+	elseif( targ.GetLockId() )
+		SendSysMessage( who, "The destination key is not blank." );
+		return 0;
+	endif
+	
+	targ.SetLockId( key_id );
+	SendSysMessage( who, "Done copying keys." );
+	
+	return 1;
+endfunction

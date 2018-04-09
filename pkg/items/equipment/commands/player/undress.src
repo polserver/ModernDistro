@@ -1,0 +1,145 @@
+/*
+        Maintened by *Edwards
+
+        2009-05-30
+*/
+use uo;
+use os;
+use basic;
+
+include "include/client";
+
+program txtcommand_undress( mobile, text )
+
+	if( mobile.dead )
+		SendSysMessage( mobile, "Cancelled." );
+		return 0;
+	endif
+
+	if( !text )
+		SendSysMessage( mobile, "Options are:" );
+		SendSysMessage( mobile, "all - Removes all items that are equipped." );
+		SendSysMessage( mobile, "jewelry - Only unequips jewelry items (rings, necklaces, etc)." );
+		SendSysMessage( mobile, "nojewelry - Unequips everything except jewelry items." );
+		return;
+	endif
+
+	foreach item in ListEquippedItems( mobile )
+		case( Lower( text ))
+			"all":
+				var jewl := 1;
+				if( RemoveIt( mobile, item, jewl ))
+					MoveItemToContainer( item, mobile.backpack );
+				endif
+			"jewelry":
+				if( RemoveJewl( mobile, item ))
+					MoveItemToContainer( item, mobile.backpack );
+				endif
+			"nojewelry":
+				var jewl := 0;
+				if( RemoveIt( mobile, item, jewl ))
+					MoveItemToContainer( item, mobile.backpack );
+				endif
+		endcase
+  
+                SleepMS(5);
+	endforeach
+
+        return 1;
+endprogram
+
+function RemoveIt( mobile, item, jewl )
+
+	var ring := GetEquipmentByLayer( mobile, LAYER_RING );
+	if( item.serial == ring.serial )
+		return jewl;
+	endif
+
+	var bracelet := GetEquipmentByLayer( mobile, LAYER_WRIST );
+	if( item.serial == bracelet.serial )
+		return jewl;
+	endif
+
+	var earrings := GetEquipmentByLayer( mobile, LAYER_EARS );
+	if( item.serial == earrings.serial )
+		return jewl;
+	endif
+
+	var neck := GetEquipmentByLayer( mobile, LAYER_NECK );
+	if( item.serial == neck.serial )
+		if( IsNecklace( item ))
+			return jewl;
+		endif
+	endif
+
+	var beard := GetEquipmentByLayer( mobile, LAYER_BEARD );
+	if( item.serial == beard.serial )
+		return 0;
+	endif
+
+	var hair := GetEquipmentByLayer( mobile, LAYER_HAIR );
+	if( item.serial == hair.serial )
+		return 0;
+	endif
+
+	var mount :=  GetEquipmentByLayer( mobile, LAYER_MOUNT );
+	if( item.serial == mount.serial )
+		return 0;
+	endif
+
+	if( item.objtype == 0x204E ) //Death Shroud
+		return 0;
+	endif
+
+	var my_pack := mobile.backpack;
+	if( item.serial == my_pack.serial )
+		return 0;
+	endif
+
+	return 1;
+endfunction
+
+function RemoveJewl( mobile, item )
+
+	if( item.objtype == 0x204E ) //Death Shroud
+		return 0;
+	endif
+
+	var ring := GetEquipmentByLayer( mobile, LAYER_RING );
+	if( item.serial == ring.serial )
+		return 1;
+	endif
+
+	var bracelet := GetEquipmentByLayer( mobile, LAYER_WRIST );
+	if( item.serial == bracelet.serial )
+		return 1;
+	endif
+
+	var earrings := GetEquipmentByLayer( mobile, LAYER_EARS );
+	if( item.serial == earrings.serial )
+		return 1;
+	endif
+
+	var neck := GetEquipmentByLayer( mobile, LAYER_NECK );
+	if( item.serial == neck.serial )
+		if( IsNecklace( item ))
+			return 1;
+		endif
+	endif
+ 
+        return 1;
+endfunction
+
+function IsNecklace( item )
+
+	case( item.graphic )
+		0x1F05:
+			return 1;
+		0x1F08:
+			return 1;
+		0x1F0A:
+			return 1;
+		default:
+			return 0;
+	endcase
+endfunction

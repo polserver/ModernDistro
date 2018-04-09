@@ -1,0 +1,63 @@
+/*
+        Maintened by *Edwards
+
+        2009-10-21
+*/
+use uo;
+use os;
+
+program ChessBoardCreate( board )
+
+	var i;
+	var pieces:=array();
+
+	// White Pieces
+	for( i:=1; i<=8 ; i+=1 )
+		pieces.Append( CreateItemInContainer( board, "WhitePawn" ));
+                SleepMS(5);
+	endfor
+	for( i:=1; i<=2 ; i+=1 )
+		pieces.Append( CreateItemInContainer( board, "WhiteBishop" ));
+                SleepMS(5);
+	endfor
+	for( i:=1; i<=2 ; i+=1 )
+		pieces.Append( CreateItemInContainer( board, "WhiteKnight" ));
+                SleepMS(5);
+	endfor
+	for( i:=1; i<=2 ; i+=1 )
+		pieces.Append( CreateItemInContainer( board, "WhiteRook" ));
+                SleepMS(5);
+	endfor
+ 
+	pieces.Append( CreateItemInContainer( board, "WhiteKing" ));
+	pieces.Append( CreateItemInContainer( board, "WhiteQueen" ));
+
+
+	// Black Pieces
+	for( i:=1; i<=8 ; i+=1 )
+		pieces.Append( CreateItemInContainer( board, "RedPawn" ));
+                SleepMS(5);
+	endfor
+	for( i:=1; i<=2 ; i+=1 )
+		pieces.Append( CreateItemInContainer( board, "RedBishop" ));
+                SleepMS(5);
+	endfor
+	for( i:=1; i<=2 ; i+=1 )
+		pieces.Append( CreateItemInContainer( board, "RedKnight" ));
+                SleepMS(5);
+	endfor
+	for( i:=1; i<=2 ; i+=1 )
+		pieces.Append( CreateItemInContainer( board, "RedRook" ));
+                SleepMS(5);
+	endfor
+ 
+	pieces.Append( CreateItemInContainer( board, "RedKing" ));
+	pieces.Append( CreateItemInContainer( board, "RedQueen" ));
+	
+	foreach piece in ( pieces )
+		SetObjProperty( piece, "boardserial", board.serial );
+                SleepMS(5);
+	endforeach
+
+	return 1;
+endprogram

@@ -1,0 +1,135 @@
+/*
+        Maintened by *Edwards
+
+        2009-08-29
+*/
+use uo;
+use os;
+use util;
+use cfgfile;
+
+include ":attributes:attributes";
+include ":weapons:weaponInfo";
+include ":training:training";
+include "include/client";
+include ":damage:damage";
+include ":itemutils:itemUtil";
+
+program ArcheryButte( who, butte )
+
+	if( butte.container )
+		return 0;
+	elseif( !useItem_check( who, butte, DEFAULT_ITEM ))
+		return 0;
+	endif
+
+	var weapon := who.weapon;
+	var weapon_attrib := CS_GetWeaponInfo( weapon, "Attribute" );
+	var weapon_anim := CInt( CS_GetWeaponInfo( weapon, "Anim" ));
+	var miss_sound := CInt( CS_GetWeaponInfo( weapon, "MissSound" ));
+	var hit_sound := CInt( CS_GetWeaponInfo( weapon, "Hitsound" ));
+	var projectile_anim := CInt( CS_GetWeaponInfo( weapon, "ProjectileAnim" ));
+	var projectile_type := CInt( CS_GetWeaponInfo( weapon, "ProjectileType" ));
+
+	if( Distance( who, butte ) == 1 )
+		RecoverAmmo( who, butte );
+		return 0;
+	elseif( !CS_GetWeaponInfo( weapon, "Projectile" ))
+		SendSysMessage( who, "You need to use a missile weapon." );
+		return 0;
+	elseif( !TP_CheckRange( who, weapon, butte ))
+		return 0;
+	endif
+
+	if( !ConsumeSubstance( who.backpack, projectile_type, 1 ))
+		SendSysMessage( who, "You do not have any ammo for this weapon." );
+		return 0;
+	endif
+
+	PerformAction( who, weapon_anim );
+
+	Sleep(1);
+
+	var closest := butte;
+	foreach point in ( GetCoordsInLine( who.x, who.y, butte.x, butte.y ))
+		var z_pos := who.z;
+		if( z_pos < GetWorldHeight( point.x, point.y ))
+			z_pos := GetWorldHeight( point.x, point.y );
+		endif
+
+		foreach mobile in ( ListMobilesNearLocationEX( point.x, point.y, z_pos, 0, LISTEX_FLAG_NORMAL+LISTEX_FLAG_HIDDEN ))
+			if( mobile != who )
+				closest := mobile;
+				break;
+				SleepMS(2);
+			endif
+		endforeach
+		SleepMS(2);
+	endforeach
+
+	PlayMovingEffect( who, closest, projectile_anim, 10, 0, 0 );
+
+	if( SkillCheck( who, weapon_attrib, -1, 0, TP_CanAdvance( who, weapon_attrib )) > 0 )
+		PlaySoundEffect( who, hit_sound );
+
+		if( closest.IsA( POLCLASS_MOBILE ))
+			PerformAction( closest, ANIM_HIT );
+			var projectile_damage := CS_GetWeaponInfo( weapon, "Damage" );
+			ApplyDamageEX( closest, RandomDiceRoll( projectile_damage ), DMG_PHYSICAL, who );
+		else
+			PrintTextAbove( butte, DetermineHit( who, weapon_attrib ));
+			if( RandomInt(2) )
+				var ammo := CInt( GetObjProperty( butte, "Ammo-"+projectile_type ));
+				ammo += 1;
+				SetObjProperty( butte, "Ammo-"+projectile_type, ammo );
+			endif
+		endif
+	else
+		PlaySoundEffect( who, miss_sound );
+	endif
+
+	Sleep(3);
+
+        return 1;
+endprogram
+
+function DetermineHit( who, weapon_attrib )
+
+	if( SkillCheck( who, weapon_attrib, RandomDiceRoll("50d3"), 0, ADV_DISABLE ) > 0 )
+		return "*Bullseye*";
+	elseif( SkillCheck( who, weapon_attrib, RandomDiceRoll("30d3"), 0, ADV_DISABLE ) > 0 )
+		return "*Hit the inner red ring*";
+	elseif( SkillCheck( who, weapon_attrib, RandomDiceRoll("20d3"), 0, ADV_DISABLE ) > 0 )
+		return "*Hit the inner white ring*";
+	elseif( SkillCheck( who, weapon_attrib, RandomDiceRoll("10d3"), 0, ADV_DISABLE ) > 0 )
+		return "*Hit the outer red ring*";
+	else
+		return "*It hit the straw*";
+	endif
+endfunction
+
+function RecoverAmmo( who, butte )
+
+	var prop_list := GetObjPropertyNames( butte );
+	if( prop_list.Size() > 0 )
+		foreach c_prop in ( prop_list )
+			if( c_prop["Ammo-"] )
+				var ammo := c_prop;
+				ammo["Ammo-"] := "";
+
+				CreateItemInBackPack( who, CInt( ammo ), CInt( GetObjProperty( butte, c_prop )));
+				SendSysMessage( who, "You recover some ammo." );
+
+				EraseObjProperty( butte, c_prop );
+			endif
+			SleepMS(2);
+		endforeach
+
+		return 1;
+	else
+		SendSysMessage( who, "There is no ammunition to recover from this butte." );
+		return 0;
+	endif
+ 
+        return 1;
+endfunction

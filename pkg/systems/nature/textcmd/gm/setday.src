@@ -1,0 +1,21 @@
+
+use uo;
+
+include "../../nature";
+
+program setyear(who, text)
+
+    text := CInt(text);
+    if (!text)
+	text := 1;
+    endif
+
+    if (text < 1)
+	text := 1;
+    endif
+
+    var calendar := GetGlobalProperty("Calendar");
+    calendar[DAY] := text;
+    SetGlobalProperty("Calendar", calendar);
+
+endprogram

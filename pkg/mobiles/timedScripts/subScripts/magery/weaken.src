@@ -1,0 +1,27 @@
+/*
+ * $Id: weaken.src 921 2006-12-20 23:27:45Z tekproxy $
+ *
+ */
+ 
+use uo;
+use os;
+
+include ":attributes:attributes";
+
+program TimedScript_Weaken(params)
+	var defender := params[1];
+	var attacker := params[2];
+	var points := params[3];
+	params := 0;
+	
+	// Prevents mod from being applied twice.
+	if ( GetObjProperty(defender, "WeakenMod") )
+		return 0;
+	endif
+	
+	SetObjProperty(defender, "WeakenMod", points);
+	AP_ModifyStatMod(defender, STRENGTH, -(points));
+	
+	return 1;
+endprogram
+

@@ -1,0 +1,21 @@
+use uo;
+use os;
+
+program lighting(me,item)
+    if (me.cmdlevel < 1)
+      return;
+    endif
+	SetScriptController( me );
+	if (item.color == 0x481)
+	  item.color := 0x455;
+	  SendSysMessage(me, "lighting is now off.");
+	  return;
+	endif
+	item.color := 0x481;
+    Detach();
+	while (item.color == 0x481)
+	  SendSysMessage(me, "maintaining light");
+      me.setlightlevel( 0, 60 );
+	  sleep(60);
+	endwhile
+endprogram

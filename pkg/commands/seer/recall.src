@@ -1,0 +1,41 @@
+use uo;
+use os;
+
+include "include/objtype";
+
+program textcmd_recall( caster )
+
+
+	var dest := struct;
+	SendSysMessage( caster, "Select a target to recall from." );
+	var cast_on := Target(caster);
+	if (!cast_on)
+		SendSysMessage(caster, "Canceled.", 1, 33);
+		return;
+	endif
+	
+	if(cast_on == caster)
+		dest := GetObjProperty(caster, "RecallDestination");
+		if(!dest)
+			SendSysMessage(caster, "You have not previously marked yourself with a location.", 1, 33);
+			return 0;
+		endif
+		MoveObjectToLocation( caster, dest.x, dest.y, dest.z, dest.realm, MOVEOBJECT_FORCELOCATION );
+		return 1;
+	endif
+	
+	if (cast_on.objtype != UOBJ_RUNE)
+		SendSysMessage(caster, "You can only cast that on a recall rune!");
+		return 0;
+	endif
+
+	if (!Accessible(caster, cast_on))
+		SendSysMessage(caster, "You can't reach that!");
+		return 0;
+	endif
+
+	dest := cast_on.GetDestination();
+
+	MoveObjectToLocation( caster, dest.x, dest.y, dest.z, dest.realm, MOVEOBJECT_FORCELOCATION );
+
+endprogram

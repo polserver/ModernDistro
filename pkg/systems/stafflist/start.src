@@ -1,0 +1,6 @@
+use os;
+use uo;
+
+print("Starting stafflist system");
+var stafflist_script := start_script("staffList");
+SetGlobalProperty( "#stafflist", stafflist_script.pid );

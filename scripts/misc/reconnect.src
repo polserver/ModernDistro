@@ -1,0 +1,21 @@
+use uo;
+use os;
+
+
+program reconnect(who)
+  var mount := GetEquipmentByLayer(who, 25 );
+  if (mount)
+    var animal := SystemFindObjectBySerial(CInt(GetObjProperty(mount,"serial")));
+    EraseObjProperty(animal,"onhold");
+  endif
+  run_script_to_completion( ":motd:textcmd/player/motd", who );
+  var ppl := EnumerateOnlineCharacters();
+  if (GetObjProperty(who, "StealthLogin") )
+    return;
+  endif
+  foreach staff in ppl
+    if((staff.cmdlevel > 0) && (CInt(GetObjProperty(staff, "LogNotify") ) == 1) )
+      SendSysMessage(staff, CStr(who.name) + " (Account name: " + CStr(who.acctname) + ") has reconnected.  IP: " + CStr(who.ip) );
+    endif
+  endforeach
+endprogram

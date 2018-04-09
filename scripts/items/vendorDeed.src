@@ -1,0 +1,54 @@
+use os;
+use uo;
+include "include/canAccess";
+include ":attributes:attributes";
+
+const SEARCH_RANGE := 10;
+
+program makevendor(who, deed)
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  if(!can_access(who, deed))
+    return;
+  endif
+  if(!ReserveItem(deed))
+    return;
+  endif
+  var place;
+  if(who.multi.serial)
+    var multi := who.multi;
+    var sign;
+    foreach thing in (multi.components)
+      if(thing.objtype == 0xbd2)
+        sign := thing;
+        break;
+      endif
+    endforeach
+    if(!sign)
+      SendSysMessage(who, "You cannot place a vendor here.");
+      return;
+    endif
+    if(!GetObjProperty(sign, "Public"))
+      SendSysMessage(who, "You can only place vendors in public houses.");
+      return;
+    endif
+    place := CreateNpcFromTemplate("playervendor", who.x, who.y, who.z, 0, who.realm);
+    if(!place)
+      SendSysMessage( who, "Your vendor has not been created");
+      return;
+    else
+      SendSysMessage(who, "You have successfully created a vendor");
+      SetObjProperty(place, "master", who.serial);
+      SetObjProperty(place, "mn", who.name);
+      SetObjProperty(place, "r", 1500);
+      if(!DestroyItem(deed))
+        RevokePrivilege(place, "invul");
+        SetObjProperty(place, "guardkill", 1);
+        ApplyRawDamage(place, (GetHp(place) + 5));
+      endif
+    endif
+  else
+	SendSysMessage( who, "You cannot place your vendor here");
+	return;
+  endif
+endprogram

@@ -1,0 +1,22 @@
+use uo;
+
+program textcmd_destroy( who )
+	SendSysMessage( who, "Please target something to destroy.", 1, 88 );
+	SendSysMessage( who, "Press <ESC> to exit.", 1, 88 );
+	while(1)
+		var tgt := Target( who, TGTOPT_NOCHECK_LOS );
+		if(!tgt)
+			SendSysMessage(who, "Cancelled.", 1, 33);
+			return 0;
+		endif
+		if(GetObjProperty(tgt, "Permanent"))
+			SendSysMessage(who, "That item cannot be destroyed.", 1, 33);
+			return 0;
+		endif
+		if(!tgt.isA(POLCLASS_NPC) || !tgt.client)
+			DestroyItem( tgt);
+		else
+		SendSysMessage( who, "You can only destroy items", 1, 33 );
+		endif
+	endwhile
+endprogram

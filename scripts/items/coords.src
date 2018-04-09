@@ -1,0 +1,10 @@
+use uo;
+include "include/coords";
+include "include/canAccess";
+
+program get_coords(who, item)
+  if(!can_access(who, item))
+    return;
+  endif
+  PrintTextAbovePrivate(who, ToSextant(who.x, who.y), who);
+endprogram

@@ -1,0 +1,17 @@
+use uo;
+
+program canRemove( mobile, container, item, move_type )
+
+        //Avoid compiler warnings
+        item := item;
+        mobile := mobile;
+        container := container;
+        
+	if( move_type == MOVETYPE_COREMOVE )
+		return 1;
+        elseif( mobile.cmdlevel > 2 )
+		return 1;
+	endif
+ 
+	return 0;
+endprogram

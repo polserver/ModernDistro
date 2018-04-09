@@ -1,0 +1,23 @@
+use uo;
+use os;
+use polsys;
+
+include ":chat:packets";
+
+program Logon(character)
+	var chatName := GetObjProperty(character, "ChatName");
+	
+	// Tell the client we know the client's chat name.
+	// I'm PRETTY SURE this is not correct.
+	if ( chatName != error )
+		var packet := CreatePacket(0xB2, 13 + (Len(chatName) * 2));
+		packet.SetInt16(1, 13 + (Len(chatName) * 2)); // length
+		packet.SetInt16(3, 0x03EE); // add user
+		// 0x0030 = user, 0x0031 = moderator, 0x0032 = muted, 0x0034 = me, 0x0035 = system
+		packet.SetInt16(9, 0x0034); // user type
+		packet.SetUnicodeString(11, CAscZ(chatName), 0); // unicode chat name
+		SendChatPacket(packet, character);
+	endif
+	
+	return 0;
+endprogram

@@ -1,0 +1,129 @@
+use uo;
+use util;
+use os;
+
+include "include/NPCUtil";
+
+program Install()
+
+	return 1;
+endprogram
+
+exported function IsCorpse( corpse )
+
+	corpse := corpse; //Avoid compiler warnings
+	return 1;
+endfunction
+
+exported function GetOwner( corpse )
+
+	if( corpse.ownerserial )
+		return SystemFindObjectBySerial( corpse.ownerserial );
+	elseif( CInt( GetObjProperty( corpse, "ownerserial" )))
+		return SystemFindObjectBySerial( CInt( GetObjProperty( corpse, "ownerserial" )));
+	endif
+endfunction
+
+exported function SetOwner( corpse, serial )
+
+	if( serial.IsA( POLCLASS_UOBJECT ))
+		serial := serial.serial;
+	endif
+
+	return SetObjProperty( corpse, "ownerserial", serial );
+endfunction
+
+exported function NPCTemplate( corpse )
+
+	var template := GetObjProperty( corpse, "npctemplate" );
+	if( template )
+		return NPC_GetNPCConfig( template );
+	else
+		return error{"errortext":="Corpse did not belong to an npc."};
+	endif
+endfunction
+
+exported function IsPlayerCorpse( corpse )
+
+	var owner := GetOwner( corpse );
+	if( owner )
+		return owner;
+	else
+		return error{"errortext":="Corpse does not have an owner."};
+	endif
+endfunction
+
+exported function SetSkinned( corpse, skinner )
+
+	var serial;
+	if( !skinner.IsA( POLCLASS_MOBILE ))
+		return 0;
+	else
+		serial := skinner.serial;
+	endif
+
+	CreateItemAtLocation( corpse.x, corpse.y, corpse.z, "blood", 1, corpse.realm );
+
+	//Store the serial of who skinned the corpse.
+	SetObjProperty( corpse, "Skinned", serial );
+
+	return 1;
+endfunction
+
+exported function IsSkinned( corpse )
+
+	return CInt( GetObjProperty( corpse, "Skinned" ));
+endfunction
+
+exported function Gibbify( corpse, range )
+
+	var piece_list := array
+	{
+		0x1DAD, //Torso
+		0x1DB2, //Left Leg
+		0x1DB1, //Right Leg
+		0x1DB0, //Left Arm
+		0x1DAF, //Right Arm
+		0x1CEE, //Liver
+		0x1CED, //Heart
+		0x1CF0  //Brain
+	};
+
+	foreach item in ( EnumerateItemsInContainer( corpse ))
+		if( item.container == corpse )
+			MoveObjectToLocation( item, corpse.x, corpse.y, corpse.z, corpse.realm, MOVEOBJECT_FORCELOCATION );
+		endif
+                SleepMS(5);
+	endforeach
+
+	foreach objtype in ( piece_list )
+		var item := CreateItemAtLocation( corpse.x, corpse.y, corpse.z, objtype, 1 );
+
+		var newx, newy;
+		var num_tries := 0;
+
+		MOVE_LOOP:
+		do
+			newx := RandomInt( range )-CInt( range / 2 );
+			newy := RandomInt( range )-CInt( range / 2 );
+
+			newx := newx + corpse.x;
+			newy := newy + corpse.y;
+
+			num_tries := num_tries+1;
+			if( num_tries > 30 )
+				num_tries := 0;
+				newx := corpse.x;
+				newy := corpse.y;
+				break MOVE_LOOP;
+			endif
+		dowhile( CheckLosAt( corpse, newx, newy, corpse.z ));
+
+		MoveObjectToLocation( item, newx, newy, corpse.z, corpse.realm, MOVEOBJECT_FORCELOCATION );
+                SleepMS(5);
+	endforeach
+
+	DestroyItem( corpse );
+
+	return 1;
+endfunction

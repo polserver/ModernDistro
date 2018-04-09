@@ -1,0 +1,15 @@
+use uo;
+
+include "include/clock";
+
+program about( cmd )
+
+    var system := polcore();
+
+    print("System Message:    About" );
+    print("    POL:           " + system.verstr );
+    print("    Designer:      Syzygy" );
+    print("    Email          syzygy@pobox.com" );
+    print("    Last Updated:  " + system.compiledate + " " + system.compiletime );
+
+endprogram

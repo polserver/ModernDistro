@@ -1,0 +1,87 @@
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+
+program cast_poly( parms )
+  var caster := parms[1];
+  var info := parms[2];
+  var cast_on := caster;
+	
+  var origform := caster.graphic;
+  var magery     := CInt(GetAttribute(caster, MAGERY));
+  var meditation := CInt(GetAttribute(caster, MEDITATION));
+  var evalint    := CInt(GetAttribute(caster, EVALUATING_INTELLIGENCE));
+  var critgroup;
+  var thecreature;
+  if (magery < 70)
+	critgroup := RandomInt(1);
+  elseif (magery < 80)
+	critgroup := RandomInt(1)+1;
+  elseif (magery < 90)
+	critgroup := RandomInt(1)+2;
+  else
+	critgroup := 3;
+  endif
+  var critter := RandomInt(8);
+  case (critgroup)
+	0:
+	  case (critter)
+		0: thecreature := 6;	//bird
+		1: thecreature := 51;	//slime
+		2: thecreature := 5;	//eagle
+		3: thecreature := 39;	//mongbat
+		4: thecreature := 31;	//headless
+		5: thecreature := 29;	//gorilla
+		6: thecreature := 42;	//ratman
+		7: thecreature := 28;	//giant spider
+	  endcase
+	1:
+	  case (critter)
+		0: thecreature := 48;	//scorpion
+		1: thecreature := 7;	//orc
+		2: thecreature := 3;	//zombie
+		3: thecreature := 17;	//orc
+		4: thecreature := 33;	//lizardman
+		5: thecreature := 26;	//shade
+		6: thecreature := 21;	//giant serp
+		7: thecreature := 30;	//harpy
+	  endcase
+	2:
+	  case (critter)
+	    0: thecreature := 18;	//ettin
+		1: thecreature := 8;	//corpser
+		2: thecreature := 22;	//beholder
+		3: thecreature := 14;	//earth elem
+		4: thecreature := 16;	//water elem
+		5: thecreature := 15;	//fire elem
+		6: thecreature := 13;	//air elem
+		7: thecreature := 47;	//ent
+	  endcase
+	3:
+	  case (critter)
+		0: thecreature := 1;	//ogre
+		1: thecreature := 4;	//gargoyle
+		2: thecreature := 24;	//lich
+		3: thecreature := 150;	//seaserp
+		4: thecreature := 9;	//demon
+		5: thecreature := 12;	//dragon
+		6: thecreature := 10;	//demon with sword
+		7: thecreature := 58;	//wisp
+	  endcase
+  endcase
+  caster.graphic := thecreature;
+  if ( thecreature == 150 )
+	caster.color := 233;
+  else
+	caster.color := 0;
+  endif
+  var magerydur := magery/2;
+  var meditadur := magerydur + meditation/10;
+  var duration  := meditadur + evalint/10;
+  Detach();
+  sleep(duration);
+  caster.graphic := caster.objtype;
+  caster.color := caster.truecolor;
+  EraseObjProperty(caster,"poly");
+endprogram

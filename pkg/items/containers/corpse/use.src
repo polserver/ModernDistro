@@ -1,0 +1,11 @@
+use uo;
+use os;
+
+include ":containers:useCorpse";
+
+program useScript_Corpse( mobile, corpse )
+
+        SetObjProperty( corpse, "#CorpseUsed", 1 );
+
+        return OpenContainer( mobile, corpse );
+endprogram

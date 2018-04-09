@@ -1,0 +1,31 @@
+use uo;
+use os;
+use util;
+
+include ":itemutils:itemdesc";
+include "include/math";
+include "include/eventID";
+
+program portrait_control ( portrait )
+    //RegisterForSpeechEvents(item, 5);
+	var ev;
+    EnableEvents ( EVID_ENTEREDAREA + EVID_LEFTAREA, 3 );
+	var who;
+    while(portrait) //exit loop if item is destroyed
+	ListMobilesInLineOfSight( portrait, 3 );
+        ev := wait_for_event(120);
+        if(ev)
+            who := ev.source;
+            PrintTextAbove(portrait, who.name + " said: " + ev.text);
+        endif
+    endwhile
+
+/* 
+	var sounds := GetObjTypeArray ( pixie.graphic, "Sounds" );
+	
+	var playsound := RandomDiceRoll ( normal_distribution_dice ( 1, soundids.size() ) );
+	
+	PlaySoundEffect ( pixie, CInt(sounds[Cint(playsound)]) );
+	return 1;
+*/
+endprogram

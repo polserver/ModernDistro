@@ -1,0 +1,8 @@
+
+use uo;
+
+program mining_logon( who )
+
+  EraseObjProperty(who, "IsMining");
+
+endprogram

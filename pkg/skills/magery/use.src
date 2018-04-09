@@ -1,0 +1,39 @@
+/*
+ * $Id: use.src 373 2006-06-17 18:27:33Z austinheilman $
+ *
+ */
+
+use uo;
+use os;
+use cfgfile;
+
+program useScroll(who, scroll)
+	var item_cfg;
+	var spell_id;
+	
+	if(scroll.objtype != 0xab01)
+	    item_cfg := ReadConfigFile(":*:itemdesc");
+	    item_cfg := item_cfg[scroll.objtype];
+	    spell_id := item_cfg.SpellId;
+	else // Special Kluge for Wizardry system since those scrolls are generated dynamically.
+	    if(!GetObjProperty(scroll, "SpellID")) // For the original way wiz scrolls were scripted.
+		item_cfg := ReadConfigFile(":magery:spells");
+		foreach thing in GetConfigIntKeys(item_cfg)
+		    if(GetObjProperty(scroll, "SpellName") == Lower(thing.Name))
+			spell_id := CInt(thing.SpellId);
+			break;
+		    endif
+		endforeach
+	    else // Now we do them this way.
+		spell_id := CInt(GetObjProperty(scroll, "SpellID"));
+	    endif
+	endif
+	
+	var script := Start_Script("spellStarter", {who, spell_id, scroll});
+	if ( script.errortext )
+		SendSysMessage(who, "Error - Could not start spell starter ->"+script.errortext);
+		return 0;
+	endif
+	
+	return 1;
+endprogram

@@ -1,0 +1,24 @@
+use uo;
+
+program textcmd_newaccount(who, info)
+  var split := SplitWords(info);
+  var uname := split[1];
+  var pword := split[2];
+  var check := 0;
+  foreach acctname in ListAccounts()
+    if(uname == acctname)
+      SendSysMessage(who, "That account name is already taken");
+      check := 1;
+      break;
+    endif
+  endforeach
+  if(!check)
+    var act := CreateAccount(uname, pword, 1);
+    if(act.errortext)
+      SendSysMessage(who, "" + act.errortext);
+      return;
+    endif
+    SendSysMessage(who, "Account created successfully.");
+    act.set_uo_expansion("ML");
+  endif
+endprogram

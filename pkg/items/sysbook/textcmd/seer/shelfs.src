@@ -1,0 +1,19 @@
+use uo;
+use os;
+use util;
+
+program textcmd_shelfsouth(who);
+  var rint;
+  case (RandomInt(3)+1)
+    1: rint := 0xA97;
+    2: rint := 0xA98;
+    3: rint := 0xA9B;
+  endcase
+  var shelf := CreateItemAtLocation(who.x, who.y, who.z, rint, 1, who.realm);
+  shelf.graphic := rint;
+  if(shelf)
+    return 1;
+  else
+    SendSysMessage(who, shelf.errortext);
+  endif
+endprogram

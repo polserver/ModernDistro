@@ -1,0 +1,49 @@
+///////////////////////////////////////////////////////////////
+//
+// Adds the necessary CProps to a book shelf for it to spawn
+// books from :sysbook:books.cfg.
+//
+//
+///////////////////////////////////////////////////////////////
+
+use uo;
+use util;
+use basic;
+use os;
+use file;
+
+program spawnShelf(who, text);
+
+	var bookshelves := {0xA97, 0xA98, 0xA99, 0xA9A, 0xA9B, 0xA9F, 0xA9C, 0x2DEF, 0x2DF0};
+	var maxbooks := CInt(text);
+	if(!text || !maxbooks)
+		maxbooks := RandomDiceRoll("1d5+2");
+	endif
+
+	SendSysMessage(who, "Select the bookshelf you wish to have spawn books:", 1, 88);
+	var bookshelf := Target(who);
+	if(!bookshelf)
+		SendSysMessage(who, "Canceled.", 1, 33);
+		return 0;
+	endif
+	if(GetObjProperty(bookshelf, "Spawn") == "Yes")
+		SendSysMessage(who, "That shelf is already set to spawn books.", 1, 33);
+		return 0;
+	endif
+	if(bookshelf.objtype in bookshelves)
+		SetObjProperty(bookshelf, "Spawn", "Yes");
+		SetObjProperty(bookshelf, "MaxBooks", maxbooks);
+		SendSysMessage(who, "The shelf has spawned " + CStr(maxbooks) + " and", 1, 66);
+		SendSysMessage(who, "will restock it to " + CStr(maxbooks) + " every 10 minutes.", 1, 66);
+		var shelfControl := start_script(":sysbook:bookShelf/control.ecl", bookshelf);
+		if(shelfControl.errortext)
+			LogToFile("::log/sysbook.log", "[textcmd/gm/spawnShelf.ecl]: Control script failed to start: "+shelfControl.errortext, LOG_DATETIME);
+		endif
+	else
+		SendSysMessage(who, "Ether you targgetted an 'empty' shelf or you chose something that is not a book shelf.", 1, 33);
+		SendSysMessage(who, "Only book shelves with the graphic with books in them can be 'book spawns'.", 1, 33);
+		return 0;
+	endif
+	return 1;
+
+endprogram

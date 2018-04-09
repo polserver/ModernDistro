@@ -1,0 +1,205 @@
+use uo;
+use os;
+use guilds;
+
+var proc := 0;
+var stonemanager := 0;
+var guildstone;
+
+program guildNode(stone)
+  guildstone := stone;
+  while(!proc)
+    print("Waiting for Process");
+    sleep(5);
+    proc := GetProcess(GetGlobalProperty("#GuildManager"));
+  endwhile
+  var guildid := GetObjProperty(stone, "guild_id");
+  while(!guildid)
+    sleep(2);
+    guildid := GetObjProperty(stone, "guild_id");
+  endwhile
+  var pid := GetPid();
+  stonemanager := GetProcess(pid);
+  SetGlobalProperty(CStr("#Guild" + guildid), pid);
+  while(stone)
+    var ev := wait_for_event(360);
+    if(ev)
+      case(ev.type)
+        "gc":           stone.GuildChat(ev, FindGuild(guildid));
+        "resign":       Resign(ev);
+        "declarewar":   DeclareWar(ev);
+        "declareally":  DeclareAlly(ev);
+        "removeally":   RemoveAlly(ev);
+        "removeenemy" : RemoveEnemy(ev);
+      endcase
+    endif
+  endwhile
+endprogram
+
+function RemoveEnemy(ev)
+  var who := ev.who;
+  var guild := ev.guild;
+  var enemy := ev.enemy;
+  SendSysMessage(who, "Your have ended the war.");
+  guild.removeenemyguild(enemy);
+  enemy.removeenemyguild(guild);
+  guildstone.RemoveEnemyGuild(guild, enemy);
+  var evnt      := struct;
+  evnt.+status  := 1;
+  evnt.+message := "We have ended our war with guild: " + enemy.getprop("guildname") + ".";
+  guildstone.guildchat(evnt, guild);
+  evnt.message := "guild: " + guild.getprop("guildname") + " has ended their war with us.";
+  guildstone.guildchat(evnt, enemy);
+endfunction
+
+function RemoveAlly(ev)
+  var who := ev.who;
+  var guild := ev.guild;
+  var enemy := ev.enemy;
+  SendSysMessage(who, "Your have ended the alliance.");
+  guild.removeallyguild(enemy);
+  enemy.removeallyguild(guild);
+  guildstone.RemoveAllyGuild(guild, enemy);
+  var evnt      := struct;
+  evnt.+status  := 1;
+  evnt.+message := "We have ended our alliance with guild: " + enemy.getprop("guildname") + ".";
+  guildstone.guildchat(evnt, guild);
+  evnt.message := "guild: " + guild.getprop("guildname") + " has ended their alliance with us.";
+  guildstone.guildchat(evnt, enemy);
+endfunction
+
+function DeclareAlly(ev)
+  var who := ev.who;
+  var guild := ev.guild;
+  var enemy := ev.enemy;
+  var chk := 0;
+  var dc := guild.getprop("GuildDeclareStatus");
+  if(!dc)
+    dc := {};
+  endif
+  foreach thing in dc
+    if(enemy.guildid == thing[2] && (guild.guildid == thing[1]) && (thing[3] == "RA"))
+      chk := 1;
+      break;
+    endif
+  endforeach
+  if(chk)
+    if(!guildstone.CanWar(guild.getprop("type"),  enemy.getprop("type"), who))
+      return;
+    endif
+    SendSysMessage(who, "Your have accepted their request for peace.");
+    guild.addallyguild(enemy);
+    enemy.addallguild(guild);
+    guildstone.RemoveDeclaration(guild, enemy);
+    guildstone.AddAllyGuild(guild, enemy);
+    var evnt      := struct;
+    evnt.+status  := 1;
+    evnt.+message := "We have begun an alliance with guild: " + enemy.getprop("guildname") + ".";
+    guildstone.guildchat(evnt, guild);
+    evnt.message := "guild: " + guild.getprop("guildname") + " has begun an alliance with us.";
+    guildstone.guildchat(evnt, enemy);
+  else
+    chk := 0;
+    foreach gstatus in dc
+      if((guild.guildid == gstatus[2]) && (enemy.guildid == gstatus[1]) && (gstatus[3] == "RA"))
+        chk := 1;
+        break;
+      endif
+    endforeach
+    if(chk)
+      SendSysMessage(who, "Your request for peace has been cancelled.");
+      guildstone.RemoveDeclaration(guild, enemy);
+      var evnt      := struct;
+      evnt.+status  := 1;
+      evnt.+message := "We have cancelled our request for an alliance with guild: " + enemy.getprop("guildname") + ".";
+      guildstone.guildchat(evnt, guild);
+      evnt.message := "guild: " + guild.getprop("guildname") + " has cancelled their request for an alliance with us.";
+      guildstone.guildchat(evnt, enemy);
+    else
+      SendSysMessage(who, "Your request for an alliance has been made.");
+      guildstone.AddDeclaration(guild, enemy, "RA");
+      var evnt      := struct;
+      evnt.+status  := 1;
+      evnt.+message := "We have Requested to have an alliance with guild: " + enemy.getprop("guildname") + ".";
+      guildstone.guildchat(evnt, guild);
+      evnt.message := "guild: " + guild.getprop("guildname") + " has requested to have an alliance with us.";
+      guildstone.guildchat(evnt, enemy);
+    endif
+  endif
+endfunction
+
+function DeclareWar(ev)
+  var who := ev.who;
+  var guild := ev.guild;
+  var enemy := ev.enemy;
+  var chk := 0;
+  var dc := guild.getprop("GuildDeclareStatus");
+  if(!dc)
+    dc := {};
+  endif
+  foreach thing in dc
+    if((enemy.guildid == thing[2]) && (guild.guildid == thing[1]) && (thing[3] == "RE"))
+      if(!guildstone.CanWar(guild.getprop("type"),  enemy.getprop("type"), who))
+        return;
+      endif
+      SendSysMessage(who, "Your have accepted their declaration of war.");
+      guild.addenemyguild(enemy);
+      enemy.addenemyguild(guild);
+      guildstone.RemoveDeclaration(guild, enemy);
+      guildstone.AddEnemyGuild(guild, enemy);
+      var evnt      := struct;
+      evnt.+status  := 1;
+      evnt.+message := "We have begun a war with guild: " + enemy.getprop("guildname") + ".";
+      guildstone.guildchat(evnt, guild);
+      evnt.message := "guild: " + guild.getprop("guildname") + " has begun a war with us.";
+      guildstone.guildchat(evnt, enemy);
+      chk := 1;
+      break;
+    elseif((enemy.guildid == thing[1]) && (guild.guildid == thing[2]) && (thing[3] == "RE"))
+      SendSysMessage(who, "Your request for war has been retired.");
+      guildstone.RemoveDeclaration(guild, enemy);
+      var evnt      := struct;
+      evnt.+status  := 1;
+      evnt.+message := "We have cancelled our request for war with guild: " + enemy.getprop("guildname") + ".";
+      guildstone.guildchat(evnt, guild);
+      evnt.message := "guild: " + guild.getprop("guildname") + " has cancelled their request for war with us.";
+      guildstone.guildchat(evnt, enemy);
+      chk := 1;
+      break;
+    endif
+  endforeach
+  if(chk)
+    return;
+  else
+    SendSysMessage(who, "Your request for war has been made.");
+    guildstone.AddDeclaration(guild, enemy, "RE");
+    var evnt      := struct;
+    evnt.+status  := 1;
+    evnt.+message := "We have requested to have a war with guild: " + enemy.getprop("guildname") + ".";
+    guildstone.guildchat(evnt, guild);
+    evnt.message := "guild: " + guild.getprop("guildname") + " has requested to have a war with us.";
+    guildstone.guildchat(evnt, enemy);
+  endif
+endfunction
+
+function Resign(ev)
+  var who   := ev.source;
+  var gm    := ev.gm;
+  var guild := ev.guild;
+  //var stone := ev.guildstone;	// uncomment if/when required :)
+  if(who == gm)
+    guild.setprop("gm", 0);
+  endif
+  guild.removemember(who);
+  EraseObjProperty(who, "guildtitle");
+  EraseObjProperty(who, "guild_id");
+  EraseObjProperty(who, "fealty");
+  who.title_guild := "";
+  EraseObjProperty(who, "abv");
+  SendSysMessage(who, "You are no longer a member of " + guild.getprop("guildname") + ".", 3, 70);
+  var members := guild.members;
+  if(len(members) == 0)
+    ev.type := "disband";
+    proc.sendevent(ev);
+  endif
+endfunction

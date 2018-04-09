@@ -1,0 +1,115 @@
+use uo;
+use os;
+use math;
+use cliloc;
+
+include ":gumps:gumps";
+
+program gump_gump ( who, shrine )
+	who.tithing := 50000;
+	DisplayTithingGump ( who, shrine );
+	
+endprogram
+
+function DisplayTithingGump ( who, shrine )
+	var while_tithing := 1;
+	while ( while_tithing )
+		var tempTithing := GetObjProperty ( who, "#tempTithing" );
+		if ( !tempTithing )
+			tempTithing :=  0;
+		endif
+		var tithediff := 0;
+		var remainingGold := CInt ( who.gold - tempTithing );
+		
+		var gump := GFCreateGump ( 160, 40 );
+		
+		GFPage ( gump, 0);
+		GFGumpPic ( gump, 30, 30, 102, 0);
+		GFAddHTMLLocalized ( gump, 85, 95, 120, 100, 1060198); // May your wealth bring blessings to those in need, if tithed upon this most sacred site.
+		GFTextLine ( gump, 57, 274, 0, "Gold:" );
+		GFTextLine ( gump, 87, 274, 53, CStr ( remainingGold ) );
+		GFTextLine ( gump, 140, 274, 0, "Tithe:" );
+		GFTextLine ( gump, 172, 274, 53, CStr ( CInt ( who.tithing + tempTithing ) ) );
+		
+		GFAddButton ( gump, 105, 230, 5220, 5220, GF_CLOSE_BTN, 2 );
+		GFAddButton ( gump, 113, 230, 5222, 5222, GF_CLOSE_BTN, 2 );
+		GFTextLine ( gump, 108, 228, 0, "<" );
+		GFTextLine ( gump, 112, 228, 0, "<" );
+		
+		GFAddButton ( gump, 127, 230, 5223, 5223, GF_CLOSE_BTN, 1 );
+		GFTextLine ( gump, 131, 228, 0, "<" );
+		
+		GFAddButton ( gump, 168, 230, 5220, 5220, GF_CLOSE_BTN, 4 );
+		GFAddButton ( gump, 176, 230, 5222, 5222, GF_CLOSE_BTN, 4 );
+		GFTextLine ( gump, 172, 228, 0, ">" );
+		GFTextLine ( gump, 176, 228, 0, ">" );
+		
+		GFAddButton ( gump, 147, 230, 5224, 5224, GF_CLOSE_BTN, 3 );
+		GFTextLine ( gump, 153, 228, 0, ">" );
+		
+		GFAddButton ( gump, 217, 272, 4023, 4025, GF_CLOSE_BTN, 5 );
+
+		var input := GFSendGump ( who, gump );
+		if( !input || input == 5 && tempTithing < 1 )
+			SendSysMessageCL ( who, 1060193, color := 0x3B2 ); // You have decided to tithe no gold to the shrine.
+			EraseObjProperty ( who, "#tempTithing" );
+			while_tithing := 0;
+			return 0;
+		endif
+		
+		input := input[0];
+		if ( input == 1 ) // Subtract 100 gold from the tithediff
+			tithediff := tempTithing - 100;
+			if ( tithediff < 0 )
+				tithediff := 0;
+			endif
+			SetObjProperty ( who, "#tempTithing", tithediff );
+		elseif ( input == 2 ) // Set tithediff to 0
+			SetObjProperty ( who, "#tempTithing", 0 );
+		elseif ( input == 3 ) // Add 100 gold to the tithediff
+			tithediff := Abs ( CInt ( tempTithing + 100 ) );
+			if ( tithediff >= 100000 )
+				SendSysMessageCL ( who, 1060840, color := 0x3B2 ); // You have reached the maximum amount of Tithing Points available.
+				tithediff := Abs ( CInt ( who.tithing + tempTithing - 100000 ) );;
+			endif
+			SetObjProperty ( who, "#tempTithing", tithediff );
+		elseif ( input == 4 ) // Set tithediff to the difference of player's current tithing points - 100,000
+			tithediff := Abs ( CInt ( who.tithing + tempTithing - 100000 ) );
+			if ( CInt ( who.gold - tithediff ) < 0 )
+				SetObjProperty ( who, "#tempTithing", who.gold );
+			else
+				SetObjProperty ( who, "#tempTithing", tithediff );
+			endif
+		elseif ( input == 5 ) // Accept tithed ammount, maybe?
+			if ( who.tithing >= 100000 && tithediff > 0 )
+				SendSysMessageCL ( who, 1060840, color := 0x3B2 ); // You have reached the maximum amount of Tithing Points available.
+				EraseObjProperty ( who, "#tempTithing" );
+				while_tithing := 0;
+				return 0;
+			else
+				EraseObjProperty ( who, "#tempTithing" );
+				while_tithing := 0;
+				return 0;				
+			endif
+			
+			if ( who.gold >= CInt ( tempTithing ) )
+				SendSysMessageCL ( who, 1060195, color := 0x3B2 ); // You tithe gold to the shrine as a sign of devotion.
+				who.spendgold ( CInt ( tempTithing ) );
+				PlaySoundEffectPrivate ( shrine, 0x243, who );
+				SleepMS ( 2450 );
+				PlaySoundEffectPrivate ( shrine, 0x2E6, who );
+				who.tithing := who.tithing + tempTithing;
+				EraseObjProperty ( who, "#tempTithing" );
+				while_tithing := 0;
+				return 1;
+			else
+				SendSysMessageCL ( who, 1060194, color := 0x3B2 ); // You do not have enough gold to tithe that amount!
+				EraseObjProperty ( who, "#tempTithing" );
+				while_tithing := 0;
+				return 0;
+			endif
+		endif
+	endwhile
+	EraseObjProperty ( who, "#tempTithing" );
+	return 1;
+endfunction

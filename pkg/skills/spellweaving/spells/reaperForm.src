@@ -1,0 +1,81 @@
+use uo;
+use vitals;
+use attributes;
+
+include "include/spellRestrictions";
+
+program chrcast_iweapon( parms )
+  var circle := 4;
+  var delivery := "notarget";
+  var noto := "heplful";
+  var result := maincast(parms, delivery, circle, noto, 609);
+
+  if(result == 0)
+    return 0;
+  endif
+
+  var caster := result[1];
+
+
+var dru := Cint(GetEffectiveSkill(caster, SPELLWEAVING));
+var alore := Cint(GetEffectiveSkill(caster, SKILLID_ANIMALLORE));
+var int := GetIntelligence(caster);
+
+var bonus := 0;
+
+if(caster.ip)
+bonus := int/5;
+endif
+
+if(Cint(GetObjProperty(caster, "#reaper")))
+SendSysMessage(caster, "Jestes juz pod postacia zniwiarza.",3,40);
+return 0;
+endif
+
+var wierzchowiec := GetEquipmentByLayer(caster, 25);
+  if(wierzchowiec)
+  SendSysMessage(caster, "Nie mozesz uzywac tego czaru na wierchowcu.", FONT_NORMAL, 40);
+  return;
+  endif
+  
+var duration := (dru + alore + bonus);
+
+PlayObjectCenteredEffect( caster, 0x3779, 10,45 );
+PlaySoundEffect(caster, 0x210);
+SetObjProperty(caster, "#reaper", 1);
+SetAttributeTemporaryMod( caster, SPELLWEAVING, 500 );
+    if(CanMod(caster, "dex"))
+	DoTempMod(caster, "dex", 25, duration);
+  endif
+  if(CanMod(caster, "str"))
+	DoTempMod(caster, "str", 25, duration);
+  endif
+SetAttributeTemporaryMod( caster, RESISTING_SPELLS, -500 );
+SetObjProperty(caster, "oldgraphic", caster.graphic);
+SetObjProperty (caster, "oldname", caster.name);
+SetObjProperty (caster, "oldcolor", caster.color);
+
+caster.graphic := 285;
+caster.color := 0;
+
+
+Detach();
+sleep(duration);
+
+if(Cint(GetObjProperty(caster, "#reaper")))
+    PlaySoundEffect(caster, SFX_SPELL_BLESS);
+    PlayObjectCenteredEffect( caster, 0x3779, 10,45 );
+    EraseObjProperty(caster, "#reaper");
+
+    SetAttributeTemporaryMod( caster, RESISTING_SPELLS, 0 );
+    SetAttributeTemporaryMod( caster, SPELLWEAVING, 0 );
+    SetName(caster, GetObjProperty (caster, "oldname"));
+    caster.graphic := Cint(GetObjProperty(caster, "oldgraphic"));
+    caster.color :=  Cint(GetObjProperty(caster, "oldcolor"));
+    EraseObjProperty(caster, "oldname");
+    EraseObjProperty(caster, "oldgraphic");
+    EraseObjProperty(caster, "oldcolor");
+endif
+
+endprogram
+

@@ -1,0 +1,43 @@
+use uo;
+use os;
+use util;
+
+include "include/security";
+include ":security:report";
+
+program control_Corpse( corpse )
+
+	if( corpse.NPCTemplate() )
+		// Dont need to do the skeleton break-down for npc corpses.
+		corpse.SetDestroyable(1);
+		return 1;
+	endif
+
+        corpse.CanDecay(0);
+        Sleep( 900 );
+
+	corpse.color	:= 0;
+	corpse.graphic	:= 0xeca + RandomInt(9);
+
+	var name := corpse.name;
+	name["A corpse"] := "Remains";
+	SetName( corpse, name );
+
+	Sleep( 300 );
+
+	foreach item in EnumerateItemsInContainer( corpse )
+		if( item.container == corpse )
+                        var move := MoveObjectToLocation( item, corpse.x, corpse.y, corpse.z, corpse.realm, MOVEOBJECT_FORCELOCATION );
+                        if( move.errortext )
+                        	ReportText( "Error moving item serial <"+item.serial+"> on the ground --->"+ move.errortext, REPORT_SYSLOG );
+                        endif
+		endif
+                item.DecayAt := 0;
+
+		SleepMS(5);
+	endforeach
+
+        DestroyItem( corpse );
+
+	return 1;
+endprogram

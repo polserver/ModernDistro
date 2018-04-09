@@ -1,0 +1,83 @@
+use uo;
+use os;
+
+include "include/eventID";
+include "include/insertSound";
+
+//if inserttype == INSERT_INCREASE_STACK, adding_item is uninit
+//if inserttype == INSERT_ADD_ITEM, existing_stack and amt_to_add are uninit
+program on_insert(who, container, movetype, inserttype, adding_item, existing_stack, amt_to_add )
+  const CCOIN := 0xeea;
+  const SCOIN := 0xef0;
+  const GCOIN := 0xeed;
+  var item;
+  var additem_obj;
+  var junk, stuff, qty;
+  if(inserttype == INSERT_INCREASE_STACK)
+    item := existing_stack;
+    additem_obj := item.objtype;
+    qty := item.amount;
+  else
+  	item := adding_item;
+  endif
+   inNoise(who, container, item);
+  set_critical(1);
+  if(GetObjProperty(container, "Hold"))
+    SendSysMessage(who, "You can only add one item at a time.");
+    if(!MoveItemToContainer(item, who.backpack))
+      MoveObjectToLocation(item, who.x, who.y, who.z, who.realm, MOVEOBJECT_FORCELOCATION);
+    endif
+    return;
+  endif
+	if(item.objtype == CCOIN)
+	    if(item.amount >= 10000)
+		qty := item.amount;
+		junk := CInt(qty/10000);
+		stuff := junk*10000;
+		SubtractAmount(item, stuff);
+		CreateItemInContainer(container, GCOIN, junk);
+		qty := qty - stuff;
+	    endif
+	    if(qty >= 100)
+		junk := CInt(qty/100);
+		stuff := junk*100;
+		SubtractAmount(item, stuff);
+		CreateItemInContainer(container, SCOIN, junk);
+	    endif
+	endif
+	if(item.objtype == SCOIN)
+	    if(item.amount >= 100)
+		qty := item.amount;
+		junk := CInt(qty/100);
+		stuff := junk*100;
+		SubtractAmount(item, stuff);
+		CreateItemInContainer(container, GCOIN, junk);
+	    endif
+	endif
+  var vendorserial := GetObjProperty(container,"Vendored");
+  if(!vendorserial)
+    var ownerserial := GetObjProperty(container, "Owner");
+    if(item.isa(POLCLASS_CONTAINER) && ownerserial)
+      SetObjProperty(item, "Owner", ownerserial);
+    endif
+    return;
+  endif
+  sendsysmessage(who, "Vendor");
+  var vendor := SystemFindObjectBySerial(vendorserial);
+  SetObjProperty(container, "Hold", 1);
+  if(item.isA(POLCLASS_CONTAINER))
+    foreach thing in EnumerateItemsInContainer(item)
+      thing.movable := 0;
+    endforeach
+  endif
+  item.movable := 0;
+  var ev := array;
+  ev.+type := EVID_ITEM_GIVEN;
+  ev.+source := who;
+  ev.+item := item;
+  ev.+vendor := 1;
+  ev.+container := container;
+  SendEvent(vendor, ev);
+  return 1;
+  set_critical(0);
+endprogram

@@ -1,0 +1,20 @@
+use uo;
+use os;
+
+program lightningeffect (who)
+
+        for i := 0 to 2
+             SetRegionLightLevel( "Background", 15 );
+             PlayLightningBoltEffect( who );
+             sleep(1);
+             SetRegionLightLevel("Background", 0);
+             sleep(1);
+             SetRegionLightLevel( "Background", 15 );
+             sleep(1);
+        endfor
+
+        PlayLightningBoltEffect( who );
+        sleep(1);
+        SetRegionLightLevel("Background", 0);
+
+endprogram

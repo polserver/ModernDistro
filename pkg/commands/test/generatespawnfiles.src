@@ -1,0 +1,51 @@
+use uo;
+use os;
+use cfgfile;
+use datafile;
+
+program generatespawnfiles(who)
+  var gps, rect, group, elem, npc;
+  var spawngroups := OpenDataFile(":spawnregion:SpawnGroups");
+  if(!spawngroups or spawngroups.errortext)
+    sendsysmessage(who, "error reading groups");
+    return;
+  endif
+  foreach thing in (spawngroups.Keys())
+    elem := spawngroups.FindElement(thing);
+    var props:= array;
+    var prop:= array;
+    prop .+ pname;
+    prop .+ pvalue;
+    npc  := elem.GetProp("npc");
+    foreach type in npc
+      prop.pname := "npc";
+      prop.pvalue := type;
+      props.append(prop);
+    endforeach
+    AppendConfigFileElem("::spawngroups", "group", thing, props );
+    UnloadConfigFile("::spawngroups");
+  endforeach
+  var spawnregions := OpenDataFile(":spawnregion:SpawnRegions");
+  foreach thing in (spawnregions.Keys())
+    elem := spawnregions.FindElement(thing);
+    rect  := elem.GetProp("rect");
+    var props:= array;
+    var prop:= array;
+    prop .+ pname;
+    prop .+ pvalue;
+    gps   := elem.PropNames();
+    prop.pname := "rect";
+    prop.pvalue := rect;
+    props.append(prop);
+    foreach type in gps
+      if(type != "rect")
+        group := elem.GetProp(type);
+        prop.pname := "group";
+        prop.pvalue := group;
+        props.append(prop);
+      endif
+    endforeach
+    AppendConfigFileElem("::spawnregions", "region", thing, props );
+    UnloadConfigFile("::spawngroups");
+  endforeach
+endprogram 

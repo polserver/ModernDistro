@@ -1,0 +1,23 @@
+use boat;
+use uo;
+
+
+program textcmd_where( who )
+    SendSysMessage( who, "Target the key to the ship" );
+
+    var tgt := Target( who );
+    if (tgt)
+        var shipserial := GetObjProperty( tgt, "shipserial" );
+        if (shipserial)
+            var ship := SystemFindBoatBySerial( shipserial );
+            if (ship)
+                SendSysMessage( who, "That ship is located at ("+ship.x+","+ship.y+") in the realm of " + ship.realm + "." );
+            else
+                SendSysMessage( who, "That ship doesn't seem to exist." );
+            endif
+        else
+            SendSysMessage( who, "That isn't a key to a built ship." );
+        endif
+      
+    endif
+endprogram

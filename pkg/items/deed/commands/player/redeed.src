@@ -1,0 +1,106 @@
+/*
+        Created by *Edwards
+
+        2010-04-11
+*/
+use uo;
+use os;
+
+program textcmd_redeed( mobile )
+
+	var house := GetStandingHeight( mobile.x, mobile.y, mobile.z ).multi;
+	if( house )
+		if( !house.CanCommand( mobile ))
+			SendSysMessage( mobile, "You cannot redeed anything in this house!" );
+			return 0;
+		endif
+        else
+                if( mobile.cmdlevel < 3 )
+			SendSysMessage( mobile, "You must be in a house!" );
+			return 0;
+                endif
+	endif
+ 
+	var targ := Target( mobile );
+	if( !targ )
+                SendSysMessage( mobile, "Cancelled." );
+		return 0;
+	elseif( !targ.IsA( POLCLASS_ITEM ))
+		SendSysMessage( mobile, "You must select an item!" );
+		return 0;
+	endif
+
+	var owner_serial := GetObjProperty( targ, "DeedOwnerSerial" );
+	if( !owner_serial )
+		SendSysMessage( mobile, "There is no deed for that!" );
+		return 0;
+	endif
+
+	var the_serials := GetObjProperty( targ, "ItemsCreatedSerials" ),
+	    deed_objtype := GetObjProperty( targ, "DeedObjType" );
+ 
+	if( !the_serials || !deed_objtype )
+		SendSysMessage( mobile, "Error couldn't find serials or deed objtype." );
+		return 0;
+	endif
+
+	var created := {};
+	foreach serial in the_serials
+		var part := SystemFindObjectBySerial( serial );
+		if( part )
+			created.Append( part );
+		endif
+                SleepMS(5);
+	endforeach
+
+	if( !Len( created ))
+		SendSysMessage( mobile, "Error couldn't find the serials to redeed." );
+		return 0;
+	endif
+ 
+        var exceptional_type := GetObjProperty( targ, "ExceptionalType" ),
+            exceptional := GetObjProperty( targ, "Exceptional" ),
+            iname := GetObjProperty( targ, "IName" ),
+            ided := GetObjProperty( targ, "IDed" ),
+            color := targ.color;
+ 
+        foreach item in created
+        
+                if( item.IsA( POLCLASS_CONTAINER ))
+			var content := EnumerateItemsInContainer( item );
+			foreach thing in content
+				MoveItemToContainer( thing, mobile.backpack );
+                                SleepMS(5);
+			endforeach
+		endif
+
+		DestroyItem( item );
+  
+                SleepMS(5);
+        endforeach
+        
+        var the_deed := CreateItemInBackpack( mobile, deed_objtype );
+        if( the_deed.errortext )
+                SendSysMessage( mobile, "Error couldn't create deed in your backpack -->"+the_deed.errortext );
+                return 0;
+        endif
+
+	the_deed.color := color;
+ 
+        if( exceptional_type )
+		SetObjProperty( the_deed, "ExceptionalType", exceptional_type );
+		SetObjProperty( the_deed, "Exceptional", exceptional );
+	endif
+ 
+        if( iname )
+                SetObjProperty( the_deed, "IName", iname );
+        endif
+
+        if( ided )
+                SetObjProperty( the_deed, "IDed", ided );
+        endif
+
+        SendSysMessage( mobile, "You successfully place the deed in your backpack." );
+        
+        return 1;
+endprogram

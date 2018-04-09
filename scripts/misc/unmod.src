@@ -1,0 +1,43 @@
+use uo;
+use os;
+include ":attributes:attributes";
+
+program demod(parms)
+  var mod := lower(parms[1]);
+  var who := parms[2];
+  var amt := parms[3];
+  var duration := parms[4];
+  var serial := parms[5];
+  sleep(duration);
+  undo_mod(who, mod, amt, serial);
+endprogram
+
+function undo_mod(who, mod, amt, serial)
+  if(!who)
+    who := SystemFindObjectBySerial(serial, SYSFIND_SEARCH_OFFLINE_MOBILES);
+  endif
+  case(mod)
+    "str": SetStrengthMod(who, GetStrengthMod(who) - amt);
+    "dex": SetDexterityMod(who, GetDexterityMod(who) - amt);
+    "int": SetIntelligenceMod(who, GetIntelligenceMod(who) - amt);
+    "ar":  who.ar_mod := who.ar_mod - amt;
+    "p" :  who.setParalyzed(0);
+  endcase
+  EraseModFlags(who, mod);
+  PlaySoundEffect(who, 0x01eb);
+  PlayObjectCenteredEffect(who, 0x373a, 10,10);
+endfunction
+
+function EraseModFlags(who, stat)
+  var mod;
+  case(stat)
+    "str": mod := "#ss";
+    "dex" : mod := "#dd";
+    "int" : mod := "#ii";
+    "ar"  : mod := "#ar";
+    "p"   : mod := "#pp";
+  endcase
+  if(who)
+    EraseObjProperty(who, mod);
+  endif
+endfunction

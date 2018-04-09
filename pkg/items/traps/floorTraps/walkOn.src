@@ -1,0 +1,41 @@
+/* $Id: walkOn.src 373 2006-06-17 18:27:33Z austinheilman $
+ *
+ * Explanation:
+ * Generic walk on script for floor traps.
+ * Plays a stationary effect to make it appear animated and deals damage.
+ *
+ */
+
+use uo;
+use os;
+use cfgfile;
+use util;
+
+include ":damage:damage";
+
+program TrapWalkOn(mobile, trap)
+
+	var Dmg := 0;
+	if ( mobile.dead )
+		// Ghosts dont trigger traps.
+		return 0;
+	elseif ( mobile.npctemplate )
+		// Dont hurt NPCs.
+		return 0;
+	elseif ( mobile.concealed )
+		// Concealed GM's dont trigger traps.
+		return 0;
+	endif
+	
+	var cfg := ReadConfigFile(":*:itemdesc");
+	cfg := cfg[trap.objtype];
+	Dmg := CInt(cfg.Damage);
+	if(!Dmg)
+		Dmg := CInt(RandomDiceRoll("3d5"));
+	endif
+	
+	PlayStationaryEffect(trap.x, trap.y, trap.z, CInt(cfg.Animation), 10, 11, 0, trap.realm);
+	ApplyRawDamageEX(mobile, CInt(cfg.Damage));
+	
+	return 1;
+endprogram

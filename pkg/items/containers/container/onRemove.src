@@ -1,0 +1,22 @@
+/*
+        Maintened by *Edwards
+
+        2009-10-20
+*/
+use uo;
+use os;
+
+program onRemove( mobile, container, item, item_amount, movetype )
+
+        //Avoid compiler warnings
+        mobile := mobile;
+        container := container;
+        item := item;
+        item_amount := item_amount;
+        movetype := movetype;
+        
+	//To-do
+	//Play sound effect now that item is being removed.
+
+	return 1;
+endprogram

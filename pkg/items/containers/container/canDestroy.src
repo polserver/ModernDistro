@@ -1,0 +1,14 @@
+/*
+        Maintened by *Edwards
+
+        2009-10-20
+*/
+use uo;
+
+program canDestroy( container )
+
+        //Avoid compiler warnings
+        container := container;
+        
+	return 1;
+endprogram

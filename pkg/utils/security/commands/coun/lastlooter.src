@@ -1,0 +1,31 @@
+/*
+        Created by *Edwards
+
+        2008-10-14
+*/
+use uo;
+
+program textcmd_lastLooter( mobile )
+
+	SendSysMessage( mobile, "What would you like to evaluate?" );
+	var targ := Target( mobile, TGTOPT_NOCHECK_LOS );
+	if( !targ )
+                SendSysMessage( mobile, "Cancelled." );
+		return 0;
+	elseif( !targ.IsA( POLCLASS_CONTAINER ))
+		SendSysMessage( mobile, "You can't find anything." );
+		return 0;
+	endif
+ 
+        var answer;
+        var Last_Loot := GetObjProperty( targ, "LastLoot" );
+        if( Last_Loot )
+                answer := SystemFindObjectBySerial( Last_Loot[1] );
+                SendSysMessage( mobile, "I see that it was looted by "+answer.name+"." );
+        else
+                SendSysMessage( mobile, "No, I can't find anything..." );
+                return 0;
+        endif
+
+        return 1;
+endprogram

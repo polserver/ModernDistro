@@ -1,0 +1,112 @@
+use uo;
+use os;
+use util;
+
+include "include/NPCBackpacks";
+include ":attributes:attributes";
+include "include/statMod";
+include "include/noto";
+include "include/reportMurder";
+include ":poisonwatcher:poisons";
+
+program chrdeath(corpse,ghost)
+  EraseObjProperty(ghost, "IsMeditating");
+  ghost.SetPoisoned(0);
+  while(ListPoisonsByType(ghost, "defaultPoison").size() > 0)
+      CurePoison(ghost, "defaultPoison", 120, 1);
+  endwhile
+  var killer := GetObjProperty(ghost, "LastHit");
+  if(killer != error)
+    AdjustNoto((SystemFindObjectBySerial(killer[2], SYSFIND_SEARCH_OFFLINE_MOBILES)), ghost);
+  endif
+  var fame := CInt(GetObjProperty(ghost, "Fame"));
+  fame := (fame - CInt(fame / 20));
+  SetObjProperty(ghost, "Fame", fame);
+  SetObjProperty(corpse,"serial", ghost.serial);
+  dismount(corpse);
+  CheckForAutoRes(ghost, corpse);
+  CheckForDivineRes(ghost, corpse);
+  var corpsenamearray := SplitWords(corpse.name);
+  var corpsenamearraylen := len(corpsenamearray);
+  var x, corpsename := "";
+  for (x := 4; x <= corpsenamearraylen; x := x + 1)
+    corpsename := corpsename + " " + corpsenamearray[x];
+  endfor
+  if(len(ghost.reportables)>0)
+	SendReportGump(ghost);
+  endif
+endprogram
+
+function CheckForAutoRes(who, corpse)
+  if(CInt(GetObjProperty(corpse, "AutoRes")) == 1)
+	Resurrect(who);
+	SetHp(who, GetMaxHP(who));
+	SetMana(who, GetMaxMana(who));
+	SetStamina(who, GetMaxStamina(who));
+	var mypack := who.backpack;
+    if(!mypack)
+      return;
+    endif
+	foreach thing in EnumerateItemsInContainer(corpse)
+	  if(thing.container == corpse)
+	    if(!EquipItem(who, thing))
+		  MoveItemToContainer(thing, mypack);
+	    endif
+	  endif
+	endforeach
+  endif
+endfunction
+
+function CheckForDivineRes(who, corpse)
+  if ( CInt( GetObjProperty(corpse, "DivineRes") ) == 1 )
+    EraseObjProperty(corpse, "DivineRes");
+    EraseObjProperty(who, "DivineRes");
+    Resurrect(who);
+    PrintTextAbove(who, who.name + " has been restored by the Gods!");
+    PlaySoundEffect(who, 0x11e);
+    var itemlist := EnumerateItemsInContainer(corpse);
+    var x;
+    var mypack := GetEquipmentByLayer(who, 0x15);
+    foreach x in itemlist
+      if (!EquipItem(who, x) )
+        if (x.container == corpse)
+            MoveItemToContainer(x, mypack);
+        endif
+      endif
+    endforeach
+    SetHp(who, who.maxhp);
+    SetMana(who, who.maxmana);
+    SetStamina(who, who.maxstamina);
+  endif
+endfunction
+
+function dismount(corpse)
+  var mount := GetEquipmentByLayer( corpse, 25 );
+  foreach item in EnumerateItemsInContainer(corpse)
+	if (item.objtype == 0xf021)
+	  mount := item;
+	  break;
+	endif
+  endforeach
+  if (!mount)
+	return;
+  endif
+  var animal := SystemFindObjectBySerial(CInt(GetObjProperty(mount,"serial")));
+  animal.facing := corpse.facing;
+  EraseObjProperty(animal, "mounted");
+  EraseObjProperty(animal, "mounted_on");
+  MoveObjectToLocation( animal, corpse.x, corpse.y, corpse.z, corpse.realm, MOVEOBJECT_FORCELOCATION);
+  DestroyItem(mount);
+endfunction
+
+function remove_poison (cast_on)
+
+  if (ListPoisonsByType(cast_on, "defaultPoison").size() > 0)
+    CurePoison(cast_on, 120, "defaultPoison", 4);
+    if (ListPoisonsByType(cast_on, "defaultPoison").size() > 0)
+        CurePoison(cast_on, 120, "defaultPoison", 4);
+    endif
+  endif
+  
+endfunction
+

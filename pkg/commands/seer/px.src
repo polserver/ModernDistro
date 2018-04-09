@@ -1,0 +1,25 @@
+use uo;
+
+program  textcmd_z(who, howfar)
+  var what := Target(who, TGTOPT_NOCHECK_LOS);
+  if(!what)
+    return;
+  endif
+  var tdist;
+  if(howfar == "")
+    tdist := 1;
+  else
+    tdist := CInt(howfar);
+  endif
+
+  if (what.isA(POLCLASS_ITEM))
+    if(what.movable == 0)
+      what.movable := 1;
+    endif
+    MoveObjectToLocation(what, what.x + tdist, what.y, what.z, who.realm, MOVEOBJECT_FORCELOCATION);
+    what.movable := 0;
+  elseif (what.isA(POLCLASS_MOBILE))
+    MoveObjectToLocation(what, what.x+tdist, what.y, what.z, who.realm, MOVEOBJECT_FORCELOCATION);
+  endif
+  
+endprogram

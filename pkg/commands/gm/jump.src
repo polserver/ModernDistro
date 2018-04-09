@@ -1,0 +1,46 @@
+use uo;
+use os;
+
+program textcmd_jump(who, text)
+  if(!text)
+    return;
+  endif
+  var dir := lower(text[1]);
+  SendSysMessage(who, "direction is: " + dir);
+  var x, y, z, where;
+  case(dir)
+    "n": x := who.x;
+         y := who.y - 59;
+         z := GetWorldHeight(x, y, who.realm);
+         if(!CInt(z))
+           z := 1;
+         endif
+         where := MoveObjectToLocation(who, x, y, z, who.realm, MOVEOBJECT_FORCELOCATION);
+    "s": x := who.x;
+         y := who.y + 59;
+         z := GetWorldHeight(x, y, who.realm);
+         if(!CInt(z))
+           z := 1;
+         endif
+         where := MoveObjectToLocation(who, x, y, z, who.realm, MOVEOBJECT_FORCELOCATION);
+    "e": x := who.x + 59;
+         y := who.y;
+         z := GetWorldHeight(x, y, who.realm);
+         if(!CInt(z))
+           z := 1;
+         endif
+         where := MoveObjectToLocation(who, x, y, z, who.realm, MOVEOBJECT_FORCELOCATION);
+    "w": x := who.x - 59;
+         y := who.y;
+         z := GetWorldHeight(x, y, who.realm);
+         if(!CInt(z))
+           z := 1;
+         endif
+         where := MoveObjectToLocation(who, x, y, z, who.realm, MOVEOBJECT_FORCELOCATION);
+  endcase
+  SendSysMessage(who, "x: " + x);
+  SendSysMessage(who, "y: " + y);
+  SendSysMessage(who, "z: " + z);
+  SendSysMessage(who, where.errortext);
+endprogram
+ 

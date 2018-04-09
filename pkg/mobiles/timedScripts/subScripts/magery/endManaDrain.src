@@ -1,0 +1,18 @@
+/*
+ * $Id: endManaDrain.src 1013 2007-03-05 22:46:11Z tekproxy $
+ *
+ */
+use uo;
+use os;
+
+include ":attributes:attributes";
+
+program TimedScript_EndManaDrain(params)
+	var mobile := params[1];
+
+	var points := CInt(GetObjProperty(mobile, "#ManaDrainMod"));	
+	AP_SetVital(mobile, MANA, AP_GetVital(mobile, MANA) + points);	
+	
+	return 1;
+endprogram
+

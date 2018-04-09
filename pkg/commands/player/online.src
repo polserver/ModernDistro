@@ -1,0 +1,99 @@
+use uo;
+
+include "include/myUtil";
+
+var layout := {
+	"nodispose",
+	"page 0",
+	"resizepic 0 20 2620 310 470",
+	"gumppic 15 50 2621",
+	"text 20 29 40 0"
+};
+
+var data := {
+	"Online Characters",
+	"Score"
+};
+
+program textcmd_online (character)
+	if (CInt(GetObjProperty(character, "#checkonline")) > ReadGameClock())
+		SendSysMessage(character, "That gump is already open!");
+		return;
+	endif
+	SetObjProperty(character, "#checkonline", CInt(ReadGameClock() + 120));
+
+	FillInArrays(character);
+	var gump_return := SendDialogGump(character, layout, data);
+	if (!gump_return && gump_return[0] != 0)
+		SendSysMessage(character, "You must close other gumps before you can do this.");
+	endif
+	EraseObjProperty(character, "#checkonline");
+endprogram
+
+
+function FillInArrays(character)
+
+	var playercount := 0;
+	var pagecount := 1;
+	var ypos := 70;
+	var string_counter := 2;
+
+	layout.append ("page " + pagecount);
+	foreach player in HLEnumerateOnlineCharacters(0, 1)
+                if (player.cmdlevel || (GetObjProperty(player, "IsCounselor")) || (GetObjProperty(player, "HideDev")))
+                    if (GetObjProperty(player, "HideDev"))
+                           // dummy line
+                    elseif (GetObjProperty(player, "HideGM"))
+                            playercount := playercount + 1;
+                            data.append (playercount +". " + player.name + "");
+                            layout.append ("text 20 " + ypos + " 40 " + string_counter);
+                            string_counter := string_counter + 1;
+                            ypos:= ypos + 20;
+                    elseif (GetObjProperty(player, "IsCounselor"))
+                            playercount := playercount + 1;
+                            data.append (playercount +". " + player.name + " [Coun]");
+                            layout.append ("text 20 " + ypos + " 40 " + string_counter);
+                            string_counter := string_counter + 1;
+                            ypos:= ypos + 20;
+                    elseif(player.cmdlevel == 3 )
+                            playercount := playercount + 1;
+                            data.append (playercount +". " + player.name + " [GM]");
+                            layout.append ("text 20 " + ypos + " 40 " + string_counter);
+                            string_counter := string_counter + 1;
+                            ypos:= ypos + 20;
+                    elseif (player.cmdlevel > 3 )
+                            playercount := playercount + 1;
+                            data.append (playercount +". " + player.name + " [Admin]");
+                            layout.append ("text 20 " + ypos + " 40 " + string_counter);
+                            string_counter := string_counter + 1;
+                            ypos:= ypos + 20;
+                    endif
+		else
+			playercount := playercount + 1;
+			layout.append ("text 20 " + ypos + " 40 " + string_counter);
+			string_counter := string_counter + 1;
+			ypos:= ypos + 20;
+
+			if (!GetObjProperty(player, "private"))
+				data.append (playercount +". " + player.name);
+			elseif (player.cmdlevel > 2)
+				data.append (playercount +". " + player.name + " [P]");
+			else
+				data.append (playercount +". " + "[PRIVATE]");
+			endif
+		endif
+
+		case (playercount)
+			20:
+			40:
+			60:
+			80:
+			100:
+				layout.append ("button 285 30 2648 2647 0 " + (pagecount + 1));
+				pagecount := pagecount + 1;
+				layout.append ("page " + pagecount);
+				ypos := 70;
+				layout.append ("button 255 30 2650 2651 0 " + (pagecount - 1));
+		endcase
+	endforeach
+endfunction

@@ -1,0 +1,13 @@
+
+use uo;
+
+include ":containers:storageAreas";
+
+program open_bank( who )
+
+		var bank_region := CP_DEFAULT_AREA;
+		var bankbox		:= CP_GetStorageContainerForMobile( who, bank_region, CP_CREATE );
+
+             SendOpenSpecialContainer( who, bankbox );
+   
+endprogram

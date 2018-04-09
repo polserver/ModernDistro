@@ -1,0 +1,31 @@
+// Created 2017-07-04 21:44:26, with Gump Studio.
+// Exported with POLGumpExporter ver 1.1 for gump pkg
+
+use uo;
+use os;
+
+include ":gumps:gumps";
+
+program gump_gump(who)
+
+	var gump := GFCreateGump();
+	
+	GFPage(gump, 0);
+	GFResizePic(gump, 0, 0, 9200, 443, 285);
+	GFPicTiled(gump, 10, 10, 423, 20, 2624);
+	GFAddAlphaRegion(gump, 10, 10, 423, 20);
+	GFHTMLArea(gump, 10, 10, 423, 20, "HtmlElement");
+	GFPicTiled(gump, 10, 40, 150, 235, 2624);
+	GFAddAlphaRegion(gump, 10, 40, 150, 235);
+	GFPicTiled(gump, 170, 40, 263, 205, 2624);
+	GFAddAlphaRegion(gump, 170, 40, 263, 205);
+	GFPicTiled(gump, 170, 255, 263, 20, 2624);
+	GFAddAlphaRegion(gump, 170, 255, 263, 20);
+	GFAddButton(gump, 175, 45, 4005, 4007, GF_CLOSE_BTN, 0);
+	GFHTMLArea(gump, 210, 45, 220, 20, "HtmlElement");
+	GFAddButton(gump, 15, 45, 4005, 4007, GF_CLOSE_BTN, 0);
+	GFHTMLArea(gump, 47, 45, 110, 20, "HtmlElement");
+
+	GFSendGump(who, gump);
+
+endprogram

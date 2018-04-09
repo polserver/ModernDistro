@@ -1,0 +1,20 @@
+/*
+ * $Id: endstrengthpotion.src 970 2007-01-18 03:43:20Z sroyalty $
+ *
+ */
+ 
+use uo;
+use os;
+
+include ":attributes:attributes";
+
+program TimedScript_EndStrengthPotion(params)
+	var mobile := params[1];
+	
+	var points := CInt(GetObjProperty(mobile, "StrengthMod"));	
+	AP_ModifyStatMod(mobile, STRENGTH, -(points));
+	EraseObjProperty(mobile, "StrengthMod");
+	
+	return 1;
+endprogram
+

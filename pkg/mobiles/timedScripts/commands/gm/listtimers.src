@@ -1,0 +1,25 @@
+/* $Id: listtimers.src 625 2006-07-10 04:42:02Z austinheilman $
+ *
+ */
+use uo;
+use os;
+
+include ":timedscripts:timedScripts";
+
+program textcmd_listTimers(who, type)
+	SendSysMessage(who, "Select a mobile.");
+	var targ := Target(who, TGTOPT_NOCHECK_LOS);
+	if ( !targ.IsA(POLCLASS_MOBILE) )
+		SendSysMessage(who, "Cancelled.");
+		return 0;
+	endif
+
+	foreach timer_name in ( TS_GetTimerNames(targ, type) )
+		SendSysMessage(who, "->"+timer_name);
+		SleepMS(2);
+	endforeach
+
+	SendSysMessage(who, "Done");
+
+	return 1;
+endprogram

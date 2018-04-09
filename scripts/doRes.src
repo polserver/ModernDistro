@@ -1,0 +1,44 @@
+use uo;
+use os;
+
+include "include/res";
+include "include/resPenalty";
+include "include/client";
+//include "include/poisons";
+
+const SOUND_EFFECT_RES := 0x215;
+const ACTION_EFFECT_CAST2 := 0x11;
+
+program do_res(parms)
+  var who := parms[1];
+  var mobile := parms[2];
+  if(((who.npctemplate == "healer") || (who.npctemplate == "townhealer") || (who.npctemplate == "wanderinghealer")) && (mobile.criminal))
+    PrintTextAbove(who, "I will not aid a criminal.");
+    return;
+  endif
+  if((mobile.dead) && (CheckLineOfSight(who, mobile)))
+    set_critical(1);
+  	if(GetObjProperty(mobile, "#ResMenu"))
+  	  return;
+  	endif
+	SetObjProperty(mobile, "#ResMenu", 1);
+	set_critical(0);
+	if(ResNow(mobile)==1)
+	  PrintTextAbove(who, "Live again by the Virtues!");
+	  PerformAction(who, ACTION_EFFECT_CAST2);
+	  PlaySoundEffect(who, SOUND_EFFECT_RES);
+      Resurrect(mobile);
+      ResPenalties(mobile);
+    endif
+    EraseObjProperty(mobile, "#ResMenu");
+//  elseif((GetPoisonByType(who, "DefaultPoison").size() > 0) && CheckLineOfSight(who, mobile))
+//	PrintTextAbove(who, "Sacrifice Purifies the Body and Soul!");
+//	PerformAction(who, ANIM_CAST_AREA);
+//	FakeDeath(who);
+//    sleep(1);
+//    PlayObjectCenteredEffect(mobile, FX_BLESS_EFFECT, 10,10);
+//	SendSysMessage(mobile, who.name + " has cured you completely!");
+    
+  endif
+
+endprogram

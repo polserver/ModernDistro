@@ -1,0 +1,47 @@
+use uo;
+use os;
+use cfgfile;
+
+include "include/mrcSpawn";
+
+program textcmd_restock_from_cfg(who, type)
+  UnloadConfigFile("::mrcspawn");
+  if(type != "")
+    var cfg := ReadConfigFile("::mrcspawn");
+    if(!cfg[type])
+      SendSysMessage(who, "Invalid type, must match a valid Merchant Type from npcdesc.cfg", 3, 40);
+      return;
+    endif
+  endif
+  var count := 0;
+  var counter := 0;
+  foreach thing in ListObjectsInBox(0, 0, -100, 6143, 4095, 100, who.realm);
+    if(thing.objtype == 0x1887a)
+      sendsysmessage(who, "processing node: " + (count + 1));
+      sendsysmessage(who, "total vendors reset: " + counter);
+      var cratelist := GetObjProperty(thing, "Type");
+      foreach entry in cratelist
+        var anchor    := entry[2];
+        var stockname := FindMerchantType(entry[1]) + " " + anchor[1] + " " + anchor[2] + " " + anchor[3];
+        if((type == "") or (lower(type) == lower(entry[1])))
+          var inv_fs := FindRootItemInStorageArea(storage, stockname + " FS");
+          var inv_rs := FindRootItemInStorageArea(storage, stockname + " RS");
+          if(inv_fs and inv_rs)
+            foreach thing in EnumerateItemsInCOntainer(inv_rs)
+              DestroyItem(thing);
+            endforeach
+            StockInventory(FindMerchantType(entry[1]), inv_rs);
+// The following line was the original one. I replaced it with the RestockInitialInventory line.
+//            RestockMyInventory(inv_rs, inv_fs);
+            RestockInitialInventory(inv_rs, inv_fs);
+          endif
+          counter := counter + 1;
+        endif
+      endforeach
+      count := count + 1;
+    endif
+    sleepms(10);
+  endforeach
+  SendSysMessage(who, "Finished updating vendor lists.", color := 66);
+  SendSysMessage(who, "- " + counter + " vendors updated -", color := 66);
+endprogram

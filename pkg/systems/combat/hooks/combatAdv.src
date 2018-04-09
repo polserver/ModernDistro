@@ -1,0 +1,23 @@
+/*
+ * $Id: combatAdv.src 373 2006-06-17 18:27:33Z austinheilman $
+ *
+ */
+use uo;
+
+program hook_startup()
+	print("INSTALLING: Combat Advancement hook... ");
+	return 1;
+endprogram
+
+//
+// NOTE: This function is called EVEN IF THE ATTACK DIDN'T SUCCEED!
+//
+exported function CombatAdvancement(attacker, weapon, defender)
+	// Eliminates compiler warnings
+	attacker := attacker;
+	weapon := weapon;
+	defender := defender;
+	
+	// Advancement currently handled in mainHitScript
+	return 0;
+endfunction

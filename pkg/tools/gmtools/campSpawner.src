@@ -1,0 +1,327 @@
+use vitals;
+use uo;
+use os;
+
+include "include/startEqp";
+include "util/key";
+
+var chestarray := {};
+var mobarray := {};
+
+program spawntest(item)
+  var rng := GetObjProperty(item,"range");
+  foreach thing in ListItemsNearLocation(item.x, item.y, item.z, 20, item.realm)
+    if(GetObjProperty(thing,"link") == item.serial)
+      DestroyItem(thing);
+    endif
+  endforeach
+  if((GetObjProperty(item,"duration") == error) || (!GetObjProperty(item,"duration")))
+    SetObjProperty(item,"waiting", 1);
+    foreach char in EnumerateOnlineCharacters()
+      if(char.cmdlevel > 1)
+        SendSysMessage(char,"ERROR: Camp Spawner at " + item.x + " " + item.y + " is not functioning properly.");
+      endif
+    endforeach
+  endif
+  while(GetObjProperty(item,"waiting"))
+    foreach char in EnumerateOnlineCharacters()
+      if(char.cmdlevel > 1)
+        SendSysMessage(char,"ERROR: Camp Spawner at " + item.x + " " + item.y + " is not functioning properly.");
+      endif
+    endforeach
+    sleep(5);
+  endwhile
+  var amt := GetObjProperty(item,"amount");
+  var frq := GetObjProperty(item,"duration");
+  var chest, thechest, themob;
+  var i := 1;
+  while(item)
+    chestarray := GetObjProperty(item, "chestarray");
+    if(!chestarray)
+      chestarray := {};
+    endif
+    mobarray := GetObjProperty(item, "MobArray");
+    if(!mobarray)
+      mobarray := {};
+    endif
+    foreach chst in chestarray
+      thechest := SystemFindObjectBySerial(CInt(chst));
+      chestarray.erase(returnindex(chestarray, chst));
+      DestroyItem(thechest);
+    endforeach
+    foreach mobile in mobarray
+      themob := SystemFindObjectBySerial(CInt(mobile));
+      mobarray.erase(returnindex(mobarray, mobile));
+      SetObjProperty(themob, "guardkill", 1);
+      ApplyRawDamage(themob, 2000);
+    endforeach
+    if(amt > 0)
+      i := 1;
+      for(1:=1; i<=amt; i:=i+1)
+        CreateTreasureChest(item);
+      endfor
+      foreach thing in chestarray
+        thechest := SystemFindObjectBySerial(CInt(thing));
+        thechest.graphic := thechest.objtype;
+      endforeach
+    endif
+    create_standards(item);
+    create_guardians(item);
+    sleep(frq);
+    foreach thing in ListItemsNearLocation(item.x, item.y, item.z, CInt(20), item.realm)
+      if(GetObjProperty(thing,"link") == item.serial)
+        DestroyItem(thing);
+      endif
+    endforeach
+    sleep(1);
+    process_move(item);
+  endwhile
+endprogram
+
+function process_move(item)
+  var anchor := GetObjProperty(item, "AnchorPoint");
+  var newx, newy, newz;
+  var check := 0;
+  var counter := 0;
+  item.movable := 1;
+  while((check == 0) && (counter <= 20))
+    newx := anchor[1] + RandomInt(100) - RandomInt(100);
+    newy := anchor[2] + RandomInt(100) - RandomInt(100);
+    newz := GetWorldHeight(newx, newy, item.realm);
+    if(MoveObjectToLocation(item, newx, newy, newz, item.realm, MOVEOBJECT_NORMAL))
+      foreach char in EnumerateOnlineCharacters()
+        if(char.cmdlevel > 1)
+          SendSysMessage(char, "moving Camp Spawner " + item.serial + " to " + item.x + " " + item.y, 3, 38);
+        endif
+      endforeach
+      check := 1;
+    else
+      counter := counter + 1;
+    endif
+    sleep(1);
+  endwhile
+  item.movable := 0;
+endfunction
+
+function create_guardians(item)
+  var cfgfile := ReadConfigFile(":gmtools:guardians");
+  if(!cfgfile)
+    foreach char in EnumerateOnlineCharacters()
+      if(char.cmdlevel > 1)
+        SendSysMessage(char,"ERROR: Camp Spawner " + item.serial + " at " + item.x + " " + item.y + " is not functioning properly.");
+      endif
+    endforeach
+    return;
+  endif
+  var lvl;
+  var spawntype := GetObjProperty(item, "CritterType");
+  case(spawntype)
+    "orcs"      : lvl := 1;
+    "ratmen"    : lvl := 2;
+    "lizardmen" : lvl := 3;
+    "bandit"    : lvl := 4;
+    "gypsie"    : lvl := 5;
+  endcase
+  var elem := FindConfigElem( cfgfile, lvl );
+  if(!elem)
+    foreach char in EnumerateOnlineCharacters()
+      if(char.cmdlevel > 1)
+        SendSysMessage(char,"ERROR: Camp Spawner " + item.serial + " at " + item.x + " " + item.y + " is not functioning properly.");
+      endif
+    endforeach
+    return;
+  endif
+  var limit := GetObjProperty(item, "CritterAmount");
+  var num := GetConfigInt( elem, "num");
+  var rand, template;
+  var i := 1;
+  var mobarray := {};
+  var critter;
+  for( i := 1; i <= limit; i := i + 1 )
+    rand := RandomInt(num) + 1;
+    template := GetConfigString(elem, ("creature" + rand) );
+    critter := CreateGuardian(item, template);
+    mobarray.append(critter);
+  endfor
+  SetObjProperty(item, "MobArray", mobarray);
+  UnloadConfigFile(":gmtools:guardians");
+endfunction
+
+function create_standards(item)
+  var rng := RandomInt(5) + 5;
+  var newx, newy, newz;
+  if(rng > 10)
+    rng := 10;
+  endif
+  var checker := 0;
+  if((rng == 0) || (rng == error))
+    rng := 1;
+  endif
+  var checkitem;
+  while((checker == 0) && (item))
+    checker := 1;
+    case(rng)
+      1:  newx := item.x + RandomInt( 1) - RandomInt( 1);    newy := item.y + RandomInt( 1) - RandomInt( 1);
+      2:  newx := item.x + RandomInt( 2) - RandomInt( 2);    newy := item.y + RandomInt( 2) - RandomInt( 2);
+      3:  newx := item.x + RandomInt( 3) - RandomInt( 3);    newy := item.y + RandomInt( 3) - RandomInt( 3);
+      4:  newx := item.x + RandomInt( 4) - RandomInt( 4);    newy := item.y + RandomInt( 4) - RandomInt( 4);
+      5:  newx := item.x + RandomInt( 5) - RandomInt( 5);    newy := item.y + RandomInt( 5) - RandomInt( 5);
+      6:  newx := item.x + RandomInt( 6) - RandomInt( 6);    newy := item.y + RandomInt( 6) - RandomInt( 6);
+      7:  newx := item.x + RandomInt( 7) - RandomInt( 7);    newy := item.y + RandomInt( 7) - RandomInt( 7);
+      8:  newx := item.x + RandomInt( 8) - RandomInt( 8);    newy := item.y + RandomInt( 8) - RandomInt( 8);
+      9:  newx := item.x + RandomInt( 9) - RandomInt( 9);    newy := item.y + RandomInt( 9) - RandomInt( 9);
+     10:  newx := item.x + RandomInt(10) - RandomInt(10);    newy := item.y + RandomInt(10) - RandomInt(10);
+    endcase
+    newz:= GetWorldHeight(newx, newy, item.realm);
+    if((item.x == newx) && (item.y == newy))
+      checker := 0;
+    endif
+    foreach box in chestarray
+      if((box.x == newx) && (box.y == newy))
+        checker := 0;
+        break;
+      endif
+    endforeach
+  endwhile
+  var type := GetObjProperty(item, "CritterType");
+  var gfx1, gfx2, gfx3;
+  case(type)
+    "orcs"      : gfx1 := 0x41f;   gfx2 := 0x428;   gfx3 := 0x10f2;
+    "ratmen"    : gfx1 := 0x420;   gfx2 := 0x429;   gfx3 := 0x10f3;
+    "lizardmen" : gfx1 := 0x420;   gfx2 := 0x429;   gfx3 := 0x10f2;
+    "bandit"    : gfx1 := 0xe56;   gfx2 := 0xe57;   gfx3 := 0x0974;
+    "gypsie"    : gfx1 := 0xe58;   gfx2 := 0xe59;   gfx3 := 0x0975;
+  endcase
+  var chest := CreateItemAtLocation( newx, newy, newz, gfx1, 1, item.realm);
+  SetObjProperty(chest,"link", item.serial);
+  chest.movable := 0;
+  chestarray.append(chest.serial);
+  case(rng)
+    1:  newx := item.x + RandomInt( 1) - RandomInt( 1);    newy := item.y + RandomInt( 1) - RandomInt( 1);
+    2:  newx := item.x + RandomInt( 2) - RandomInt( 2);    newy := item.y + RandomInt( 2) - RandomInt( 2);
+    3:  newx := item.x + RandomInt( 3) - RandomInt( 3);    newy := item.y + RandomInt( 3) - RandomInt( 3);
+    4:  newx := item.x + RandomInt( 4) - RandomInt( 4);    newy := item.y + RandomInt( 4) - RandomInt( 4);
+    5:  newx := item.x + RandomInt( 5) - RandomInt( 5);    newy := item.y + RandomInt( 5) - RandomInt( 5);
+    6:  newx := item.x + RandomInt( 6) - RandomInt( 6);    newy := item.y + RandomInt( 6) - RandomInt( 6);
+    7:  newx := item.x + RandomInt( 7) - RandomInt( 7);    newy := item.y + RandomInt( 7) - RandomInt( 7);
+    8:  newx := item.x + RandomInt( 8) - RandomInt( 8);    newy := item.y + RandomInt( 8) - RandomInt( 8);
+    9:  newx := item.x + RandomInt( 9) - RandomInt( 9);    newy := item.y + RandomInt( 9) - RandomInt( 9);
+   10:  newx := item.x + RandomInt(10) - RandomInt(10);    newy := item.y + RandomInt(10) - RandomInt(10);
+  endcase
+  chest := CreateItemAtLocation( newx, newy, newz, gfx2, 1, item.realm);
+  SetObjProperty(chest,"link", item.serial);
+  chest.movable := 0;
+  chestarray.append(chest.serial);
+  case(rng)
+    1:  newx := item.x + RandomInt( 1) - RandomInt( 1);    newy := item.y + RandomInt( 1) - RandomInt( 1);
+    2:  newx := item.x + RandomInt( 2) - RandomInt( 2);    newy := item.y + RandomInt( 2) - RandomInt( 2);
+    3:  newx := item.x + RandomInt( 3) - RandomInt( 3);    newy := item.y + RandomInt( 3) - RandomInt( 3);
+    4:  newx := item.x + RandomInt( 4) - RandomInt( 4);    newy := item.y + RandomInt( 4) - RandomInt( 4);
+    5:  newx := item.x + RandomInt( 5) - RandomInt( 5);    newy := item.y + RandomInt( 5) - RandomInt( 5);
+    6:  newx := item.x + RandomInt( 6) - RandomInt( 6);    newy := item.y + RandomInt( 6) - RandomInt( 6);
+    7:  newx := item.x + RandomInt( 7) - RandomInt( 7);    newy := item.y + RandomInt( 7) - RandomInt( 7);
+    8:  newx := item.x + RandomInt( 8) - RandomInt( 8);    newy := item.y + RandomInt( 8) - RandomInt( 8);
+    9:  newx := item.x + RandomInt( 9) - RandomInt( 9);    newy := item.y + RandomInt( 9) - RandomInt( 9);
+   10:  newx := item.x + RandomInt(10) - RandomInt(10);    newy := item.y + RandomInt(10) - RandomInt(10);
+  endcase
+  chest := CreateItemAtLocation( newx, newy, newz, gfx3, 1, item.realm);
+  SetObjProperty(chest,"link", item.serial);
+  chest.movable := 0;
+  chestarray.append(chest.serial);
+  SetObjProperty(item,"chestarray", chestarray);
+endfunction
+
+function CreateTreasureChest(item)
+  var lvl := GetObjProperty(item,"level");
+  var rng := (GetObjProperty(item,"range") * 2);
+  var newx, newy, newz, chest, gfx, type;
+  if(rng > 10)
+    rng := 10;
+  endif
+  var checker := 0;
+  if((rng == 0) || (rng == error))
+    rng := 1;
+  endif
+  while((checker == 0) && (item))
+    case(rng)
+      1:  newx := item.x + RandomInt( 1) - RandomInt( 1);    newy := item.y + RandomInt( 1) - RandomInt( 1);
+      2:  newx := item.x + RandomInt( 2) - RandomInt( 2);    newy := item.y + RandomInt( 2) - RandomInt( 2);
+      3:  newx := item.x + RandomInt( 3) - RandomInt( 3);    newy := item.y + RandomInt( 3) - RandomInt( 3);
+      4:  newx := item.x + RandomInt( 4) - RandomInt( 4);    newy := item.y + RandomInt( 4) - RandomInt( 4);
+      5:  newx := item.x + RandomInt( 5) - RandomInt( 5);    newy := item.y + RandomInt( 5) - RandomInt( 5);
+      6:  newx := item.x + RandomInt( 6) - RandomInt( 6);    newy := item.y + RandomInt( 6) - RandomInt( 6);
+      7:  newx := item.x + RandomInt( 7) - RandomInt( 7);    newy := item.y + RandomInt( 7) - RandomInt( 7);
+      8:  newx := item.x + RandomInt( 8) - RandomInt( 8);    newy := item.y + RandomInt( 8) - RandomInt( 8);
+      9:  newx := item.x + RandomInt( 9) - RandomInt( 9);    newy := item.y + RandomInt( 9) - RandomInt( 9);
+     10:  newx := item.x + RandomInt(10) - RandomInt(10);    newy := item.y + RandomInt(10) - RandomInt(10);
+    endcase
+    newz:= GetWorldHeight(newx, newy, item.realm);
+    if((item.x == newx) && (item.y == newy))
+      checker := 0;
+    endif
+    foreach box in chestarray
+      if((box.x == newx) && (box.y == newy))
+        checker := 0;
+        break;
+      endif
+    endforeach
+    type := RandomInt(4)+1;
+    case(type)
+      1: gfx := 3650;
+      2: gfx := 3651;
+      3: gfx := 3703;
+      4: gfx := 3648;
+      5: gfx := 3708;
+    endcase
+    chest := CreateItemAtLocation( newx, newy, newz, gfx, 1, item.realm );
+    if(chest)
+      checker := 1;
+    endif
+  endwhile
+  SetObjProperty(chest,"link", item.serial);
+  chest.graphic := 1;
+  chest.locked :=  1;
+  chest.movable := 0;
+  chest.usescript := ":tinkering:tinkerTraps";
+  var lockid := AllocLockId();
+  SetObjProperty( chest, "lockid", lockid );
+  var lootgroup;
+  var strngth := 0;
+  case(lvl)
+    1: lootgroup := 69;    strngth :=  20;
+    2: lootgroup := 70;    strngth :=  40;
+    3: lootgroup := 71;    strngth :=  60;
+    4: lootgroup := 72;    strngth :=  80;
+    5: lootgroup := 73;    strngth := 100;
+  endcase
+  var traptype := RandomInt(10)+1;
+  if(traptype > 3)
+    traptype := 3;
+  else
+    traptype := 2;
+  endif
+  SetObjProperty(chest, "trap_type", (CStr(traptype)));
+  SetObjProperty(chest, "LockPickDiff", (strngth - RandomInt(20)));
+  SetObjProperty(chest, "trap_strength", strngth);
+  makeloot( chest, lootgroup );
+  CreateFromGroup(chest, lootgroup);
+  chestarray.append(chest.serial);
+  SetObjProperty(item,"chestarray", chestarray);
+endfunction
+
+function returnindex(info, information)
+  var i;
+  for (i := 0; i <= len(info); i := i + 1)
+    if (info[i] == information)
+      return i;
+    endif
+  endfor
+  return 0;
+endfunction
+
+function CreateGuardian(chest, template)
+  var dx := RandomInt( 8 ) - 4;
+  var dy := RandomInt( 8 ) - 4;
+  var nasty := CreateNpcFromTemplate( template, chest.x+dx, chest.y+dy, chest.z, 0, chest.realm );
+  return nasty.serial;
+endfunction

@@ -1,0 +1,156 @@
+
+use uo;
+use os;
+use util;
+
+include ":nature:nature";
+
+set_critical(1);
+var wstuff := GetGlobalProperty("Nature");
+
+program weather()
+  var doonce := 0;
+  syslog("Starting weather system...");
+  while(1)        
+    wstuff := GetGlobalProperty("Nature");
+    var incdec := RandomInt(8);
+    var calendar := GetGlobalProperty("Calendar");
+    var winter := 0;    
+    case (calendar[MONTH])
+      12:
+      1:
+      2:
+        incdec := incdec+1;
+        winter := 1;
+      6:
+      7:
+      8:
+        incdec := incdec-1;
+      3:
+      4:
+      5:
+      9:
+      10:
+      11:
+      default:
+    endcase
+    var newweather := wstuff[CURRENTWEATHER];
+    var setweather := CInt(GetGlobalProperty("#setweather"));
+    EraseGlobalProperty("#setweather");
+    if (setweather)
+      if (DEBUG)
+        syslog("Someone has used setweather: " + setweather);
+      endif
+      newweather := newweather + setweather;
+      if (newweather < 0)
+        newweather := 0;
+      elseif (newweather > 5)
+        newweather := 5;
+      endif
+    elseif (incdec < 3)
+      newweather := newweather-1;
+      if (DEBUG)
+        syslog("The weather gets milder.");
+      endif
+      if (newweather < 0)
+        newweather := 0;
+      endif
+    elseif (incdec > 5)
+      newweather := newweather+1;
+      if (DEBUG)
+        syslog("The weather gets harsher.");
+      endif
+      if (newweather > 5)
+        newweather := 5;
+      endif
+      if ((winter) and (newweather == 5))
+        newweather := 4;
+      endif
+    endif
+    if (DEBUG)
+      syslog("Newweather := " + newweather);
+      syslog("Current weather := " + wstuff[CURRENTWEATHER]);
+    endif
+    if ((newweather != wstuff[CURRENTWEATHER]) or (!doonce))
+      doonce := 1;
+      var change := newweather - wstuff[CURRENTWEATHER];
+      if (DEBUG)
+        syslog("change in weather is " + change);
+      endif
+      wstuff[CURRENTWEATHER] := newweather;
+      case (newweather)
+        default:
+        0:
+        1: 
+          if ((change < 0) and (newweather == 1))
+            Broadcast("The skies clear.");
+            if (DEBUG)
+              syslog("The skies clear.");
+            endif
+          endif
+        2: 
+          if (change > 0)
+            Broadcast("A light overcast moves in, obscuring the sky.");
+            if (DEBUG)
+              syslog("A light overcast moves in, obscuring the sky.");
+            endif
+          else
+            Broadcast("The clouds get thinner.");
+            if (DEBUG)
+              syslog("The clouds get thinner.");
+            endif
+          endif
+        3:
+          SetWeatherOff();
+          if (change > 0)
+            Broadcast("The clouds darken and turn ominous.");
+            if (DEBUG)
+              syslog("The clouds darken and turn ominous.");
+            endif
+          else
+//          Broadcast("The rain stops.");
+            if (DEBUG)
+              syslog("The rain stops.");
+            endif
+          endif
+        4: 
+          if (change > 0)
+            if (winter)
+//            Broadcast("It begins to snow.");
+              if (DEBUG)
+                syslog("It begins to snow.");
+              endif
+            else
+//            Broadcast("Water begins falling from the sky.");
+              if (DEBUG)
+                syslog("Water begins falling from the sky.");
+              endif
+            endif
+          else
+//          Broadcast("The thunder ends, but not the storm.");
+            if (DEBUG)
+              syslog("The thunder ends, but not the storm.");
+            endif
+          endif
+          var intensity := RandomInt(39)+12;
+          start_script("snowRain", intensity);
+        5: 
+//        Broadcast("A great storm rages overhead.");
+          if (DEBUG)
+            syslog("A great storm rages overhead.");
+          endif
+          var intensity := RandomInt(20)+51;
+          start_script("snowRain", intensity);
+          start_script("thunderstorm");
+      endcase;
+      SetGlobalProperty("Nature", wstuff);
+      start_script("setLight");
+    endif
+    var addtime := CInt(randomInt(22) * 30) + 180;
+    if (DEBUG)
+      syslog("Sleeping " + addtime);
+    endif
+    sleep(addtime);
+    set_critical(1);
+  endwhile
+endprogram

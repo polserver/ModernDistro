@@ -1,0 +1,80 @@
+use uo;
+use basic;
+
+program flip (me)
+  SendSysMessage(me, "Select the furniture you wish to re-orient.");
+  var targetfurniture := Target(me);
+  if (!targetfurniture.objtype)
+    SendSysMessage(me, "You must select an item!");
+    return;
+  endif
+  while(targetfurniture)
+    case (targetfurniture.graphic)
+      0xa97: targetfurniture.graphic := 0xa9a;   // bookshelves
+      0xa9a: targetfurniture.graphic := 0xa97;
+      0xa98: targetfurniture.graphic := 0xa99;
+      0xa99: targetfurniture.graphic := 0xa98;
+      0xa9b: targetfurniture.graphic := 0xa9c;
+      0xa9c: targetfurniture.graphic := 0xa9b;
+      0xa9d: targetfurniture.graphic := 0xa9e;
+      0xa9e: targetfurniture.graphic := 0xa9d;
+      0xe3c: targetfurniture.graphic := 0xe3d;   // Large crate
+      0xe3d: targetfurniture.graphic := 0xe3c;
+      0xe3e: targetfurniture.graphic := 0xe3f;   // Medium crate
+      0xe3f: targetfurniture.graphic := 0xe3e;
+      0x9a9: targetfurniture.graphic := 0xe7e;   // Small crate
+      0xe7e: targetfurniture.graphic := 0x9a9;
+      0x9a8: targetfurniture.graphic := 0xe80;   // Metal box
+      0xe80: targetfurniture.graphic := 0x9a8;
+      0x9aa: targetfurniture.graphic := 0xe7d;   // Wooden box
+      0xe7d: targetfurniture.graphic := 0x9aa;
+      0x9ab: targetfurniture.graphic := 0xe7c;   // Metal chest, plain
+      0xe7c: targetfurniture.graphic := 0x9ab;
+      0xe40: targetfurniture.graphic := 0xe41;   // Metal chest, gold lining
+      0xe41: targetfurniture.graphic := 0xe40;
+      0xe42: targetfurniture.graphic := 0xe43;   // Wooden chest
+      0xe43: targetfurniture.graphic := 0xe42;
+      0x9b2: targetfurniture.graphic := 0xe75;   // Backpack
+      0xe75: targetfurniture.graphic := 0x9b2;
+      0x9b0: targetfurniture.graphic := 0xe79;   // Beltpouch
+      0xe79: targetfurniture.graphic := 0x9b0;
+      0xb7d: targetfurniture.graphic := 0xb90;   // Plank table
+      0xb90: targetfurniture.graphic := 0xb7d;
+      0xb7c: targetfurniture.graphic := 0xb8f;   // fancy table
+      0xb8f: targetfurniture.graphic := 0xb7c;
+      0xb2c: targetfurniture.graphic := 0xb2d;   // Bench
+      0xb2d: targetfurniture.graphic := 0xb2c;
+      0xb5b: targetfurniture.graphic := 0xb5a;   // Poor chair
+      0xb5a: targetfurniture.graphic := 0xb5c;
+      0xb5c: targetfurniture.graphic := 0xb5d;
+      0xb5d: targetfurniture.graphic := 0xb5b;
+      0xb57: targetfurniture.graphic := 0xb56;   // Chair
+      0xb56: targetfurniture.graphic := 0xb58;
+      0xb58: targetfurniture.graphic := 0xb59;
+      0xb59: targetfurniture.graphic := 0xb57;
+      0xb4f: targetfurniture.graphic := 0xb4e;   // Fancy Chair
+      0xb4e: targetfurniture.graphic := 0xb50;
+      0xb50: targetfurniture.graphic := 0xb51;
+      0xb51: targetfurniture.graphic := 0xb4f;
+      0xb2e: targetfurniture.graphic := 0xb2f;   // Throne
+      0xb2f: targetfurniture.graphic := 0xb30;
+      0xb30: targetfurniture.graphic := 0xb31;
+      0xb31: targetfurniture.graphic := 0xb2e;
+      0xb32: targetfurniture.graphic := 0xb33;   // Magician's Throne
+      0xb33: targetfurniture.graphic := 0xb32;
+      0xa4f: targetfurniture.graphic := 0xa53;  // Armoire
+      0xa53: targetfurniture.graphic := 0xa4f;
+      0xa4d: targetfurniture.graphic := 0xa51;  // Cherry wood armoire
+      0xa51: targetfurniture.graphic := 0xa4d;
+      0xa2c: targetfurniture.graphic := 0xa34;  // Dressor
+      0xa34: targetfurniture.graphic := 0xa2c;
+      0xa30: targetfurniture.graphic := 0xa38;  // Dressor, bright handles
+      0xa38: targetfurniture.graphic := 0xa30;
+      0xec6: targetfurniture.graphic := 0xec7;  // Dress form
+      0xec7: targetfurniture.graphic := 0xec6;
+      default: SendSysMessage(me, "That item cannot be reoriented.");
+    endcase
+    targetfurniture := 0;
+    targetfurniture := Target(me);
+  endwhile
+endprogram

@@ -1,0 +1,71 @@
+use uo;
+use os;
+
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include "include/isValidLoc";
+
+program cast_teleport( parms )
+  var caster := parms[1];
+  var info := parms[2];
+  var interdiction;
+  
+  var cast_on := MS_TargetCoordinates(caster, info.targ, "Select a target.");
+      if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+
+  if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+        return 0;
+  endif
+
+  if (!isValidLoc(cast_on.x, cast_on.y))
+    SendSysMessage(caster, "You cannot teleport there.");
+    return;
+  endif
+  
+// Start Interdiction
+  interdiction := ListItemsNearLocationOfType(caster.x, caster.y, caster.z, 20, 0xaa07, caster.realm);
+  foreach i in interdiction
+    if (Distance(caster, i) <= CInt( GetObjProperty(i, "Range")))
+	SendSysMessage(caster, "Something interferes with this spell.");
+	return 0;
+	endif
+  endforeach
+  interdiction := ListItemsNearLocationOfType(cast_on.x, cast_on.y, cast_on.z, 20, 0xaa07, caster.realm);
+  var j := CreateItemAtLocation(cast_on.x, cast_on.y, cast_on.z, 0xeed, 1, caster.realm);
+  foreach i in interdiction
+    if (Distance(j, i) <= CInt( GetObjProperty(j, "Range")))
+	SendSysMessage(caster, "Something interferes with this spell.");
+	DestroyItem(j);
+	return 0;
+	endif
+  endforeach
+  DestroyItem(j);
+// End Interdiction
+
+  
+  var sx := caster.x, sy := caster.y, sz := caster.z; 
+  var multicheck := CreateItemAtLocation(cast_on.x, cast_on.y, cast_on.z, 0xeed, 1, caster.realm);
+  multicheck.hidden := 1;
+  if (multicheck.multi.serial != error)
+    SendSysMessage(caster,"You cannot teleport there.");
+    DestroyItem(multicheck);
+    return;
+  else
+    if((multicheck.x > 5120) && (multicheck.x < 6133) && (multicheck.y > 2063) && (multicheck.y < 2303))
+      DestroyItem(multicheck);
+      return;
+    endif
+    DestroyItem(multicheck);
+    MoveObjectToLocation( caster, cast_on.x, cast_on.y, cast_on.z, caster.realm );
+    PlayStationaryEffect( sx, sy, sz, FX_SMOKE, speed:=0xa, loop:=0xa, explode := 0, realm := caster.realm );
+    PlayStationaryEffect( caster.x, caster.y, caster.z, FX_SMOKE, speed:=0xa, loop:=0xa, explode := 0, realm := caster.realm );
+    PlaySoundEffect( caster, SFX_SPELL_TELEPORT );
+  endif
+endprogram

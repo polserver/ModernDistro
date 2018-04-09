@@ -1,0 +1,60 @@
+use uo;
+use vitals;
+
+include ":attributes:attributes";
+include "include/spellRestrictions";
+
+program mind_rot( params )
+	var caster := params[1];
+	var info := params[2]; // Struct containing additional info about the spell.
+	var spellID := params[3];
+
+	SendSysMessage(caster, "Select your victim:", 1, 88);
+	var cast_on := Target(caster);
+	
+
+	var sspeak := Cint(AP_GetSkill(caster, SPIRITSPEAK));
+	var int := GetIntelligence(caster);
+
+	var bonus := 0;
+
+	if(caster.ip)
+		bonus := int/5;
+	endif
+
+	if(!cast_on.isa(POLCLASS_MOBILE))
+		SendSysMessage(caster, "You cannot use this spell on that.",3,40);
+		return 0;
+	endif
+
+	if(Reflected(cast_on))
+		cast_on := caster;
+	endif
+
+
+	var duration :=  (sspeak  - AP_GetSkill(cast_on, RESISTING_SPELLS)) / 5 + 20;
+	detach();
+	PlaySoundEffect(cast_on, 0x1FB);
+	PlaySoundEffect(cast_on, 0x258);
+	PlayObjectCenteredEffectEx( cast_on, 0x373A, 1, 17, 9903, 15, 0, 4 );
+
+	Setobjproperty(cast_on, "#mindrot", 1);
+	EraseObjProperty (caster, "casting");
+	sleep(duration);
+	Eraseobjproperty(cast_on, "#mindrot");
+
+
+
+endprogram
+
+/*
+I don't know
+double strength = 1.0
+if target is player the formula is: 1.25 * strength
+if not: 2.00 * strength
+
+            m.PlaySound(0x1FB);
+            m.PlaySound(0x258);
+            m.FixedParticles(0x373A, 1, 17, 9903, 15, 4, EffectLayer.Head);
+
+Those are the sounds and effects played for mindrot btw*/

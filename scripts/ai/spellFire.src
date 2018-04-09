@@ -1,0 +1,60 @@
+use npc;
+use os;
+use uo;
+use cfgfile;
+
+include "include/eventID";
+include ":attributes:attributes";
+include "include/sysEvent";
+include "include/randName";
+include "include/vetement";
+include "include/NPCUtil";
+include "include/objtype";
+include "include/dist";
+include "include/NPCCast";
+include "include/anchors";
+include "ai/main/killPCsLoop";
+include "ai/combat/fight";
+include "ai/combat/spellFireEvent";
+include "ai/setup/spellSetup";
+include "ai/main/loot";
+include "ai/main/sleepMode";
+
+
+const HALT_THRESHOLD := 15;
+var LAST_BREATH := ReadGameClock();
+var npccfgfile := ReadConfigFile( "npcdesc" );
+var FLAME_STRENGTH := npccfgfile[me.npctemplate].flamestrength;
+var idlesnd1 := CInt(npccfgfile[me.npctemplate].idlesound1);
+var idlesnd2 := CInt(npccfgfile[me.npctemplate].idlesound2);
+
+program KillPlayers()
+  if (GetObjProperty(me, "frozen"))
+	me.frozen := 1;
+  endif
+  SetWarMode( 0 );
+  main_AI_loop();
+endprogram
+
+function CloseDistance( opponent )
+  var sleepdelay := 400 - (CInt(GetDexterity(me)) * 1.5);
+  case (Distance(me, opponent))
+    1:
+    0:       return 1;
+    default: RunToward(opponent);
+		     sleepms(sleepdelay);
+		     Opendoors(me);
+             return 0;
+  endcase
+endfunction
+
+function Opendoors(me)
+  foreach door in ListItemsNearLocation(me.x, me.y, me.z, 1, me.realm)
+    if(door.isa(POLCLASS_DOOR))
+      if(!GetObjProperty(door, "WhenOpened" ))
+        start_script(":doors:openDoor", door);
+      endif
+      EraseObjProperty(door, "#inuse");
+    endif
+  endforeach
+endfunction

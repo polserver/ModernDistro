@@ -1,0 +1,75 @@
+use util;
+
+include ":magery:summon";
+include ":attributes:attributes";
+include ":magery:spells";
+
+
+program cast_summon( parms )
+  var caster := parms[1];
+  var info := parms[2];
+  var cast_on := MS_TargetCoordinates(caster, info.targ, "Select a place:");
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+  if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+        return 0;
+  endif
+  Sleepms (200);
+  
+  var thecreature;
+  var critgroup;
+  var basemagery := CInt(AP_GetSkill(caster, MAGERY));
+  if (basemagery < 70)
+	critgroup := RandomInt(1);
+  elseif (basemagery < 80)
+	critgroup := RandomInt(1)+1;
+  elseif (basemagery < 90)
+	critgroup := RandomInt(1)+2;
+  else
+	critgroup := 3;
+  endif
+  var critter := RandomInt(29);
+	  case (critter)
+		0: thecreature := "chicken";
+		1: thecreature := "cat";
+		2: thecreature := "slime";
+		3: thecreature := "sheep";
+		4: thecreature := "pig";
+		5: thecreature := "dog";
+		6: thecreature := "grat";
+		7: thecreature := "eagle";
+		8: case(RandomInt(4))
+		     0: thecreature := "horse";
+		     1: thecreature := "horse2";
+		     2: thecreature := "horse3";
+		     3: thecreature := "horse4";
+		   endcase
+                9: thecreature := "gorilla";
+                10: thecreature := "panther";
+                11: thecreature := "deer";
+                12: thecreature := "bear";
+                13: thecreature := "ghart";
+                14: thecreature := "blackbear";
+                15: thecreature := "alligator";
+                16: thecreature := "giantspider";
+                17: thecreature := "giant_serpent";
+                18: thecreature := "polar";
+                19: thecreature := "mongbat";
+                20: thecreature := "headless";
+                21: thecreature := "cow";
+                22: thecreature := "bull";
+                23: thecreature := "frostwolf";
+                24: thecreature := "hildisvini";
+                25: thecreature := "imp";
+                26: thecreature := "harpy";
+                27: thecreature := "grizzly";
+                28: thecreature := "direwolf";
+                
+  endcase
+  summon_creature( caster, info.circle, thecreature, cast_on, 30, "animal" );
+endprogram

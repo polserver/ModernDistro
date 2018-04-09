@@ -1,0 +1,33 @@
+use os;
+use uo;
+use util;
+use cfgfile;
+include ":alchemy:drinkPotion";
+include ":attributes:attributes";
+include "include/canAccess";
+
+program drink_blue (who, potion)
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  if(!can_access(who, potion))
+    return;
+  endif
+  if(potion.movable == 0)
+    SendSysMessage(who, "You cannot drink that.");
+    return;
+  endif
+  if(!checkifcandrink(who, "red"))
+    return;
+  endif
+  if(potion.objtype == 0x1DC0f)
+	SetStamina(who, GetMaxStamina(who));
+  else
+	var heal_amount := RandomDiceRoll("5d6+3");
+    if((heal_amount + GetStamina(who))  > GetMaxStamina(who))
+	  heal_amount := GetMaxStamina(who) - GetStamina(who);
+    endif
+	SetStamina(who, GetStamina(who) + heal_amount);
+  endif
+  empty_bottle(who, potion);
+  PlayObjectCenteredEffect(who, EFFECT_SPARKLE, 10,10);
+endprogram

@@ -1,0 +1,30 @@
+use uo;
+use os;
+
+program textcmd_shelfclear(who)
+
+  SendSysMessage(who, "This command disabled until Distro team updates it to", 1, 88);
+  SendSysMessage(who, "conform to the updated book spawn system.", 1, 88);
+  return 0;
+  var count := 0;
+  var shelf;
+  var shelves := {};
+  var ct1 := 0, ct2 := 0;
+  var globalshelves := GetGlobalProperty("shelves");
+  foreach thing in globalshelves
+    shelf := SystemFindObjectBySerial(thing);
+    if(shelf)
+      foreach book in EnumerateItemsInContainer(shelf)
+        count := count + 1;
+        DestroyItem(book);
+      endforeach
+      shelves.append(thing.serial);
+      ct1 := ct1 + 1;
+    endif
+    ct2 := ct2 + 1;
+    sleepms(1);
+  endforeach
+  SetGlobalProperty("shelves", shelves);
+  sendsysmessage(who, "Total Books Destroyed: " + count);
+  SendSysMessage(who, "Wiping " + (ct2 - ct1) + " shelves out of " + ct2);
+endprogram

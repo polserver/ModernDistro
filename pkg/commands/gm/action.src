@@ -1,0 +1,9 @@
+use uo;
+
+program textcmd_action( who, action )
+  SendSysMessage( who, "Whom do you want to perform the action?" );
+  var performer := Target( who, TGTOPT_NOCHECK_LOS );
+  if(performer)
+    PerformAction( performer, CInt(action));
+  endif
+endprogram

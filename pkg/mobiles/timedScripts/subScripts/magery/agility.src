@@ -1,0 +1,26 @@
+/*
+ * $Id: agility.src 1013 2007-03-05 22:46:11Z tekproxy $
+ *
+ */
+use uo;
+use os;
+
+include ":attributes:attributes";
+
+program TimedScript_Agility(params)
+	var defender := params[1];
+	var attacker := params[2];
+	var points := params[3];
+	params := 0;
+	
+	// Prevents mod from being applied twice.
+	if ( GetObjProperty(defender, "AgilityMod") )
+		return 0;
+	endif
+	
+	SetObjProperty(defender, "AgilityMod", points);
+	AP_ModifyStatMod(defender, DEXTERITY, points);
+	
+	return 1;
+endprogram
+

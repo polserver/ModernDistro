@@ -1,0 +1,59 @@
+use uo;
+use os;
+
+include ":gumps:gumps";
+
+program Gump_YesNo( params )
+
+        var mobile := params[1],
+            prompt := params[2],
+            yes_text := params[3],
+            no_text := params[4],
+            delay := params[5];
+
+	SetObjProperty( mobile, "#CloseYesNoGumpPID", GetPid() );
+
+	var yn_gump := GFCreateGump( 140, 100 );
+	GFClosable( yn_gump, 0 );
+
+	GFResizePic( yn_gump, 0, 0, GFGetCfgConst( "Defaults", "BackGround" ), 400, 205 );
+	GFResizePic( yn_gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 370, 175 );
+ 
+
+	var y_pos := 20;
+	foreach line in ( GFWordWrap( prompt, 420 ))
+		GFTextLine( yn_gump, 30, y_pos, 1153, line );
+		y_pos += 20;
+		SleepMS(2);
+	endforeach
+
+	var x_pos := 30;
+	GFAddButton( yn_gump, ( x_pos+3 ), 160, 4005, 4007, GF_CLOSE_BTN, 0xA1 );
+	foreach line in ( GFWordWrap( yes_text, 355 ))
+		line := line; // Avoid Compiler Warnings!
+		GFAddHTMLLocalized( yn_gump, ( x_pos + 40 ), 162, 160, 18, 1074976 );
+		x_pos += 30;
+		SleepMS(2);
+	endforeach
+
+	x_pos := 140;
+	GFAddButton( yn_gump, ( x_pos+3 ), 160, 4005, 4007, GF_CLOSE_BTN, 0xA2 );
+	foreach line in ( GFWordWrap( no_text, 355 ))
+		line := line; // Avoid Compiler Warnings!
+		GFAddHTMLLocalized( yn_gump, ( x_pos + 40 ), 162, 160, 18, 1074977 );
+		x_pos += 20;
+		SleepMS(2);
+	endforeach
+
+        if( delay )
+                var close_gump := GetObjProperty( mobile, "#CloseYesNoGumpPID" );
+                GFCloseGumpTimed( mobile, close_gump, CInt( delay ), 0 );
+        endif
+
+	var input := GFSendGump( mobile, yn_gump );
+        if( input[0xA1] )
+                return 1;
+        endif
+
+        return 0;
+endprogram

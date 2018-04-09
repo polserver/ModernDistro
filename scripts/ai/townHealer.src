@@ -1,0 +1,218 @@
+use npc;
+use basic;
+use os;
+use uo;
+
+include "include/eventID";
+include ":attributes:attributes";
+include "include/sysEvent";
+include "include/randName";
+include "include/utility";
+include "include/mrcSpawn";
+include "include/vetement";
+include "include/NPCBackpacks";
+include "include/client";
+include "include/anchors";
+include "include/dist";
+include "include/res";
+include "include/resPenalty";
+include "include/findCity";
+include "include/begging";
+include "include/trainSkill";
+
+const SOUND_EFFECT_RES := 0x215;
+const ACTION_EFFECT_CAST2 := 0x11;
+const MAX_SKILLS      := 48;
+
+var me := Self();
+me.hidden := 1;
+var inv_fs, inv_pb, inv_1c, inv_rs;
+var merchant_type := GetObjProperty(me, "MerchantType");
+var npccfg        := ReadConfigFile("npcdesc");
+
+set_priority(50);
+  start_script("NPCKeeper", me);
+  if(!merchant_type)
+    SetObjProperty(me, "MerchantGroup", "Mage");
+    merchant_type := "Mage";
+  endif
+  var myanchor := GetObjProperty(me, "Anchor");
+  if(myanchor)
+    MoveObjectToLocation(me, myanchor[1], myanchor[2], myanchor[3], me.realm, MOVEOBJECT_FORCELOCATION);
+  endif
+  drop_anchor();
+  myanchor := GetObjProperty(me, "Anchor");
+  var spawnname := merchant_type + " " + myanchor[1] + " " + myanchor[2] + " " + myanchor[3];
+  inv_fs := FindRootItemInStorageArea(storage, spawnname + " FS");
+  inv_pb := FindRootItemInStorageArea(storage, spawnname + " PB");
+  inv_1c := FindRootItemInStorageArea(storage, spawnname + " 1C");
+  inv_rs := FindRootItemInStorageArea(storage, spawnname + " RS");
+  while((!inv_rs) or (!inv_fs) or (!inv_pb) or (!inv_1c))
+    sleep(5);
+    inv_fs := FindRootItemInStorageArea(storage, spawnname + " FS");
+    inv_pb := FindRootItemInStorageArea(storage, spawnname + " PB");
+    inv_1c := FindRootItemInStorageArea(storage, spawnname + " 1C");
+    inv_rs := FindRootItemInStorageArea(storage, spawnname + " RS");
+  endwhile
+  me.hidden := 0;
+  EnableEvents( SYSEVENT_ITEM_GIVEN);
+  EnableEvents(SYSEVENT_ENGAGED + SYSEVENT_DISENGAGED + SYSEVENT_DAMAGED);
+  EnableEvents(SYSEVENT_ENTEREDAREA, 3);
+  DisableEvents(SYSEVENT_SPEECH);
+  if(GetObjProperty(me, "frozen"))
+    me.frozen := 1;
+  endif
+  if(!GetObjProperty(me, "MyGold"))
+    SetObjProperty(me, "MyGold", 1000);
+  endif
+  var next_wander := ReadGameClock() + 10;
+  const loops := 0;
+  while (1)
+    var ev;
+    ev := os::wait_for_event(120);
+    if(ev)
+      case (ev.type)
+        SYSEVENT_ENGAGED:         lookiehere(me);
+        SYSEVENT_DAMAGED:         lookiehere(me);
+        EVID_NODE:                var txt := ev.text;
+                                  if((ev.source.cmdlevel > 2) && (ev.text["showinventory"]))
+                                    SendOpenSpecialContainer(ev.source, inv_fs);
+                                  elseif((ev.source.cmdlevel > 2) && (ev.text["unloadcfg"]))
+                                    UnloadConfigFile("::mrcspawn");
+                                  else
+                                    if(ev.text["buy"])
+                                      TurnToward(ev.source);
+                                      var res := SendBuyWindow(ev.source, inv_fs, Self(), inv_pb);
+                                      foreach thing in ListRootItemsInContainer((ev.source).backpack)
+                                        EraseObjProperty(thing, "ClearRestock");
+                                      endforeach
+                                    elseif (ev.text["sell"])
+                                      if(GetObjProperty(me, "MyGold") >= 1000)
+                                        TurnToward(ev.source);
+                                        ModifyPCSellList(merchant_type, (ev.source));
+                                        var res := SendSellWindow(ev.source, Self(), inv_fs, inv_pb, inv_1c);
+                                        if(res)
+                                          PrintTextAbovePrivate(Self(), "You dont have anything I would be interested in.", ev.source);
+                                        endif
+                                      else
+                                        PrintTextAbovePrivate(Self(), "I cannot afford any more of that", ev.source );
+                                      endif
+                                    elseif((txt["vendor train"]) || (txt["vendor teach"]) || (txt["merchant train"]) || (txt["merchant teach"]))
+                                      TurnToward(ev.source);
+                                      MerchantTrain(me, ev.source, ev.text);
+                                    endif
+                                  endif
+        SYSEVENT_MERCHANT_BOUGHT: TurnToward(ev.source);
+                                  PrintTextAbovePrivate(Self(), "The total of thy sale is " + ev.amount, ev.source);
+                                  var mygold := GetObjProperty(me, "MyGold");
+                                  mygold := mygold - ev.amount;
+                                  SetObjProperty(me, "MyGold", mygold);
+                                  foreach item in EnumerateItemsInContainer(inv_pb)
+                                    MoveItemToContainer(item, inv_fs);
+                                    SetObjProperty(item,"ClearRestock", (ReadGameClock() + 1800));
+//                                    item.buyprice  := itemconfig[item.objtype].VendorBuysFor;
+//                                   item.sellprice := itemconfig[item.objtype].VendorSellsFor;
+                                  endforeach
+                                  PlaySoundEffect(me, 0x38);
+        SYSEVENT_MERCHANT_SOLD:   TurnToward(ev.source);
+                                  PrintTextAbovePrivate(Self(), "The total of thy purchase is " + ev.amount, ev.source );
+                                  var mygold := GetObjProperty(me, "MyGold");
+                                  mygold := mygold + ev.amount;
+                                  SetObjProperty(me, "MyGold", mygold);
+                                  PlaySoundEffect(me, 0x38);
+        SYSEVENT_ITEM_GIVEN:      TrainSkill(me, ev.source, ev.item);
+        SYSEVENT_ENTEREDAREA:     if(!ev.source.isA(POLCLASS_NPC))
+                                    HealerStuff(ev.source);
+                                  endif
+      endcase
+    endif
+	if(ReadGameClock() >= next_wander)
+	  begpurse(me);
+      wander();
+      if(coordist(me.x, me.y, myanchor[1], myanchor[2]) > 5)
+        MoveObjectToLocation(me, myanchor[1], myanchor[2], myanchor[3], me.realm, MOVEOBJECT_FORCELOCATION);
+      endif
+      next_wander := ReadGameClock() + 30;
+    endif
+    lookiehere(me);
+  endwhile
+
+function HealerStuff(mobile)
+  var parms := {me, mobile};
+  start_script("doRes", parms);
+  return;
+endfunction
+
+function lookiehere(who)
+  var mobiles := ListMobilesNearLocation(who.x, who.y, who.z, 15);
+  var guard, num, i, hogcall, guardzone, element, range, timer, elem;
+  var cfgfile := ReadConfigFile("::gzone");
+  var entries := GetConfigStringKeys(cfgfile);
+  foreach listing in entries
+    element :=  cfgfile[listing];
+    range := element.range;
+    range := SplitWords(range);
+    if((who.x >= CInt(range[1])) && (who.x <= CInt(range[3])) && (who.y >= CInt(range[2])) && (who.y <= CInt(range[4])))
+      guardzone := 1;
+      break;
+    endif
+  endforeach
+  foreach npc in mobiles
+	if(!npc.acctname)
+	  elem := FindConfigElem(npccfg, npc.npctemplate);
+	  if(!elem.guardignore && !GetObjProperty(npc, "called"));
+		if(npc.script != "tamed")
+          case(RandomInt(4) + 1)
+            1: hogcall := "Guards! They're killing people here!";
+            2: hogcall := "Guards! I pay my taxes and no guards? Guards!";
+            3: hogcall := "Help! They're dying here! Guards!";
+            4: hogcall := "Guards! Come save us quick!";
+            5: hogcall := "Ah! Help us! Guards!";
+          endcase
+          PrintTextAbove(me, hogcall);
+          if(guardzone == 1)
+		    SetObjProperty(npc, "called", 1);
+            num := RandomInt(4) + 1;
+            var count := 0;
+            foreach mobile in ListMobilesNearLocation(me.x, me.y, me.z, 25)
+              if(count == 3)
+                break;
+              else
+		        if(mobile.npctemplate == "townguard")
+		          var ev := array;
+                  ev.+ type;
+                  ev.+ source;
+                  ev.type := EVID_PEACEMADE;
+                  ev.source := npc;
+                  SendEvent(mobile, ev);
+                  ev.type := SYSEVENT_ENGAGED;
+                  SendEvent(mobile, ev);
+                  count := count + 1;
+                endif
+              endif
+            endforeach
+          endif
+		endif
+	  endif
+    else
+	  timer := GetObjProperty(npc, "guardstimer");
+	  if(npc.criminal && (timer < ReadGameClock() || timer.errortext))
+        foreach mobile in ListMobilesNearLocation(me.x, me.y, me.z, 15)
+		  if(mobile.npctemplate == "townguard")
+		    var ev := array;
+            ev.+ type;
+            ev.+ source;
+            ev.type := EVID_PEACEMADE;
+            ev.source := npc;
+            SendEvent(mobile, ev);
+            ev.type := SYSEVENT_ENGAGED;
+            SendEvent(mobile, ev);
+            SetObjProperty(npc, "guardkill", 1);
+          endif
+        endforeach
+        SetObjProperty(npc, "guardstimer", ReadGameClock()+60);
+	  endif
+	endif
+  endforeach
+  sleep(1);
+endfunction

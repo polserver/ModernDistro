@@ -1,0 +1,19 @@
+use uo;
+
+program explosiontrap(who, strngth)
+  strngth := CInt(strngth);
+  if (!strngth)
+    strngth := 100;
+  endif
+  SendSysMessage(who,"select the container you wish to place a trap on");
+  var chest := Target(who);
+  if (!chest)
+    SendSysMessage(who,"canceled");
+    return;
+  endif
+    strngth := strngth/3;
+    SetObjProperty(chest, "trap_type", "2");
+    SetObjProperty(chest, "trap_strength", strngth);
+    SendSysMessage(who, "You carefully place the trap on the container");
+    chest.usescript := ":tinkering:tinkerTraps";
+endprogram

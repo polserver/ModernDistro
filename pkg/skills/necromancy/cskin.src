@@ -1,0 +1,47 @@
+use uo;
+use vitals;
+
+include ":attributes:attributes";
+include ":damage:damage";
+
+program corpse_skin( params )
+	var caster := params[1];
+	var info := params[2]; // Struct containing additional info about the spell.
+	var spellID := params[3];
+
+
+	SendSysMessage(caster, "Select your victim:", 1, 88);
+	var cast_on := Target(caster);
+	
+
+	var targrs := Cint(GetAttribute(cast_on, RESISTING_SPELLS));
+	var sspeak := Cint(GetAttribute(caster, SPIRITSPEAK));
+
+
+	var duration := CInt(((sspeak - targrs) / 2.5) + 40);
+
+	if(!cast_on.isa(POLCLASS_MOBILE))
+		SendSysMessage(caster, "You cannot cast this spell on items.");
+		return 0;
+	endif
+
+	detach();
+	PlaySoundEffect(cast_on, 0x1BB);
+	PlayObjectCenteredEffectEx( cast_on, 0x373A, 1, 15, 9913, 0, 0, 7 );
+	SetObjProperty(cast_on, "corpse_skin", 1);
+	ModifyResistance(caster, "Fire", -15);
+	ModifyResistance(caster, "Poison", -15);
+	ModifyResistance(caster, "Cold", 10);
+	ModifyResistance(caster, "Physical", 10);
+
+	Sleep(duration);
+
+	PlaySoundEffect(cast_on, 0x205);
+	PlayObjectCenteredEffectEx( cast_on, 0x373A, 1, 15, 9913, 0, 0, 7 );
+	EraseObjProperty(cast_on, "corpse_skin");
+	ModifyResistance(caster, "Fire", 15);
+	ModifyResistance(caster, "Poison", 15);
+	ModifyResistance(caster, "Cold", 1-0);
+	ModifyResistance(caster, "Physical", -10);
+
+endprogram

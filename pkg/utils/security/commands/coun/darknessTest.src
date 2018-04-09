@@ -1,0 +1,26 @@
+/*
+        Created by *Edwards
+
+        2008-12-2
+*/
+use uo;
+
+include ":security:commandReport";
+
+program textcmd_darknessTest( mobile )
+
+	SendSysMessage( mobile, "Who would you like to test?" );
+	var targ := Target( mobile, TGTOPT_NOCHECK_LOS );
+	if( !targ )
+                SendSysMessage( mobile, "Cancelled." );
+		return 0;
+	elseif( !targ.IsA( POLCLASS_MOBILE ) || targ.IsA( POLCLASS_NPC ))
+		SendSysMessage( mobile, "Cancelled." );
+		return 0;
+	endif
+ 
+        targ.SetLightLevel( 30, 30 );
+        CMD_ReportText( mobile, "targ: "+targ.serial, CMD_REPORT_SYSLOG );
+
+        return 1;
+endprogram

@@ -1,0 +1,5 @@
+use os;
+program Start_OreCore()
+  print("Starting ore core");
+  start_script("oreCore");
+endprogram

@@ -1,0 +1,25 @@
+/*
+ * $Id: polymorph.src 1012 2007-03-05 20:12:44Z tekproxy $
+ *
+ */
+ 
+use uo;
+use os;
+
+include ":attributes:attributes";
+
+program TimedScript_Polymorph(params)
+	var mobile := params[1];
+	var color := params[2];
+	var gfx := params[3];
+		
+	if ( GetObjProperty(mobile, "Polymorph") == error )
+		SetObjProperty(mobile, "Polymorph", mobile.color);
+	endif
+	
+	mobile.graphic := gfx;
+	mobile.color := color;
+	
+	return 1;
+endprogram
+

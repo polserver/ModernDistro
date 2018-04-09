@@ -1,0 +1,27 @@
+use uo;
+
+include "include/packets";
+
+program textcmd_setseason( who, text )
+
+  if(!text or text == "")
+    SendSysMessage(who, "Useage: .setseason <season>");
+    SendSysMessage(who, "<season>: spring | desolation | fall | winder | summer");
+    return;
+  endif
+  
+  var season := lower(text);
+  case(season)
+    "spring":     SetSeasonForAll(SEASON_SPRING); SendSysMessage(who, "Season spring set");
+                  SetGlobalProperty("gseason", "SEASON_SPRING");
+    "desolation": SetSeasonForAll( SEASON_DESOLATION ); SendSysMessage(who, "Season desolation set");
+                  SetGlobalProperty("gseason", "SEASON_DESOLATION");
+    "fall":       SetSeasonForAll( SEASON_FALL ); SendSysMessage(who, "Season fall set");
+                  SetGlobalProperty("gseason", "SEASON_FALL");
+    "winter":     SetSeasonForAll( SEASON_WINTER ); SendSysMessage(who, "Season winter set");
+                  SetGlobalProperty("gseason", "SEASON_WINTER");
+    "summer":     SetSeasonForAll( SEASON_SUMMER ); SendSysMessage(who, "Season summer set");
+                  SetGlobalProperty("gseason", "SEASON_SUMMER");
+  endcase
+  
+endprogram

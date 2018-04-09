@@ -1,0 +1,62 @@
+use os;
+use uo;
+use cfgfile;
+include "include/client";
+include ":attributes:attributes";
+
+program textcmd_kill( who )
+
+     while(1)
+
+	var mob := Target( who, TGTOPT_NOCHECK_LOS );
+	if (!mob)
+		SendSysMessage( who, "Canceled!" );
+		return;
+	endif
+
+        if((mob.cmdlevel) && mob.cmdlevel > who.cmdlevel)
+		RevokePrivilege( who, "invul" );
+		ApplyDamage( who, GetHp(who) );
+                return;
+        endif
+
+        if(mob.isA(POLCLASS_NPC))
+           SetObjProperty(mob, "DotKill", "1"); //needs to be here, cuz i wants guards to spawn like merchants
+        endif
+
+//      PlayLightningBoltEffect( mob);
+//      PlaySoundEffect( mob, SFX_SPELL_LIGHTNING  );
+
+	if (!mob.dead)
+	if (mob.npctemplate)
+		MoveObjectToLocation(mob, 5288, 1176, 0, "britannia_alt", 0x40000000);
+		SetObjProperty(mob, "guardkill", 1);
+	else
+		var prop := { };
+		var log := { };
+		prop .+ pname := who.acctname + " " + who.name + " used the kill command!";
+		prop .+ pvalue := "and " + mob.acctname + " " + mob.name + " got killed!";
+		var elemkey := who.name + "(" + who.acctname + ")";
+		log[1] := prop;
+		AppendConfigFileElem( "helppages", "KILLED BY: ", elemkey, log );
+		UnloadConfigFile("helppages");
+	endif
+
+	RevokePrivilege( mob, "invul" );
+	ApplyRawDamage( mob, GetHp(mob) );
+
+	else
+		if (!mob.isA(POLCLASS_NPC))
+			SendSysMessage(who,"Already dead!");
+		else
+			Resurrect( mob );
+			MoveObjectToLocation(mob, 5288, 1176, 0, who.realm, 0x40000000);
+			SetObjProperty(mob, "guardkill", 1);
+			RevokePrivilege( mob, "invul" );
+			ApplyRawDamage( mob, GetHp(mob) );
+		endif
+	endif
+
+     endwhile
+
+endprogram

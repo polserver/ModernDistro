@@ -1,0 +1,27 @@
+/*
+        Maintened by *Edwards
+
+        2009-10-20
+*/
+use uo;
+
+include ":containers:checks";
+include ":containers:canRemove";
+
+program canRemoveScript( mobile, container, item, movetype )
+
+        //Avoid compiler warnings
+        item := item;
+        movetype := movetype;
+
+        if( !Anti_Fast_Loot( mobile ))
+                return 0;
+        endif
+        
+	if( CP_IsLocked( container ))
+		SendSysMessage( mobile, "You can't remove items from locked containers." );
+		return 0;
+	endif
+
+	return 1;
+endprogram

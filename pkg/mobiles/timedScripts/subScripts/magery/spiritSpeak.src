@@ -1,0 +1,19 @@
+/*
+ * $Id: spiritSpeak.src 373 2006-06-17 18:27:33Z austinheilman $
+ *
+ */
+ 
+use uo;
+use os;
+
+include ":attributes:attributes";
+
+program TimedScript_SpiritSpeak(params)
+	var mobile := params[1];
+	
+	mobile.GrantPrivilege("hearghosts");
+	mobile.Enable("hearghosts");
+	
+	return 1;
+endprogram
+

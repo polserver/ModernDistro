@@ -1,0 +1,136 @@
+3/01/02
+Removed Nature[NIGHTLEVEL], simplified moons initialization. Preparing to include
+the package in the 094 distro.
+If you are upgrading from a previous version of nature, remove the nature cprop
+from pol.txt.
+
+7/11/01
+It no longer repeatedly sends "It begins to rain."
+
+7/07/01
+Everything seems to work at the moment. Added differing intensities to the 2.0.0 client
+rain code.
+
+7/04/01
+Majorly simplified the moons code overall, fixing a few small problems and a problem
+that remained in the previous fixes for the moons. Removed the Nature[NIGHTLEVEL]
+storage, though the slot for it remains in the array for legacy compatibility purposes.
+I haven't tested it yet- that'll be tomorrow. I'm tired. It's 1am and I work tomorrow. 
+
+7/03/01
+Implimented a lazier fix for the moons problem, and also fixed a (mostly harmless) race
+condition between various Nature scripts that read and write to the same GProp.
+
+7/01/01
+Added a seer textcommand: setweather. It takes as its argument an integer, and the next time
+the weather changes, it will change by the amount set in setweather.
+For example, if the weather is "2" (light overcast) and you ".setweather 2", then the next
+time the weather checks to see if it changes it will go to "4" (rain/snow).
+
+I've discovered a bug that is making the moons go out of phase. It's not a big deal, but to
+fix it will require a substantial rewrite of the moons script. I'll get to it later in the
+week.
+
+6/29/01
+Added the config option for resend time.
+
+6/28/01
+Made the messages in .lookup more informative and varied.
+Weather effects are resent every 2 minutes. Unfortunately, they only last about 30 seconds
+on the client. For a while I tried sending it every 30 seconds, and while this was wonderful
+as far as seeing constant rain, it also meant getting the "It begins to rain." system message
+every 30 seconds, which sucked. And as far as I know, there is no way around it. I may yet
+add a toggle- lots of messages vs less weather animation.
+
+6/18/01
+Made harsher weather more likely- as it was, it was very very rarely getting beyond "overcast
+skies." 
+If the weather level doesn't change, rain and snow will be sent to the client again.
+Added a toggle for whether or not to broadcast the "It is dawn" type messages.
+Added a teleport in place effect before all weather effects (to clear the weather effects).
+
+3/16/01
+Added two more cases for the seasons switch in nature.cfg. You may now select no seasons, all
+seasons, all but winter, and replacing winter with desolation.
+Added a .resetcalendar command, which resets the calendar to 1/1/1.
+
+2/24/01
+Created a new function- .desolation. Type ".desolation on" and the world will convert to
+Felucca mode and ignore seasons until a GM restores normality by typing ".desolation off".
+
+It appears that seasons are iffy with Ignition. I haven't tracked this down any more absolutely
+yet.
+
+
+2/21/01
+Ok, here is a complete list of nature's textcommands:
+PLAYER: .lookup - tells the phases of the moons. (To-do: have this return values in the font
+that contains the moon phases as characters- font #4)
+SEER: .setlocallight [level] [radius] - radius is optional and defaults to 50. Sets the
+personal lightlevels for everyone within radius of the seer to the level entered.
+      .localthunderstorm [radius] - radius defaults to 50. Causes a thunderstorm around the
+seer. 
+GM: .setday , .setmonth , .setyear - sets each of these values to the number specified. If
+you specify a number greater than the max value it will accept it but the next time it
+changes, it will be set to one by the IncrementCalendar function. If you do not send a 
+value, send a non-number, or send a number less than 1, it sets it to 1.
+
+
+2/17/01
+Added GM level textcommands that can set the year, day, or month. They are, unimaginatively,
+called .setyear, .setday, and .setmonth. Just pass them a number. They will default to 1 if
+not passed a number, or if passed a number less than 1.
+
+The arrays.inc file that is bundled with this package needs to be placed in the include 
+directory.
+
+Nature.cfg contains two entries, the second of which will hopefully become obsolete. The
+first is a toggle for seasons- set to 1 if you want seasons. The second is what client
+your server is set up to accept.
+
+
+2/15/01
+It sends weather to all clients, can make use of seasons, and cleans your oven.
+
+You'll need the std.inc available in the POL-scriptforum files section (in the
+include folder), and you'll need to comment out or rename the GetTimeofDay
+function within it, or within clock.inc. Doesn't matter which- Nature doesn't 
+use either one.
+
+If you would like to customize the length of dawn and dusk, the whole day, or the time
+between phases of Trammel or Felucca, you will need to edit days.cfg in your config 
+directory.
+Here, for example, is my days.cfg:
+
+DayConfig WholeDay
+{
+	Length	60
+}
+DayConfig Transition
+{
+	Length  5
+}
+DayConfig Trammel
+{
+	Length  60
+}
+DayConfig Felucca
+{
+	Length 20
+}
+
+
+If any of those are not present, the scripts will default them to the entries above.
+
+If you have made use of any previous version of the Nature script, you might have to
+remove the following GProps from pol.txt in the data/ directory: "Nature" and "Calendar".
+Note that doing so will reset your world to day 1, month 1, year 1.
+
+
+10/5/00
+Renamed package Nature. Am rewriting such that: sunny days are more frequent
+than overcast ones; Felucca phases every 3 Trammel phases; 3 phases of Felucca occur
+within one full day; it keeps track of month, day, year. I'm taking over
+maintaining this fork of Raxxla's original (and wonderful) package. 
+Also, the weather global array has been converted to make use of consts to make
+the scripts more readable.

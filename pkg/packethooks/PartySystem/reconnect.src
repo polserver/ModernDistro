@@ -1,0 +1,44 @@
+/* $Id: reconnect.src 523 2006-06-30 17:36:14Z tekproxy $
+ *
+ */
+
+use uo;
+use os;
+use polsys;
+
+include ":partySystem:config";
+include ":partySystem:packetInfo";
+include ":partySystem:messages";
+
+CONST OFFSET_PARTY_ADD_SIZE := 6;
+CONST OFFSET_PARTY_ADD_PLAYERIDS := 7;
+
+program Reconnect(character)
+	var party := GetObjProperty(character, PARTY_PROP);
+
+	if ( party )
+		ReconnectParty(character, party);
+	endif
+
+	return 1;
+endprogram
+
+function ReconnectParty(character, party)
+	// Create and build the packet
+	var packet := CreatePacket(MSGTYPE_PARTY, MSGLEN_VARIABLE);
+	packet.SetInt16(OFFSET_PARTY_SUBCMD, SUBCMD_PARTY); // Set subcmd to Party
+	packet.SetInt8(OFFSET_PARTY_SUBSUBCMD, 1); // Set subsubcmd to Add
+	packet.SetInt8(OFFSET_PARTY_ADD_SIZE, party.Size()); // Set party size
+
+	// Fill in the party member serials at the end of the packet
+	for i := 1 to (party.Size())
+		packet.SetInt32(OFFSET_PARTY_ADD_PLAYERIDS + ((i - 1) * 4), party[i]);
+		SleepMS(2);
+	endfor
+
+	packet.SendPacket(character);
+	SendPartyMessage(party, character, "rejoined the party.");
+	SendSysMessage(character, "You have rejoined the party.");
+
+	return 1;
+endfunction

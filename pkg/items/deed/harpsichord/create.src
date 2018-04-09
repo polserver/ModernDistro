@@ -1,0 +1,49 @@
+use uo;
+use util;
+use cfgfile;
+
+CONST Plain 	:= 0x0;		// Common
+CONST White 	:= 0x9C2;	// Common
+CONST Pink 		:= 0x490;	// Common
+CONST Brown 	:= 0x78D;	// Common
+CONST Navy 		:= 0xA17;	// Common
+CONST Green 	:= 0x9ED;	// Uncommon
+CONST Blue 		:= 0x5B6;	// Uncommon
+CONST Red 		:= 0x782;	// Uncommon
+CONST Purple 	:= 0xA31;	// Uncommon
+CONST Charcoal 	:= 0x776;	// Rare
+CONST Paragon 	:= 0x499;	// Rare
+CONST Rose 		:= 0xAB2;	// Mythic
+CONST Crystal 	:= 0xAA9;	// Mythic
+
+program create_harpsichord_deed(deed)
+	
+	var chance := CInt(RandomDiceRoll( "1d100" ));
+	if ( chance == 100 )
+		deed.color := Rose;
+	elseif ( chance == 99 )
+		deed.color := Crystal;
+	elseif ( chance < 99 && chance >= 96 )
+		deed.color := Charcoal;
+	elseif ( chance < 96 && chance >= 93  )
+		deed.color := Paragon;
+	elseif ( chance < 93 && chance >= 84 )
+		deed.color := Purple;
+	elseif ( chance < 83 && chance >= 75 )
+		deed.color := Red;
+	elseif ( chance < 75 && chance >= 66 )
+		deed.color := Blue;
+	elseif ( chance < 66 && chance >= 57 )
+		deed.color := Green;
+	elseif ( chance < 57 && chance >= 46 )
+		deed.color := Navy;
+	elseif ( chance < 46 && chance >= 35 )
+		deed.color := Brown;
+	elseif ( chance < 35 && chance >= 24 )
+		deed.color := Pink;
+	elseif ( chance < 24 && chance >= 13 )
+		deed.color := White;
+	elseif ( chance < 13 && chance > 0 )
+		deed.color := Plain;
+	endif
+endprogram

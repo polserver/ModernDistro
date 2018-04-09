@@ -1,0 +1,26 @@
+/*
+        Created by *Edwards
+
+        2008-10-14
+*/
+use uo;
+
+program textcmd_idiot( mobile )
+
+	SendSysMessage( mobile, "What would you like to check?" );
+	var targ := Target( mobile, TGTOPT_NOCHECK_LOS );
+	if( !targ )
+                SendSysMessage( mobile, "Cancelled." );
+		return 0;
+	endif
+
+        var idiot := GetObjProperty( targ, "Idiot" );
+        if( !idiot )
+                SendSysMessage( mobile, "No Idiot has been found.", 3, 70 );
+                return 0;
+        endif
+        
+        SendSysMessage( mobile, "Idiot has been found! Serial: "+idiot, 3, 33 );
+
+        return 1;
+endprogram

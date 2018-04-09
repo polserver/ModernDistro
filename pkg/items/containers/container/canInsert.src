@@ -1,0 +1,46 @@
+/*
+        Maintened by *Edwards
+
+        2009-10-20
+*/
+use uo;
+use cliloc;
+
+include ":containers:checks";
+include ":housing:housing";
+
+program canInsert( mobile, container, move_type, inserttype, adding_item, existing_stack, amount_to_add )
+ 
+        //Avoid compiler warnings
+        amount_to_add := amount_to_add;
+        existing_stack := existing_stack;
+        adding_item := adding_item;
+        inserttype := inserttype;
+
+	if( move_type == MOVETYPE_COREMOVE )
+		return 1;
+	elseif( mobile.cmdlevel >= 2 )
+		return 1;
+	elseif( CP_IsLocked( container ))
+		SendSysMessage( mobile, "You can't insert items into locked containers." );
+		return 0;
+	elseif( ContainerIsSecured( mobile, container ) )
+		SendSysMessageCL ( mobile, 1010565, color := 33 ); // You do not have permission to place things in this container.
+		return 0;
+	endif
+
+	return 1;
+endprogram
+
+function ContainerIsSecured( mobile, container )
+
+	var sign := FindHouseSign ( mobile );
+	if ( !container.IsSecured() )
+		// Nothing to worry about.
+		return 0;
+	elseif ( sign.IsAffiliated( mobile ) >= container.GetSecureLevel() )
+		return 0;
+	else
+		return 1;
+	endif
+endfunction

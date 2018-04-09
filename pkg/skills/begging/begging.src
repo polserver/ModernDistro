@@ -1,0 +1,175 @@
+
+use uo;
+use util;
+use cfgfile;
+
+include ":attributes:attributes";
+include "include/client";
+include "include/objtype";
+
+const MINKARMA := 4000;
+const MINFAME := 4000;
+
+var zPleas := {
+  "Spare some change?",
+  "Alms for the poor?",
+  "Donate to my charity?",
+  "Wanna buy a rock?",
+  "C'mon...   please?",
+  "Spare a few gold?"
+};
+
+var zFails := {
+  "I think not",
+  "Go away!",
+  "Off with you, peasant!",
+  "Thou dost not look trustworthy... No gold for thee today!",
+  "I feel sorry for thee... Thou dost not look trustworthy... No gold for thee today!",
+  "Ye wont be getting any gold from me today"
+};
+
+var zBroke := {
+  "Ain't got nothin' t' give ya!",
+  "No' got nothin'. Sorry.",
+  "Not much better off meself'.",
+  "Maybe ye can spare a coin for me?"
+};
+
+var zEmpty := {
+  "Sorry, gave it all away already.",
+  "Ain't got nothin' t' give ya!",
+  "Nope. Gots nothing. Sorry.",
+  "Your cohorts cleaned me out already!"
+};
+
+var zNone := {
+  "I'm sorry, I can give thee nothing.",
+  "Does it look like I have pockets in this armor?",
+  "Not while I'm on duty."
+};
+
+var zLowKarma := {
+  "I will not give money to such as thee!",
+  "Take off, eh?",
+  "I do not give money to naughty evildoers!",
+  "Thou dost not look trustworthy... no gold for thee today!"
+};
+
+const UOBJ_GOLDCOIN :=0x0eed;
+
+program skill_begging( who )
+  SendSysMessage( who, "Select the victim" );
+  var tgt := Target( who );
+  if ( !tgt )
+    SendSysMessage( who, "Cancelled" );
+    return;
+  endif
+  if(tgt.serial == who.serial)
+    SendSysMessage(who, "You might want to consider therapy.");
+    return;
+  endif
+  if((tgt.graphic != CID_HUMAN_MALE) && (tgt.graphic != CID_HUMAN_FEMALE))
+    SendSysMessage(who, "You look a little silly doing that.");
+    return;
+  endif
+  if(GetObjProperty(tgt, "LoggedIn"))
+    SendSysMessage(who, "Perhaps talking to them would be a better idea.");
+    return;
+  endif
+  
+  var cfgtemplate := ReadConfigFile("::npcdesc");
+  var ismob := tgt.isa(POLCLASS_MOBILE);
+  if (ismob)
+    PrintTextAbove(who, "*looks at " + tgt.name + "*" );
+  else
+    PrintTextAbove( who, "*looks at " + tgt.desc + "*" );
+  endif
+  if ((!ismob) || (!tgt.isa(POLCLASS_NPC)))
+    return;
+  endif
+  PrintRandomMessage( who, zPleas );
+  sleep(1);
+  var karma := GetObjProperty(who, "Karma");
+  if (!karma)
+    karma := 0;
+    SetObjProperty(who, "Karma", karma);
+  endif
+  if (karma < 0)
+    PrintRandomMessage( tgt, zLowKarma );
+    return;
+  endif
+  var wealth := cfgtemplate[tgt.npctemplate].wealth;
+  if (!wealth)
+    PrintTextAbovePrivate(who, "This creature will not give thee money!", who);
+    return;
+  endif
+  var lb := Cint(GetObjProperty(tgt, "begpurse"));
+  if(!lb)
+    lb := 50;
+    SetObjProperty(tgt, "begpurse", lb);
+  endif
+  if(lb < 25)
+    PrintRandomMessage( tgt, zEmpty );
+    return;
+  endif
+
+  var pts := CInt(GetAttribute(who, BEGGING)) + 15;
+
+  if(!SkillCheck(who,BEGGING, -1, pts/3))
+    PrintRandomMessage( tgt, zFails );
+    return;
+  endif
+  var gold;
+  case (wealth)
+    "upper":
+      gold := RandomDiceRoll("4d5");
+    "middle":
+      gold := RandomDiceRoll("3d4");
+    "poor":
+      gold := RandomDiceRoll("2d3");
+    "broke":
+    default:
+      PrintRandomMessage( tgt, zBroke );
+      return;
+    "none":
+      PrintRandomMessage( tgt , zNone );
+      return;
+  endcase
+  if ((GetObjProperty(who, "Karma") > MINKARMA) and (GetObjProperty(who, "Fame") > MINFAME))
+    gold := CInt(gold*1.3);
+  endif
+  lb := Cint(lb - gold);
+  SetObjProperty(tgt, "begpurse", lb);
+  PrintTextAbove( tgt, "*throws a few coins to " + who.name + "*" );
+  if ( !CreateItemInBackpack( who, UOBJ_GOLDCOIN, gold ) )
+    SendSysMessage( who, "You miss and the coins bounce into cracks in the ground!" );
+  else
+    var coin := "coins";
+    if (gold == 1)
+      coin := "coin";
+    endif
+    SendSysMessage( who, "You quickly stuff " + gold + " " + coin + " in your pack!" );
+  endif
+  if (GetObjProperty(who, "Karma") > 10)
+    SendSysMessage(who, "You lose a little karma.");
+    SetObjProperty(who, "Karma", GetObjProperty(who, "Karma")-10);
+  endif
+
+  var fame := GetObjProperty(who, "Fame");
+  if (!fame)
+    fame := 0;
+    SetObjProperty(who, "Fame", fame);
+  endif
+  if (fame > 5)
+    SendSysMessage(who, "You lose a little fame.");
+    SetObjProperty(who, "Fame", CInt(fame*0.98));
+  endif
+  return;
+endprogram
+
+function PrintRandomMessage( speaker, byref zSpeech )
+  if(zSpeech.size())
+    PrintTextAbove(speaker, zSpeech[RandomInt(zSpeech.size())+1]);
+  endif
+  return;
+endfunction

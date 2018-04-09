@@ -1,0 +1,22 @@
+use uo;
+use os;
+
+include ":attributes:attributes";
+
+program TimedScript_AgilityPotion(params)
+	var mobile := params[1];
+	var points := params[3];
+	params := 0;
+	
+	// Prevents mod from being applied twice.
+	// Uses the same as Magery Agility, to keep them from stacking.
+	if ( GetObjProperty(mobile, "AgilityMod") )
+		return 0;
+	endif
+	
+	SetObjProperty(mobile, "AgilityMod", points);
+	AP_ModifyStatMod(mobile, DEXTERITY, points);
+	
+	return 1;
+endprogram
+

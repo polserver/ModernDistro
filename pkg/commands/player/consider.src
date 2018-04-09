@@ -1,0 +1,39 @@
+//
+// Consider your sins - informs player of murder status
+//
+// Todo: Move to be a text listener on the player's pack instead of a txtcommand
+//
+// Author:Racalac,8/20/00
+
+use uo;
+
+program ConsiderSins(who)
+
+	var longc := GetObjProperty(who,"longmurders");
+	if(!longc)
+		longc := 0;
+	endif
+	/*var shortc := GetObjProperty(who,"shortmurders");
+	if(!shortc)
+		shortc := 0;
+	endif
+	*/
+	var mesg;
+	/*
+	//FIXME: impliment pingpong counter and permared cprop
+	if( GetObjProperty(who,"permared") )
+		mesg := "You are known throughout the land as a murderous brigand.";
+	endif
+	*/
+	if(longc==0)
+		mesg := "Fear not, thou hast not slain the innocent.";
+	elseif(longc==1)
+		mesg := "Although thou hast slain the innocent, thy deeds shall not bring retribution. ";
+	elseif(longc==2)
+		mesg := "You have had your chance, next time you harm an innocent you will be a wanted man";
+	elseif(longc>2)
+		mesg := "You are known throughout the land as a murderous brigand.";
+	endif
+
+	SendSysMessage(who,mesg);
+endprogram

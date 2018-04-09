@@ -1,0 +1,41 @@
+use uo;
+use os;
+use util;
+
+program summonnpc(who,item)
+  if (who.cmdlevel < 2)
+    return;
+  endif
+  var monlink := GetObjProperty(item,"mobilearray");
+  if (!monlink)
+	SendSysMessage(who, "no mobiles attached.");
+	return;
+  endif
+  var radius := CInt(SendTextEntryGump( who, "what radius would you like them to spawn in? (Min 1, Max 10)", 40 ));
+  if(!radius)
+    return;
+  endif
+  var arraysize := len(monlink);
+  var i := 0;
+  var newx, newy, newz;
+  for (i:=1;i<=arraysize;i:=i+1)
+    var monstr := SystemFindObjectBySerial(monlink[i]);
+    case(radius)
+      1:  newx := who.x + RandomInt( 1) - RandomInt( 1);    newy := who.y + RandomInt( 1) - RandomInt( 1);
+      2:  newx := who.x + RandomInt( 2) - RandomInt( 2);    newy := who.y + RandomInt( 2) - RandomInt( 2);
+      3:  newx := who.x + RandomInt( 3) - RandomInt( 3);    newy := who.y + RandomInt( 3) - RandomInt( 3);
+      4:  newx := who.x + RandomInt( 4) - RandomInt( 4);    newy := who.y + RandomInt( 4) - RandomInt( 4);
+      5:  newx := who.x + RandomInt( 5) - RandomInt( 5);    newy := who.y + RandomInt( 5) - RandomInt( 5);
+      6:  newx := who.x + RandomInt( 6) - RandomInt( 6);    newy := who.y + RandomInt( 6) - RandomInt( 6);
+      7:  newx := who.x + RandomInt( 7) - RandomInt( 7);    newy := who.y + RandomInt( 7) - RandomInt( 7);
+      8:  newx := who.x + RandomInt( 8) - RandomInt( 8);    newy := who.y + RandomInt( 8) - RandomInt( 8);
+      9:  newx := who.x + RandomInt( 9) - RandomInt( 9);    newy := who.y + RandomInt( 9) - RandomInt( 9);
+     10:  newx := who.x + RandomInt(10) - RandomInt(10);    newy := who.y + RandomInt(10) - RandomInt(10);
+    endcase
+    newz:= GetWorldHeight(newx, newy, who.realm);
+    if ( !MoveObjectToLocation(monstr, newx, newy, newz, who.realm, MOVEOBJECT_FORCELOCATION) )
+	  SendSysMessage(who, "NPC no longer exists.");
+	  return;
+    endif
+  endfor
+endprogram

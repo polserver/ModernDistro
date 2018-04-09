@@ -1,0 +1,30 @@
+
+use uo;
+
+program change_cmdlevel( who, level )
+  SendSysMessage( who, "Change whose CmdLevel?" );
+  var player := Target( who, TGTOPT_NOCHECK_LOS );
+  if(player.ip)
+    var holder := "a";
+    case(level)
+      "test":   holder := 5;
+      "admin":  holder := 4;
+      "gm":     holder := 3;
+      "seer":   holder := 2;
+      "coun":   holder := 1;
+      "player": holder := 0;
+      default:  SendSysMessage(who, "that is not a valid command level."); 
+    endcase
+    if(holder == "a")
+      return;
+    else
+      if(holder <= who.cmdlevel)
+        player.cmdlevel := holder;
+      else
+        SendSysMessage(who, "You cannot grant a command level higher than your own");
+      endif
+    endif
+  else
+    SendSysMessage(who, "That is not a player");
+  endif
+endprogram

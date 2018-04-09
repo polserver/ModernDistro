@@ -1,0 +1,19 @@
+/*
+ * plankcontrol - plank control script
+ *
+ * sole job is to close an open locked plank on startup.
+ *
+ */
+
+use os;
+use uo;
+
+include "include/objtype";
+include ":boat:plankUtil";
+
+program plankcontrol (plank)
+    if (plank.locked and IsExtended(plank))
+        Retract( plank );
+    endif
+endprogram
+

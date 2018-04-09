@@ -1,0 +1,8 @@
+use uo;
+use os;
+
+program textcmd_itemcount(who)
+  var targ := Target(who);
+  var items := targ.item_count;
+  SendSysMessage(who, "there are " + items + " items in that container.");
+endprogram

@@ -1,0 +1,35 @@
+/* $Id: use.src 471 2006-06-28 00:07:48Z austinheilman $
+ *
+ */
+
+use uo;
+
+include ":timedscripts:timedScripts";
+include ":itemutils:itemdesc";
+include "include/client";
+include "include/sounds";
+
+program use_Drink(character, drink)
+	if( drink.movable == 0 )
+		SendSysMessage(character, "You cannot drink that.");
+		return 0;
+	endif
+	
+	var cfg_elem := GetItemDescInfo(drink.objtype);
+	var proof := GetConfigInt(cfg_elem, "Proof");
+	var poison := CInt(GetObjProperty(drink, "PoisonLevel"));
+
+	SubtractAmount(drink, 1);
+	PerformAction(character, ANIM_EAT);
+	PlaySoundEffect(character, SFX_DRINK_1);
+	Sleep(2);
+
+	if ( poison > 0 )
+		TS_StartTimer(character, "DefaultPoison", 120, poison, character);
+	endif
+	if ( proof )
+		TS_StartTimer(character, "Alcohol", proof*10);
+	endif
+
+	return 1;
+endprogram

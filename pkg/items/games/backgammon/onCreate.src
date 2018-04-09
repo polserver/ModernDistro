@@ -1,0 +1,25 @@
+/*
+        Maintened by *Edwards
+
+        2009-10-21
+*/
+use uo;
+use os;
+
+program OnCreate( board )
+
+	var i;
+	var pieces := array;
+	for( i:=1; i<=15; i+=1 )
+		pieces.Append( CreateItemInContainer( board, "WhiteChecker" ));
+		pieces.Append( CreateItemInContainer( board, "RedChecker" ));
+                SleepMS(5);
+	endfor
+	
+	foreach piece in ( pieces )
+		SetObjProperty( piece, "boardserial", board.serial );
+                SleepMS(5);
+	endforeach
+	
+	return 1;
+endprogram

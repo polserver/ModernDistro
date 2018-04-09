@@ -1,0 +1,42 @@
+/*
+        Maintened by *Edwards
+
+        2009-10-21
+*/
+use uo;
+use os;
+
+program Controller( gamepiece )
+
+	var my_board := GetObjProperty( gamepiece, "boardserial" );
+	my_board := SystemFindObjectBySerial( my_board );
+
+	if( !my_board )
+		DestroyItem( gamepiece );
+		return 0;
+	elseif( gamepiece.container != my_board )
+		MoveItemToContainer( gamepiece, my_board );
+	endif
+
+	SetObjProperty( gamepiece, "#pid", GetPid() );
+	gamepiece.movable := 1;
+	
+	while( gamepiece )
+		// Events are received when the game piece is 'removed'
+		// from the game board.
+		var ev := Wait_For_Event(900000);
+		if( ev )
+			// Once an event is received, keep trying to put the game
+			// piece back into the game board.
+			while( gamepiece.container != my_board )
+				gamepiece.movable := 1;
+				if( gamepiece.container != my_board )
+					MoveItemToContainer( gamepiece, my_board );
+				endif
+				Sleep(1);
+			endwhile
+		endif
+	endwhile
+	
+	return 1;
+endprogram

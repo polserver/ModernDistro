@@ -1,0 +1,60 @@
+/*
+ * Increases caster's Physical Resistance by ((Inscription / 20) + 15) points,
+ * and decreases caster's Fire, Cold, Energy and Poison Resistance by 5 points each.
+ * Lasts until cast again.
+ */
+
+use uo;
+use os;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":damage:damage";
+
+program cast_reactivearmor( parms )
+  var caster := parms[1];
+  var info := parms[2];
+  
+  var cast_on := caster;
+	
+  PlaySoundEffect(cast_on, SFX_SPELL_REACTIVE_ARMOR);
+  PlayObjectCenteredEffect( cast_on, FX_SPARK_EFFECT, 7, 0x10 );
+  
+	if ( GetObjProperty(cast_on, "ReactiveArmor") )
+		RemoveReactiveArmor(cast_on);
+	else
+		var points := (AP_GetSkill(cast_on, INSCRIPTION) / 20) + 15;
+		ApplyReactiveArmor(cast_on, points);
+	endif
+
+//	MS_PlaySpellSFX(info.spell_id, cast_on);
+//	MS_PlaySpellGFX(info.spell_id, cast_on, cast_on);
+	
+	return 1;
+  
+endprogram
+
+
+function ApplyReactiveArmor(mobile, points)
+	ModifyResistance(mobile, DMG_PHYSICAL, points);
+	ModifyResistance(mobile, DMG_FIRE, -5);
+	ModifyResistance(mobile, DMG_COLD, -5);
+	ModifyResistance(mobile, DMG_POISON, -5);
+	ModifyResistance(mobile, DMG_ENERGY, -5);
+
+	SetObjProperty(mobile, "ReactiveArmor", points);
+endfunction
+
+function RemoveReactiveArmor(mobile)
+	var points := GetObjProperty(mobile, "ReactiveArmor");
+
+	ModifyResistance(mobile, DMG_PHYSICAL, -(points));
+	ModifyResistance(mobile, DMG_FIRE, 5);
+	ModifyResistance(mobile, DMG_COLD, 5);
+	ModifyResistance(mobile, DMG_POISON, 5);
+	ModifyResistance(mobile, DMG_ENERGY, 5);
+
+	EraseObjProperty(mobile, "ReactiveArmor");
+endfunction

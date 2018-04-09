@@ -1,0 +1,12 @@
+use uo;
+
+program can_remove(who, item)
+
+  who := who;
+  item := item;
+  if (GetObjProperty(item, "canRemove")) 
+    return 1;
+  endif
+  return 0;
+
+endprogram

@@ -1,0 +1,30 @@
+/*
+        Maintened by *Edwards
+
+        2009-10-20
+*/
+use uo;
+
+include ":containers:checks";
+
+program quiverCanInsert( character, container, movetype, inserttype, adding_item, existing_stack, amount_to_add )
+
+        //Avoid compiler warnings
+        amount_to_add := amount_to_add;
+        existing_stack := existing_stack;
+        inserttype := inserttype;
+        movetype := movetype;
+
+	// Add to this list for addtional ammo objtypes allowed in quivers.
+	var ammo_list := { 0xf3f, 0x1bfb };
+
+	if( CP_IsLocked( container ))
+		SendSysMessage( character, "You can't insert items into locked containers." );
+		return 0;
+	elseif( !( adding_item.objtype in ammo_list ))
+		SendSysMessage( character, "Quivers can only hold ammunition for Archery weapons." );
+		return 0;
+	endif
+ 
+        return 1;
+endprogram

@@ -1,0 +1,86 @@
+/*
+ * $Id: incognito.src 1013 2007-03-05 22:46:11Z tekproxy $
+ *
+ */
+use uo;
+use os;
+
+include ":attributes:attributes";
+include "include/client";
+
+var hair_types := array{ "cutHair", "ShortHair", "LongHair", "PonyTailHair", "MohawkHair",
+                    "PageBoyHair", "BunsHair", "AfroHair", "RecedingHair", "PigTailHair",
+                    "KrisnaHair" }; 
+var beard_types := array{ "LongBeardHair", "ShortBeardHair", "GoateeHair", "MustacheHair",
+                     "MedShortBeardHair", "medlongbeard", "VandykeHair" };
+
+program TimedScript_Incognito(params)
+	var mobile := params[1];
+	params := 0;
+	
+	// Store original info if this is the first time incognito has been cast
+	if ( !GetObjProperty(mobile, "Incognito") )
+		var original := struct;
+		original.+name := mobile.name;
+		original.+gender := mobile.gender;
+		original.+truecolor := mobile.truecolor;
+		original.+title_prefix := mobile.title_prefix;
+		original.+title_suffix := mobile.title_suffix;
+		original.+title_guild := mobile.title_guild;
+		original.+title_race := mobile.title_race;
+		
+		var hair := GetEquipmentByLayer(mobile, LAYER_HAIR);
+		var beard := GetEquipmentByLayer(mobile, LAYER_BEARD);
+		original.+hair := hair.name;
+		original.+hair_color := hair.color;
+		original.+beard := beard.name;
+		original.+beard_color := hair.color;
+
+		SetObjProperty(mobile, "Incognito", original);		
+		Print("Incognito original:"+original);
+	endif
+	
+	// Remove title prefix and suffix, ignore guild and race for now.
+	mobile.title_prefix := "";
+	mobile.title_suffix := "";
+	//mobile.title_guild := "";
+	//mobile.title_race := "";
+
+	// Set gender and color
+	mobile.gender := RandomInt(1);
+	mobile.truecolor	:= 1056 - RandomInt(55); // 1002-1056
+
+	// Get random hair type with random hair color and equip it.
+	var color_cfg := ReadConfigFile(":hair:hairColors");
+	var categories := GetConfigStringArray(color_cfg["Index"], "Category");
+	var new_hair_color := GetConfigStringArray(color_cfg[categories[RandomInt(categories.Size()) + 1]], "Color");
+	new_hair_color := new_hair_color[RandomInt(new_hair_color.Size()) + 1];
+
+	DestroyItem(GetEquipmentByLayer(mobile, LAYER_HAIR));
+	var new_hair := CreateItemInBackpack(mobile, hair_types[RandomInt(hair_types.Size()) + 1]);
+	new_hair.color := new_hair_color;
+	EquipItem(mobile, new_hair);
+		
+	// Get name template and if it's a male, get random beard and color and equip it.
+	var name_template;
+	if ( mobile.gender == 0 )
+		name_template := "Human_Male";
+		DestroyItem(GetEquipmentByLayer(mobile, LAYER_BEARD));
+		var new_beard := CreateItemInBackpack(mobile, beard_types[RandomInt(beard_types.Size()) + 1]);
+		var new_beard_color := GetConfigStringArray(color_cfg[categories[RandomInt(categories.Size()) + 1]], "Color");
+		new_beard_color := new_beard_color[RandomInt(new_beard_color.Size()) + 1];
+		new_beard.color := new_beard_color;
+		
+		EquipItem(mobile, new_beard);
+	else
+		name_template := "Human_Female";
+	endif
+	
+	// Give mobile a random name
+	var names := ReadConfigFile("::names");
+	var name_list := GetConfigStringArray(names[name_template], "Name");
+	SetName(mobile, name_list[RandomInt(name_list.Size()) + 1]);	
+
+	return 1;
+endprogram
+

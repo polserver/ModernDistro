@@ -1,0 +1,29 @@
+use os;
+use uo;
+use util;
+include ":alchemy:drinkPotion";
+include "include/canAccess";
+
+program drink_blue (who, potion)
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  if(!can_access(who, potion))
+    return;
+  endif
+  if(potion.movable == 0)
+    SendSysMessage(who, "You cannot drink that.");
+    return;
+  endif
+  if(!checkifcandrink(who, "yellow"))
+    return;
+  endif
+  var obj := potion.objtype;
+  empty_bottle(who, potion);
+  case(obj)
+    0x1DC01: HealDamage(who, (RandomInt(7)  + 3));
+    0x1DC02: HealDamage(who, (RandomInt(14) + 6));
+    0x1DC03: HealDamage(who, (RandomInt(21) + 9));
+  endcase
+  PlaySoundEffect( who,  SOUND_EFFECT_HEAL );
+  PlayObjectCenteredEffect(who, EFFECT_SPARKLE, 10,10);
+endprogram

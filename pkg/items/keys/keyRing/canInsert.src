@@ -1,0 +1,35 @@
+/*
+        Maintened by *Edwards
+
+        2009-10-21
+*/
+use uo;
+
+program OnInsert( who, keyring, movetype, insert_type, adding_item, existing_stack, amt_to_add )
+
+        //Avoid compiler warnings
+        amt_to_add := amt_to_add;
+        existing_stack := existing_stack;
+        insert_type := insert_type;
+        movetype := movetype;
+        
+	if( !adding_item.IsKey() )
+		SendSysMessage( who, "That is not a key." );
+		return 0;
+	endif
+	
+	SendSysMessage( who, "You put the key on the ring." );
+	
+	var numkeys := ( EnumerateItemsInContainer( keyring ).Size() )+1;
+	if( numkeys == 1 )
+		keyring.graphic := 5993;
+	elseif( numkeys >= 2 && numkeys <= 4 )
+		keyring.graphic := 5994;
+	elseif( numkeys >= 5 )
+		keyring.graphic := 5995;
+	endif
+ 
+        SetObjProperty( keyring, "CantSteal", 1 );
+	
+	return 1;
+endprogram

@@ -1,0 +1,56 @@
+use uo;
+use vitals;
+
+include "include/spellRestrictions";
+
+program chrcast_thunderstorm( parms )
+  var circle := 3;
+  var delivery := "notarget";
+  var noto := "harmful";
+  var result := maincast(parms, delivery, circle, noto, 605);
+
+  if(result == 0)
+    return 0;
+  endif
+
+  var caster := result[1];
+
+var dru := Cint(GetEffectiveSkill(caster, SPELLWEAVING));
+var alore := Cint(GetEffectiveSkill(caster, SKILLID_ANIMALLORE));
+var int := GetIntelligence(caster);
+
+var bonus := 0;
+
+if(caster.ip)
+bonus := int/5;
+endif
+
+  
+var dmg := Cint((dru/12) + (alore/12) + bonus);
+var duration := (dru + alore) / 10;
+var obszar := Cint(dru/15);
+var cwele := {};
+  
+  
+Detach();
+Playsoundeffect(caster, 0x5CF);
+
+foreach osoba in ListMobilesInLineOfSight(caster, obszar)
+
+SetObjProperty(osoba, "LastHit", {caster.name, caster.serial, "tstorm" });
+PlayLightningBoltEffect( osoba);
+ApplyRawDamage(osoba, Resisted(circle, caster, osoba, dmg));
+SetObjProperty(osoba, "#zwolnij", 1); // prop wykorzystywany w spellrestrict do zwalniania czarowania o 1 sek
+cwele.append(osoba.serial); // dodaje do arraya seriale kolesi ktorzy dostali thunderstormem
+endforeach
+
+sleep(duration);
+
+foreach id in cwele // wyszukuje kolesi ktorzy dostali thunderstormem i usuwa propa
+var serjal := SystemFindObjectBySerial(id, 1);
+EraseObjProperty(serjal, "#zwolnij");
+endforeach
+
+
+
+endprogram

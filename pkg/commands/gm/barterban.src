@@ -1,0 +1,23 @@
+// auction  version 1.0
+// by Zulu (zulu@zuluhotel.com)   November 12, 2000
+
+use uo;
+
+program change_cmdlevel( who )
+    SendSysMessage( who, "Barter Ban, select player." );
+
+    var player := Target( who, TGTOPT_NOCHECK_LOS );
+ 
+    if( !player.npctemplate and !player.amount )
+	if (getObjProperty (player, "barterban") == 1)
+	    EraseObjProperty (player, "barterban");
+	    SendSysMessage( who, "Player is no longer banned." );
+	else
+	    SetObjProperty (player, "barterban", 1);
+	    SendSysMessage( who, "Player is now banned." );
+	endif
+    else
+    	SendSysmessage( who , "Not a player" );
+    endif
+
+endprogram

@@ -1,0 +1,101 @@
+// //$Id: use.src 1027 2007-03-21 14:14:25Z tekproxy $
+
+use uo;
+use os;
+use util;
+use cfgfile;
+
+include ":attributes:attributes";
+include ":timedscripts:timedScripts";
+include ":itemutils:itemdesc";
+include "include/client";
+
+program eat(who, food)
+	if ( food.movable == 0 )
+		SendSysMessage(who, "You cannot use that.");
+		return 0;
+	elseif ( !ReserveItem(food) )
+		SendSysMessage(who, "Someone else is already using that.");
+		return 0;
+	endif
+
+	var cfg_elem := GetItemDescInfo(food.objtype);
+	var themsg;
+	var poison := CInt(GetObjProperty(food, "PoisonLevel"));
+	var foodvalue := CInt(cfg_elem.foodvalue);
+	
+	var hunger := AP_GetVital(who, "Hunger");
+	if ( !foodvalue )
+		foodvalue := 1;
+	endif
+	if ( hunger == 0 )
+		SendSysMessage(who, "You are too full to eat any more.");
+		return 0;
+	endif
+	
+	if ( !SubtractAmount(food, 1) )
+		SendSysMessage(who, "Error - unable to subtract 1 from item.");
+		return 0;
+	endif
+
+	case ( RandomInt(3) + 1 )
+		1: 
+			PlaySoundEffect(who, 0x3b);
+			break;
+		2: 
+			PlaySoundEffect(who, 0x3c);
+			break;
+		3: 
+			PlaySoundEffect(who, 0x3d);
+			break;
+	endcase
+
+	PerformAction(who, ANIM_EAT);
+	AP_SetVital(who, "Stamina", AP_GetVital(who, "Stamina") + (RandomInt(5)+foodvalue));
+
+	hunger := hunger - foodvalue;
+	case (hunger)
+		0: 1:
+			themsg := "You manage to eat the food, but you are stuffed.";
+			break;
+		2: 3:
+			themsg := "You feel quite full after consuming the food.";
+			break;
+		4: 5: 6: 7:
+			themsg := "After eating the food you feel much less hungry.";
+			break;
+		8: 9: 10:
+			themsg := "You eat the food but are still extremely hungry.";
+			break;
+	endcase
+
+	if ( hunger < 0 )
+		themsg := "You manage to eat the food, but you are now stuffed.";
+		hunger := 0;
+	endif
+
+	AP_SetVital(who, "Hunger", hunger);
+
+	var regen := AP_GetVitalRegenRateMod(who, "Hunger");
+	case ( hunger )
+		0: regen := regen - 200; break;
+		1: regen := regen + 100; break;
+		2: regen := regen + 0; break;
+		3: regen := regen + 0; break;
+		4: regen := regen + 0; break;
+		5: regen := regen + 0; break;
+		6: regen := regen + 0; break;
+		7: regen := regen - 100; break;
+		8: regen := regen - 400; break;
+		9: regen := regen - 600; break;
+		10: regen := regen - 800; break;
+	endcase
+	AP_SetVitalRegenRateMod(who, "Hunger", regen);
+
+	SendSysMessage(who, themsg);
+	if ( poison > 0 )
+		TS_StartTimer(who, "defaultPoison", 120, poison, who);
+	endif
+
+	return 1;
+endprogram

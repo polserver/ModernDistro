@@ -1,0 +1,11 @@
+use uo;
+use os;
+
+program cursed(parms)
+  var who := parms[1];
+  var item := parms[2];
+  while(who.dead)
+    sleep(1);
+  endwhile
+  EquipItem(who, item);
+endprogram

@@ -1,0 +1,118 @@
+/* $Id$
+ *
+ */
+
+use cfgfile;
+use util;
+
+include ":attributes:attributeConstants";
+include ":attributes:attributes";
+include ":attributes:skillCheck";
+include ":containers:containers";
+include ":crafting:old/include/crafting";
+include ":crafting:old/include/craftingRepair";
+include ":crafting:old/include/toolWear";
+
+var item_config     := ReadConfigFile(":*:itemdesc");
+var craft_config    := ReadConfigFile(":cooking:cooking");
+
+program use_cookingtool(who, tool)
+
+	if ( !ReserveItem(tool) )
+		SendSysMessage(who, "That is already in use.");
+		return 0;
+	elseif( (!tool.movable) || !ReserveItem(tool) )
+		SendSysMessage(who, "You cannot use that");
+		return 0;
+	elseif( !(tool in EnumerateItemsInContainer(who.backpack)) )
+		SendSysMessage(who, "That item is not in your backpack.");
+		return 0;
+	endif
+
+	EraseObjProperty(who, "#IsMeditating");
+	EraseObjProperty(who, "#HealTimer");
+
+	var rinfo := sendCraftGump(who, COOKING);
+
+	// OK was pressed, close it on out
+	if(rinfo == 0)
+		return 0;
+	endif
+
+	var the_objtype := rinfo[1];
+	var amt         := rinfo[2];
+
+	var CraftNear := isNearRequiredObject(who, the_objtype);
+	if ( CraftNear == 0 )
+		RequiredObjectMissing(who, the_objtype);
+		return 0;
+	endif
+
+	if(craft_config[Hex(the_objtype)].assemble == 1)
+		CraftAssembly(who, craft_skill, tool, the_objtype, amt);
+	else
+		CookItems(who, the_objtype, amt, tool);
+	endif
+
+endprogram
+
+function CookItems(who, what, amt, tool)
+
+	if( !what )
+		SendSysMessage(who, "Cancelled");
+		return 0;
+	endif
+
+	// Metal is sent for the ResourceList entry type.
+	var itemchk := MaterialSelection(who, craft_skill, lower(craft_config[what].type));
+	if( !itemchk )
+		return 0;
+	endif
+	var use_on := itemchk[1];
+	var ptmod := itemchk[3];
+
+	var num, theitem;
+	var itemname := craft_config[what].name;
+	var material := Cint(craft_config[what].material);
+	var reqd := Cint(craft_config[what].skill);
+	var diff := Cint(craft_config[what].difficulty);
+	var pts  := Cint(craft_config[what].points);
+	pts      := CInt(pts + ptmod);
+	var counter := 0, x := who.x, y := who.y;
+
+	while( counter < amt )
+		if( (who.x != x) || (who.y != y) )
+			SendSysMessage(who, "You stop cooking. Was that a rat!?");
+			break;
+		elseif( !tool )
+			break;
+		endif
+
+		Sleep(2);
+
+		if( GetAmount(use_on) >= material )
+			if( CraftCheckSkill(who, craft_skill, diff, pts) )
+				theitem := CreateCraftItem(who, craft_skill, use_on, use_on.objtype, what, material, itemname, reqd);
+				if( TypeOf(theitem) != "ItemRef" )
+					SubtractAmount(use_on, (material / 2));
+					SendSysMessage(who, "You failed to create the item, and some of your materials are lost.");
+					counter := counter + 1;
+					continue;
+				endif
+			else
+				num := CInt(randomint(material)/2) + 1;
+				if(SubtractAmount(use_on, num))
+					SendSysMessage(who, "You lost some material");
+				endif
+			endif
+			CheckToolWear (who, tool, craft_skill);
+		else
+			SendSysMessage(who, "You don't have the resources required to make that item.");
+			return 0;
+		endif
+		counter := counter + 1;
+	endwhile
+
+	return 0;
+
+endfunction

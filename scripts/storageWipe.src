@@ -1,0 +1,63 @@
+use os;
+use uo;
+use vitals;
+use storage;
+
+program storagewipe()
+
+	set_critical(0);//without list line it runs fast, goes RunAway, makes megalag.
+
+	var endnum, npctest;
+	var startnum := CInt( GetGlobalProperty("storagestart") );
+
+	if (!startnum)
+		startnum := 1;
+		SetGlobalProperty("storagestart", startnum);
+	endif
+
+	if (GetGlobalProperty("storageend"))
+	EraseGlobalProperty("storageend");
+	endif
+
+	npctest := CreateNpcFromTemplate( "banker", 5445, 1153, 0, 0, "britannia" ); // newmap problem
+	endnum := npctest.serial;
+	RevokePrivilege( npctest, "invul" );
+	SetObjProperty(npctest, "guardkill", 1);
+	ApplyRawDamage( npctest, 510 );
+
+	print("Wiping orphaned storage locations");
+	var tamedstorage, merchantstorage, inv_fs, inv_pb, inv_1c;
+	tamedstorage := FindStorageArea( "Tamed Storage" );
+	merchantstorage := FindStorageArea( "Merchant Storage" );
+
+	var containername;
+	var container;
+	var num := 0;
+	var mercs := 0;
+	var i;
+	for (i := startnum; i < endnum; i:= i + 1)
+		sleepms(250);//without list line it runs fast, goes RunAway, makes megalag.
+		if (!SystemFindObjectBySerial(i))
+			inv_fs := i + " FS";
+			inv_pb := i + " PB";
+			inv_1c := i + " 1C";
+			containername := "Bankbox  " + Hex(i);
+			if (DestroyRootItemInStorageArea( tamedstorage, containername))
+				num := num + 1;
+				print("Tamed Storage destroyed for "+i);
+			endif
+			if (DestroyRootItemInStorageArea( merchantstorage, inv_fs))
+				DestroyRootItemInStorageArea( merchantstorage, inv_pb);
+				DestroyRootItemInStorageArea( merchantstorage, inv_fs);
+				print("Merchant Storage destroyed for "+i);
+				mercs := mercs +1;
+			endif
+		endif
+		SetGlobalProperty("storagestart", i);
+	endfor
+
+	print("Searched from " + startnum + " through " + endnum);
+	print("Total Tamed areas destroyed: "+num);
+	print("Total Merc areas destroyed: "+mercs);
+
+endprogram

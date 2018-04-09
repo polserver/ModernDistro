@@ -1,0 +1,158 @@
+use uo;
+use os;
+
+
+program on_insert( who, runebook, movetype, inserttype, item, existing_stack, amt_to_add )
+
+	amt_to_add := amt_to_add;
+	existing_stack := existing_stack;
+	inserttype := inserttype;
+	movetype := movetype;
+	
+	if( !ReserveItem( runebook ) )
+		return 0;
+	endif
+
+	case( item.objtype )
+	
+		0x1f14:		if( AddRuneToRunebook( runebook, item ) )
+					SendSysMessage( who, "The rune was successfully added to the runebook." );
+					return 1;
+				else
+					SendSysMessage( who, "Couldn't add the rune to the runebook." );
+					return 0;
+				endif
+				break;
+		
+		0x1f4c:		if( RechargeBook( who, runebook, item ) )
+					return 1;
+				else
+					return 0;
+				endif
+				break;
+		
+		default:	MoveItemToContainer( item, who.backpack );
+		
+	endcase
+	
+endprogram
+
+
+function AddRuneToRunebook( runebook, rune )
+
+	set_critical(1);
+	
+	if( !ReserveItem( rune ) )
+		set_critical(0);
+		return 0;
+	endif
+	
+	var runes_def	 := GetObjProperty( runebook, "RuneDefs" );
+	if( !runes_def )
+		runes_def := array;
+	endif
+	
+	if( runes_def.size() >= 16 )
+		set_critical(0);
+		return 0;
+	endif
+	
+        var tox := Cint(GetObjProperty( rune, "x" ));
+	var toy := Cint(GetObjProperty( rune, "y" ));
+	var toz := Cint(GetObjProperty( rune, "z" ));
+	var tor := GetObjProperty(rune, "realm");
+	if( !tox and !toy and !toz )
+		set_critical(0);
+		return 0;
+	endif
+	
+	var name := rune.name - "A recall rune for ";
+	if( !name )
+		name := "A marked rune";
+	endif
+			
+	var rune_data		:= struct;
+	rune_data.+tox		:= tox;
+	rune_data.+toy		:= toy;
+	rune_data.+toz		:= toz;
+	rune_data.+tor		:= tor;
+	rune_data.+name		:= name;
+	rune_data.+defloc	:= 0;
+	rune_data.+dtindex	:= 5;
+	
+	if( !runes_def.append(rune_data) )
+		set_critical(0);
+		return 0;
+	endif
+	
+	if( !SetObjProperty( runebook, "RuneDefs", runes_def ) )
+		set_critical(0);
+		return 0;
+	endif
+	
+	DestroyItem( rune );
+
+	set_critical(0);
+	
+	return 1;
+	
+endfunction
+
+
+function RechargeBook( who, runebook, scrolls )
+
+	set_critical(1);
+	
+	var charges	 := Cint( GetObjProperty( runebook, "charges" ) );
+	var maxcharges := Cint( GetObjProperty( runebook, "maxcharges" ) );
+	if( !maxcharges )
+		maxcharges := 5;
+	endif
+	
+	var maxamount	 := Cint( maxcharges - charges );
+	var amount	 := Cint( scrolls.amount );
+	
+	if( maxamount <= 0 )
+		SendSysMessage( who, "This runebook is full." );
+		set_critical(0);
+		return 0;
+		
+	elseif( amount >= maxamount )
+		var to_substract := maxamount;
+		if( SubtractAmount( scrolls, to_substract ) )
+			charges := maxcharges;
+		endif
+		
+	elseif( DestroyItem( scrolls ) )
+		charges := charges + amount;
+	endif
+	
+	if( scrolls and scrolls.amount )
+		MoveItemToContainer( scrolls, who.backpack );
+	endif
+
+	PlaySoundEffect( who, 0x1f1);
+	PlayObjectCenteredEffect( who , 0x375a , 7 , 0x10 );
+	SetObjProperty( runebook, "charges", charges );
+	SendSysMessage( who, "There's now " + charges + " charges in this runebook." );
+	
+	UpdateName( runebook, charges );
+	
+	set_critical(0);
+	return 1;
+	
+endfunction
+
+
+function UpdateName( runebook, charges )
+
+	set_critical(1);
+	
+	var name := GetObjProperty( runebook, "name" );
+	if( !name )
+		name := "Runebook";
+	endif
+	
+	runebook.name := name + " [charges: " + charges + "]";
+
+endfunction

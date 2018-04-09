@@ -1,0 +1,21 @@
+use uo;
+use os;
+
+include ":attributes:attributes";
+
+program TimedScript_Strength(params)
+	var mobile := params[1];
+	var points := params[3];
+	params := 0;
+	
+	// Prevents mod from being applied twice.
+	if ( GetObjProperty(mobile, "StrengthMod") )
+		return 0;
+	endif
+	
+	SetObjProperty(mobile, "StrengthMod", points);
+	AP_ModifyStatMod(mobile, STRENGTH, points);
+	
+	return 1;
+endprogram
+

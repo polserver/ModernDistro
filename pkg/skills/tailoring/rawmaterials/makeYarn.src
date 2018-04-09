@@ -1,0 +1,84 @@
+// $Id: makeYarn.src 1266 2008-09-04 00:23:03Z AustinHeilman $
+
+use uo;
+use cfgfile;
+use util;
+
+include ":attributes:attributes";
+include ":crafting:toolWear";
+
+CONST UOBJ_WHEEL_START	:= 0x1015;
+CONST UOBJ_WHEEL_END		:= 0x101e;
+CONST UOBJ_WHEEL_START2	:= 0x10a4;
+CONST UOBJ_WHEEL_END2		:= 0x10a6;
+CONST UOBJ_YARN					:= 0xe1f;
+
+var item_config := ReadConfigFile(":*:itemdesc");
+
+program make_Yarn(who,wool)
+	if ( !ReserveItem(wool) )
+		SendSysMessage(who, "That is already in use.");
+		return 0;
+	elseif	( (!wool.movable) || !ReserveItem(wool) )
+		SendSysMessage(who, "You cannot use that.");
+		return 0;
+	elseif	( !(wool in EnumerateItemsInContainer(who.backpack)) )
+		SendSysMessage(who, "That item is not in your backpack.");
+		return 0;
+	endif
+
+	EraseObjProperty(who, "#IsMeditating");
+	EraseObjProperty(who, "#HealTimer");
+
+	SendSysMessage(who, "Select the spinning wheel to use");
+	var tool := Target(who);
+	if (!tool)
+		SendSysMessage(who, "Cancelled.");
+		return;
+	endif
+
+	var spinwheel := tool.objtype;
+	if ( (( spinwheel >= UOBJ_WHEEL_START ) && ( spinwheel <= UOBJ_WHEEL_END)) || (( spinwheel >= UOBJ_WHEEL_START2 ) && ( spinwheel <= UOBJ_WHEEL_END2 )) )
+		case( spinwheel )
+			4117:
+			4119:
+				tool.graphic := 0x1016;
+				break;
+			4121:
+			4123:
+				tool.graphic := 0x101a;
+				break;
+			4124:
+			4126:
+				tool.graphic := 0x101d;
+				break;
+			4260:
+			4262:
+				tool.graphic := 0x10a5;
+				break;
+		endcase
+
+		Detach();
+		Sleep(3);
+		tool.graphic := spinwheel;
+		makeYarn(who, wool);
+ 	else
+		SendSysMessage(who, "You can only use wool on a spinning wheel.");
+ 	endif
+endprogram
+
+function makeYarn(who,item)
+	if (item.amount <= 0 )
+		SendSysMessage(who, "You don't have any wool!");
+		return;
+	endif
+
+	if(SubtractAmount(item, 1))
+		var yarn := CreateItemInBackpack(who, UOBJ_YARN, 3);
+		if (!yarn)
+			SendSysMessage(who, "You fail to create yarn.");
+		else
+			SendSysMessage(who, "You spin some wool and create some yarn.");
+		endif
+	endif
+endfunction

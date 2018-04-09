@@ -1,0 +1,410 @@
+/* $Id: combatHook.src 119 2009-07-19 22:30:25Z AustinHeilman $
+ *
+ * NOTES:
+ *	Return 0 if you want the core to handle the
+ *	combat cycle. Return 1 to say that the cycle is over.
+ */
+
+use uo;
+use os;
+use polsys;
+use cfgfile;
+
+include ":attributes:attributes";
+include ":armor:armorZones";
+include ":combat:hitScripts";
+include ":combat:settings";
+include ":damage:damage";
+include ":itemutils:itemdesc";
+include "include/client";
+include "include/facings";
+
+/*
+ * Global variables
+ * With the way hooks work, these are only set only ONCE
+ * and stay the same in every instance the hook gets run.
+ */
+var g_item_cfg := ReadConfigFile(":*:itemdesc");
+var g_settings_cfg := CS_GetSettingsCfgFile();
+
+program Install()
+	print("INSTALLING: Combat hook... ");
+	return 1;
+endprogram
+
+exported function Attack(attacker, defender)
+	if ( !g_settings_cfg["Settings"].EnableHook )
+		return 0;
+	elseif ( !CanAttack(attacker, defender) )
+		return 1;
+	endif
+
+	var a_info, d_info;
+	SetupInfo(attacker, defender, a_info, d_info);
+
+	if ( !DistanceChecks(a_info, d_info) )
+		return 1;
+	elseif ( !AmmoChecks(a_info, d_info) )
+		return 1;
+	elseif ( !FacingChecks(attacker, defender) )
+		return 1;
+	endif
+	
+	PlayAttackAnimation(a_info);
+
+	var hit_chance := CalcHitDifficulty(a_info, d_info);
+	if ( RandomFloat(1.0) < hit_chance )
+		var attribute := GetConfigString(a_info.cfginfo, a_info.prefix+"Attribute");
+		var gain_flag := GetCombatGainFlags(attacker, defender);
+		SkillCheck(attacker, attribute, -1, "", gain_flag);
+
+		PlayHitSound(a_info, d_info);
+
+		var base_damage := CalcBaseDamage(a_info);
+		var raw_damage := base_damage;
+		ParryChecks(a_info, d_info, raw_damage);
+
+		var armor_hit := GetArmorHit(d_info);
+		ArmorChecks(d_info, armor_hit, raw_damage);
+
+		RunWeaponHitScripts(a_info, d_info, armor_hit, base_damage, raw_damage);
+		RunArmorHitScripts(a_info, d_info, armor_hit, base_damage, raw_damage);
+
+		ApplyRawDamageEX(d_info.mobile, raw_damage, DMG_FORCED, a_info.mobile);
+	else
+		PlayMissSound(a_info);
+	endif
+
+	return 1;
+endfunction
+
+function GetCombatGainFlags(attacker, defender)
+	if ( defender.npctemplate )
+		return ADV_ALL;
+	elseif ( attacker.npctemplate )
+		return ADV_ALL;
+	elseif ( g_settings_cfg["Settings"].PvPGains )
+		return ADV_ALL;
+	else
+		return ADV_DISABLE;
+	endif
+endfunction
+
+function CanAttack(attacker, defender)
+	if ( attacker == defender )
+		return 0;
+	elseif ( defender.dead || attacker.dead )
+		return 0;
+	elseif ( defender.hidden || attacker.hidden )
+		return 0;
+	elseif ( defender.concealed > attacker.cmdlevel )
+		return 0;
+	elseif ( !CheckLineOfSight(attacker, defender) )
+		return 0;
+	elseif ( !attacker.warmode && !g_settings_cfg["Settings"].AutoDefend )
+		return 0;
+	endif
+
+	return 1;
+endfunction
+
+function FacingChecks(attacker, defender)
+	if ( g_settings_cfg["Settings"].ForceFacing )
+		if ( attacker.x == defender.x && attacker.y == defender.y )
+				return 1;
+		elseif ( !InPosition(attacker, defender.x, defender.y, FACE_POS_INFRONT) )
+			if ( attacker.npctemplate )
+				TurnObjectToward(attacker, defender.x, defender.y);
+			else
+				CombatMsg(attacker, "You need to be facing "+defender.name+" to attack.", "Facing");
+				return 0;
+			endif
+		endif
+		// Should only turn the attacker
+		//if ( !IsFacing(defender, attacker.x, attacker.y) )
+		//	TurnObjectToward(defender, attacker.x, attacker.y);
+		//endif
+	endif
+
+	return 1;
+endfunction
+
+function DistanceChecks(byref a_info, byref d_info)
+	var cur_range := Distance(a_info.mobile, d_info.mobile);
+	var max_range := GetConfigInt(a_info.cfginfo, a_info.prefix+"MaxRange");
+	if ( max_range == error )
+		max_range := 1;
+	endif
+
+	if ( cur_range > max_range )
+		CombatMsg(a_info.mobile, "Opponent is too far away.", "Dist");
+		return 0;
+	elseif ( cur_range < CInt(GetConfigInt(a_info.cfginfo, a_info.prefix+"MinRange")) )
+		CombatMsg(a_info.mobile, "Opponent is too close.", "Dist");
+		return 0;
+	else
+		return 1;
+	endif
+endfunction
+
+function AmmoChecks(byref a_info, byref d_info)
+	var ammo_type := CInt((a_info.cfginfo).ProjectileType);
+	if ( !ammo_type )
+		return 1;
+	endif
+
+	if ( ConsumeSubstance((a_info.mobile).backpack, ammo_type, 1) )
+		PlaySoundEffect(a_info.mobile, CInt((a_info.cfginfo).ProjectileSound));
+		PlayMovingEffect(a_info.mobile, d_info.mobile, (a_info.cfginfo).ProjectileAnim, 10, 0);
+		return 1;
+	else
+		CombatMsg(a_info.mobile, "You do not have any "+GetObjTypeDesc(ammo_type, 1)+"!", "Ammo");
+		return 0;
+	endif
+endfunction
+
+function PlayAttackAnimation(byref a_info)
+	var attack_anim := ANIM_FIDGET_1; // Default attack anim for NPCs.
+	if ( (a_info.cfginfo).Anim )
+		// Normal weapons
+		var anim_list := GetConfigStringArray(a_info.cfginfo, "Anim");
+		attack_anim := anim_list[RandomInt(anim_list.Size())+1];
+	elseif ( (a_info.cfginfo).AttackAnimation )
+		// NPC intrinsic weapons
+		var anim_list := GetConfigStringArray(a_info.cfginfo, "AttackAnimation");
+		attack_anim := anim_list[RandomInt(anim_list.Size())+1];
+	endif
+
+	if ( GetEquipmentbyLayer(a_info.mobile, LAYER_MOUNT) )
+		var xlate_cfg := ReadConfigFile("::animxlate");
+		if ( xlate_cfg )
+			var cfg_elem := xlate_cfg["OnMount"];
+			if ( cfg_elem )
+				var change := GetConfigInt(cfg_elem, Hex(attack_anim));
+				if ( change )
+					attack_anim := change;
+				endif
+			endif
+		endif
+	endif
+
+
+	PerformAction(a_info.mobile, CInt(attack_anim));
+
+	return attack_anim;
+endfunction
+
+function CalcHitDifficulty(byref a_info, byref d_info)
+	//hit_chance = (weapon_attribute + 50.0) / (2.0 * opponent_weapon_attribute + 50.0)
+	var a_skill := AP_GetSkill(a_info.mobile, GetConfigString(a_info.cfginfo, a_info.prefix+"Attribute"));
+	var d_skill := AP_GetSkill(d_info.mobile, GetConfigString(d_info.cfginfo, d_info.prefix+"Attribute"));
+
+	return ((a_skill + 50.0) / (2.0 * d_skill + 50));
+endfunction
+
+function PlayHitSound(byref a_info, byref d_info)
+	var hit_sound := GetConfigStringArray(a_info.cfginfo, a_info.prefix+"HitSound");
+	hit_sound := hit_sound[RandomInt(hit_sound.Size())+1];
+	PlaySoundEffect(a_info.mobile, CInt(hit_sound));
+
+	var damaged_sound;
+	if ( (d_info.mobile).npctemplate )
+		damaged_sound := GetConfigStringArray(d_info.cfginfo, "DamagedSound");
+	else
+		case ( (d_info.mobile).gender )
+			0:// Male
+				damaged_sound := array{341, 342, 343, 345, 346};
+				break;
+			1://Female
+				damaged_sound := array{332, 333, 334, 335, 336};
+				break;
+		endcase
+	endif
+	damaged_sound := damaged_sound[RandomInt(damaged_sound.Size())+1];
+
+	PlaySoundEffect(d_info.mobile, CInt(damaged_sound));
+
+	return 1;
+endfunction
+
+function PlayMissSound(byref a_info)
+	var miss_sound := GetConfigStringArray(a_info.cfginfo, a_info.prefix+"MissSound");
+	miss_sound := miss_sound[RandomInt(miss_sound.Size())+1];
+	PlaySoundEffect(a_info.mobile, CInt(miss_sound));
+
+	return 1;
+endfunction
+
+function CalcBaseDamage(byref a_info)
+	var base_dmg := GetConfigString(a_info.cfginfo, a_info.prefix+"Damage");
+	base_dmg := RandomDiceRoll(base_dmg);
+
+	var attribute := GetConfigString(a_info.cfginfo, a_info.prefix+"Attribute");
+	var dmg_mult := CDbl(AP_GetSkill(a_info.mobile, attribute))+50.0;
+	dmg_mult += (CDbl(AP_GetStat(a_info.mobile, STRENGTH)) * 0.2);
+	dmg_mult := CDbl(dmg_mult) * 0.01;
+	base_dmg *= dmg_mult;
+
+	return CInt(base_dmg);
+endfunction
+
+function ParryChecks(byref a_info, byref d_info, byref raw_damage)
+	var shield := (d_info.mobile).shield;
+	if ( !shield )
+		return 0;
+	elseif ( !InPosition(d_info.mobile, a_info.mobile.x, a_info.mobile.y, FACE_POS_INFRONT) )
+		return 0;
+	endif
+
+	var attribute := GetConfigString(a_info.cfginfo, a_info.prefix+"Attribute");
+	var parry_elem := g_settings_cfg["Parry"];
+	var divisor := CDbl(parry_elem.ParryDivisor);
+	var roll := CDbl(parry_elem.ParryRoll);
+	var parry_chance := CDbl(AP_GetSkill(a_info.mobile, attribute)) / divisor;
+
+	if ( RandomFloat(roll) < parry_chance )
+		PerformAction(d_info.mobile, ANIM_TWIST_DODGE);
+		SendSysMessage(d_info.mobile, "You deflect some damage using your shield.");
+		raw_damage -= shield.ar;
+
+		var armor_elem := g_settings_cfg["Armor"];
+		if ( RandomInt(100)+1 <= armor_elem.WearChance )
+			SendSysMessage(d_info.mobile, shield.desc+" takes some damage.");
+			shield.hp := shield.hp - 1;
+
+			if ( shield.hp <= 1 )
+				MoveObjectToLocation(shield, 1, 1, 1, shield.realm, MOVEOBJECT_FORCELOCATION);
+				SendSysMessage(d_info.mobile, shield.desc+" has been destroyed.");
+				DestroyItem(shield);
+			endif
+		endif
+	endif
+
+	return 1;
+endfunction
+
+function GetArmorHit(byref d_info)
+	var hit_zone := CS_GetRandomArmorZone();
+	var armor_hit := CS_GetEquipmentInArmorZone(d_info.mobile, hit_zone);
+
+	var best_armor := struct;
+	best_armor.name := "nothing-"+hit_zone;
+	best_armor.desc := "nothing"+hit_zone;
+	best_armor.ar := 0;
+	
+	if ( armor_hit.Size() < 1 )
+		return 0;
+	endif
+
+	foreach item in ( armor_hit )
+		if ( item.ar > best_armor.ar )
+			best_armor := item;
+		endif
+		SleepMS(2);
+	endforeach
+
+	return best_armor;
+endfunction
+
+function ArmorChecks(byref d_info, armor_hit, byref raw_damage)
+	var blocked := CInt(armor_hit.ar) + CInt((d_info.mobile).ar_mod);
+	var absorbed := blocked / 2;
+	blocked -= absorbed;
+	absorbed += RandomInt(blocked+1);
+	raw_damage -= absorbed;
+
+	// Why is this *0.5 part in the pseudo code?
+	//if ( raw_damage >= 2.0 )
+	//	raw_damage *= 0.5;
+	//endif
+	raw_damage := CInt(raw_damage);
+
+	if ( !armor_hit.IsA(POLCLASS_ARMOR) )
+		return 1;
+	endif
+
+	var armor_elem := g_settings_cfg["Armor"];
+	if ( RandomInt(100)+1 <= armor_elem.WearChance )
+		SendSysMessage(d_info.mobile, armor_hit.desc+" takes some damage.");
+		armor_hit.hp := armor_hit.hp - 1;
+
+		if ( armor_hit.hp <= 1 )
+			MoveObjectToLocation(armor_hit, 1, 1, 1, armor_hit.realm, MOVEOBJECT_FORCELOCATION);
+			SendSysMessage(d_info.mobile, armor_hit.desc+" has been destroyed.");
+			DestroyItem(armor_hit);
+		endif
+	endif
+
+	return 1;
+endfunction
+
+function RunWeaponHitScripts(byref a_info, byref d_info, armor_hit, base_damage, raw_damage)
+	var weapon_scripts := array{};
+	if ( ((a_info.mobile).weapon).intrinsic )
+		weapon_scripts := GetWeaponHitScripts(a_info.mobile);
+	elseif ( ((a_info.mobile).weapon).IsA(POLCLASS_WEAPON) )
+		weapon_scripts := GetWeaponHitScripts((a_info.mobile).weapon);
+	endif
+
+	var params := array{a_info.mobile, d_info.mobile, (a_info.mobile).weapon, armor_hit, base_damage, raw_damage};
+	foreach hitscript in ( weapon_scripts )
+		var script := Start_Script(hitscript, params);
+		if ( !script || script.errortext )
+			SendSysMessage(a_info.mobile, "*Attacker* Weapon script error starting ["+hitscript+"] :"+script.errortext);
+			SendSysMessage(d_info.mobile, "*Attacker* Weapon script error starting ["+hitscript+"] :"+script.errortext);
+		endif
+		SleepMS(2);
+	endforeach
+
+	return 1;
+endfunction
+
+function RunArmorHitScripts(byref a_info, byref d_info, armor_hit, base_damage, raw_damage)
+	var armor_scripts := GetArmorHitScripts(d_info.mobile, (d_info.mobile).weapon);
+
+	var params := array{a_info.mobile, d_info.mobile, (a_info.mobile).weapon, armor_hit, base_damage, raw_damage};
+	foreach hitscript in ( armor_scripts )
+		var script := Start_Script(hitscript, params);
+		if ( !script || script.errortext )
+			SendSysMessage(a_info.mobile, "*Defender* Armor script error starting ["+hitscript+"] :"+script.errortext);
+			SendSysMessage(d_info.mobile, "*Defender* Armor script error starting ["+hitscript+"] :"+script.errortext);
+		endif
+		SleepMS(2);
+	endforeach
+
+	return 1;
+endfunction
+
+function SetupInfo(attacker, defender, byref a_info, byref d_info)
+	a_info := struct;
+	a_info.+mobile := attacker;
+	if ( attacker.IsA(POLCLASS_NPC) && (attacker.weapon).intrinsic )
+		a_info.+prefix := "Attack";
+		a_info.+cfginfo := NPC_GetNPCConfig(attacker.npctemplate);
+	else
+		a_info.+prefix := "";
+		a_info.+cfginfo := g_item_cfg[(attacker.weapon).objtype];
+	endif
+
+	d_info := struct;
+	d_info.+mobile := defender;
+	if ( defender.IsA(POLCLASS_NPC) && (defender.weapon).intrinsic )
+		d_info.+prefix := "Attack";
+		d_info.+cfginfo := NPC_GetNPCConfig(defender.npctemplate);
+	else
+		d_info.+prefix := "";
+		d_info.+cfginfo := g_item_cfg[(defender.weapon).objtype];
+	endif
+
+	return 1;
+endfunction
+
+function CombatMsg(mobile, text, type:="")
+	// This is done just to prevent message spam on fast weapons.
+	if ( CInt(GetObjProperty(mobile, "#CH-Msg"+type)) < ReadMillisecondClock() )
+		SendSysMessage(mobile, text);
+		SetObjProperty(mobile, "#CH-Msg"+type, ReadMillisecondClock()+800);
+	endif
+
+	return 1;
+endfunction

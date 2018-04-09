@@ -1,0 +1,101 @@
+use uo;
+use os;
+
+include ":attributes:attributes";
+include ":timedscripts:timedScripts";
+include ":damage:damage";
+
+program TimedScript_DefaultPoison(params)
+	var who := params[1];
+	var attacker := params[2];
+	var level := CInt(params[3]);
+	params := 0; // No longer needed.
+
+	if ( !level )
+		level := 1;
+	endif
+
+	if ( attacker )
+		SetScriptController(attacker);
+	endif
+
+	var dmg := 0;
+	var stam := 0;
+	var poisonedmsg := "";
+	var viewermsg := "";
+	var time := 15;
+	case ( level )
+		default:
+		1: dmg := Cint(AP_GetVitalMaximumValue(who, "Hits") / 40);
+		   if (dmg < 3 )
+			dmg := 3;
+		   endif
+		   poisonedmsg := "You feel a bit nauseous.";
+		   viewermsg := "* - "+who.name+" looks ill. - *";
+		   break;
+		   
+		2: dmg := Cint(AP_GetVitalMaximumValue(who, "Hits") / 32);
+		   if ( dmg < 5 )
+			dmg := 5;
+  		   endif
+		   poisonedmsg := "You feel disoriented and nauseous.";
+		   viewermsg := "* - "+who.name+" looks extremely ill. - *";
+		   time := 12;
+		   break;
+		   
+		3: dmg := Cint(AP_GetVitalMaximumValue(who, "Hits") / 16);
+		   if ( dmg < 7 )
+			dmg := 7;
+		   endif
+		   stam := Cint(AP_GetVitalMaximumValue(who, "Stamina") / 30);
+		   poisonedmsg := "You begin to feel pain throughout your body.";
+		   viewermsg := "* - "+who.name+" stumbles around in confusion and pain. - *";
+		   time := 10;
+		   break;
+		   
+		4: dmg := Cint(AP_GetVitalMaximumValue(who, "Hits") / 8);
+		   if ( dmg < 6 )
+			dmg := 6;
+		   endif
+		   stam := Cint(AP_GetVitalMaximumValue(who, "Stamina") / 20);
+		   poisonedmsg := "You feel extremely weak and are in severe pain!";
+		   viewermsg := "* - "+who.name+" is wracked with extreme pain! - *";
+		   time := 5;
+		   break;
+		   
+		5: dmg := Cint(AP_GetVitalMaximumValue(who, "Hits") / 4);
+		   if ( dmg < 12 )
+			dmg := 12;
+		   endif
+		   stam := Cint(AP_GetVitalMaximumValue(who, "Stamina") / 10);
+		   poisonedmsg := "You are in extreme pain, and require immediate aid!";
+		   viewermsg := "* - "+who.name+" begins to spasm uncontrollably! - *";
+		   time := 5;
+		   break;
+	endcase
+
+	while ( 1 )
+		PrintTextAbovePrivate(who, poisonedmsg, who);
+		foreach mobile in ( ListMobilesInLineOfSight(who, 8) )
+			if( mobile.ip && mobile != who )
+				PrintTextAbovePrivate(who, viewermsg, mobile);
+			endif
+			SleepMS(2);
+		endforeach		
+		
+		ApplyRawDamageEX(who, dmg, DMG_POISON, attacker);
+
+		Set_Critical(1);
+		var curr := CInt(AP_GetVital(who, "Stamina"));
+		if ( curr >= stam )
+			AP_SetVital(who, "Stamina", (curr-stam));
+		else
+			AP_SetVital(who, "Stamina", 0);
+		endif
+		Set_Critical(0);
+		
+		Sleep(time);
+	endwhile
+
+	return 1;
+endprogram

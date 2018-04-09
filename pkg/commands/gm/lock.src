@@ -1,0 +1,11 @@
+use os;
+use uo;
+
+program textcmd_lock( speaker )
+    SendSysMessage( speaker, "What do you wish to lock?" );
+
+    var what := Target( speaker,TGTOPT_NOCHECK_LOS );
+    if (what)
+        what.locked := 1;
+    endif
+endprogram

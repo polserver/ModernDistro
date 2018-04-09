@@ -1,0 +1,54 @@
+use os;
+use uo;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include "include/findCity";
+include "util/key";
+
+program cast_strength( parms )
+  var caster := parms[1];
+  var info := parms[2];
+  
+  var cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_NEUTRAL);
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+
+  if((cast_on.multi) ||(GetObjProperty(cast_on,"houseserial")) ||(GetObjProperty(cast_on,"house_serial")))
+    SendSysMessage(caster, "That cannot be magic locked!");
+    PlayLightningBoltEffect(caster);
+    return;
+  endif
+  if(cast_on.locked)
+    SendSysMessage(caster,"That is already locked!");
+    return;
+  endif
+  if((checkfordoors(cast_on)) && ((FindCity(cast_on) != "no city") || (FindCity(caster) != "no city")))
+    SendSysMessage(caster, "That cannot be magic locked!");
+    return;
+  endif
+  if(((cast_on.graphic<=0x9ab) &&(cast_on.graphic>=0x9a8)) ||((cast_on.graphic<=0xe43) &&(cast_on.graphic>=0xe3c)) ||((cast_on.graphic<=0xe80) &&(cast_on.graphic>=0xe7c)) ||(checkfordoors(cast_on)))
+    PlaySoundEffect(caster, SFX_SPELL_MAGIC_LOCK);
+    PrintTextAbovePrivate(cast_on, "*Locked!*", caster);
+    var magery := CInt(GetAttribute(caster, MAGERY) / 4);
+    SetObjProperty(cast_on, "MLockPickDiff", magery);
+    cast_on.locked := 1;
+  else
+    SendSysMessage(caster, "That cannot be magic locked!");
+  endif
+endprogram
+
+function checkfordoors(cast_on)
+  if(((cast_on.graphic<=0x1ffc) &&(cast_on.graphic>=0x1fed)) ||((cast_on.graphic<=0x6f4) &&(cast_on.graphic>=0x675)))
+    return 1;
+  endif
+  return 0;
+endfunction

@@ -1,0 +1,52 @@
+use http;
+use uo;
+
+var system := polcore();
+var itemcount := polcore().itemcount;
+var mobcount := polcore().mobilecount;
+var load := system.sysload;
+var uptime := system.uptime;
+var struptime;
+
+uptime := uptime / 60;
+
+if (uptime > 60)
+  uptime := uptime /60;
+  struptime := CStr(uptime) + " hours";
+else
+  struptime := CStr(uptime) + " minutes";
+endif
+writehtml(" <body bgcolor=#000000 text=#FFFFFF link=#0000ff vlink=#cc00ff alink=#0000CC>");
+writehtml("<td valign=top width=24></td><!--msnavigation--><td valign=top><h1 align=center><a href=http://pol.tumbolia.org>POL</a></h1>");
+writehtml("<html><head><title>Icrontic Shard Server Stats</title></head>");
+writehtml("<div align=center><p><font face=Verdana, Arial, Helvetica, sans-serif size=3><b>POL Shard Server Specs</b></font></p></div>");
+writehtml("<blockquote>");
+writehtml("<div align=left>");
+writehtml("<p><font face=Verdana, Arial, Helvetica, sans-serif size=2><b>Server Hardware:</b>");
+writehtml("</font></p>");
+writehtml("</div>");
+writehtml("<blockquote>");
+writehtml("<table border=1 cellspacing=0 cellpadding=10 bordercolor=#ff0000 width=400>");
+writehtml("<tr><td><div align=left><font face=Verdana, Arial, Helvetica, sans-serif size=2>CPU: <td>Unknown<br></td></tr>");
+writehtml("<tr><td>RAM: <td>Unknown<br></td></tr>");
+writehtml("<tr><td>HDD: <td>Unknown<br></td></tr>");
+writehtml("<tr><td>OS: <td>Unknown<br></td></tr>");
+writehtml("<tr><td>Connection:<td>Unknown</font></div></td></tr>");
+writehtml("</table></blockquote>");
+writehtml("<div align=left>");
+writehtml("<p><font face=Verdana, Arial, Helvetica, sans-serif size=2><b>Shard Statistics:</b></font></p>");
+writehtml("</div>");
+writehtml("<blockquote><table border=1 cellspacing=0 cellpadding=10 bordercolor=#ff0000 width=400>");
+writehtml("    <div align=left>");
+writehtml("<tr><td><p><font face=Verdana, Arial, Helvetica, sans-serif size=2>Current number of accounts:  <td>" + len(ListAccounts()) + "<br></td></tr>");
+writehtml("<tr><td>Total NPCs in the world:  <td>" +  mobcount + "<br></td></tr>");
+writehtml("<tr><td>Total item count:  <td>" + itemcount + "<br></td></tr>");
+writehtml("<tr><td>Current Uptime since last restart :   <td>" + struptime + "<br></td></tr>");
+writehtml("<tr><td>Current Server Load : <td>" + CStr(load) + " % <br></td></tr>");
+writehtml("<tr><td>Longest server uptime: <td>34 days<br></td></tr>");
+writehtml("<tr><td>Server Timezone: <td>Unknown<br></td></tr>");
+writehtml("<tr><td>Server Location: <td>Unknown</font></p></td></tr>");
+writehtml("</div></table>");
+writehtml("</blockquote>");
+writehtml("</blockquote>");
+writehtml( "</BODY></HTML>" );

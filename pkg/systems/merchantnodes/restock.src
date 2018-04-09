@@ -1,0 +1,38 @@
+use uo;
+use os;
+use util;
+
+include "include/mrcSpawn";
+include "include/utility";
+
+program restok(parms)
+  var item := 0;
+  var initial := 0;
+  if(len(parms) == 2)
+    item    := parms[1];
+    initial := Cint(parms[2]);
+  else
+    item := parms;
+  endif
+  if((!GetGlobalProperty("norestock")) and (!GetGlobalProperty("nomerchants")))
+    sleep(RandomInt(20)+1);
+    var cratelist := GetObjProperty(item, "Type");
+    foreach entry in cratelist
+      var anchor    := entry[2];
+      var stockname := FindMerchantType(entry[1]) + " " + anchor[1] + " " + anchor[2] + " " + anchor[3];
+      var inv_fs := FindRootItemInStorageArea(storage, stockname + " FS");
+      var inv_rs := FindRootItemInStorageArea(storage, stockname + " RS");
+      if(inv_rs and inv_fs)
+        checkstock(inv_rs, inv_fs);
+        if(initial == 1)
+          RestockInitialInventory(inv_rs, inv_fs);
+          SetObjProperty(inv_rs, "MyGold", 5000);
+        else
+          RestockMyInventory(inv_rs, inv_fs);
+        endif
+      endif
+      sleep(1);
+    endforeach
+  endif
+endprogram
+       

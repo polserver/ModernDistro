@@ -1,0 +1,37 @@
+use uo;
+use os;
+use cfgfile;
+
+include "include/client";
+include ":magic:getSpellID";
+include "include/canAccess";
+
+
+program use_scroll(who, scroll)
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  if(!can_access(who, scroll))
+    return;
+  endif
+  if(scroll.movable == 0)
+    SendSysMessage(who, "You cannot use that.");
+    return;
+  endif
+  if (!scroll.amount)
+	return;
+  endif
+  if(!ReserveItem(scroll))
+    return;
+  endif
+  var spellid := GetSpellId( scroll );
+  var spells_cfg := ReadConfigFile( ":spells:spells" );
+  var element := FindConfigElem( spells_cfg, spellid );
+  var spellname := GetConfigString(element, "script");
+  spellname := spellname; // compiler warning stopper
+  PrintTextAbove( who, GetConfigString(element, "PowerWords") );
+  var parms := {};
+  parms[1] := "#scroll";
+  parms[2] := who;
+  parms[3] := scroll;
+  start_script(":spells:" + spellname, parms);
+endprogram

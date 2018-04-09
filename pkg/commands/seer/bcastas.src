@@ -1,0 +1,10 @@
+use uo;
+
+
+program bcastas(who, msg)
+
+if (msg)
+        Broadcast(msg);
+endif
+
+endprogram

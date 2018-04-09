@@ -1,0 +1,16 @@
+use uo;
+
+program showmember(who, membername)
+  SendSysMessage(who, "Display " + membername + " of what?");
+  var what := Target(who);
+  if(what)
+    var member := what.get_member(membername);
+    var extra := CInt( member );
+    if(extra)
+      extra := " (" + Hex(extra) + ")";
+    else
+      extra := "";
+    endif
+    PrintTextAbovePrivate(what, "that." + membername + " = " + member + extra, who);
+  endif
+endprogram

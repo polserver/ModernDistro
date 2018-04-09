@@ -1,0 +1,21 @@
+/*
+ * $Id: paralysis.src 373 2006-06-17 18:27:33Z austinheilman $
+ *
+ */
+ 
+use uo;
+use os;
+
+program TimedScript_Paralysis(params)
+	var mobile := params[1];
+	
+	PlaySoundEffect(mobile, 0x205);
+	SendSysMessage(mobile, "You are unable to move.");
+	while ( mobile )
+		mobile.paralyzed := 1;
+		SleepMS(250);
+	endwhile
+	
+	return 1;
+endprogram
+

@@ -1,0 +1,87 @@
+use uo;
+use vitals;
+use attributes;
+
+include "include/spellRestrictions";
+
+Const TIME_RESTRICT := 300; // 300 sekund = 5 minut
+
+program chrcast_voyage( parms )
+	var circle := 3;
+	var delivery := "notarget";
+	var noto := "heplful";
+	var result := maincast(parms, delivery, circle, noto, 613);
+	if(result == 0)
+		return 0;
+	endif
+	var caster := result[1];
+	var dru := Cint(GetEffectiveSkill(caster, SPELLWEAVING));
+	var alore := Cint(GetEffectiveSkill(caster, SKILLID_ANIMALLORE));
+	var int := GetIntelligence(caster);
+	var bonus := 0;
+	if(caster.ip)
+		bonus := int/5;
+	endif
+	var journey := GetObjProperty(caster, "#journey");
+	if(journey > ReadGameClock())
+		SendSysMessage(caster, "Ten czar mozesz rzucac raz na " + TIME_RESTRICT + " sekund. Pozostalo jeszcze " + (journey - ReadGameClock()) + " sekund.",3,40);
+		return 0;
+	endif
+	if(journey)
+		SendSysMessage(caster, "Juz jestes pod wplywem tego czaru.",3,40);
+		return 0;
+	endif
+	var wrogowie := 0;
+	foreach wrog in ListHostiles( caster, 15 );
+		if(wrog.npctemplate)
+			wrogowie := 1;
+		endif
+	endforeach
+
+	if(wrogowie == 1)
+		SendSysMessage(caster, "Nie mozesz uzywac tego czaru gdy przeciwnicy cie widza.",3,40);
+		return 0;
+	endif
+	
+	var duration := (dru + alore) / 10;
+	PlaySoundEffect(caster, 0x5C9);
+	SetObjProperty(caster, "#journey", ReadGameClock() + TIME_RESTRICT);
+	Detach();
+	sleep(duration);
+	SendSysMessage(caster, "Czar Etheral Voyage zakonczyl swoje dzialanie.",3,40);
+	EraseObjProperty(caster, "#journey");
+	CheckForEnemies(caster);
+endprogram
+
+function CheckForEnemies(caster)
+	foreach przeciwnik in ListMobilesNearLocation(caster.x, caster.y, caster.z , 8)
+		SendHostileEvent(caster, przeciwnik);
+	endforeach
+endfunction
+
+function SendHostileEvent(caster, przeciwnik)
+	if(HostileScripts(przeciwnik))
+		var ev := array;
+		ev.+ type;
+		ev.+ source;
+		ev.type := EVID_PEACEMADE;
+		ev.source := caster;
+		SendEvent(przeciwnik, ev);
+		ev.type := EVID_ENGAGED;
+		SendEvent(przeciwnik, ev);
+	endif
+endfunction
+
+function HostileScripts(przeciwnik)
+	case(przeciwnik.script)
+		"firebreather":
+		"spellKillPCs":  
+		"spellFire":
+		"killPCs":  
+		"nuksKillPCs":
+		"vampireKillPCs":
+			return 0;
+		default:
+			return 1;
+	endcase
+endfunction

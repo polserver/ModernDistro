@@ -1,0 +1,32 @@
+/* $Id: lowertimer.src 625 2006-07-10 04:42:02Z austinheilman $
+ *
+ */
+use uo;
+
+include ":timedscripts:timedScripts";
+
+program textcmd_lowerTimer(who, params)
+	params := SplitWords(params);
+
+	var timer_name	:= params[1];
+	var amount	:= CInt(params[2]);
+
+	if ( !timer_name || !amount )
+		SendSysMessage(who, "Command syntax: .lowertimer <timer name> <amount>");
+		return 0;
+	endif
+
+	SendSysMessage(who, "Select a mobile.");
+	var targ := Target(who);
+
+	if ( !targ.IsA(POLCLASS_MOBILE) )
+		SendSysMessage(who, "Cancelled.");
+		return 0;
+	endif
+
+	TS_LowerDuration(targ, timer_name, amount);
+	SendSysMessage(who, "Done.");
+
+	return 1;
+endprogram
+

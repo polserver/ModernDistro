@@ -1,0 +1,7 @@
+use uo;
+
+program textcmd_savenow()
+    Broadcast( "Saving Game State Now" );
+    SaveWorldState();
+    Broadcast( "Carry on, then" );
+endprogram

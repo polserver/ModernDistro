@@ -1,0 +1,33 @@
+use os;
+use uo;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+
+program cast_strength(parms)
+  var caster := parms[1];
+  var info := parms[2];
+  
+  var cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_NEUTRAL);
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+
+  if(GetObjProperty(cast_on, "trap_strength") > 25)
+    SendSysMessage(caster, "You couldn't disarm the trap.");
+  else
+    var oldscript := GetObjProperty(cast_on, "oldscript");
+    PlaySoundEffect(caster, SFX_SPELL_MAGIC_UNTRAP);
+    PlayStationaryEffect(cast_on.x, cast_on.y, cast_on.z, 0x376a, 30, 30, 0, cast_on.realm);
+    EraseObjProperty(cast_on, "trap_type");
+    EraseObjProperty(cast_on, "trap_strength");
+    cast_on.usescript := oldscript;
+  endif
+endprogram

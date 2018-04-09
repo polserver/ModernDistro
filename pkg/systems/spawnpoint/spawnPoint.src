@@ -1,0 +1,176 @@
+use uo;
+use os;
+include ":attributes:attributes";
+
+var spawneditlayout :=
+{
+    "page 0",
+    "gumppic    30   0  101",
+    "button    118  90 2130 2129  1   0 100",
+    "text       80 120   33    0",
+    "text       85 140    0    1",
+    "text       85 156    0    2",
+    "text       85 180   33    3",
+    "text      100 196    0    4",
+    "text      100 212    0    5",
+    "text       95 250   33    6",
+    "text       95 235   33   12",
+    "group       1",
+    "radio     180 235 210 211 0 99",
+    "textentry 160 140  40  15 50 1  7",
+    "textentry 160 156  40  15 50 2  8",
+    "textentry 155 196  30  15 50 3  9",
+    "textentry 155 212  30  15 50 4 10",
+    "textentry  65 268 160  15 50 5 11"
+};
+
+var spawneditdata :=
+{
+	"Spawn Point Data",
+	"Amount: ",
+	"Range: ",
+	"Delay (Minutes)",
+	"Min: ",
+	"Max: ",
+	"Monster Type",
+	"0",
+	"0",
+	"0",
+	"0",
+	"NONE",
+    "Ignore LOS"
+};
+
+program use_spawnpoint(who, spawnpoint)
+  EraseObjProperty(spawnpoint, "IgnoreLOS");
+  if(who.cmdlevel < 2)
+	return;
+  endif
+  var spawn := GetObjProperty(spawnpoint, "Spawn");
+  var amount := GetObjProperty(spawnpoint, "Amount");
+  var mindelay := GetObjProperty(spawnpoint, "MinDelay");
+  var maxdelay := GetObjProperty(spawnpoint, "MaxDelay");
+  var range := GetObjProperty(spawnpoint, "Range");
+  var i, x;
+  if(spawn == "NONE")
+	SendSysMessage(who, "Initializing new spawnpoint...");
+  else
+	spawneditdata[8] := CStr(amount);
+	spawneditdata[9] := CStr(range);
+	spawneditdata[10] := CStr(mindelay);
+	spawneditdata[11] := CStr(maxdelay);
+	spawneditdata[12] := CStr(spawn);
+  endif
+  var res := SendDialogGump(who, spawneditlayout, spawneditdata);
+  if(res[0] != 100)
+	SendSysMessage(who, "Aborted.");
+	return;
+  endif
+  for(i:=1; i<=5; i:=i+1);
+	if(!res[i])
+	  SendSysMessage(who, "Error: spawn data incomplete.  Aborting.");
+	  return;
+	endif
+  endfor
+	x := len(res[1]);
+	i := res[1];
+	i := i[4, (x-3)];
+	amount := CInt(i);
+	x := len(res[2]);
+	i := res[2];
+	i := i[4, (x-3)];
+	range := CInt(i);
+	x := len(res[3]);
+	i := res[3];
+	i := i[4, (x-3)];
+	mindelay := CInt(i);
+	x := len(res[4]);
+	i := res[4];
+	i := i[4, (x-3)];
+	maxdelay := CInt(i);
+  if((amount < 1) || (amount > 32))
+	SendSysMessage(who, "Amount must be between 1 and 32.  Setting to 1.");
+	amount := 1;
+  endif
+  if((range < 1) || (range > 32))
+	SendSysMessage(who, "Range must be between 1 and 32.  Setting to 1.");
+	range := 1;
+  endif
+  if((mindelay < 0) || (mindelay > 1440))
+	SendSysMessage(who, "MinDelay must be between 0 and 1440.  Setting to 1.");
+	mindelay := 1;
+  endif
+  if((maxdelay < 0) || (maxdelay > 1440))
+	SendSysMessage(who, "MaxDelay must be between 0 and 1440.  Setting to 1.");
+	maxdelay := 1;
+  endif
+  if(maxdelay < mindelay)
+	SendSysMessage(who, "MaxDelay cannot be less than MinDelay.   Setting equal.");
+	maxdelay := mindelay;
+  endif
+  x := len(res[5]);
+  i := res[5];
+  i := i[4, (x-3)];
+  spawn := i;
+  foreach thing in (res.keys)
+    if(thing == 99)
+      SetObjProperty(spawnpoint, "IgnoreLOS", 1);
+      break;
+    endif
+  endforeach
+  SendSysMessage(who, i);
+  var critterarray := {"ettins", "orchorde", "trolls", "lesserundead", "undead", "vermin", "orcs", "dracos", "lizardmen", "ratmen"};
+  if(!i in critterarray)
+    var thecritter := CreateNpcFromTemplate(i, spawnpoint.x, spawnpoint.y, spawnpoint.z, 0, spawnpoint.realm);
+    if(!thecritter)
+	  SendSysMessage(who, "Invalid creature type.");
+	  spawn := "NONE";
+    else
+	  SetObjProperty(thecritter, "summoned", 1);
+	  ApplyRawDamage(thecritter, GetHp(thecritter)+3);
+    endif
+  else
+    var thecritter := CreateNpcFromTemplate(GetCritter(i), spawnpoint.x, spawnpoint.y, spawnpoint.z, 0, spawnpoint.realm);
+    if(!thecritter)
+	  SendSysMessage(who, "Invalid creature type.");
+	  spawn := "NONE";
+    else
+	  SetObjProperty(thecritter, "summoned", 1);
+	  ApplyRawDamage(thecritter, GetHp(thecritter)+3);
+    endif
+  endif
+  SetObjProperty(spawnpoint, "Amount",   amount);
+  SetObjProperty(spawnpoint, "Range",    range);
+  SetObjProperty(spawnpoint, "MinDelay", mindelay);
+  SetObjProperty(spawnpoint, "MaxDelay", maxdelay);
+  SetObjProperty(spawnpoint, "Spawn",    spawn);
+  SetObjProperty(spawnpoint, "ResetMe",  1);
+  SendSysMessage(who, "Spawnpoint initialized.  Resetting spawn.  This may take a minute...");
+  spawnpoint.invisible := 1;
+endprogram
+
+function GetCritter(type)
+  if(type == "vermin")
+    return "grat";
+  elseif(type == "orcs")
+     return "orc1";
+  elseif(type == "orchorde")
+    return "orclord";
+  elseif(type == "ratmen")
+    return "ratman1";
+  elseif(type == "lizardmen")
+    return "lizardman1";
+  elseif(type == "dracos")
+    return "dragon1";
+  elseif(type == "trolls")
+    return "troll1";
+  elseif(type == "undead")
+    return "shade";
+  elseif(type == "lesserundead")
+    return "zombie";
+  elseif(type == "ettins")
+    return "ettin";
+  else
+    return type;
+  endif
+endfunction

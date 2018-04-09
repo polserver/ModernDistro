@@ -1,0 +1,31 @@
+use uo;
+use os;
+
+include ":gumps:requestGump";
+include ":containers:storageAreas";
+
+program command_OpenStorage( mobile )
+
+	var storage_area := RequestGump( mobile, "Storage Area Name", "", CP_DEFAULT_AREA );
+	if( !storage_area )
+		SendSysMessage( mobile, "Cancelled." );
+		return 0;
+	endif
+
+	var container_id := RequestGump( mobile, "Storage container ID" );
+	if( !container_id )
+		SendSysMessage( mobile, "Cancelled." );
+		return 0;
+	endif
+
+	var root_container := CP_GetStorageAreaContainer( container_id, storage_area );
+	if( !root_container )
+		SendSysMessage( mobile, "Container does not exist. ->"+root_container.errortext );
+		return 0;
+	else
+		SendSysMessage( mobile, "Opening..." );
+		SendOpenSpecialContainer( mobile, root_container );
+	endif
+
+	return 1;
+endprogram

@@ -1,0 +1,34 @@
+use uo;
+use os;
+use cfgfile;
+
+include "include/mrcSpawn";
+
+program textcmd_seednode(who)
+  var cfg := ReadConfigFile("packedNodes");
+  foreach thing in GetConfigStringKeys(cfg)
+    if(thing["guard"])
+      var node := CreateItemAtLocation(cfg[thing].x, cfg[thing].y, cfg[thing].z, 0x1887b, 1);
+      var data := unpack(cfg[thing].data);
+      foreach entry in data
+        var key := entry[1];
+        var val := entry[2];
+        SetObjProperty(node, key, val);
+      endforeach
+    else
+      var node := CreateItemAtLocation(cfg[thing].x, cfg[thing].y, cfg[thing].z, 0x1887a, 1);
+      var data := unpack(cfg[thing].data);
+      foreach entry in data
+        var key := entry[1];
+        var val := entry[2];
+        SetObjProperty(node, key, val);
+        if(key == "Type")
+          foreach type in val
+            create_node_merc(type[1], type[1] + " " + type[2][1] + " " + type[2][2] + " " + type[2][3]);
+          endforeach
+        endif
+      endforeach
+    endif
+  endforeach
+  SendSysMessage(who, "Finished seeding nodes");
+endprogram

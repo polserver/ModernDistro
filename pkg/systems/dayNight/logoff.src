@@ -1,0 +1,7 @@
+// $Id: logoff.src 605 2011-09-11 01:14:50Z AustinHeilman $
+//
+//
+
+program LogOff(user)
+	return 1;
+endprogram

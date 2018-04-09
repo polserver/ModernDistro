@@ -1,0 +1,358 @@
+use uo;
+use os;
+use util;
+use cfgfile;
+
+include "include/eventID";
+include ":attributes:attributes";
+include "include/sysEvent";
+include "include/mrcSpawn";
+include "include/utility";
+include "include/dist";
+include "util/bank";
+
+var npclist := {};
+var spawn, amt, item, status, rng, tmplate;
+var npccfg := ReadConfigFile("::npcdesc");
+
+program merchantnode(itm)
+	item := itm;
+	SetObjProperty(item, "#Pid", GetPid());
+	item.color := 53;
+	item.invisible := 1;
+	SetObjProperty(item, "#wait", 1);
+	SetNodeName("initializing");
+	sleep(RandomInt(1));
+
+// if all nodes are globally disabled, we sleep until they are enabled again.
+	if(GetGlobalProperty("nomerchants"))											
+		SetNodeName("globally disabled");
+		SetObjProperty(item, "#wait", 2);
+		while(GetGlobalProperty("nomerchants"))
+			sleep(1);
+		endwhile
+	endif
+
+// 
+	SetNodeName("enabled");
+	EraseObjProperty(item, "#wait");
+	rng := CInt(GetObjProperty(item, "Range"));
+	if (!rng )
+		rng := 5;
+		SetObjProperty(item, "Range", rng);
+	endif
+	item.color := 0;
+
+// construct a list of npcs in a struct.
+	foreach entry in GetObjProperty(item, "NpcList");
+		var critter := SystemFindObjectBySerial(entry);
+		if(critter)
+			if( !(critter in npclist) )
+				npclist.append(critter);
+			endif
+		endif
+		sleepms(10);
+	endforeach
+
+	spawn := GetObjProperty(item, "Type");
+
+	if(!spawn)
+		var holder := array;
+		var tmparray := array;
+		var template := GetObjProperty(item, "Template");
+		foreach thing in npclist
+			tmparray := array;
+			tmparray.append(thing.npctemplate);
+			var anchor := GetObjProperty(thing, "Anchor");
+			tmparray.append(anchor);
+			tmparray.append(1);
+			holder.append(tmparray);
+			if((!template) or (template == 1) or (template == "merchant"))
+				SetObjProperty(item, "Template", 1);
+				var merctype := FindMerchantType(tmparray[1]);
+				create_node_merc(merctype, merctype + " " + anchor[1] + " " + anchor[2] + " " + anchor[3]);
+			endif
+			DestroyRootItemInStorageArea(storage, thing.serial + " FS");
+			DestroyRootItemInStorageArea(storage, thing.serial + " PB");
+			DestroyRootItemInStorageArea(storage, thing.serial + " 1C");
+			sleep(2);
+		endforeach
+		spawn := holder;
+		SetObjProperty(item, "Type", spawn);
+
+	endif
+
+//
+	ValidateSpawns();
+	amt := len(spawn);
+	if(!GetObjProperty(item, "Status"))
+		SetObjProperty(item, "Status", "on");
+	endif
+	var gc := 0;
+	RegisterForSpeechEvents(item, rng);
+	EnableEvents(SYSEVENT_SPEECH, rng);
+	var nxt := CInt(GetObjProperty(item, "Restock")) * 60;
+	var next_restock	:= ReadGameClock() + nxt;
+	if(!GetObjProperty(item, "Status"))
+		SetObjProperty(item, "Status", "on");
+	endif
+	var template := GetObjProperty(item, "Template");
+	SetObjProperty(item, "#FirstRestock", 1);
+	var parms := array;
+	parms.append(item);
+	parms.append(1);
+	start_script("restock", parms);
+	EraseObjProperty(item, "#FirstRestock");
+
+// This is the main loop for listening to events and sending them to the merchants
+	while(item)
+		if((GetObjProperty(item, "Status") == "on") and (!GetGlobalProperty("nomerchants")))
+			// only process if the node is still enabled
+			spawn := GetObjProperty(item, "Type");
+			if(ReadGameClock() >= gc)
+				ValidateSpawns();
+				SpawnAll(item.realm);
+				ValidateSpawns();
+				gc := ReadGameClock() + 120;
+			endif
+			var ev := os::wait_for_event(30);
+			case(ev.type)
+				SYSEVENT_SPEECH: if(template == 2)
+							ProcessBankerText(ev);
+						else
+							ProcessMerchantText(ev);
+						endif
+				"Respawn":	spawn := GetObjProperty(item, "Type");
+						ValidateSpawns();
+						SpawnAll(item.realm);
+						ValidateSpawns();
+				"Restock":	RestockAllMerchants();
+			endcase
+			if(ReadGameClock() > next_restock)
+				if(template == 1)
+					start_script("restock", item);
+				endif
+				next_restock	:= ReadGameClock() + nxt;
+			endif
+		else
+			// Merchants with this node have been turned off (locally or globally)
+			item.color := 53;
+			if(GetObjProperty(item, "Status") == "off")
+				SetNodeName("disabled");
+			else
+				SetNodeName("globally disabled");
+			endif
+			DespawnAll();
+			ValidateSpawns();
+			
+			// hang out here until it gets turned back on again.
+			while((GetObjProperty(item, "Status") == "off") or (GetGlobalProperty("nomerchants")))
+				var ev := os::wait_for_event(120);
+				ev := ev;
+			endwhile
+			
+			// Things have turned back on, so this stuff gets moving
+			SpawnAll(item.realm);
+			ValidateSpawns();
+			item.color := 0;
+			SetNodeName("enabled");
+			sleep(1);
+		endif
+	endwhile
+endprogram
+
+function SetNodeName(txt)
+	var tmplate := GetObjProperty(item, "Template");
+	if((!tmplate) or (tmplate == "merchant"))								 // setting to merchant mode
+		SetObjProperty(item, "Template", 1);
+	elseif(tmplate == "banker")																// setting to banker mode
+		SetObjProperty(item, "Template", 2);
+	endif
+	if(tmplate == 1)
+		item.name := "a merchant node [" + txt + "]";
+	else
+		item.name := "a banker node [" + txt + "]";
+	endif
+endfunction
+
+function ValidateSpawns()
+	var chk := array;
+	foreach entry in spawn
+		foreach thing in npclist
+			if(entry[2] == GetObjProperty(thing, "Anchor"))
+				var npc := thing;
+				if((entry[3] == 1) and (GetHP(npc)))
+					if(npc in chk)
+						// do nothing -- invalid entry --
+					else
+						chk.append(npc);
+					endif
+				else
+					MoveObjectToLocation(npc, 6066, 1, 0, "britannia", MOVEOBJECT_FORCELOCATION);
+					RevokePrivilege(npc, "invul");
+					ApplyRawDamage(npc, GetHP(npc) + 100);
+				endif
+			endif
+			sleepms(2);
+		endforeach
+		sleepms(2);
+	endforeach
+	foreach npc in npclist
+		if(npc in chk)
+			// do nothing;
+		else
+			MoveObjectToLocation(npc, 6066, 1, 0, "britannia", MOVEOBJECT_FORCELOCATION);
+			RevokePrivilege(npc, "invul");
+			ApplyRawDamage(npc, GetHP(npc) + 100);
+		endif
+		sleepms(2);
+	endforeach
+	npclist := chk;
+	var holder := array;
+	foreach thing in npclist
+		holder.append(thing.serial);
+	endforeach
+	SetObjProperty(item, "NpcList", holder);
+endfunction
+
+function DespawnAll()
+	var chk := array;
+	foreach thing in npclist
+		var hp := GetHP(thing);
+		if(hp)
+			MoveObjectToLocation(thing, 6066, 1, 0, "britannia", MOVEOBJECT_FORCELOCATION);
+			RevokePrivilege(thing, "invul");
+			ApplyRawDamage(thing, Cint(hp + 100));
+		endif
+		sleepms(2);
+	endforeach
+	npclist := array;
+	SetObjProperty(item, "NpcList", npclist);
+endfunction
+
+function SpawnAll(map)
+	foreach thing in spawn
+		var type	 := thing[1];
+		var root1	 := thing[2];
+		var status := thing[3];
+		var chest	:= thing[4];
+		var chk := 0;
+		foreach npc in npclist
+			if(root1 == GetObjProperty(npc, "Anchor"))
+				chk := 1;
+			endif
+		endforeach
+		if((chk == 0) and (status == 1))
+			var new := 0;
+			while((!new) and item)
+				new := CreateNpcFromTemplate(type, root1[1], root1[2], root1[3], 0, map);
+				if(new)
+					SetObjProperty(new, "Anchor", array(root1[1], root1[2], root1[3]));
+					SetObjProperty(new, "restockserial", chest);
+					npclist.append(new);
+				endif
+				sleep(1);
+			endwhile
+		endif
+	endforeach
+endfunction
+
+function ProcessBankerText(ev)
+	var text := lower(ev.text);
+	var who := ev.source;
+	var npc;
+	var evnt := array;
+	evnt.+ type;
+	evnt.+ source;
+	evnt.+ text;
+	if(text["bankers note"] || text["banker's note"] || text["bankers order"] || text["banker's order"] || text["bank draft"] || text["balance"] || text["bank"])
+		var dis := 15;
+		foreach mob in npclist
+			if(CheckLineOfSight(ev.source, mob))
+				var dst := dist(who, mob);
+				if(dst < dis)
+					dis := dst;
+					npc := mob;
+				endif
+			endif
+		endforeach
+		evnt.type := EVID_NODE;
+		evnt.source := ev.source;
+		evnt.text := ev.text;
+		if (npc)
+			SendEvent(npc, evnt);
+		endif
+	endif
+endfunction
+
+function ProcessMerchantText(ev)
+	var text := lower(ev.text);
+	var who := ev.source;
+	var npc;
+	var pass := 0;
+	var evnt := array;
+	evnt.+ type;
+	evnt.+ source;
+	evnt.+ text;
+	// These speech items require no other speech, so should be included in all checks.
+	if (text["appraise"] || text["stable"] || text["showinventory"] || text["showrestock"])
+		pass := 1;
+	endif
+	
+	// If the character wants to do something with a vendor:
+	if (text["buy"] || text["sell"] || text["job"] || text["train"] || text["teach"] || (pass))
+		
+		// Just pick the nearest vendor if the player isn't specific.
+		if( text["merchant"] || text["vendor"] || (pass) )
+			var dis := 7;
+			foreach mob in npclist
+				if(CheckLineOfSight(who, mob))
+					var dst := dist(who, mob);
+					if(dst < dis)
+						dis := dst;
+						npc := mob;
+					endif
+				endif
+			endforeach
+		endif
+
+		// Has the player said the name of the vendor?  Use that.
+		var vendorname;
+		foreach mob in npclist
+			if(CheckLineOfSight(who, mob))
+				vendorname := splitwords(mob.name);
+				if (text[lower(vendorname[1])])
+					npc := mob;
+				endif
+			endif
+		endforeach
+	endif
+	if (!npc)
+		return;
+	endif
+
+	if(Distance(who, npc) <= 4)
+		evnt.type := EVID_NODE;
+		evnt.source := ev.source;
+		evnt.text := ev.text;
+		SendEvent(npc, evnt);
+	endif
+	return;
+endfunction
+
+function RestockAllMerchants()
+	if((!GetGlobalProperty("norestock")) and (!GetGlobalProperty("nomerchants")))
+		var cratelist := GetObjProperty(item, "Type");
+		foreach entry in cratelist
+			var anchor		:= entry[2];
+			var stockname := FindMerchantType(entry[1]) + " " + anchor[1] + " " + anchor[2] + " " + anchor[3];
+			var inv_fs := FindRootItemInStorageArea(storage, stockname + " FS");
+			var inv_rs := FindRootItemInStorageArea(storage, stockname + " RS");
+			if(inv_rs and inv_fs)
+				checkstock(inv_rs, inv_fs);
+				RestockMyInventory(inv_rs, inv_fs);
+			endif
+			sleepms(10);
+		endforeach
+	endif
+endfunction

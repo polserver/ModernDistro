@@ -1,0 +1,46 @@
+use uo;
+use os;
+
+//add your own logic for these checking functions
+function CanIncreaseStack( mob, container, movetype, existing_stack, amt_to_add, item_to_add ) 
+   return 1; 
+endfunction 
+
+function CanAddItem( mob, container, movetype, item_to_add ) 
+   return 1; 
+endfunction 
+
+//if inserttype == INSERT_ADD_ITEM, existing_stack and amt_to_add are uninit
+program can_insert(who, container, movetype, inserttype, adding_item, existing_stack, amt_to_add)
+  var ok := 0;
+  if (inserttype == INSERT_INCREASE_STACK) 
+    ok := CanIncreaseStack( who, container, movetype, existing_stack, amt_to_add, adding_item ); 
+  elseif (inserttype == INSERT_ADD_ITEM) 
+    ok := CanAddItem( who, container, movetype, adding_item ); 
+  endif
+  if(!ok)
+    return 0;
+  endif
+     
+  var vendorserial := GetObjProperty(container,"Vendor");
+  if(!vendorserial)
+    var ownerserial := CInt(GetObjProperty(container, "Owner"));
+    if(ownerserial)
+      if((who.serial != ownerserial) && (who.cmdlevel < 3))
+        SendSysMessage(who, "You cannot move that");
+        return 0;
+      else
+        return 1;
+      endif
+    else
+      return 1;
+    endif
+  endif
+  var vendor := SystemFindObjectBySerial(vendorserial);
+  if((GetObjProperty(container, "Master") == who.serial) or (who.npctemplate == "playervendor"))
+    return 1;
+  else
+    PrintTextAbovePrivate(vendor, "You cannot put that there.", who);
+    return 0;
+  endif
+endprogram

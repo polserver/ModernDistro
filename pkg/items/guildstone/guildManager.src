@@ -1,0 +1,88 @@
+use uo;
+use os;
+use guilds;
+
+include "include/eventID";
+
+var proc := GetProcess(GetPid());
+var guilds;
+var stafflist := 0;
+while(stafflist == 0)
+  print("Guild Manager: Waiting for Stafflist to initialize");
+  sleep(2);
+  stafflist := GetProcess(GetGlobalProperty("#stafflist"));
+endwhile
+print("GuildManager Loaded");
+
+program GuildManager()
+  SetGlobalProperty("#GuildManager", GetPid());
+  var ev;
+  guilds := ListGuilds();
+  if(!guilds)
+    guilds := {};
+  endif
+  sleep(5);
+  while(1)
+    ev := os::wait_for_event(3600);
+    if(ev)
+      case(ev.type)
+        "orderchaos": OrderChaos(ev);
+        "disband":    GuildDisband(ev);
+        "created":    GuildCreated(ev);
+      endcase
+    endif
+  endwhile
+endprogram
+
+function OrderChaos(ev)
+  ev := ev; // stops ecompile "not used" warning
+  return;
+endfunction
+
+function GuildDisband(ev)
+  var guild  := ev.guild;
+  var gm     := ev.gm;
+  var stone  := ev.gs;
+  var name   := guild.GetProp("guildname");
+  var abbv   := guild.GetProp("guildabv");
+  var holder := guild.allyguilds;
+  foreach ally in holder
+    stone.RemoveAllyGuild(ally, guild);
+    guild.removeallyguild(ally);
+  endforeach
+  holder := guild.enemyguilds;
+  foreach enemy in holder
+    stone.RemoveAllyGuild(enemy, guild);
+    guild.removeenemyguild(enemy);
+  endforeach
+  stone.PurgeDeclarations(guild);
+  DestroyGuild(guild);
+  guilds := ListGuilds();
+  if(!guilds)
+    guilds := {};
+  endif
+  ev.type := "gmbcast";
+  ev.+src := "ScriptManager";
+  ev.+msg := "Guild Manager: guild [" + name + ", [" + abbv + "]]  has been disbanded.";
+  stafflist.SendEvent(ev);
+  var chk := 0;
+  while(chk == 0)
+    if(DestroyItem(stone))
+      chk := 1;
+    else
+      sleep(10);
+    endif
+  endwhile
+  CreateItemInBackpack(gm, 0x1A391, 1);
+endfunction
+
+function GuildCreated(ev)
+  guilds     := ListGuilds();
+  if(!guilds)
+    guilds := {};
+  endif
+  ev.type    := "gmbcast";
+  ev.+src := "GuildManager";
+  ev.+msg    := "Guild Manager: guild [" + ev.name + ", [" + ev.abbv + "]]  has been created.";
+  stafflist.sendevent(ev);
+endfunction

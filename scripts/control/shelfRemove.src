@@ -1,0 +1,52 @@
+use uo;
+use os;
+use util;
+
+program on_remove(who, backpack, item, movetype)
+  set_critical(1);
+  var vendorserial := GetObjProperty(backpack,"Vendored");
+  if(!vendorserial)
+    if(item.isa(POLCLASS_CONTAINER))
+      EraseObjProperty(item, "Owner");
+    endif
+  else
+    var vendor := SystemFindObjectBySerial(vendorserial);
+    var oldname := GetObjProperty(item,"OldName");
+    if((!oldname) || (oldname == error))
+      oldname := item.desc;
+    endif
+    item.name := oldname;
+    EraseObjProperty(item, "price");
+    EraseObjProperty(item, "Master");
+    EraseObjProperty(item, "OldName");
+    EraseObjProperty(item, "Vendored");
+  endif
+  if(backpack.item_count == 1)
+    case(backpack.graphic)
+      0xa97: backpack.graphic := 0xa9d;
+      0xa98: backpack.graphic := 0xa9d;
+      0xa9b: backpack.graphic := 0xa9d;
+      0xa99: backpack.graphic := 0xa9e;
+      0xa9a: backpack.graphic := 0xa9e;
+      0xa9c: backpack.graphic := 0xa9e;
+    endcase
+  else
+    if(backpack.graphic == 0xa9d)
+      var rint := RandomInt(3)+1;
+      case(rint)
+        1: backpack.graphic := 0xa97;
+        2: backpack.graphic := 0xa98;
+        3: backpack.graphic := 0xa9b;
+      endcase
+    elseif(backpack.graphic == 0xa9e)
+      var rint := RandomInt(3)+1;
+      case(rint)
+        1: backpack.graphic := 0xa99;
+        2: backpack.graphic := 0xa9a;
+        3: backpack.graphic := 0xa9c;
+      endcase
+    endif
+  endif
+  return 1;
+  set_critical(0);
+endprogram

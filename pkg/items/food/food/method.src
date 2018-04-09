@@ -1,0 +1,14 @@
+/* $Id: method.src 471 2006-06-28 00:07:48Z austinheilman $
+ *
+ */
+ 
+use uo;
+
+program Install()
+	return 1;
+endprogram
+
+exported function IsFood(item)
+	item := item; // To avoid unused var warnings
+	return 1;
+endfunction

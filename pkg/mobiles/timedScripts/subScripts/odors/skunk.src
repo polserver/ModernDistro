@@ -1,0 +1,42 @@
+/* $Id: skunk.src 373 2006-06-17 18:27:33Z austinheilman $
+ *
+ */
+use uo;
+use util;
+use os;
+
+include "include/client";
+
+program TimedScript_Skunk(params)
+	var who := params[1];
+	
+	while ( 1 )
+		PrintTextAbove(who, "*"+who.name+" smells like skunk*");
+		Sleep(10);
+		if ( RandomInt(5) == 3 )
+			DoVomit(who);
+		endif				
+	endwhile
+	
+	return 1;
+endprogram
+
+function DoVomit(who)
+	var players := array{};
+	foreach mobile in ( ListMobilesInLineOfSight(who, 6) )
+		if ( mobile.connected )
+			players.Append(mobile);
+		endif
+		SleepMS(2);
+	endforeach
+	
+	if ( players.Size() > 0 )
+		var vomiter := players[RandomInt(players.Size())+1];
+		SendSysMessage(vomiter, "The stench from "+who.name+" makes you feel extremely sick.");
+		PerformAction(vomiter, ANIM_BOW);
+		SleepMS(60);
+		CreateItemAtLocation(vomiter.x, vomiter.y, vomiter.z, "vomit", 1, vomiter.realm);
+	endif
+	
+	return 1;
+endfunction

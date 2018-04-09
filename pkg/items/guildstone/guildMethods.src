@@ -1,0 +1,481 @@
+use uo;
+use os;
+use cfgfile;
+use util;
+use guilds;
+
+include ":attributes:attributes";
+include "include/canAccess";
+
+program Install()
+  return 1;
+endprogram
+
+exported function guild_destroy(stone)
+  var guild_id := GetObjProperty(stone,"guild_id");
+  var guild := FindGuild(guild_id);
+  var gname := guild.getprop("guildname");
+  foreach thing in (guild.members)
+    guild.removemember(thing);
+    EraseObjProperty(thing, "guild_id");
+    EraseObjProperty(thing, "fealty");
+    EraseObjProperty(thing, "abv");
+    thing.title_guild := "";
+    SendSysMessage(thing, "You are no longer a member of " + gname, 3, 34);
+  endforeach
+  foreach thing in (guild.allyguilds)
+    guild.removeallyguild(thing);
+  endforeach
+  foreach thing in (guild.enemyguilds)
+    guild.removeenemyguild(thing);
+  endforeach
+  DestroyGuild(guild);
+endfunction
+
+exported function FindGM(stone, guild)
+  stone := stone; // stops ecompile "not used" warning
+  var returninfo := {"In Vote", "0"};
+  var gm := guild.getprop("gm");
+  foreach thing in (guild.members)
+    if(thing.serial == gm)
+      returninfo[1] := thing.name;
+      returninfo[2] := thing.serial;
+      returninfo[3] := thing;
+      break;
+    endif
+  endforeach
+  return returninfo;
+endfunction
+
+exported function FindNewGM(stone, guild)
+  stone := stone; // stops ecompile "not used" warning
+  var vote, count, i;
+  var dict := dictionary;
+  foreach thing in (guild.members)
+    vote := GetObjProperty(thing, "fealty");
+    if(dict.exists(vote))
+      count := dict[vote] + 1;
+      dict[vote] := count;
+    else
+      dict.insert(vote, 1);
+    endif
+  endforeach
+  var winner := 0, votes:=dict.keys(),tie:=0;
+  count :=0;
+  for(i:=1;i<=dict.size();i:=i+1)
+    vote:=dict[votes[i]];
+    if(vote>count)
+      count:=vote;
+      winner:=votes[i];
+      tie:=0;
+    elseif(vote==count)
+      tie:=1;
+    endif
+  endfor
+  if(!tie)
+    guild.setprop("gm", winner);
+  endif
+endfunction
+
+exported function Toggle_Showing(stone, who, guild)
+  stone := stone; // stops ecompile "not used" warning
+  var abv := guild.getprop("guildabv");
+  var type := guild.getprop("type");
+  var tname := "[" + abv + "]";
+  if(type == "Order")
+    tname := tname + "(Order)";
+  elseif(type == "Chaos")
+    tname := tname + "(Chaos)";
+  endif
+  var gtitle := GetObjProperty(who, "guildtitle");
+  if(!gtitle)
+    gtitle := "";
+  endif
+  if(GetObjProperty(who, "abv") == "0")
+    if(gtitle == "")
+      who.title_guild := tname;
+    else
+      who.title_guild := gtitle + ", " + tname;
+    endif
+    SetObjProperty(who, "abv", 1);
+  else
+    SetObjProperty(who, "abv", "0");
+    if(type == "Standard")
+      who.title_guild := "";
+    else
+      who.title_guild := tname;
+    endif
+  endif
+endfunction
+
+exported function Abreviation_Validation(stone, thestring)
+  stone := stone; // stops ecompile "not used" warning
+  var chk := 1;
+  foreach guilds in ListGuilds()
+    if(lower(guilds.getprop("guildabv")) == lower(thestring))
+      chk := 0;
+      break;
+    endif
+  endforeach
+  return chk;
+endfunction
+
+exported function Name_Validation(stone, thestring)
+  stone := stone; // stops ecompile "not used" warning
+  var chk := 1;
+  foreach guilds in ListGuilds()
+    if(lower(guilds.getprop("guildname")) == lower(thestring))
+      chk := 0;
+      break;
+    endif
+  endforeach
+  return chk;
+endfunction
+
+exported function Character_Validation(stone, thestring)
+  stone := stone; // stops ecompile "not used" warning
+  var i, validstr:={"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "$", "*", "&", "#", "@", "!", "?", "+", "-", "^", " "};
+  thestring := lower(thestring);
+  var chk := 1;
+  for(i:=1; i<=len(thestring);i:=i+1)
+    if(!(thestring[i] in validstr))
+      chk := 0;
+    endif
+  endfor
+  return chk;
+endfunction
+
+exported function GuildChat(stone, ev, guild)
+  stone := stone; // stops ecompile "not used" warning
+  var the_msg := ev.message;
+  //var status  := ev.status; // uncomment if needed
+  if(ev.status == 1)
+    foreach person in (guild.members)
+      SendSysMessage(person, "Guild Status: " + the_msg, 3, 70);
+    endforeach
+  else
+    var who     := ev.who;
+    var gm := {"In Vote", "0"};
+    var chk := guild.getprop("gm");
+    foreach thing in (guild.members)
+      if(thing.serial == chk)
+        gm := thing;
+        break;
+      endif
+    endforeach
+    foreach person in (guild.members)
+      if((!GetObjProperty(person, "gc_off")) or (person == who) or (gm == who))
+        SendSysMessage(person, who.name + ": " + the_msg, 3, 70);
+      endif
+    endforeach
+  endif
+endfunction
+
+exported function CanWar(stone, ourtype, theirtype, who)
+  stone := stone; // stops ecompile "not used" warning
+  if(ourtype != "Standard")
+    if((ourtype == theirtype) or (theirtype == "Chaos") or (theirtype == "Order"))
+      SendSysMessage(who, "You cannot change your warfare status with a " + theirtype + " guild.");
+      return 0;
+    endif
+  endif
+  return 1;
+endfunction
+
+exported function PurgeDeclarations(stone, guild)
+  var dc := guild.getprop("GuildDeclareStatus");
+  if(!dc)
+    return;
+  endif
+  foreach gstatus in dc
+    var chk := gstatus[1];
+    if(chk == guild.guildid)
+      chk := FindGuild(gstatus[2]);
+    else
+      chk := FindGuild(chk);
+    endif
+    RemoveDeclaration(stone, guild, chk);
+  endforeach
+endfunction
+
+exported function RemoveDeclaration(stone, guild, enemy)
+  stone := stone; // stops ecompile "not used" warning
+  var holder := {};
+  var dc := guild.getprop("GuildDeclareStatus");
+  if(!dc)
+    dc := {};
+  endif
+  foreach gstatus in dc
+    if(((enemy.guildid != gstatus[2]) && (guild.guildid != gstatus[1])) and ((enemy.guildid != gstatus[1]) && (guild.guildid != gstatus[2])))
+      holder.append(gstatus);
+      break;
+    endif
+  endforeach
+  guild.setprop("GuildDeclareStatus", holder);
+  holder := {};
+  dc := enemy.getprop("GuildDeclareStatus");
+  if(!dc)
+    dc := {};
+  endif
+  foreach gstatus in dc
+    if(((enemy.guildid != gstatus[2]) && (guild.guildid != gstatus[1])) and ((enemy.guildid != gstatus[1]) && (guild.guildid != gstatus[2])))
+      holder.append(gstatus);
+      break;
+    endif
+  endforeach
+  enemy.setprop("GuildDeclareStatus", holder);
+endfunction
+
+exported function AddDeclaration(stone, guild, enemy, type)
+  stone := stone; // stops ecompile "not used" warning
+  var request:={};
+  request[1]:= enemy.guildid;
+  request[2]:= guild.guildid;
+  request[3]:= type;
+  var ga := guild.getprop("GuildDeclareStatus");
+  if(!ga)
+    ga := {};
+  endif
+  ga.append(request);
+  guild.setprop("GuildDeclareStatus", ga);
+  ga := enemy.getprop("GuildDeclareStatus");
+  if(!ga)
+    ga := {};
+  endif
+  ga.append(request);
+  request[1]:= guild.guildid;
+  request[2]:= enemy.guildid;
+  enemy.SetProp("GuildDeclareStatus", ga);
+endfunction
+
+exported function AddEnemyGuild(stone, guild, enemy)
+  stone := stone; // stops ecompile "not used" warning
+  var guildenemies := guild.getprop("guildenemies");
+  if(!guildenemies)
+    guildenemies := {};
+  endif
+  guildenemies.append(enemy.guildid);
+  guild.setprop("guildenemies", guildenemies);
+  guildenemies := enemy.getprop("guildenemies");
+  if(!guildenemies)
+    guildenemies := {};
+  endif
+  guildenemies.append(guild.guildid);
+  enemy.setprop("guildenemies", guildenemies);
+endfunction
+
+exported function AddAllyGuild(stone, guild, ally)
+  stone := stone; // stops ecompile "not used" warning
+  var guildallies := guild.getprop("guildallies");
+  if(!guildallies)
+    guildallies := {};
+  endif
+  guildallies.append(ally.guildid);
+  guild.setprop("guildallies", guildallies);
+  guildallies := ally.getprop("guildallies");
+  if(!guildallies)
+    guildallies := {};
+  endif
+  guildallies.append(guild.guildid);
+  ally.setprop("guildallies", guildallies);
+endfunction
+
+exported function RemoveAllyGuild(stone, guild, ally)
+  stone := stone; // stops ecompile "not used" warning
+  var guildallies := guild.getprop("guildallies");
+  if(!guildallies)
+    guildallies := {};
+  endif
+  var holder := {};
+  foreach thing in guildallies
+    if(thing != ally.guildid)
+      holder.append(thing);
+    endif
+  endforeach
+  guild.setprop("guildallies", guildallies);
+  guildallies := ally.getprop("guildallies");
+  if(!guildallies)
+    guildallies := {};
+  endif
+  foreach thing in guildallies
+    if(thing != guild.guildid)
+      holder.append(thing);
+    endif
+  endforeach
+  ally.setprop("guildallies", guildallies);
+endfunction
+
+exported function RemoveEnemyGuild(stone, guild, enemy)
+  stone := stone; // stops ecompile "not used" warning
+  var guildenemies := guild.getprop("guildenemies");
+  if(!guildenemies)
+    guildenemies := {};
+  endif
+  var holder := {};
+  foreach thing in guildenemies
+    if(thing != enemy.guildid)
+      holder.append(thing);
+    endif
+  endforeach
+  guild.setprop("guildenemies", guildenemies);
+  guildenemies := enemy.getprop("guildenemies");
+  if(!guildenemies)
+    guildenemies := {};
+  endif
+  foreach thing in guildenemies
+    if(thing != guild.guildid)
+      holder.append(thing);
+    endif
+  endforeach
+  enemy.setprop("guildenemies", guildenemies);
+endfunction
+
+exported function Pending(stone, guild, enemy, type)
+  stone := stone; // stops ecompile "not used" warning
+  var chk := 1;
+  foreach thing in (guild.getprop("GuildDeclareStatus"))
+    if((Cint(thing[1]) == enemy.guildid) and (Cint(thing[2]) == guild.guildid) and (thing[3] == type))
+      chk := 0;
+      break;
+    endif
+  endforeach
+  return chk;
+endfunction
+
+exported function OrderChaos(stone, guild, type)
+  print("Changing Order Chaos");
+  var orderguilds := GetGlobalProperty("OrderGuilds");
+  var chaosguilds := GetGlobalProperty("ChaosGuilds");
+  if(!orderguilds)
+    orderguilds := {};
+  endif
+  if(!chaosguilds)
+    chaosguilds := {};
+  endif
+  //var allies := guild.allyguilds;		// uncomment if needed
+  //var enemies := guild.enemyguilds;	// uncomment if needed
+  if(type == "Order")
+    foreach gld in orderguilds
+      var holder := FindGuild(gld);
+      if(holder)
+        if((Pending(stone, guild, holder, "RE")) or (Pending(stone, guild, gld, "RA")))
+          RemoveDeclaration(stone, guild, gld);
+        endif
+        guild.removeenemyguild(holder);
+        holder.removeenemyguild(guild);
+        guild.addallyguild(holder);
+        holder.addallyguild(guild);
+      endif
+    endforeach
+    foreach gld in chaosguilds
+      var holder := FindGuild(gld);
+      if(holder)
+        if((Pending(stone, guild, holder, "RE")) or (Pending(stone, guild, gld, "RA")))
+          RemoveDeclaration(stone, guild, gld);
+        endif
+        guild.removeallyguild(holder);
+        holder.removeallyguild(guild);
+        guild.addenemyguild(holder);
+        holder.addenemyguild(guild);
+      endif
+    endforeach
+    guild.setprop("type", "Order");
+    orderguilds.append(guild.guildid);
+    SetGlobalProperty("OrderGuilds", orderguilds);
+    foreach member in (guild.members)
+      if(GetObjProperty(member, "abv" == "0"))
+        SetObjProperty(member, "abv", 1);
+      else
+        SetObjProperty(member, "abv", "0");
+      endif
+      Toggle_Showing(stone, member, guild);
+    endforeach
+  elseif(type == "Chaos")
+    foreach gld in orderguilds
+      var holder := FindGuild(gld);
+      if(holder)
+        if((Pending(stone, guild, holder, "RE")) or (Pending(stone, guild, gld, "RA")))
+          RemoveDeclaration(stone, guild, gld);
+        endif
+        guild.removeallyguild(holder);
+        holder.removeallyguild(guild);
+        guild.addenemyguild(holder);
+        holder.addenemyguild(guild);
+      endif
+    endforeach
+    foreach gld in chaosguilds
+      var holder := FindGuild(gld);
+      if(holder)
+        if((Pending(stone, guild, holder, "RE")) or (Pending(stone, guild, gld, "RA")))
+          RemoveDeclaration(stone, guild, gld);
+        endif
+        guild.removeenemyguild(holder);
+        holder.removeenemyguild(guild);
+        guild.addallyguild(holder);
+        holder.addallyguild(guild);
+      endif
+    endforeach
+    chaosguilds.append(guild.guildid);
+    SetGlobalProperty("ChaosGuilds", chaosguilds);
+    guild.setprop("type", "Chaos");
+    foreach member in (guild.members)
+      if(GetObjProperty(member, "abv" == "0"))
+        SetObjProperty(member, "abv", 1);
+      else
+        SetObjProperty(member, "abv", "0");
+      endif
+      Toggle_Showing(stone, member, guild);
+    endforeach
+  else
+    if(guild.getprop("type") == "Order")
+      var holder := {};
+      foreach thing in orderguilds
+        if(thing != guild.guildid)
+          holder.append(thing);
+        endif
+      endforeach
+      orderguilds := holder;
+      SetGlobalProperty("OrderGuilds", orderguilds);
+    elseif(guild.getprop("type") == "Chaos")
+      var holder := {};
+      foreach thing in chaosguilds
+        if(thing != guild.guildid)
+          holder.append(thing);
+        endif
+      endforeach
+      chaosguilds := holder;
+      SetGlobalProperty("ChaosGuilds", chaosguilds);
+    endif
+    foreach thing in (guild.enemyguilds)
+      if((thing.guildid in orderguilds) or (thing.guildid in chaosguilds))
+        guild.removeenemyguild(thing);
+        thing.removeenemyguild(guild);
+        guild.removeallyguild(thing);
+        thing.removeallyguild(guild);
+      endif
+    endforeach
+    foreach thing in (guild.allyguilds)
+      if((thing.guildid in orderguilds) or (thing.guildid in chaosguilds))
+        guild.removeenemyguild(thing);
+        thing.removeenemyguild(guild);
+        guild.removeallyguild(thing);
+        thing.removeallyguild(guild);
+      endif
+    endforeach
+    foreach thing in (guild.getprop("guildenemies"))
+      guild.addenemyguild(FindGuild(thing));
+    endforeach
+    foreach thing in (guild.GetProp("guildallies"))
+      guild.addallyguild(FindGuild(thing));
+    endforeach
+    guild.setprop("type", "Standard");
+    foreach member in (guild.members)
+      if(GetObjProperty(member, "abv" == "0"))
+        SetObjProperty(member, "abv", 1);
+      else
+        SetObjProperty(member, "abv", "0");
+      endif
+      Toggle_Showing(stone, member, guild);
+    endforeach
+  endif
+endfunction

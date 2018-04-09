@@ -1,0 +1,26 @@
+use uo;
+use os;
+use util;
+
+program TimedScript_Flatulence(params)
+	var who := params[1];
+	
+	var sounds := array{0x5d, 0x5f, 0x5b, 0x22};
+	
+	SendSysMessage(who, "Your stomach feels bloated.");
+	
+	while ( 1 )
+		Sleep(RandomDiceRoll("6d5"));
+		
+		PlaySoundEffect(who, sounds[RandomInt(sounds.Size())+1]);
+		
+		PrintTextAbove(who, "*breaks wind*");
+		
+		foreach mobile in ( ListMobilesNearLocationEX(who.x, who.y, who.z, 10, LISTEX_FLAG_NORMAL+LISTEX_FLAG_HIDDEN) )
+			SendSysMessage(mobile, "You notice an indistinguishable stench in the air.");
+			SleepMS(2);
+		endforeach
+	endwhile
+	
+	return 1;
+endprogram

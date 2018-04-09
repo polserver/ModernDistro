@@ -1,0 +1,29 @@
+/////////////////////////////////////////////////////////////////////////////
+//
+//  ".l" -	Toggles between full light level and the 
+//			Region light level at character's X, Y, realm location.
+//
+//
+/////////////////////////////////////////////////////////////////////////////
+
+use uo;
+include "include/attributes";
+
+program textcmd_refreshme( who, text )
+    var ll := 0;
+
+	if(!GetObjProperty(who, "LightLevelSet"))
+		if(text)
+			ll:=CInt(text);
+		endif
+		who.setlightlevel (ll, 10800);
+		SetObjProperty(who, "LightLevelSet", 1);
+		SendSysMessage(who, "Light level set to user specified level.", 3, 88);
+	else
+		EraseObjProperty(who, "LightLevelSet");
+		ll := GetRegionLightLevelAtLocation( who.x, who.y, who.realm );
+		who.setlightlevel (ll, 10800);
+		SendSysMessage(who, "Light level set to region light level.", 3, 88);
+	endif
+    
+endprogram

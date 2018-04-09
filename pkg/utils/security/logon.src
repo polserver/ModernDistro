@@ -1,0 +1,14 @@
+/*
+        Maintened by *Edwards
+
+        2009-06-11
+*/
+use uo;
+use os;
+
+program LogOff(mobile)
+
+        EraseObjProperty( mobile, "#AuthCodeGiven" );
+        
+	return 1;
+endprogram

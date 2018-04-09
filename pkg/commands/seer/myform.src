@@ -1,0 +1,10 @@
+use os;
+use uo;
+
+program my_form( who )
+
+	who.graphic := CInt(GetObjProperty(who, "MyForm"));
+	EraseObjProperty(who, "MyForm");
+	SendSysMessage(who, "You are no longer in GM form.", color := 88);
+
+endprogram

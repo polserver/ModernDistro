@@ -1,0 +1,22 @@
+use uo;
+
+program evidence(who, evidence)
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  var ser := GetObjProperty(evidence, "serial");
+  if (!ser)
+    SendSysMessage(who, "This proves nothing!");
+    return;
+  endif
+  SendSysMessage(who,"Select the item to which you wish to match this evidence");
+  var what := Target(who, TGTOPT_CHECK_LOS);
+  if(!what)
+    SendSysMessage(who, "Targetting cancelled");
+    return;
+  endif
+  if(what.serial == CInt(ser))
+    PrintTextAbove(what, "This matches the evidence");
+  else
+    PrintTextAbove(what, "This does not match the evidence");
+  endif
+endprogram       

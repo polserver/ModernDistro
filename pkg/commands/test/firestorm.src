@@ -1,0 +1,37 @@
+use uo;
+use os;
+use util;
+
+include "include/client";
+include ":attributes:attributes";
+
+program flamewind(who)
+  var newtarg;
+  var x, y;
+  var i := 20;
+  Detach();
+  PlaySoundEffect(who, 0x231);
+  while(i > 0)
+    x := who.x + RandomInt(15) - 7;
+    y := who.y + RandomInt(15) - 7;
+    newtarg := CreateItemAtLocation(x, y, who.z, 0xeed, 1, who.realm);
+    newtarg.graphic := 1;
+    PlayMovingEffectXYZ( newtarg.x, newtarg.y,(newtarg.z + 80), newtarg.x, newtarg.y, newtarg.z, 0x36d4, 0x18, 0x10, 0, who.realm);
+    RainDamage(newtarg);
+    i := i - 1;
+    DestroyItem(newtarg);
+    sleepms(200);
+  endwhile
+endprogram
+
+function RainDamage(targ)
+  var victims := ListMobilesNearLocationEx(targ.x, targ.y, targ.z, 3, 0x3, targ.realm);
+  foreach targ in victims
+    if((GetHp(targ)) && (!targ.cmdlevel))
+      PlayObjectCenteredEffect(targ, 0x36cb, 7, 0x10);
+      PlaySoundEffect(targ, 0x228);
+      SetObjProperty(targ, "guardkill", 1);
+      ApplyRawDamage(targ, 1000);
+    endif
+  endforeach
+endfunction

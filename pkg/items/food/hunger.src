@@ -1,0 +1,55 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+
+program Hunger(chr)
+	if( chr.cmdlevel >= 2 )
+		return 0;
+	endif
+
+	var hunger;
+	while( chr )
+		hunger := CInt(AP_GetVital(chr, "Hunger") / 10);
+		if(hunger >= 9)
+			hunger := 9;
+		elseif (!hunger)
+			hunger :=0;
+		endif
+
+		hunger := hunger +1;
+		SetObjProperty(chr, "hunger", hunger);
+
+		var regen := AP_GetVitalRegenRateMod(chr, "Hunger");
+		case ( hunger )
+			0: regen := regen - 200; break;
+			1: regen := regen + 100; break;
+			2: regen := regen + 0; break;
+			3: regen := regen + 0; break;
+			4: regen := regen + 0; break;
+			5: regen := regen + 0; break;
+			6: regen := regen + 0; break;
+			7: regen := regen - 100; break;
+			8: regen := regen - 400; break;
+			9: regen := regen - 600; break;
+			10: regen := regen - 800; break;
+		endcase
+		AP_SetVitalRegenRateMod(chr, "Hunger", regen);
+
+		if (hunger > 8)
+			if (AP_GetVital(chr, "Stamina") > AP_GetVitalMaximumValue(chr, "Stamina"))
+				AP_SetVital(chr, "Stamina", AP_GetVitalMaximumValue(chr, "Stamina"));
+				RecalcVitals(chr);
+			endif
+		endif
+
+		case (hunger)
+			4 : SendSysMessage(chr, "You could use a bite to eat...");
+			8 : SendSysMessage(chr, "You're getting pretty hungry...");
+			10: SendSysMessage(chr, "You're absolutely famished!");
+		endcase
+
+		Sleep(60 * 60);
+	endwhile
+endprogram

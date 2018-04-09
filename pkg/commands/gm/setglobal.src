@@ -1,0 +1,15 @@
+use uo;
+use os;
+
+
+program textcmd_setglobal( who, text )
+    var tparams := SplitWords( text );
+
+    print( "Property Name: " + tparams[1] );
+    print( "Property Value: " + tparams[2] );
+
+    var res := SetGlobalProperty( tparams[1], tparams[2] );
+    if (!res)
+        SendSysMessage( who, "Error setting property: " + res.errortext );
+    endif
+endprogram

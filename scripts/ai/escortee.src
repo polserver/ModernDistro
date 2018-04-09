@@ -1,0 +1,253 @@
+use vitals;
+use npc;
+use os;
+use uo;
+
+include "include/eventID";
+include ":attributes:attributes";
+include "include/sysEvent";
+include "include/randName";
+include "include/anchors";
+include "include/dist";
+include "ai/main/mainLoopGood";
+include "ai/combat/animalCombatEvent";
+include "ai/combat/fight";
+include "ai/main/loot";
+include "include/vetement";
+include "include/NPCUtil";
+include "include/objtype";
+include "ai/main/sleepMode";
+include "include/skillLists";
+include "include/vetement";
+include "include/begging";
+
+const HALT_THRESHOLD := 2;
+var following;
+var waittime;
+var escortee;
+var next_wander := ReadGameClock() + 10;
+var ev;
+var txt;
+var killtime := 0;
+var master;
+var spells := {};
+var me := Self();
+var cast_pct;
+var num_casts;
+var count_casts;
+var summons := 3;
+var graphics;
+var num_changes;
+var will_cast;
+var will_breathe;
+var flee_point;
+
+var npccfg := ReadConfigFile("npcdesc");
+var speechelem := FindConfigElem(npccfg, me.npctemplate);
+spells := GetConfigStringArray(speechelem, "spell");
+cast_pct := speechelem.cast_pct;
+num_casts  := speechelem.num_casts;
+count_casts  := speechelem.count_casts;
+if(!cast_pct)
+  cast_pct := 10;
+endif
+flee_point := speechelem.flee_point;
+if(!flee_point)
+  flee_point := 10;
+endif
+
+program CastleGuard()
+  run_script_to_completion("NPCKeeper", me);
+  drop_anchor();
+  EnableEvents(SYSEVENT_SPEECH, 3);
+  EnableEvents(SYSEVENT_ENGAGED + SYSEVENT_DISENGAGED + SYSEVENT_DAMAGED );
+  EnableEvents(SYSEVENT_OPPONENT_MOVED);
+  if(GetObjProperty(me, "frozen"))
+	me.frozen := 1;
+  endif
+  SetWarMode( 0 );
+  set_priority(10);
+  var ph := SplitWords(me.name);
+  var myname := lower(ph[1]);
+  var destination := GetObjProperty(me, "Dest");
+  SetObjProperty(me, "Waiting", 1);
+  waittime := 120;
+  escortee := 0;
+  var arrived := 0;
+  while (1)
+    ev := os::wait_for_event(waittime);
+    case(ev.type)
+      SYSEVENT_SPEECH:      txt := lower(ev.text);
+                        if(txt["destination"])
+                          TurnToward(ev.source);
+                          say("I am waiting for my escort to " + destination + ". Will you take me?");
+                        elseif(txt["i will take thee"])
+                          if(!escortee)
+                            TurnToward(ev.source);
+                            escortee := ev.source;
+                            SetObjProperty(me, "Escortee", (ev.source).serial);
+                            say("Lead on. You will recieve your payment when we reach " + destination);
+                            SetAnchor( me.x, me.y, 20, 0 );
+                            killtime := ReadGameClock() + 1800;
+                            following := 1;
+                            waittime := 0;
+                          endif
+                        endif
+      SYSEVENT_ENGAGED:     say("Aaahhh! Help! Help!  I'm being oppressed!");
+                        Fight(ev.source);
+      SYSEVENT_DAMAGED:     if(ev.source)
+                          Fight(ev.source);
+                        else
+                          say( "What sinister force is this!" );
+                        endif
+    endcase
+	if(ReadGameClock() >= next_wander)
+	  begpurse(me);
+	  if(!GetObjProperty(me, "Waiting"))
+        wander();
+      endif
+      next_wander := ReadGameClock() + 10;
+    elseif((ReadGameClock() > killtime) && (killtime != 0))
+      MoveObjectToLocation(me, 5555, 1111, 0, "britannia", MOVEOBJECT_FORCELOCATION); // newmap problem
+      SetObjProperty(me, "guardkill", 1);
+      ApplyRawDamage(me, GetHp(me) + 100);
+      break;
+    endif
+    if(escortee)
+      arrived := checkdestination(me, destination);
+      if(arrived == 1)
+        idleloop();
+      endif
+    endif
+    if(following == 1)
+      waittime := 0;
+      Follow();
+    else
+      waittime := 10;
+    endif
+  endwhile
+endprogram
+
+function checkdestination(me, destination);
+  var coords := SplitWords(GetObjProperty(me, "Coords"));
+  var x1 := CInt(coords[1]);
+  var y1 := CInt(coords[2]);
+  var x2 := CInt(coords[3]);
+  var y2 := CInt(coords[4]);
+  if((me.x >= x1) && (me.x <= x2))
+    if((me.y >= y1) && (me.y <= y2))
+      say("We have arrived at " + destination + ". Here is your pay");
+      case(GetObjProperty(me, "Type"))
+        "peasant1":  CreateItemInContainer(escortee.backpack, 0xeed, RandomInt(50) + 200);
+        "Mage":      CreateItemInContainer(escortee.backpack, 0xeed, RandomInt(150) + 250);
+        "seeker":    CreateItemInContainer(escortee.backpack, 0xeed, RandomInt(150) + 350);
+        "peasant2":  CreateItemInContainer(escortee.backpack, 0xeed, RandomInt(150) + 500);
+      endcase
+      return 1;
+    endif
+  endif
+  return 0;
+endfunction
+
+function idleloop()
+  while (1)
+    ev := os::wait_for_event(10);
+    case(ev.type)
+      SYSEVENT_SPEECH:      txt := lower(ev.text);
+                        if(txt["destination"])
+                          TurnToward(ev.source);
+                          say("I doi not wish to go anywhere");
+                        elseif(txt["i will take thee"])
+                          TurnToward(ev.source);
+                          say("I do not wish to go anywhere.");
+                        endif
+      SYSEVENT_ENGAGED:     say("Aaahhh! Help! Help!  I'm being oppressed!");
+                        Fight(ev.source);
+      SYSEVENT_DAMAGED:     if(ev.source)
+                          Fight(ev.source);
+                        endif
+    endcase
+	if(ReadGameClock() >= next_wander)
+      wander();
+      grabloot();
+      next_wander := ReadGameClock() + 10;
+    elseif((ReadGameClock() > killtime) && (killtime != 0))
+      MoveObjectToLocation(me, 5555, 1111, 0, "britannia", MOVEOBJECT_FORCELOCATION); // newmap problem
+      ApplyRawDamage(me, GetHp(me) + 100);
+      break;
+    endif
+  endwhile
+endfunction
+
+function Follow()
+  var d := Distance(me, escortee);
+  if(d > 15)
+    escortee := 0;
+	following := 0;
+    say("My escort seems to have abandoned me.");
+    waittime := 120;
+  elseif(d <= 2)
+    waittime := 1;
+  else
+    if(GetObjProperty(me, "Pause"))
+      waittime := 2;
+    else
+      var ma := 200 - CInt(GetDexterity(me));
+      SetDexterityMod(me, CInt(GetDexterityMod(me)) + ma);
+	  walkToward(escortee);
+      SetDexterityMod(me, CInt(GetDexterityMod(me)) - ma);
+      waittime := 0;
+    endif
+  endif
+  if((!GetStrength(escortee)) || (escortee.dead) || (dist(me,escortee) > 15) )
+    following := 0;
+  endif
+endfunction
+
+function CloseDistance( opponent )
+  case (Distance( me, opponent ))
+    1:
+    0:       return 1;
+    default: RunToward( opponent );
+             return 0;
+  endcase
+endfunction
+
+function Herd(ev)
+  var holder := ev.data;
+  var lx := holder[1];
+  var ly := holder[2];
+  var loops := 0;
+  var opponent;
+  var waittime := 0;
+  while(1)
+	if(!CloseIn(me, lx, ly))
+	  loops := loops + 1;
+	  waittime := 0;
+	else
+	  loops := 0;
+	  waittime := 1;
+	endif
+	if((loops >= 30) or (coordist(me.x, me.y, lx, ly) <= 1))
+	  break;
+	endif
+	ev := wait_for_event(waittime);
+	case (ev.type)
+      SYSEVENT_DAMAGED: opponent := ev.source;
+			  		    SetOpponent(opponent);
+					    TurnToward(opponent);
+	  SYSEVENT_ENGAGED: opponent := ev.source;
+			  		    SetOpponent(opponent);
+					    TurnToward(opponent);
+	endcase
+  endwhile
+  Return;
+endfunction
+
+function CloseIn(me, lx, ly)
+  case (coordist(me.x, me.y, lx, ly))
+    0:       return 1;
+    default: WalkTowardLocation(lx, ly);
+             return 0;
+  endcase
+endfunction

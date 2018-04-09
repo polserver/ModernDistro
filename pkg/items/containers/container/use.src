@@ -1,0 +1,79 @@
+/*
+        Maintened by *Edwards
+
+        2009-10-20
+*/
+use uo;
+use os;
+use cfgfile;
+use cliloc;
+
+include ":keys:key";
+include ":traps:traps";
+include ":housing:housing";
+
+program useContainer( mobile, container )
+//	var equipped := GetEquipmentByLayer ( mobile, 0x15 );
+//	if ( equipped.objtype == container.objtype )
+//		return 0;
+//	endif
+	
+	var item_cfg := ReadConfigFile( ":*:itemdesc" );
+	item_cfg := item_cfg[container.graphic];
+
+ 	if( container.container.IsA( POLCLASS_CORPSE ))
+		SendSysMessage( mobile, "You can't open this while it is in a corpse." );
+                return 0;
+	elseif( ContainerIsSecured( mobile, container ) )
+		return 0;
+	elseif( ContainerIsLocked( mobile, container ))
+		return 0;
+//        elseif( RunTraps( container, mobile ))
+//                RemoveTrap( container );
+//		return 0;
+	endif
+
+	SendViewContainer( mobile, container );
+
+	if(( item_cfg.OpenGraphic ) && ( item_cfg.CloseGraphic ))
+		container.graphic := item_cfg.OpenGraphic;
+		Sleep(2);
+		container.graphic := item_cfg.CloseGraphic;
+	endif
+
+	return 1;
+endprogram
+
+function ContainerIsLocked( mobile, container )
+
+	if( !container.locked )
+		// Nothing to worry about.
+		return 0;
+	elseif( KP_HasKeyForLock( mobile, container ))
+		SendSysMessage( mobile, "You use your key to open the container." );
+		return 0;
+	elseif ( mobile.cmdlevel >= 3 )
+		SendSysMessageCL( mobile, 501745, color := 66 ); // It appears to be locked, but you open it with your godly powers.
+		return 0;
+	else
+		PrintTextAbovePrivateCL ( mobile, container, 501746, color := 33 ); // It appears to be locked.
+		return 1;
+	endif
+endfunction
+
+function ContainerIsSecured( mobile, container )
+
+	var sign := FindHouseSign ( mobile );
+	if ( !container.IsSecured() )
+		// Nothing to worry about.
+		return 0;
+	elseif ( sign.IsAffiliated( mobile ) >= container.GetSecureLevel() )
+		return 0;
+	elseif ( mobile.cmdlevel >= 3 )
+		SendSysMessageCL ( mobile, 501646, color := 66 ); // This item is secure but your Godly powers allow access.
+		return 0;
+	else
+		PrintTextAbovePrivateCL ( mobile, container, 501647, color := 33 ); // That is secure.
+		return 1;
+	endif
+endfunction

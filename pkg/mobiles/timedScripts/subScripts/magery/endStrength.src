@@ -1,0 +1,19 @@
+/*
+ * $Id: endStrength.src 1013 2007-03-05 22:46:11Z tekproxy $
+ *
+ */
+use uo;
+use os;
+
+include ":attributes:attributes";
+
+program TimedScript_EndCunning(params)
+	var mobile := params[1];
+	
+	var points := CInt(GetObjProperty(mobile, "StrengthMod"));	
+	AP_ModifyStatMod(mobile, STRENGTH, -(points));
+	EraseObjProperty(mobile, "StrengthMod");
+	
+	return 1;
+endprogram
+

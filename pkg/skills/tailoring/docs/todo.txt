@@ -1,0 +1,14 @@
+#
+# $Id: todo.txt 1084 2007-10-15 07:57:26Z sroyalty $
+#
+
+- check for reasonable skill gains
+- check if difficulty isn't set too high/low for items
+
+What is the tailoring animation to be set in craftConfig.cfg ?
+
+Unraveling? From UO.com:
+As your clothing grows older, you may wish to give it new life by sewing it into a new item. To gain cloth from used clothing items:
+* Double-click scissors in your inventory.
+* Target the item you wish to unravel.
+The amount of cloth gained is dependent on your Tailoring skill. 

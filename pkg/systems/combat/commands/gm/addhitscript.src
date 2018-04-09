@@ -1,0 +1,78 @@
+/* $Id: addhitscript.src 539 2006-07-03 21:18:36Z austinheilman $
+ *
+ */
+
+use uo;
+use os;
+use cfgfile;
+
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+
+CONST SELECT_START	:= 0xA00;
+// CONST OKAY_BTN		:= 0x1;
+
+program AddHitScript(who);
+	SendSysMessage(who, "Select a weapon to modify.");
+	var targ := target(who);
+	if ( !targ.IsA(POLCLASS_WEAPON) )
+		SendSysMessage(who, "Cancelled.");
+		return 0;
+	endif
+	var hit_scripts := GetObjProperty(targ, "HitScripts");
+	if ( !hit_scripts )
+		hit_scripts := array{};
+	endif
+	
+	var gump := GFCreateGump();
+	GFResizePic(gump, 0, 0, GFGetCfgConst("Defaults", "BackGround"), 310, 480);
+	GFResizePic(gump, 15, 15, GFGetCfgConst("Defaults", "ForeGround"), 280, 450);
+	GFAddButton(gump, 125, 435, 2128, 2129, GF_CLOSE_BTN, OKAY_BTN);
+	
+	var config := ReadConfigFile(":combat:hitScripts");
+	var elem := config["WeaponHitScripts"];
+	var script_list := GetConfigStringDictionary(elem, "Script");
+	var script_keys := script_list.Keys();
+	
+	var y_pos := 25;
+	foreach key in ( script_keys )
+		var match := HasHitScript(script_list[key], hit_scripts);
+		GFCheckBox(gump, 20, y_pos, 210, 211, match, _key_iter+SELECT_START);
+		GFTextLine(gump, 45, y_pos, 2100, key);
+		y_pos += 20;
+		SleepMS(2);
+	endforeach
+	
+	var input := GFSendGump(who, gump);
+	if ( input[OKAY_BTN] )
+		hit_scripts.Shrink(0);
+		foreach key in ( input.keys )
+			if ( key >= SELECT_START )
+				var temp := key-SELECT_START;
+				temp := script_keys[temp];
+				hit_scripts.Append(script_list[temp]);
+			endif
+			SleepMS(2);
+		endforeach
+		if ( hit_scripts.Size() < 1 )
+			EraseObjProperty(targ, "HitScripts");
+		else
+			SetObjProperty(targ, "HitScripts", hit_scripts);
+		endif
+		SendSysMessage(who, "Done.");
+	else
+		SendSysMessage(who, "Cancelled.");
+	endif
+
+	return 1;
+endprogram
+
+function HasHitScript(script, byref hit_scripts)
+	foreach entry in ( hit_scripts )
+		if ( Lower(script) == Lower(entry) )
+			return 1;
+		endif
+		SleepMS(2);
+	endforeach
+	return 0;
+endfunction

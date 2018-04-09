@@ -1,0 +1,124 @@
+/* $Id: bladed.src 1207 2008-05-21 00:53:22Z AustinHeilman $
+ *
+ *
+ */
+
+use uo;
+use os;
+use util;
+
+include ":timeutils:time";
+include ":lumberjacking:lumberJack";
+include ":brainai:npcUtil";
+include "include/objtype";
+include "include/sounds";
+program use_Bladed(mobile, tool)
+	SendSysMessage(mobile, "What would you like to use that on?");
+	var targ := TargetCoordinates(mobile);
+
+	if ( !targ )
+		SendSysMessage(mobile, "Cancelled.");
+		return 0;
+	endif
+
+	if ( targ.item )
+		CarveItems(mobile, tool, targ.item);
+	elseif ( targ.mobile )
+		CarveMobiles(mobile, tool, targ.mobile);
+	else
+		CarveObject(mobile, tool, targ.objtype);
+	endif
+endprogram
+
+function CarveItems(mobile, tool, item)
+	SendSysMessage(mobile, "In Carve Items");
+
+	tool := tool; // These lines are to stop stupid "var not used" compiler warnings.
+	if ( item.IsA(POLCLASS_CORPSE) )
+		CarveCorpse(mobile, item);
+		item.SetSkinned(1);
+		return 1;
+	endif
+	if(is_fish(item.objtype))
+		var multiplier;
+		if((item.objtype >= UOBJ_FISH_START) && (item.objtype <= UOBJ_FISH_END) )
+			multiplier := 4;
+		else
+			multiplier := 2;
+		endif
+
+		var num_steaks := (multiplier * item.amount);
+		PlaySoundEffect(mobile, SFX_SLICE);
+		if(DestroyItem(item))
+			CreateItemInBackpack(mobile, UOBJ_FISHSTEAK, num_steaks);
+			SendSysMessage(mobile, "You carve the fish steaks and put them in your backpack");
+		endif
+		return 1;
+	endif
+
+	return 1;
+endfunction
+
+function CarveMobiles(mobile, tool, targ)
+	tool := tool;
+	if ( !CheckLineOfSight(mobile, targ) )
+		SendSysMessage(mobile, "You can not see that.");
+		return 0;
+	elseif ( targ.npctemplate )
+		if ( targ.graphic == 207 ) // Fluffy sheep
+			targ.graphic := 223; // Bald sheep
+			CreateItemInContainer(mobile.backpack, "wool", 3);
+			return 1;
+		else
+			SendSysMessage(mobile, "You can't get any more wool from that sheep.");
+		endif
+	endif
+
+	return 0;
+endfunction
+
+function CarveObject(mobile, tool, objtype)
+	tool := tool;
+	mobile := mobile;
+	if ( LJ_IsTree(objtype) )
+		// Give kindling;
+		return 1;
+	endif
+
+	return 1;
+endfunction
+
+function CarveCorpse(mobile, corpse)
+	if ( corpse.IsSkinned() )
+		SendSysMessage(mobile, "That has already been skinned.");
+		return 0;
+	elseif ( corpse.NPCTemplate() )
+		corpse.SetSkinned(mobile);
+		var template := NPC_ParseTemplateName(corpse.NPCTemplate());
+		var cfg_elem := NPC_GetNPCConfig(template);
+		foreach entry in ( GetConfigStringArray(cfg_elem, "SkinningItem") )
+			entry := SplitWords(entry);
+			CreateItemInContainer(corpse, entry[1], RandomDiceRoll(CStr(entry[2])));
+			SleepMS(2);
+		endforeach
+	else
+		
+	endif
+	
+	SendSysMessage(mobile, "You carve the corpse...");
+
+	return 1;
+endfunction
+
+function is_fish(theobj)
+	// Check for large fish
+	if((theobj >= UOBJ_FISH_START) && (theobj <= UOBJ_FISH_END) )
+		return 1;
+	// Check for small fish
+	elseif ((theobj >= UOBJ_SFISH_START) && (theobj <= UOBJ_SFISH_END))
+		return 1;
+	else
+		return 0;
+	endif
+	
+endfunction

@@ -1,0 +1,21 @@
+<b>.go [text]</b>
+
+<u>Flags</u>
+text - Optional. Location name of a go location will take you directly to this location. If no location exists by this name, it brings up the gump of locations.
+
+<u>Reserved Location Names</u>
+xyz	- Used in .go xyz <x> <y> <z> to go to specific coordinates given.
+refresh	- Used to refresh your gumps. Gumps are stored once generated. Usually only used when altering the script.
+
+<u>Purpose</u>
+The command .go is part of a staff travel system. It has a public menu, and a private menu. The private menu is only viewable by the person it belongs to. With the Menu, you can select to Goto the location, or Send someone, depending on which button you click on.
+
+You can Add, Copy, Edit, and Delete entries from the Public and Private Menus.
+
+To Add a new entry, go to the menu you wish to add it to (public or private) and click on the Add button.
+
+To Edit an existing entry, go to the menu that has the entry, and click Edit. This will let you edit the information for this entry (including name).
+
+To Delete an existing entry, select Delete from the Edit screen.
+
+To Copy an existing entry from one menu to another (from public to private, or vice versa), go to the appropriate menu that has the entry, and click Copy. Then select the entry you wish to Copy.

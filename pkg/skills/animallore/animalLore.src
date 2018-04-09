@@ -1,0 +1,134 @@
+use uo;
+use os;
+use cfgfile;
+
+include ":attributes:attributes";
+include ":poisonwatcher:poisons";
+include "include/trainingskill";
+
+var cfg := ReadConfigFile("::npcdesc");
+
+program animal_lore(who)
+        var data := {};
+        data[1] := "animallore";
+        data[2] := ReadGameClock();
+        data[3] := 2;
+        SetObjProperty(who, "LastUsedSkill", data );
+        TrainingSkill(who, data[3]);
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  var targ := Target(who);
+  if(!targ.isA(POLCLASS_NPC))
+	SendSysMessage(who, "You must target a creature");
+	return;
+  endif
+  var elem := cfg[targ.npctemplate];
+  var tameskill := GetAttribute( who, TAMING );
+  var lore :=      GetAttribute( who, ANIMALLORE );
+  var tamedif := elem.tameskill -20;
+  var phisical := "";
+  var health := "";
+  var tameinfo := "";
+  var poison := "";
+  var foodtype := elem.food;
+  var foodinfo := "";
+  if(!foodtype)
+    foodtype := "all";
+  endif
+  var pts := CInt(GetAttribute(who, ANIMALLORE)) + 15;
+  if(SkillCheck(who,ANIMALLORE, -1, pts/3))
+    phisical := GetStr(GetStrength(targ)/20);
+    health := GetHealth(10*GetHp(targ)/GetMaxHp(targ));
+    if (ListPoisonsByType(targ, "defaultPoison").size() > 0 )
+      poison := ", but is poisoned";
+    endif
+    foodinfo := FindFood(foodtype);
+    if(tamedif)
+      if(GetObjProperty(targ,"master"))
+        tameinfo := "The animal is tamed and " + GetHappy(CInt(GetObjProperty(targ, "happiness")));
+      elseif(GetObjProperty( targ, "prevtamed" ))
+        tameinfo := "The animal has been previosly tamed";
+      else
+        tameinfo := "The animal has never been tamed";
+      endif
+      if(tameskill < tamedif)
+        tameinfo := tameinfo + " but you have no change to do so";
+      elseif((tameskill >= tamedif) && (!GetObjProperty(targ,"master")))
+	    tameinfo := tameinfo + " and you may try do so";
+      endif
+    else
+	  tameinfo := "The creature cannot be tamed";
+    endif
+    PrintTextAbovePrivate(targ, "" +targ.name+" looks "+ phisical+ " and " + health +poison + ".", who);
+    sleep(1);
+    PrintTextAbovePrivate(targ, foodinfo, who);
+    sleep(1);
+    PrintTextAbovePrivate(targ, tameinfo, who);
+  else
+	PrintTextAbovePrivate(targ, "You fail to understand anything about the animal", who);
+  endif
+endprogram
+
+function FindFood(foodtype)
+  if(foodtype == "all")
+    return "This animal is a scavenger who will eat both vegetables and raw meats.";
+  elseif(foodtype == "meat")
+    return "This animal is a meat eater, and will settle for most raw meats.";
+  elseif(foodtype == "veggie")
+    return "This animal eats raw fruits and vegetables.";
+  endif
+endfunction
+
+function GetHappy(percentage)
+  if(percentage >= 98)
+    return "looks wonderfully happy.";
+  elseif(percentage >= 88)
+    return "looks extremely happy.";
+  elseif(percentage >= 78)
+    return "looks very happy.";
+  elseif(percentage >= 68)
+    return "looks rather happy.";
+  elseif(percentage >= 58)
+    return "looks happy.";
+  elseif(percentage >= 48)
+    return "looks content.";
+  elseif(percentage >= 38)
+    return "looks content, I suppose.";
+  elseif(percentage >= 28)
+    return "looks unhappy.";
+  elseif(percentage >= 18)
+    return "looks rather unhappy.";
+  elseif(percentage >= 8)
+    return "looks extremely unhappy.";
+  else
+    return "looks confused.";
+  endif
+endfunction
+
+function GetStr(temp)
+  case(temp)
+	0: return "very weak";
+	1: return "weak";
+	2: return "like an averange man";
+	3: return "somewhat strong";
+	4: return "strong";
+	5: return "very strong";
+	6: return "strong like a titan";
+	7: return "strong like a dragon";
+	default: return "strong beyone comprehention";
+  endcase
+endfunction
+
+function GetHealth(percentage)
+  case(percentage)
+	0: return "near death";
+	1: return "in bad shape";
+	2: return "in poor health";
+	3: return "in poor health";
+	4: return "in fair health";
+	5: return "in fair health";
+	6: return "in good health";
+	7: return "in good health";
+	default: return "in excellent shape";  //80+
+  endcase
+endfunction

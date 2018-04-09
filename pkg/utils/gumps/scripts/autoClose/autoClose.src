@@ -1,0 +1,13 @@
+include ":gumps:gumps";
+
+program CloseGumpEx(params)
+	var mobile	:= params[1];
+	var pid		:= params[2];
+	var timer	:= params[3];
+	var ret_val	:= params[4];
+	params := 0; // Not needed anymore.
+
+	Sleep(CInt(timer));
+
+	return GFCloseGump(mobile, pid, ret_val);
+endprogram

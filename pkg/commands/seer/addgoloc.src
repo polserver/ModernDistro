@@ -1,0 +1,52 @@
+use npc;
+use uo;
+use basicio;
+use util;
+use basic;
+use cfgfile;
+
+
+var  cfg;
+var colors;
+var num_colors;
+
+program addgoloc(who)
+
+
+var where := TargetCoordinates(who);
+var desc := RequestInput(who, who.backpack, "How would you like to refer to this location?" );
+var locs    := ReadConfigFile("golocs");
+var locvalue := GetConfigMaxIntKey(locs)+1;
+var elemkey := "" + lower(desc);
+
+    var props:= array;
+    var prop:= array;
+    prop .+ pname;
+    prop .+ pvalue;
+
+    prop.pname := "Name";
+    prop.pvalue := elemkey;
+    props[1] := prop;
+
+    prop.pname := "Type";
+    prop.pvalue := "all";
+    props[2] := prop;
+
+    prop.pname := "x";
+    prop.pvalue := where.x;
+    props[3] := prop;
+
+    prop.pname := "y";
+    prop.pvalue := where.y;
+    props[4] := prop;
+
+    prop.pname := "z";
+    prop.pvalue := where.z;
+    props[5] := prop;
+
+    AppendConfigFileElem( "golocs", "goloc", locvalue, props );
+
+
+UnloadConfigFile("golocs");
+
+endprogram

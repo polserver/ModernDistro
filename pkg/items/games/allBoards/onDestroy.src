@@ -1,0 +1,17 @@
+/*
+        Maintened by *Edwards
+
+        2009-10-21
+*/
+use uo;
+use os;
+
+program OnDestroy( chessboard )
+
+	foreach item in ( EnumerateItemsInContainer( chessboard ))
+		DestroyItem( item );
+                SleepMS(5);
+	endforeach
+	
+	return 1;
+endprogram

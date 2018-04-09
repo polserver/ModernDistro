@@ -1,0 +1,163 @@
+use uo;
+use basic;
+use cfgfile;
+use util;
+use os;
+include "include/client";
+include ":attributes:attributes";
+include "include/objtype";
+var config_file;
+
+program do_poisoning( who )
+    var the_item;
+    var the_poison;
+    var skill;
+//    var elem;
+    var stren;
+    var point;
+    config_file := ReadConfigFile( "poisoning");
+    SendSysMessage( who, "Select a poison potion." );
+    the_poison := Target(who, "");
+    if (!the_poison)
+	SendSysMessage(who, "Targetting cancelled.");
+	return;
+    endif
+    if (! Accessible(who, the_poison))
+	SendSysMessage(who, "You can't reach that!");
+	return;
+    endif
+    if (the_poison.graphic != UOBJ_POISON_POTION)
+	SendSysMessage(who, "You must select a poison potion!");
+	return;
+    endif
+    SendSysMessage(who, "Select an object on which to apply this poison.");
+    the_item := Target(who, TGTOPT_CHECK_LOS);
+    if (!the_item)
+	SendSysMessage(who, "Targetting cancelled.");
+	return;
+    endif
+    if (! Accessible(who, the_item))
+	SendSysMessage(who, "You can't reach that!");
+	return;
+    endif
+    var alchcfg := ReadConfigFile(":adval:alchemy2");
+    var itemcfg := ReadConfigFile(":adval:itemdesc");
+    itemcfg := itemcfg;
+    var potion_cfg := ReadConfigFile( "potion" );
+    var potion_strength :=FindConfigElem(potion_cfg, the_poison.objtype);
+	stren :=CInt(GetConfigInt(potion_strength, "strength"));
+    var acfgfile;
+    var theitem := FindConfigElem( acfgfile, CInt(the_item.objtype) );  
+    if (!theitem)
+	acfgfile := ReadConfigFile(":combat:itemdesc");
+	theitem := acfgfile[the_item.objtype];
+	    if (theitem)
+		if ((theitem.attribute == "Swords") || (theitem.attribute == "Fencing"))
+		    if (stren == 0)
+			stren := 8;
+		    endif
+		    case( stren )
+			8:	skill := 10;
+				point := 100;
+			12:	skill := 30;
+				point := 130;
+			16:	skill := 55;
+				point := 200;
+			20:	skill := 88;
+				point := 290;
+		    endcase
+// Didn't mess with the skill gains here until we see how it pans out 08-05-2011
+		    if (SkillCheck( who, POISONING, skill, point/10) + 20)
+			SetObjProperty(the_item, "poison_level", stren*2);
+			SetObjProperty(the_item, "d", 25 - (stren));
+			var hitscripts := GetObjProperty(the_item, "OnHit");
+			var previouspoison := GetObjProperty(the_item, "phit");
+			PlaySoundEffect(who, 0x248);
+			    if (!hitscripts)
+				hitscripts := {};
+				hitscripts[1] := ":combat:poisonHit";
+			    else
+				  hitscripts.append(":combat:poisonHit");
+			    endif
+			    
+			    if (previouspoison != 1)
+					SetObjProperty(the_item, "OnHit", hitscripts);
+			    endif
+			SendSysMessage(who, "You have successfully applied the poison.");
+			SetObjProperty(the_item, "phit", 1);
+		    else
+			if (RandomInt(100) > GetAttribute(who, POISONING))
+			    SendSysMessage(who, "You fail, and poison yourself!");
+			    SetObjProperty(who, "poison_level", stren);
+			    start_script(":spells:poisondamage", who);
+			else
+			    SendSysMessage(who, "You fail to apply the poison properly.");
+			endif
+		    endif
+		SubtractAmount(the_poison,1);
+		CreateItemInBackpack(who, UOBJ_EMPTY_BOTTLE, 1);  
+		return;
+	    elseif((the_item.objtype == 0xf3f) || (the_item.objtype == 0x1bfb))
+		SubtractAmount(the_poison,1);
+		if(!ReserveItem(the_item))
+		    SendSysMessage(who,"cancelled");
+		    return;
+		endif
+		if(the_item.amount < 10)
+		    SendSysMessage(who,"Those must be poisoned in groups of 10.");
+		    return;
+		endif
+//		if (SkillCheck( who, POISONING, -1, 100))
+		if (SkillCheck( who, POISONING, -1, 10))
+		    var obj := the_item.objtype;
+		    if(!SubtractAmount(the_item, 10))
+			SendSysMessage(who,"Those must be poisoned in groups of 10.");
+			return;
+		    endif
+		    var objtype;
+		    case(obj)
+			0xf3f:   objtype := 0x1999a;
+			0x1bfb:  objtype := 0x1999b;
+		    endcase 
+		    CreateItemInBackpack( who, objtype, 10 );
+		    PlaySoundEffect(who, 0x248);
+		    SendSysMessage(who, "You poison some arrows and put them in your backpack");
+		else
+		    if (RandomInt(100) > GetAttribute(who, POISONING))
+			SendSysMessage(who, "You fail, and poison yourself!");
+			SetObjProperty(who, "poison_level", (RandomInt(20) + 10));
+			start_script(":spells:poisondamage", who);
+		    else
+			SendSysMessage(who, "You fail to apply the poison properly.");
+		    endif
+		endif
+	      CreateItemInBackpack(who, UOBJ_EMPTY_BOTTLE, 1); 
+	    else
+		SendSysMessage(who, "That cannot be poisoned.");
+	    endif
+	endif
+	if (!theitem)
+	    if (the_item.usescript["eat"] || the_item.usescript["drink"])
+		theitem := the_item;
+	    else
+		if (alchcfg[the_item.objtype])
+		    theitem := theitem;
+		else
+		    return;
+		endif
+	    endif
+	endif
+    endif   
+endprogram
+
+
+function poisonArrows (arrow)
+
+//    var arrow := CreateItemInBackpack( who, obj, 10 );
+    var arrowName := arrow.desc;
+    arrow.color := 0x8042;
+    arrow.desc := "poisoned " + arrowName;
+    SetObjProperty(arrow, "OnHit", {":combat:poisonHit"});
+
+endfunction
+

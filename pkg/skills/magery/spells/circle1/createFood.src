@@ -1,0 +1,24 @@
+use uo;
+use os;
+use util;
+
+include "include/client";
+// include "include/spellRestrictions";
+
+program create_food(parms)
+  var caster := parms[1];
+  
+  var food;
+  case (RandomInt(8))
+	0:	food := 0x09c9;
+	1:	food := 0x09ea;
+	2:	food := 0x1040;
+	3:	food := 0x09b7;
+	4: 	food := 0x1608;
+	5: 	food := 0x09e9;
+	6: 	food := 0x1044;
+	7: 	food := 0x0c77;
+  endcase
+  PlaySoundEffect(caster, 0x01e3);
+  CreateItemInBackpack(caster, food, 1);
+endprogram

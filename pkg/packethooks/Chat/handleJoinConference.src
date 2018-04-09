@@ -1,0 +1,36 @@
+use uo;
+use os;
+use polsys;
+
+include ":chat:chatIO";
+include ":chat:packets";
+include ":chat:functions";
+include ":chat:settings";
+
+program JoinConference(params)
+	var character := params[1];
+	var packet := params[2];
+	params := "";
+
+	if ( CH_CheckDebug() )
+		Print("JoinConference: "+character.name+" "+packet);
+	endif
+
+	// Sent like this: "ConferenceName" password, split them up
+	// comeback: Shouldn't the offset be 13 and not 11??
+	var conference_name := CChrZ(packet.GetUnicodeString(11, (packet.GetSize() / 2) - 5));
+	conference_name := SplitWords(conference_name, CChr(0x22));
+
+	var conference_pass;
+	if ( conference_name[2] )
+		conference_pass := conference_name[2];
+		conference_pass := conference_pass[2, Len(conference_pass) - 2];
+	endif
+
+	conference_name := conference_name[1];
+	
+	// AddPlayerToConference() checks password
+	AddPlayerToConference(character, conference_name, conference_pass);	
+	
+	return 1;
+endprogram

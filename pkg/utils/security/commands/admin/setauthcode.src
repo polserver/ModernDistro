@@ -1,0 +1,30 @@
+use uo;
+
+include "include/security";
+
+program SetAuthCode( who )
+
+	var oldcode := GetGlobalProperty( "CA" );
+	if( !oldcode )
+		SetCode( who );
+	else
+		var newcode := SendTextEntryGump( who, "Enter the Old Authorization code.", TE_CANCEL_ENABLE,TE_STYLE_NORMAL, 10 );
+		while( oldcode == newcode || !newcode )
+			newcode := SetCode( who );
+		endwhile
+	endif
+endprogram
+
+function SetCode( who )
+
+             var code := SendTextEntryGump( who, "Enter a new Authorization Code.", TE_CANCEL_ENABLE,TE_STYLE_NORMAL, 10 );
+             if( !code )
+                      SendSysMessage( who, "You must enter a valid Authorization Code", 3, 33 );
+                      return 0;
+             endif
+
+             NotifyStaffOnline( who, "A new Authorization Code is set." );
+             SetGlobalProperty( "CA", code );
+             
+             return 1;
+endfunction

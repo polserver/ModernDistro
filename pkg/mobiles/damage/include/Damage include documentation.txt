@@ -1,0 +1,232 @@
+/*
+ * http://uo.stratics.com/content/guides/resistance.shtml
+ * Damage constants listed here to prevent typos in scripts.
+ *
+ */
+enum DAMAGE_TYPES
+	DMG_FORCED	:= -1, // Ignores resistance
+	DMG_PHYSICAL	:= "Physical",
+	DMG_FIRE	:= "Fire",
+	DMG_COLD	:= "Cold",
+	DMG_POISON	:= "Poison",
+	DMG_ENERGY	:= "Energy"
+endenum
+
+/*
+ * ApplyDamageEX(mobile, amount, type, source)
+ *
+ * Purpose: Does damage to mobile taking into account mobile's AR
+ *
+ * Parameters
+ * mobile:
+ * amount:
+ * type:
+ * source:
+ *
+ * Return value
+ *
+ */
+ 
+ 
+/*
+ * ApplyRawDamageEX(mobile, amount, type, source)
+ *
+ * Purpose: Does damage to a mobile ignoring the mobile's AR
+ *
+ * Parameters
+ * mobile:
+ * amount:
+ * type:
+ * source:
+ *
+ * Return value
+ *
+ */
+
+
+/*
+ * DisplayDamage(damaged, amount, source)
+ *
+ * Purpose
+ * Displays the damage done above the damaged mobile.
+ * Normally it's called from the ApplyDamage function calls. No need to access this externally.
+ *
+ * Parameters
+ * damaged:	Mobile that was damaged.
+ * amount:	Amount of damage that was done.
+ * source:	Source of the damage.
+ *
+ * Return Value
+ * Returns 1
+ *
+ */
+
+
+/*
+ * CalcDamageAmount(mobile, amount, type)
+ *
+ * Purpose
+ * Calculates the amount of damage based on the damage type and resistance.
+ * This is called from the ApplyDamage scripts so no need to call externally usually.
+ *
+ * Parameters
+ * mobile:	Mobile that is being damaged and to check resistances on.
+ * amount:	Amount of base damage to deal.
+ * type:	Type of damage that is being dealt.
+ *
+ * Return value
+ * Integer
+ *
+ */
+
+
+/*
+ * SetLastDamageInfo(mobile, amount, type, source)
+ *
+ * Purpose: Sets a CProp, LastDamage, on the damaged mobile with the following info
+ 	var last_damage := struct;
+	last_damage.+serial	:= source.serial;
+	last_damage.+time	:= POLCore().systime;
+	last_damage.+amount	:= amount;
+	last_damage.+type	:= type;
+
+ * This is called from the ApplyDamage scripts so no need to call externally usually.
+ *
+ * Parameters
+ * mobile:
+ * amount:
+ * type:
+ * source:
+ *
+ * Return value
+ *
+ */
+
+
+/*
+ * GetResistanceNames()
+ *
+ * Purpose
+ * Retrieves a list of resistance names from settings.cfg
+ *
+ * Parameters
+ *
+ * Return Value
+ * Returns an array of strings
+ *
+ */
+
+
+/*
+ * GetResistance(mobile, type)
+ *
+ * Purpose
+ * Retrieves the resistances list for a mobile, taking into consideration
+ * the magic resist skill.
+ * I am not sure it takes into account magic resist.
+ * This is called from the ApplyDamage scripts so no need to call externally usually.
+ *
+ *
+ * Parameters
+ * mobile:	Mobile to retrieve the resistances for.
+ * type:	Optional argument.
+ *		If 0 or blank, will return a dictionary of all resistances.
+ *		If specified, will return a double for that value.
+ *
+ * Return value
+ * dictionary or double
+ *
+ */
+
+
+/*
+ * GetNPCResistance(template, type)
+ *
+ * Purpose
+ * Retrieves base resistances from an npc's npcdesc.cfg
+ *
+ * Parameters
+ * template:	Can take in a template name or an npc reference.
+ * type:	Find a specific resistance value. If 0, will retrieve them all.
+ *
+ * Return Value
+ * Returns a double or a dictionary.
+ *
+ */
+
+
+
+/*
+ * SetResistance(mobile, name, value)
+ *
+ * Purpose
+ * Sets a resistance value on a mobile.
+ *
+ * Parameters
+ * mobile:	Mobile to set the resistance value for.
+ * name:	Name of the resistance type to set.
+ * value:	Value for the resistance.
+ *
+ * Return value
+ * Returns result of SetObjProperty()
+ *
+ */
+
+
+/*
+ * ModifyResistance(mobile, name, value)
+ * Purpose
+ * Modifies a resistance value on a mobile.
+ *
+ * mobile:	Mobile to set the resistance value for.
+ * name:	Name of the resistance type to change.
+ * value:	Adjustment to the value.
+ *
+ * Return value
+ * Returns result of SetObjProperty()
+ *
+ */
+
+
+/*
+ * GetDamageTypes(mobile)
+ *
+ * Purpose
+ * Retrieves the DamageTypes prop from the mobile if NPC, from the mobile.weapon if not
+ * If no DamageTypes is found, returns all damage as physical
+ *
+ * mobile: mobile refrence
+ *
+ * Return value:
+ * Dictionary with the type of damage and porcentage, eg.: "DMG_FIRE -> 0.5 DMG_COLD -> 0.5"
+*/
+
+
+/*
+ * ResistancePercentToMult(percent)
+ *
+ * Purpose
+ * Turns a percentage into a resistance multiplier.
+ *
+ * Parameters
+ * percent
+ *
+ * Return value
+ * Double resistance multiplier
+ *
+ */
+
+
+/*
+ * ResistancePercentToMult(percent)
+ *
+ * Purpose
+ * Turns a resistance multiplier into a percentage.
+ *
+ * Parameters
+ * mult
+ *
+ * Return value
+ * Int percentage
+ *
+ */

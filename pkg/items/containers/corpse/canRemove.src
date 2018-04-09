@@ -1,0 +1,71 @@
+use uo;
+
+//include ":areas:managment";		// Pkg required by Destiny's Reach scripts. ?Might implement later.
+include ":containers:checks";
+include ":containers:canRemove";
+
+program canRemove( mobile, corpse, item, move_type )
+
+        if( !Anti_Fast_Loot( mobile ))
+                return 0;
+        endif
+        
+	if( CP_RootContainerLocked( item ))
+		// Verify the locked status of containers.
+		SendSysMessage( mobile, "You can't remove items from locked containers." );
+		return 0;
+        elseif( move_type == MOVETYPE_COREMOVE || mobile.dead )
+		// Core has freedom to remove items at all times.
+		return 1;
+	elseif( mobile.cmdlevel >= 2 )
+		// Game moderators can loot.
+                AddLooter( mobile, corpse, item );
+		return 1;
+	elseif( GetObjProperty( item, "NoLoot" ))
+                SendSysMessage( mobile, "That item cannot be looted at all." );
+                return 0;
+	endif
+
+	var owner := corpse.GetOwner();
+	if( !owner )
+		// No owner. Could be deleted or an NPC corpse.
+                AddLooter( mobile, corpse, item );
+		return 1;
+	elseif( owner == mobile )
+		// Owner is looting his/her own stuff.
+		return 1;
+	elseif( IsGuildMember(mobile, owner) )
+                AddLooter( mobile, corpse, item );
+		return 1;
+// The following required by Destiny's Reach scripts.
+// I might implement the 'areas' pkg later.
+/*        elseif( A_IsIn( corpse, AREAS_NO_LOOTING ))
+                if( owner.criminal || owner.murderer )
+                        if( A_IsIn( corpse, AREAS_NO_DAMAGE ))
+		                return 0;
+                        endif
+                        
+                        AddLooter( mobile, corpse, item );
+                        return 1;
+                endif
+		return 0; */
+        endif
+
+	//If it got this far then it was an illegal looting.
+	mobile.SetCriminal(1);
+	SendSysMessage( mobile, "You have been flagged as a criminal!" );
+        AddLooter( mobile, corpse, item );
+
+	return 1;
+endprogram
+
+function IsGuildMember( mobile, owner )
+
+	// This should probably exist in a guilds include file.
+	if( owner.Guildid == mobile.Guildid )
+		// Both are members of the same guild.
+		return 1;
+	endif
+
+	return 0;
+endfunction

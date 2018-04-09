@@ -1,0 +1,32 @@
+/* $Id: steveDonaldTrap.src 373 2006-06-17 18:27:33Z austinheilman $
+ *
+ * Purpose:
+ * Trap script that turns victim's hair to an old and gray color.
+ *
+ */
+
+use uo;
+use util;
+
+include "include/client";
+include ":damage:damage";
+
+program trapScript(params)
+	var mobile := params[1];
+	//var object := params[2];
+	//var trap_info := params[3];
+	//var trap_index := params[4];
+	params := 0; // Not needed anymore.
+	
+	SendSysMessage(mobile, "You set off a trap!");
+	
+	PlayObjectCenteredEffect(mobile, FX_GLOW_SPIKE, 10, 10);
+	
+	SleepMS(100);
+	
+	SendSysMessage(mobile, "You feel slightly aged...");
+	GetEquipmentByLayer(mobile, LAYER_HAIR).color := 1000;
+	GetEquipmentByLayer(mobile, LAYER_BEARD).color := 1000;
+	
+	return 1;
+endprogram

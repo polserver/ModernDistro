@@ -1,0 +1,21 @@
+use uo;
+use os;
+
+program core_chatButton( mobile )
+
+// This is commented out because I have not added the "new" guild system.
+// There is a guild system in this set of scripts based on the old-style
+// system. See \pkg\items\guildstone
+/*
+	var guild := mobile.guildid;
+	if( !guild )
+		Start_Script( ":guilds:guildCreate", mobile );
+		return 1;
+	elseif( guild )
+		Start_Script( ":guilds:guildMenu", mobile );
+		return 1;
+	endif
+ 
+	return 1;
+	*/
+endprogram

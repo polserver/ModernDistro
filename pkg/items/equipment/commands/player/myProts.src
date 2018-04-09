@@ -1,0 +1,43 @@
+/*
+        Created by *Edwards
+
+        2010-08-28
+*/
+use uo;
+use os;
+
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+include ":equipment:protections";
+
+program textcommand_myProts( mobile )
+
+        if( GetProcess( CInt( GetObjProperty( mobile, "#CmdMyProtPid" ))))
+		return 0;
+	else
+		SetObjProperty( mobile, "#CmdMyProtPid", GetPid() );
+	endif
+ 
+        var gump := GFCreateGump();
+
+	GFResizePic( gump, 0, 0, GFGetCfgConst( "Defaults", "BackGround" ), 310, 420 );
+
+	GFResizePic( gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 280, 25 );
+	GFResizePic( gump, 15, 45, GFGetCfgConst( "Defaults", "ForeGround" ), 280, 360 );
+	GFTextLine( gump, 105, 15, 1720, "Your protections" );
+ 
+        var y_pos := 60;
+        foreach protection in GetProtections()
+
+                var prot_level := GetMobileProtection( mobile, protection );
+	        GFTextLine( gump, 30, y_pos, 2100, protection );
+	        GFTextLine( gump, 200, y_pos, 1720, prot_level );
+                
+                y_pos += 20;
+                SleepMS(5);
+        endforeach
+ 
+	GFSendGump( mobile, gump );
+ 
+        return 1;
+endprogram

@@ -1,0 +1,10 @@
+use os;
+use uo;
+
+program textcmd_unloadcfg ( cmd )
+	cmd := cmd;
+    print("System Message: Unloading all scripts.");
+    Unload_Scripts(scriptname := "");
+    print("System Message: All scripts unloaded.");
+
+endprogram

@@ -1,0 +1,14 @@
+use uo;
+
+include ":itemutils:itemUtil";
+
+program useLight( mobile, light )
+
+       	if( !useItem_check( mobile, light, DEFAULT_ITEM ))
+		return 0;
+	endif
+ 
+	light.Toggle();
+
+	return 1;
+endprogram

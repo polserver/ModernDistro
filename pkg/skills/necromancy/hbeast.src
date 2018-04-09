@@ -1,0 +1,78 @@
+// Deviates from official spell
+
+use uo;
+use vitals;
+
+include ":attributes:attributes";
+
+program horrific_beast( params )
+	var caster := params[1];
+	var info := params[2]; // Struct containing additional info about the spell.
+	var spellID := params[3];
+	var cast_on := params[4]; // Target of spell if required.
+
+	if (Getobjproperty(caster, "poly")  == 1)
+		SendSysMessage(caster,"You are under the influence of the spell!");
+		return 0;
+	elseif(Getobjproperty(caster, "poly") != 2)
+		SetObjProperty (caster, "oldname", caster.name);
+		SetObjProperty (caster, "oldprefix", caster.title_prefix);
+		SetObjProperty (caster, "oldsuffix", caster.title_suffix);
+		SetObjProperty (caster, "oldguild", caster.title_guild);
+		SetObjProperty (caster, "oldrace", caster.title_race);
+		SetObjProperty (caster, "oldmurderer", caster.murderer);
+	elseif(Getobjproperty(caster, "poly") == 2)
+		if(getobjproperty(caster, "horrificbeast"))
+			eraseobjproperty(caster,"horrificbeast");
+			eraseobjproperty(caster,"NewRegenRateForLife");
+			recalcvitals(caster);
+			PlaySoundEffect(caster, 0x165);
+			PlayObjectCenteredEffectEx( caster, 0x3728, 1, 13, 9918, 92, 0, 3 );
+			caster.graphic := caster.trueobjtype;
+			caster.color := caster.truecolor;
+			caster.name := GetObjProperty (caster, "oldname");
+			caster.title_prefix := GetObjProperty (caster, "oldprefix");
+			caster.title_suffix := GetObjProperty (caster, "oldsuffix");
+			caster.title_guild := GetObjProperty (caster, "oldguild");
+			caster.title_race := GetObjProperty (caster, "oldrace");
+			caster.murderer := GetObjProperty (caster, "oldmurderer");
+			EraseObjProperty (caster, "oldname");
+			EraseObjProperty (caster, "oldprefix");
+			EraseObjProperty (caster, "oldsuffix");
+			EraseObjProperty (caster, "oldguild");
+			EraseObjProperty (caster, "oldrace");
+			EraseObjProperty (caster, "oldmurderer");
+			EraseObjProperty (caster, "poly");
+			return 0;
+		endif
+		if(getobjproperty(caster, "wraith") && !caster.cmdlevel)
+			 RevokePrivilege(caster, "freemove");
+			caster.ar_mod := caster.ar_mod - getobjproperty(caster, "wraith");
+		endif
+
+		eraseobjproperty(caster,"wraith");
+		eraseobjproperty(caster,"vampire");
+		if(Cint(GetObjProperty(caster, "vampiric_resist")))
+			var vampresist := Cint(GetObjProperty(caster, "vampiric_resist"));
+			SetAttributeBaseValue(caster, RESISTING_SPELLS, vampresist * 10);
+			EraseObjProperty(caster, "vampiric_resist");
+		endif
+		eraseobjproperty(caster,"lichform");
+		eraseobjproperty(caster,"NewRegenRateForLife");
+		eraseobjproperty(caster,"NewRegenRateForMana");
+		eraseobjproperty(caster,"NewRegenRateForStamina");
+		recalcvitals(caster);
+	endif
+
+	PlaySoundEffect(caster, 0x165);
+	PlayObjectCenteredEffectEx( caster, 0x3728, 1, 13, 9918, 92, 0, 3 );
+	caster.graphic := 0x2EA;
+	caster.murderer := 1;
+	setobjproperty(caster, "horrificbeast", 1);
+	setobjproperty(caster, "poly", 2);
+	setobjproperty(caster, "NewRegenRateForLife", 15000);
+	RecalcVitals(caster);
+
+
+
+endprogram

@@ -1,0 +1,166 @@
+
+use uo;
+use os;
+use cfgfile;
+
+include "include/clock";
+include ":nature:nature";
+
+var TLength := 60;
+var FLength := 20;
+
+initmoons(TLength, FLength);
+
+set_critical(1);
+syslog("Moons running.");
+start_script( "dayNight" );
+
+program moons()
+  var moons := array;
+  if (DEBUG) 
+    syslog("ReadGameClock() reads: " + ReadGameClock());
+  endif
+
+  while(1)
+    moons := untilNextPhase();
+    if (moons[2] > 0)
+      if (DEBUG)
+        syslog("Sleeping for : " + moons[2]);
+      endif
+      sleep(moons[2]);
+      set_critical(1);
+    endif
+    if (DEBUG)
+      syslog("Phasing : " + moons[1]);
+    endif
+    phase(moons[1]);
+  endwhile
+endprogram
+      
+function untilNextPhase();
+  var returns := array;
+  var wstuff := GetGlobalProperty("Nature");
+  if (wstuff[TRAMMELNEXT] < wstuff[FELUCCANEXT])
+    returns[1] := "Trammel";
+    returns[2] := wstuff[TRAMMELNEXT] - ReadGameClock();
+    return returns;
+  elseif (wstuff[FELUCCANEXT] < wstuff[TRAMMELNEXT])
+    returns[1] := "Felucca";
+    returns[2] := wstuff[FELUCCANEXT] - ReadGameClock();
+    return returns;
+  else
+    returns[1] := "both";
+    returns[2] := wstuff[TRAMMELNEXT] - ReadGameClock();
+    return returns;
+  endif
+endfunction
+
+function phase(moon)
+  var moonvar := 0;
+  var phasetime := 0;
+  var nextphase := 0;
+  case (moon)
+    "Trammel": 
+      moonvar := TRAMMEL;
+      phasetime := TLength;
+      nextphase := TRAMMELNEXT;
+    "Felucca": 
+      moonvar := FELUCCA;
+      phasetime := FLength;
+      nextphase := FELUCCANEXT;
+  endcase
+  var wstuff := GetGlobalProperty("Nature");
+  case (moon)
+    "Trammel": 
+    "Felucca":
+      wstuff[moonvar] := wstuff[moonvar]+1;
+      if (wstuff[moonvar] == 8)
+        wstuff[moonvar] := 0;
+      endif
+      wstuff[nextphase] := wstuff[nextphase] + phasetime;
+      if (DEBUG)
+        syslog("Phasing " + moon + " to phase " + wstuff[moonvar] +".");
+        syslog("Next phase: " + wstuff[nextphase] + ". The current time is: " + ReadGameClock());
+      endif
+      "both":
+        wstuff[FELUCCA] := wstuff[FELUCCA]+1;
+        wstuff[TRAMMEL] := wstuff[TRAMMEL]+1;
+        if (wstuff[FELUCCA] == 8)
+          wstuff[FELUCCA] := 0;
+        endif
+        if (wstuff[TRAMMEL] == 8)
+          wstuff[TRAMMEL] := 0;
+        endif
+        wstuff[FELUCCANEXT] := wstuff[FELUCCANEXT] + FLength;
+        wstuff[TRAMMELNEXT] := wstuff[TRAMMELNEXT] + TLength;
+        if (DEBUG)
+          syslog("Phasing Trammel to phase " + wstuff[TRAMMEL] + ".");
+          syslog("Next phase: " + wstuff[TRAMMELNEXT] + ".");
+          syslog("Phasing Felucca to phase " + wstuff[FELUCCA] + ".");
+          syslog("Next phase: " + wstuff[FELUCCANEXT] + ".");
+          syslog("The current time is: " + ReadGameClock());
+        endif
+  endcase
+  SetGlobalProperty("Nature", wstuff);
+  if (wstuff[DAY] == 3)
+    start_script("setLight");
+    syslog("Setting the light level.");
+  endif
+endfunction
+
+function initmoons( byref TLength, byref FLength)
+  trustGameClock();
+  var cfg := ReadConfigFile( "::days");
+  if (cfg)
+    if (DEBUG)
+      syslog("Moons found the cfg file.");
+    endif
+    var elemT := FindConfigElem( cfg, "Trammel");
+    if (elemT)
+      TLength := GetConfigInt( elemT, "Length");
+    endif
+    var elemF := FindConfigElem( cfg, "Felucca");
+    if (elemF)
+      FLength := GetConfigInt( elemF, "Length");
+    endif
+  endif
+  TLength := TLength * 60;
+  FLength := FLength * 60;
+  if (DEBUG)
+    syslog("TLength = " + TLength + ", FLength = " + FLength);
+  endif
+  syslog("Initializing the moons.");
+  set_critical(1);
+  var wstuff := GetGlobalProperty("Nature");
+  if (!wstuff[TRAMMELNEXT])
+    wstuff[TRAMMEL] := 0;
+    wstuff[FELUCCA] := 0;
+    if (DEBUG)
+      syslog("The gametime is: " +ReadGameClock());
+    endif
+    wstuff[TRAMMELNEXT] := ReadGameClock() + TLength;
+    if (DEBUG)
+      syslog("Trammel will next phase at:" + wstuff[TRAMMELNEXT]);
+    endif
+    wstuff[FELUCCANEXT] := ReadGameClock() + FLength;
+    if (DEBUG)
+      syslog("Felucca will next phase at:" + wstuff[FELUCCANEXT]);
+    endif
+    SetGlobalProperty("Nature", wstuff);
+    set_critical(0);
+  endif
+  set_critical(0);
+  return;
+endfunction
+
+function trustGameClock()
+  var i := 1;
+  while (ReadGameClock() < 1000)
+    if (i)
+      syslog("Either this is the first boot, or GameClock could not be trusted!");
+      syslog("Gameclock reads: " + ReadGameClock());
+      i := 0;
+    endif
+    sleepms(500);
+  endwhile
+endfunction

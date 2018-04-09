@@ -1,0 +1,22 @@
+use uo;
+use cfgfile;
+
+program makeset(who, tsetname  )
+  var cfg  := readconfigfile("sets");
+  if (!cfg[tsetname])
+    sendsysmessage(who, "Invalid set!");
+    return;
+  endif
+  var where := targetcoordinates(who);
+  if (!where.x)
+    return;
+  endif
+  foreach entry in GetConfigStringArray( cfg[tsetname], "item" )
+    var it := cfg[entry];
+    var item := createitematlocation(where.x - cint(it.x) , where.y - cint(it.y) ,where.z -  cint(it.z) , cint(it.objtype), 1, who.realm);
+    if (it.color)
+      item.color := cint(it.color);
+    endif
+    item.movable := 0;
+  endforeach
+endprogram

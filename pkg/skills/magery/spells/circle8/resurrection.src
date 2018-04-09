@@ -1,0 +1,73 @@
+use os;
+use uo;
+
+include "include/eventID";
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include "include/res";
+include "include/resPenalty";
+include ":damage:damage";
+
+var npccfg := ReadConfigFile("npcdesc");
+
+
+program spell_resurrect( parms )
+    var caster := parms[1];
+    var info := parms[2];
+    var cast_on;
+    cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_HELPFUL);
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+    if ( !MS_MobileCheck(caster, cast_on) )
+        return 0;
+    endif
+
+  if(Distance(caster, cast_on) > 1)
+	SendSysMessage(caster,"That is too far away!");
+	return;
+  endif
+  PlaySoundEffect(caster, SFX_SPELL_RESSURECTION);
+  PlaySoundEffect(cast_on, SFX_SPELL_RESSURECTION);
+  if(cast_on.isA(POLCLASS_NPC))
+    var element := npccfg[cast_on.npctemplate].elemental;
+    if(element == "undead")
+      PlayStationaryEffect( cast_on.x, cast_on.y, cast_on.z, FX_HEAL_EFFECT, 0xa, 0xa, 0, cast_on.realm );
+      var ev := array;
+      ev.+ type;
+      ev.+ source;
+      ev.type := EVID_PEACEMADE;
+      SendEvent(cast_on, ev);
+      ev.source := caster;
+      SendEvent(cast_on, ev);
+      ev.type := EVID_ENGAGED;
+      SendEvent(cast_on, ev);
+      PlayObjectCenteredEffect(cast_on, 0x37b9,0x03, 0x0a);
+      if(SkillCheck(cast_on, RESISTING_SPELLS, 70, 800))
+        var dmg := CalcSpellDamage(info.circle,caster,cast_on) + (RandomInt(20));
+        ApplyRawDamageEX(cast_on, dmg, DMG_FORCED, caster);
+      else
+        ApplyRawDamage(cast_on, GetHp(cast_on) +1);
+      endif
+    endif
+  else
+    if (!cast_on.dead)
+	  SendSysMessage(caster,"That isn't dead!");
+	  return;
+    endif
+    if(cast_on.criminal)
+      caster.setCriminal(1);
+    endif
+    detach();
+    if(ResNow(cast_on)==1)
+      Resurrect(cast_on);
+      ResPenalties(cast_on);
+    endif
+  endif
+endprogram

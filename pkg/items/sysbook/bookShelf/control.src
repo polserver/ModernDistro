@@ -1,0 +1,169 @@
+/********************************************************************
+*
+*  Sysbook Pkg - bookShelf/control
+*  This script is a control script which runs on bookshelves and controls
+*  respawning of books in those shelves.
+*  The script will basically run a check to see if books need to be respawned.
+*  When a book is removed from the shelf the onremove script will run and trigger
+*  an event which is sent to the bookshelf this then causes the bookshelf
+*  to start the while statement again and re-evaluate if it needs to respawn.
+*  if there is no event for the book being removed the script will wait DEFAULT_WAIT_TIME
+*  before checking again.
+*
+*
+********************************************************************/
+use uo;
+use os;
+use util;
+use file;
+use datafile;
+use cfgfile;
+
+include ":sysbook:eventID";
+	
+var SettingsCfg := 	ReadConfigFile( ":sysbook:settings" );
+var SettingsElem :=	FindConfigElem( settingsCfg, "settings" );
+var DefaultWaitTime := GetConfigInt( SettingsElem, "DefaultWaitTime" );
+var DefaultSpawningDelay := GetConfigInt( SettingsElem, "DefaultSpawningDelay" );
+var DefaultMaxBooks :=  GetConfigInt( SettingsElem, "DefaultMaxBooks" );
+
+program shelfstock(bookshelf);
+	
+	var rand := RandomDiceRoll("1d90+30");
+	sleep(rand); //random 30 sec to 2 minute delay on starting to prevent all shelves spawning at the same time.
+	var ev;
+	bookshelf.setprop("#PID", GetPID()); //set a PID cprop to the book shelf for other scripts to call.
+	
+	if( CheckToSpawn(bookshelf) )
+		//print("Spawning book shelf at " + bookshelf.x + " " + bookshelf.y + " " + bookshelf.z + " in " + bookshelf.realm + ".");
+		addbooks(bookshelf);
+	endif
+	while(1)
+		if( ev.type == EVID_SYSBOOK_BOOK_REMOVED )
+			if( CheckToSpawn(bookshelf) )
+				//print("Spawning book shelf at " + bookshelf.x + " " + bookshelf.y + " " + bookshelf.z + " in " + bookshelf.realm + ".");
+				addbooks(bookshelf);
+			else
+				//if shelf shouldn't be spawning switch off. This should maybe be changed so that global spawning can turn it on and off.
+				break;
+			endif
+		endif
+		ev := Wait_For_Event( DefaultWaitTime );
+	endwhile
+	bookshelf.eraseprop("#PID"); //Process will be dead soon so delete the PID cprop
+  
+endprogram
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//	addbook( bookcase ) -
+//	This function checks how many books are in the case and what the maximum books should be.
+//	It will then call the SpecialBook() function which will create a new book.
+//	This function loops until the max number of books is created.
+//	
+//	Returns: Nothing
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function addbooks(bookcase)
+	var count := 0;
+	var books := EnumerateItemsInContainer(bookcase);
+	var max := GetObjProperty(bookcase, "MaxBooks");
+  
+	if((!max) or (max > DefaultMaxBooks))
+		max := RandomDiceRoll("1d5+2");
+		SetObjProperty(bookcase, "MaxBooks", max);
+	endif
+
+	if(books.size()!= 0)
+		foreach book in books
+			if(book.objtype == 0xfef)
+				count := count + 1;
+			endif
+		endforeach
+	endif
+	while(count < max)
+		Sleep(DefaultSpawningDelay); //Sleep delay between books being created to stop all books being recreated at once.
+		SpecialBook(bookcase);
+		count := count + 1;
+	endwhile
+endfunction
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//	SpecialBook( bookcase ) -
+//	This function actually creates the book.
+//	Previous scripts had calls for creating junk and i think Special Book was a book with readable
+//	content, however now calling it SpecialBook doesn't make a lot of sense and should probably be
+//	changed.
+//	
+//	Returns: Nothing
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function SpecialBook(bookcase)
+	var book := CreateItemInContainer(bookcase, 0xfef, 1);
+	case(RandomInt(4)+1)
+		1: book.graphic := 4079;
+		2: book.graphic := 4080;
+		3: book.graphic := 4081;
+		4: book.graphic := 4082;
+	endcase
+	var rint := CInt(RandomInt(30) + 1);
+	var bookContents := GetBookContents(rint);
+	book.setprop("contents", bookContents.conents);
+	book.setprop("title",    bookContents.title);
+	book.setprop("author",   bookContents.author);
+	book.name := bookContents.title;
+endfunction
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//	GetBookContents( bookid ) -
+//	Will return the contents of the book at bookId in the datastore.
+//
+//	Returns: either a struct with the book content or 0 on error.
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+function GetBookContents(bookid)
+
+	var df := OpenDataFile("staticbooks");
+  
+	if(!df)
+		LogToFile("::log/sysbook.log", "[bookShelf/control.ecl]: Datastore file error: " + df.errortext, LOG_DATETIME);
+		print("Sysbook error - check sysbook.log");
+		return 0;
+	endif
+  
+	var elem := df.FindElement(bookid);
+	var book := struct{};
+  
+	book.author := elem.getprop("author");
+	book.title := elem.getprop("title");
+	book.conents := elem.getprop("contents");
+	return book;
+
+endfunction
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//	CheckToSpawn( bookshelf ) -
+//	Will check if the global pause is in effect or if the shelf has been turned off
+//
+//	Returns: 1 if shelf should spawn and 0 if checks failed.
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+function CheckToSpawn( bookshelf )
+	if(!GetGlobalProperty("BookSpawnPause"))
+		if(GetObjProperty(bookshelf, "Spawn") == "Yes");
+			return 1;
+		elseif( GetObjProperty(bookshelf, "Spawn") == "No")
+			return 0;
+		else
+			SetObjProperty(bookshelf, "Spawn", "No");
+			LogToFile("log/sysbook.log", "[bookShelf/control.ecl]: Shelf at "+bookshelf.x+", "+bookshelf.y+", "+bookshelf.z+", "+bookshelf.realm+" has been disabled.", LOG_DATETIME);
+			return 0;
+		endif
+	endif
+	return 0;
+endfunction

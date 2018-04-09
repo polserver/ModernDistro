@@ -1,0 +1,17 @@
+
+use uo;
+use os;
+
+program cmd_shutdown()
+
+   print("Saving World State");
+   Broadcast("Saving World State");
+   var res := SaveWorldState();
+   if (res)
+      print("Done saving: " + res );
+      Broadcast("Done saving");
+   else
+      print("Save error: " + res);
+   endif
+
+endprogram

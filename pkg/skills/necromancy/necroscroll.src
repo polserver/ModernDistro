@@ -1,0 +1,46 @@
+use uo;
+use os;
+use cfgfile;
+
+include "include/client";
+include ":necromancy:getSpellID";
+include "include/canAccess";
+
+program use_scroll(who, scroll)
+	EraseObjProperty(who, "IsMeditating");
+	EraseObjProperty(who, "HealTimer");
+	var params := {};
+	if(!can_access(who, scroll))
+		return;
+	endif
+	
+	if(scroll.movable == 0)
+		SendSysMessage(who, "You cannot use that.");
+		return;
+	endif
+	
+	if (!scroll.amount)
+		return;
+	endif
+	
+	if(!ReserveItem(scroll))
+		return;
+	endif
+	
+	var spellid := GetSpellId( scroll );
+	params[1] := who;
+	params[2] := spellid;
+	params[3] := scroll.objtype;
+	Start_script(":magery:spellStarter", params);
+/*
+	var spells_cfg := ReadConfigFile( ":necromancy:spells" );
+	var element := FindConfigElem( spells_cfg, spellid );
+	var spellname := GetConfigString(element, "script");
+	PrintTextAbove( who, GetConfigString(element, "PowerWords") );
+	var parms := {};
+	parms[1] := "#scroll";
+	parms[2] := who;
+	parms[3] := scroll;
+	start_script(":necromancy:"+spellname, parms);
+*/
+endprogram

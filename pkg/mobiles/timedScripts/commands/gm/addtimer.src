@@ -1,0 +1,35 @@
+/* $Id: addtimer.src 625 2006-07-10 04:42:02Z austinheilman $
+ *
+ */
+use uo;
+
+include ":timedscripts:timedScripts";
+
+program textcmd_AddTimer(who, params)
+	params := SplitWords(params);
+
+	var timer_name	:= params[1];
+	var duration	:= CInt(params[2]);
+	var level	:= CInt(params[3]);
+
+	if ( !timer_name || !duration )
+		SendSysMessage(who, "Command syntax .addtimer <duration> (level)");
+		return 0;
+	elseif ( !level )
+		level := 1;
+	endif
+
+	SendSysMessage(who, "Select a mobile.");
+	var targ := Target(who);
+	if ( !targ.IsA(POLCLASS_MOBILE) )
+		SendSysMessage(who, "Cancelled.");
+		return 0;
+	endif
+
+	TS_StartTimer(targ, timer_name, duration, level);
+
+	SendSysMessage(who, "Done.");
+
+	return 1;
+endprogram
+

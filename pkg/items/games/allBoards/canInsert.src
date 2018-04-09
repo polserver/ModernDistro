@@ -1,0 +1,24 @@
+/*
+        Maintened by *Edwards
+        
+        2009-10-21
+*/
+use uo;
+
+program CanInsert( character, container, movetype, insert_type, adding_item, existing_stack, amount_to_add )
+
+	// Prevent compiler warnings about not being used.
+	insert_type := insert_type;
+	existing_stack := existing_stack;
+	amount_to_add := amount_to_add;
+	
+	if( movetype == MOVETYPE_CORECREATE )
+		return 1;
+	elseif( GetObjProperty( adding_item, "boardserial" ) == container.serial )
+		return 1;
+	elseif( !character )
+		return 1;
+	else
+		return 0;
+	endif
+endprogram

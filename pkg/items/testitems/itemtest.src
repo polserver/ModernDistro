@@ -1,0 +1,44 @@
+//////////////////////////////////////////////////////////
+// This program file is here to use for creating little //
+// pieces of code for testing item "use" script purposes.					//
+//////////////////////////////////////////////////////////
+// 0x1022 - fletching kit graphic
+
+use uo;
+use cfgfile;
+use os;
+use basic;
+use cliloc;
+
+include "include/findCity";
+//include "include/myUtil";
+//include "util/bank";
+include ":currency:currency";
+include "include/string";
+//include ":gumps:gumpMessage";
+//include ":staticHousing:staticHousing";
+include "include/packets";
+include ":clilocs:clilocs";
+
+program itemtest(who, item)
+
+	who := who;
+	var i := 0;
+	var flmgraphicsstart := 0x9C2E;
+	var flmgraphicsend := 0x9C37;
+	item.graphic := flmgraphicsstart;
+	for x := flmgraphicsstart + 1 to flmgraphicsend
+		sleep(1);
+		item.graphic := x;
+//		UpdateItem(item);
+		Broadcast(CStr(Hex(x)));
+	endfor
+//	for ( i := flmgraphicsend - 1; i < flmgraphicsstart; i := i - 1)
+	for ( i := flmgraphicsend - 1; i >= flmgraphicsstart; i := i - 1)
+		sleep(1);
+		item.graphic := i;
+//		UpdateItem(item);
+		Broadcast(CStr(Hex(i)));
+	endfor
+	item.graphic := flmgraphicsstart;
+endprogram

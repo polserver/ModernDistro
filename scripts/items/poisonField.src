@@ -1,0 +1,42 @@
+use uo;
+use util;
+use os;
+use cfgfile;
+include ":attributes:attributes";
+include "include/spellRestrictions";
+include "include/spellAttack";
+include ":poisonwatcher:poisons";
+
+program mpoisonfield(character, item)
+  if(character.dead)
+    return;
+  elseif(character.cmdlevel)
+    return;
+  endif
+  var npccfg := ReadConfigFile("::npcdesc");
+  var boss := SystemFindObjectBySerial(GetObjProperty(item, "creater"), SYSFIND_SEARCH_OFFLINE_MOBILES);
+  SetScriptController(boss);
+  var dmg := CInt(GetAttribute(boss, "magery") / 25);
+  if(!dmg)
+    dmg := 1;
+  endif
+  PlaySoundEffect(character, 0x206);
+  if(character.isA(POLCLASS_NPC))
+    if((npccfg[character.npctemplate].elemental) == "poison")
+      HealDamage(character, (dmg * 10));
+    else
+      send_attack(character, boss, 46);
+      ApplyRawDamage(character, 1);
+      HealDamage(character, 1);
+      PlaySoundEffect(character, 0x206);
+      var passparms := {character, boss, "poisoned weapon", dmg, 1};
+      start_script(":spells:poisonDamage", passparms);
+    endif
+  elseif(!character.dead)
+    ApplyRawDamage(character, 1);
+    HealDamage(character, 1);
+    PlaySoundEffect(character, 0x206);
+    var passparms := {character, boss, "poison field", dmg, 1};
+    start_script(":spells:poisonDamage", passparms);
+  endif
+endprogram

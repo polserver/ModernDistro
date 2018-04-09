@@ -1,0 +1,43 @@
+/*
+        Created by *Edwards
+
+        2008-08-30
+*/
+use uo;
+use util;
+
+include ":attributes:attributes";
+include ":equipment:equipment";
+include "include/security";
+
+program textcmd_addMod( mobile, text )
+
+        if( !AuthorizationCode( mobile ))
+                SendSysMessage( mobile, "Cancelled." );
+                return 0;
+        endif
+        
+        var param := SplitWords( text ),
+            attrib := CStr( param[1] ),
+            value := CInt( param[2] );
+
+        if( !attrib || !value )
+               SendSysMessage( mobile, "Usage is .addMod <attribute> <value>" );
+               return 0;
+        endif
+
+        SendSysMessage( mobile, "Select the item to apply the modification." );
+        var targ := Target( mobile );
+        if( !targ.IsA( POLCLASS_EQUIPMENT ))
+               SendSysMessage( mobile, "Cancelled" );
+               return 0;
+        endif
+
+        var result := AddModifierToEquipment( targ, attrib, value );
+        if( result.errortext )
+               SendSysMessage( mobile, "Error --> "+result.errortext );
+               return 0;
+        endif
+
+	return 1;
+endprogram

@@ -1,0 +1,54 @@
+/* $Id: newAccount.src 375 2006-06-17 19:26:32Z austinheilman $
+ *
+ */
+use uo;
+use os;
+use http;
+
+include ":accounts:accounts";
+include ":accounts:settings";
+
+/* NOTES:
+ *
+ * Expects a URL string with info for the following
+ * username=username (string)
+ * password=password (string)
+ * cmdlevel=default command level (integer)
+ * expansion=expansion (string)
+ * email=email ( string)
+ * adminpw=creation password (string) - if set in settings.cfg
+ *
+ * Example:
+ * ?username=Bob&password=Beer&cmdlevel=3&expansion=AOS&email=Bob@beer.org&adminpw=DistroR0x
+ *
+ */
+program HTTPScript()
+	var settings := ACCT_GetSettingsCfgElem("Settings");
+	if ( !settings.AllowWWWAccounts )
+		WriteHTMLRaw("Error: Web account maker is disabled.");
+		return 0;
+	endif
+	
+	var username := QueryParam("username");
+	var password := QueryParam("password");
+	var cmd_lvl := QueryParam("cmdlevel");
+	var expansion := QueryParam("expansion");
+	var email := QueryParam("email");
+	var admin_pw := QueryParam("adminpw");
+	
+	if ( settings.AuxWebPassword )
+		if ( settings.AuxWebPassword != admin_pw )
+			 WriteHTMLRaw("Error: Invalid administration password.");
+			 return 0;
+		endif
+	endif
+
+	var result := CreateNewAccount(username, password, cmd_lvl, expansion, email);
+	if ( result.errortext )
+		WriteHTMLRaw("Error: "+result.errortext);
+	else
+		WriteHTMLRaw("Success: The acount was created successfully.");
+	endif
+
+	return 1;
+endprogram

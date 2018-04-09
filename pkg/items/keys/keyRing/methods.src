@@ -1,0 +1,19 @@
+/*
+        Maintened by *Edwards
+        
+        2009-10-21
+*/
+use uo;
+
+program Install()
+
+	return 1;
+endprogram
+
+exported function IsKeyRing( keyring )
+
+	keyring := keyring; // Avoid compiler warning
+ 
+	return 1;
+endfunction
+

@@ -1,0 +1,25 @@
+How to start with a clean unpopulated world.
+
+If you have never had a POL server before then skip to number 3.
+
+1.  Be absolutely certain you want to delete everything, accounts, players, items NPCs, etcetera from your world.
+
+2.  If you decide that is what you want to do then delete everything inside the /data folder.
+
+3.  There are two files named 'clean_accounts.txt' and 'clean_pol.txt' in the Distro root directory.
+	These files have all game parameters set to a new POL install.
+	ONLY use these files if you are starting with NO items, NPCs, players, multis, guilds, etc. In other words a clean virgin world!
+    If you have an existing world DO NOT use these files!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	You WILL cause POL to fail to start if you do not heed this warning!
+	
+4.  If however you are starting out with all items deleted from the data folder then copy the clean_pol.txt and
+    the clean_accounts.txt files to your data folder and rename them to pol.txt and accounts.txt.
+	It is safe to delete everything from the data directory if you wish to do a complete wipe of your server but
+	you need an accounts.txt and a pol.txt file for POL to start. The 'clean' files are intended to be used
+	only on a new, never populated world or one that has been wiped clean of all things.
+	
+5.	Note: If this is the first time you have ever downloaded the Distro there may not be a data directory present in
+	your pol directory. If there is no data directory then create it and do step number 4.
+	
+6.  Now you can configure POL using the POL Configurator. You can download it at:
+    https://forums.polserver.com/viewtopic.php?f=1&t=6063&sid=d286b30f7cdec649888caf0b009367ee

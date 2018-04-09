@@ -1,0 +1,104 @@
+/* $Id: parseCharProfile.src 375 2006-06-17 19:26:32Z austinheilman $
+ * script by MuadDib
+ *
+ */
+use uo;
+use os;
+use polsys;
+use datafile;
+
+include ":datafile:datafile";
+
+CONST PROFILE_MSGTYPE := 0xB8;
+CONST PROFILE_TITLE := "Profile for ";
+CONST PROFILE_UPDATE_MODE := 1;
+CONST PROFILE_REQUEST_MODE := 0;
+CONST HEADER_SIZE := 7;
+CONST NULL_SIZE := 1;
+CONST UNULL_SIZE := 2;
+CONST UCHAR_SIZE := 2;
+
+CONST OFFSET_MSGTYPE := 0;
+CONST OFFSET_MSGLEN := 1;
+CONST OFFSET_MODE := 3;
+CONST OFFSET_SERIAL_OUT := 3;
+CONST OFFSET_SERIAL_IN := 4;
+CONST OFFSET_TITLE_STR := 7;
+CONST OFFSET_CMDTYPE := 8;
+CONST OFFSET_NEW_PROFILE_TEXTLEN := 10;
+CONST OFFSET_NEW_PROFILE := 12;
+
+program runScript_CharProfileRequest( params )
+	var who := params[1];
+	var packet := params[2];
+	params := 0; // Not needed anymore.
+
+	var mode := packet.GetInt8(OFFSET_MODE); //mode 0 for request, 1 for update
+	var id := packet.GetInt32(OFFSET_SERIAL_IN);  //serial of requested profile
+                                                //who
+	var chr := SystemFindObjectBySerial(id);
+	if( !chr.isa(POLCLASS_MOBILE) )
+		return 0; //don't bother working on nonexistant or items :P
+	endif
+
+	var cp_data_file  := DFOpenDataFile(":charprofile:CPFile", DF_CREATE);
+	var cp_elem       := DFFindElement(cp_data_file, chr.serial, DF_CREATE);
+	var cp_profile    := DFGetProp(cp_elem, "Profile", DF_CREATE);
+
+	if(mode == PROFILE_UPDATE_MODE)
+		//number of unicode whos
+		var msglen := packet.GetInt16(OFFSET_NEW_PROFILE_TEXTLEN);
+
+		//updated profile str
+		var uctext := packet.GetUnicodeString(OFFSET_NEW_PROFILE,msglen);
+		if(chr.serial == who.serial) // don't allow setting profile for others
+			cp_elem.SetProp("Profile", uctext); // set my profile
+		endif
+	elseif(mode == PROFILE_REQUEST_MODE)
+		//profile request, send profile back
+		if(cp_profile == error)
+			cp_profile := array; //empty array if no profile was set prev.
+		endif
+
+		//create the response packet
+		var title_str := PROFILE_TITLE + chr.name; //goes at the top of scroll
+		var outpkt := CreatePacket(PROFILE_MSGTYPE, MSGLEN_VARIABLE);
+
+		outpkt.SetInt16(OFFSET_MSGLEN, outpkt.GetSize()); //set the size of the packet
+		outpkt.SetInt32(OFFSET_SERIAL_OUT, chr.serial); //set the serial of the who
+		outpkt.SetString(OFFSET_TITLE_STR,title_str,1); //set the title string+terminator
+
+		//profile packet includes an uneditable string and an editable one.
+		//if this is "my" profile, put the profile text in the editable
+		//location. if this is another who's profile, put it in the
+		//uneditable location. This is why we reserved 2 bytes twice for the
+		//terminators. only one of the strings will be filled, the other will
+		//only include a 2-byte terminator.
+		var uneditable_profile_offset := OFFSET_TITLE_STR+Len(title_str)+NULL_SIZE; //edit comes first
+		var editable_profile_offset;
+
+		if(chr.serial != who.serial)
+			//not me, set the string at the uneditable offset
+			outpkt.SetUnicodeString(uneditable_profile_offset,cp_profile,1);
+			//calculate the editable string offset
+			editable_profile_offset := uneditable_profile_offset + (cp_profile.Size()*UCHAR_SIZE);
+			//set just a double terminator at the editable offset
+			outpkt.SetInt16(editable_profile_offset,0);
+		else
+			//it's my profile, no text at uneditable
+			outpkt.SetInt16(uneditable_profile_offset,0);
+			//editable offset past the 2 byte terminator
+			editable_profile_offset := uneditable_profile_offset + UNULL_SIZE;
+			//set the unicode text
+			outpkt.SetUnicodeString(editable_profile_offset,cp_profile,1);
+		endif
+		//send the packet to the _requesting_ who, not the who
+		//whose profile this is.
+		outpkt.SendPacket(who);
+	else
+		SysLog("Unknown profile mode: "+mode);
+	endif
+
+	return 1;
+
+endprogram

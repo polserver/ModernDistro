@@ -1,0 +1,53 @@
+use uo;
+use os;
+use util;
+use cfgfile;
+include "include/eventID";
+include "include/canAccess";
+
+program use_explosion(who, potion)
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  if(!can_access(who, potion))
+    return;
+  endif
+  if(potion.movable == 0)
+    SendSysMessage(who, "You cannot use that.");
+    return;
+  endif
+  if(!Accessible( who, potion))
+	SendSysMessage(who,"You can't get to that!");
+	return;
+  endif
+  who.hidden := 0;
+  SendSysMessage(who, "Select a target");
+  if(!GetObjProperty(potion, "#bomb"))
+    var parms := {};
+    parms[1] := potion;
+    parms[2] := who;
+    start_script(":alchemy:explosionTimer", parms);
+  endif
+  SetObjProperty(potion, "#bomb", 1);
+  ReleaseItem(potion); // allows bomb to be destroyed in pack
+  var cast_on := TargetCoordinates( who );
+  if(!cast_on)
+    return;
+  endif
+  if(!potion)
+    return;
+  endif
+  if(!CheckLosAt(who, cast_on.x, cast_on.y, cast_on.z))
+    MoveObjectToLocation(potion, who.x, who.y, who.z, who.realm, MOVEOBJECT_FORCELOCATION );
+    SendSysMessage(who, "You can't see that!");
+    return;
+  endif
+  if(!potion)
+    return;
+  endif
+  Detach();
+  PlayMovingEffectXYZ( who.x, who.y, who.z+15, cast_on.x, cast_on.y, cast_on.z, 0x0f0d, 8, 0, 0, who.realm );
+  if(!potion)
+    return;
+  endif
+  MoveObjectToLocation(potion, cast_on.x, cast_on.y, cast_on.z, cast_on.realm, MOVEOBJECT_FORCELOCATION );
+endprogram

@@ -1,0 +1,81 @@
+/* $Id: receiveStatLock.src 375 2006-06-17 19:26:32Z austinheilman $
+ *
+ */
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  name:    0xBF Hook: Stat Lock Recieve Subcommand 0x1A
+//  version: 1.0
+//  author:  MuadDib
+//
+//  Purpose: Handles the Stat Lock state change when the client clicks on the Stat Locks on the
+//           status bar in AOS and up clients.
+//
+// CONST settings:
+// OFFSET_STAT = 5 		DO NOT CHANGE
+// OFFSET_MODE = 6 		DO NOT CHANGE
+// CLEAR_STR_MASK = 0xCF 	DO NOT CHANGE
+// CLEAR_DEX_MASK = 0xF3 	DO NOT CHANGE
+// CLEAR_INT_MASK = 0xFC 	DO NOT CHANGE
+//
+////////////////////////////////////////////////////////////////////////////////////////////////////
+use uo;
+use polsys;
+use math;
+
+program receiveStatLock()
+	Print( "INSTALLING: Statlock Recieving PH..." );
+	return 1;
+endprogram
+
+CONST OFFSET_STAT := 5;
+CONST OFFSET_MODE := 6;
+CONST CLEAR_STR_MASK := 0xCF;
+CONST CLEAR_DEX_MASK := 0xF3;
+CONST CLEAR_INT_MASK := 0xFC;
+
+exported function HandleReceiveStatLock( character, byref packet )
+	// Stat ID of the adjusted stat
+	var stat := packet.GetInt8(OFFSET_STAT);
+	// Lock state of the stat
+	var mode := packet.GetInt8(OFFSET_MODE);
+
+	// lockBits - Bits: XXSS DDII (s=strength, d=dex, i=int), 0 = up, 1 = down, 2 = locked
+	var statBit := GetObjProperty( character, "%StatLock%" );
+	if( statBit.errortext )
+		statBit := 0x00000000;
+	endif
+
+	// & CLEAR... will clear out the old states.
+	// | lsh() sets the new state cleanly. Not clearing before this will break the Bit
+	// when set to Locked state.
+	// Example: statbit AND CLEAR_STR_MASK OR leftshift(mode, 4 to the left)
+	// Remember, we are dealing with BITS, a Byte, hex or integer, consists of
+	// 8 Bits. A 1 is 00000001 in bit form. Using lsh we can move them to the left
+	// and obtain the format the lockBit shows. the |, or OR command, will match 2
+	// different bits up and "combine them". So example:
+	// 00100100 |
+	// 00100101    becomes 00100101, because it checks if there is a 1 in EITHER bit,
+	// and if there is, it makes a 1 in the new bit it creates. AND requires there
+	// to be a 1 in both of them at the position. Hence is why we must Clean the
+	// states when we change them. Going from Down to Lock will create a 11 entry
+	// instead of 10 for the lock state, because of the OR command. Cleaning these
+	// with AND (&) will make them 00 so the new state can be set cleanly.
+	case(stat)
+		0: statBit := statBit & CLEAR_STR_MASK | lsh(mode, 4);
+		1: statBit := statBit & CLEAR_DEX_MASK | lsh(mode, 2);
+		2: statBit := statBit & CLEAR_INT_MASK | mode;
+		default: return 1;
+	endcase
+
+	// Record the bit for stat locks onto the character.
+	SetObjProperty(character, "%StatLock%", statBit);
+
+	return 1;
+endfunction
+
+// This function is used to give POL the ability of << (left shift) in eScript since
+// it does not natively support it.
+function lsh(x, n)
+	return Cint(x * pow(2, n));
+endfunction
+

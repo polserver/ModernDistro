@@ -1,0 +1,11 @@
+use uo;
+use os;
+
+program can_remove(who, backpack, item, movetype)
+  if(who.cmdlevel >= 2)
+    return 1;
+  else
+    PrintTextAbovePrivate(backpack, "That cannot be removed.", who);
+    return 0;
+  endif
+endprogram

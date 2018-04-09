@@ -1,0 +1,74 @@
+use uo;
+use os;
+include ":attributes:attributes";
+
+program stablecounter(parms)
+  var me := parms[1];
+  var timer := parms[2];
+  var counter := GetObjProperty(me, "counter");
+  if(!counter)
+    counter := 0;
+  endif
+  while(GetObjProperty(me,"countercheck") == timer)
+    if(counter < 576)
+      counter := counter + 1;
+      SetObjProperty(me, "counter", counter);
+      sleep(300);
+    else
+      upkeep(me);
+      counter := 0;
+      SetObjProperty(me, "counter", counter);
+      sleep(300);
+    endif
+  endwhile
+endprogram
+
+function upkeep(me)
+  var mypen := GetObjProperty(me,"mypen");
+  if(mypen)
+    var mx, my;
+    case(CInt(mypen))
+      1: mx := 5144;
+         my := 1181;
+      2: mx := 5162;
+         my := 1181;
+      3: mx := 5179;
+         my := 1181;
+      4: mx := 5180;
+         my := 1161;
+      5: mx := 5162;
+         my := 1161;
+      6: mx := 5145;
+         my := 1161;
+      7: mx := 5146;
+         my := 1143;
+      8: mx := 5163;
+         my := 1143;
+      9: mx := 5181;
+         my := 1143;
+     10: mx := 5164;
+         my := 1125;
+    endcase
+    var list := ListMobilesNearLocation(mx, my, 0, 8, me.realm);
+    var cost, days, c;
+    var mystorage := 0;
+    if (list)
+      foreach critter in list
+        c := GetObjProperty(critter,"amtdue");
+        cost := GetHp(critter) /2;
+        days := GetObjProperty(critter,"days");
+        if(days >4)
+          ApplyRawDamage(critter, GetHp(critter) + 5);
+        else
+          mystorage := mystorage - 1;
+          days := days + 1;
+          cost := c + cost;
+          SetObjProperty(critter, "amtdue", cost);
+          SetObjProperty(critter, "days", days);
+        endif
+        sleep(5);
+      endforeach
+    endif
+    SetObjProperty(me, "totalpets", mystorage);
+  endif
+endfunction

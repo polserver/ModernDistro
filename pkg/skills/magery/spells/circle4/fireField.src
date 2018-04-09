@@ -1,0 +1,44 @@
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include "include/fields";
+//include "include/firewall";
+const UOBJ_FIREFIELD_NS := 0x398c;
+const UOBJ_FIREFIELD_EW := 0x3996;
+
+program spell_firefield( parms )
+  var caster := parms[1];
+  var info := parms[2];
+  
+  var cast_on := MS_TargetCoordinates(caster, info.targ, "Select a target.");
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+  if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+        return 0;
+  endif
+  
+  var fields := {};
+//  var listeners := {};
+//  var sufferers := {};
+  var magic := info.Circle; // For the benefit of the field damage to use MR if field is result of magic
+  var x := cast_on.x;
+  var y := cast_on.y;
+  var z := cast_on.z;
+  case(get_direction(caster))
+	"NS" : fields := CreateNorthSouthField(caster, UOBJ_FIREFIELD_NS, x, y, z, 5, magic);
+	"EW" : fields := CreateEastWestField(caster, UOBJ_FIREFIELD_EW, x, y, z, 5, magic);
+  endcase
+  PlaySoundEffect(caster, 0x20d);
+  Detach();
+  var duration := 20 + ( CInt(GetAttribute( caster, MAGERY ) ) / 3 );
+  sleep(duration);
+  foreach fieldpart in fields
+    DestroyItem(fieldpart);
+  endforeach
+endprogram

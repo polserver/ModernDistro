@@ -1,0 +1,14 @@
+use uo;
+
+program textcmd_getregionstring( who, text )
+    var params := SplitWords( text );
+    var rs := GetRegionString( params[1], who.x, who.y, params[2], who.realm );
+    var rstext;
+    if (rs)
+        rstext := rs;
+    else
+        rstext := "Error: " + rs.errortext;
+    endif
+
+    SendSysMessage( who, "GetRegionString("+params[1]+","+who.x+","+who.y+","+params[2]+")=" + rstext );
+endprogram

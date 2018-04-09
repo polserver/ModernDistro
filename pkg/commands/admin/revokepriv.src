@@ -1,0 +1,10 @@
+use uo;
+
+program textcmd_grantpriv( who, priv )
+    SendSysMessage( who, "From whom do you want to revoke the '" + priv + "' privilege?" );
+    
+    var subject := Target( who, TGTOPT_NOCHECK_LOS );
+    if (subject)
+        RevokePrivilege( subject, priv );
+    endif
+endprogram

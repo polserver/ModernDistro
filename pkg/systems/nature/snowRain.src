@@ -1,0 +1,79 @@
+use uo;
+use os;
+use cfgfile;
+
+include ":nature:nature";
+
+var clienttype;
+var senddelay;
+
+initialization(clienttype, senddelay);
+
+program SnowAndRain(sev)
+  var wstuff := GetGlobalProperty("Nature");
+  var weathercheck := wstuff[CURRENTWEATHER];
+  var calendar := GetGlobalProperty("Calendar");
+  while(wstuff[CURRENTWEATHER] == weathercheck)
+    if ((calendar[MONTH] == 12) or (calendar[MONTH] == 1) or (calendar[MONTH] == 2))
+      if (clienttype == 2)
+        set_world_weather(2, sev);
+      else
+//      SetWeatherOff();
+//      SetRegionWeatherLevel( "Background", 2, sev, 0, -1);
+        sev := (sev*9)/14 + 10;
+        set_world_weather(2, sev);
+      endif
+      if (DEBUG)
+        syslog("Sending snow, severity " + sev);
+      endif
+    else
+      if (clienttype == 2)
+        var intensity := 0;
+        if (weathercheck == 5)
+          intensity := 1;
+        endif
+        set_world_weather(intensity, sev);
+        if (DEBUG)
+          syslog("Sending rain (client 2), intensity " + intensity + ", severity " + sev);
+        endif
+      else
+//      SetWeatherOff();
+//      SetRegionWeatherLevel( "Background", 1, sev, 0, -1);
+        sev := (sev*9)/14 + 10;
+        set_world_weather(1, sev);
+        if (DEBUG)
+          syslog("Sending rain (client 1), intensity 1, severity " + sev);
+        endif
+      endif
+    endif
+    if (DEBUG)
+      syslog("Snoozing for 35 seconds.");
+    endif
+    sleep(35);
+    wstuff := GetGlobalProperty("Nature");
+    calendar := GetGlobalProperty("Calendar");
+  endwhile
+endprogram
+
+function initialization(byref clienttype, byref senddelay)
+  var cfg := ReadConfigFile("nature");
+  if (cfg)
+    var elem := FindConfigElem(cfg, "clienttype");
+    clienttype := GetConfigInt(elem, "client");
+    if (DEBUG)
+      syslog("nature.cfg read, clienttype : " + clienttype);
+    endif
+  endif
+//    elem := FindConfigElem(cfg, "resendtime");
+//    senddelay := GetConfigInt(elem, "resend");
+
+//if ((!senddelay) or (senddelay > 180))
+//    senddelay := 180;
+//elseif (senddelay < 30)
+//    senddelay := 30;
+//endif
+
+  if ((clienttype != 1) and (clienttype != 2))
+    clienttype := 2;
+  endif
+endfunction

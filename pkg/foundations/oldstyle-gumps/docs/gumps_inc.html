@@ -1,0 +1,1402 @@
+<HTML>
+<HEAD>
+<TITLE>GUMPS.INC help file -v2.2-</TITLE>
+
+<LINK REV="made" HREF="mailto:myrathi@templar.dhs.org">
+
+<META NAME="author" content="Myrathi (TJ Houston)">
+<META name="generator" content="Hand-written HTML :)">
+<META name="keywords" content="UO, ultima, ultima online, player-run, shard, gumps, include, help">
+<META name="description" content="GUMPS.INC help file -v2.2- for POL UO server">
+</HEAD>
+
+<BODY BGCOLOR="black" TEXT="yellow" LINK="white" VLINK="white" ALINK="white" RIGHTMARGIN="0" TOPMARGIN="0">
+<HR>
+<TABLE WIDTH="100%" BORDER="0" BGCOLOR="navy">
+ <TR>
+  <TD WIDTH="70%" ALIGN="BOTTOM"><CENTER><BR><H1>GUMPS.INC help file -<I>v2.2</I>-</H1></CENTER></TD>
+  <TD WIDTH="30%">
+   <TABLE BORDER="0">
+    <TR><TD><LI><U>Author</U>:</TD><TD>TJ Houston (Myrathi)</TD></TR>
+    <TR><TD><LI><U>Email</U>:</TD><TD><A HREF="mailto:tjh@myrathi.co.uk">tjh@myrathi.co.uk</A></TD></TR>
+   </TABLE>
+  </TD>
+ </TR>
+</TABLE>
+<HR>
+<P>
+<B>Commands covered in this help file:</B> <CODE>(optional parameters are in [ ] brackets)</CODE>
+<P>
+<TABLE WIDTH="90%" BORDER="1" CELLPADDING="10">
+<TR>
+ <TD WIDTH="4%" ALIGN="CENTER" VALIGN="CENTER" ROWSPAN="2" BGCOLOR="navy">
+  F<BR>U<BR>N<BR>C<BR>T<BR>I<BR>O<BR>N<BR><BR>L<BR>I<BR>S<BR>T
+ </TD>
+ <TD WIDTH="48%" ALIGN="LEFT" VALIGN="TOP" NOWRAP>
+  <LI><A HREF="#GFSetRef">GFSetRef( [x], [y] )</A>
+  <LI><A HREF="#GFSetRefRel">GFSetRefRel( dx, dy )</A>
+  <BR><BR>
+  <LI><A HREF="#GFInitGump">GFInitGump( [sx], [sy] )</A>
+  <BR><BR>
+  <LI><A HREF="#GFPage">GFPage( page )</A>
+  <LI><A HREF="#GFNoClose">GFNoClose( )</A>
+  <LI><A HREF="#GFNoDispose">GFNoDispose( )</A>
+  <LI><A HREF="#GFNoMove">GFNoMove( )</A>
+  <BR><BR>
+  <LI><A HREF="#GFExtractData">GFExtractData( keyid, keyarray )</A>
+  <BR><BR>
+  <LI><A HREF="#GFGetNextIndex">GFGetNextIndex( type )</A> *
+  <LI><A HREF="#GFSetNextIndex">GFSetNextIndex( type, value )</A> *
+  <LI><A HREF="#GFIncIndex">GFIncIndex( type )</A> *
+  <BR><BR>
+  <LI><A HREF="#GFGetData">GFGetData( index )</A> *
+  <LI><A HREF="#GFSetData">GFSetData( index, text )</A> *
+  <BR><BR>
+  <LI><A HREF="#GFGetLayout">GFGetLayout( index )</A> *
+  <LI><A HREF="#GFSetLayout">GFSetLayout( index, text )</A> *
+ </TD>
+ <TD WIDTH="48%" ALIGN="LEFT" VALIGN="TOP" NOWRAP>
+  <LI><A HREF="#GFGumpPic">GFGumpPic( x, y, gumpid )</A>
+  <LI><A HREF="#GFResizePic">GFResizePic( x, y, gumpid, w, h )</A>
+  <LI><A HREF="#GFTilePic">GFTilePic( x, y, tileid )</A>
+  <BR><BR>
+  <LI><A HREF="#GFTextLine">GFTextLine( x, y, colour, text )</A>
+  <LI><A HREF="#GFTextMid">GFTextMid(x, y, w, colour, text )</A>
+  <LI><A HREF="#GFTextRight">GFTextRight( rx, y, colour, text )</A>
+  <LI><A HREF="#GFTextCrop">GFTextCrop( x, y, w, h, colour, text )</A>
+  <BR><BR>
+  <LI><A HREF="#GFTextEntry">GFTextEntry( x, y, w, h, colour, text )</A>
+  <BR><BR>
+  <LI><A HREF="#GFButtonPage">GFButtonPage( x, y, release, press, page )</A>
+  <LI><A HREF="#GFButtonID">GFButtonID( x, y, release, press, close )</A>
+  <BR><BR>
+  <LI><A HREF="#GFCheckBox">GFCheckBox( x, y, off, on, state )</A>
+  <LI><A HREF="#GFRadioButton">GFRadioButton( x, y, off, on, state )</A>
+  <LI><A HREF="#GFSetRadioGroup">GFSetRadioGroup( group )</A>
+  <BR><BR>
+  <LI><A HREF="#GFUser1">GFUser1( line )</A>
+  <LI><A HREF="#GFUser2">GFUser2( l_line, d_pos, d_line )</A>
+ </TD>
+</TR>
+<TR>
+ <TD WIDTH="50%" ALIGN="LEFT" VALIGN="TOP" NOWRAP>
+  <LI><A HREF="#GFStoreGump">GFStoreGump( )</A>
+  <LI><A HREF="#GFRestoreGump">GFRestoreGump( gumpvar )</A>
+ </TD>
+ <TD WIDTH="50%" ALIGN="LEFT" VALIGN="TOP" NOWRAP>
+  <LI><A HREF="#GFSendGump">GFSendGump( who )</A>
+  <LI><A HREF="#GFSendGumpV">GFSendGumpV( who, gumpvar )</A>
+ </TD>
+</TR>
+</TABLE>
+<BR>
+<B><U>Notes</U>:</B>
+<P>
+<UL>
+ <LI>This package requires at least core 090 due to its use of the 'struct' type.</LI>
+ <LI>All functions will accept hex values in place of integers and convert them,
+     if necessary, to integer form (gumps crash with hex values! Ugh!)</LI>
+ <LI>Sending negative values to gump functions *will* crash the client!</LI>
+ <LI>Refer to the '<CODE>GUMPS.INC</CODE>' file for a list of '<CODE>BKGND_<I>???????</I></CODE>'
+     constants for use with the <A HREF="#GFResizePic">GFResizePic( )</A> function.</LI>
+</UL>
+<BR>
+(<I>For an example program, see the <A HREF="#Example">bottom</A> of this file</I>)
+
+<BR>
+<A NAME="GFSetRef">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFSetRef(</B> <I>[x]</I><B>,</B> <I>[y]</I> <B>)</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Specifies the absolute co-ordinates, from
+top-left corner of the client window, that any successive controls will use as a reference.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>x</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance <I>in</I> from the <I>left</I> edge of the client-area.
+(<I>Default: 0</I>)</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>y</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance <I>down</I> from the <I>top</I> edge of the client-area.
+ (<I>Default: 0</I>)</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">A structure containing the old <I>absolute</I> reference co-ordinates:<BR>
+<UL><CODE>oldref.<B>x</B><BR>oldref.<B>y</B></CODE></UL></TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT"><LI>This can be used more than once within the same gump build to alter the
+reference-origin.<LI>Useful for grouping several controls together from the same point.</TD>
+</TR>
+</TABLE>
+</A><!-- NAME -->
+
+<BR>
+<A NAME="GFSetRefRel">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFSetRefRel(</B> <I>dx</I><B>,</B> <I>dy</I> <B>)</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Specifies the relative co-ordinates, from
+the current virtual cursor-position, that any successive controls will use as a reference.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>dx</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance from the current <I>x</I>-position within the
+client-area. Negative values will move left, instead of right.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>dy</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance from the current <I>y</I>-position within the
+client-area. Negative values will move upwards, instead of down.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">A structure containing the old <I>absolute</I> reference co-ordinates:<BR>
+<UL><CODE>oldref.<B>x</B><BR>oldref.<B>y</B></CODE></UL></TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT"><LI>This can be used more than once within the same gump build to alter the
+reference-origin.<LI>Useful for placing groups of controls relative to the current origin.</TD>
+</TR>
+</TABLE>
+</A><!-- NAME -->
+
+<BR>
+<A NAME="GFInitGump">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFInitGump(</B> <I>[sx]</I><B>,</B> <I>[sy]</I> <B>)</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">To initialise the global variables necessary to use GUMPS.INC properly.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>sx</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Parameter, if given, is sent to
+<A HREF="#GFSetRef">GFSetRef( )</A> as its first parameter. (<I>Default: 0</I>)</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>sy</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Parameter, if given, is sent to
+<A HREF="#GFSetRef">GFSetRef( )</A> as its second parameter. (<I>Default: 0</I>)</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">None.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT"><LI>Automatically inserts <I>"page 0"</I> into the layout array. You don't need to specify
+it.<LI>Automatically inserts <I>"<A HREF="#GFNoDispose">nodispose</A>"</I> into the layout array. This <B>must</B> be present!</TD>
+</TR>
+</TABLE>
+</A><!-- NAME -->
+
+<BR>
+<A NAME="GFPage">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFPage(</B> <I>page</I> <B>)</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Specifies that successive controls are to be placed on this page.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>page</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Page number to use.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">A structure...<BR>
+ <TABLE BORDER="0">
+  <TR>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>retv.<B>lytidx</B><BR>retv.<B>keyid</B></CODE></UL></TD>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>- Layout-array index changed<BR>- Page number</CODE></UL></TD>
+  </TR>
+ </TABLE>
+</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT">Use "<A HREF="#GFButtonPage">GFButtonPage( )</A>" to create buttons to flip between pages.</TD>
+</TR>
+</TABLE>
+</A><!-- NAME -->
+
+<BR>
+<A NAME="GFNoClose">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFNoClose( )</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Specifies that the Gump cannot be closed by right-clicking on it.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">A structure...<BR>
+ <TABLE BORDER="0">
+  <TR>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>retv.<B>lytidx</B></CODE></UL></TD>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>- Layout-array index changed</CODE></UL></TD>
+  </TR>
+ </TABLE>
+</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT"><LI>Must be closed by pressing an "<A HREF="#GFButtonID">action button</A>" on
+one of the pages.<LI>This is usually specified directly after <A HREF="#GFInitGump">initialisation</A>.</TD>
+</TR>
+</TABLE>
+</A><!-- NAME -->
+
+<BR>
+<A NAME="GFNoDispose">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFNoDispose( )</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Specifies that the Gump cannot be closed by pressing ESCAPE.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">A structure...<BR>
+ <TABLE BORDER="0">
+  <TR>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>retv.<B>lytidx</B></CODE></UL></TD>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>- Layout-array index changed</CODE></UL></TD>
+  </TR>
+ </TABLE>
+</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT"><LI><I><B>This </I>MUST<I> be included, otherwise the server is never told the
+gump has been closed!</B></I><LI>This is usually specified directly after
+<A HREF="#GFInitGump">initialisation</A>.</TD>
+</TR>
+</TABLE>
+</A><!-- NAME -->
+
+<BR>
+<A NAME="GFNoMove">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFNoMove( )</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Specifies that the Gump cannot be dragged or moved from it's initial position.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">A structure...<BR>
+ <TABLE BORDER="0">
+  <TR>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>retv.<B>lytidx</B></CODE></UL></TD>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>- Layout-array index changed</CODE></UL></TD>
+  </TR>
+ </TABLE>
+</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT">This is usually specified directly after <A HREF="#GFInitGump">initialisation</A>.</TD>
+</TR>
+</TABLE>
+</A><!-- NAME -->
+
+<BR>
+<A NAME="GFExtractData">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFExtractData(</B> <I>keyid</I><B>,</B> <I>keyarray</I> <B>)</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Strips the KeyID prefix ('<CODE>nnn:</CODE>') from the front of a TextEntry value taken from the specified point in the key-array.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>keyid</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">The element from the <B><CODE>key-array</CODE></B> to use.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>keyarray</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">The array of key-values returned by a gump function (the main return value, NOT the <CODE>.keys</CODE> member!!)</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">The extracted string.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT">The <B><CODE>keyid</CODE></B> specifies both the element of the <B><CODE>keyarray</CODE></B> to extract the string from and the substring
+('<CODE>nnn:</CODE>')that has to be removed from the data to give the final result.</TD>
+</TR>
+</TABLE>
+</A><!-- NAME -->
+
+<BR>
+<A NAME="GFGumpPic">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFGumpPic(</B> <I>x</I><B>,</B> <I>y</I><B>,</B>
+<I>gumpid</I> <B>)</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Displays a graphic from the "Gumps" section of the InsideUO program
+on the screen.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>x</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance <I>in</I> from the left edge, <I><B>relative</B></I> to the
+pre-specified origin.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>y</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance <I>down</I> from the top edge, <I><B>relative</B></I> to the
+pre-specified origin.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>gumppic</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">ID of the graphic to use (taken from InsideUO)</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">A structure...<BR>
+ <TABLE BORDER="0">
+  <TR>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>retv.<B>lytidx</B></CODE></UL></TD>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>- Layout-array index changed</CODE></UL></TD>
+  </TR>
+ </TABLE>
+</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT"><LI>Can be used as a background gump <I>or</I> a control-graphic.<LI>Graphic
+is placed relative to current origin as set by the <A HREF="#GFSetRef">GFSetRef( )</A> function.</TD>
+</TR>
+</TABLE>
+</A><!-- NAME -->
+
+<BR>
+<A NAME="GFResizePic">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFResizePic(</B> <I>x</I><B>,</B> <I>y</I><B>,</B>
+<I>gumpid</I><B>,</B> <I>w</I><B>,</B> <I>h</I> <B>)</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Displays a complex graphic, from the "Gumps" section of the InsideUO program,
+on the screen by building up the 9 consecutive graphics from #(<I>gumpid</I>) to #(<I>gumpid+8</I>).</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>x</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance <I>in</I> from the left edge, <I><B>relative</B></I> to the
+pre-specified origin.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>y</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance <I>down</I> from the top edge, <I><B>relative</B></I> to the
+pre-specified origin.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>gumppic</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">ID of the first of the 9 graphics to use (taken from InsideUO)</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>w</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Total width of the resulting complex-graphic.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>h</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Total height (down the screen) of the resulting complex-graphic.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">A structure...<BR>
+ <TABLE BORDER="0">
+  <TR>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>retv.<B>lytidx</B></CODE></UL></TD>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>- Layout-array index changed</CODE></UL></TD>
+  </TR>
+ </TABLE>
+</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT">This is usually used to make up the background graphics for the large majority of Gumps.</TD>
+</TR>
+</TABLE>
+</A><!-- NAME -->
+
+<BR>
+<A NAME="GFTilePic">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFTilePic(</B> <I>x</I><B>,</B> <I>y</I><B>,</B>
+<I>tileid</I> <B>)</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Displays a graphic from the "Artwork / Static Tiles" section of the InsideUO program
+on the screen.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>x</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance <I>in</I> from the left edge, <I><B>relative</B></I> to the
+pre-specified origin.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>y</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance <I>down</I> from the top edge, <I><B>relative</B></I> to the
+pre-specified origin.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>tileid</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">ID of the graphic to use (taken from InsideUO)</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">A structure...<BR>
+ <TABLE BORDER="0">
+  <TR>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>retv.<B>lytidx</B></CODE></UL></TD>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>- Layout-array index changed</CODE></UL></TD>
+  </TR>
+ </TABLE>
+</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT">TilePics differ from <A HREF="#GFGumpPic">GumpPics</A> and
+<A HREF="#GFResizePic">Resizables</A> in that they use the graphics normally accessed by objects! Be careful
+if you're switching between GumpPics and TilePics, especially!</TD>
+</TR>
+</TABLE>
+</A><!-- NAME -->
+
+<BR>
+<A NAME="GFTextLine">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFTextLine(</B> <I>x</I><B>,</B> <I>y</I><B>,</B>
+<I>colour</I><B>,</B> <I>text</I> <B>)</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Displays a line of text at a given position and in a given colour,
+<I><B>relative</B></I> to the pre-specified origin.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>x</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance <I>in</I> from the left edge, <I><B>relative</B></I> to the
+pre-specified origin.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>y</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance <I>down</I> from the top edge, <I><B>relative</B></I> to the
+pre-specified origin.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>colour</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Colour of text.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>text</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Text to display.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">A structure...<BR>
+ <TABLE BORDER="0">
+  <TR>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>retv.<B>lytidx</B><BR>retv.<B>dtidx</B></CODE></UL></TD>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>- Layout-array index changed
+       <BR>- Data-array index changed (0-based index)</CODE></UL></TD>
+  </TR>
+ </TABLE>
+</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT">This text is static.</TD>
+</TR>
+</TABLE>
+</A><!-- NAME -->
+
+<BR>
+<A NAME="GFTextMid">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFTextMid(</B> <I>x</I><B>,</B> <I>y</I><B>,</B>
+<I>w</I><B>,</B> <I>colour</I><B>,</B> <I>text</I> <B>)</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Displays a line of text, centred within the region indicated by the leftmost co-ordinates
+and the width of the region, <I><B>relative</B></I> to the pre-specified origin and in a given colour.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>x</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance <I>in</I> from the left edge, <I><B>relative</B></I> to the
+pre-specified origin.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>y</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance <I>down</I> from the top edge, <I><B>relative</B></I> to the
+pre-specified origin.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>w</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Width of the region, <I><B>relative</B></I> to the <CODE><I>x</I></CODE>
+co-ordinate, given.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>colour</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Colour of text.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>text</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Text to display.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">A structure...<BR>
+ <TABLE BORDER="0">
+  <TR>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>retv.<B>lytidx</B><BR>retv.<B>dtidx</B></CODE></UL></TD>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>- Layout-array index changed
+       <BR>- Data-array index changed (0-based index)</CODE></UL></TD>
+  </TR>
+ </TABLE>
+</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT">This text is static.</TD>
+</TR>
+</TABLE>
+</A><!-- NAME -->
+
+<BR>
+<A NAME="GFTextRight">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFTextRight(</B> <I>rx</I><B>,</B> <I>y</I><B>,</B>
+<I>colour</I><B>,</B> <I>text</I> <B>)</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Displays a line of text, right aligned to a given position, in a
+given colour, <I><B>relative</B></I> to the pre-specified origin.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>rx</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance of the right-most edge of the text <I>in</I> from the left
+edge, <I><B>relative</B></I> to the pre-specified origin.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>y</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance <I>down</I> from the top edge, <I><B>relative</B></I> to the
+pre-specified origin.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>colour</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Colour of text.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>text</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Text to display.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">A structure...<BR>
+ <TABLE BORDER="0">
+  <TR>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>retv.<B>lytidx</B><BR>retv.<B>dtidx</B></CODE></UL></TD>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>- Layout-array index changed
+       <BR>- Data-array index changed (0-based index)</CODE></UL></TD>
+  </TR>
+ </TABLE>
+</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT">This text is static.</TD>
+</TR>
+</TABLE>
+</A><!-- NAME -->
+
+<BR>
+<A NAME="GFTextCrop">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFTextCrop(</B> <I>x</I><B>,</B> <I>y</I><B>,</B>
+<I>w</I><B>,</B> <I>h</I><B>,</B> <I>colour</I><B>,</B> <I>text</I> <B>)</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Display a line of text at a given position and in a given colour,
+<I><B>relative</B></I> to the pre-specified origin, but restricts it to a bounding box.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>x</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance the bounding-box is <I>in</I> from the left edge, <I><B>relative</B></I> to the
+pre-specified origin.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>y</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance the bounding-box is <I>down</I> from the top edge, <I><B>relative</B></I> to the
+pre-specified origin.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>w</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">The width of the bounding box, from the <I>x</I>-position.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>h</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">The height of the bounding box, from the <I>y</I>-position.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>colour</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Colour of text.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>text</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Text to display.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">A structure...<BR>
+ <TABLE BORDER="0">
+  <TR>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>retv.<B>lytidx</B><BR>retv.<B>dtidx</B></CODE></UL></TD>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>- Layout-array index changed
+       <BR>- Data-array index changed (0-based index)</CODE></UL></TD>
+  </TR>
+ </TABLE>
+</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT">This text is static and shows '<CODE>...</CODE>' if it exceeds
+the rightmost edge of the bounding box.</TD>
+</TR>
+</TABLE>
+</A><!-- NAME -->
+
+<BR>
+<A NAME="GFTextEntry">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFTextEntry(</B> <I>x</I><B>,</B> <I>y</I><B>,</B>
+<I>w</I><B>,</B> <I>h</I><B>,</B> <I>colour</I><B>,</B> <I>text</I> <B>)</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Displays a line of text <I>(optional)</I> at a given position and
+in a given colour, <I><B>relative</B></I> to the pre-specified origin which can then be edited by the player
+and is returned via the <I>keylist</I> (by <A HREF="#GFSendGump">GFSendGump( )</A>.)</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>x</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance <I>in</I> from the left edge, <I><B>relative</B></I> to the
+pre-specified origin.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>y</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance <I>down</I> from the top edge, <I><B>relative</B></I> to the
+pre-specified origin.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>w</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Width of text-entry area.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>h</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Height (downwards) of text-entry area.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>colour</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Colour of text.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>text</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Text to display.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">A structure...<BR>
+ <TABLE BORDER="0">
+  <TR>
+   <TD VALIGN="TOP"><UL><CODE>retv.<B>lytidx</B><BR>retv.<B>dtidx</B><BR>retv.<B>keyid</B></CODE></UL></TD>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>- Layout-array index changed<BR>- Data-array index changed
+       (0-based index)
+       <BR>- KeyID allocated to the text when the Gump returns
+       <BR>&nbsp; (This method is DAFT! But hey, I didn't write it! :-P" )
+       <BR>&nbsp; (Returns eg:  "Key=2024, Value=2024: This is the text" )</CODE></UL></TD>
+  </TR>
+ </TABLE>
+</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT"><LI>Only the text itself is shown... if you want a "background slot" for
+it to sit in, then you must create it yourself (with <A HREF="#GFGumpPic">GFGumpPic( )</A>,
+<A HREF="#GFResizePic">GFResizePic( )</A> or <A HREF="#GFTilePic">GFTilePic( )</A> )</LI>
+<LI>Call <A HREF="#GFExtractData">GFExtractData( )</A> with the <B><CODE>retv.keyid</CODE></B> member to
+extract only the text from the data-array.</LI></TD>
+</TR>
+</TABLE>
+</A><!-- NAME -->
+
+<BR>
+<A NAME="GFButtonPage">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFButtonPage(</B> <I>x</I><B>,</B> <I>y</I><B>,</B>
+<I>release</I><B>,</B> <I>press</I><B>,</B> <I>page</I> <B>)</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Displays a "button" graphic which changes the "page" that the Gump shows.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>x</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance <I>in</I> from the left edge, <I><B>relative</B></I> to the
+pre-specified origin.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>y</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance <I>down</I> from the top edge, <I><B>relative</B></I> to the
+pre-specified origin.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>release</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">The Gump graphic ID relating to the "released" state of the button (default position)</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>press</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">The Gump graphic ID relating to the "pressed in" state of the button (when the
+mouse is clicked on it)</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>page</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">The page number that the button flicks to.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">A structure...<BR>
+ <TABLE BORDER="0">
+  <TR>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>retv.<B>lytidx</B><BR>retv.<B>keyid</B></CODE></UL></TD>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>- Layout-array index changed
+       <BR>- Page number that the button changes to</CODE></UL></TD>
+  </TR>
+ </TABLE>
+</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT">If there is no "pushed in" graphic, then supply the same ID for both <I>release</I> and
+<I>press</I>.<BR>(example: book corner graphics)</TD>
+</TR>
+</TABLE>
+</A><!== NAME -->
+
+<BR>
+<A NAME="GFButtonID">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFButtonID(</B> <I>x</I><B>,</B> <I>y</I><B>,</B>
+<I>release</I><B>,</B> <I>press</I><B>,</B> <I>close</I> <B>)</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Displays a "button" graphic which returns a "key value" when pressed.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>x</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance <I>in</I> from the left edge, <I><B>relative</B></I> to the
+pre-specified origin.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>y</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance <I>down</I> from the top edge, <I><B>relative</B></I> to the
+pre-specified origin.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>release</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">The Gump graphic ID relating to the "released" state of the button (default position)</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>press</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">The Gump graphic ID relating to the "pressed in" state of the button (when the
+mouse is clicked on it)</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>close</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Does the page close when the button's pressed? (0=No, 1=Yes)</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">A structure...<BR>
+ <TABLE BORDER="0">
+  <TR>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>retv.<B>lytidx</B><BR>retv.<B>keyid</B></CODE></UL></TD>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>- Layout-array index changed
+       <BR>- KeyID allocated to the button
+       <BR>&nbsp; (returned from Gump if pressed) <FONT SIZE="-1">(butid)</FONT></CODE></UL></TD>
+  </TR>
+ </TABLE>
+</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT">If there is no "pushed in" graphic, then supply the same ID for both <I>release</I> and
+<I>press</I>.<BR>(example: book corner graphics)</TD>
+</TR>
+</TABLE>
+</A><!== NAME -->
+
+<BR>
+<A NAME="GFCheckBox">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFCheckBox(</B> <I>x</I><B>,</B> <I>y</I><B>,</B>
+<I>off</I><B>,</B> <I>on</I><B>,</B> <I>state</I> <B>)</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Displays an on/off (yes/no) checkbox which returns its 'state' when the Gump is closed.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>x</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance <I>in</I> from the left edge, <I><B>relative</B></I> to the
+pre-specified origin.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>y</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance <I>down</I> from the top edge, <I><B>relative</B></I> to the
+pre-specified origin.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>off</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">The Gump graphic ID relating to the "off/no" state of the checkbox</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>on</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">The Gump graphic ID relating to the "on/yes" state of the checkbox</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>state</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Sets the initial state of the checkbox (0=Off/No, 1=On/Yes)</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">A structure...<BR>
+ <TABLE BORDER="0">
+  <TR>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>retv.<B>lytidx</B><BR>retv.<B>keyid</B></CODE></UL></TD>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>- Layout-array index changed
+       <BR>- KeyID allocated to the checkbox. <FONT SIZE="-1">(cbxid)</FONT></CODE></UL></TD>
+  </TR>
+ </TABLE>
+</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT">The state of a checkbox is <B>only</B> returned from the Gump if it's <I>On/Yes</I>; if
+it's <I>Off/No</I>, then it's not returned.</TD>
+</TR>
+</TABLE>
+</A><!== NAME -->
+
+<BR>
+<A NAME="GFRadioButton">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFRadioButton(</B> <I>x</I><B>,</B> <I>y</I><B>,</B>
+<I>off</I><B>,</B> <I>on</I><B>,</B> <I>state</I> <B>)</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Displays an on/off (yes/no) radio (option) button which returns its 'state'
+when the Gump is closed.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>x</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance <I>in</I> from the left edge, <I><B>relative</B></I> to the
+pre-specified origin.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>y</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Distance <I>down</I> from the top edge, <I><B>relative</B></I> to the
+pre-specified origin.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>off</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">The Gump graphic ID relating to the "off/no" state of the radio-button</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>on</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">The Gump graphic ID relating to the "on/yes" state of the radio-button</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>state</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Sets the initial state of the radio-button (0=Off/No, 1=On/Yes)</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">A structure...<BR>
+ <TABLE BORDER="0">
+  <TR>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>retv.<B>lytidx</B><BR>retv.<B>keyid</B></CODE></UL></TD>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>- Layout-array index changed
+       <BR>- KeyID allocated to the radio-button. <FONT SIZE="-1">(radid)</FONT></CODE></UL></TD>
+  </TR>
+ </TABLE>
+</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT"><LI>The state of a radio button is <B>only</B> returned from the Gump if it's <I>On/Yes</I>.
+<LI>Only <B>one</B> radio button in a group may be selected!<LI>Set up seperate groups of radio buttons with
+<A HREF="#GFSetRadioGroup">GFSetRadioGroup( )</A>.</TD>
+</TR>
+</TABLE>
+</A><!== NAME -->
+
+<BR>
+<A NAME="GFSetRadioGroup">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFSetRadioGroup(</B> <I>group</I> </B>)</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">To set which group any future radio-buttons are a part of.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>group</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">The group number</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">A structure...<BR>
+ <TABLE BORDER="0">
+  <TR>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>retv.<B>lytidx</B><BR>retv.<B>keyid</B></CODE></UL></TD>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>- Layout-array index changed
+       <BR>- The group number</CODE></UL></TD>
+  </TR>
+ </TABLE>
+</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT">
+<LI>This has to be used BEFORE the radio buttons are created (default group is 1)</LI>
+<LI>I have no idea if the group number is used... tests have been inconclusive. Your call!</LI>
+</TD>
+</TR>
+</TABLE>
+</A><!-- NAME -->
+
+<BR>
+<A NAME="GFUser1">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFUser1(</B> <I>line</I> <B>)</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Appends a user-specified control-line directly onto the end of the layout array.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>line</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">The line of command-text to append</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">A structure...<BR>
+ <TABLE BORDER="0">
+  <TR>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>retv.<B>lytidx</B></CODE></UL></TD>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>- Layout-array index changed</CODE></UL></TD>
+  </TR>
+ </TABLE>
+</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT">This is <B><I>not</I></B> checked for errors! Be careful!</TD>
+</TR>
+</TABLE>
+</A><!-- NAME -->
+
+<BR>
+<A NAME="GFUser2">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFUser2(</B> <I>l_line</I><B>,</B>
+<I>d_pos</I><B>,</B> <I>d_line</I> <B>)</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Appends a user-specified control-line directly onto the end of the layout
+array and places the other, supplied, text string into the specified location in the data array.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>l_line</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">The line of command-text to append.</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>d_pos</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">The position in the data array to place the "text line".</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>d_line</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">The text-line to place in the data array.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">A structure...<BR>
+ <TABLE BORDER="0">
+  <TR>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>retv.<B>lytidx</B><BR>retv.<B>dtidx</B></CODE></UL></TD>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>- Layout-array index changed
+       <BR>- Data-array index changed</CODE></UL></TD>
+  </TR>
+ </TABLE>
+</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT">This is <B><I>not</I></B> checked for errors! Be careful!</TD>
+</TR>
+</TABLE>
+</A><!-- NAME -->
+
+<BR>
+<A NAME="GFStoreGump">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFStoreGump( )</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">To store the current gump, that's being worked on, into a structure.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">A structure that can be sent direct to the <A HREF="#GFSendGumpV">GFSendGumpV( )</A> or
+<A HREF="#GFRestoreGump">GFRestoreGump( )</A> functions...<BR>
+ <TABLE BORDER="0">
+  <TR>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>retv.<B>layout</B><BR>retv.<B>data</B><BR>retv.<B>idx</B></CODE></UL></TD>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>- Layout-array<BR>- Data-array<BR>- Internal index values</CODE></UL></TD>
+  </TR>
+ </TABLE>
+</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT">
+ <LI>Store the returned value using something like: <B><CODE>var gump := GFStoreGump( );</CODE></B></LI>
+ <LI>Gump Storage-variables can be saved in Global Properties (GProps) :-)</LI>
+</TD>
+</TR>
+</TABLE>
+</A><!-- NAME -->
+
+<BR>
+<A NAME="GFRestoreGump">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFRestoreGump(</B> <I>gumpvar</I> <B>)</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">To restore a previously stored gump into the current workspace.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>gumpvar</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">The structure-variable holding the gump details</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">An integer...<BR>
+ <TABLE BORDER="0">
+  <TR>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE><B>0</B><BR><B>1</B></CODE></UL></TD>
+   <TD VALIGN="TOP" NOWRAP><UL><CODE>- Failure: Error message printed to console<BR>- Success: Gump can be accessed again</CODE></UL></TD>
+  </TR>
+ </TABLE>
+</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT">If you've stored a gump in a variable (using the <A HREF="#GFStoreGump">GFStoreGump( )</A> function)
+and need to change the details in it, use this function.
+</TD>
+</TR>
+</TABLE>
+</A><!-- NAME -->
+
+<BR>
+<A NAME="GFSendGump">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFSendGump(</B> <I>who</I> <B>)</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">To create and run the gump itself, then return the results to the
+calling function.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>who</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">The player you want to send the Gump to</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Returns the exact same type of key-array as the core-function
+<I>SendDialogGump( )</I><BR>(see the <I>UO.EM</I> file)
+</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT">This function call uses the gump definition that's currently being worked
+on. See <A HREF="#GFSendGumpV">GFSendGumpV( )</A> for the gump-in-a-box method :-)</TD>
+</TR>
+</TABLE>
+</A><!-- NAME -->
+
+<BR>
+<A NAME="GFSendGumpV">
+<HR>
+<P>
+<TABLE WIDTH="70%" BORDER="1" BGCOLOR="navy" CELLPADDING="3">
+<TR>
+<TD COLSPAN="2" ALIGN="LEFT"><FONT SIZE="+2" COLOR="white"><B>GFSendGumpV(</B> <I>who</I><B>,</B> <I>gumpvar</I> <B>)</B></FONT></TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Purpose</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">To create and run the gump stored in the <I>gumpvar</I> variable, then return the
+results to the calling function.</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>who</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">The player you want to send the Gump to</TD>
+</TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>gumpvar</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">The variable that holds the gump information</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Return Value</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT" BGCOLOR="black">Returns the exact same type of key-array as the core-function
+<I>SendDialogGump( )</I><BR>(see the <I>UO.EM</I> file)
+</TD>
+</TR>
+<TR HEIGHT="5"></TR>
+<TR>
+<TD WIDTH="10%" ALIGN="CENTER"><B>Notes</B></TD>
+<TD WIDTH="90%" ALIGN="LEFT">This function call uses the gump definition that's stored in the <I>gumpvar</I> variable using the
+<A HREF="#GFStoreGump">GFStoreGump( )</A> function. Calling this function will <I>not</I> overwrite the gump that's
+currently being worked on! :-)</TD>
+</TR>
+</TABLE>
+</A><!-- NAME -->
+
+<BR>
+<A NAME="Example">
+<HR>
+<P>
+<B><U>Example code</U></B>
+<P>
+Returns a '1' if you click "Okay", a '0' if you click "Cancel", or '-1' if something weird occurs.
+<P>
+<PRE>
+//
+// Gump which asks "Are you sure?"
+//
+<FONT COLOR="lime">include</FONT> "include/gumps.inc";
+
+<FONT COLOR="lime">function</FONT> gump_areyousure( <FONT COLOR="silver">who</FONT> )
+
+    <FONT COLOR="white">GFInitGump</FONT>();
+    <FONT COLOR="white">GFNoClose</FONT>();
+
+    <FONT COLOR="white">GFSetRef</FONT>( 100, 100 );
+    <FONT COLOR="white">GFGumpPic</FONT>( 0, 0, 0x816 );
+    <FONT COLOR="white">GFTextLine</FONT>( 38, 33, 55, <FONT COLOR="pink">"Are you sure?"</FONT> );
+    <FONT COLOR="lime">var</FONT> <FONT COLOR="silver">okay</FONT> := <FONT COLOR="white">GFButtonID</FONT>( 35, 72, 0x81c, 0x81b, 1 );
+    <FONT COLOR="lime">var</FONT> <FONT COLOR="silver">cancel</FONT> := <FONT COLOR="white">GFButtonID</FONT>( 85, 72, 0x819, 0x818, 1 );
+
+    <FONT COLOR="lime">var</FONT> <FONT COLOR="silver">retv</FONT> := <FONT COLOR="white">GFSendGump</FONT>( <FONT COLOR="silver">who</FONT> );
+
+    <FONT COLOR="lime">if</FONT> ( <FONT COLOR="silver">retv</FONT>[0] == <FONT COLOR="silver">okay</FONT>.<FONT COLOR="cyan">keyid</FONT> )
+        <FONT COLOR="lime">return</FONT> 1;
+    <FONT COLOR="lime">elseif</FONT> ( <FONT COLOR="silver">retv</FONT>[0] == <FONT COLOR="silver">cancel</FONT>.<FONT COLOR="cyan">keyid</FONT> )
+        <FONT COLOR="lime">return</FONT> 0;
+    <FONT COLOR="lime">else</FONT>
+        <FONT COLOR="lime">return</FONT> -1;
+    <FONT COLOR="lime">endif</FONT>
+
+<FONT COLOR="lime">endfunction</FONT>
+</PRE>
+</A><!-- NAME -->
+<P>
+<HR>
+<BR>
+</BODY>
+</HTML>

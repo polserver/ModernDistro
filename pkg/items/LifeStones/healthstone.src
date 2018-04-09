@@ -1,0 +1,225 @@
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                 //
+// Heakth Stone script                                                                             //  
+// Double clicking a Health Stone will use it.                                                     //
+// If it is not "linked" to someone, ie. never used before, it will be linked to the user and the  //
+// user will get a target.                                                                         //
+// If it has been "linked" then there is a check to verify if the user is the one linked to the    //
+// stone. If so then the user will get a target. If not then the user will get an error message.   //
+// If the user targets the stone her hp will charge the stone. Her hp will be drained until        //
+// either she reaches 1 or the stone is fully charged. If she targets herself then hp will         // 
+// be transferred from the stone to her until either her hp is full or the stone is empty.         //
+//                                                                                                 //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+use uo;
+use os;
+
+//include "include/client";
+include ":attributes:attributes";
+//include "include/objtype";
+//include "include/string";
+//include "include/magicitems";
+//include "include/utility";
+
+program use_healthstone (who, stone)
+
+        var what, myhp, maxhpts, hpdif, amt, capacity;
+	if (!InInventory(who.backpack, stone))
+		SendSysMessage(who, "The health stone has to be in your backpack to use it!", color := 33);
+		return;
+	endif
+	if (!ReserveItem(stone)) // If the item is in use already
+		SendSysMessage(who, "You can't use that right now!", color := 33);
+		return;
+	endif
+        if (!GetObjProperty(stone, "ownedby")) // If the stone is not linked already
+            Init(who, stone);
+        endif
+	if (GetObjProperty(stone, "ownedby") != who.serial) // The stone was linked to someone else
+		SendSysMessage(who, "You can't use that health stone. It isn't yours!", color := 33);
+		return;
+	endif
+        SendSysMessage(who, "Target the stone to transfer your health to it or", color := 100);
+        SendSysMessage (who, "target yourself to transfer stored health from the stone to you", color := 100);
+	what := Target(who);
+	if (!what) // If she presses escape or targets nothing
+		SendSysMessage(who, "Canceled.", color := 44);
+		return;
+	endif
+        capacity := GetObjProperty (stone, "MaxCapacity"); // Get the stones Maximum cap for HP
+        amt := GetObjProperty(stone, "Amount"); //  How much health is in the stone now
+        myhp := GetHp( who ); // How much health does she have
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Section where we decide what to do based on what was targetted by the Health Stone user         //
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+// If she targets herself then transfer any stored health to her until either she is full or
+// the stone is empty
+        if (what == who)
+            maxhpts := GetMaxHp(who);
+            if (!amt) //If the stone is bone dry of HP
+                SendSysMessage(who, "That stone has no stored health.", color := 666);
+                return;
+            endif
+            if (maxhpts == myhp) // If she doesn't need any hp
+                SendSysMessage(who, "You are in full health already.", color := 666);
+                return;
+            endif
+            hpdif := maxhpts - myhp; // How low is her hp? hpdif contains that info
+            if (amt <= hpdif) // If she needs more hp than the stone has
+                hpdif := amt; // just give her all the hp left in the stone
+            endif
+            SetHp (who, myhp + hpdif ); // Transfer the hp to her
+            SendSysMessage (who, "Your body feels stronger.", color := 68);
+            SetObjProperty (stone, "Amount", amt - hpdif); // Take the hp "out of" the stone
+            PlaySoundEffect(who, 0x1FB); // Play a cool sound effect
+
+// If she targets the stone then transfer all but 1 of her hp to the stone
+        elseif (what == stone)
+            if (!GetObjProperty(stone, "Charges")) // If this Property is 0 then the stone cannot be charged again
+                SendSysMessage (who, "The stone cannot recieve any more health. It has been used too many times.", color := 33);
+                SendSysMessage (who, "However there may still be more health you can recover from the stone.", color := 44);
+                return; // Done
+            endif
+
+// Then transfer hp from her to the stone until the stone is full but
+// hp transferred is not to exceed her total hp -1 or the stones maximum capacity
+
+            if (amt == capacity) // Is the stone already at max capacity?
+                SendSysMessage(who, "That Health Stone cannot hold any more life force.", color := 44);
+            elseif (myhp < 2) // if her hp is less than 2 there ain't none to transfer
+                SendSysMessage(who, "You are too weak to give any health to the stone.", color := 33);
+            else
+// Find out how much the stone needs to be fully charged - hpdif
+                hpdif := capacity - amt;
+                if (!hpdif <= myhp - 1) //If the stone needs more than her hp - 1
+                    hpdif := myhp - 1; // then give all her available hp - 1
+                endif
+                if (hpdif + amt >= capacity) // If giving the stone all her hp will put it over
+                    hpdif := capacity - amt; // its max cap then only give it what it needs.
+                endif
+                ApplyDamage (who, hpdif); // Take the hp from her
+                SetObjProperty (stone, "Amount", amt + hpdif); // Place it "in" the stone
+                SetObjProperty(stone, "Charges", GetObjProperty(stone, "Charges") -1); // Lose a charge
+                SendSysMessage (who, "You transfer the health.", color := 68);
+                PlaySoundEffect(who, 0x1EC); // Play a cool sound effect
+            endif
+        else // Well, she tried to target something other than herself.
+            SendSysMessage(who, "You can only use a Health Stone for tranferring health to or from yourself silly!", color := 33);
+        endif
+        Status (stone);
+endprogram
+        
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// This function is called the first time a Health Stone is used to initialize the stones CProps //
+///////////////////////////////////////////////////////////////////////////////////////////////////
+        function Init(who, stone)
+        
+            SetObjProperty(stone, "MaxCharges", 10);
+            SetObjProperty(stone, "Charges", 10);
+            SetObjProperty(stone, "MaxCapacity", RandomInt(400) + 91);
+            SetObjProperty(stone, "Amount", 0);
+            LinkTheItem(who, stone); // This makes the stone only usable by the original user
+        endfunction
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+// Links the item to the original user.                                                            //
+// Customized "own" function for Life Stones so they are permanently attached to the original user //
+// Yeah I ripped off the own command for this function.                                            //
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function LinkTheItem(who, it)
+
+//      Can only mark one stone at a time
+	if (it.amount > 1 )
+		PrintTextAbovePrivate(it, "You can't mark those.", who );
+		return;
+	endif
+
+	PrintTextAbovePrivate(it, "The stone is now linked to your mind. Only you can use it.", who );
+	PlaySoundEffect(who, 0x1e9);
+	var ownerserial := who.serial;
+	var ownername := who.name;
+	var thename := it.desc;
+	SetObjProperty(it, "oldname", thename);
+	var longname := SplitWords(thename);
+	if (longname[1]=="a" || longname[1]=="an")
+		thename:="";
+		foreach word in longname;
+			if (word != longname[1])
+				thename := thename + " "+ word;
+			endif
+		endforeach
+                it.name := who.name+"'s" + TheName;
+	else
+		it.name := who.name+"'s " + TheName;
+	endif
+	it.sellprice := -1;
+	SetObjProperty(it, "ownedby", ownerserial);
+	SetObjProperty(it, "ownername", ownername);
+endfunction
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+// This function will check the wear on the stone and also gauge how much health the stone has left  //
+// Used for placing something on the stone so the user can have an idea of the status of the stone   //
+// ItemID uses this data for verifying a quantifiable, though not specific, amount of energy in the  //
+// stone.                                                                                            //
+// This was a fun function to write - NOT! *grins*                                                   //
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+function Status (stone)
+
+    var maxcharges := GetObjProperty(stone, "MaxCharges");
+    var charges := GetObjProperty(stone, "Charges");
+    var capacity := GetObjProperty(stone, "MaxCapacity");
+    var amt := GetObjProperty(stone, "Amount");
+    var condition, quantity;
+    
+    var wear := CInt(charges /2); // Var used to calculate wear
+    var storage := CInt(amt * 100 / capacity); // Var used to gauge the amt of life-energy stored in the stone (%).
+    
+    case(wear)
+        5: condition := "unused";
+        4: condition := "hardly used";
+        3: condition := "used";
+        2: condition := "worn";
+        1: condition := "badly worn";
+        default: condition := "unknown";
+    endcase
+    // "stone seems to hold " ... " Health" 
+    if (storage >= 85)
+        quantity := "a very large amount of";
+    elseif (storage >=70)
+        quantity := "a large amount of";
+    elseif (storage >=50)
+        quantity := "a good amount of";
+    elseif (storage >=25)
+        quantity := "a fair amount of";
+    elseif (storage > 0)
+        quantity := "a small amount of";
+    else
+        quantity := "no";
+    endif
+    SetObjProperty(stone, "Quantity", quantity);
+    SetObjProperty(stone, "Condition", condition);
+endfunction
+    
+        
+function InInventory(byref inventory, byref it)
+
+	foreach item in EnumerateItemsInContainer(inventory)
+		if (item == it)
+			return 1;
+		endif
+	endforeach
+
+	return 0;
+
+endfunction
+

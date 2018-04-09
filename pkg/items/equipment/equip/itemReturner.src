@@ -1,0 +1,35 @@
+/*
+        Maintened by *Edwards
+
+        2008-08-30
+        
+        Last Modifications 2009-10-21
+             * Changed error will now be displayed with printextabove()
+
+        Original Idea from ZuluHotel
+*/
+use uo;
+use os;
+
+program item_Returner( item )
+
+        var owner_serial := GetObjProperty( item, "owner" );
+	if( !owner_serial )
+                return 0;
+	endif
+
+        var owner := SystemFindObjectBySerial( owner_serial ),
+            owner_name := CStr( owner.name );
+
+        EraseObjProperty( item, "EquippedOn" );
+
+        //Return the item to the owner
+        Set_Script_Option( SCRIPTOPT_CAN_ACCESS_OFFLINE_MOBILES, 1 );
+        
+        var move_item := MoveItemToContainer( item, owner.backpack );
+        if( move_item.errortext )
+                PrintTextAbove( item, "Error moving item to "+owner_name+" item: "+item.serial+" --> "+move_item.errortext );
+        endif
+
+        return 1;
+endprogram

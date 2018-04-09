@@ -1,0 +1,323 @@
+///////////////////////////////////////////////////////////////
+//	homeinfo[1] = Owner Character Serial
+//	homeinfo[2] = NW X coord
+//	homeinfo[3] = NW Y coord
+//	homeinfo[4] = SE X coord
+//	homeinfo[5] = SE Y coord
+//	homeinfo[6] = NW Z coord
+//	homeinfo[7] = SE Z coord
+//	homeinfo[8] = num lockdowns
+//	homeinfo[9]	= num secures
+//
+// Static house sign methods
+//
+// function GetHouseValueOfSign( sign )
+// function CalculateHouseValueBySize( sign )
+// function CalculateHousePriceBySize(sign)
+// function GetHouseSize(sign)
+// function GetMaxLockdowns( sign )
+// function GetLockdowns( sign )
+// function GetMaxContainers( sign )
+// function GetContainers( sign )
+// function GetMaxSecures( sign )
+// function GetSecures( sign )
+// function IsAffiliated( sign, mobile )
+// function IsCoOwnerOrOwner(sign, mobile)
+// function SetHouseName( sign, name )
+// function GetHouseName( sign )
+// function GetPreviousOwner( sign )
+// function SetPreviousOwner( sign, mobile )
+// function IsOwner( sign, mobile )
+// function GetOwner( sign )
+// function SetOwner( sign )
+// function IsCoOwner( sign, mobile )
+// function AddCoOwner( sign, mobile )
+// function SetCoOwnerList( sign, list )
+// function WipeCoOwnerList( sign )
+// function CalculateMaxCoOwners( sign )
+// function IsFriend( sign, mobile )
+// function GetFriends( sign )
+// function AddFriend( sign, mobile )
+// function SetFriendsList( sign, list )
+// function WipeFriendsList( sign )
+// function CalculateMaxFreinds( sign )
+// function IsGuildAffiliate( sign, mobile )
+// function SetGuildStone( sign, guildid )
+// function GetGuildStone( sign )
+// function EraseGuildStone( sign )
+// function IsInHouse( locx, locy, locz)
+///////////////////////////////////////////////////////////////
+
+
+use uo;
+use cfgfile;
+use os;
+use util;
+use math;
+
+program Install()
+
+	return 1;
+endprogram
+
+// The following commented out functions need to be modified to work with the Distro house pricing system.
+/*
+exported function GetHouseValueOfSign( sign )
+	var HV;
+	if (GetObjProperty ( sign, "housevalue" ) )
+		return CInt ( GetObjProperty ( sign, "housevalue" ) );
+	else
+		HV := CalculateHouseValueBySize( sign );
+		SetObjProperty ( sign, "housevalue", CInt ( HV ) );
+		return HV;
+	endif
+endfunction
+
+exported function CalculateHouseValueBySize( sign )
+	var area := GetHouseSize( sign );	
+	if( area >= 1070 ) 
+		return 50;
+	elseif( area < 1070 && area >= 820 )
+		return CInt((area-820) / 115) + 40;
+	elseif( area < 820 && area >= 520 )
+		return CInt((area-520) / 50) + 30;
+	elseif( area < 520 && area >= 245 )
+		return CInt((area-245) / 25) + 15;
+	else 
+		return CInt(area / 17.5) + 1;
+	endif
+endfunction
+
+exported function CalculateHousePriceBySize(sign)
+	var area := GetHouseSize( sign );
+	if( area >= 870 ) 
+		return CInt(area * 6500);
+	elseif( area < 870 && area >= 521 )
+		return CInt(area * 5000);
+	elseif( area < 521 && area >= 321 )
+		return CInt(area * 4000);
+	elseif( area < 321 && area >= 101 )
+		return CInt(area * 3500);
+	else 
+		return CInt(area * 3000);
+	endif
+endfunction
+*/
+exported function GetHouseSize(sign)
+	var homeinfo := GetObjProperty(sign, "homeinfo");
+	var x1, y1, z1, x2, y2, z2, x, y, levels := 1, area := 0;	
+	if (homeinfo)
+		x1 := homeinfo[2];
+		y1 := homeinfo[3];
+		z2 := homeinfo[4];
+		y2 := homeinfo[5];
+		z1 := homeinfo[6];
+		z2 := homeinfo[7];
+		x := x2-x1+1;
+		y := y2-y1+1;
+		levels := z2/20;
+		area := area + x * y * levels;
+	endif
+	return area;
+endfunction
+
+exported function GetMaxLockdowns( sign )
+	var homeinfo := GetObjProperty(sign, "homeinfo");
+	return CInt(homeinfo[8]);
+endfunction
+
+exported function GetLockdowns( sign )
+return GetObjProperty(sign, "numlockowns");
+endfunction
+
+exported function GetMaxSecures( sign )
+	var homeinfo := GetObjProperty(sign, "homeinfo");
+	return CInt(homeinfo[9]);
+endfunction
+
+exported function GetSecures( sign )
+	return GetObjProperty(sign, "numsecure");
+endfunction
+
+//Affiliated Check
+exported function IsAffiliated( sign, mobile )
+
+	if( IsOwner( sign, mobile ))
+		return 4;
+	elseif( IsCoOwner( sign, mobile ))
+		return 3;
+	elseif( IsFriend( sign, mobile ))
+		return 2;
+	elseif( IsGuildAffiliate( sign, mobile ))
+		return 1;
+//	elseif( mobile.cmdlevel >= 3 )
+//		return 4;
+	else
+		return 0;
+	endif
+endfunction
+
+exported function IsCoOwnerOrOwner(sign, mobile)
+	if (mobile.serial in GetObjProperty(sign,"coowners"))
+		return 1;
+	endif
+	
+	if (mobile.acctname == (GetObjProperty(sign, "owneracct") ) )
+		return 1;
+	endif
+	return 0;
+endfunction
+
+//Rename House Stuff
+exported function SetHouseName( sign, name )
+	return SetObjProperty(sign, "signname", name);
+endfunction
+
+exported function GetHouseName( sign )
+	return GetObjProperty(sign, "signname");
+endfunction
+
+//Previous Owner Stuff
+exported function GetPreviousOwner( sign )
+	return GetObjProperty(sign, "lastownername");
+endfunction
+
+exported function SetPreviousOwner( sign, mobile )
+	return SetObjProperty(sign, "lastownername", mobile.name );
+endfunction
+
+//Owner Stuff
+exported function IsOwner( sign, mobile )
+	if( mobile.acctname == GetObjProperty(sign, "owneracct" ) ) 
+		return 1;
+	else
+		return 0;
+	endif
+endfunction
+
+exported function GetOwner( sign )
+	return GetObjProperty( sign, "Owner" );
+endfunction
+
+exported function SetOwner( sign, owner )
+	return SetObjProperty(sign, "Owner", owner.name );
+endfunction
+
+//Co-Owner Stuff
+exported function IsCoOwner( sign, mobile )
+	var coownerlist := GetCoOwners( sign );
+	if(mobile.serial in coownerlist)
+		return 1;
+	endif
+	return 0;
+endfunction
+
+exported function GetCoOwners( sign )
+
+	var CoOwner_list := GetObjProperty( sign, "coowners" );
+	if( !CoOwner_list )
+		CoOwner_list := array{};
+	endif
+
+	return CoOwner_list;
+endfunction
+
+exported function AddCoOwner( sign, mobile )
+	var coownerinfo := GetObjProperty(sign,"coowners");
+	if(Len(coownerinfo) >= 5)
+		SendSysMessage(mobile, "You cannot add another co-owner.", color := 33);
+		return;
+	endif
+	coownerinfo[Len(coownerinfo)] := mobile.serial;
+	SetObjProperty( sign, "coowners", coownerinfo);
+	SendSysMessage( mobile, "Co-owner Added.", color := 66 );
+endfunction
+
+exported function SetCoOwnerList( sign, list )
+	return SetObjProperty( sign, "coowners", list );
+endfunction
+
+exported function WipeCoOwnerList( sign )
+	return EraseObjProperty( sign, "coowners" );
+endfunction
+
+
+//Friend Stuff
+exported function IsFriend( sign, mobile )
+	var friendlist := GetObjProperty(sign, "friends");
+	if(mobile.serial in friendlist)
+		return 1;
+	endif
+	return 0;
+endfunction
+
+exported function GetFriends( sign )
+
+	var friendlist := GetObjProperty( sign, "friends" );
+	if( !friendlist )
+		friendlist := array{};
+	endif
+
+	return friendlist;
+endfunction
+
+exported function AddFriend( sign, mobile )
+
+	var friendlist := GetObjProperty(sign,"friends");
+	if (!friendlist)
+		friendlist := {};
+	endif
+	var arraysize := len(friendlist);
+	arraysize := arraysize + 1;
+	if (arraysize > 20)
+		SendSysMessage(mobile,"Your house cannot support any more friends.", color := 33);
+		return;
+	endif
+
+	if(IsFriend( sign, mobile ))
+		SendSysMessage(mobile, "that person is already a friend", color := 33);
+		return;
+	endif
+	
+	friendlist[len(friendlist) + 1] := mobile.serial;
+	SetObjProperty(sign, "friends", friendlist);
+	SendSysMessage( mobile, "Friend Added.", color := 66 );
+	return;
+	
+endfunction
+
+exported function SetFriendsList( sign, list )
+	return SetObjProperty( sign, "friends", list );
+endfunction
+
+exported function WipeFriendsList( sign )
+	return EraseObjProperty( sign, "friends" );
+endfunction
+
+//Guild Stuff
+
+exported function IsGuildAffiliate( sign, mobile )
+
+	var isGuildHouse := GetGuildStone( sign );
+	if ( isGuildHouse && mobile.guildid == isGuildHouse )
+		return 1;
+	endif
+	
+	return 0;
+endfunction
+
+exported function SetGuildStone( sign, guildid )
+
+	return SetObjProperty( sign, "GuildStone", guildid );
+endfunction
+
+exported function GetGuildStone( sign )
+
+	return GetObjProperty( sign, "GuildStone" );
+endfunction
+
+exported function EraseGuildStone( sign )
+
+	return EraseObjProperty( sign, "GuildStone" );
+endfunction
+

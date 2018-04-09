@@ -1,0 +1,22 @@
+use uo;
+
+include ":containers:checks";
+
+program CanInsert( character, container, movetype, inserttype, adding_item, existing_stack, amount_to_add )
+
+        //Avoid compiler warnings
+        amount_to_add := amount_to_add;
+        existing_stack := existing_stack;
+        inserttype := inserttype;
+        movetype := movetype;
+        
+	if( adding_item.IsBook() )
+		return 1;
+	elseif( CP_IsLocked( container ))
+		SendSysMessage( character, "You can't insert items into locked containers." );
+		return 0;
+	else
+		SendSysMessage( character, "That is not a book." );
+		return 0;
+	endif
+endprogram

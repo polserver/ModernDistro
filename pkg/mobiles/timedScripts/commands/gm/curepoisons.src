@@ -1,0 +1,33 @@
+/* $Id: curepoisons.src 373 2006-06-17 18:27:33Z austinheilman $
+ *
+ */
+use uo;
+
+include ":timedscripts:timedScripts";
+include ":timedscripts:poisonUtil";
+
+
+program textcmd_curePoisons(who, text)
+	text := SplitWords(text);
+	
+	var amount	:= CInt(text[1]);
+	var type	:= CStr(text[2]);
+	var level	:= CInt(text[3]);
+	
+	if ( !amount || !type || !level )
+		SendSysMessage(who, "Syntax: .curePoisons <amount> <type> <level>");
+		return 0;
+	endif
+
+	SendSysMessage(who, "Select a mobile to cure poisons on.");
+	var targ := target(who);
+	
+	if ( !targ.IsA(POLCLASS_MOBILE) )
+		SendSysMessage(who, "Cancelled.");
+		return 0;
+	endif
+	
+	var num_cured := TS_CurePoison(targ, amount, type, level);
+	SendSysMessage(who, "Done. Number of poisons cured ->"+num_cured);
+	return 1;
+endprogram

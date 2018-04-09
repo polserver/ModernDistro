@@ -1,0 +1,13 @@
+use uo;
+use os;
+
+include "include/client";
+include "include/packets";
+
+program color(who, textline)
+
+//	var item := target(who);
+//	item.color := CINT (textline);
+        PlayMidiMusic ( who, CInt(textline));
+
+endprogram

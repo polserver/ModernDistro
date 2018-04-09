@@ -1,0 +1,13 @@
+use uo;
+
+
+program textcmd_unlockradius( who, text )
+    var ranget := CInt( text );
+
+    foreach thingie in ListItemsNearLocation( who.x, who.y, who.z, ranget, who.realm );
+        thingie.movable := 1;
+    endforeach
+
+    SendSysMessage(who, "released everything in a radius of " + ranget);
+
+endprogram

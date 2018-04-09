@@ -1,0 +1,21 @@
+use uo;
+
+program textcmd_lockdown(who)
+
+        SendSysMessage(who, "Select target.");
+        var what := Target(who, TGTOPT_NOCHECK_LOS);
+
+        if (!what)
+                SendSysMessage(who, "Aborted.");
+                return;
+        endif
+
+        if (what.movable == 0)
+                SendSysMessage(who, "Released.");
+                what.movable := 1;
+        else
+                SendSysMessage(who, "Locked down.");
+                what.movable := 0;
+        endif
+
+endprogram

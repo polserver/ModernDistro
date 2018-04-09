@@ -1,0 +1,62 @@
+use uo;
+use cfgfile;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":damage:damage";
+
+
+
+program cast_flamestrike( parms )
+    var caster := parms[1];
+    var info := parms[2];
+    var cast_on;
+    cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_HARMFUL);
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+    if ( !MS_MobileCheck(caster, cast_on) )
+        return 0;
+    endif
+  SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "flame strike" });
+  PlayObjectCenteredEffect(cast_on, 0x3709, 0x0a, 0x1e );
+  PlaySoundEffect( caster, SFX_SPELL_FLAME_STRIKE );
+/////////////////////////// 0.97 Distro stuff begins here /////////////////////////////
+
+	// Base damage is a decimal number in between min and max damage
+        if (Reflected(cast_on))
+            SendSysMessage (caster, "The spell was reflected back onto you!!!", color := 33);
+            cast_on := caster;
+        endif
+	var min_damage := CInt(GetConfigInt(info.spell_config, "MinBaseDamage"));
+	var max_damage := CInt(GetConfigInt(info.spell_config, "MaxBaseDamage"));
+	var base_damage := min_damage + (CDbl(RandomInt(CInt((max_damage - min_damage) * 10)) + 1) / 10);
+	var damage := MS_GetSpellDamage(caster, cast_on, base_damage);
+
+	ApplyRawSpellDamageEX(cast_on, damage, info.damage_type, caster, info.Circle);
+
+	return 1;
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+/*  var dmg := RandomDiceRoll("6d8");
+  SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "flame strike" });
+  if (Reflected(cast_on))
+	cast_on := caster;
+  endif
+  PlayObjectCenteredEffect(cast_on, 0x3709, 0x0a, 0x1e );
+  PlaySoundEffect( caster, SFX_SPELL_FLAME_STRIKE );
+  if(GetHp(cast_on) >= 1)
+    if(cast_on.npctemplate)
+      dmg := dmg * 2;
+    endif
+    ApplyRawDamage(cast_on, Resisted(info.circle,caster,cast_on,dmg));
+  endif
+  */
+endprogram

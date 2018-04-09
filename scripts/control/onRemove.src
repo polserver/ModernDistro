@@ -1,0 +1,28 @@
+use uo;
+use os;
+
+include "include/insertSound";
+
+program on_remove(who, backpack, item, movetype)
+  outNoise(who, backpack, item);
+  set_critical(1);
+  var vendorserial := GetObjProperty(backpack,"Vendored");
+  if(!vendorserial)
+    if(item.isa(POLCLASS_CONTAINER))
+      EraseObjProperty(item, "Owner");
+    endif
+    return 1;
+  endif
+  var vendor := SystemFindObjectBySerial(vendorserial);
+  var oldname := GetObjProperty(item,"OldName");
+  if((!oldname) || (oldname == error))
+    oldname := item.desc;
+  endif
+  item.name := oldname;
+  EraseObjProperty(item, "price");
+  EraseObjProperty(item, "Master");
+  EraseObjProperty(item, "OldName");
+  EraseObjProperty(item, "Vendored");
+  return 1;
+    set_critical(0);
+endprogram

@@ -1,0 +1,29 @@
+use uo;
+use os;
+
+program Install()
+
+	return 1;
+endprogram
+
+exported function IsContainer( container )
+
+	// object.IsA(POLCLASS_CONTAINER) is more ideal but this allows for securable containers without checking for objtypes
+	container := container; //Avoid compiler warnings
+ 
+	return 1;
+endfunction
+
+exported function IsSecured( container )
+
+	var secured := GetObjProperty( container, "secured" );
+	if( !secured )
+		secured := 0;
+	endif
+
+	return secured;
+endfunction
+
+exported function GetSecureLevel( container )
+		return IsSecured( container ).level;
+endfunction

@@ -1,0 +1,15 @@
+use uo;
+use os;
+use util;
+
+include ":itemutils:itemdesc";
+
+program Pixie_use ( who, pixie )
+	who := who; // Avoid compiler warnings
+	var sounds := GetObjTypeArray ( pixie.graphic, "Sounds" );
+	
+	var playsound := sounds.randomentry();
+	
+	PlaySoundEffect ( pixie, CInt ( playsound ) );
+	return 1;
+endprogram

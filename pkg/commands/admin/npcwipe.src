@@ -1,0 +1,48 @@
+use uo;
+use os;
+include ":attributes:attributes";
+/*
+program npcwipe(who)
+  set_critical(0);
+  var x, y, z;
+  for(x:=6144; x>16; x:=x -32)
+    for(y:=16; y<4096; y:=y+32)
+      for(z:=-60; z<=60; z:=z+30)
+        foreach npc in ListMobilesNearLocation(x, y, z, 32, who.realm)
+	    if(!npc.ip)
+			if((npc.graphic == 0x190 || npc.graphic == 0x191))
+				SetObjProperty(npc, "guardkill", 1);
+				ApplyRawDamage(npc, GetHp(npc) + 100);
+			endif
+	    endif
+		SleepMS(20);
+        endforeach
+      endfor
+    endfor
+  endfor
+  SendSysMessage(who, "Finished wiping npcs");
+endprogram
+*/
+program npcwipe(who)
+  set_critical(0);
+  var x, y, z;
+  for(x:=6144; x>16; x:=x -32)
+    for(y:=16; y<4096; y:=y+32)
+//      for(z:=-100; z<=100; z:=z+10)
+	  SendSysMessage(who, x + " " + y);
+        foreach npc in ListMobilesNearLocation(x, y, LIST_IGNORE_Z, 64, who.realm)
+	    if(!npc.ip)
+			if(npc.graphic == 0x190 || npc.graphic == 0x191)
+				RevokePrivilege(npc, "invul" );
+				SetObjProperty(npc, "guardkill", 1);
+				ApplyRawDamage(npc, GetHp(npc) + 100);
+				SendSysMessage(who, "Wiped an NPC!", color :=33);
+			endif
+	    endif
+		SleepMS(20);
+        endforeach
+//      endfor
+    endfor
+  endfor
+  SendSysMessage(who, "Finished wiping npcs", color :=66);
+endprogram

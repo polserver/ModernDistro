@@ -1,0 +1,16 @@
+/* $Id$
+ *
+ */
+
+use uo;
+use os;
+
+program EndPoison(params)
+	var mobile := params[1];
+
+	SendSYsMessage(mobile, "The dark borer is no longer within your body.");
+
+	EraseObjProperty(mobile, "DarkBorer");
+
+	return 1;
+endprogram

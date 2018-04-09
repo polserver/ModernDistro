@@ -1,0 +1,158 @@
+use uo;
+use os;
+use util;
+use cfgfile;
+
+include "include/client";
+include ":attributes:attributes";
+include "include/yesNo";
+
+const SFX_MEDITATION := 0xfa;
+const UOBJ_WAYPOINT := 0xa40a;
+
+var combatcfg := ReadConfigFile(":*:itemdesc");
+
+program meditation(who)
+
+	var shrinelist := ListItemsNearLocationOfType(who.x, who.y, who.z, 3, UOBJ_WAYPOINT, who.realm);
+	if ( GetObjProperty(shrinelist[1], "LocationType") == "Shrine" )
+		SendSysMessage(who, "Do you wish to pray at this shrine?");
+		if (yesno(who, "Pray here?") )
+//			var theshrine := shrinelist[1];
+			start_script( (GetObjProperty(shrinelist[1], "Virtue") ), { who, shrinelist[1] } );
+			return 1;
+		else
+			PrintTextAbove(who, "Just meditating...");
+		endif
+	endif
+	
+
+	var poisoned := CInt( GetObjProperty(who,"poison_level") );
+	var lastmed := CInt( GetObjProperty(who, "LastMeditation") );
+	if (lastmed > ReadGameClock() )
+		EraseObjProperty(who, "#ISMEDITATING");
+		SendSysMessage(who, "You must rest for a bit.");
+		return 0;
+	endif
+	if (poisoned >= 1)
+		SendSysMessage( who, "You cannot meditate while poisoned." ); 
+		return 0;
+	endif
+
+	if(who.warmode)
+		SendSysMessage(who, "You cannot meditate in war mode");
+		return 0;
+	endif
+
+	var loss := manaloss(who);
+	if(loss == "nomed")
+		SendSysMessage(who,"Regenerative forces cannot penetrate your armor.");
+		return 0;
+	endif
+
+	if ( GetAttribute(who,MEDITATION) < 5.0 )
+//		loss := SkillCheck(who, MEDITATION, 10, 50);
+		loss := SkillCheck(who, MEDITATION, 10, 20);
+		SendSysMessage(who, "You cannot focus your concentration.");
+		lastmed := CInt(ReadGameClock()) + 15;
+		SetObjProperty(who, "LastMeditation", lastmed);
+		EraseObjProperty(who, "#ISMEDITATING");
+	endif
+
+	var diff := CInt(GetAttribute(who,MEDITATION) - GetMana(who)) + (loss / 1000);
+	if (diff < 0)
+		diff := 0;
+	elseif (diff > 110)
+		diff := 110;
+	endif
+	var pts := CInt(GetAttribute(who, MEDITATION) / 10) + 15;
+	if(pts > 35)
+		pts := 35;
+	endif
+	
+//	if(SkillCheck(who, MEDITATION, diff, (CInt(GetAttribute(who,MEDITATION)) * 5) ))
+	if(SkillCheck(who, MEDITATION, diff, pts))
+		var oldx := who.x;
+		var oldy := who.y;
+		var oldstamina := GetStamina(who);
+		var chp := GetHp(who);
+		var cmana := GetMana(who);
+		lastmed := CInt(ReadGameClock()) + 60;
+		SetObjProperty(who, "LastMeditation", lastmed);
+		SendSysMessage(who, "You start to meditate.");
+		PlaySoundEffect(who, SFX_MEDITATION);
+		PrintTextAbove(who, "* Meditating *");
+		SetObjProperty(who, "#ISMEDITATING", 1);
+
+		while( (oldstamina <= GetStamina(who)) && (oldx==who.x) && (oldy==who.y) && (poisoned < 1) && (!who.warmode) && (!IsThingOnHand(who)) && (!who.hidden) )
+
+			loss := manaloss(who);
+			if(loss == "nomed")
+				SendSysMessage(who,"Regenerative forces cannot penetrate your armor.", color := 33);
+				EraseObjProperty(who, "#ISMEDITATING");
+				return 0;
+			endif
+			if(GetMana(who) >= GetIntelligence(who))
+				SendSysMessage(who, "Your mana has recharged.", color := 66);
+				EraseObjProperty(who, "#ISMEDITATING");
+				return 1;
+			endif
+			if((GetHp(who) < chp) || (GetMana(who) < cmana))
+				SendSysMessage(who, "You lose your concentration.", color := 33);
+				EraseObjProperty(who, "#ISMEDITATING");
+				return 0;
+			endif
+			sleepms( CInt(50000 / GetAttribute(who,MEDITATION) ) );
+			SetMana(who, GetMana(who) + 1);
+			chp := GetHp(who);
+			cmana := GetMana(who);
+			oldstamina := GetStamina(who);
+//			poisoned := CInt( GetObjProperty(who,"poison_level") );
+			poisoned := who.poisoned;
+		endwhile
+		SendSysMessage(who, "You lose your concentration.", color := 33);
+		EraseObjProperty(who, "#ISMEDITATING");
+		return 0;
+	else
+		SendSysMessage(who, "You cannot focus your concentration.", color := 33);
+		lastmed := CInt(ReadGameClock()) + 15;
+		SetObjProperty(who, "LastMeditation", lastmed);
+		EraseObjProperty(who, "#ISMEDITATING");
+	endif
+
+endprogram
+
+function IsThingOnHand(who)
+  var hand1 := (GetEquipmentByLayer(who, 1));
+  var hand2 := (GetEquipmentByLayer(who, 2));
+  if(hand1)
+    if ((hand1.graphic == 0x0df0) || (hand1.graphic == 0x0e81) || (hand1.graphic == 0x13f9) || (hand1.graphic == 0x13f8) || (hand1.graphic == 0x0e8a) || (hand1.graphic == 0x0efa))
+	else
+      SendSysMessage(who,"Your equipment prevents meditation.", color := 33);
+      return 1;
+	endif
+  elseif (hand2)
+    if((hand2.graphic == 0x0df0) || (hand2.graphic == 0x0e81) || (hand2.graphic == 0x13f9) || (hand2.graphic == 0x13f8) || (hand2.graphic == 0x0e8a) || (hand1.graphic == 0x0efa))
+	else
+      SendSysMessage(who,"Your equipment prevents meditation.", color := 33);
+      return 1;
+	endif
+  else
+    return 0;
+  endif
+endfunction
+
+function manaloss(who)
+//  var medit := GetAttribute(who,MEDITATION);
+  var elem;
+  var loss := 0;
+  foreach thing in ListEquippedItems(who)
+    elem := FindConfigElem(combatcfg, thing.objtype);
+    loss := GetConfigString(elem, "medloss");
+    if(loss == "nomed")
+      return loss;
+      break;
+    endif
+  endforeach
+  return 0;
+endfunction

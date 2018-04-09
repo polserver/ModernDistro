@@ -1,0 +1,229 @@
+////////////////////////////////////////////////
+//      Message Board
+//
+//      By Hugo P.L.
+//
+//      hugo_pl@bol.com.br
+//      Ver 1.0b in 10/Jun/2001
+//
+//      TODO:
+//
+//      * Rollbar. ?
+////////////////////////////////////////////////
+
+use uo;
+use os;
+
+include "include/clock";
+include ":gumps:old-gumps";
+
+var topicos;
+
+program messageboard( character, quadro )
+
+    if (Distance(character, quadro) > 2)
+        SendSysMessage(character, "You are very far to read the Forum of the City.");
+        return;
+    endif
+
+    GFInitGump( 80, 20 );
+    var newmsg := GFButtonID( 20, 175, 0x1b6b, 0x1b6b, 1 );
+    GFGumpPic( 0, 0, 0x087a );
+    GFTextMid(240, 37, 0, 50, "FORUM OF THE CITY" );
+
+// Listar tópicos.
+    topicos := GetObjPropertyNames( quadro );
+    var i := 1;
+    var pulalinha := 0;
+    var botoes := {};
+    topicos := Reverter(topicos);
+
+    foreach topico in topicos
+        if ( i <= 10 )
+            botoes[i] := GFButtonID( 110, 160+pulalinha, 0x1523, 0x1523, 1 );
+            var temp := GetObjProperty(quadro, topico);
+            if (!temp[1])
+                temp[1] := "Without Subject!";
+            endif
+            GFTextCrop( 130, 158+pulalinha, 240, 20, 50,  temp[1]);
+            i := i + 1;
+            pulalinha := pulalinha + 15;
+            // Até agora o forum só suporta 10 mensagens
+        else
+            EraseObjProperty(quadro, topico);
+        endif
+    endforeach
+// Não há nenhum topico
+    if (!topicos.size())
+        GFTextCrop( 130, 158, 240, 20, 50,  "There is not any topic.");
+    endif
+
+    var resultado := GFSendGump( character );
+    if (resultado[0] == newmsg.keyid)
+        Postarmsg(character, quadro);
+    else
+        var index := 1;
+        foreach botao in botoes
+            if ( resultado[0] == botao.keyid)
+                LerMsg(character, quadro, index);
+            endif
+            index := index+1;
+        endforeach
+    endif
+endprogram
+
+////////////////////////////////////////////////////////////////////////
+//              Função Ler menssagens
+//              Read menssages function
+////////////////////////////////////////////////////////////////////////
+
+function LerMsg(character, quadro, index)
+    var data := GetObjProperty(quadro, topicos[index]);
+    GFInitGump( 80, 0 );
+    GFResizePic( 0, 0, 0x9d8, 400, 330 );
+
+// Autor
+    GFTextLine( 30, 50, 0, "Author:" );
+    GFTextCrop( 80, 50, 240, 20, 50,  data[5]);
+
+// Hora-Data
+    GFTextLine( 30, 65, 0, "Date:" );
+    var diasatras := ReadGameClock()/(GetDayLength()*60)-data[3];
+    var complemento;
+    case(diasatras)
+        0: complemento := "posted today";
+        1: complemento := "posted yesterday";
+        default: complemento := "posted "+diasatras+" days ago";
+    endcase
+    GFTextCrop( 80, 65, 240, 20, 50,  data[2]+", "+complemento);
+
+    GFGumpPic( 30, 90, 0x082b );
+    GFGumpPic( 155, 90, 0x082b );
+
+// Texto
+    var i := 0;
+    foreach linha in (data[4])
+        GFTextCrop( 30, 100+i, 330, 20, 0, linha );
+        i := i + 15;
+    endforeach
+
+// Apagar Tópico
+    var remover := GFButtonID( 300, 305, 0x885, 0x885, 1 );
+// Responder
+    var reply := GFButtonID( 35, 305, 0x884, 0x884, 1 );
+
+    var resultado := GFSendGump( character );
+
+    if (resultado[0] == remover.keyid)
+        if ((diasatras > 10)||(data[5] == character.name))
+            EraseObjProperty(quadro, topicos[index]);
+            SendSysMessage(character, "Erased topic with success!");
+        else
+            SendSysMessage(character, "The topic needs to have at least 10 days to be erased.");
+        endif
+    elseif(resultado[0] == reply.keyid)
+        Replymsg(character, data[5]);
+    endif
+
+endfunction
+////////////////////////////////////////////////////////////////////////
+//              Função Postar menssagens
+//              Function Post menssages
+////////////////////////////////////////////////////////////////////////
+
+function Postarmsg(character, quadro);
+    GFInitGump( 80, 20 );
+// Imagem de fundo
+// Background
+    GFResizePic( 0, 0, 0x9d8, 400, 300 );
+// 'NEW MESSAGE' Title
+// Título 'NEW MESSAGE'
+    GFGumpPic( 150, 15, 0x0883 );
+// Assunto
+// Subject
+    GFTextLine( 30, 50, 0, "Subject:" );
+    var subject := GFTextEntry( 90, 50, 270, 20, 50, "Subject" );
+// Linha Horizontal
+// Horizontal line
+    GFGumpPic( 30, 70, 0x082b );
+    GFGumpPic( 155, 70, 0x082b );
+// Botão 'POST'
+// Post Button
+    var post := GFButtonID( 320, 275, 0x0886, 0x0886, 1);
+// Texto
+// Text
+    var conteudo := {};
+    var i2 := 1;
+    var i;
+    for (i:=0; i<170; i:=i+15)
+        var temp;
+        temp := GFTextEntry( 30, 80+i, 330, 20, 0);
+        conteudo[i2] := temp.keyid;
+        i2 := i2+1;
+    endfor
+    var resultado := GFSendGump( character );
+/// Extrai o Texto do Gump.
+/// Extract Text
+    var texto := {};
+    i := 1;
+    foreach key in conteudo
+        var temp := resultado[key];
+        temp := temp[6, len(temp)];
+        if (temp != error)
+            texto[i] := temp;
+            i := i+1;
+        endif
+    endforeach
+/// Extrai o Assunto do Gump
+/// Extract Subject
+    subject := resultado[subject.keyid];
+    subject := subject[6, len(subject)];
+// Gravar post.
+// Record post.
+    if (resultado[0] == post.keyid)
+        var topico := {};
+        topico[1] := subject;
+        topico[2] := GetTimeofDay();
+        topico[3] := ReadGameClock()/(GetDayLength()*60);
+        topico[4] := texto;
+        topico[5] := character.name;
+        set_critical(1);
+        SetObjProperty(quadro, CStr(ReadGameClock()), topico);
+        set_critical(0);
+        SendSysMessage(character, "Topic posted.");
+    else
+        SendSysMessage(character, "Canceled.");
+    endif
+endfunction
+
+////////////////////////////////////////////////////////////////////////
+//              Função para enviar Respostas
+//              Reply Function
+////////////////////////////////////////////////////////////////////////
+
+function Replymsg(byref character, nome)
+
+    foreach onlinechr in EnumerateOnlineCharacters()
+        if (onlinechr.name == nome)
+            var themessage := RequestInput(character, character.backpack, "What answer you want to send for " + onlinechr.name + "?");
+            if (!themessage)
+                SendSysMessage(character, "Canceled.");
+                return;
+            endif
+            SendSysMessage(onlinechr, character.name + " answered your topic in the forum: " + themessage);
+            return;
+        endif
+    endforeach
+    SendSysMessage(character, "The author doesn't meet online at the moment.");
+
+endfunction
+
+
+// array.sort() ?
+function Reverter( byref oldarray )
+    var newarray := array;
+    foreach item in oldarray
+        newarray.insert( 1, item );
+    endforeach
+    return newarray;
+endfunction

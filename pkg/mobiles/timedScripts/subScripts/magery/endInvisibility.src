@@ -1,0 +1,21 @@
+/*
+ * $Id: endInvisibility.src 1028 2007-03-25 19:06:41Z tekproxy $
+ *
+ */
+
+use uo;
+use os;
+
+include ":attributes:attributes";
+
+program TimedScript_EndInvisibility(params)
+	var defender := params[1];
+	var attacker := params[2];
+	params := 0;
+	
+	EraseObjProperty(defender, "Invisibility");
+	defender.hidden := 0;
+	
+	return 1;
+endprogram
+

@@ -1,0 +1,98 @@
+/* $Id: use.src 471 2006-06-28 00:07:48Z austinheilman $
+ *
+ */
+
+use uo;
+
+include ":timedscripts:timedScripts";
+include ":itemutils:itemdesc";
+include "include/client";
+include "include/sounds";
+
+program usePitcher (who, pitcher)
+	if ( !ReserveItem(pitcher) )
+		SendSysMessage(who, "That is already in use.");
+		return 0;
+	elseif( (!pitcher.movable) )
+		SendSysMessage(who, "You cannot use that");
+		return 0;
+	elseif( !(pitcher in EnumerateItemsInContainer(who.backpack)) )
+		SendSysMessage(who, "That item is not in your backpack.");
+		return 0;
+	endif
+
+	EraseObjProperty(who, "#IsMeditating");
+	EraseObjProperty(who, "#HealTimer");
+
+	SendSysMessage(who, "What would you like to fill the pitcher from?");
+	var targetted := TargetCoordinates(who);
+	if(!targetted || targetted.errortext )
+		SendSysMessage(who, "Canceled.");
+		return 0;
+	endif
+	if(!CheckLosAt( who, targetted.x, targetted.y, targetted.z ))
+		SendSysMessage(who,"You cannot see that.");
+		return 0;
+	endif
+	if(!CheckDistance( who, targetted.x, targetted.y, targetted.z ))
+		SendSysMessage(who,"That location is too far away.");
+		return 0;
+	endif
+	if( CheckWaterAt(targetted) )
+		PlaySoundEffect(who, 0x0026);
+		DestroyItem(pitcher);
+		CreateItemInBackpack(who, 0x1F9D, 1);
+	elseif(CheckCow(targetted))
+		PlaySoundEffect(who, 0x007a);
+		DestroyItem(pitcher);
+		CreateItemInBackpack(who, 0x9AD, 1);
+	else
+		SendSysMessage(who,"You cannot fill the pitcher there.");
+		return 0;
+	endif
+	return 1;
+endprogram
+
+function CheckCow(theobj)
+    if (theobj.isA(POLCLASS_NPC))
+        if (theobj.objtype == 0xd8 || theobj.objtype == 0xe7)
+            return 1;
+        endif
+    endif
+    return 0;
+endfunction
+
+function CheckWaterAt(theobj)
+    if ((theobj.objtype >= 0x1796) && (theobj.objtype <= 0x17b2) )
+        return 1;
+    elseif ((theobj.objtype >= 0x346e) && (theobj.objtype <= 0x3530))
+        return 1;
+    elseif ((theobj.objtype >= 0xb41) && (theobj.objtype <= 0xb44))
+        return 1;
+    elseif (theobj.objtype == 0x0e7b || theobj.objtype == 0x154d)
+        return 1;
+    else
+        return 0;
+    endif
+    return 0;
+endfunction
+
+function CheckDistance( who, x, y, z )
+    var xd, yd, zd;
+    xd := who.x - x;
+    if (xd < -2 || xd > 2)
+        return 0;
+    endif
+    yd := who.y - y;
+    if (yd < -2 || yd > 2)
+        return 0;
+    endif
+	// We use 9 here, because of base character heights. They can stretch
+	// to reach after all!
+    zd := who.z - z;
+    if (zd < -9 || zd > 9)
+        return 0;
+    endif
+
+    return 1;
+endfunction

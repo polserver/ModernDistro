@@ -1,0 +1,18 @@
+use uo;
+use os;
+
+program use_spittoon ( who, spittoon )
+	if ( Distance ( who, spittoon ) > 3 )
+		return;
+	endif
+
+	PrintTextAbove ( who, "*spits*" );
+	if ( who.gender == 0 )
+		PlaySoundEffect ( who, 0x447 ); // Male Spit sound
+	else
+		PlaySoundEffect ( who, 0x335 ); // Female Spit sound
+	endif
+	
+	sleepms (500);
+	PlaySoundEffectXYZ ( spittoon.x, spittoon.y, spittoon.z, 0x240, spittoon.realm );
+endprogram

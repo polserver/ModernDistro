@@ -1,0 +1,48 @@
+use os;
+use uo;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include "include/fields";
+
+program stonewall( parms )
+  var caster := parms[1];
+  var info := parms[2];
+  
+  var cast_on := MS_TargetCoordinates(caster, info.targ, "Select a target.");
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+
+  var fields := {};
+  var duration;
+  var listeners := {};
+  var sufferers := {};
+  var x := cast_on.x;
+  var y := cast_on.y;
+  var z := cast_on.z;
+  case(get_direction(caster))
+	"NS" : fields:= CreateNorthSouthField(caster, 0x80, x, y, z, 5);
+	"EW" : fields:= CreateEastWestField(caster, 0x80, x, y, z, 5);
+  endcase
+  Detach();
+  duration := CInt(AP_GetSkill( caster, MAGERY ) )/2;
+  if (duration < 20)
+    duration := 20;
+  endif
+  var i;
+  for (i := 1; i <= 5; i := i + 1)
+    PlaySoundEffect(fields[i], SFX_SPELL_WALL_OF_STONE);
+  endfor
+  sleep(duration);
+  foreach fieldpart in fields
+    DestroyItem(fieldpart);
+  endforeach
+endprogram

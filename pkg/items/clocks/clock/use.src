@@ -1,0 +1,11 @@
+// $Id: use.src 1804 2014-08-21 05:08:58Z austinheilman $
+//
+
+use uo;
+
+include ":daynight:dayNight";
+
+program UseScript(user, item)
+	PrintTextAbovePrivate(item, GetGameHour()+":"+GetGameMinute(), user);
+	return 1;
+endprogram

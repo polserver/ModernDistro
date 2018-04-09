@@ -1,0 +1,12 @@
+use uo;
+use os;
+
+include "include/client";
+
+
+program read_decayat(who)
+//
+	var item := target(who);
+	SendSysMessage (who, "DecayAt property set to " + item.decayat);
+
+endprogram

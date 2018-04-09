@@ -1,0 +1,16 @@
+use uo;
+use os;
+
+include "include/bounty";
+include ":datafile:datafile";
+
+program bountyWatcher()
+  print("////////////////////////////////");
+  print("// Initializing Bounty System");
+  print("////////////////////////////////");
+  sleep(30);
+  while(1)
+    MaintainBountySystem();
+    sleep(3600);
+  endwhile
+endprogram

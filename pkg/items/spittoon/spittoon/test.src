@@ -1,0 +1,31 @@
+// Drop this in pkg/commands/test and compile it in scite then use .test in game, I have a few of these scripts.
+// The only thing to remember about text commands that is very important is well two things actually, they are hierarchical
+// which means if you put a test.src file in the commands/player folder and one in commands/admin, the admin one is only usable by admin command level
+// and if I remember correctly, if an admin uses .test in game the admin level one will take precedent so it is advised to use unique names for command
+// and place them in the command level folder they fit in. Pangaea is riddled with duplicate commands because someone does not understand hierarchical
+// structure so there is a mess of duplicate commands spread across multiple folders in some cases, rather annoying. Note that when I say hierarchical,
+// if you put this in the counselor folder the player command level will not have access to it, however, counselor, seer, gm, admin and test command level
+// characters will.
+// command level structure from lowest to highest is: 
+// 0 - player
+// 1 - counselor
+// 2 - seer
+// 3 - gm
+// 4 - admin
+// 5 - test
+
+use uo;
+use os;
+use cfgfile;
+use math;
+use attributes;
+use basic;
+use cliloc;
+use util;
+use vitals;
+
+include "include/client";
+
+program textcmd_test ( who )
+	SendSysMessage ( who, "My Test Command!", 0x3, 0x42 );
+endprogram

@@ -1,0 +1,105 @@
+use uo;
+use os;
+
+// include "include/security";
+include ":containers:storageAreas";
+
+program textcommand_fixbank( mobile )
+
+ 	var targ := Target( mobile );
+ 	if( !targ )
+ 	 	SendSysMessage( mobile, "Cancelled." );
+ 	 	return 0;
+        elseif( !targ.IsA( POLCLASS_MOBILE ) || targ.IsA( POLCLASS_NPC ))
+                SendSysMessage( mobile, "You must target a player." );
+                return 0;
+ 	endif
+
+ 	var bank_box := CP_GetStorageContainerForMobile( targ, CP_DEFAULT_AREA );
+        if( !bank_box )
+                SendSysMessage( mobile, targ.name+" has no bank box." );
+                return 0;
+        endif
+
+        var chest := CreateItemAtLocation( mobile.x, mobile.y, mobile.z, "bankbox", 1, mobile.realm );
+        if( chest.errortext )
+                SendSysMessage( mobile, "Couldn't create bankbox for targ "+targ.name+" -->"+chest.errortext );
+                return 0;
+        endif
+
+        SetName( chest, "BankBox of "+targ.name+" serial "+targ.serial );
+        chest.locked := 1;
+        chest.movable := 0;
+
+        SetObjProperty( targ, "#FastLooting", 1 );
+
+        var obj_bank := array{};
+        var move_all_to_chest := 1;
+        foreach obj in EnumerateItemsInContainer( bank_box )
+                SleepMS(20);
+
+                if( obj.serial == bank_box.serial )
+                        continue;
+                endif
+
+                var move := MoveItemToContainer( obj, chest );
+                if( move.errortext )
+                        SendSysMessage( mobile, "Error moving obj serial: "+obj.serial+" in chest -->"+move.errortext );
+                        move_all_to_chest := 0;
+
+                endif
+
+                SendSysMessage( mobile, "obj: "+obj.desc );
+
+                obj_bank.Append( obj );
+        endforeach
+
+        EraseObjProperty( targ, "#FastLooting" );
+
+        if( move_all_to_chest )
+                var box_id := CP_GetMobileContainerID( targ );
+                var destroy_bank := CP_RemoveStorageAreaContainer( box_id, CP_DEFAULT_AREA );
+                if( destroy_bank.errortext )
+                        SendSysMessage( mobile, "Error destroying bank_box of targ: "+targ.name+" -->"+destroy_bank.errortext );
+                        return 0;
+                endif
+        endif
+
+        var new_bank := CP_GetStorageContainerForMobile( targ, CP_DEFAULT_AREA, CP_CREATE );
+        if( new_bank.errortext )
+                SendSysMessage( mobile, "Couldn't create new bank box for targ "+targ.name+" -->"+new_bank.errortext );
+                return 0;
+        endif
+
+        SetObjProperty( targ, "#FastLooting", 1 );
+
+        var move_all_to_new_bank := 1;
+        foreach obj in EnumerateItemsInContainer( chest )
+                SleepMS(20);
+
+                if( obj.serial == chest.serial )
+                        continue;
+                endif
+
+                var move := MoveItemToContainer( obj, new_bank );
+                if( move.errortext )
+                        SendSysMessage( mobile, "Error moving obj serial: "+obj.serial+" in new bank -->"+move.errortext );
+                        move_all_to_new_bank := 0;
+                        continue;
+                endif
+
+                SendSysMessage( mobile, "obj: "+obj.desc );
+        endforeach
+
+        EraseObjProperty( targ, "#FastLooting" );
+
+        if( move_all_to_new_bank )
+                var destroy_chest := DestroyItem( chest );
+                if( destroy_chest.errortext )
+                        SendSysMessage( mobile, "Error destroying chest of targ: "+targ.name+" -->"+destroy_chest.errortext );
+                        return 0;
+                endif
+        endif
+
+        return 1;
+endprogram

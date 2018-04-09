@@ -1,0 +1,96 @@
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
+# =========================
+# Operating System Files
+# =========================
+
+# OSX
+# =========================
+
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# POL ecompile generated files
+*.ecl
+*.lst
+*.dbg
+*.dbg.txt
+*.dep
+
+# POL logs
+log/*.log
+
+# POL realms
+realm/*
+
+# POL MULs
+MUL/*
+
+# Misc Directories used locally
+decoration/
+
+# Other files
+core-changes.txt
+objtypes.txt
+packethooks.txt
+packets.zip
+data/
+landtiles.cfg
+multis.cfg
+tiles.cfg
+ecompile.log
+leftovers.txt
+orphans.txt
+
+# POL binaries and cfg
+pol.exe
+libmysql.dll
+uoconvert.exe
+uoconvert.cfg
+uoconvert.txt
+uotool.exe
+uotool.txt
+ecompile.exe
+poltool.exe
+ecompile.cfg
+runecl.exe
+
+# Misc files
+
+scripts/eCompile_commands.txt
+scripts/ecompile.cfg.example
+scripts/modules/*
+Realm funcs.txt
+*.session

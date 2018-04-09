@@ -1,0 +1,22 @@
+
+use uo;
+
+include "setlight";
+
+program setlocallight(who, text)
+
+	if (!text)
+		PrintTextAbovePrivate(who, "Please specify a light level and, optionally, a range.", who);
+	endif
+
+	var input := SplitWords(text);
+	input[1] := CInt(input[1]);
+	if (input[2])
+		input[2] := CInt(input[2]);
+	else
+		input[2] := 50;
+	endif
+
+	set_light(who, input[1], input[2]);
+	
+endprogram

@@ -1,0 +1,50 @@
+use uo;
+use os;
+use util;
+use vitals;
+
+include ":damage:damage";
+
+
+program angry_bees (bees)
+
+	//the amount of time between bee attacks (in seconds), how much damage they do, and how long before they settle down
+	var time_between_attacks := 4;
+	var attack_damage := 12;
+	var attack_length := 35;
+
+	//setup for how long the bees last
+	var start_time := ReadGameClock();
+	var current_time := ReadGameClock();
+
+	var creator_serial := GetObjProperty(bees, "creator");
+	var creator := SystemFindObjectBySerial(creator_serial);
+	if (creator)
+		SetScriptController(creator);
+	endif
+
+	var victims := ListMobilesNearLocation(bees.x, bees.y, bees.z, 2, bees.realm);
+	var mainvictim := victims [RandomInt(victims.size() ) + 1 ];
+	var lastattack := 0;
+	repeat
+		if ( ReadGameClock() > lastattack )
+			foreach mobile in ListMobilesNearLocation( bees.x, bees.y, bees.z, 1, bees.realm )
+                                ApplyRawDamageEX(mobile, (attack_damage + RandomInt(attack_damage)+1), DMG_PHYSICAL, bees);
+			endforeach
+			lastattack := ReadGameClock() + time_between_attacks;
+			PlaySoundEffect(bees, 0xff);
+			current_time := ReadGameClock();
+		endif
+		sleepms(250);
+		if (mainvictim && !mainvictim.dead)
+			if (bees.x != mainvictim.x || bees.y != mainvictim.y)
+				set_critical(1);
+				bees.movable := 1;
+				MoveObjectToLocation(bees, mainvictim.x, mainvictim.y, mainvictim.z+1, bees.realm, MOVEOBJECT_FORCELOCATION);
+				bees.movable := 0;
+				set_critical(0);
+			endif
+		endif
+	until ( current_time > start_time + attack_length );
+	DestroyItem(bees);
+endprogram

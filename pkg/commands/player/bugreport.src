@@ -1,0 +1,32 @@
+use uo;
+use os;
+use cfgfile;
+
+include ":gumps:requestGump";
+include ":timeutils:time";
+
+
+program textcmd_bug_reporter_script( who )
+
+
+    var prop1 := {};
+    var log1 := {};
+    var w1, description, elemkey;
+	var time := FormatTime(GetTimeStruct(GetTime()), "<HH>:<MM>:<SS> on <DAY>-<MON>-<YY>");
+
+    description := RequestGump2(who, "Enter a description of the bug:", "", "", 1);
+
+	if(description == error)
+		SendSysMessage(who, "Cancelled.", color := 33);
+		return 0;
+	endif
+	
+    prop1 .+ pname := "Date and time: " + time + " - " + who.x + " " + who.y + " " + who.z;
+        prop1 .+ pvalue := w1.realm + " - Player Account: " + who.acctname;
+
+    elemkey := description;
+    log1[1] := prop1;
+    AppendConfigFileElem( "bug_reports", "Location: ", elemkey, log1 );
+    UnloadConfigFile("map_issues");
+
+endprogram

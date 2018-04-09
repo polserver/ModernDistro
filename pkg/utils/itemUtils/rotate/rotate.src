@@ -1,0 +1,17 @@
+use uo;
+use os;
+
+include ":itemutils:itemUtil";
+include ":itemutils:itemdesc";
+
+program Rotate_Item( who, item )
+
+	if( !useItem_check( who, item, ITEM_WILD ))
+		return 0;
+	endif
+ 
+	var cfg_info := GetItemDescInfo( item.graphic );
+	item.graphic := CInt( cfg_info.RotateTo );
+
+	return 1;
+endprogram

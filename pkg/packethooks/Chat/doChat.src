@@ -1,0 +1,131 @@
+use uo;
+use os;
+use polsys;
+use unicode;
+
+CONST TYPE_DISPLAY_USERNAME := 0X03EB;
+CONST TYPE_USERNAME_ACCEPTED := 0x03ED;
+CONST TYPE_JOIN_CHANNEL := 0X03E8;
+
+include ":chat:chatIO";
+include ":chat:packets";
+include ":chat:functions";
+include ":chat:settings";
+
+
+program doChat()
+	Print("INSTALLING: Chat PH...");
+	
+	return 1;
+endprogram
+
+exported function handleChatMessage(character, byref packet)
+	if ( CH_CheckDebug() )
+		Print("handleChatMessage: "+character.name+" packet: "+packet);
+	endif
+	
+	var type := packet.GetInt8(3);	
+	Print("handleChatMessage type: "+type);
+endfunction
+
+exported function handleChatText(character, byref packet)
+	if ( CH_CheckDebug() )
+		Print("handleChatText: "+character.name+" packet: "+packet);
+	endif
+
+	var cmd := packet.GetInt8(3);	
+	Print("handleChatText cmd: "+cmd);
+endfunction
+
+exported function handleOpenChatWindow(character, byref packet)
+	var settings := CH_GetSettingsCfgElem("Settings");
+
+	if ( CH_CheckDebug() )
+		Print("handleOpenChatWindow: "+character.name+" packet: "+packet);
+	endif
+
+	var chat_name;
+	if ( settings.PermChatName )
+		chat_name := GetObjProperty(character, "ChatName");
+		Print("Perm chat name enabled, getting chat name: "+chat_name);
+	endif
+	
+	if ( !chat_name )
+		chat_name := CChrZ(packet.GetUnicodeString(2, 31));
+	endif
+	
+	if ( chat_name )
+		// Validate chat name
+		if ( chat_name == character.acctname )
+			SendSysMessage(character, "For security reasons, you can not use your account name for your chat name.");
+			return 0;
+		endif
+		
+		// Chat names are suposed to be permenant, but for now...
+		SetObjProperty(character, "ChatName", chat_name);
+		
+		// Display chat
+		SendChatMessagePacket(character, TYPE_USERNAME_ACCEPTED, chat_name);
+		
+		// Create Add Player packet and send to character
+		// TODO: maybe this should be it's own function
+		var packet := CreatePacket(0xB2, 13 + (Len(chat_name) * 2));
+		packet.SetInt16(1, 13 + (Len(chat_name) * 2)); // length
+		packet.SetInt16(3, 0x03EE); // add user
+		// 0x0030 = user, 0x0031 = moderator, 0x0032 = muted, 0x0034 = me, 0x0035 = system
+		packet.SetInt16(9, 0x0034); // user type
+		packet.SetUnicodeString(11, CAscZ(chat_name), 0); // unicode chat name
+		SendChatPacket(packet, character);
+		
+		// Modify packet and send it to everyone else
+		var user_type;
+		if ( character.cmdlevel )
+			user_type := 0x31;
+		else
+			user_type := 0x30;
+		endif
+		packet.SetInt16(9, user_type);
+		
+		CH_AddPlayerToChat(character.serial); // add user to datafiles
+		SendChatPacket(packet, "", character.serial);
+		
+		// Send character the conferences
+		SendConferences(character);
+	else
+		SendChatMessagePacket(character, TYPE_DISPLAY_USERNAME);
+	endif
+endfunction
+
+function SendChatMessagePacket(targ, type, param:="")
+	var packet := CreatePacket(0xB2, MSGLEN_VARIABLE);
+	packet.SetInt16(3, type);
+	
+	case ( type )
+		TYPE_DISPLAY_USERNAME:
+			packet.SetInt32(5, 0); // unknown
+			packet.SetInt32(9, 0); // unknown
+			break;
+		TYPE_USERNAME_ACCEPTED:
+			packet.SetInt32(5, 0); // unknown
+			packet.SetUnicodeString(9, CAscZ(param), 1); // chat name
+			packet.SetInt32(packet.GetSize() - 1, 0); // unknown
+			break;
+		TYPE_JOIN_CHANNEL:
+			packet.SetInt32(5, 0); // unknown
+			packet.SetUnicodeString(9, CAscZ(param), 1);
+			packet.SetInt16(packet.GetSize() - 1, 0); // unknown
+			packet.SetInt16(packet.GetSize() - 1, 30); // unknown
+			packet.SetInt16(packet.GetSize() - 1, 0); // unknown
+			break;
+	endcase
+	
+	packet.SetInt16(1, packet.GetSize()); // packet length
+	
+	if ( CH_CheckDebug() )
+		Print("SendChatMessagePacket(): "+type+" "+param);
+		Print("Send CM: "+packet);
+	endif
+
+	packet.SendPacket(targ);
+endfunction
+

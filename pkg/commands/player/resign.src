@@ -1,0 +1,61 @@
+use uo;
+use os;
+use guilds;
+
+include "include/yesNo";
+
+program use_guild_stone(who)
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  var guild_id := who.guildid;
+  var guild:= FindGuild(guild_id);
+  resign(guild, who);
+endprogram
+
+function resign(guild,who)
+  SendSysMessage(who, "Are you sure you want to resign?",3,34);
+  var answer:=YesNo(who, "Quit Guild?");
+  if(!answer)
+    SendSysMessage(who, "Canceled.",3,34);
+    return;
+  endif
+  var gm:=findgm(guild);
+  if(who.serial==gm[2])
+    guild.setprop("gm", 0);
+  endif
+  guild.removemember(who);
+  EraseObjProperty(who, "guildtitle");
+  EraseObjProperty(who, "guild_id");
+  EraseObjProperty(who, "fealty");
+  who.title_guild:="";
+  EraseObjProperty(who, "abv");
+  SendSysMessage(who, "You are no longer a member of "+guild.getprop("guildname")+".",3,70);
+  var i,all:=guild.members;
+  if(all.size() == 0)
+    all := guild.allyguilds;
+    if(all.size()!=0)
+      for(i:=1;i<=all.size();i:=i+1)
+        guild.removeallyguild(all[i]);
+      endfor
+    endif
+    all:=guild.enemyguilds;
+    if(all.size()!=0)
+      for(i:=1;i<=all.size();i:=i+1)
+        guild.removeenemyguild(all[i]);
+      endfor
+    endif
+    DestroyGuild(guild);
+  endif
+endfunction
+
+function findgm(guild)
+  var returninfo:={"In Vote", "0"},i,all:=guild.members,gm:=guild.getprop("gm");
+  for(i:=1;i<=all.size();i:=i+1)
+    if(all[i].serial==gm)
+      returninfo[1]:=all[i].name;
+      returninfo[2]:=all[i].serial;
+      returninfo[3]:=all[i];
+    endif
+  endfor
+  return returninfo;
+endfunction

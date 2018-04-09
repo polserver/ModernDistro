@@ -1,0 +1,63 @@
+use uo;
+use os;
+
+include ":magery:spells";
+include ":damage:damage";
+
+program cast_reflect( parms )
+  var caster := parms[1];
+  
+///////////////////////////////////////////////////////////////////////////
+// I am going to add the new system here and  leave the old one in place //
+// as well until I can implement the new system in all scripts.          //
+///////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////
+// New system from POL 0.97 Distro //
+/////////////////////////////////////
+/*	if ( GetObjProperty(caster, "MagicReflection") )
+		RemoveMagicReflection(caster);
+	else
+		var points := 25 - (AP_GetSkill(caster, INSCRIPTION) / 20);
+		ApplyMagicReflection(caster, points);
+	endif
+*/
+/////////////////////////////////////
+
+/////////////////////////////////////
+// Original system from POL 0.95   //
+/////////////////////////////////////
+  if (!(GetObjProperty(caster, "mr") == "1") )
+	PlaySoundEffect(caster, 0x1ea);
+	PlayObjectCenteredEffect( caster, FX_SPARK_EFFECT, 10,10);
+	SetObjProperty(caster, "mr","1");
+  else
+    PlaySoundEffect(caster,0x005d);
+    PlayObjectCenteredEffect(caster, 0x3735,0x0a, 0x1e);
+    SendSysMessage(caster,"Removing protection.", color := 33);
+    EraseObjProperty (caster, "mr");
+  endif
+//////////////////////////////////////
+endprogram
+
+function ApplyMagicReflection(caster, points)
+	ModifyResistance(caster, DMG_PHYSICAL, -(points));
+	ModifyResistance(caster, DMG_FIRE, 10);
+	ModifyResistance(caster, DMG_COLD, 10);
+	ModifyResistance(caster, DMG_POISON, 10);
+	ModifyResistance(caster, DMG_ENERGY, 10);
+
+	SetObjProperty(caster, "MagicReflection", points);
+endfunction
+
+function RemoveMagicReflection(caster)
+	var points := GetObjProperty(caster, "MagicReflection");
+	
+	ModifyResistance(caster, DMG_PHYSICAL, points);
+	ModifyResistance(caster, DMG_FIRE, -10);
+	ModifyResistance(caster, DMG_COLD, -10);
+	ModifyResistance(caster, DMG_POISON, -10);
+	ModifyResistance(caster, DMG_ENERGY, -10);
+
+	EraseObjProperty(caster, "MagicReflection");
+endfunction

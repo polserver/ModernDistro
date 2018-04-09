@@ -1,0 +1,14 @@
+use uo;
+
+program DummyControl( dummy )
+	//De-animates dummies on start-up.
+	
+	if( dummy.graphic == 4209 ) // Animated
+		dummy.graphic := 4208; // None animated
+		
+	elseif( dummy.graphic == 4213 ) // Animated
+		dummy.graphic := 4212; // Non animated
+	endif
+	
+	return 1;
+endprogram

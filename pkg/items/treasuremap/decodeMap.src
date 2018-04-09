@@ -1,0 +1,89 @@
+use uo;
+use cfgfile;
+use util;
+
+include "include/client";
+include ":attributes:attributes";
+include "include/objtype";
+include "include/canAccess";
+
+program decode_map( who, map )
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  if(!can_access(who, map))
+    return;
+  endif
+  if(map.movable == 0)
+    SendSysMessage(who, "You cannot use that.");
+    return;
+  endif
+  var cfgfile := ReadConfigFile( "itemdesc" );
+  var elem := FindConfigElem( cfgfile, map.objtype );
+  var maplevel := GetConfigInt( elem, "Level" );
+  var maxlevel := GetMaxMapLevel( who );
+  if( maplevel > maxlevel )
+    SendSysMessage( who, "You cannot comprehend the map." );
+  else
+    if(SkillCheck( who, CARTOGRAPHY, (maplevel*20), (maplevel*100)))
+      CreateTreasureMap( who, map, maplevel );
+    else
+      SendSysMessage( who, "You understand the map, but fail to decode it." );
+    endif
+  endif
+endprogram
+
+function GetMaxMapLevel( who );
+  var skill := GetAttribute( who, CARTOGRAPHY );
+  if( skill >= 100 )
+    return 5;
+  elseif( skill >= 80 )
+    return 4;
+  elseif( skill >= 60 )
+    return 3;
+  elseif( skill >= 40 )
+    return 2;
+  elseif( skill >= 20 )
+    return 1;
+  else
+    return 0;
+  endif
+endfunction
+
+function CreateTreasureMap( who, oldmap, maplevel);
+  var map := CreateItemInBackpack( who, GetObjtypeByName("map_nonedit"), 1 );
+  SetObjProperty(map, "level", maplevel);
+  SetObjProperty(map, "decoder", who.serial);
+  map.name := "a treasure map [lvl " + maplevel + "] [decoded by " + who.name + "]";
+  SetTreasureCoords(map);
+  SendSysMessage( who, "You successfully decode the map!" );
+  DestroyItem( oldmap );
+endfunction
+
+function SetTreasureCoords( map );
+  var cfgfile := ReadConfigFile( "treasure" );
+  var num := GetConfigMaxIntKey( cfgfile );
+  var pick := (RandomInt( num ) + 1);
+  var elem := FindConfigElem( cfgfile, pick );
+  var x := GetConfigInt( elem, "X" );
+  var y := GetConfigInt( elem, "Y" );
+  var z := GetConfigInt( elem, "Z" );
+  SetObjProperty( map, "chestx", x );
+  SetObjProperty( map, "chesty", y );
+  SetObjProperty( map, "chestz", z );
+  SetName( map, "a treasure map" );
+  if( x < 265 )
+     map.xwest := 0;
+  else
+    map.xwest := x-265;
+  endif
+  if( y < 260 )
+     map.ynorth := 0;
+  else
+    map.ynorth := y-260;
+  endif
+  map.xeast := x+265;
+  map.ysouth := y+260;
+  map.gumpwidth := 200;
+  map.gumpheight := 200;
+  map.AppendPin(x,y);
+endfunction

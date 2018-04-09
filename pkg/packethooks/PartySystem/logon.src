@@ -1,0 +1,14 @@
+/* $Id: logon.src 523 2006-06-30 17:36:14Z tekproxy $
+ *
+ */
+
+use uo;
+
+include ":partySystem:config";
+
+program LogOn(character)
+	EraseObjProperty(character, PARTY_JOINING_PROP); 
+	EraseObjProperty(character, PARTY_PROP);
+	
+	return 1;
+endprogram

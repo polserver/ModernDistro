@@ -1,0 +1,27 @@
+use os;
+use uo;
+
+include "include/client";
+include ":attributes:attributes";
+
+program textcmd_setskill( who, text )
+var i;
+var amt := CInt (text);
+var attribs := array;
+attribs := List_of_Skills;
+
+    if (!text)
+        amt := 100;
+    endif
+    amt := amt * 10;
+     for (i := 1; i <= attribs.Size(); i := i + 1)
+            print( "Setting Skill " + attribs[i] + " to " + amt );
+            var res := SetBaseSkillBaseValue( who, AP_AttributeNameToSkillId(attribs[i]), amt);
+            if (res == error)
+                SendSysMessage( who, "Unable to set skill for " + who.name + ": " + res.errortext );
+            else
+                SendSysMessage( who, "New Effective Skill for " + who.name + ": " + GetAttribute(who, attribs[i]) );
+            endif
+        endfor
+       endprogram
+//

@@ -1,0 +1,59 @@
+//
+// .create command - create items
+// Items created with this command will not decay.
+// Two forms:
+//   ".create [objtype] [amount]" - specify object type and amount
+//       amount defaults to 1
+//   ".create" - show the item creation menu, create one of that item
+//
+use uo;
+use file;
+
+include ":timeutils:time";
+include "include/crafting";
+
+program textcmd_create( who, text )
+    var dmy, month, hms;
+    if (text)
+        var params := SplitWords( text );
+        var objtype := params[1];
+        var amount := CInt( params[2] );
+
+        if (CInt(objtype))
+            objtype := CInt(objtype);
+        endif
+
+        if (!amount)
+            amount := 1;
+        endif
+
+        // print( "objtype=" + Hex(objtype) + ", amount=" + amount );
+       
+            SendSysMessage( who, "Now select a location on the ground, where you want the item to appear." );
+            var place := TargetCoordinates( who );
+            var item := CreateItemAtLocation( place.x, place.y, place.z, objtype, amount, who.realm );
+            item.decayAt := 600;
+	    
+	    dmy := FormatTime(GetTimeStruct(GetTime()), "<DAY>-<MON>-<YY>");
+	    month := FormatTime(GetTimeStruct(GetTime()), "<MON>-<YY>");
+	    LogToFile("::log/createstack_" + month + ".log", "On " + dmy + " at " + hms + " " + who.name +" on account " + who.acctname + 
+	    " created  " + amount + " of " + get_item_name(item.objtype, 1));
+
+    else
+        var selection := SelectMenuItem2( who, "ItemCreation" );
+        if (selection)
+            SendSysMessage( who, "Now select a location on the ground, where you want the item to appear." );
+            var place := TargetCoordinates( who );
+            var created := CreateItemAtLocation( place.x, place.y, place.z, selection.objtype, 1, who.realm );
+            created.color := selection.color;
+            created.decayAt := 600;
+//            SetObjProperty(created, "Created", who.name);
+
+	    dmy := FormatTime(GetTimeStruct(GetTime()), "<DAY>-<MON>-<YY>");
+	    hms := FormatTime(GetTimeStruct(GetTime()), "<HH>:<MM>:<SS>");
+	    month := FormatTime(GetTimeStruct(GetTime()), "<MON>-<YY>");
+	    LogToFile("::log/createstack_" + month + ".log", "On " + dmy + " at " + hms + " " + who.name + " on account " + who.acctname + 
+	    " created  " + created.amount + " of " + get_item_name(created.objtype, 1));
+        endif
+    endif
+endprogram

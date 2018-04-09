@@ -1,0 +1,40 @@
+Changes:
+2017-20-06:	1.6 
+		Yukiko:
+			+ Added GFTooltip function to gumps.inc to allow for tooltip display when moused over gump elements.
+
+2017-23-06:	1.7 
+		ThisIsMe:
+			+ Added parameter to GFTooltip to allow for use of clilocs that support custom arguments.
+				
+			+ Added customstring parameter to GFAddHTMLLocalized to allow for clilocs that allow custom arguments.
+				
+2017-28-06:	1.8 
+		ThisIsMe:
+			+ Added GFPicTiled to slowly move in the missing gump functionality.
+			
+			+ Added GFAddImageTileButton to gumps.inc to move in missing gump functionality.
+			
+2018-02-17: 1.9 
+		ThisIsMe:
+			+ Added parameter to GFTextEntry which allows for limited text entry in a text entry gump element.
+				
+2018-03-10: 2.0 
+		ThisIsMe:
+			+ Added GFItemProperty which allows for an item's tooltip to be displayed when the mouse cursor is over a gump's element,
+				
+			+ Moved GFCloseGump and GFCloseGumpTimed to a new include file; autoClose.inc in gumps pkg.
+			
+			+ Added GFCloseGumpOnMovedCoordinateDistance to autoClose.inc to allow a gump to be closed if player moves so many squares.
+				+ Added autoCloseOnMovedCoordinateDistance.src to :gumps:scripts/autoClose/ which is called by GFCloseGumpOnMovedCoordinateDistance
+			
+			+ Added GFCloseGumpOnMovedDistance to autoClose.inc to allow a gump to be closed if player moves X squares away from an object.
+				+ Added autoCloseOnMovedDistance.src to :gumps:scripts/autoClose/ which is called by GFCloseGumpOnMovedDistance
+			
+			+ Added GFCloseGumpOnLeaveArea to autoClose.inc to allow a gump to be closed if player leaves a defined area.
+				+ Added autoCloseOnLeaveArea.src to :gumps:scripts/autoClose/ which is called by GFCloseGumpOnLeaveArea
+				
+2018-03-17: 2.01
+			ThisIsMe:
+				+ Fixed a compile error, stupid mistake on my part, changed the name of a parameter and forgot to change it in the function
+				  as well. Crumbs!

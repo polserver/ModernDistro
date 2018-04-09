@@ -1,0 +1,434 @@
+use uo;
+use os;
+
+program change_bed (character, bed)
+	if (!GetObjProperty (bed, "OtherItems"))
+		SendSysMessage (character, "This bed is a tad broken.  Please redeed it and place it again.");
+		return;
+	endif
+
+	var bedstate := CINT(GetObjProperty (bed, "bedstate"));
+	if (!bedstate)
+		bedstate := 1;
+	endif
+
+	case (bed.objtype)
+		0x0A70:
+		0x0A71:
+		0x0A72:
+		0x0A73:
+			ChangeBedDirection1 (character, bed, bedstate);
+		0x0A74:
+		0x0A75:
+		0x0A76:
+		0x0A77:
+			ChangeBedDirection2 (character, bed, bedstate);
+		0x0A60:
+		0x0A61:
+			if (GetObjProperty (bed, "crudebed"))
+				ChangeCrudeBed1 (character, bed, bedstate);
+			else
+				ChangeSmallBed1 (character, bed, bedstate);
+			endif
+		0x0A5E:
+		0x0A5F:
+			if (GetObjProperty (bed, "crudebed"))
+				ChangeCrudeBed2 (character, bed, bedstate);
+			else
+				ChangeSmallBed2 (character, bed, bedstate);
+			endif
+		0x11e2:
+		0x11e3:
+			ChangeCrudeBed2 (character, bed, bedstate);
+		0x11e4:
+		0x11e5:
+			ChangeCrudeBed1 (character, bed, bedstate);
+	endcase
+
+endprogram
+
+
+
+
+///////////////////
+//  this function takes care of beds that are facing E/W
+///////////////////
+
+function ChangeBedDirection1 (character, thebed, bedstate)
+	var otheritemserials := GetObjProperty (thebed, "otheritems");
+	var bed1, bed2, bed3, bed4;
+	foreach serialnum in otheritemserials
+		var otheritem := SystemFindObjectBySerial (serialnum);
+		if (otheritem)
+			case (otheritem.objtype)
+				0x0A70:	bed1 := otheritem;
+				0x0A71:	bed2 := otheritem;
+				0x0A72:	bed3 := otheritem;
+				0x0A73:	bed4 := otheritem;
+			endcase
+		endif
+	endforeach
+
+	if (!bed1 or !bed2 or !bed3 or !bed4)
+		SendSysMessage (character, "That bed seems to be broken.");
+		return;
+	endif
+
+	case (bedstate)
+		1:
+			bed1.graphic := 0x0A84;
+			SetObjProperty (bed1, "bedstate", 2);
+			bed2.graphic := 0x0A86;
+			SetObjProperty (bed2, "bedstate", 2);
+			bed3.graphic := 0x0A87;
+			SetObjProperty (bed3, "bedstate", 2);
+			bed4.graphic := 0x0A85;
+			SetObjProperty (bed4, "bedstate", 2);
+		2:
+			bed1.graphic := 0x0A7A;
+			SetObjProperty (bed1, "bedstate", 3);
+			bed2.graphic := 0x0A78;
+			SetObjProperty (bed2, "bedstate", 3);
+			bed3.graphic := 0x0A79;
+			SetObjProperty (bed3, "bedstate", 3);
+			bed4.graphic := 0x0A7B;
+			SetObjProperty (bed4, "bedstate", 3);
+		3:
+			bed1.graphic := 0x0A7C;
+			SetObjProperty (bed1, "bedstate", 4);
+			bed2.graphic := 0x0A78;
+			SetObjProperty (bed2, "bedstate", 4);
+			bed3.graphic := 0x0A79;
+			SetObjProperty (bed3, "bedstate", 4);
+			bed4.graphic := 0x0A7B;
+			SetObjProperty (bed4, "bedstate", 4);
+		4:
+			bed1.graphic := 0x0A90;
+			SetObjProperty (bed1, "bedstate", 5);
+			bed2.graphic := 0x0A8C;
+			SetObjProperty (bed2, "bedstate", 5);
+			bed3.graphic := 0x0A8D;
+			SetObjProperty (bed3, "bedstate", 5);
+			bed4.graphic := 0x0A91;
+			SetObjProperty (bed4, "bedstate", 5);
+		5:
+			bed1.graphic := 0x0A8E;
+			SetObjProperty (bed1, "bedstate", 6);
+			bed2.graphic := 0x0A8c;
+			SetObjProperty (bed2, "bedstate", 6);
+			bed3.graphic := 0x0A8d;
+			SetObjProperty (bed3, "bedstate", 6);
+			bed4.graphic := 0x0A8F;
+			SetObjProperty (bed4, "bedstate", 6);
+
+		default:
+			bed1.graphic := bed1.objtype;
+			SetObjProperty (bed1, "bedstate", 1);
+			bed2.graphic := bed2.objtype;
+			SetObjProperty (bed2, "bedstate", 1);
+			bed3.graphic := bed3.objtype;
+			SetObjProperty (bed3, "bedstate", 1);
+			bed4.graphic := bed4.objtype;
+			SetObjProperty (bed4, "bedstate", 1);
+	endcase
+
+endfunction
+
+
+
+
+///////////////////
+//  this function takes care of beds that are facing N/S
+///////////////////
+
+function ChangeBedDirection2 (character, thebed, bedstate)
+	var otheritemserials := GetObjProperty (thebed, "otheritems");
+	var bed1, bed2, bed3, bed4;
+	foreach serialnum in otheritemserials
+		var otheritem := SystemFindObjectBySerial (serialnum);
+		if (otheritem)
+			case (otheritem.objtype)
+				0x0A74:	bed1 := otheritem;
+				0x0A75:	bed2 := otheritem;
+				0x0A76:	bed3 := otheritem;
+				0x0A77:	bed4 := otheritem;
+			endcase
+		endif
+	endforeach
+
+	if (!bed1 or !bed2 or !bed3 or !bed4)
+		SendSysMessage (character, "That bed seems to be broken.");
+		return;
+	endif
+
+	case (bedstate)
+		1:
+			bed1.graphic := 0x0A88;
+			SetObjProperty (bed1, "bedstate", 2);
+			bed2.graphic := 0x0A8A;
+			SetObjProperty (bed2, "bedstate", 2);
+			bed3.graphic := 0x0A8B;
+			SetObjProperty (bed3, "bedstate", 2);
+			bed4.graphic := 0x0A89;
+			SetObjProperty (bed4, "bedstate", 2);
+		2:
+			bed1.graphic := 0x0A81;
+			SetObjProperty (bed1, "bedstate", 3);
+			bed2.graphic := 0x0A7E;
+			SetObjProperty (bed2, "bedstate", 3);
+			bed3.graphic := 0x0A7F;
+			SetObjProperty (bed3, "bedstate", 3);
+			bed4.graphic := 0x0A80;
+			SetObjProperty (bed4, "bedstate", 3);
+		3:
+			bed1.graphic := 0x0A82;
+			SetObjProperty (bed1, "bedstate", 4);
+			bed2.graphic := 0x0A7E;
+			SetObjProperty (bed2, "bedstate", 4);
+			bed3.graphic := 0x0A7F;
+			SetObjProperty (bed3, "bedstate", 4);
+			bed4.graphic := 0x0A83;
+			SetObjProperty (bed4, "bedstate", 4);
+		4:
+			bed1.graphic := 0x0DB4;
+			SetObjProperty (bed1, "bedstate", 5);
+			bed2.graphic := 0x0DB0;
+			SetObjProperty (bed2, "bedstate", 5);
+			bed3.graphic := 0x0DB1;
+			SetObjProperty (bed3, "bedstate", 5);
+			bed4.graphic := 0x0DB5;
+			SetObjProperty (bed4, "bedstate", 5);
+		5:
+			bed1.graphic := 0x0DB2;
+			SetObjProperty (bed1, "bedstate", 6);
+			bed2.graphic := 0x0DB0;
+			SetObjProperty (bed2, "bedstate", 6);
+			bed3.graphic := 0x0DB1;
+			SetObjProperty (bed3, "bedstate", 6);
+			bed4.graphic := 0x0DB3;
+			SetObjProperty (bed4, "bedstate", 6);
+		default:
+			bed1.graphic := bed1.objtype;
+			SetObjProperty (bed1, "bedstate", 1);
+			bed2.graphic := bed2.objtype;
+			SetObjProperty (bed2, "bedstate", 1);
+			bed3.graphic := bed3.objtype;
+			SetObjProperty (bed3, "bedstate", 1);
+			bed4.graphic := bed4.objtype;
+			SetObjProperty (bed4, "bedstate", 1);
+	endcase
+
+endfunction
+
+
+
+
+///////////////////
+//  this function takes care of small beds that are facing E/W
+///////////////////
+
+function ChangeSmallBed1 (character, thebed, bedstate)
+	var otheritemserials := GetObjProperty (thebed, "otheritems");
+	var bed1, bed2;
+	foreach serialnum in otheritemserials
+		var otheritem := SystemFindObjectBySerial (serialnum);
+		if (otheritem)
+			case (otheritem.objtype)
+				0x0A60:	bed1 := otheritem;
+				0x0A61:	bed2 := otheritem;
+			endcase
+		endif
+	endforeach
+
+	if (!bed1 or !bed2)
+		SendSysMessage (character, "That bed seems to be broken.");
+		return;
+	endif
+
+	case (bedstate)
+		1:
+			bed1.graphic := 0x0A5D;
+			SetObjProperty (bed1, "bedstate", 2);
+			bed2.graphic := 0x0A62;
+			SetObjProperty (bed2, "bedstate", 2);
+		2:
+			bed1.graphic := 0x0A69;
+			SetObjProperty (bed1, "bedstate", 3);
+			bed2.graphic := 0x0A6b;
+			SetObjProperty (bed2, "bedstate", 3);
+		3:
+			bed1.graphic := 0x0A6A;
+			SetObjProperty (bed1, "bedstate", 4);
+			bed2.graphic := 0x0A6b;
+			SetObjProperty (bed2, "bedstate", 4);
+		default:
+			bed1.graphic := bed1.objtype;
+			SetObjProperty (bed1, "bedstate", 1);
+			bed2.graphic := bed2.objtype;
+			SetObjProperty (bed2, "bedstate", 1);
+	endcase
+
+endfunction
+
+
+
+
+///////////////////
+//  this function takes care of small beds that are facing E/W
+///////////////////
+
+function ChangeCrudeBed1 (character, thebed, bedstate)
+	var otheritemserials := GetObjProperty (thebed, "otheritems");
+	var bed1, bed2;
+	foreach serialnum in otheritemserials
+		var otheritem := SystemFindObjectBySerial (serialnum);
+		if (otheritem)
+			case (otheritem.objtype)
+				0x0A60:	bed1 := otheritem;
+				0x11E4:	bed1 := otheritem;
+				0x0A61:	bed2 := otheritem;
+				0x11E5:	bed2 := otheritem;
+			endcase
+		endif
+	endforeach
+
+	if (!bed1 or !bed2)
+		SendSysMessage (character, "That bed seems to be broken.");
+		return;
+	endif
+
+	case (bedstate)
+		1:
+			bed1.graphic := 0x11e8;
+			SetObjProperty (bed1, "bedstate", 2);
+			bed2.graphic := 0x11e9;
+			SetObjProperty (bed2, "bedstate", 2);
+		2:
+			bed1.graphic := 0x11f0;
+			SetObjProperty (bed1, "bedstate", 3);
+			bed2.graphic := 0x11f1;
+			SetObjProperty (bed2, "bedstate", 3);
+		3:
+			bed1.graphic := 0x11fd;
+			SetObjProperty (bed1, "bedstate", 4);
+			bed2.graphic := 0x11fe;
+			SetObjProperty (bed2, "bedstate", 4);
+		4:
+			bed1.graphic := 0x1f75;
+			SetObjProperty (bed1, "bedstate", 5);
+			bed2.graphic := 0x1f76;
+			SetObjProperty (bed2, "bedstate", 5);
+		5:
+			bed1.graphic := 0x1f79;
+			SetObjProperty (bed1, "bedstate", 6);
+			bed2.graphic := 0x1f7a;
+			SetObjProperty (bed2, "bedstate", 6);
+		default:
+			bed1.graphic := 0x11e4;
+			SetObjProperty (bed1, "bedstate", 1);
+			bed2.graphic := 0x11e5;
+			SetObjProperty (bed2, "bedstate", 1);
+	endcase
+
+endfunction
+
+
+
+
+///////////////////
+//  this function takes care of small beds that are facing N/S
+///////////////////
+
+function ChangeSmallBed2 (character, thebed, bedstate)
+	var otheritemserials := GetObjProperty (thebed, "otheritems");
+	var bed1, bed2;
+	foreach serialnum in otheritemserials
+		var otheritem := SystemFindObjectBySerial (serialnum);
+		if (otheritem)
+			case (otheritem.objtype)
+				0x0A5E:	bed1 := otheritem;
+				0x0A5F:	bed2 := otheritem;
+			endcase
+		endif
+	endforeach
+
+	if (!bed1 or !bed2)
+		SendSysMessage (character, "That bed seems to be broken.");
+		return;
+	endif
+
+	case (bedstate)
+		1:
+			bed1.graphic := 0x0A63;
+			SetObjProperty (bed1, "bedstate", 2);
+			bed2.graphic := 0x0A5C;
+			SetObjProperty (bed2, "bedstate", 2);
+		default:
+			bed1.graphic := 0x0A66;
+			SetObjProperty (bed1, "bedstate", 1);
+			bed2.graphic := 0x0A68;
+			SetObjProperty (bed2, "bedstate", 1);
+	endcase
+
+endfunction
+
+
+
+///////////////////
+//  this function takes care of small beds that are facing N/S
+///////////////////
+
+function ChangeCrudeBed2 (character, thebed, bedstate)
+	var otheritemserials := GetObjProperty (thebed, "otheritems");
+	var bed1, bed2;
+	foreach serialnum in otheritemserials
+		var otheritem := SystemFindObjectBySerial (serialnum);
+		if (otheritem)
+			case (otheritem.objtype)
+				0x0A5E:	bed1 := otheritem;
+				0x11E2:	bed1 := otheritem;
+				0x0A5F:	bed2 := otheritem;
+				0x11E3:	bed2 := otheritem;
+			endcase
+		endif
+	endforeach
+
+	if (!bed1 or !bed2)
+		SendSysMessage (character, "That bed seems to be broken.");
+		return;
+	endif
+
+	case (bedstate)
+		1:
+			bed1.graphic := 0x11e6;
+			SetObjProperty (bed1, "bedstate", 2);
+			bed2.graphic := 0x11e7;
+			SetObjProperty (bed2, "bedstate", 2);
+		2:
+			bed1.graphic := 0x11f3;
+			SetObjProperty (bed1, "bedstate", 3);
+			bed2.graphic := 0x11f2;
+			SetObjProperty (bed2, "bedstate", 3);
+		3:
+			bed1.graphic := 0x11ff;
+			SetObjProperty (bed1, "bedstate", 4);
+			bed2.graphic := 0x1200;
+			SetObjProperty (bed2, "bedstate", 4);
+		4:
+			bed1.graphic := 0x1f73;
+			SetObjProperty (bed1, "bedstate", 5);
+			bed2.graphic := 0x1f74;
+			SetObjProperty (bed2, "bedstate", 5);
+		5:
+			bed1.graphic := 0x1f77;
+			SetObjProperty (bed1, "bedstate", 6);
+			bed2.graphic := 0x1f78;
+			SetObjProperty (bed2, "bedstate", 6);
+		default:
+			bed1.graphic := 0x11e2;
+			SetObjProperty (bed1, "bedstate", 1);
+			bed2.graphic := 0x11e3;
+			SetObjProperty (bed2, "bedstate", 1);
+	endcase
+
+endfunction

@@ -1,0 +1,38 @@
+use vitals;
+use uo;
+use os;
+use util;
+
+include "include/client";
+include ":attributes:attributes";
+include "include/spellAttack";
+include "include/spellRestrictions";
+program cast_fireball( caster, effect, sound )
+
+if (!effect)
+        SendSysMessage(caster, "this command plays a moving effect, then kills the target. Usage: ekill <effect>");
+        return;
+endif
+
+var tsound := CInt(sound);
+var teffect := CInt(effect);
+
+    var parms := {};
+    var cast_on := Target( caster );
+    if (!cast_on)
+        return;
+    endif
+
+    // FIXME make sure you targetted a mobile
+
+
+     PlaySoundEffect( cast_on, tsound  );
+    PlayMovingEffect( caster, cast_on,
+                      teffect,
+                      5,
+                       1 );
+   
+
+
+   ApplyRawDamage( cast_on, GetMaxHp(cast_on) + 10  );
+endprogram

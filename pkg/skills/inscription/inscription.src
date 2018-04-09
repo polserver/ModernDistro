@@ -1,0 +1,113 @@
+use cfgfile;
+use util;
+ 
+include ":attributes:attributes";
+include ":crafting:crafting";
+include ":crafting:craftingRepair";
+include ":crafting:toolWear";
+
+var item_config     := ReadConfigFile(":*:itemdesc");
+var craft_config    := ReadConfigFile(":inscription:inscription");
+
+program use_InscTool(mobile, tool)
+
+	if ( !ReserveItem(tool) )
+		SendSysMessage(mobile, "That is already in use.");
+		return 0;
+	elseif( (!tool.movable) || !ReserveItem(tool) )
+		SendSysMessage(mobile, "You cannot use that");
+		return 0;
+	elseif( !(tool in EnumerateItemsInContainer(mobile.backpack)) )
+		SendSysMessage(mobile, "That item is not in your backpack.");
+		return 0;
+	endif
+
+	EraseObjProperty(mobile, "#IsMeditating");
+	EraseObjProperty(mobile, "#HealTimer");
+
+	var rinfo := sendCraftGump(mobile, INSCRIPTION);
+
+	// OK was pressed, close it on out
+	if(rinfo == 0)
+		return 0;
+	endif
+
+	var the_objtype := rinfo[1];
+	var amt         := rinfo[2];
+	
+	if(craft_config[Hex(the_objtype)].assemble == 1)
+		CraftAssembly(mobile, INSCRIPTION, tool, the_objtype, amt);
+	else
+		makeScribeItems(mobile, the_objtype, amt, tool);
+	endif
+
+endprogram
+
+function makeScribeItems(mobile, what, amt, tool)
+
+	if(!what)
+		SendSysMessage(mobile, "Cancelled");
+		return 0;
+	endif
+
+	// what's type is sent for the ResourceList entry type.
+	var itemchk := MaterialSelection(mobile, craft_skill, lower(craft_config[what].type));
+	if(!itemchk)
+		return 0;
+	endif
+	var use_on := itemchk[1];
+	var ptmod := itemchk[3];
+
+	var num, theitem;
+	var itemname := craft_config[what].name;
+	var material := Cint(craft_config[what].Material);
+	var reqd := Cint(craft_config[what].Skill);
+	var diff := Cint(craft_config[what].Difficulty);
+	var pts  := Cint(craft_config[what].Points);
+	var requires_mana := Cint(craft_config[what].ManaUsage);
+	if ( requires_mana )
+		if ( !AP_ConsumeVital(mobile, MANA, requires_mana) )
+			SendSysMessage(mobile, "You don't have enough mana to craft that!");
+			return 0;
+		endif
+	endif
+	pts      := CInt(pts + ptmod);
+	var counter := 0, x := mobile.x, y := mobile.y;
+
+	while(counter < amt)
+		if((mobile.x != x) || (mobile.y != y))
+			SendSysMessage(mobile, "You stop brewing.");
+			break;
+		endif
+		if(!tool)
+			break;
+		endif
+		sleep(2);
+
+		if(GetAmount(use_on) >= material)
+			if(CraftCheckSkill(mobile, craft_skill, diff, pts))
+				theitem := CreateCraftItem(mobile, craft_skill, use_on, use_on.objtype, what, material, itemname, reqd);
+				if( TypeOf(theitem) != "ItemRef" )
+					SubtractAmount(use_on, (material / 2));
+					SendSysMessage(mobile, "You failed to create the item, and some of your materials are lost.");
+					counter := counter + 1;
+					continue;
+				endif
+			else
+				num := CInt(randomint(material)/2) + 1;
+				if(SubtractAmount(use_on, num))
+					SendSysMessage(mobile, "You lost some material");
+				endif
+			endif
+			CheckToolWear (mobile, tool, craft_skill);
+		else
+			SendSysMessage(mobile, "You don't have the resources required to make that item.");
+			counter := 100;
+			break;
+		endif
+		counter := counter + 1;
+	endwhile
+
+	return 0;
+
+endfunction

@@ -1,0 +1,22 @@
+use uo;
+use cfgfile;
+use util;
+use os;
+
+include "include/client";
+
+
+program clean(who, reg)
+
+	if ((RandomInt(1000) + 1) < 950)
+		var cfg := ReadConfigFile("itemdesc");
+		var what := cfg[reg.objtype].product;
+		var howmuch := cfg[reg.objtype].produceamount;
+		CreateItemInBackpack(who, what, howmuch);
+		DestroyItem(reg);
+		SendSysMessage(who, "You successfully cull the reagent");
+	else
+		DestroyItem(reg);
+		SendSysMessage(who, "The plant falls to pieces as you try to clean it.");
+	endif
+endprogram

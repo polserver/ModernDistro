@@ -1,0 +1,37 @@
+/*
+        Maintened by *Edwards
+
+        2009-10-20
+*/
+use uo;
+use cfgfile;
+use util;
+
+program OnInsert( character, container, movetype, inserttype, adding_item, existing_stack, amount_to_add )
+
+        //Avoid compiler warnings
+        amount_to_add := amount_to_add;
+        existing_stack := existing_stack;
+        adding_item := adding_item;
+        inserttype := inserttype;
+        movetype := movetype;
+        character := character;
+
+	var cfg := ReadConfigFile( ":containers:bookshelf" );
+	if( !cfg )
+		return 1;
+	endif
+
+	cfg := cfg[container.graphic];
+
+	var num_items := EnumerateItemsInContainer( container ).Size();
+	if( num_items > 0 )
+		// Duh, we know it is > 0 since this is an onInsert script, but its good to be safe.
+		var graphics := GetConfigStringArray( cfg, "FilledGraphic" );
+		// Change the book shelf to a random compatable filled graphic.
+		// Ooo special effects.
+		container.graphic := graphics.RandomEntry();
+	endif
+
+	return 1;
+endprogram

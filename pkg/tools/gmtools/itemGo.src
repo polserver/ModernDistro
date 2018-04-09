@@ -1,0 +1,143 @@
+// Go v2.0
+// Author: Unknown
+// Updated by: Sentack
+// Updates:
+//   1/13/2000 : v2.0
+//     - displays gump of all available locations (Stole from .goto command)
+//     - Can now teleport other mobles with "Send" button in gump window (Got some help from .info Command)
+//     - Updated and editied s.cfg to better work with gump
+
+use os;
+use uo;
+use cfgfile;
+use util;
+
+include "include/math"; // Used for Mod
+include ":attributes:attributes";
+
+const TEXTSTARTLOCY :=  70;  // The location of the top of the gump
+const DEFAULT_REALM := "britannia";
+var who;
+
+var locationscount := 0;  // The number of locations found for this user
+var pagecount := 1;       // The current developing page
+
+var layout := array(      // The layout of the gump with text notes to be added later
+
+"page 0",
+"nodispose",
+"gumppic 0 50 2620",
+"gumppic 20 50 2621",
+"gumppic 290 50 2622",
+"gumppic 0 68 2623",
+"gumppic 22 68 2624",
+"gumppic 288 68 2625",
+"gumppic 0 272 2623",
+"gumppic 22 272 2624",
+"gumppic 288 272 2625",
+"gumppic 0 476 2626",
+"gumppic 20 476 2627",
+"gumppic 290 476 2628",
+"gumppic 20 80 2621",
+
+"text 20 59 40 0",
+"text 200 59 40 1",
+"text 260 59 40 2"
+);
+
+var data := array(      // The data array that holds all the text to be displayed in the gump
+       "Location",         //0
+       "Goto",
+       "Send"
+);
+
+DEFAULT_REALM := "britannia";
+
+program go(who)
+    if (who.cmdlevel < 2)
+      return;
+    endif
+    UnloadConfigFile("::golocs");
+    var tname := lower(who.name);
+    FillInArrays( tname );
+    var result := SendDialogGump( who, layout, data );
+    if (result[0] == 0)
+      return;
+    endif
+    var locs    := ReadConfigFile("::golocs");
+    var MaxLocs := GetConfigMaxIntKey(locs)+1;
+    var dest    := locs[mod(result[0], MaxLocs)];
+    var traveler;
+    if ( result[0] > MaxLocs )
+       SendSysMessage( who, "Select a MOBILE." );
+       traveler :=  Target( who, TGTOPT_NOCHECK_LOS );
+       if(!traveler || !GetStrength(traveler))
+         SendSysMessage( who, "Invalid selection." );
+         return;
+       endif
+//       dest := dest+2;
+    else
+      traveler := who;
+    endif
+    MoveObjectToLocation(traveler, dest.X, dest.Y, GetMapInfo(dest.X, dest.Y, who.realm).z, realm := who.realm);
+    UnloadConfigFile("::golocs");
+endprogram
+
+
+function FillInArrays( tname )
+    var telelocations := ReadConfigFile("::golocs");
+    if (!telelocations)
+      SendSysMessage(who,"no telelocations");
+    endif
+    var datalen;
+    var layoutlen;
+    var prev_y := CInt(TEXTSTARTLOCY);
+    var datindx := 2;
+    var buttonret := 1;
+    var i;
+    var numlocations := GetConfigMaxIntKey(telelocations);
+    SendSysMessage(who,"numlocations is: " + numlocations);
+    var currloc;
+    for( i := 1; i <= numlocations; i := i + 1  )
+      currloc := telelocations[i];
+      if ((currloc.TYPE == "all") || (currloc.TYPE == tname))
+        locationscount := locationscount + 1;
+        datalen := GetDataLength();
+        layoutlen := GetLayoutLength();
+        // Store Name
+        datindx := datalen+1;
+        data[datindx] := currloc.Name;
+        if (mod(locationscount, 19) == 1)
+          // Pointer Down
+          if (locationscount >= 19)
+            layout[GetLayoutLength()+1] := "button 285 465 2648 2647 0 " + (pagecount);
+          endif
+          // Set Page Number
+          layout[GetLayoutLength()+1] := "page " + pagecount;
+          pagecount := pagecount + 1;
+          prev_y := TEXTSTARTLOCY;
+          if (locationscount > 19)
+            // Pointer Up
+            if( i > 19)
+              layout[GetLayoutLength()+1] := "button 285 85 2650 2651 0 " + (pagecount - 2);
+            endif
+          endif
+        endif
+        layout[GetLayoutLength()+1] := ("text 20 " + CStr(prev_y + 20) + " 40 " + datalen);
+        layout[GetLayoutLength()+1] := ("button 200 " + CStr(prev_y + 20) + " 2640 2641 1 0 " + ((buttonret+1) / 2)); // Go Button
+        layout[GetLayoutLength()+1] := ("button 260 " + CStr(prev_y + 20) + " 2640 2641 1 0 " + (((buttonret+1) / 2) + numlocations+1)); // Send Button
+        prev_y := prev_y + 20;
+      endif
+      buttonret := buttonret + 2;
+    endfor
+endfunction
+
+// Returns the Length of the Layout Gump Array
+function GetLayoutLength();
+    return (len(layout));
+endfunction
+
+// Returns the length of the Names Array that populates the gump.
+function GetDataLength();
+    return (len(data));
+endfunction

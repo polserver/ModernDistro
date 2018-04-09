@@ -1,0 +1,184 @@
+use uo;
+use os;
+use util;
+use cfgfile;
+
+include "include/objtype";
+include "include/canAccess";
+
+const UOBJ_POTIONKEG := 0xf022;
+const POTION_START   := 0x1DC01;
+const POTION_END     := 0x1DCe6;
+
+program use_potionkeg(ch, keg)
+  EraseObjProperty(ch, "IsMeditating");
+  EraseObjProperty(ch, "HealTimer");
+  if(!can_access(ch, keg))
+    return;
+  endif
+  var type := GetObjProperty(keg, "PotionType");
+  var amt  := 0;
+  foreach thing in EnumerateItemsInContainer(keg)
+    if(thing.objtype == 0xf0e)
+      amt := amt + thing.amount;
+    endif
+  endforeach
+  if(GetObjProperty(keg, "Vendored"))
+    SendSysMessage(ch, "You cannot use that while its on a vendor.");
+    return;
+  endif
+  if(amt == 0)
+    SendSysMessage(ch, "That keg is empty.");
+    return;
+  else
+//    if(ch.cmdlevel)
+//      SendViewContainer(ch, keg);
+//      return;
+//    endif
+    if(keg.movable == 0)
+      var ownerserial := GetObjProperty(keg, "OwnerSerial");
+      if(ownerserial)
+        if(ownerserial != ch.serial)
+          var hs := GetObjProperty(keg, "houseserial");
+          var friend := 0;
+          if(hs)
+            var house := SystemFindObjectBySerial(hs);
+            foreach thing in GetObjProperty(house, "coowners")
+              if(thing == ch.serial)
+                friend := 1;
+                break;
+              endif
+            endforeach
+            if(friend == 0)
+              foreach thing in GetObjProperty(house, "coowners")
+                if(thing == ch.serial)
+                  friend := 1;
+                  break;
+                endif
+              endforeach
+            endif
+            if(friend == 0)
+              SendSysMessage(ch, "That does not belong to you.");
+              return;
+            endif
+          else
+            SendSysMessage(ch, "That does not belong to you.");
+            return;
+          endif
+        endif
+      else
+        SendSysMessage(ch, "That does not belong to you.");
+        return;
+      endif
+    endif
+  endif
+  if(!amt)
+    SendSysMessage(ch, "The Keg is currently empty.");
+    return;
+  endif
+  var potion := 0;
+  foreach thingie in EnumerateItemsInContainer(ch.backpack)
+    if(thingie.container.objtype != 0x1940)
+      if(thingie.objtype == 0xf0e)
+        potion := thingie;
+        break;
+      endif
+    endif
+  endforeach
+  if(potion == 0)
+    SendSysMessage(ch, "You are out of bottles");
+    return;
+  endif
+  if(SubtractAmount(potion, 1))
+    var check := 0;
+    foreach thing in EnumerateItemsInContainer(keg)
+      if(thing.objtype == 0xf0e)
+        if(SubtractAmount(thing, 1))
+          check := 1;
+          break;
+        endif
+      endif
+    endforeach
+    if(check == 1)
+      PlaySoundEffect(ch, 0x241);
+      var the_potion := CreateItemInBackpack(ch, type, 1);
+      SetName(the_potion, lower(GetObjProperty(keg, "PotionName")));
+      if(amt)
+        rename_keg(keg, type);
+      else
+        SetName(keg, "a potion keg");
+      endif
+      SendSysMessage(ch, "You fill a bottle with liquid from the keg.");
+    endif
+  endif
+endprogram
+
+function GetFullness( pkeg )
+  var amt := 0;
+  foreach thing in EnumerateItemsInContainer(pkeg)
+    if(thing.objtype == 0xf0e)
+      amt := amt + thing.amount;
+    endif
+  endforeach
+  var str;
+  if (amt == 0)
+    str := "the keg is empty";
+  elseif ((amt >= 1) && (amt <= 4))
+    str := "the keg is nearly empty";
+  elseif ((amt >= 5) && (amt <= 19))
+    str := "the keg is not very full";
+  elseif ((amt >= 20) && (amt <= 29))
+    str := "the keg is about one quarter full";
+  elseif ((amt >= 30) && (amt <= 39))
+    str := "the keg is about one third full";
+  elseif ((amt >= 40) && (amt <= 46))
+    str := "the keg is almost half full";
+  elseif ((amt >= 47) && (amt <= 53))
+    str := "the keg is approximately half full";
+  elseif ((amt >= 54) && (amt <= 69))
+    str := "the keg is more than half full";
+  elseif ((amt >= 70) && (amt <= 79))
+    str := "the keg is about three quarters full";
+  elseif ((amt >= 80) && (amt <= 95))
+    str := "the keg is very full";
+  elseif ((amt >= 96) && (amt <= 99))
+    str := "The liquid is almost to the top of the keg";
+  else
+    str := "the keg is completely full";
+  endif
+  return str;
+endfunction
+
+function is_potion(obj)
+  if((obj.objtype >= 0x1DC01) && (obj.objtype <= 0x1DCe6))
+    return 1;
+  endif
+  return 0;
+endfunction
+
+function rename_keg(keg, potion)
+  var itemdesc := ReadConfigFile(":alchemy:itemdesc");
+  var obj := FindConfigElem(itemdesc, potion);
+  var amt  := 0;
+  foreach thing in EnumerateItemsInContainer(keg)
+    if(thing.objtype == 0xf0e)
+      amt := amt + thing.amount;
+    endif
+  endforeach
+  if(amt > 0)
+    var str := "a keg of " + obj.desc + "s. " + GetFullness(keg);
+    SetObjProperty(keg, "PotionName", obj.desc);
+    SetName(keg, str);
+  else
+    var str := "specially lined keg for holding potions. " + GetFullness(keg);
+    EraseObjProperty(keg, "PotionName");
+    EraseObjProperty(keg, "PotionType");
+    EraseObjProperty(keg, "OwnerSerial");
+    EraseObjProperty(keg, "houseserial");
+    SetName(keg, str);
+  endif
+  return;
+endfunction
+
+
+

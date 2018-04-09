@@ -1,0 +1,35 @@
+use uo;
+use os;
+
+include ":gumps:gumps";
+
+program Gump_YesNo( params )
+
+        var mobile := params[1],
+            prompt := params[2],
+            delay := params[5];
+            
+	SetObjProperty( mobile, "#CloseYesNoGumpPID", GetPid() );
+            
+        var gump := GFCreateGump();
+        GFClosable( gump, 0 );
+
+        GFGumpPic( gump, 310, 300, 2070 );
+
+        GFTextMid( gump, 350, 330, 110, 1720, prompt );
+
+        GFAddButton( gump, 340, 375, 2130, 2129, GF_CLOSE_BTN, 0xA00 ); //Yes
+        GFAddButton( gump, 400, 375, 2119, 2120, GF_CLOSE_BTN, 0xA01 ); //No
+
+        if( delay )
+                var close_gump := GetObjProperty( mobile, "#YesNoGumpPID" );
+                GFCloseGumpTimed( mobile, close_gump, CInt( delay ), 0 );
+        endif
+
+        var input := GFSendGump( mobile, gump );
+        if( input[0xA00] )
+		return 1;
+        endif
+        
+        return 0;
+endprogram

@@ -1,0 +1,21 @@
+/*
+        Created by *Edwards
+
+        2010-03-15
+*/
+use uo;
+
+include ":itemutils:itemUtil";
+
+program clothing_UseItem( mobile, armor )
+
+        if( useItem_check( mobile, armor, ITEM_INCONTAINER ))
+                var equip := EquipItem( mobile, armor );
+                if( equip.errortext )
+                        SendSysMessage( mobile, "You can't think of a way to use that!" );
+                        return 0;
+                endif
+        endif
+
+        return 1;
+endprogram

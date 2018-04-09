@@ -1,0 +1,43 @@
+// Deviates from official spell as implemented in mainHitScript.src
+
+use uo;
+use vitals;
+
+include ":attributes:attributes";
+
+
+program blood_oath( params )
+	var caster := params[1];
+	var info := params[2]; // Struct containing additional info about the spell.
+	var spellID := params[3];
+	
+	SendSysMessage(caster, "Select your victim:", 1, 88);
+	var cast_on := Target(caster);
+	
+	var necroskill := Cint(AP_GetSkill(caster, NECROMANCY));
+	var sspeak := Cint(AP_GetSkill(caster, SPIRITSPEAK));
+	var int := GetIntelligence(caster);
+
+	var bonus := 0;
+
+	if(caster.ip)
+		bonus := int/5;
+	endif
+
+	PlaySoundEffect(caster, 0x175);
+	PlaySoundEffect(cast_on, 0x175);
+	PlayObjectCenteredEffectEx( caster, 0x375A, 1, 17, 9919, 33, 3, 7 );
+	PlayObjectCenteredEffectEx( cast_on, 0x375A, 1, 17, 9919, 33, 3, 7 );
+	Sleep(1);
+	PlayObjectCenteredEffectEx( caster, 0x3728, 1, 13, 9502, 33, 255, 7 );
+	PlayObjectCenteredEffectEx( cast_on, 0x3728, 1, 13, 9502, 33, 255, 7 );
+
+	var duration := (necroskill + sspeak + bonus) / 4;
+
+	SetObjProperty(cast_on, "bloodoath", caster.serial);
+	Detach();
+	sleep(duration);
+	Eraseobjproperty(cast_on, "bloodoath");
+
+
+endprogram

@@ -1,0 +1,22 @@
+use uo;
+use os;
+use polsys;
+
+include ":chat:chatIO";
+include ":chat:packets";
+include ":chat:functions";
+include ":chat:settings";
+
+program Ignore(params)
+	var character := params[1];
+	var packet := params[2];
+	params := "";
+
+	if ( CH_CheckDebug() )
+		Print("Ignore: "+character.name+" "+packet);
+	endif
+
+	// 1 = ignore, 2 = stop ignoring, 3 = toggle ignore
+
+	return 1;
+endprogram

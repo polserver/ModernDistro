@@ -1,0 +1,17 @@
+include ":gumps:gumps";
+
+program autoCloseGumpOnMovedDistance(params)
+	var mobile			:= params[1];
+	var object			:= params[2];
+	var pid				:= params[3];
+	var dist_traveled	:= params[4];
+	var ret_val			:= params[5];
+	
+	dist_traveled += 1;
+	while ( GetProcess ( pid ) )
+		if ( Distance ( mobile, object ) > dist_traveled )
+			return GFCloseGump(mobile, pid, ret_val);
+		endif
+		SleepMS ( 5 );
+	endwhile
+endprogram

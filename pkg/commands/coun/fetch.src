@@ -1,0 +1,18 @@
+use uo;
+
+
+program textcmd_tele(who)
+  if((who.cmdlevel < 3) && (who.multi))
+    SendSysMessage(who, "You cannot move players into houses.");
+    return;
+  endif
+  SendSysMessage(who, "Who do you want to fetch?");
+  var where := Target(who, TGTOPT_NOCHECK_LOS);
+  if(!where)
+    SendSysMessage(who, "Aborted.");
+  endif
+  var result := MoveObjectToLocation(where, who.x, who.y, who.z, who.realm, MOVEOBJECT_FORCELOCATION);
+  if(!result)
+    SendSysMessage(who, result.errortext);
+  endif
+endprogram

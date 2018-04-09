@@ -1,0 +1,219 @@
+// auction  version 1.0
+// by Zulu (zulu@zuluhotel.com)   November 12, 2000
+
+use npc;
+use os;
+use uo;
+
+include "include/randName";
+include "include/eventID";
+include "include/client";
+include "include/utility";
+
+    var who, auctioneer := Self();
+    if (auctioneer.name["<random>"])
+	    SetName (auctioneer, RandomName (auctioneer) );
+	    EquipFromTemplate( auctioneer, "Clothes" );
+    endif
+    
+    var storage:=findstoragearea("Merchant Storage");
+    var inv_sell:=find_or_create_item(storage,"AUCTION",0xE7C);
+    
+    if(!storage or !inv_sell)
+	exit;
+    endif
+    
+    EnableEvents (EVID_SPEECH, 2);
+    EnableEvents (EVID_ITEM_GIVEN);
+
+
+program auctioneerai()
+    
+    while (1)
+	var item, event := 0;
+    
+	event := os::wait_for_event (20);
+    
+	who:=event.source;
+	TurnToward(who);
+    
+	if(event.text["hello"])
+    
+	    Say("To learn about the auction type help or .auc help");
+	    Say("Any items not claimed in 7 days will be deleted.");
+    
+	elseif(event.text["help"])
+    
+	    Say("To sell an item: type sell and click on the item");
+	    Say("We charge 10% to handle the sale.");
+	    Say("Return to any auctioneer to claim your item.");
+    
+	elseif((event.text["holdbox"]) and (who.cmdlevel>3))
+    
+	    sendopenspecialcontainer(who,inv_sell);
+    
+	elseif(event.item)
+	    item:=event.item;
+	    if(item.objtype == 0x186E and item.graphic == 5360)
+		    Say ("That item has been destroyed.");
+		    destroyitem(item);
+	    endif
+    
+	elseif(getglobalproperty("#aucnpc") == 1)
+    
+	    Say("I am busy right now, please try later.");
+    
+	else
+    
+	    if(event.text["sell"])
+	
+		setglobalproperty("#aucnpc",1);
+		Say ("What would you like to sell?");
+	
+		item:=Target(who,TGTOPT_NOCHECK_LOS);
+		If (!item)
+		    SendSysMessage(who,"canceled.");
+		elseif(ReserveItem(item))
+		    sell_item(who,item);
+		    ReleaseItem(item);
+		endif
+		setglobalproperty("#aucnpc",0);
+	    endif
+    
+	endif
+    
+	cleareventque();
+    
+    endwhile
+
+endprogram
+
+function cleareventque()
+
+    var ev;
+    repeat
+    until (! (ev := os::wait_for_event(0)) );
+
+endfunction
+
+function sell_item(who,item)
+	var money, num1, bartermsg;
+
+	if (totalauctionitems() == 9)
+		Say ("There are too many items right now.");
+		return;
+	endif
+
+	if (ownitem(who.backpack,item) == 0)
+		SendSysMessage( who, "You do not own that.", FONT_NORMAL, 34);
+		return;
+	endif
+
+        if((item.objtype == 0x186E and item.graphic == 5360) or (item.objtype>=0xff0 and item.objtype<=0xff4))
+                Say ("You cannot sell that.");
+		return;
+        endif
+
+        if((item.objtype == 0x86df) or (item.objtype == 0x86df) or (item.objtype == 0x14ef))
+                Say ("You cannot sell that.");
+                destroyitem(item);
+		return;
+        endif
+
+	num1:=CInt(RequestInput(who,who.backpack,"What is the minimum bid for " +item.desc));
+
+	if((num1<0) or (!num1))
+		SendSysMessage(who,"canceled.");
+		return;
+	endif
+
+	money:=CInt(num1*0.1);
+
+	if (money<11)
+		money:=10;
+	endif
+
+	if (!who.spendgold(money))
+	    SendSysMessage(who,"You do not have "+money+" to cover commission.",FONT_NORMAL,34);
+	    return;
+	endif
+
+	bartermsg:=RequestInput(who,who.backpack,"What is your message (esc for none)");
+
+	if((bartermsg == "") or (!bartermsg)) 
+		bartermsg:="<none>";
+	endif
+
+	var bid:=0;
+	var time:=240;
+
+        SetObjProperty(item,"sellname",who.name);
+        SetObjProperty(item,"seller",who.serial);
+        SetObjProperty(item,"buyer",who.serial);
+        SetObjProperty(item,"msg",bartermsg );
+        SetObjProperty(item,"bid",bid);
+        SetObjProperty(item,"starting",num1);
+        SetObjProperty(item,"time",ReadGameClock()+time);
+
+        MoveItemToContainer(item,inv_sell);
+
+	tellplayers(item.desc,num1,bartermsg,who.name);
+
+endfunction
+
+
+function tellplayers(itemname, price, msg, name)
+
+    foreach chr in EnumerateOnlineCharacters()
+    
+       if (getobjproperty(chr, "auction") == "yes")
+	 PlaySoundEffect(chr,0xEF);
+	 SendSysMessage( chr, "New item: " + itemname, FONT_NORMAL, 300 );
+	 SendSysMessage( chr, "from " + name, FONT_NORMAL, 300 );
+	 if (msg<>"<none>") SendSysMessage( chr, "msg: " + msg); endif
+	 SendSysMessage( chr, "Starting bid: " + price, FONT_NORMAL, 300);
+       endif
+    
+    endforeach
+
+endfunction
+
+
+function totalauctionitems()
+
+   var backpack := EnumerateItemsInContainer ( inv_sell );
+   var totalitems := 0;
+   var timeleft;
+
+   foreach auction_items in backpack
+
+       timeleft := (GetObjProperty(auction_items, "time")-ReadGameClock());
+    
+       if ((!timeleft) or (timeleft == ""))
+    
+       else
+	    totalitems := totalitems + 1;
+       endif
+
+   endforeach
+
+   return totalitems;
+
+endfunction
+
+
+function ownitem(bpack,item)
+
+   var backpack:=EnumerateItemsInContainer(bpack);
+
+       foreach bpitem in backpack
+    
+	    if (bpitem.serial == item.serial)
+		return 1;
+	    endif
+    
+       endforeach
+
+   return 0;
+
+endfunction

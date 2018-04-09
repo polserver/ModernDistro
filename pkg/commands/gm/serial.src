@@ -1,0 +1,13 @@
+use uo;
+use os;
+
+include "include/client";
+
+
+program serl(who)
+
+	var item := target(who);
+	SendSysMessage ( who, "Serial number is " + CInt(item.serial));
+	SendSysMessage ( who, "Serial number is " + Hex(CInt(item.serial)));
+
+endprogram

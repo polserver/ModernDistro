@@ -1,0 +1,5 @@
+std-saver (POL077)
+==================
+    Added logging and broadcasting if save fails
+    Added the saver checker, which complains if it thinks saver isn't working
+    - Syzygy <syzygy@pobox.com> 19990806

@@ -1,0 +1,13 @@
+/*
+ * $Id: endParalysis.src 373 2006-06-17 18:27:33Z austinheilman $
+ *
+ */
+ 
+use uo;
+use os;
+
+program TimedScript_EndParalysis(mobile)
+	mobile.paralyzed := 0;
+	
+	return 1;
+endprogram

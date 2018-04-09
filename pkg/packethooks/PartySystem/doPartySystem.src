@@ -1,0 +1,69 @@
+/* $Id: doPartySystem.src 749 2006-08-25 04:18:26Z tekproxy $
+ *
+ */
+
+use uo;
+use os;
+
+include ":partySystem:config";
+include ":partySystem:packetInfo";
+
+CONST OFFSET_PARTY_SERIAL := 6;
+CONST OFFSET_PARTY_MSG_PLAYERID := 6;
+CONST OFFSET_PARTY_MSG_MSG := 10;
+CONST OFFSET_PARTY_CHAT_MSG := 6;
+
+// IDs for party subsub commands
+CONST SUBSUBCMD_PARTY_ADD := 1;
+CONST SUBSUBCMD_PARTY_REMOVE := 2;
+CONST SUBSUBCMD_PARTY_MSG := 3;
+CONST SUBSUBCMD_PARTY_CHAT := 4;
+CONST SUBSUBCMD_PARTY_LOOT := 6;
+CONST SUBSUBCMD_PARTY_ACCEPT := 8;
+CONST SUBSUBCMD_PARTY_DECLINE := 9;
+
+program doPartySystem()
+	Print("INSTALLING: Party System PH...");
+	return 1;
+endprogram
+
+exported function handlePartyCommand(character, byref packet)
+	var cmd := packet.GetInt8(OFFSET_PARTY_SUBSUBCMD);
+	var param, param2;
+	
+	if ( DEBUG )
+		Print( "handlePartyCommand - character: "+character.name+"	subcmd: "+cmd+" packet: "+packet);
+	endif
+
+	case ( cmd )
+		SUBSUBCMD_PARTY_ADD:
+			Start_Script("handlePartyAdd", character);
+		SUBSUBCMD_PARTY_REMOVE:
+			param := packet.GetInt32(OFFSET_PARTY_SERIAL);
+			Start_Script("handlePartyRemove", array{character, packet.GetInt32(OFFSET_PARTY_SERIAL)});
+		SUBSUBCMD_PARTY_MSG:
+			param := packet.GetInt32(OFFSET_PARTY_MSG_PLAYERID);
+			param2 := packet.GetUnicodeString(OFFSET_PARTY_MSG_MSG, CInt(packet.GetSize() - OFFSET_PARTY_MSG_MSG) / 2);
+			Start_Script("handlePartyMessage", array{character, param, param2});
+		SUBSUBCMD_PARTY_CHAT:
+			param := packet.GetUnicodeString(OFFSET_PARTY_CHAT_MSG, CInt(packet.GetSize() - OFFSET_PARTY_CHAT_MSG) / 2);
+			Start_Script("handlePartyChat", array{character, param});
+		SUBSUBCMD_PARTY_LOOT:
+			param := packet.GetInt8(OFFSET_PARTY_SERIAL);
+			Start_Script("handlePartyLoot", array{character, param});
+		SUBSUBCMD_PARTY_ACCEPT:
+			param := packet.GetInt32(OFFSET_PARTY_SERIAL);
+			Start_Script("handlePartyAccept", array{character, param});
+		SUBSUBCMD_PARTY_DECLINE:
+			param := packet.GetInt32(OFFSET_PARTY_SERIAL);
+			Start_Script("handlePartyDecline", array{character, param});
+		default:
+			if ( DEBUG )
+				Print("handlePartyCommand: unknown command");
+				Print("Subsubcmd: "+cmd+" Packet: "+packet);
+			endif
+	endcase
+
+	// POL ignores the packet anyway, so return 1 (no further processing)
+	return 1;
+endfunction

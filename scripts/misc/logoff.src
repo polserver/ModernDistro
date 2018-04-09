@@ -1,0 +1,133 @@
+use uo;
+use util;
+use math;
+use file;
+use os;
+
+include "include/math";
+include "include/eventID";
+include ":attributes:attributes";
+include "include/clock";
+include "include/accounts";
+include ":timeutils:time";
+
+const EVID_UNEQUIP   := 0x123456;
+const EVID_DISCHARGE := 0x123457;
+
+program onlogoff(who)
+    var time_logged_in, real_life_time, time_online, dmy, month, timestring;
+  var acct := FindAccount(who.acctname);
+  acct.setprop("LastLogin", readGameclock());
+  var sessiontime := ReadGameClock() - GetObjProperty(who,"logontime");
+  var timer := GetObjProperty(who,"onlinetimer");
+  if(!timer)
+    timer := 0;
+  endif
+  SetObjProperty(who,"onlinetimer",timer+sessiontime);
+  EraseObjProperty(who,"LoggedIn");
+  RemoveMods(who);
+  var mount := GetEquipmentByLayer(who, 25 );
+  if(mount)
+    if(GetObjProperty(mount, "summoned"))
+      var ser := Cint(GetObjProperty(mount, "serial"));
+      var critter := SystemFindObjectBySerial(ser);
+      if(critter)
+        ApplyRawDamage(critter, 2000);
+      endif
+      DestroyItem(mount);
+    else
+      var animal := SystemFindObjectBySerial(CInt(GetObjProperty(mount,"serial")));
+      SetObjProperty(animal,"onhold", 1);
+    endif
+  endif
+  staffnotify(who);
+  if(Lower(who.acctname) != "yukiko" && Lower(who.acctname) != "admin")
+	  EraseObjProperty(who, "HideDev");
+  endif
+
+// Stuff from WoD for logging time online
+/*
+    set_critical (1);
+	var logon_time := GetObjProperty (who, "logontime");
+	if (!logon_time)
+		set_critical (0);
+		return;
+	endif
+	var play_time := ReadGameClock() - logon_time;
+
+	//The semi-permanent counter
+	var old_online_time := GetAccountProperty (who.acctname, "online_time");
+	if (!old_online_time)
+		old_online_time := 0;
+	endif
+
+	var total_online_time := old_online_time + play_time;
+	SetAccountProperty (who.acctname, "online_time", total_online_time);
+
+	//This months counter
+	var this_month_string := GetCurrentPlaytimeMonth ();
+	var old_monthly_play_time := GetAccountProperty (who.acctname, this_month_string);
+	if (!old_monthly_play_time)
+		old_monthly_play_time := 0;
+	endif
+
+	var total_monthly_play_time := old_monthly_play_time + play_time;
+	SetAccountProperty (who.acctname, this_month_string, total_monthly_play_time);
+	
+	//add to the server number
+	var total_monthly_string := "total_" + this_month_string;
+	var total_monthly := GetGlobalProperty (total_monthly_string);
+	if (!total_monthly)
+		total_monthly := 0;
+	endif
+	total_monthly := total_monthly + play_time;
+	SetGlobalProperty (total_monthly_string, total_monthly);
+    set_critical (0);
+*/
+    dmy := FormatTime(GetTimeStruct(GetTime()), "<DAY>-<MON>-<YY>");
+    month := FormatTime(GetTimeStruct(GetTime()), "<MON>-<YY>");
+    time_logged_in := GetObjProperty(who, "logontime");
+    real_life_time := GetObjProperty(who, "Real_Life_login_Time");
+    time_online := ReadGameClock() - CInt(time_logged_in);
+    timestring := GetTimeDesc (time_online, showseconds := 1);
+    LogToFile("::log/activity_" + month + ".log", who.name +" on account " + who.acctname + " logged on at " + real_life_time + 
+    " and was online for " + timestring);
+    EraseObjProperty(who, "Real_Life_login_Time");
+    EraseObjproperty(who, "bloodoath");
+    EraseObjproperty(who, "evilomen");
+    EraseObjproperty(who, "mindrot");
+    EraseObjproperty(who, "EnemyOfOne");
+    EraseObjProperty(who, "strangle");
+	
+endprogram
+
+function staffnotify(who)
+  var pid := 0;
+  while(!pid)
+    sleepms(50);
+    pid := GetGlobalProperty("#stafflist");
+  endwhile
+  pid := getprocess(pid);
+  if(!pid)
+    return;
+  endif
+//  if(who.concealed < 5 && !GetObjProperty(who, "HideDev"))
+	var k := struct;
+	k.+player := who;
+	k.+type  := EVID_PLAYER_LOGOFF;
+	pid.sendevent(k);
+//    endif
+endfunction
+
+function RemoveMods(who)
+  foreach item in ListEquippedItems(who)
+    var proc := GetProcess(Cint(GetObjProperty(item, "Pid")));
+    if(proc)
+      var ev := {};
+      ev.+type := EVID_UNEQUIP;
+      proc.sendevent(ev);
+    endif
+  endforeach
+  EraseObjProperty(who, "EquipTimers");
+  return;
+endfunction

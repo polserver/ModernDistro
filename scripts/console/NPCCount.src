@@ -1,0 +1,7 @@
+use uo;
+
+program npccount( cmd )
+    var npccount := polcore().mobilecount - len(EnumerateOnlineCharacters());
+
+    print( "System Message: Current # of NPCS - " + npccount );
+endprogram

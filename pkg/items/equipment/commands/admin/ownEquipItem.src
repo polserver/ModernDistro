@@ -1,0 +1,46 @@
+/*
+        Created by *Edwards
+
+        2009-08-21
+*/
+use uo;
+use util;
+
+include ":itemutils:itemUtil";
+include "include/security";
+
+program textcmd_ownEquip( mobile )
+
+        if( !AuthorizationCode( mobile ))
+                SendSysMessage( mobile, "Cancelled." );
+                return 0;
+        endif
+        
+        SendSysMessage( mobile, "Select the item you would like to set a owner." );
+        var targ := Target( mobile );
+        if( !targ )
+                SendSysMessage( mobile, "Cancelled." );
+                return 0;
+        elseif( !targ.IsA( POLCLASS_EQUIPMENT ))
+                SendSysMessage( mobile, "You must select an object that you can wear." );
+                return 0;
+        elseif( !useItem_check( mobile, targ ))
+		return 0;
+        endif
+        
+        SendSysMessage( mobile, "Select the new owner of "+targ.desc+"." );
+        var character := Target( mobile );
+        if( !character )
+                SendSysMessage( mobile, "Cancelled." );
+                return 0;
+        elseif( !character.connected )
+                SendSysMessage( mobile, "You must only select a connected character." );
+                return 0;
+        endif
+        
+        SetObjProperty( targ, "owner", character.serial );
+        
+        SendSysMessage( mobile, "Now, only "+character.name+" can wear "+targ.desc+"." );
+        
+	return 1;
+endprogram

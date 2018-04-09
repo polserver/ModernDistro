@@ -1,0 +1,12 @@
+use uo;
+use os;
+
+program textcmd_booklock(who)
+  SendSysMessage(who, "Target the book you wish to make read-only");
+  var trg := Target(who, TGTOPT_NOCHECK_LOS);
+  if(!trg)
+    SendSysMessage(who, "Cancelled");
+    return;
+  endif
+  SetObjProperty(trg, "NoWrite", 1);
+endprogram

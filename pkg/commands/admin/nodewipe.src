@@ -1,0 +1,19 @@
+use uo;
+use os;
+
+program npcwipe(who)
+  set_critical(0);
+  var x, y, z;
+  for(x:=6144; x>16; x:=x -32)
+    for(y:=16; y<4096; y:=y+32)
+      for(z:=-60; z<=60; z:=z+30)
+        foreach npc in ListItemsNearLocation(x, y, z, 32, who.realm)
+          if((npc.objtype == 0x1887b) || (npc.objtype == 0x1a401) || (npc.objtype == 0x1887A)) //  Guard node, Spawnpoint, and merch node
+            DestroyItem(npc);
+          endif
+        endforeach
+      endfor
+    endfor
+  endfor
+  SendSysMessage(who, "Finished wiping nodes");
+endprogram

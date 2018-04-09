@@ -1,0 +1,22 @@
+use attributes;
+use basic;
+use uo;
+
+include ":attributes:attributes";
+
+program test(who)
+
+var skill := GetAttribute(who, MAGERY);
+SendSysMessage(who, CStr(skill), 2, 88);
+skill := CDbl(skill);
+SendSysMessage(who, CStr(skill), 2, 88);
+skill := skill / 5;
+SendSysMessage(who, CStr(skill), 2, 88);
+skill := skill / 100;
+SendSysMessage(who, CStr(skill), 2, 88);
+SendSysMessage(who, CStr(GetVital(who, "Mana")), 2, 88);
+SendSysMessage(who, CStr(GetVitalMaximumValue(who, "Mana")), 2, 88);
+SendSysMessage(who, CStr(CInt(skill * 100)), 2, 88);
+
+
+endprogram

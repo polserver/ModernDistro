@@ -1,0 +1,40 @@
+use uo;
+
+program console_online( cmd )
+    var chrs := EnumerateOnlineCharacters();
+    var names := {};
+    foreach chr in chrs
+        names.append( chr.name );
+    endforeach
+
+    names.sort();
+
+    var msg := "System Message: " + names.size() + " Character";
+    if ( names.size() == 1 )
+        msg := msg + " is";
+    else
+        msg := msg + "s are";
+    endif
+    print( msg + " online" );
+
+    var namestr := "";
+    foreach name in names
+        var toadd := "";
+        if (namestr == "")
+            toadd := name;
+        else
+            toadd := ", " + name;
+        endif
+        if (len(namestr+toadd) < 80)     // it'll fit
+            namestr := namestr + toadd;
+        else
+            print( namestr );
+            namestr := name;
+        endif
+    endforeach
+    if (namestr != "")
+        print( namestr );
+    endif
+    
+      
+endprogram

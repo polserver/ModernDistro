@@ -1,0 +1,45 @@
+use os;
+use uo;
+use boat;
+
+include ":attributes:attributes";
+
+program textcmd_setskill( who, text )
+
+	text := SplitWords(text);
+	if( !text[1] )
+		SendSysMessage( who, "Usage is : .setskill <skillid> <level>" );
+		return 0;
+	elseif( !text[2] )
+		SendSysMessage( who, "Usage is : .setskill <skillid> <level>" );
+		return 0;
+	endif
+		
+	var skillid := Cint(text[1]);
+	if( skillid == error )
+		SendSysMessage( who, "Skillid must be a an integer." );
+		return 0;
+	endif
+	
+	var level := Cdbl(text[2]);
+	if( level == error )
+		SendSysMessage( who, "Skill level must be a floating value." );
+		return 0;
+	endif
+	
+	SendSysMessage( who, "Set skill " + skillid + " to " + level + " on who?" );
+	var mobile := Target(who);
+	if( !mobile )
+		return 0;
+	elseif( !mobile.IsA(POLCLASS_MOBILE) )
+		SendSysMessage( who, "You must target a mobile." );
+		return 0;
+	endif
+	
+	if( SetBaseSkillBaseValue( mobile, skillid, Cint(level*10.0) ) )
+		SendSysMessage( who, "New Effective Skill is " + GetTrueEffectiveSkill( mobile, skillid ) );
+	else
+		SendSysMessage( who, "Unable to set the skill." );
+	endif
+	
+endprogram

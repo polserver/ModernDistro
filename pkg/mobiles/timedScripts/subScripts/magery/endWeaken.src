@@ -1,0 +1,20 @@
+/*
+ * $Id: endWeaken.src 921 2006-12-20 23:27:45Z tekproxy $
+ *
+ */
+ 
+use uo;
+use os;
+
+include ":attributes:attributes";
+
+program TimedScript_EndWeaken(params)
+	var mobile := params[1];
+
+	var points := CInt(GetObjProperty(mobile, "WeakenMod"));	
+	AP_ModifyStatMod(mobile, STRENGTH, points);
+	EraseObjProperty(mobile, "WeakenMod");
+	
+	return 1;
+endprogram
+

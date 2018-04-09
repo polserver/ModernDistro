@@ -1,0 +1,47 @@
+/*
+        Maintened by *Edwards
+
+        2009-08-29
+*/
+use uo;
+use os;
+
+include ":keys:key";
+include ":itemutils:itemUtil";
+
+program UseKeyRing( who, keyring )
+
+	SendSysMessage( who, "What do you want to use that on?" );
+	
+	var targ := Target( who );
+        if( !targ )
+                SendSysMessage( who, "Cancelled." );
+                return 0;
+        elseif( !useItem_check( who, keyring, ITEM_INCONTAINER ))
+		return 0;
+	elseif( targ == keyring )
+		RemoveKeys( who, keyring );
+		return 1;
+	elseif( !KP_IsLockable( targ ))
+		SendSysMessage( who, "That is not lockable." );
+		return 0;
+	endif
+
+	if( KP_HasKeyForLock( keyring, targ ))
+		KP_ToggleLock( targ, who );
+	else
+		SendSysMessage( who, "You do not have a key for that lock." );
+	endif
+ 
+        return 1;
+endprogram
+
+function RemoveKeys( who, keyring )
+	
+	foreach item in ( EnumerateItemsInContainer( keyring ))
+		MoveItemToContainer( item, who.backpack );
+		SleepMS(2);
+	endforeach
+	
+	return 1;
+endfunction

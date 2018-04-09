@@ -1,0 +1,26 @@
+use os;
+use uo;
+
+program talk( who )
+
+	SendSysMessage( who, "Say above what or whom?" );
+
+	var what := Target( who, TGTOPT_NOCHECK_LOS );
+	if (!what)
+		SendSysMessage( who, "Canceled" );
+		return;
+	endif	
+
+	SendSysMessage( who, "Hit ESCAPE to stop" );
+
+	var text;
+	repeat
+		text := RequestInput(who, who.backpack, "");
+		if (text)
+			PrintTextAbove( what, text );
+		endif
+	until ( (!who) or (!what) or (!text) );
+
+	SendSysMessage(who,"Done!");
+
+endprogram

@@ -1,0 +1,280 @@
+use cfgfile;
+use uo;
+use os;
+use util;
+include "include/client";
+include ":attributes:attributes";
+include "include/string";
+include "include/objtype";
+include "include/canAccess";
+include "include/dist";
+include "include/toolWear";
+include "include/noto";
+include "include/crafting";
+include ":gumps:requestGump";
+
+
+program use_blade(who, blade)
+  var craftingbag := FindCraftingbag (who);
+  
+  EraseObjProperty(who, "IsMeditating");
+  EraseObjProperty(who, "HealTimer");
+  if(!can_access(who, blade))
+    return;
+  endif
+  if(!ReserveItem(blade))
+    return;
+  endif
+  SendSysMessage(who, "What would you like to use that on, " + who.name + "?");
+  var use_on := TargetCoordinates(who);
+  if(!use_on)
+    return;
+  endif
+  if(use_on.item)
+    if(!can_access(who, use_on.item, "unmovable"))
+      return;
+    endif
+  endif
+  var checkme := use_on.item.objtype;
+  if (use_on.mobile.graphic == CID_SHEERED_SHEEP)
+          SendSysMessage(who, "You cannot get any more wool from that sheep", color := 33);
+          return 0;
+  elseif (use_on.mobile.graphic == CID_SHEEP)
+          process_wool(who, blade, use_on.mobile, craftingbag);
+  elseif(use_on.item.objtype == UOBJ_CORPSE)
+    ReleaseItem(blade);
+    Carve_Corpse(who, use_on.item, craftingbag);
+  elseif(is_fish(checkme))
+    CarveFish(who, blade, use_on.item, craftingbag);
+  elseif (is_tree(use_on.objtype ))
+    CarveTree(who, blade, use_on.item, craftingbag);
+  else
+    SendSysMessage(who, "I don't know how to use those items together.");
+  endif
+endprogram
+
+function process_wool(who, blade, sheep, craftingbag)
+  blade := blade;
+  if((!CheckLineOfSight(who, sheep)) or (dist(who, sheep) > 2))
+    SendSysMessage(who, "That sheep is too far away!", color := 33);
+    return 0;
+  endif
+  if(sheep.graphic == 207)
+    sheep.graphic := 223;
+    CreateItemInContainer(craftingbag, 0xdf8, 3);
+  endif
+  CheckToolWear (who, blade, TAILORING);
+endfunction
+
+function is_tree(theobj)
+  if((theobj == 0x0c9e) || (theobj == 0x0ca8) || (theobj == 0x0caa))
+    return 1;
+  elseif (theobj == 0x0cab)
+    return 1;
+  elseif ((theobj >= 0x0c99) && (theobj <= 0x0cea))
+    return 1;
+  elseif ((theobj >= 0x0cf3) && (theobj <= 0x0d03))
+    return 1;
+  elseif ((theobj >= 0x0d41) && (theobj <= 0x0dab))
+    return 1;
+  else
+    return 0;
+  endif
+endfunction
+
+function is_fish(theobj)
+  if((theobj >= UOBJ_FISH_START) && (theobj <= UOBJ_FISH_END) )
+    return 1;
+  elseif ((theobj >= UOBJ_SFISH_START) && (theobj <= UOBJ_SFISH_END))
+    return 1;
+  else
+    return 0;
+  endif
+endfunction
+
+function CarveTree(who, blade, use_on, craftingbag)
+  blade := blade;
+  if(dist(who, use_on) > 2)
+    SendSysMessage(who, "You cannot use that");
+    return;
+  endif
+  CreateItemInContainer(craftingbag, UOBJ_KINDLING, 1);
+  DestroyItem(use_on);
+  SendSysMessage(who, "You chip off some kindling and put it in your backpack");
+  CheckToolWear (who, blade, CAMPING);
+endfunction
+
+function CarveFish(who, blade, use_on, craftingbag)
+  blade := blade;
+  if((!Accessible(who, use_on)) or (!CheckLineOfSight(who, use_on)) or (dist(who, use_on) > 2))
+    SendSysMessage(who, "You cannot use that");
+    return 0;
+  endif
+  if((!ReserveItem(use_on)) || (use_on.movable == 0))
+    SendSysMessage(who, "You cannot use that.");
+    return 0;
+  endif
+  var num_steaks := (4 * use_on.amount);
+  PlaySoundEffect(who, SFX_57);
+  if(DestroyItem(use_on))
+    CreateItemInContainer(craftingbag, UOBJ_FISHSTEAK, num_steaks);
+    SendSysMessage(who, "You carve the fish steaks and put them in your backpack");
+    CheckToolWear (who, blade, COOKING);
+  endif
+  sleep(1);
+endfunction
+
+function CreatableObjects( who, blade, logs )
+  var objtypes := GetMenuObjTypes( "BowcraftCarving" );
+  objtypes := ApplyConstraint( objtypes, bowcraftconfigfile, "material", GetAmount(logs) );
+  return objtypes;
+endfunction
+
+function Carve_Corpse(who, cadaver, craftingbag)
+  craftingbag := craftingbag;
+  Detach();
+  if((!Accessible(who, cadaver)) or (!CheckLineOfSight(who, cadaver)))
+    SendSysMessage(who, "You cannot use that");
+    return;
+  endif
+  if(Distance(who, cadaver) > 2)
+    SendSysMessage(who, "You are not close enough");
+    return;
+  endif
+  var c_type := cadaver.corpsetype;
+  if(GetObjProperty(cadaver, "cut") == "1")
+    SendSysMessage( who, "You cannot get any more from this corpse." );
+    foreach thing in EnumerateItemsInContainer(cadaver)
+      MoveObjectToLocation(thing, cadaver.x, cadaver.y, cadaver.z, cadaver.realm, MOVEOBJECT_FORCELOCATION);
+    endforeach
+    DestroyItem(cadaver);
+  elseif((c_type == 400) || (c_type == 401))
+    var beardlist := {0x203e, 0x203f, 0x2040, 0x2041, 0x204b, 0x204c, 0x204d };
+    var hairlist  := {0x2044, 0x2045, 0x2046, 0x2047, 0x2048, 0x2049, 0x204a, 0x203b, 0x203c, 0x203d };
+    foreach thing in EnumerateItemsInContainer(cadaver)
+      if((thing.objtype in hairlist) or (thing.objtype in beardlist))
+        DestroyItem(thing);
+      else
+        MoveObjectToLocation(thing, cadaver.x, cadaver.y, cadaver.z, cadaver.realm, MOVEOBJECT_FORCELOCATION);
+      endif
+    endforeach
+    var partsarray := {};
+    var part;
+    part := CreateItemAtLocation(cadaver.x-1, cadaver.y, cadaver.z, 0x1da0, 1, who.realm);
+    partsarray.append(part);
+    SetObjProperty(part, "serial", GetObjProperty(cadaver, "serial"));
+    var aname := cadaver.name;
+    aname["A corpse of"] := "";
+    part.name := "The head of " + aname;
+    part := CreateItemAtLocation(cadaver.x-1, cadaver.y, cadaver.z, 0x1da1, 1, who.realm);
+    partsarray.append(part);
+    part := CreateItemAtLocation(cadaver.x-1, cadaver.y+1, cadaver.z, 0x1da2, 1, who.realm);
+    partsarray.append(part);
+    part := CreateItemAtLocation(cadaver.x+1, cadaver.y, cadaver.z, 0x1da3, 1, who.realm);
+    partsarray.append(part);
+    part := CreateItemAtLocation(cadaver.x+1, cadaver.y+1, cadaver.z, 0x1da4, 1, who.realm);
+    partsarray.append(part);
+    part := CreateItemAtLocation(cadaver.x, cadaver.y, cadaver.z, 0x1d9f, 1, who.realm);
+    partsarray.append(part);
+    var blood := CreateItemAtLocation(cadaver.x, cadaver.y, cadaver.z, 0x122a, 1, who.realm);
+    blood.movable := 0;
+    DestroyItem(cadaver);
+    sleep(40);
+    foreach thing in partsarray
+      if(!thing.container)
+        DestroyItem(thing);
+      endif
+    endforeach
+    sleep(20);
+    DestroyItem(blood);
+  else
+    if(c_type == 223)
+      CreateItemInContainer(cadaver, 0x9f1, 2);
+      SendSysMessage(who, "You place the items on the corpse.");
+      var theblood := CreateItemAtLocation(cadaver.x, cadaver.y, cadaver.z, UOBJ_BLOOD, 1, who.realm);
+      sleep(120);
+      DestroyItem(cadaver);
+      sleep(30);
+      DestroyItem(theblood);
+      return;
+    endif
+    var conf := ReadConfigFile(":*:npcdesc");
+    var tmplate := GetObjProperty(cadaver, "npctemplate");
+    if(!tmplate)
+      SendSysMessage(who, "You cut the corpse, but fail to find anything useful.", 3, 40);
+      var theblood := CreateItemAtLocation(cadaver.x, cadaver.y, cadaver.z, UOBJ_BLOOD, 1, who.realm);
+      sleep(30);
+      DestroyItem(cadaver);
+      sleep(30);
+      DestroyItem(theblood);
+      return;
+    else
+      SetObjProperty(cadaver, "cut","1");
+      var corpseitm := conf[tmplate]."corpseitm";
+      var corpseamt := conf[tmplate]."corpseamt";
+      print("I: " + corpseitm);
+      print("A: " + corpseamt);
+      if(!corpseitm)
+        print("error");
+        var theblood := CreateItemAtLocation(cadaver.x, cadaver.y, cadaver.z, UOBJ_BLOOD, 1, who.realm);
+        sleep(120);
+        DestroyItem(cadaver);
+        sleep(30);
+        DestroyItem(theblood);
+        return;
+      endif
+      var i := 1;
+      corpseitm := SplitWords(corpseitm);
+      corpseamt := SplitWords(corpseamt);
+      foreach thing in corpseitm
+        CreateItemInContainer(cadaver, thing, Cint(corpseamt[i]));
+        i := i + 1;
+      endforeach
+      SendSysMessage(who, "You place the items on the corpse.");
+      var theblood := CreateItemAtLocation(cadaver.x, cadaver.y, cadaver.z, UOBJ_BLOOD, 1, who.realm);
+      sleep(120);
+      DestroyItem(cadaver);
+      sleep(30);
+      DestroyItem(theblood);
+    endif
+  endif
+endfunction
+
+function MakeWizardWeed(who, weed)
+
+	SubtractAmount(weed, 1);
+	SendSysMessage(who, "Select paper.");
+	var paper := target(who);
+	if (paper.objtype != 0xe34)
+		SendSysMessage(who, "Aborted.");
+		return 0;
+	endif
+
+	SubtractAmount(paper, 1);
+	var stuff := CreateItemInContainer(craftingbag, 0xec1, 1);
+	stuff.color := 935;
+	stuff.usescript := ":apothecary:smoke";
+	stuff.name := "a roll of Wizard Weed";
+
+endfunction
+
+
+function make_jack_o_latern(who, blade, pumpkin)
+    if((!CheckLineOfSight(who, pumpkin)) or (distance(who, pumpkin) > 2))
+     SendSysMessage(who, "The pumpkin is either not close enough or is not within line of sight.");
+     return;
+   endif
+    if(pumpkin.graphic == 3178 || 3179)
+     SubtractAmount(pumpkin, 1);
+     var jol := CreateItemInContainer(craftingbag, 6228, 1);
+	if (jol)
+	     SendSysMessage(who, "You successfully create the Jack o' Lantern and put it in your pack.");
+	     SendSysMessage(who, "Have a happy Halloween!");
+		jol.color := 244;
+		SetName(jol, "a Jack o' Lantern");
+	endif
+   else
+     SendSysMessage(who,"That ain't no pumpkin.");
+   endif
+ endfunction
+ 

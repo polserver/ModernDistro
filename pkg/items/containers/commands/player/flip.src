@@ -1,0 +1,939 @@
+use uo;
+use basic;
+use cfgfile;
+
+program flip (who)
+    SendSysMessage(who, "Select the furniture you wish to re-orient.");
+    var targetfurniture := Target(who);
+
+    if (!targetfurniture.objtype)
+          SendSysMessage(who, "You must select an item!");
+          return;
+    endif
+
+    if (targetfurniture.movable == 0)
+          SendSysMessage(who, "That item is locked down.");
+          return;
+    endif
+
+    case (targetfurniture.graphic)
+        0xa97:
+            targetfurniture.graphic := 0xa9a;   // bookshelves
+        0xa9a:
+            targetfurniture.graphic := 0xa97;
+        6870:
+            targetfurniture.graphic := 6871;
+        6871:
+            targetfurniture.graphic := 6870;
+        0xa98:
+            targetfurniture.graphic := 0xa99;
+        0xa99:
+            targetfurniture.graphic := 0xa98;
+        0xa9b:
+            targetfurniture.graphic := 0xa9c;
+        0xa9c:
+            targetfurniture.graphic := 0xa9b;
+        0xa9d:
+            targetfurniture.graphic := 0xa9e;
+        0xa9e:
+            targetfurniture.graphic := 0xa9d;
+        0xe3c:
+            targetfurniture.graphic := 0xe3d;   // Large crate
+        0xe3d:
+            targetfurniture.graphic := 0xe3c;
+        0xe3e:
+            targetfurniture.graphic := 0xe3f;   // Medium crate
+        0xe3f:
+            targetfurniture.graphic := 0xe3e;
+        0x9a9:
+            targetfurniture.graphic := 0xe7e;   // Small crate
+        0xe7e:
+            targetfurniture.graphic := 0x9a9;
+        0x9a8:
+            targetfurniture.graphic := 0xe80;   // Metal box
+        0xe80:
+            targetfurniture.graphic := 0x9a8;
+        0x9aa:
+            targetfurniture.graphic := 0xe7d;   // Wooden box
+        0xe7d:
+            targetfurniture.graphic := 0x9aa;
+        0x9ab:
+            targetfurniture.graphic := 0xe7c;   // Metal chest, plain
+        0xe7c:
+            targetfurniture.graphic := 0x9ab;
+        0xe40:
+            targetfurniture.graphic := 0xe41;   // Metal chest, gold lining
+        0xe41:
+            targetfurniture.graphic := 0xe40;
+        0xe42:
+            targetfurniture.graphic := 0xe43;   // Wooden chest
+        0xe43:
+            targetfurniture.graphic := 0xe42;
+        0x9b2:
+            targetfurniture.graphic := 0xe75;   // Backpack
+        0xe75:
+            targetfurniture.graphic := 0x9b2;
+        0x9b0:
+            targetfurniture.graphic := 0xe79;   // Beltpouch
+        0xe79:
+            targetfurniture.graphic := 0x9b0;
+        0xb7d:
+            targetfurniture.graphic := 0xb90;   // Plank table
+        0xb90:
+            targetfurniture.graphic := 0xb7d;
+        0xb7c:
+            targetfurniture.graphic := 0xb8f;   // fancy table
+        0xb8f:
+            targetfurniture.graphic := 0xb7c;
+        0xb2c:
+            targetfurniture.graphic := 0xb2d;   // Bench
+        0xb2d:
+            targetfurniture.graphic := 0xb2c;
+        0xb5b:
+            targetfurniture.graphic := 0xb5a;   // Poor chair
+        0xb5a:
+            targetfurniture.graphic := 0xb5c;
+        0xb5c:
+            targetfurniture.graphic := 0xb5d;
+        0xb5d:
+            targetfurniture.graphic := 0xb5b;
+        0xb57:
+            targetfurniture.graphic := 0xb56;   // Chair
+        0xb56:
+            targetfurniture.graphic := 0xb58;
+        0xb58:
+            targetfurniture.graphic := 0xb59;
+        0xb59:
+            targetfurniture.graphic := 0xb57;
+        0xb4f:
+            targetfurniture.graphic := 0xb4e;   // Fancy Chair
+        0xb4e:
+            targetfurniture.graphic := 0xb50;
+        0xb50:
+            targetfurniture.graphic := 0xb51;
+        0xb51:
+            targetfurniture.graphic := 0xb4f;
+        0xb2e:
+            targetfurniture.graphic := 0xb2f;   // Throne
+        0xb2f:
+            targetfurniture.graphic := 0xb30;
+        0xb30:
+            targetfurniture.graphic := 0xb31;
+        0xb31:
+            targetfurniture.graphic := 0xb2e;
+        0xb32:
+            targetfurniture.graphic := 0xb33;   // Magician's Throne
+        0xb33:
+            targetfurniture.graphic := 0xb32;
+        0xa4f:
+            targetfurniture.graphic := 0xa53;  // Armoire
+        0xa53:
+            targetfurniture.graphic := 0xa4f;
+        0xa4d:
+            targetfurniture.graphic := 0xa51;  // Cherry wood armoire
+        0xa51:
+            targetfurniture.graphic := 0xa4d;
+        0xa2c:
+            targetfurniture.graphic := 0xa34;  // Dressor
+        0xa34:
+            targetfurniture.graphic := 0xa2c;
+        0xa30:
+            targetfurniture.graphic := 0xa38;  // Dressor, bright handles
+        0xa38:
+            targetfurniture.graphic := 0xa30;
+        0xec6:
+            targetfurniture.graphic := 0xec7;  // Dress form
+        0xec7:
+            targetfurniture.graphic := 0xec6;
+        0x1E5E:
+            targetfurniture.graphic := 0x1E5F;  // Dress form
+        0x1E5F:
+            targetfurniture.graphic := 0x1E5E;
+0x0459:
+ targetfurniture.graphic :=  0x045a;
+
+0x045a:
+	 targetfurniture.graphic :=  0x0459;
+
+0x045b:
+	
+	 targetfurniture.graphic :=  0x045c;
+
+  0x045c:
+
+	 targetfurniture.graphic :=  0x045b;
+
+  0x09bd:
+
+	 targetfurniture.graphic :=  0x09d4;
+
+  0x09be:
+
+	 targetfurniture.graphic :=  0x09bd;
+
+  0x09d4:
+
+	 targetfurniture.graphic :=  0x09d5;
+
+  0x09d5:
+
+	 targetfurniture.graphic :=  0x09be;
+
+  0x0A2C:
+
+	 targetfurniture.graphic :=  0x0A34;
+
+  0x0A30:
+
+	 targetfurniture.graphic :=  0x0A38;
+
+  0x0A34:
+
+	 targetfurniture.graphic :=  0x0A2C;
+
+  0x0A38:
+
+	 targetfurniture.graphic :=  0x0A30;
+
+  0x0A4D:
+	 targetfurniture.graphic :=  0x0A51;
+
+  0x0A4F:
+	//armoire
+	 targetfurniture.graphic :=  0x0A53;
+
+  0x0A51:
+	//armoire
+	 targetfurniture.graphic :=  0x0A4D;
+
+  0x0A53:
+	//armoire
+	 targetfurniture.graphic :=  0x0A4F;
+
+  0x0A97:
+	//bookshelf
+	 targetfurniture.graphic :=  0x0A98;
+
+  0x0A98:
+	//bookshelf
+	 targetfurniture.graphic :=  0x0A9B;
+
+  0x0A9B:
+	//bookshelf
+	 targetfurniture.graphic :=  0x0A99;
+
+  0x0A99:
+	//bookshelf
+	 targetfurniture.graphic :=  0x0A9A;
+
+  0x0A9A:
+	//bookshelf
+	 targetfurniture.graphic :=  0x0A9C;
+
+  0x0A9C:
+	//bookshelf
+	 targetfurniture.graphic :=  0x0A97;
+
+  0x0B2C:
+	//wooden bench
+	 targetfurniture.graphic :=  0x0B2D;
+
+  0x0B2D:
+	//wooden bench
+	 targetfurniture.graphic :=  0x0B2C;
+
+  0X0b2e:
+	//wooden chair
+	 targetfurniture.graphic :=  0X0b2f;
+
+  0X0b2f:
+	//wooden chair
+	 targetfurniture.graphic :=  0X0b31;
+
+  0X0b30:
+	//wooden chair
+	 targetfurniture.graphic :=  0X0b2e;
+
+  0X0b31:
+	//wooden chair
+	 targetfurniture.graphic :=  0X0b30;
+
+  0x0B32:
+	//throne
+	 targetfurniture.graphic :=  0x0B33;
+
+  0x0B33:
+	//throne
+	 targetfurniture.graphic :=  0x0B32;
+
+  0X0b34:
+	//small table
+	 targetfurniture.graphic :=  0X0b36;
+
+  0X0b35:
+	//small table
+	 targetfurniture.graphic :=  0X0b34;
+
+  0X0b36:
+	//small table
+	 targetfurniture.graphic :=  0X0b3C;
+
+  0X0b3C:
+	//small table
+	 targetfurniture.graphic :=  0X0b35;
+
+  0X0b3f:
+	//counter
+	 targetfurniture.graphic :=  0X0b40;
+
+  0X0b40:
+	//counter
+	 targetfurniture.graphic :=  0X0b3f;
+
+  0x0b49:
+	//writing desk
+	 targetfurniture.graphic :=  0x0b4b;
+
+  0x0b4a:
+	//writing desk
+	 targetfurniture.graphic :=  0x0b49;
+
+  0x0b4b:
+	//writing desk
+	 targetfurniture.graphic :=  0x0b4c;
+
+  0x0b4c:
+	//writing desk
+	 targetfurniture.graphic :=  0x0b4a;
+  0x0B4E:
+	//fancy chair
+	 targetfurniture.graphic :=  0x0B4F;
+
+  0x0B4F:
+	//fancy chair	 
+targetfurniture.graphic :=  0x0B51;
+
+  0x0B50:
+	//fancy chair
+	 targetfurniture.graphic :=  0x0B4E;
+
+  0x0B51:
+	//fancy chair
+	 targetfurniture.graphic :=  0x0B50;
+
+  0x0B52:
+	//cushioned chair
+	 targetfurniture.graphic :=  0x0B53;
+
+  0x0B53:
+	//cushioned chair
+	 targetfurniture.graphic :=  0x0B55;
+
+  0x0B54:
+	//cushioned chair
+	 targetfurniture.graphic :=  0x0B52;
+
+  0x0B55:
+	//cushioned chair
+	 targetfurniture.graphic :=  0x0B54;
+
+  0x0B56:
+	//plain wooden chair
+	 targetfurniture.graphic :=  0x0B57;
+
+  0x0B57:
+	//plain wooden chair
+	 targetfurniture.graphic :=  0x0B58;
+
+  0x0B58:
+	//plain wooden chair
+	 targetfurniture.graphic :=  0x0B59;
+
+  0x0B59:
+	//plain wooden chair
+	 targetfurniture.graphic :=  0x0B56;
+
+  0x0B5A:
+	//simple chair
+	 targetfurniture.graphic :=  0x0B5B;
+
+  0x0B5B:
+	//simple chair
+	 targetfurniture.graphic :=  0x0B5D;
+
+  0x0B5C:
+	//simple chair
+	 targetfurniture.graphic :=  0x0B5A;
+
+  0x0B5D:
+	//simple chair
+	 targetfurniture.graphic :=  0x0B5C;
+
+  0x0B7D:
+	//table
+	 targetfurniture.graphic :=  0x0B90;
+
+  0x0B7C:
+	//table
+	 targetfurniture.graphic :=  0x0B8F;
+
+  0x0B8F:
+	//table
+	 targetfurniture.graphic :=  0x0B7C;
+
+  0x0B90:
+	//table
+	 targetfurniture.graphic :=  0x0B7D;
+
+  0x0E40:
+	//metal chest
+	 targetfurniture.graphic :=  0x0E41;
+
+  0x0E41:
+	//metal chest
+	 targetfurniture.graphic :=  0x0E40;
+
+  0x0E42:
+	//wooden chest
+	 targetfurniture.graphic :=  0x0E43;
+
+  0x0E43:
+	//wooden chest
+	 targetfurniture.graphic :=  0x0E42;
+
+  0x0EE3:
+	//spider web
+	 targetfurniture.graphic :=  0x0EE4;
+
+  0x0EE4:
+	//spider web
+	 targetfurniture.graphic :=  0x0EE3;
+
+  0x0F65:
+	//easel
+	 targetfurniture.graphic :=  0x0F67;
+
+  0x0F66:
+	//easel
+	 targetfurniture.graphic :=  0x0F68;
+
+  0x0F67:
+	//easel
+	 targetfurniture.graphic :=  0x0F69;
+
+  0x0F68:
+	//easel
+	 targetfurniture.graphic :=  0x0F6A;
+
+  0x0F69:
+	//easel
+	 targetfurniture.graphic :=  0x0F65;
+
+  0x0F6A:
+	//easel
+	 targetfurniture.graphic :=  0x0F66;
+
+  0x100a:
+	//archery butte
+	 targetfurniture.graphic :=  0x100b;
+
+  0x100b:
+	//archery butte
+	 targetfurniture.graphic :=  0x100a;
+
+  0x1069:
+	//stretched hide
+	 targetfurniture.graphic :=  0x107A;
+
+  0x106A:
+	//stretched hide
+	 targetfurniture.graphic :=  0x107B;
+
+  0x106B:
+	//stretched hide
+	 targetfurniture.graphic :=  0x107C;
+  0x107A:
+	//stretched hide
+	 targetfurniture.graphic :=  0x1069;
+
+  0x107B:
+	//stretched hide
+	 targetfurniture.graphic :=  0x106A;
+
+  0x107C:
+	//stretched hide
+	 targetfurniture.graphic :=  0x106B;
+
+  0x10FC:
+	//stone face
+	 targetfurniture.graphic :=  0x110F;
+
+  0x110F:
+	//stone face
+	 targetfurniture.graphic :=  0x10FC;
+
+  0x1218:
+	//stone chairs
+	 targetfurniture.graphic :=  0x1219;
+
+  0x1219:
+	//stone chairs
+	 targetfurniture.graphic :=  0x121A;
+
+  0x121A:
+	//stone chairs
+	 targetfurniture.graphic :=  0x121B;
+
+  0x121B:
+	//stone chairs
+	 targetfurniture.graphic :=  0x1218;
+
+  0x12CA:
+	//bust
+	 targetfurniture.graphic :=  0x12CB;
+
+  0x12CB:
+	//bust
+	 targetfurniture.graphic :=  0x12CA;
+
+  0x12DB:
+	//curtains
+	 targetfurniture.graphic :=  0x12DF;
+
+  0x12DD:
+	//curtains
+	 targetfurniture.graphic :=  0x12DF;
+
+  0x12DF:
+	//curtains
+	 targetfurniture.graphic :=  0x12E6;
+
+  0x12E1:
+	//curtains
+	 targetfurniture.graphic :=  0x12E6;
+
+  0x12E6:
+	//curtains
+	 targetfurniture.graphic :=  0x12EA;
+
+  0x12E8:
+	//curtains
+	 targetfurniture.graphic :=  0x12EA;
+
+  0x12EA:
+	//curtains
+	 targetfurniture.graphic :=  0x12E2;
+
+  0x12EC:
+	//curtains
+	 targetfurniture.graphic :=  0x12E2;
+
+  0x12E2:	//curtains
+	 targetfurniture.graphic :=  0x12ED;
+
+  0x12ED:
+	//curtains
+	 targetfurniture.graphic :=  0x12DB;
+
+  0x1508:	//Decorative Armor
+	 targetfurniture.graphic :=  0x151c;
+
+  0x1512:
+	//Decorative Armor
+	 targetfurniture.graphic :=  0x151a;
+
+  0x151a:
+	//Decorative Armor
+	 targetfurniture.graphic :=  0x1512;
+
+  0x151c:
+	//Decorative Armor
+	 targetfurniture.graphic :=  0x1508;
+
+  0x155C:
+	//decorative bow and arrows
+	 targetfurniture.graphic :=  0x155D;
+
+  0x155D:
+	//decorative bow and arrows
+	 targetfurniture.graphic :=  0x155E;
+
+  0x155E:
+	//decorative bow and arrows
+	 targetfurniture.graphic :=  0x155F;
+
+  0x155F:
+	//decorative bow and arrows
+	 targetfurniture.graphic :=  0x155C;
+
+  0x1560:
+	//decorative axe
+	 targetfurniture.graphic :=  0x1561;
+
+  0x1561:
+	//decorative axe
+	 targetfurniture.graphic :=  0x1562;
+
+  0x1562:
+	//decorative axe
+	 targetfurniture.graphic :=  0x1563;
+
+  0x1563:
+	//decorative axe
+	 targetfurniture.graphic :=  0x1560;
+
+  0x1569:
+	//decorative axe and spears
+	 targetfurniture.graphic :=  0x156A;
+
+  0x156A:
+	//decorative axe and spears
+	 targetfurniture.graphic :=  0x1569;
+
+  0x156C:
+	//decorative shield
+	 targetfurniture.graphic :=  0x156D;
+
+  0x156D:
+	//decorative shield
+	 targetfurniture.graphic :=  0x156C;
+
+  0x156E:
+	//decorative shield
+	 targetfurniture.graphic :=  0x156F;
+
+  0x156F:
+	//decorative shield
+	 targetfurniture.graphic :=  0x156E;
+
+  0x1570:
+	//decorative shield
+	 targetfurniture.graphic :=  0x1571;
+
+  0x1571:
+	//decorative shield
+	 targetfurniture.graphic :=  0x1570;
+
+  0x1572:
+	//decorative shield
+	 targetfurniture.graphic :=  0x1573;
+
+  0x1573:
+	//decorative shield
+	 targetfurniture.graphic :=  0x1572;
+
+  0x1574:
+	//decorative shield
+	 targetfurniture.graphic :=  0x1575;
+
+  0x1575:
+	//decorative shield
+	 targetfurniture.graphic :=  0x1574;
+
+  0x1576:
+	//decorative shield
+	 targetfurniture.graphic :=  0x1577;
+
+  0x1577:
+	//decorative shield
+	 targetfurniture.graphic :=  0x1576;
+
+  0x1578:
+	//decorative shield
+	 targetfurniture.graphic :=  0x1579;
+
+  0x1579:
+	//decorative shield
+	 targetfurniture.graphic :=  0x1578;
+
+  0x157A:
+	//decorative shield
+	 targetfurniture.graphic :=  0x157B;
+
+  0x157B:
+	//decorative shield
+	 targetfurniture.graphic :=  0x157A;
+
+  0x157C:
+	//decorative shield
+	 targetfurniture.graphic :=  0x157D;
+
+  0x157D:
+	//decorative shield
+	 targetfurniture.graphic :=  0x157C;
+
+  0x157E:
+	//decorative shield
+	 targetfurniture.graphic :=  0x157F;
+
+  0x157F:
+	//decorative shield
+	 targetfurniture.graphic :=  0x157E;
+
+  0x1580:
+	//decorative shield
+	 targetfurniture.graphic :=  0x1581;
+
+  0x1581:
+	//decorative shield
+	 targetfurniture.graphic :=  0x1580;
+
+  0x1851:
+	//scales
+	 targetfurniture.graphic :=  0x1852;
+
+  0x1852:
+	//scales
+	 targetfurniture.graphic :=  0x1851;
+
+  0x1871:
+	//beef carcass
+	 targetfurniture.graphic :=  0x1872;
+
+  0x1872:
+	//beef carcass
+	 targetfurniture.graphic :=  0x1871;
+
+  0x1873:
+	//sheep carcass
+	 targetfurniture.graphic :=  0x1874;
+
+  0x1874:
+	//sheep carcass
+	 targetfurniture.graphic :=  0x1873;
+
+  0x1e34:
+	//scarecrow
+	 targetfurniture.graphic :=  0x1e35;
+
+  0x1e35:
+	//scarecrow
+	 targetfurniture.graphic :=  0x1e34;
+
+  0x1E60:
+	//brown bear head
+	 targetfurniture.graphic :=  0x1E67;
+
+  0x1E61:
+	//deer head
+	 targetfurniture.graphic :=  0x1E68;
+
+  0x1E62:
+	//fish trophy
+	 targetfurniture.graphic :=  0x1E69;
+
+  0x1E63:
+	//gorilla trophy
+	 targetfurniture.graphic :=  0x1E6A;
+
+  0x1E64:
+	//orc head
+	 targetfurniture.graphic :=  0x1E6B;
+
+  0x1E65:
+	//white bear head
+	 targetfurniture.graphic :=  0x1E6C;
+
+  0x1E66:
+	//troll head
+	 targetfurniture.graphic :=  0x1E6D;
+
+  0x1E67:
+	//brown bear head
+	 targetfurniture.graphic :=  0x1E60;
+
+  0x1E68:
+	//deer head
+	 targetfurniture.graphic :=  0x1E61;
+
+  0x1E69:
+	//fish trophy
+	 targetfurniture.graphic :=  0x1E62;
+
+  0x1E6A:
+	//gorilla trophy
+	 targetfurniture.graphic :=  0x1E63;
+
+  0x1E6B:
+	//orc head
+	 targetfurniture.graphic :=  0x1E64;
+
+  0x1E6C:
+	//white bear head
+	 targetfurniture.graphic :=  0x1E65;
+
+  0x1E6D:
+	//troll head
+	 targetfurniture.graphic :=  0x1E66;
+
+  0x278b:
+	//stocking
+	 targetfurniture.graphic :=  0x278c;
+
+  0x278c:
+	//stocking
+	 targetfurniture.graphic :=  0x278b;
+
+  0x2850:
+	//jack-o-lantern
+	 targetfurniture.graphic :=  0x2854;
+  0x2854:
+	//jack-o-lantern
+	 targetfurniture.graphic :=  0x2850;
+
+  0x2851:
+	//jack-o-lantern
+	 targetfurniture.graphic :=  0x2855;
+
+  0x2855:
+	//jack-o-lantern
+	 targetfurniture.graphic :=  0x2851;
+
+  0x2866:
+	//broom
+	 targetfurniture.graphic :=  0x2867;
+
+  0x2867:
+	//broom
+	 targetfurniture.graphic :=  0x2866;
+
+  0x2882:
+	//ghost cutout
+	 targetfurniture.graphic :=  0x2883;
+
+  0x2883:
+	//ghost cutout
+	 targetfurniture.graphic :=  0x2882;
+
+  0x28A0:
+	//wine rack
+	 targetfurniture.graphic :=  0x28A1;
+
+  0x28A1:
+	//wine rack
+	 targetfurniture.graphic :=  0x28A2;
+
+  0x28A2:
+	//wine rack
+	 targetfurniture.graphic :=  0x28A3;
+
+  0x28A3:
+	//wine rack
+	 targetfurniture.graphic :=  0x28A4;
+
+  0x28A4:
+	//wine rack
+	 targetfurniture.graphic :=  0x28A5;
+
+  0x28A5:
+	//wine rack
+	 targetfurniture.graphic :=  0x28A6;
+
+  0x28A6:
+	//wine rack
+	 targetfurniture.graphic :=  0x28A7;
+
+  0x28A7:
+	//wine rack
+	 targetfurniture.graphic :=  0x28A8;
+
+  0x28A8:
+	//wine rack
+	 targetfurniture.graphic :=  0x28A9;
+
+  0x28A9:
+	//wine rack
+	 targetfurniture.graphic :=  0x28A0;
+
+  0x2968:
+	//painting
+	 targetfurniture.graphic :=  0x2969;
+
+  0x2969:
+	//painting
+	 targetfurniture.graphic :=  0x2968;
+
+  0x296a:
+	//painting
+	 targetfurniture.graphic :=  0x296b;
+
+  0x296b:
+	//painting
+	 targetfurniture.graphic :=  0x296a;
+
+  0x296c:
+	//painting
+	 targetfurniture.graphic :=  0x296d;
+
+  0x296d:
+	//painting
+	 targetfurniture.graphic :=  0x296c;
+
+  0x296e:
+	//painting
+	 targetfurniture.graphic :=  0x296f;
+
+  0x296f:
+	//painting
+	 targetfurniture.graphic :=  0x296e;
+
+  0x2970:
+	//painting
+	 targetfurniture.graphic :=  0x2971;
+
+  0x2971:
+	//painting
+	 targetfurniture.graphic :=  0x2970;
+
+  0x2972:
+	//painting
+	 targetfurniture.graphic :=  0x2973;
+
+  0x2973:
+	//painting
+	 targetfurniture.graphic :=  0x2972;
+
+  0x2974:
+	//painting
+	 targetfurniture.graphic :=  0x2975;
+
+  0x2975:
+	//painting
+	 targetfurniture.graphic :=  0x2974;
+
+  0x2976:
+	//painting
+	 targetfurniture.graphic :=  0x2977;
+
+  0x2977:
+	//painting
+	 targetfurniture.graphic :=  0x2976;
+
+  0x2978:
+	//painting
+	 targetfurniture.graphic :=  0x2979;
+
+  0x2979:
+	//painting
+	 targetfurniture.graphic :=  0x2978;
+
+  0x297a:
+	//painting
+	 targetfurniture.graphic :=  0x297b;
+
+  0x297b:
+	//painting
+	 targetfurniture.graphic :=  0x297a;
+
+  0x3dff:	//stone bench
+	 targetfurniture.graphic :=  0x3e00;
+
+  0x3e00:
+	//stone bench
+	 targetfurniture.graphic :=  0x3dff;
+		default:
+            SendSysMessage(who, "That item cannot be reoriented.");
+	endcase
+
+
+endprogram

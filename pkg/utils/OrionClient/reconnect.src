@@ -1,0 +1,31 @@
+use os;
+use uo;
+
+include ":timeutils:time";
+include ":OrionClient:settings";
+
+Program OrionClientLogon(who)
+
+	var time := "";
+	var res;
+	var SettingsInfos := OC_GetSettingsCfgElem("Settings");
+	var ClientFeatures := SettingsInfos.ClientFeatures;
+	var AssistantFeatures := SettingsInfos.AssistantFeatures;
+	
+	res := SendPacket(who, ClientFeatures);
+	if (!res && SettingsInfos.OnlyAllowOrion == "1");
+		time := FormatTime(GetTimeStruct(GetTime()), "<HH>:<MM>:<SS> on <DAY>-<MON>-<YY>");
+//		DisconnectClient( who );
+		SysLog("Non-Orion client attempted to connect - Account name " + who.acctname + " on " + time + ".");
+		print("Non-Orion client attempted to connect - Account name " + who.acctname + " on " + time + ".");
+	endif
+
+	res := SendPacket(who, AssistantFeatures);
+	if (!res && SettingsInfos.OnlyAllowOrion == "1");
+		time := FormatTime(GetTimeStruct(GetTime()), "<HH>:<MM>:<SS> on <DAY>-<MON>-<YY>");
+//		DisconnectClient( who );
+		SysLog("Non-Orion client attempted to connect - Account name " + who.acctname + " on " + time + ".");
+		print("Non-Orion client attempted to connect - Account name " + who.acctname + " on " + time + ".");
+	endif
+
+endprogram

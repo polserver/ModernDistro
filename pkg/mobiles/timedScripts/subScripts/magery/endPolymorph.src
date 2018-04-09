@@ -1,0 +1,20 @@
+/*
+ * $Id: endPolymorph.src 1012 2007-03-05 20:12:44Z tekproxy $
+ *
+ */
+ 
+use uo;
+use os;
+
+include ":attributes:attributes";
+
+program TimedScript_EndPolymorph(params)
+	var mobile := params[1];
+
+	var orig_color := GetObjProperty(mobile, "Polymorph");
+	mobile.color := orig_color;
+	mobile.graphic := mobile.trueobjtype;
+	EraseObjProperty(mobile, "Polymorph");
+	
+	return 1;
+endprogram

@@ -1,0 +1,39 @@
+/*
+        Created by *Edwards
+
+        2008-10-14
+*/
+use uo;
+
+program textcmd_lastDamage( mobile )
+
+	SendSysMessage( mobile, "What would you like to evaluate?" );
+	var targ := Target( mobile, TGTOPT_NOCHECK_LOS );
+	if( !targ )
+                SendSysMessage( mobile, "Cancelled." );
+		return 0;
+	endif
+ 
+        var answer;
+        var Last_Damage := GetObjProperty( targ, "LastDamage" );
+        if( Last_Damage )
+                var type;
+                if( Last_Damage[4] == 1 )
+                        type := "Physical";
+                elseif( Last_Damage[4] == 2 )
+                        type := "Ranged";
+                elseif( Last_Damage[4] == 3 )
+                        type := "Magical";
+                else
+                        type := Last_Damage[4];
+                endif
+                
+                answer := SystemFindObjectBySerial( Last_Damage[1] );
+                SendSysMessage( mobile, "I see it was damaged by "+answer.name+" by "+type+" damage." );
+        else
+                SendSysMessage( mobile, "No, I can't find anything..." );
+                return 0;
+        endif
+
+        return 1;
+endprogram

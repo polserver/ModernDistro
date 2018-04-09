@@ -1,0 +1,21 @@
+/*
+        Created by *Edwards
+
+        2008-09-28
+*/
+use uo;
+
+program textcmd_notify( mobile )
+
+	var status := GetObjProperty( mobile, "Notify" );
+
+        if( !status )
+             SetObjProperty( mobile, "Notify", 1 );
+             SendSysMessage( mobile, "*Staff Notify Messages ON*", 3, 70 );
+        else
+             EraseObjProperty( mobile, "Notify" );
+             SendSysMessage( mobile, "*Staff Notify Messages OFF*", 3, 33 );
+        endif
+
+        return 1;
+endprogram

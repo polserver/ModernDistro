@@ -1,0 +1,153 @@
+// $Id: useScissors.src 1266 2008-09-04 00:23:03Z AustinHeilman $
+
+use uo;
+use cfgfile;
+use util;
+
+include ":attributes:attributes";
+include ":crafting:crafting";
+include ":crafting:toolWear";
+
+var scissors_config := ReadConfigFile(":tailoring:scissors");
+var craft_config    := ReadConfigFile(":tailoring:tailoring");
+
+program use_scissors(who, tool)
+	if ( !ReserveItem(tool) )
+			SendSysMessage(who, "That is already in use.");
+			return 0;
+	elseif ( (!tool.movable) || !ReserveItem(tool) )
+			SendSysMessage(who, "You cannot use that");
+			return 0;
+	elseif ( !(tool in EnumerateItemsInContainer(who.backpack)) )
+			SendSysMessage(who, "That item is not in your backpack.");
+			return 0;
+	endif
+
+	EraseObjProperty(who, "#IsMeditating");
+	EraseObjProperty(who, "#HealTimer");
+
+	SendSysMessage(who, "Select an item to cut.");
+	var cloth := Target(who);
+	if ( !(cloth in EnumerateItemsInContainer(who.backpack)) )
+			SendSysMessage(who, "That item is not in your backpack.");
+			return 0;
+	endif
+
+	cutItems(who, cloth, tool);
+endprogram
+
+function cutItems(who, item, tool)
+	if ( !item )
+		SendSysMessage(who, "Cancelled.");
+		return;
+	elseif ( !ReserveItem(item) )
+		SendSysMessage(who, "You cannot use that.");
+		return;
+	elseif (!item.movable )
+		SendSysMessage(who, "You cannot use that.");
+		return;
+	elseif ( item in ListEquippedItems(who) )
+		SendSysMessage(who, "You cannot cut something being worn!");
+		return;
+	elseif ( !(item in EnumerateItemsInContainer(who.backpack)) )
+		SendSysMessage(who, "That item is not in your backpack.");
+		return 0;
+	endif
+
+	// Let's start everything off looking at it's Class type. If this is an
+	// armor item (clothing/armor), we can chop it back to raw material.
+	var material, new_item, material_cnt, item_color, new_cloth;
+	if (item.isA(POLCLASS_ARMOR))
+		// Is crafted, so now let's build the info.
+		if (GetObjProperty(item, "material"))
+			material := FindConfigElem(resource_config, GetObjProperty(item, "material"));
+			new_item := material;
+			material_cnt := CInt(craft_config[item.objtype].material);
+	 		item_color := material.Color;
+		else
+			// Since not crafted, block cutting it!
+			SendSysMessage(who, "Scissors cannot be used on that to produce anything.");
+			return;
+		endif
+	else
+		// Since it's not armor, it's either resourceList material or scissors.cfg item.
+		// ResourceList items MUST be in the scissors config!
+	 	material := FindConfigElem(scissors_config, item.objtype);
+		// If it's fine, pull the information.
+		if (material && !material.errortext)
+	 		new_item := material.newitem;
+			material_cnt := material.material;
+	 		item_color := item.color;
+		else
+			// Since not listed in crafting config, or scissors, don't cut it!
+			SendSysMessage(who, "Scissors cannot be used on that to produce anything.");
+			return;
+		endif
+	endif
+
+	// If there is still nothing, we can't do anything with this item! Redundancy
+	if (!material || material.errortext)
+		SendSysMessage(who, "Scissors cannot be used on that to produce anything.");
+		return;
+	endif		
+
+	// If there is no product to make from this, we can't do anything with this item! Redundancy
+	if (!new_item || new_item.errortext)
+		SendSysMessage(who, "Scissors cannot be used on that to produce anything.");
+		return;
+	endif		
+
+	// Now let's handle cutting this bad boy up!
+	if ( material )
+		playCraftWork(who, "tailoring", 1);
+		
+		// If it's armor, the amount gets modified based on skill to get original cost back.
+		var amt := 1;
+		if (item.isA(POLCLASS_ARMOR))
+			amt := CInt((material_cnt * AP_GetSkill(who, TAILORING) * 75) / 10000);
+		else
+			amt := CInt(item.amount * material_cnt);
+		endif
+		if ( amt < 1 )
+  			amt := 1;
+		endif
+
+		if ( DestroyItem(item) )
+ 			CheckToolWear(who, tool, TAILORING);
+
+			var leftovers, tempname;
+			// If this is leather, let's make it's base objtype.
+			if (Lower(resource_config[new_item].Type) == "leather")
+				leftovers := GetItemDescriptor(0x1067);
+				leftovers.Color := material.Color;
+				leftovers.CProps.insert("material", new_item);
+				tempname := (material.Name) + " cut hide";
+				new_cloth := CreateItemInBackpack(who, leftovers, amt);
+				if (tempname && !tempname.errortext)
+					SetName(new_cloth, tempname);
+				endif
+			else
+				leftovers := GetItemDescriptor(0x1767);
+				leftovers.Color := item_color;
+				new_cloth := CreateItemInBackpack(who, leftovers, amt);
+			endif
+
+			if ( !new_cloth )
+				// If no room in pack, create at cutter's feet.
+				if (Lower(resource_config[new_item].Type) == "leather")
+					// Leftovers and such was created above if this still passes here.
+					new_cloth := CreateItemAtLocation(who.x, who.y, who.z, leftovers, amt, who.realm);
+					if (tempname && !tempname.errortext)
+						SetName(new_cloth, tempname);
+					endif
+				else
+					// Leftovers and such was created above if this still passes here.
+					new_cloth := CreateItemAtLocation(who.x, who.y, who.z, leftovers, amt, who.realm);
+				endif
+			endif
+		endif
+ 	else
+  		SendSysMessage(who, "Scissors cannot be used on that to produce anything.");
+  		return;
+	endif
+endfunction

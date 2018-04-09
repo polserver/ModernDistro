@@ -1,0 +1,41 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+
+program cast_bless( parms )
+    var caster := parms[1];
+    var info := parms[2];
+    var cast_on;
+    cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_HELPFUL);
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+    if ( !MS_MobileCheck(caster, cast_on) )
+        return 0;
+    endif
+  PlaySoundEffect(cast_on, SFX_SPELL_BLESS);
+  PlayObjectCenteredEffect( cast_on, FX_BLESS_EFFECT, 10,10);
+
+
+  var magery := GetAttribute(caster, MAGERY);
+  var mod_amount := GetModAmount(magery);
+  var duration := GetModDuration(magery);
+  if(CanMod(cast_on, "str"))
+	DoTempMod(cast_on, "str", mod_amount, duration);
+  endif
+  if(CanMod(cast_on, "dex"))
+	DoTempMod(cast_on, "dex", mod_amount, duration);
+  endif
+  if(CanMod(cast_on, "int"))
+	DoTempMod(cast_on, "int", mod_amount, duration);
+  endif
+endprogram

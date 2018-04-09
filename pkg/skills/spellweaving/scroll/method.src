@@ -1,0 +1,17 @@
+/**********************************************************
+*
+* Method script for Spellweaving Scrolls.
+*	
+* GetSpellId()
+*
+***********************************************************/
+use cfgfile;
+
+program install()
+    return 1;
+endprogram
+
+exported function GetSpellId( scroll )
+    var itemdesc_cfg := ReadConfigFile( "itemdesc" );
+    return itemdesc_cfg[ scroll.objtype ].spellid;
+endfunction

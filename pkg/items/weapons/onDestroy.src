@@ -1,0 +1,20 @@
+/* $Id: onDestroy.src 744 2006-08-25 03:47:07Z AustinHeilman $
+ *
+ */
+
+use uo;
+
+include "include/equipment";
+
+program OnDestroy(item)
+	var equipped := CInt(GetObjProperty(item, "#EquippedOn"));
+	if ( !equipped )
+		return 1;
+	endif
+
+	var mobile := SystemFindObjectBySerial(equipped);
+
+	RemoveEquipmentMods(mobile, item);
+
+	return 1;
+endprogram

@@ -1,0 +1,357 @@
+use uo;
+use os;
+use cfgfile;
+
+include "include/eventID";
+include "include/myUtil";
+include "include/itemtypes";
+// include "../pkg/items/housing/house";
+
+var plant_cfg_file := ReadConfigFile("itemdesc");
+
+program plant_seed(character, seed)
+	if (!ReserveItem(seed))
+		SendSysMessage(character, "You can't use this right now.");
+		return;
+	endif
+
+	case (seed.objtype)
+		0x1DA09:		//flower seeds
+			PlantFlowers(character, seed);
+			return;
+		0x1DA0d:		//banana tree
+		0x1DA0a:		//apple tree
+		0x1DA0b:		//peach tree
+		0x1DA0c:		//pear tree
+			PlantATree(character, seed);
+			return;
+		0x1DA10:		//Beehives get placed where they are
+			PlaceBeehive(character, seed);
+			return;
+	endcase
+
+	var location_x := character.x;
+	var location_y := character.y;
+	var location_z := character.z;
+
+	var sign;
+	if (!is_plantable_for_trees(GetMapInfo(location_x, location_y, character.realm).landtile))
+		SendSysMessage(character, "You cannot plant a tree here!");
+/*		sign := FindHouseSign(character);
+		if (!sign)
+			return;
+		endif */
+
+
+/*		var maxlockdowns := GetMaxLockdowns(sign);
+		var lockdowns := GetLockdowns(sign);
+		if (lockdowns >= maxlockdowns)
+			SendSysMessage(character, "You don't have any more lockdowns left.");
+			return;
+		endif */
+
+
+//		SendSysMessage(character, "But since its your house, why not?");
+	endif
+
+        if (GetMapInfo(location_x, location_y, character.realm).z != character.z || character.multi)
+                SendSysMessage(character, "Uh oh! The seed tried to be planted at a Z lower than you!", color := 33);
+                return;
+        endif
+        
+	if (CountPlantsInArea(location_x, location_y, location_z, 1, character.realm) > 4)
+		SendSysMessage(character, "There's too many other plants in the area!");
+		return;
+	endif
+
+	if (CountPlantsInArea(location_x, location_y, location_z, 0, character.realm))
+		SendSysMessage(character, "There's already another plant here!");
+		return;
+	endif
+
+	var plant_type := plant_cfg_file[seed.objtype].plant;
+
+	SubtractAmount(seed,1);
+	SendSysMessage(character, "You plant the seed");
+
+	var plant := CreateItemAtLocation(location_x, location_y, location_z, plant_type, 1, character.realm);
+	plant.graphic := 1;
+	SetObjProperty(plant, "new", 1);
+	if (sign)
+		SetObjProperty(plant, "lockeddown", sign.serial);
+		SetObjProperty(plant, "lockdowndestroy", 1);
+	endif
+endprogram
+
+
+
+
+///////////////////
+//  Figures out if the maptile is valid for planting plants (farmland only)
+///////////////////
+
+function is_plantable(maptile)
+	if (maptile >= 0x9 && maptile <= 0x15)
+		return 1;
+	elseif (maptile >= 0x14f && maptile <= 0x15c)
+		return 1;
+	else
+		return 0;
+	endif
+endfunction
+
+
+
+
+///////////////////
+//  Figures out if the place is valid for planting trees (grass only)
+///////////////////
+
+function is_plantable_for_trees(maptile)
+	if (maptile >= 3 && maptile <= 6)
+		return 1;
+	elseif (maptile >= 172 && maptile <= 219)
+		return 1;
+	elseif (maptile >= 433 && maptile <= 434)
+		return 1;
+	elseif (maptile >= 1401 && maptile <= 1424)
+		return 1;
+	elseif (maptile >= 1521 && maptile <= 1560)
+		return 1;
+	elseif (maptile >= 1697 && maptile <= 1730)
+		return 1;
+	else
+		return 0;
+	endif
+endfunction
+
+
+
+
+///////////////////
+//  Counts the plants directly surrounding player
+///////////////////
+
+function CountPlantsInArea(x, y, z, range, world)
+	var plant_count := 0;
+	foreach item in ListItemsNearLocation(x, y, z, range, world)
+		if (plant_cfg_file[item.objtype].product)
+			plant_count := plant_count + 1;
+		endif
+	endforeach
+	return plant_count;
+endfunction
+
+
+
+
+///////////////////
+//  the player can select what kind of flowers they want to plant
+///////////////////
+
+function PlantFlowers(character, seed)
+/*	var sign := FindHouseSign(character);
+	if (!sign)
+		SendSysMessage(character, "You must be in your house to use this!");
+		return;
+	endif
+
+	var maxlockdowns := GetMaxLockdowns(sign);
+	var lockdowns := GetLockdowns(sign);
+	if (lockdowns >= maxlockdowns)
+		SendSysMessage(character, "You don't have any more lockdowns left.");
+		return;
+	endif */
+
+	foreach item in ListItemsNearLocation(character.x, character.y, character.z, 1, character.realm)
+ 		if (IsDoor(item))
+    			SendSysMessage(character, "You are too close to a door!");
+    			return;
+  		endif
+	endforeach
+
+	var characterx := character.x;
+	var charactery := character.y;
+
+	if (characterx != character.x || charactery != character.y)
+		SendSysMessage(character, "Canceled!");
+		return;
+	endif
+
+	SendSysMessage(character, "Select a vase to put that in, or yourself to plant it where you're standing:");
+	var targetted := Target(character);
+	if (!targetted)
+		SendSysMessage(character, "Canceled.");
+		return;
+	endif
+
+	var x := character.x;
+	var y := character.y;
+	var z := character.z;
+	if (targetted != character)
+		case (targetted.objtype)
+			0x0b45:
+				z := targetted.z + 7;
+			0x0b46:
+				z := targetted.z + 3;
+			0x0b47:
+				z := targetted.z + 5;
+			0x0b48:
+				z := targetted.z + 2;
+			0x11c6:
+				z := targetted.z + 2;
+			0x11c7:
+				z := targetted.z + 2;
+			default:
+				SendSysMessage(character, "You can't plant the flower there!");
+				return;
+		endcase
+		if (targetted.movable || !GetObjProperty(targetted, "lockeddown") )
+			SendSysMessage(character, "You must place the vase where you want it first!");
+			return;
+		endif
+		x := targetted.x;
+		y := targetted.y;
+	endif
+
+	var flowertype := SelectFlowerType(character);
+	if (!flowertype)
+		return;
+	endif
+	if (characterx != character.x || charactery != character.y)
+		SendSysMessage(character, "Canceled!");
+		return;
+	endif
+
+	var item := CreateItemAtLocation(x, y, z, flowertype, 1, character.realm);
+	if (item)
+		item.movable := 0;
+/*		SetObjProperty(item, "lockeddown", sign.serial);
+		SetObjProperty(item, "lockdowndestroy", 1); */
+		SubtractAmount(seed, 1);
+	else
+		SendSysMessage(character, "Can't place it here.");
+	endif
+	return;
+endfunction
+
+
+function SelectFlowerType(character)
+	var select_menu := CreateMenu("Select plant:");
+	AddMenuItem(select_menu, 0x0c83, "Campion flowers");
+	AddMenuItem(select_menu, 0x0c87, "Campion flowers");
+	AddMenuItem(select_menu, 0x0c89, "Campion flowers");
+	AddMenuItem(select_menu, 0x0c84, "Foxglove");
+	AddMenuItem(select_menu, 0x0c8a, "Foxglove");
+	AddMenuItem(select_menu, 0x0c88, "Snowdrops");
+	AddMenuItem(select_menu, 0x0c8e, "Snowdrops");
+	AddMenuItem(select_menu, 0x0c86, "Poppies");
+	AddMenuItem(select_menu, 0x0cbe, "Poppies");
+	AddMenuItem(select_menu, 0x0cbf, "Poppies");
+	AddMenuItem(select_menu, 0x0c85, "Orfluer flowers");
+	AddMenuItem(select_menu, 0x0cc0, "Orfluer flowers");
+	AddMenuItem(select_menu, 0x0cc1, "Orfluer flowers");
+	AddMenuItem(select_menu, 0x0c8b, "White flowers");
+	AddMenuItem(select_menu, 0x0c8c, "White flowers");
+	AddMenuItem(select_menu, 0x0c8d, "White poppies");
+	AddMenuItem(select_menu, 0x0c9f, "Fern");
+	AddMenuItem(select_menu, 0x0c8f, "Hedge");
+	AddMenuItem(select_menu, 0x0db8, "Hedge");
+	AddMenuItem(select_menu, 0x0cc8, "Juniper bush");
+	AddMenuItem(select_menu, 0x0ceb, "Vines");
+	AddMenuItem(select_menu, 0x0cef, "Vines");
+	var selected_item := SelectMenuItem2(character, select_menu);
+	if (!selected_item.objtype)
+		SendSysMessage(character, "Canceled.");
+		return 0;
+	endif
+	return selected_item.objtype;
+endfunction
+
+
+
+
+///////////////////
+//  Place a beehive
+///////////////////
+
+function PlaceBeehive(character, starterhive)
+	if (starterhive.container)
+		SendSysMessage(character, "You must place the hive where you want it.");
+		return;
+	endif
+
+	foreach item in ListItemsNearLocation(starterhive.x, starterhive.y, starterhive.z, 2, character.realm)
+		if (item.isa (POLCLASS_DOOR))
+			SendSysMessage(character, "You're too close to a door!");
+			return;
+		endif
+	endforeach
+
+	foreach item in ListItemsNearLocation(starterhive.x, starterhive.y, starterhive.z, 1, character.realm)
+		if (item.objtype == 0x091a)
+			SendSysMessage(character, "You're too close to another beehive!");
+			return;
+		endif
+	endforeach
+
+	var newbeehive := CreateItemAtLocation(starterhive.x, starterhive.y, starterhive.z, 0x091a, 1, character.realm);
+	if (!newbeehive)
+		SendSysMessage(character, "You can't place the beehive there!");
+		return;
+	endif
+
+	DestroyItem(starterhive);
+	SendSysMessage(character, "You place the beehive and wait for bees...");
+	SetObjProperty(newbeehive, "new", 1);
+endfunction
+
+
+
+
+///////////////////
+//  Banana trees require a different function than other trees because banana trees are one piece
+///////////////////
+
+function PlantATree(character, seed)
+	var location_x := character.x;
+	var location_y := character.y;
+	var location_z := character.z;
+
+	if (!is_plantable_for_trees(GetMapInfo(location_x, location_y, character.realm).landtile))
+		SendSysMessage(character, "You cannot plant a tree here!");
+		return;
+	endif
+
+	if (GetMapInfo(location_x, location_y, character.realm).z != character.z || character.multi)
+		SendSysMessage(character, "You cannot plant a tree here!");
+		return;
+	endif
+
+	if (CountPlantsInArea(character.x, character.y, character.z, 3, character.realm))
+		SendSysMessage(character, "There's too many other plants in the area!");
+		return;
+	endif
+
+	if (CountPlantsInArea(character.x, character.y, character.z, 1, character.realm))
+		SendSysMessage(character, "There's already another plant here!");
+		return;
+	endif
+
+	var plant_type := plant_cfg_file[seed.objtype].plant;
+	var plant_top := plant_cfg_file[seed.objtype].planttop;
+
+	SubtractAmount(seed, 1);
+	SendSysMessage(character, "You plant the seed");
+
+	var plant := CreateItemAtLocation(location_x, location_y, location_z, plant_type, 1, character.realm);
+	SetObjProperty(plant, "new", 1);
+	plant.graphic := 1;
+	if (plant_top)
+		var planttop := CreateItemAtLocation(location_x, location_y, location_z, plant_top, 1, character.realm);
+		SetObjProperty(planttop, "new", 1);
+		planttop.graphic := 1;
+		SetObjProperty(plant, "planttop", planttop.serial);
+		SetObjProperty(planttop, "plantbottom", plant.serial);
+	endif
+endfunction

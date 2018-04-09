@@ -1,0 +1,54 @@
+/*
+        Maintened by *Edwards
+
+        2009-10-20
+*/
+use uo;
+use os;
+use cfgfile;
+
+include ":keys:key";
+include ":traps:traps";
+
+program useContainer( mobile, container )
+
+	var item_cfg := ReadConfigFile( ":*:itemdesc" );
+	item_cfg := item_cfg[container.graphic];
+ 
+        var house_ref := container.multi;
+        if( !house_ref.CanAccess( mobile ))
+		SendSysMessage( mobile, "You cannot open that secured chest." );
+		return 0;
+	elseif( mobile.cmdlevel >= 3 )
+		SendSysMessage( mobile, "Command level is present - container is skipping locks, traps, etc." );
+		SendViewContainer( mobile, container );
+		return 1;
+	elseif( ContainerIsLocked( mobile, container ))
+		return 0;
+	endif
+ 
+        SendSysMessage( mobile, "You open the secured chest." );
+	SendViewContainer( mobile, container );
+
+	if(( item_cfg.OpenGraphic ) && ( item_cfg.CloseGraphic ))
+		container.graphic := item_cfg.OpenGraphic;
+		Sleep(2);
+		container.graphic := item_cfg.CloseGraphic;
+	endif
+
+	return 1;
+endprogram
+
+function ContainerIsLocked( mobile, container )
+
+	if( !container.locked )
+		// Nothing to worry about.
+		return 0;
+	elseif( KP_HasKeyForLock( mobile, container ))
+		SendSysMessage( mobile, "You use your key to open the container." );
+		return 0;
+	else
+		PrintTextAbovePrivate( container, "That is locked.", mobile );
+		return 1;
+	endif
+endfunction
