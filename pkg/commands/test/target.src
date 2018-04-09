@@ -22,6 +22,16 @@ include ":clilocs:clilocs";
 
 program targetbug(who, text)
 
+	POLCfg := ReadConfigFile("//pol.cfg");
+	if(POLCfg.errortext)
+		SendSysMessage(who, POLCfg.errortext);
+		return;
+	endif
+	MaxChars := POLCfg.CharacterSlots;
+	SendSysMessage(who, "MaxChars = " + MaxChars, 3, 88);
+	return;
+
+
 	var words := SplitWords(text);
 	var place := who.backpack;
 	var thing := CInt(words[1]);

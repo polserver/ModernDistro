@@ -797,7 +797,7 @@ function ban(who, acctname);
        act.ban();
 	   var x, i;
 	   // Wipe Bank Box
-	   DestroyRootItemInStorageArea( bank_region, CP_GetStorageContainerForMobile( act.GetCharacter(1), bank_region) );
+	   CP_RemoveStorageAreaContainer( CP_GetStorageContainerForMobile( act.GetCharacter(1), bank_region );
 	   for(i := 1; i <= 25; i := i + 1)
 	     x := GetEquipmentByLayer(act.GetCharacter(1), i);
 	     MoveItemToContainer(x, act.GetCharacter(1).backpack);
@@ -805,7 +805,8 @@ function ban(who, acctname);
        DestroyItem(act.GetCharacter(1).backpack);
        act.DeleteCharacter(1);
        i := 0;
-       WipeBankBox(act.GetCharacter(2));
+	   // Wipe Bank Box
+	   CP_RemoveStorageAreaContainer( CP_GetStorageContainerForMobile( act.GetCharacter(2), bank_region );
 	   for(i := 1; i <= 25; i := i + 1)
 	     x := GetEquipmentByLayer(act.GetCharacter(2), i);
 	     MoveItemToContainer(x, act.GetCharacter(2).backpack);
@@ -813,7 +814,8 @@ function ban(who, acctname);
        DestroyItem(act.GetCharacter(2).backpack);
        act.DeleteCharacter(2);
        i := 0;
-       WipeBankBox(act.GetCharacter(3));
+	   // Wipe Bank Box
+	   CP_RemoveStorageAreaContainer( CP_GetStorageContainerForMobile( act.GetCharacter(3), bank_region );
 	   for(i := 1; i <= 25; i := i + 1)
 	     x := GetEquipmentByLayer(act.GetCharacter(3), i);
 	     MoveItemToContainer(x, act.GetCharacter(3).backpack);
@@ -821,7 +823,8 @@ function ban(who, acctname);
        DestroyItem(act.GetCharacter(3).backpack);
        act.DeleteCharacter(3);
        i := 0;
-       WipeBankBox(act.GetCharacter(4));
+	   // Wipe Bank Box
+	   CP_RemoveStorageAreaContainer( CP_GetStorageContainerForMobile( act.GetCharacter(4), bank_region );
 	   for(i := 1; i <= 25; i := i + 1)
 	     x := GetEquipmentByLayer(act.GetCharacter(4), i);
 	     MoveItemToContainer(x, act.GetCharacter(4).backpack);
@@ -829,7 +832,8 @@ function ban(who, acctname);
        DestroyItem(act.GetCharacter(4).backpack);
        act.DeleteCharacter(4);
        i := 0;
-       WipeBankBox(act.GetCharacter(5));
+	   // Wipe Bank Box
+	   CP_RemoveStorageAreaContainer( CP_GetStorageContainerForMobile( act.GetCharacter(5), bank_region );
 	   for(i := 1; i <= 24; i := i + 1)
 	     x := GetEquipmentByLayer(act.GetCharacter(5), i);
 	     MoveItemToContainer(x, act.GetCharacter(5).backpack);
