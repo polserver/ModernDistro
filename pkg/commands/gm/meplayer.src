@@ -1,4 +1,0 @@
-use uo;
-program meplayer(who)
-who.cmdlevel := 0;
-endprogram

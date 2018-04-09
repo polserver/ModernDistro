@@ -1,5 +1,0 @@
-use os;
-
-while (1)
-    sleep( 600 );
-endwhile

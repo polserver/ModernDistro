@@ -1,4 +1,0 @@
-use os;
-
-print("Starting performance monitor");
-start_script( "recBandwidth" );

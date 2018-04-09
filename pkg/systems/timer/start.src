@@ -1,4 +1,0 @@
-use os;
-
-print("Starting murder timers");
-start_script("timers");

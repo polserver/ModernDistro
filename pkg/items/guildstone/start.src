@@ -1,4 +1,0 @@
-use uo;
-use os;
-
-start_script("guildManager");

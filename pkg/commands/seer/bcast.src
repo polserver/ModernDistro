@@ -1,5 +1,0 @@
-use uo;
-
-program textcmd_bcast( who, text )
-    Broadcast( who.name + ": " + text, 0, 73);
-endprogram

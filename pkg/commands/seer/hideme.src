@@ -1,3 +1,0 @@
-program hideme( who )
-    who.hidden := 1;
-endprogram
