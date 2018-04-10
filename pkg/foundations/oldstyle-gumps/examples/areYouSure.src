@@ -16,7 +16,7 @@
 //
 use uo;
 
-include "../gumps";
+include ":gumps:old-gumps";
 
 program textcmd_areyousure( who )
 

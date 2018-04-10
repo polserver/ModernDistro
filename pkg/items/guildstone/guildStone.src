@@ -5,8 +5,8 @@ use guilds;
 include "include/yesNo";
 include "include/canAccess";
 include "guildData";
-include ":gumps:old/old-gumps";
 include "include/webPage";
+include ":gumps:old-gumps";
 
 var guildstone;
 var gm, guild, guild_id;

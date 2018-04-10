@@ -17,7 +17,7 @@
 //
 use uo;
 
-include "../gumps";
+include ":gumps:old-gumps";
 
 program textcmd_radiogroup( who )
 

@@ -13,7 +13,7 @@
 use uo;
 use basic;
 
-include ":oldstyle-gumps:gumps";
+include ":gumps:old-gumps";
 
 
 // Gump constants

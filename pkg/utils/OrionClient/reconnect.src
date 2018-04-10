@@ -8,7 +8,7 @@ Program OrionClientLogon(who)
 
 	var time := "";
 	var res;
-	var SettingsInfos := OC_GetSettingsCfgElem("Settings");
+	var SettingsInfos := OC_GetSettingsCfgElem("Orion");
 	var ClientFeatures := SettingsInfos.ClientFeatures;
 	var AssistantFeatures := SettingsInfos.AssistantFeatures;
 	
