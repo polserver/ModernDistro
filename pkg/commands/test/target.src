@@ -19,16 +19,14 @@ include "include/string";
 //include ":staticHousing:staticHousing";
 include "include/packets";
 include ":clilocs:clilocs";
+include "include/server";
 
 program targetbug(who, text)
 
-	POLCfg := ReadConfigFile("//pol.cfg");
-	if(POLCfg.errortext)
-		SendSysMessage(who, POLCfg.errortext);
-		return;
-	endif
-	MaxChars := POLCfg.CharacterSlots;
-	SendSysMessage(who, "MaxChars = " + MaxChars, 3, 88);
+	var polstruct := ReadPolCFG();
+	ReadSSOptCFG();
+	//SetObjProperty(who, "POL_STRUCT", polstruct);
+	//SetGlobalProperty("PolCfgStruct", polstruct);
 	return;
 
 
