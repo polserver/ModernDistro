@@ -40,6 +40,7 @@ CONST CRAFT_CYCLE_SUCCESS := 2;
 CONST CRAFT_CYCLE_FAILED  := 3;
 
 var resource_config := ReadConfigFile(":crafting:resourceList");
+var itemdesc_configs := GetItemDescCfgFile("*");
 
 var craft_skill;
 var display_skill;
@@ -345,11 +346,17 @@ function CraftAssembly(who, craft_skill, tool, objtype, amt)
 			Set_Critical(1);
 			foreach material_objtype in ( parts_list.Keys() )
 				var amount := parts_list[material_objtype];
+        var UsedPart := GetItemDescInfo(material_objtype);
+        var ChangeTo := UsedPart.ChangeTo;
 				if ( amount > 0 )
 					if( !ConsumeSubstance(who.backpack, material_objtype, amount) )
 						SendSysMessage(who, "Error - Unable to consume ["+amount+"] of material ["+material_objtype+"]");
 						return 0;
 					endif
+          // For occasions when we need to replace a full container with any empty one
+          if(ChangeTo)
+            CreateItemInContainer(UsedPart.container, CInt(ChangeTo), 1);
+          endif
 				endif
 			endforeach
 			Set_Critical(0);
@@ -425,6 +432,7 @@ function isNearRequiredObject(who, objtype)
 
 	var ObjectList := SplitWords(craft_config[objtype].craftnear);
 	if( TypeOf(ObjectList) != "Array" || !ObjectList || ObjectList.errortext )
+    SendSysMessage(who, "Debug msg: crafting.inc -> ObjectList is empty. ", 3, 88);
 		return -1; // -1 = not required.
 	endif
 	foreach item in ( ListItemsNearLocation(who.x, who.y, who.z, 3) )
