@@ -1,0 +1,202 @@
+use uo;
+use os;
+
+
+program fireplace (character, fireplace )
+	if (character)
+	endif
+	case (fireplace.objtype)
+		// Sandstone fireplace (large piece) East lit
+		0x0475:	var other_piece := ListItemsNearLocationOfType (fireplace.x, fireplace.y-1, fireplace.z, 0, 0x0489, fireplace.realm)[1];
+				if (!other_piece)
+					return;
+				endif
+				// If not lit then light it.
+				if (fireplace.graphic != fireplace.objtype)
+					fireplace.graphic := fireplace.objtype;
+					fireplace.facing := 29;
+					other_piece.graphic := other_piece.objtype;
+					PlaySoundEffect (fireplace, 0x226);
+				// If lit extinguish it.
+				else
+					fireplace.graphic := 0x045d;
+					other_piece.graphic := 0x045e;
+				endif				
+		// Sandstone fireplace (small piece) East lit
+		0x0489:	var other_piece := ListItemsNearLocationOfType (fireplace.x, fireplace.y+1, fireplace.z, 0, 0x0475, fireplace.realm)[1];
+				if (!other_piece)
+					return;
+				endif
+				// If not lit then light it.
+				if (fireplace.graphic != fireplace.objtype)
+					fireplace.graphic := fireplace.objtype;
+					other_piece.graphic := other_piece.objtype;
+					other_piece.facing := 29;
+					PlaySoundEffect (fireplace, 0x226);
+				// If lit extinguish it.
+				else
+					fireplace.graphic := 0x045e;
+					other_piece.graphic := 0x045d;
+				endif	
+		// Sandstone fireplace (large piece) South lit
+		0x047b:	var other_piece := ListItemsNearLocationOfType (fireplace.x-1, fireplace.y, fireplace.z, 0, 0x0482, fireplace.realm)[1];
+				if (!other_piece)
+					return;
+				endif
+				// If not lit then light it.
+				if (fireplace.graphic != fireplace.objtype)
+					fireplace.graphic := fireplace.objtype;
+					fireplace.facing := 29;
+					other_piece.graphic := other_piece.objtype;
+					PlaySoundEffect (fireplace, 0x226);
+				// If lit extinguish it.
+				else
+					fireplace.graphic := 0x045f;
+					other_piece.graphic := 0x0460;
+				endif				
+		// Sandstone fireplace (small piece) South lit
+		0x0482:	var other_piece := ListItemsNearLocationOfType (fireplace.x+1, fireplace.y, fireplace.z, 0, 0x047b, fireplace.realm)[1];
+				if (!other_piece)
+					return;
+				endif
+				// If not lit then light it.
+				if (fireplace.graphic != fireplace.objtype)
+					fireplace.graphic := fireplace.objtype;
+					fireplace.facing := 29;
+					other_piece.graphic := other_piece.objtype;
+					PlaySoundEffect (fireplace, 0x226);
+				// If lit extinguish it.
+				else
+					fireplace.graphic := 0x0460;
+					other_piece.graphic := 0x045f;
+				endif				
+		// Brick fireplace (large piece) East lit
+		0x0937:	var other_piece := ListItemsNearLocationOfType (fireplace.x, fireplace.y-1, fireplace.z, 0, 0x093d, fireplace.realm)[1];
+				if (!other_piece)
+					return;
+				endif
+				// If not lit then light it.
+				if (fireplace.graphic != fireplace.objtype)
+					fireplace.graphic := fireplace.objtype;
+					fireplace.facing := 29;
+					other_piece.graphic := other_piece.objtype;
+					PlaySoundEffect (fireplace, 0x226);
+				// If lit extinguish it.
+				else
+					fireplace.graphic := 0x0935;
+					other_piece.graphic := 0x0936;
+				endif				
+		// Brick fireplace (small piece) East lit
+		0x0993d:	var other_piece := ListItemsNearLocationOfType (fireplace.x, fireplace.y+1, fireplace.z, 0, 0x0937, fireplace.realm)[1];
+				if (!other_piece)
+					return;
+				endif
+				// If not lit then light it.
+				if (fireplace.graphic != fireplace.objtype)
+					fireplace.graphic := fireplace.objtype;
+					fireplace.facing := 29;
+					other_piece.graphic := other_piece.objtype;
+					PlaySoundEffect (fireplace, 0x226);
+				// If lit extinguish it.
+				else
+					fireplace.graphic := 0x0936;
+					other_piece.graphic := 0x0935;
+				endif				
+		// Brick fireplace (large piece) South lit
+		0x0945:	var other_piece := ListItemsNearLocationOfType (fireplace.x-1, fireplace.y, fireplace.z, 0, 0x094b, fireplace.realm)[1];
+				if (!other_piece)
+					return;
+				endif
+				// If not lit then light it.
+				if (fireplace.graphic != fireplace.objtype)
+					fireplace.graphic := fireplace.objtype;
+					fireplace.facing := 29;
+					other_piece.graphic := other_piece.objtype;
+					PlaySoundEffect (fireplace, 0x226);
+				// If lit extinguish it.
+				else
+					fireplace.graphic := 0x0943;
+					other_piece.graphic := 0x0944;
+				endif				
+		// Brick fireplace (small piece) South lit
+		0x094b:	var other_piece := ListItemsNearLocationOfType (fireplace.x+1, fireplace.y, fireplace.z, 0, 0x0945, fireplace.realm)[1];
+				if (!other_piece)
+					return;
+				endif
+				// If not lit then light it.
+				if (fireplace.graphic != fireplace.objtype)
+					fireplace.graphic := fireplace.objtype;
+					fireplace.facing := 29;
+					other_piece.graphic := other_piece.objtype;
+					PlaySoundEffect (fireplace, 0x226);
+				// If lit extinguish it.
+				else
+					fireplace.graphic := 0x0944;
+					other_piece.graphic := 0x0943;
+				endif				
+		// Stone fireplace (large piece) East lit
+		0x0953:	var other_piece := ListItemsNearLocationOfType (fireplace.x, fireplace.y-1, fireplace.z, 0, 0x0959, fireplace.realm)[1];
+				if (!other_piece)
+					return;
+				endif
+				// If not lit then light it.
+				if (fireplace.graphic != fireplace.objtype)
+					fireplace.graphic := fireplace.objtype;
+					fireplace.facing := 29;
+					other_piece.graphic := other_piece.objtype;
+					PlaySoundEffect (fireplace, 0x226);
+				// If lit extinguish it.
+				else
+					fireplace.graphic := 0x0951;
+					other_piece.graphic := 0x0952;
+				endif				
+		// Stone fireplace (small piece) East lit
+		0x0959:	var other_piece := ListItemsNearLocationOfType (fireplace.x, fireplace.y+1, fireplace.z, 0, 0x0953, fireplace.realm)[1];
+				if (!other_piece)
+					return;
+				endif
+				// If not lit then light it.
+				if (fireplace.graphic != fireplace.objtype)
+					fireplace.graphic := fireplace.objtype;
+					fireplace.facing := 29;
+					other_piece.graphic := other_piece.objtype;
+					PlaySoundEffect (fireplace, 0x226);
+				// If lit extinguish it.
+				else
+					fireplace.graphic := 0x0952;
+					other_piece.graphic := 0x0951;
+				endif				
+		// Stone fireplace (large piece) South lit
+		0x0961:	var other_piece := ListItemsNearLocationOfType (fireplace.x-1, fireplace.y, fireplace.z, 0, 0x0967, fireplace.realm)[1];
+				if (!other_piece)
+					return;
+				endif
+				// If not lit then light it.
+				if (fireplace.graphic != fireplace.objtype)
+					fireplace.graphic := fireplace.objtype;
+					fireplace.facing := 29;
+					other_piece.graphic := other_piece.objtype;
+					PlaySoundEffect (fireplace, 0x226);
+				// If lit extinguish it.
+				else
+					fireplace.graphic := 0x095f;
+					other_piece.graphic := 0x0960;
+				endif				
+		// Stone fireplace (large piece) South lit
+		0x0967:	var other_piece := ListItemsNearLocationOfType (fireplace.x+1, fireplace.y, fireplace.z, 0, 0x0961, fireplace.realm)[1];
+				if (!other_piece)
+					return;
+				endif
+				// If not lit then light it.
+				if (fireplace.graphic != fireplace.objtype)
+					fireplace.graphic := fireplace.objtype;
+					fireplace.facing := 29;
+					other_piece.graphic := other_piece.objtype;
+					PlaySoundEffect (fireplace, 0x226);
+				// If lit extinguish it.
+				else
+					fireplace.graphic := 0x0960;
+					other_piece.graphic := 0x095f;
+				endif				
+	endcase;
+endprogram
