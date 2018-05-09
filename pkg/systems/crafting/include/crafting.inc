@@ -322,11 +322,19 @@ function CraftAssembly(who, craft_skill, tool, objtype, amt)
 			Set_Critical(1);
 			foreach material_objtype in ( parts_list.Keys() )
 				var amount := parts_list[material_objtype];
+        var UsedPart := GetItemDescInfo(CInt(material_objtype));
+        SendSysMessage(who, "Debug msg: Crafting.inc --> UsedPart name is " + UsedPart.Name, 3, 88);
+        SendSysMessage(who, "Debug msg: Crafting.inc --> UsedPart name is " + CStr(UsedPart.ChangeTo), 3, 88);
+        var ChangeTo := CInt(UsedPart.ChangeTo);
 				if ( amount > 0 )
 					if( !ConsumeSubstance(who.backpack, material_objtype, amount) )
 						SendSysMessage(who, "Error - Unable to consume ["+amount+"] of material ["+material_objtype+"]");
 						return 0;
 					endif
+          // For occasions when we need to replace a full container with any empty one
+          if(ChangeTo)
+            CreateItemInContainer(who.backpack, ChangeTo, 1);
+          endif
 				endif
 			endforeach
 			Set_Critical(0);
@@ -346,8 +354,8 @@ function CraftAssembly(who, craft_skill, tool, objtype, amt)
 			Set_Critical(1);
 			foreach material_objtype in ( parts_list.Keys() )
 				var amount := parts_list[material_objtype];
-        var UsedPart := GetItemDescInfo(material_objtype);
-        var ChangeTo := UsedPart.ChangeTo;
+        var UsedPart := GetItemDescInfo(CInt(material_objtype));
+        var ChangeTo := CInt(UsedPart.ChangeTo);
 				if ( amount > 0 )
 					if( !ConsumeSubstance(who.backpack, material_objtype, amount) )
 						SendSysMessage(who, "Error - Unable to consume ["+amount+"] of material ["+material_objtype+"]");
@@ -355,7 +363,7 @@ function CraftAssembly(who, craft_skill, tool, objtype, amt)
 					endif
           // For occasions when we need to replace a full container with any empty one
           if(ChangeTo)
-            CreateItemInContainer(UsedPart.container, CInt(ChangeTo), 1);
+            CreateItemInContainer(who.backpack, CInt(ChangeTo), 1);
           endif
 				endif
 			endforeach
@@ -430,29 +438,27 @@ endfunction
 //			 0 = Fail. Not near any of the required objtypes.
 function isNearRequiredObject(who, objtype)
 
-	var ObjectList := SplitWords(craft_config[objtype].craftnear);
-	if( TypeOf(ObjectList) != "Array" || !ObjectList || ObjectList.errortext )
-    SendSysMessage(who, "Debug msg: crafting.inc -> ObjectList is empty. ", 3, 88);
-		return -1; // -1 = not required.
-	endif
-	foreach item in ( ListItemsNearLocation(who.x, who.y, who.z, 3) )
-		if( (Hex(item.objtype) in ObjectList) )
-			return 1;
-			break;
-		endif
-	endforeach
+	var RequiredObject := craft_config[objtype].CraftNear;
+  if(RequiredObject == "" || RequiredObject == "nothing")
+    return 1;
+  endif
+  foreach item in ( ListItemsNearLocation(who.x, who.y, who.z, 3) )
+    // The following added to suport "ObjectKind", ie. "fire", "fireplace", "forge", "oven", "mill" etc.
+    if( item.ObjectKind() == RequiredObject )
+      return 1;
+    endif
+  endforeach
 	return 0;
 endfunction
 
 // Used to send message about not being near a custom required object.
 function RequiredObjectMissing(who, objtype)
 
-	var ObjectList := SplitWords(craft_config[objtype].craftnear);
-	if( TypeOf(ObjectList) != "Array" || !ObjectList || ObjectList.errortext )
+	var MissingObject := craft_config[objtype].CraftNear;
+	if( MissingObject == "nothing" )
 		return -1; // -1 = not required. Should never happen unless you misuse this function.
 	endif
-	var ObjectName := GetObjTypeDesc(CInt(ObjectList[1]));
-	SendSysMessage(who, "You must be near a "+ObjectName+" in order to create this.");
+	SendSysMessage(who, "You must be near a " + MissingObject + " in order to make this.");
 	return 1;
 endfunction
 

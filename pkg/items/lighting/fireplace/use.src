@@ -1,3 +1,12 @@
+///////////////////////////////////////////////////
+//
+// This script borrowed from World of Dreams
+// Comments added by Yukiko
+//
+// I would like to move this functionality to
+// a method script.
+//
+///////////////////////////////////////////////////
 use uo;
 use os;
 
