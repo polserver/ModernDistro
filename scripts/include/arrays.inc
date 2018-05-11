@@ -146,14 +146,8 @@ function FindInArray(byref the_array, find_what)
 		return error{"errortext":="Object passed was not an array."};
 	endif
 
-	foreach index in ( the_array )
-		if ( index == find_what )
-			return _index_iter;
-		endif
-		SleepMS(2);
-	endforeach
+  return (find_what in the_array);
 
-	return 0;
 endfunction
 
 
