@@ -315,7 +315,8 @@ function GFCraftInfoPage(who, objtype, skill_config)
 		graphic := CInt(objtype);
 	endif
 
-	var tooltip := thisitem.tooltip;
+//	var tooltip := thisitem.tooltip;
+	var tooltip := elem.tooltip;
 	if(TypeOf(tooltip) != "String")
 		tooltip := 0;
 	endif
@@ -416,7 +417,6 @@ function GFCraftInfoPage(who, objtype, skill_config)
 			endfor
 		endif
 	endif
-
 	// Exception % chance wording.
 	var echance   := 0;
 	if(elem.Exceptional == 1)
