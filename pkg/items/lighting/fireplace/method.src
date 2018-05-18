@@ -1,0 +1,31 @@
+use uo;
+use os;
+
+include ":itemutils:itemdesc";
+
+program Install()
+
+	return 1;
+endprogram
+
+exported function IsLight( fireplace )
+
+        fireplace := fireplace;
+
+	return 1;
+endfunction
+
+exported function IsOn( fireplace )
+
+	return (fireplace.graphic == fireplace.objtype);
+endfunction
+
+exported function ObjectKind( fireplace )
+	if(fireplace.IsOn())
+		return "fire";
+	else
+		return "";
+	endif
+endfunction
+
+
