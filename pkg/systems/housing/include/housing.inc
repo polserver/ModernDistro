@@ -150,12 +150,13 @@ function SetLockdownInfo( sign, mobile, item, type := "lockeddown" )
         SetObjProperty(sign, "numlockdowns", GetObjProperty(sign, "numlockdowns") - 1);
         PrintTextAbove(item, "Locked Down.");
       else
-        SendSysMessage(mobile, "that is not yours to lock down!", 2, 33);
+        SendSysMessage(mobile, "That is not yours to lock down!", 2, 33);
       endif
     else
       SendSysMessage(mobile, "The house has no more lockdowns remaining.", 2, 33);
     endif
 endfunction
+
 
 ///////////////////////////////////////////
 // CanBuildHere(who)

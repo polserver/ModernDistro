@@ -1,5 +1,6 @@
 use uo;
 use os;
+use cliloc;
 
 include "include/eventID";
 include ":attributes:attributes";
@@ -244,6 +245,16 @@ function HouseFunction(house, event, num)
       SendSysMessage(event.source, "Cancelled.");
       return;
     endif
+
+	// Set-up in case this item is a deeded item.
+	var DeedObjType := GetObjProperty( itemt, "DeedObjType" );
+	var DeedColor := GetObjProperty( itemt, "DeedColor" );
+	var DeedOwnerSerial := GetObjProperty( itemt, "DeedOwnerSerial" );
+	var OtherItems := array;
+	OtherItems := GetObjProperty( itemt, "OtherItems" );
+	//////////////////////////////////////////////
+	var MaxLD := 0;
+	var CurLD := 0;
     var homeinfo := GetObjProperty(house,"homeinfo");
     var nwx := homeinfo[2];
     var nwy := homeinfo[3];
@@ -260,24 +271,43 @@ function HouseFunction(house, event, num)
     endforeach
     if(inside == 1)
       case(num)
-        1: if(GetObjProperty(house, "numlockdowns") > 0)
+        1: if(house.GetLockdowns() > 0)
              if (itemt.movable == 1)
                itemt.movable := 0;
                SetObjProperty(itemt, "lockeddown", 1);
-               SetObjProperty(house, "numlockdowns", GetObjProperty(house, "numlockdowns") - 1);
+               house.SubtractLockdown();
                SendSysMessage(event.source, "Locked Down.");
              else
-               SendSysMessage(event.source, "that is not yours to lock down!");
+               SendSysMessage(event.source, "That is not yours to lock down!");
              endif
            else
              SendSysMessage(event.source, "The house has no more lockdowns remaining.");
            endif
         2: if (GetObjProperty(itemt, "lockeddown") && (itemt.movable == 0))
+
+				// This must remain first in the list for deeded items.
+				if(DeedObjType)
+					itemt := CreateItemInBackpack(event.source, CInt(DeedObjType));
+					if(!itemt)
+						SendSysMessageCL(event.source, 1045150, {}, 3, 33);	// "There is not enough room in your backpack for the deed."
+						return;
+					endif
+					itemt.color := CInt(DeedColor);
+					foreach part in OtherItems
+						itemt := SystemFindObjectBySerial(part);
+						DestroyItem(itemt);
+					endforeach
+					house.AddLockdown();
+					return;
+				endif
+				/////////////////////////////////////////////////////
+
              itemt.movable := 1;
              EraseObjProperty(itemt, "lockeddown");
-             SetObjProperty(house, "numlockdowns", GetObjProperty(house, "numlockdowns") + 1);
+             house.AddLockdown();
              SendSysMessage(event.source, "Released.");
-			 deedobj:= GetObjProperty(itemt, "deedobjtype");
+// Old deed stuff - left here temporarily.
+/*			 deedobj:= GetObjProperty(itemt, "deedobjtype");
 			 deedserial := GetObjProperty (itemt, "deedserial");
 			 if (deedobj)
 				foreach item in box
@@ -288,9 +318,11 @@ function HouseFunction(house, event, num)
 				DestroyItem(itemt);
 				CreateItemInBackpack(event.source, CInt(deedobj), 1);
 			 endif
+*/
            else
              SendSysMessage(event.source, "that is not yours to release");
            endif
+
       endcase
     else
       SendSysMessage(event.source, "That is not inside the building.");

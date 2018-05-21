@@ -127,7 +127,27 @@ exported function GetMaxLockdowns( sign )
 endfunction
 
 exported function GetLockdowns( sign )
-return GetObjProperty(sign, "numlockowns");
+return GetObjProperty(sign, "numlockdowns");
+endfunction
+
+exported function AddLockdown( sign )
+	var temp := GetLockdowns(sign);
+	temp := temp + 1;
+	if(temp > GetMaxLockdowns(sign))
+		temp := GetMaxLockdowns(sign);
+	endif
+	SetObjProperty(sign, "numlockdowns", temp);
+	return;
+endfunction
+
+exported function SubtractLockdown( sign )
+	var temp := GetLockdowns(sign);
+	temp := temp - 1;
+	if(temp < 0)
+		temp := 0;
+	endif
+	SetObjProperty(sign, "numlockdowns", temp);
+	return;
 endfunction
 
 exported function GetMaxSecures( sign )

@@ -3,6 +3,7 @@
 use uo;
 use os;
 use basic;
+use cliloc;
 
 include ":housing:housing_settings";
 include "include/eventID";
@@ -176,12 +177,19 @@ endfunction
 
 function HouseFunction(house, event, num)
   var itemt := Target(event.source, TGTOPT_NOCHECK_LOS);
-	var deedobj := "";
-	var deedserial := 0;
   if(!itemt)
     SendSysMessage(event.source, "Cancelled.");
     return;
   endif
+  
+  	// Set-up in case this item is a deeded item.
+	var DeedObjType := GetObjProperty( itemt, "DeedObjType" );
+	var DeedColor := GetObjProperty( itemt, "DeedColor" );
+	var DeedOwnerSerial := GetObjProperty( itemt, "DeedOwnerSerial" );
+	var OtherItems := array;
+	OtherItems := GetObjProperty( itemt, "OtherItems" );
+	//////////////////////////////////////////////
+  
   var lists := GetObjProperty(house, "footage");
   var itemlist := {};
   var holder;
@@ -200,78 +208,94 @@ function HouseFunction(house, event, num)
 //	SendSysMessage(event.source, CStr(homeinfo[1,3]), color :=56);
     var inside := 0;
     var box := ListObjectsInBox(homeinfo[1,1], homeinfo[1,2], -100, homeinfo[1,4], homeinfo[1,5], 100, itemt.realm);
-  if(itemt in itemlist)
+	if(itemt in itemlist)
     case(num)
-      1: if(GetObjProperty(house, "numlockdowns") > 0)
-           if(itemt.movable == 1)
-               itemt.movable := 0;
-               SetObjProperty(itemt, "lockeddown", 1);
-               SetObjProperty(itemt, "signserial", house.serial);
-               SetObjProperty(house, "numlockdowns", GetObjProperty(house, "numlockdowns") - 1);
-               SendSysMessage(event.source, "Locked Down.");
-           elseif((itemt.movable == 0) && (GetObjProperty(itemt,"lockeddown") ==1))
-             SendSysMessage(event.source, "that item is already locked down!");
-             return;
-           elseif((itemt.movable == 0) && (GetObjProperty(itemt,"secure") ==1))
-             SendSysMessage(event.source, "that item is secure!");
-             return;
-           else
-             SendSysMessage(event.source, "you cannot lock that down!");
-             return;
-           endif
-         else
-           SendSysMessage(event.source, "The house has no more lockdowns remaining.");
-         endif
-      2: if(GetObjProperty(itemt, "lockeddown") && (itemt.movable == 0))
-           if(GetObjProperty(itemt,"secure") ==1)
-             EraseObjProperty(itemt,"secure");
-             var oldscript := GetObjProperty(itemt,"oldscript");
-             if(oldscript == error)
-               oldscript := "";
-             endif
-             itemt.usescript := oldscript;
-             SetObjProperty(house, "numsecure", GetObjProperty(house, "numsecure") + 1);
-             EraseObjProperty(itemt, "oldscript");
-             EraseObjProperty(itemt, "boxserial");
-           endif
-           EraseObjProperty(itemt, "signserial");
-           itemt.movable := 1;
-           EraseObjProperty(itemt, "lockeddown");
-           SetObjProperty(house, "numlockdowns", GetObjProperty(house, "numlockdowns") + 1);
-           SendSysMessage(event.source, "Released.");
-			 deedobj:= GetObjProperty(itemt, "deedobjtype");
-			 deedserial := GetObjProperty (itemt, "deedserial");
-			 if (deedobj)
-				foreach item in box
-				  if (CInt(GetObjProperty (item, "deedserial")) == deedserial)
-					DestroyItem(item);
-				  endif
-				endforeach
-				DestroyItem(itemt);
-				CreateItemInBackpack(event.source, CInt(deedobj), 1);
-			 endif
-           return;
-         elseif ((itemt.movable == 0) &&(GetObjProperty(itemt,"secure") ==1))
-           EraseObjProperty(itemt,"secure");
-           var oldscript := GetObjProperty(itemt,"oldscript");
-           if (oldscript == error)
-             oldscript := "";
-           endif
-           itemt.usescript := oldscript;
-           SetObjProperty(house, "numsecure", GetObjProperty(house, "numsecure") + 1);
-           EraseObjProperty(itemt, "signserial");
-           EraseObjProperty(itemt, "oldscript");
-           itemt.movable := 1;
-           SendSysMessage(event.source, "Released.");
-           return;
-         elseif (itemt.movable == 1)
-           SendSysMessage(event.source, "that is not locked down");
-           return;
-         else
-           SendSysMessage(event.source, "you cannot release that");
-           return;
-         endif
-    endcase
+		1:	if(GetObjProperty(house, "numlockdowns") > 0)
+				if(itemt.movable == 1)
+					itemt.movable := 0;
+					SetObjProperty(itemt, "lockeddown", 1);
+					SetObjProperty(itemt, "signserial", house.serial);
+					SetObjProperty(house, "numlockdowns", GetObjProperty(house, "numlockdowns") - 1);
+					SendSysMessage(event.source, "Locked Down.");
+				elseif((itemt.movable == 0) && (GetObjProperty(itemt,"lockeddown") ==1))
+					SendSysMessage(event.source, "that item is already locked down!");
+					return;
+				elseif((itemt.movable == 0) && (GetObjProperty(itemt,"secure") ==1))
+					SendSysMessage(event.source, "that item is secure!");
+					return;
+				else
+					SendSysMessage(event.source, "you cannot lock that down!");
+					return;
+				endif
+			else
+				SendSysMessage(event.source, "The house has no more lockdowns remaining.");
+			endif
+		2:	if(GetObjProperty(itemt, "lockeddown") && (itemt.movable == 0))
+				// This must remain first in the list for deeded items.
+				if(DeedObjType)
+					itemt := CreateItemInBackpack(event.source, CInt(DeedObjType));
+					if(!itemt)
+						SendSysMessageCL(event.source, 1045150, {}, 3, 33);	// "There is not enough room in your backpack for the deed."
+						return;
+					endif
+					itemt.color := CInt(DeedColor);
+					foreach part in OtherItems
+						itemt := SystemFindObjectBySerial(part);
+						DestroyItem(itemt);
+					endforeach
+					house.AddLockdown();
+					return;
+				endif
+				/////////////////////////////////////////////////////
+				if(GetObjProperty(itemt,"secure") ==1)
+					EraseObjProperty(itemt,"secure");
+					var oldscript := GetObjProperty(itemt,"oldscript");
+					if(oldscript == error)
+						oldscript := "";
+					endif
+					itemt.usescript := oldscript;
+					SetObjProperty(house, "numsecure", GetObjProperty(house, "numsecure") + 1);
+					EraseObjProperty(itemt, "oldscript");
+					EraseObjProperty(itemt, "boxserial");
+				endif
+				EraseObjProperty(itemt, "signserial");
+				itemt.movable := 1;
+				EraseObjProperty(itemt, "lockeddown");
+				SetObjProperty(house, "numlockdowns", GetObjProperty(house, "numlockdowns") + 1);
+				SendSysMessage(event.source, "Released.");
+/*				deedobj:= GetObjProperty(itemt, "deedobjtype");
+				deedserial := GetObjProperty (itemt, "deedserial");
+				if (deedobj)
+					foreach item in box
+						if (CInt(GetObjProperty (item, "deedserial")) == deedserial)
+							DestroyItem(item);
+						endif
+					endforeach
+					DestroyItem(itemt);
+					CreateItemInBackpack(event.source, CInt(deedobj), 1);
+				endif		*/
+				return;
+			elseif ((itemt.movable == 0) &&(GetObjProperty(itemt,"secure") ==1))
+				EraseObjProperty(itemt,"secure");
+				var oldscript := GetObjProperty(itemt,"oldscript");
+				if (oldscript == error)
+					oldscript := "";
+				endif
+				itemt.usescript := oldscript;
+				SetObjProperty(house, "numsecure", GetObjProperty(house, "numsecure") + 1);
+				EraseObjProperty(itemt, "signserial");
+				EraseObjProperty(itemt, "oldscript");
+				itemt.movable := 1;
+				SendSysMessage(event.source, "Released.");
+				return;
+			elseif (itemt.movable == 1)
+				SendSysMessage(event.source, "that is not locked down");
+				return;
+			else
+				SendSysMessage(event.source, "you cannot release that");
+				return;
+			endif
+		endcase
   else
     SendSysMessage(event.source, "That is not inside your house.");
   endif

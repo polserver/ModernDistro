@@ -48,7 +48,7 @@ program textcmd_Info(who, serial)
 	if ( serial )
 		targ := SystemFindObjectBySerial(CInt(serial));
 	else
-		targ := Target(who, TGTOPT_NOCHECK_LOS);
+		targ := Target(who);
 	endif
 	if ( !targ.IsA(POLCLASS_ITEM) )
 		SendSysMessage(who, "Cancelled.");
@@ -105,7 +105,7 @@ function BuildEntries(targ, byref gump, byref cfg_elem, byref y_pos)
 
 	if ( cfg_elem.AutoBox )
 		var num_entries := entries.Size();
-		GFResizePic(gump, 145, y_pos, GFGetCfgConst("Defaults", "ForeGround"), 340, (num_entries*20));
+		GFResizePic(gump, 145, y_pos, GetCfgConst("Defaults", "ForeGround"), 340, (num_entries*20));
 	endif
 
 	foreach entry in ( entries )
@@ -201,7 +201,7 @@ function DisplayWeaponInfo(targ, byref gump, byref entry, byref y_pos)
 endfunction
 
 function DisplayGeneral(targ, byref gump)
-	GFResizePic(gump, 145, 55, GFGetCfgConst("Defaults", "ForeGround"), 340, 240);
+	GFResizePic(gump, 145, 55, GetCfgConst("Defaults", "ForeGround"), 340, 240);
 	var isa_types := GetIsAType(targ, ISA_GET_ALL);
 	isa_types.Reverse();
 	GFTextLine(gump, 155, 60, 2100, "ISA TREE");
@@ -213,7 +213,7 @@ function DisplayGeneral(targ, byref gump)
 		SleepMS(2);
 	endforeach
 
-	GFResizePic(gump, 145, 300, GFGetCfgConst("BackGrounds", "GOLDTRIM"), 340, 165);
+	GFResizePic(gump, 145, 300, GetCfgConst("BackGrounds", "GOLDTRIM"), 340, 165);
 	GFTilePic(gump, 290, 355, targ.graphic, targ.color);
 
 	return 1;
@@ -287,14 +287,14 @@ endfunction
 function GumpTemplate(targ)
 	var gump := GFCreateGump();
 	GFPage(gump, 0);
-	GFResizePic(gump, 0, 0, GFGetCfgConst("Defaults", "BackGround"), 500, 480);
+	GFResizePic(gump, 0, 0, GetCfgConst("Defaults", "BackGround"), 500, 480);
 
-	GFResizePic(gump, 15, 15, GFGetCfgConst("Defaults", "ForeGround"), 470, 35);
+	GFResizePic(gump, 15, 15, GetCfgConst("Defaults", "ForeGround"), 470, 35);
 	GFTextLine(gump, 25, 22, 2100, "Info on "+targ.desc);
 
 	GFTextRight(gump, 475, 22, 2100, "["+GetIsAName(GetIsAType(targ))+"]");
 
-	GFResizePic(gump, 15, START_Y, GFGetCfgConst("Defaults", "ForeGround"), 125, END_Y);
+	GFResizePic(gump, 15, START_Y, GetCfgConst("Defaults", "ForeGround"), 125, END_Y);
 
 	var y_pos := 60;
 	foreach entry in ( index_list )

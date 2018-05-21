@@ -207,17 +207,28 @@ function BuildItem ( who, deed, sign, targ, buildCFG, RetainColor, direction )
 			if ( part.IsKey() )
 				continue;
 			endif
-			SetObjProperty ( part, "DeedObjType", deed.objtype );
-			SetObjProperty ( part, "DeedColor", deed.color );
-			SetObjProperty ( part, "DeedOwnerSerial", who.serial );
-			SetObjProperty ( part, "OtherItems", the_serials );
+			SetObjProperty( part, "DeedObjType", deed.objtype );
+			SetObjProperty( part, "DeedColor", deed.color );
+			SetObjProperty( part, "DeedOwnerSerial", who.serial );
+			SetObjProperty( part, "OtherItems", the_serials );
+			SetObjProperty( part, "lockeddown", 1);
+			SetObjProperty( part, "signserial", sign.serial);
+			//SetObjProperty( sign, "numlockdowns", GetObjProperty(sign, "numlockdowns") - 1);
+			SendSysMessage( who, "Locked Down.", 3, 66);
+
 	//	Let's place the lockdown property on only the last item placed by the deed
 	//	which is a "cheat" to only have deeded items take up one lockdown.
 			if ( _part_iter == created_size )
+				// Added to prevent "That is not yours to lock down!" in SetLockdownInfo function.
+				part.movable := 1;
 				SetLockdownInfo( sign, who, part, "lockeddown" ); 
 			endif
 			SleepMS(5);
 		endforeach
+		// Deeded items will take up  one (1) lockdown no matter how many parts the item has.
+		// This corrects the lockdowns removed per part by the call to SetLockdownInfo.
+        //SetObjProperty(sign, "numlockdowns", GetObjProperty(sign, "numlockdowns") + created_size);
+
 		DestroyItem ( deed );
 	else
 		destroy_parts ( created );
@@ -256,3 +267,4 @@ function PlacedWell(who)
 		return 1;
 	endif 
 endfunction
+
