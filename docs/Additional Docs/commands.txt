@@ -1,0 +1,946 @@
+Player Commands
+----------------------------------------------------------------------------
+
+c
+Syntax: .c [message]
+Function: Use to send messages to all players with in your guild.
+Notes: type just .c to set your guild chat options.
+
+
+consider
+Syntax: .consider
+Function: allows a player to get information on their murdercounts.
+
+
+flip
+Syntax: .flip
+Function: Allows a player to change the direction of certain items (Chairs, ect)
+
+Motd
+Syntax: .motd
+Function: Displays the shards message of the day.
+
+
+resign
+Syntax: .resign
+Function: Allows a player to resign from a guild.
+
+
+Counselor Commands
+-----------------------------------------------------------------------------
+
+Concealme
+Syntax: .concealme [level]
+Function: Allows you to move while hidden. Optional parameter level allows you to be conceacled to those the level selected and below. You can never conceal yourself to those the same level or higher than you.
+
+
+Counpage
+Syntax: .counpage
+Function: Displayes the page queue for councelors.
+
+
+Disable
+Syntax: .disable [priv] 
+Function: disables an access privilage granted to a player with granpriv.
+Example .disable invul
+
+
+Enable
+Syntax: .enable [priv] 
+Function: enables an access privilage granted to a player with granpriv.
+Example .enable invul
+
+
+Fetch
+Syntax: .fetch
+Function: moves a targeted player or npc to your location. Useful for helping players that are stuck.
+
+
+GM Broadcast
+Syntax: .gmbcast [message]:
+Function: Allows the initiator to broadcast a global message to all gms online.  Only Gms will hear the message.
+
+
+Goto 
+Syntax: .goto [player name] 
+Function: Teleports you to the given player. typing .goto without a player name will display a list of all players to choose from.
+
+
+Msg 
+Syntax: .msg [player name] 
+Function: Will prompt for a message to send privately to the given player. Typing .msg without the player name will display a list of all online players to choose from.
+
+
+Mtele 
+Syntax: .mtele 
+Function: Teleports you to multiple targetted tiles. Hit ESC to cancel.
+
+
+Nsight
+Syntax: .nsight
+Function: Sets your lightlevel to daylight (0) for a duration of 600 seconds.
+
+
+Tele 
+Syntax: .tele 
+Function: Teleports you to the targetted tile.  
+
+
+Time 
+Syntax: .time 
+Function: Prints the time of day.  
+Notes: Military time. (24:00) 
+
+
+Unconcealme 
+Syntax: .unconcealme 
+Function: Unconceals you. Used with .concealme.
+
+
+Seer Commands
+-----------------------------------------------------------------------------
+
+Addgoloc
+Syntax: .addgoloc
+Function: Adds a new location to use with the .go command. Type .addgoloc and target the area to use as the location. Then type in a name for your location!  NOTE: This is saved by character name.  Locations will not be available to other characters or if you .rename to a variant.
+
+
+Bank
+Syntax: .bank
+Function: Opens your own bankbox wherever you are in the world. However, moving will make it close again.
+
+
+Booklock
+Syntax: .booklock
+Function: Makes targeted book readonly.
+
+
+Broadcast
+Syntax: .bcast [message]:
+Function: Allows the initiator to broadcast a global message
+
+
+Broadcast As
+Syntax: .bcastas [name] [Message]:
+Function: Allows the initiator to broadcast a global message as another name (or anonymous if name is not specified).
+Example: .bcastas Bucon: You shall all perish, mortals.
+
+
+Copylook
+Syntax: .copylook
+Allows you to diguise yourself as any npc including name, graphic, clothing ect.
+
+
+Create 
+Syntax: .create {objtype or name} {amount} 
+Function: .create with no parameters brings up a small item creation menu. Otherwise, creates the specified item amount times (amount defaults to 1).  
+
+
+Create At 
+Syntax: .createat {objtype or name} {amount} 
+Function: Same as .create but it prompts for a target to create the item at.  
+
+
+Create Light Source
+Syntax: .createlightsource
+Function: creates a magical lightsource can follow you or any player with the follow or followme command.
+
+
+Create NPC
+Syntax: .createnpc [template]
+Function: Creates a single NPC of the specified type. Templates are defined in npcdesc.cfg.
+Example: .createnpc walrus
+
+
+Createstack
+Syntax: .createstack [objtype / itemdesc] [amount]
+Function: Creates a stack of the specified objtype and amount. Non-stackable items will only use one graphic, but show the amount in the name.
+Example: .createstack goldcoin 1000
+
+Createstackat
+Syntax: .createstackat [objtype / itemdesc] [amount]
+Function: Creates a stack of the specified objtype and amount at the location you target. Non-stackable items will only use one graphic, but show the amount in the name.
+Example: .createstackat goldcoin 1000
+
+Darken
+Syntax: .darken
+Function: Allows you to set the light level of the target to the darkest level possible (30)
+
+
+Dart trap
+Syntax: .darttrap
+Function: Allows you to set a dart trap on a container
+
+
+Explosion trap
+Syntax: .explosiontrap
+Function: Allows you to set an explosion trap on a container
+
+
+GM Form
+Syntax: .gm
+Function: Sets you to the GM graphic and allows you to walk through doors
+
+
+Go 
+Syntax: .go [place] 
+Function: Transport to the given location. New locations can be defined in the script. 
+Example: .go green transports you to green acres.  
+
+
+Goxyz 
+Syntax: .goxyz [x] [y] [z] 
+Function: Transport to the given coordinates.  
+Notes: coordinates must be space-delimited. 
+
+
+Hideme 
+Syntax: .hideme 
+Function: Hides yourself. Note that you will be unhidden for the same reasons as if you were using the hiding skill. The advantage to this is that none of the normal LOS or distance checks are made.  
+
+
+Lockdown
+Syntax: .lockdown 
+Function: Makes the targeted item locked down(sets unmovable) by anyone with out the moveany priv
+
+
+Lockradius
+Syntax: .lockradius [radius]
+Function: Locks down (sets unmovable by anyone with out the moveany priv) all items in the specified radius.
+
+
+Log notify
+Syntax: .lognotify
+Function: sets or unsets whether or not you will be notified when players log in/out as well as their time online.
+
+
+Mark
+Syntax: .mark
+Function: marks a targeted rune with your current x,y,z coordinates
+
+
+Mpx
+Syntax: .mpx [amount]
+Function: allows you to modify an item or items x level up or down multiple times. To cancel hit ESC.
+
+
+Mpy
+Syntax: .mpy [amount]
+Function: allows you to modify an item or items y level up or down multiple times. To cancel hit ESC.
+
+
+Mpz
+Syntax: .mpz [amount]
+Function: allows you to modify an item or items z level up or down multiple times. To cancel hit ESC.
+
+
+Openpack
+Syntax: .openpack
+Function: opens a targeted players backpack.
+
+
+Poison trap
+Syntax: .poisontrap
+Function: Allows you to set a poison trap on a container
+
+
+Px
+Syntax: .px [amount]
+Function: allows you to modify an item's x level up or down.
+
+
+Py
+Syntax: .py [amount]
+Function: allows you to modify an item's y level up or down.
+
+
+Pz
+Syntax: .pz [amount]
+Function: allows you to modify an item's z level up or down.
+
+
+Recall
+Syntax: .recall
+Function: Allows you to recall to a targeted runes marked x,y,z coordinates.
+
+
+Refreshme 
+Syntax: .refreshme 
+Function: Refills your hp, mana, and stamina  
+Note: Use .nsight to get nightsight.
+
+
+Rename 
+Syntax: .rename [newname] 
+Function: Renames the targetted object to the given newname. Use this instead of ".setprop name blah"  
+
+
+Sayabove 
+Syntax: .sayabove [text] 
+Function: Prints the given text above the targetted object for all to see. 
+
+
+Sayabovepvt 
+Syntax: .sayabovepvt [text] 
+Function: Prints the text above the targetted object for you to see only.  
+
+
+Setbook
+Syntax: .setbook
+Function: an administrative tool that allows a GM to change properties of a book such as the book's graphic and whether or not a player can edit it.
+
+
+Setintproperty 
+Syntax: .setobjproperty [propname] [integer value] 
+Function: Sets a property of the given name and value on the targetted object. (Value is an integer)
+
+
+Setlight 
+Syntax: .setlight [region name] [amount] 
+Function: Changes the global light level in the given region name (see regions.cfg for names) to the given amount (0-15)  
+
+
+Shelfe
+Syntax: .shelfe
+Function: creates and registers a bookspawning bookcase facing east.
+
+
+Shelfs
+Syntax: .shelfs
+Function: creates and registers a bookspawning bookcase facing south.
+
+
+Teleto
+Syntax: .teleto 
+Function: Teleports targeted player to the targeted tile.
+
+
+Where 
+Syntax: .where 
+Function: Prints your current coordinates.  
+
+
+GM Commands
+-----------------------------------------------------------------------------
+
+Action 
+Syntax: .action [number] 
+Function: Forces the targetted mobile to perform the given action (i.e. bow, breathe fire..)  
+Notes: Use decimal or prepend with "0x" to use Hex. 
+
+
+Addset
+Syntax: .addset
+Function: takes a group of items in a given area and records their layout so that same pattern can be duplicated as needed. Recreate the items using the .makeset [name] command
+
+
+Addtele
+Syntax: .addtele
+Function: add a system teleporter
+
+
+Attack
+Syntax: .attack
+Function: forces a targetd npc to attack another npc or player.
+
+
+Bow
+Syntax: .bow
+Function: Forces all npcs and players with a human graphic to bow.
+
+
+Buzz 
+Syntax: .buzz 
+Function: Give the targetted human a buzzcut (i.e. remove hair)  
+
+
+Campspawner
+Syntax: .campspawner
+Function: creates roaming critter camps (orcs, lizardmen, ratmen, bandits or gypsies) with a defineable number of critters, a locked, trapped, and filled treasure chest, as well as some standard camp items.. once a user defined amount of time has passed, the camp will relocate itself 50 tiles in a random direction and respawn all the necessary components.
+
+
+Chestspawner
+Syntax: .chestspawner
+Function: creates a treasure chest spawner that will take user settings and spawn filled, locked, and trapped treasure chests with user defineable loot.
+
+
+Control
+Syntax: .control
+Function: Accesses the list of registered packages and brings up a gump to access them from.
+
+
+Createnode
+Syntax: .createnode
+Function: Creates a merchant or banker node.
+Notes: See readme for info on setting up merchants.
+
+
+Crim
+Syntax: .crim [1/0]
+Function: Sets a targetd players criminal status on or off.
+
+
+D
+Syntax: .d
+Function: Gm concealme command with a cool falling rock effect.
+
+
+Destroy 
+Syntax: .destroy 
+Function: Destroys the targetted item.  
+
+
+Destroyboat
+Syntax: .destroyboat
+Function: Destroys the targetted boat by targeting the tillerman.
+
+
+Destroymulti
+Syntax: .destroymulti
+Function: Destroys the house you are in.
+
+
+Dmany
+Syntax: .dmany
+Function: Destroys the all items with in a 1 tile radius of targeted location.
+
+
+E
+Syntax: .e [conceal]
+Function: Cool sparkle and flamestrike effect. If you send a flag (ie, type
+.e conceal), it will also conceal you in the process.
+
+
+Ekill
+Syntax: .ekill [effect]
+Function: this command plays a moving effect, then kills the target.
+
+
+Equip
+Syntax: .equip
+Function: forces a targeted npc or player to equip a targeted item.
+
+
+Eraseglobal
+Syntax: .eraseglobal [propname]
+Function: Deletes a global property
+
+
+Eraseobjproperty 
+Syntax: .eraseobjproperty [propname] 
+Function: Erases the given property from the targetted Object.  
+
+
+Freeze 
+Syntax: .freeze 
+Function: Paralyzes the targetted mobile. Use .thaw to undo.  
+
+
+Getglobal 
+Syntax: .getglobal [propname] 
+Function: Prints the value of the given global property.  
+
+
+Getprop 
+Syntax: .getprop [propname] 
+Function: Prints the value of the given object property.
+
+
+Getscript 
+Syntax: .getscript
+Function: Prints the AI script thats attached to the targeted NPC.
+
+
+Getstatic
+Syntax: .getstatic
+Function: Prints the objtype of the targeted location.
+
+
+Getusescript
+Syntax: .getusescript
+Function: Prints the use script thats attached to the targeted item.
+
+
+GFchart
+Syntax: .gfchart
+Function: Displays a 640x480 GUMP colour-chart.
+
+
+GMpage
+Syntax: .gmpage
+Function: Displayes the page que for GMs.
+
+
+GMTools
+Syntax: .gmtools
+Function: Opens the gmtools utility which includes various utilities to make a gms life easier.
+
+
+Goserial
+Syntax: .goserial [serial number]
+Function: Teleports you to x,y,z coordiantes of item with attached serial number.
+
+
+Hide
+Syntax: .hide
+Function: Sets the hidden property on a targeted item.
+
+
+Ident 
+Syntax: .ident 
+Function: Prints the serial and objtype of the targetted object.  
+
+
+Info
+Syntax: .info
+Function: Displays and edits various information about a targeted player or npc such as stats, skills ect.
+
+
+Ip
+Syntax: .ip
+Function: Prints the ip address of the targeted player.
+
+
+Iteminfo
+Syntax: .iteminfo
+Function: Displays and edits various information about a targeted item.
+
+
+Jump
+Syntax: .jump [Direction]
+Function: Moves a player 59 tiles in a given direction (N,S,E,W).  Useful for setting up guard nodes.
+
+
+Kick 
+Syntax: .kick 
+Function: Disconnects the targetted player from the server.  
+
+
+Kill 
+Syntax: .kill 
+Function: Kills targeted player or NPC.
+
+
+Lkill 
+Syntax: .lkill 
+Function: Plays lightning bolt effect on player or NPC then kills them.
+
+
+Lock 
+Syntax: .lock 
+Function: Sets the "locked" property on the targetted container to true.  
+Notes: The original key will still open the container. 
+
+
+Makekey
+Syntax: .makekey
+Function: Makes a key to match lock of targeted door or container.
+Notes: Will only work on doors and containers.
+
+
+Makeregs 
+Syntax: .makeregs [amount]
+Function: Creates a bag in your pack with specified amount of each type of reagent in it.  
+Notes: If no amount is specified, 20 of each will be created.
+
+
+Makeset
+Syntax: .makeset [name]
+Function: creates a group of items that were created using the addset command.
+
+
+Maketele
+Syntax: .maketele
+Function: creates a teleporter from the location you are standing at to the location of a marked rune.
+
+
+Mdestroy
+Syntax: .mdestroy [range]
+Function: destroys all items with in the set range around your character.
+
+
+Meplayer
+Syntax: .meplayer
+Function: Sets your cmdlevel to 0 (player).
+
+
+Mflip
+Syntax: .mflip
+Function: changes the direction of an item or items multiple times. Hit ESC to cancel.
+
+
+Moveitem 
+Syntax: .moveitem 
+Function: Moves the targetted item to a new position.
+
+
+Movetocont 
+Syntax: .movetocont 
+Function: Moves the targetted item to a new container.  
+
+
+Myform 
+Syntax: .myform 
+Function: Changes you back to the human male graphic.  
+Notes: Good if you somehow change your graphic to an invisible one and cant target yourself to change back. 
+
+
+Powerdown
+Syntax: .powerdown
+Function: Sets all your skills to 0.
+
+
+Powerup 
+Syntax: .powerup 
+Function: Sets all your skills to 100.
+
+
+Propedit
+Syntax: .propedit 
+Function: displays a list of all props associated with an Character or Item for editing.
+
+
+Recreate
+Syntax: .recreate
+Function: Kills and recreates the targetted NPC.
+
+
+Regionmanager
+Syntax: .regionmanger
+Function: Displays the regionmanager gump to edit regional npc spawns.  Spawns can be added, edited and deleted on the fly.
+
+
+Rekey	
+Syntax: .rekey
+Function: creates a new lock and key for the targeted door.
+
+
+Relock
+Syntax: .relock
+Function: creates a newlock on targeted door to match targeted key.
+
+
+Res 
+Syntax: .res 
+Function: Resurrect the targetted player.
+
+
+Resme 
+Syntax: .resme 
+Function: Resurrects yourself.  
+
+
+Restartregionmanager
+Syntax: .restartregionmanager
+Function: Restarts the region manager.
+
+
+Savenow 
+Syntax: .savenow 
+Function: Forces a worldsave.  
+
+
+Seehidden
+Syntax: .seehidden
+Function: shows hidden system teleporters
+
+
+Setglobalprop
+Syntax: .setglobalprop [propname] [value]
+Function: sets an global property.
+
+
+Setmovable 
+Syntax: .setmovable [0 or 1] 
+Function: Sets the targetted item to movable (1) or not (0).  
+
+
+Setobjproperty 
+Syntax: .setobjproperty [propname] [value] 
+Function: Sets a property of the given name and value on the targetted object.  
+
+
+Setprop 
+Syntax: .setprop [propname] [value] 
+Function: Sets the given property to the given value. 
+
+
+Setscript
+Syntax: .setscrpt [script name]
+Function: sets the specified Ai script to the targeted npc.
+
+
+Setskill 
+Syntax: .setskill [skill#] [amount] 
+Function: Sets the given skill number to the given amount.  
+
+
+Settextprop 
+Syntax: .settextprop [propname] [value] 
+Function: Sets the given property to the given text value. 
+
+
+Setusescript
+Syntax: .setscrpt [script name]
+Function: sets the specified use script to the targeted item.
+
+
+Sfx 
+Syntax: .Sfx [number] 
+Function: Play the given sound number to those in the vicinity, centered around you.  
+
+
+Shave 
+Syntax: .shave 
+Function: Shaves off the targetted human's facial hair.  
+
+
+Showstats 
+Syntax: .showstats 
+Function: Prints the str, int, and dex above the targetted mobile.  
+Notes: Faster than using getprop. 
+
+
+Spellbook 
+Syntax: .spellbook 
+Function: Creates a full spellbook in your pack.  
+
+
+Squelch
+Syntax: .squelch [minutes]
+Function Squelches (Silences) a players for the specified amount of time.
+
+
+Strip
+Syntax: .strip
+Function strips all items from a targeted player or npc.
+
+
+Summon
+Syntax: .summon [name]
+Function summons the specified player to you. if no player is named a list of online players will be displayed to choose from.
+
+
+Tame 
+Syntax: .tame 
+Function: Artificially tames the targetted NPC.  
+
+
+Thaw 
+Syntax: .thaw 
+Function: Unfreezes the frozen target (frozen from .freeze command).  
+
+
+Thawme 
+Syntax: .thawme 
+Function: Unfreezes yourself.  
+
+
+Tile
+Syntax: .tile [obj number] [z level]
+Function: This is a "fastbuild" command and is great for putting down floors etc.
+
+
+Unlock 
+Syntax: .Unlock 
+Function: Sets the "locked" property on the targetted container to false.  
+
+
+Unlockradius
+Syntax: .unloackradius [range]
+Function: Sets everything within the given radius to movable.
+
+
+Whereship 
+Syntax: .whereship 
+Function: Prints the coordinates of the ship by targetting the ship key.  
+
+
+Wipebank 
+Syntax: .wipebank 
+Function: Empties the bankbox of the targetted player.  
+
+
+Writequip 
+Syntax: .writequip 
+Function: Writes the equipped items of the targetted mobile to equip.cfg for later use with "equipt"  
+
+
+Admin Commands
+-----------------------------------------------------------------------------
+
+Addbook
+Syntax: .addbook
+Function: Adds targeted book to the datafiles to be spawned with the book spawner.
+
+
+Booklock
+Syntax: .booklock
+Function: Makes targeted book readonly.
+
+
+Bookspawntest
+Syntax: .bookspawntest
+Function: Fills the targeted Spawnning bookcase (created with .shelfe and .shelfs) with books.
+
+
+Booksweep
+Syntax: .booksweep
+Function: manual spawner that fills all the book spawning bookcases created with the shelfe or shelfs commands.  Basically this script just forces the respawn of all registered book spawners... 
+
+
+Critterpurge
+Syntax: .critterpurge
+Function: kills all nontamed npcs within a 20 tile radius.
+
+
+Dyehair
+Syntax: .dyehair
+Function: displays a menu of haircolors to to change current haircolor.
+
+
+Forgive
+Syntax: .forgive
+Function: Removes all murders(long term and shortterm) from a player as well as perma red status and criminal status.
+
+
+Grantpriv 
+Syntax: .grantpriv [priv] 
+Function: Grants an access privlage to a targetted character.  
+
+
+Gzone
+Syntax: .gzone
+Function: Informs you if you are within a guardzone or not.
+
+
+MakeMoongates 
+Syntax: .makemoongates 
+Function: Creates the 8 world moongates.  
+
+
+Newaccount
+Syntax: .newaccount [Username] [password]
+Function: Creates a new user account using the specified name and password.
+
+
+Nodewipe
+Syntax: .nodewipe
+Function: Destroys all merchant and guardnodes throughout the world.
+
+
+NPCwipe 
+Syntax: .npcwipe 
+Function: Kills all mobiles in the world. Including online players.  
+
+
+Release
+Syntax: .release
+Function: Unlocks and makes movable all locked down items within the given multi (House or boat).
+
+
+Restart 
+Syntax: .restart 
+Function: Restarts the targetted NPC's AI script.  
+
+
+Restart All 
+Syntax: .restartall
+Function: Restarts all NPC's AI scripts in the world.
+
+
+Revokepriv 
+Syntax: .revokepriv [priv] 
+Function: Revokes an access privlage from a targetted character.  
+
+
+Setcmdlevel 
+Syntax: .setcmdlevel [level] 
+Function: Grants a new access level to the targetted player.  
+
+
+Setmurder
+Syntax: .setmurder [ 0 / 1 ]
+Function: Toggles a targeted players murderer status on or off.
+
+
+Storebook
+Syntax: .storebook
+Function: Stores the contents of targeted book into ::bookstorage
+
+
+Unloadcfg 
+Syntax: .unloadcfg [filename] 
+Function: Forces POL to re-read a config file without restarting.  
+Notes: Do not append filename with ".cfg" 
+
+
+Test Commands
+-----------------------------------------------------------------------------
+
+Clock
+Syntax: .clock
+Function: displays the ingame time.
+
+
+Firestorm
+Syntax:  .firestorm
+Function: Kills all Non Invul NPCs with a nice meteorstorm effect.
+
+
+Getmapinfo
+Syntax: .getmapinfo
+Function: Returns the tile info of a targeted static map tile (X,y,z and tile graphic).
+
+
+getobjprop
+syntax: .getobjprop [prop name]
+Function: Returns the value of  the specified cprop of an item.  If no prop exist an error is returned.
+
+
+Getregionstring
+Syntax: .getregionstring [region name]
+Function: 
+
+
+Itemcount
+Syntax: .itemcount
+Function: Returns the total number of items in a targeted container.
+
+
+Killmods
+Syntax: .killmods
+Function: Removes all stat, ar and skill mods on the targeted player.
+
+
+KillPID
+Syntax: .killpid [serial]
+Function: Kills a current running script. PID is shown in the console.
+Notes: Useful to kill runaway scripts.
+
+
+Landtile
+Syntax: .landtile
+Function: Returns the graphic of the targeted land tile.
+
+
+Openit
+Syntax: .openit
+Function: opens the targeted container.
+
+
+Smember
+Syntax: .smember [member name]
+Function: Returns the value of the specified member of the targeted item or character.
+Example .smember weight
+
+
+Startscript
+Syntax: .startscript [script name]
+Function: Starts specified script
+
+
+Worldheight
+Syntax: .worldheight [ X , Y ]
+Function: Returns the world height of the specified x,y coordinates.
+

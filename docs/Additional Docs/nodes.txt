@@ -1,0 +1,104 @@
+Guard Nodes:
+  The Guard Node is objtype 0x887b.
+  Overview:
+    guard nodes are items used to control and spawn guards in all the cities.
+  Features:
+    guard nodes listen to speech events in a radius of 30 tiles.
+    guard nodes search for criminals in a radius of 30 tiles.
+    guard nodes recieve events from merchant nodes.
+    guard nodes send events to nearby guards to attack criminals
+    guards do not listen directly for guard calls, so they consume less 
+      CPU cycles
+    guards do listen for certain keywords at a very close range. so a player
+      must be close to them to get a response
+    guard nodes spawn their own guards as needed, and will replace any guards
+      that may be killed in the line of duty.
+    it is very difficult to kill a town guard as they will heal and cure
+      themselves if they reach half health or are poisoned
+  Installation:
+    guard nodes must be setup in a grid in all guard protected cities..
+    since guard nodes have a listen range of 30 tiles diamater, they should 
+      be placed in the following manner:
+      place nodes from the west side of town to the east.
+      find the town border and travel east 30 tiles
+      then find the north border and travel south 30 tiles
+      place a node there, the node will spawn its own guard
+      then travel 60 tiles south and place another node (30 tile radius 
+        for each node)
+      continue until you reach the south border of town
+      any guard nodes that extend past the town border will only work within
+        the actual town limits, so you dont have to worry about extending past 
+        town limits. 
+      (Guard zones are defined in config/gzone.cfg.)
+      for each node you have placed continue the above grid to the east till you
+        hit the east edge of town. once you fill in the grid, your town will be 
+        completely covered.
+Merchant Nodes:
+  The Merchant Node is objtype 0x887a.
+  Overview:
+    merchant nodes handle all speech events for npcs that interact regularly with
+      players. bankers, stablemasters, and all normal merchants are controlled
+      under this system. These npcs WILL NOT interact with players if they are
+      not controlled by a merchant node.
+
+  Features:
+    merchant nodes control all vendor restocking, and will queu restock cycles so 
+      they dont happen all at once, thus distributing system load over a longer 
+      period of time.
+    merchant nodes do all listening for their linked merchants.. the merchants 
+      themselves no longer handle speech events.. This results in lower overall
+      CPU utilization and much more user-friendly interaction for the players in
+    Only the closest npc within LOS and no greater than 4 tiles away from
+      the player will recieve the speech event, so you can always choose
+      which npc you wish to interact by positioning yourself closest to him.
+    vendors will keep items sold to them from players, and will alter the buy/sell
+      price of those items to reflect quality and condition. If a vendor does not
+      sell the item after 2 restock cycles, he will liquidate the items back into
+      gold currency to use for replenishing his stock and buying new goods.. 
+    vendors have a limited amount of gold to work with.. as a vendor buys and sells
+      goods, his pool of available gold will increase or decrease.. players that
+      sell tons of items to npcs will find that the npc cannot afford to purchase
+      anymore, and may not be able to afford to restock his normal stock items
+      (vendors spend their profit to restock their own regular inventory). once a 
+      vendor runs out of money, he must sell some of his current stock before he
+      can restock to normal levels..
+    when a vendor sells out of a particular item in a given stock cycles, he will
+      attempt to purchase an increased amount during his next restock.. this amount
+      may increase up to 20 X his base value.. if a vendor does not sell the
+      elevated items, he will stop stocking them until he reaches his base inventory
+      and then continue from that base.. 
+  Installation:
+    to install a merchant node, you must know the following information before you 
+    begin:
+      largest radius of the room to monitor. this can be determined by standing in
+      the exact center of the room and counting the tiles to the farthest wall.
+      keep in mind that the nodes check line of sight, so for buildings that are not
+      rectangular, you must base your centering on the assumption that the building
+      is rectangular. once you have your radius figure, you must create your npcs..
+      note that npcs are designed to be permanent and should not be created with a 
+      spawner, just use .createnpc.
+      once the npcs are created, you can use the .createnode command to begin setting
+      up the node.
+    creation:
+      the createnode gump is pretty straight forward. simply fill in the radius in
+      the spot provided and choose wether the node controls merchants or bankers.
+      setting a node to "banker" will cause the node to not attempt to run restock
+      so do not use this setting on normal merchants.
+      the "next respawn" field is the amount of time between restocks in minutes.
+      each npc will restock his inventory on that interval. the default of 30 minutes
+      is recommended for all merchants except reagent vendors which seem to work best
+      at 12 minute restock intervals.
+      once all the relevant information is entered, choose "okay".
+      the first target cursor is for selecting where the cursor appears.. this must be
+      set at the center of the room, even if it is within a wall or outside the actual 
+      building. once the node is placed, after the node is placed, another cursor will 
+      appear, these cursors must be targeted once each on the merchants/bankers that
+      you have previously created. once you have targeted all the npcs you wish that
+      node to control, cancel the cursors and the node should turn green.. once the 
+      node turns green, it is active and ready to use.. if the node turns purple, it 
+      means the node is improperly configured and must be destroyed and recreated.
+      Soon a more user friendly version that is easier to setup will be released in 
+      a distro service pack.
+      
+    
+    

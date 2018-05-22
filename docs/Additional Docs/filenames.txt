@@ -1,0 +1,21 @@
+
+For the ease of use of our linux users, we have standardized the file names in POL.
+Windows users will not notice any effect from this, and will not notice when it is
+done incorrectly; however, you will probably find your life easier when all the files
+have names that you never have to look up because they are all standardized. No more
+wondering if this one has an underscore, or which letters are capitalized.
+
+Here are the rules:
+
+Acronyms/Initialisms are capitalized.
+Unless part of the above, the first letter of the filename is lowercase.
+The first letter of each additional word is capitalized.
+Extensions are lowercase.
+Examples:
+
+NPCBackpacks.inc
+newFiles.inc
+killAllPCs.src
+
+Exceptions:
+Config files, textcommands, and files in scripts/misc are all lowercase.

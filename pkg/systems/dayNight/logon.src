@@ -1,8 +1,0 @@
-// $Id: logon.src 605 2011-09-11 01:14:50Z AustinHeilman $
-//
-//
-
-program LogOn(user)
-	user.SetLightLevel(0, 1);
-	return 1;
-endprogram
