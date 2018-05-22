@@ -1,0 +1,158 @@
+use uo;
+use os;
+use util;
+use cfgfile;
+
+
+	var cfg := ReadConfigFile("::days");
+	var sharddate := GetGlobalProperty("ShardDate");
+	var shardyear := GetGlobalProperty("ShardYear");
+	var elm := FindConfigElem(cfg, "WholeDay");
+	var daylength := GetConfigInt(elm, "Length");
+	var transition := GetConfigInt(elm, "Transition");
+	var nightlength := GetConfigInt(elm, "Night");
+	var dawnmsgs := { };
+	var duskmsgs := { };
+	var season := "Spring";
+	var d, n, t, time, i;
+	
+	if (!sharddate)
+		sharddate := 91;
+	endif
+	if (!shardyear)
+		shardyear := 1000;
+	endif
+
+	GetSeason();
+	SetGlobalProperty("DayPhase", "Night");
+
+program daycycle()
+
+	print("Starting day/night cycle...");
+	print("DayLength = " + CStr(d) + ", Night = " + CStr(n) + ", Transitions = " + CStr(t) );
+	print("Date: day " + CStr(sharddate) + " of year " + CStr(shardyear) );
+
+	while(1)
+
+// Midnight
+		SetGlobalProperty("NewDay", ReadGameClock() );
+//		Old nights were VERY dark. That's the reason the following line is commented.
+//		SetRegionLightLevel("Background", 30);
+		SetRegionLightLevel("Background", 25);
+		Broadcast("It is midnight.");
+		time := CInt(n / 2);
+		sleep(time);
+
+// Dawn
+		SetGlobalProperty("DayPhase", "Dawn");
+		Broadcast( CStr(dawnmsgs[ (RandomInt(len(dawnmsgs)) + 1) ]) );
+		time := CInt(t / 28);
+//		Old nights were VERY dark. That's the reason the following line is commented.
+//		for (i := 29; i >= 3; i := i - 1)
+		for (i := 24; i >= 3; i := i - 1)
+			SetRegionLightLevel("Background", i);
+			sleep(time);
+		endfor
+		SetRegionLightLevel("Background", 2);
+		time := t - (CInt(t / 28) * 27);
+		sleep(time);
+
+// Morning
+		if ( GetGlobalProperty("StopDayNightCycle") == 1 )
+			EraseGlobalProperty("StopDayNightCycle");
+			print("Stopping Day/Night Cycle...");
+			return 0;
+		endif	
+
+		SetGlobalProperty("DayPhase", "Day");
+		SetRegionLightLevel("Background", 1);
+		Broadcast("It is morning.");
+		time := CInt(d / 2);
+		sleep(time);
+
+// Noon
+		if ( GetGlobalProperty("StopDayNightCycle") == 1 )
+			EraseGlobalProperty("StopDayNightCycle");
+			print("Stopping Day/Night Cycle...");
+			return 0;
+		endif	
+
+		Broadcast("It is mid-day.");
+		time := d - CInt(d / 2);
+		sleep(time);
+
+// Evening
+		SetGlobalProperty("DayPhase", "Dusk");
+		Broadcast( CStr(duskmsgs[ (RandomInt(len(duskmsgs)) + 1) ]) );
+		time := CInt(t / 28);
+//		Old nights were VERY dark. That's the reason the following line is commented.
+//		for (i := 2; i <= 28; i := i + 1)
+		for (i := 2; i <= 24; i := i + 1)
+			SetRegionLightLevel("Background", CInt(i));
+			sleep(time);
+		endfor
+//		Old nights were VERY dark. That's the reason the following line is commented.
+		SetRegionLightLevel("Background", 29);
+		SetRegionLightLevel("Background", 25);
+		time := t - (CInt(t / 28) * 27);
+		sleep(time);
+
+		if ( GetGlobalProperty("StopDayNightCycle") == 1 )
+			EraseGlobalProperty("StopDayNightCycle");
+			print("Stopping Day/Night Cycle...");
+			return 0;
+		endif
+
+// Night
+		SetGlobalProperty("DayPhase", "Night");
+//		Old nights were VERY dark. That's the reason the following line is commented.
+//		SetRegionLightLevel("Background", 30);
+		SetRegionLightLevel("Background", 25);
+		Broadcast("It is evening.");
+		time := n - CInt(n / 2);
+		sleep(time);
+
+		sharddate := sharddate + 1;
+		if (sharddate > 360)
+			sharddate := 1;
+			shardyear := shardyear + 1;
+			SetGlobalProperty("ShardYear", shardyear);
+		endif
+
+		SetGlobalProperty("ShardDate", sharddate);
+
+		if ( (sharddate == 1) || (sharddate == 91) || (sharddate == 181) || (sharddate == 271) )
+			GetSeason();
+		endif
+
+		if ( GetGlobalProperty("StopDayNightCycle") == 1 )
+			EraseGlobalProperty("StopDayNightCycle");
+			print("Stopping Day/Night Cycle...");
+			return 0;
+		endif	
+
+	endwhile
+	
+endprogram
+
+
+function GetSeason()
+
+	if (sharddate > 270)
+		season := "Autumn";
+	elseif (sharddate > 180)
+		season := "Summer";
+	elseif (sharddate > 90)
+		season := "Spring";
+	else
+		season := "Winter";
+	endif
+
+	elm := FindConfigElem(cfg, season);
+	dawnmsgs := GetConfigStringArray(elm, "DawnMsgs");
+	duskmsgs := GetConfigStringArray(elm, "DuskMsgs");
+	t := (transition + GetConfigInt(elm, "Transition") ) * 60;
+	n := (nightlength + GetConfigInt(elm, "Night") ) * 60;
+	d := (daylength * 60) - (t + t) - n;
+
+endfunction
