@@ -20,25 +20,35 @@ const UOBJECT_WOOD_SIGN := 0x0bd0;
 const KEYSTART := 0x100e;
 const KEYEND := 0x1013;
 const KEYRING := 0x1011;
+//
+//	homeinfo[1] = Owner Character Serial
+//	homeinfo[2] = NW X coord
+//	homeinfo[3] = NW Y coord
+//	homeinfo[4] = SE X coord
+//	homeinfo[5] = SE Y coord
+//	homeinfo[6] = NW Z coord
+//	homeinfo[7] = SE Z coord
+//	homeinfo[8] = num lockdowns
+//	homeinfo[9]	= num secures
+//
 
-program textcmd_sign( who, sign )
+program staticDestroy( sign )
 
 
-	who := who;
 	var infoarr      := GetObjProperty( sign, "homeinfo" );
-	var nwx        := infoarr[1];
-	var nwy        := infoarr[2];
-	var sex        := infoarr[3];
-	var sey        := infoarr[4];
+	var nwx        := infoarr[2];
+	var nwy        := infoarr[3];
+	var sex        := infoarr[4];
+	var sey        := infoarr[5];
 	var nwz        := infoarr[6];
 	var sez        := infoarr[7];
 	nwz := nwz;
 	sez := sez;
-	var builtdeed := SystemFindObjectBySerial(GetObjProperty(sign, "builtdeed"));
+	var builtdeed := SystemFindObjectBySerial(CInt(GetObjProperty(sign, "builtdeed")));
 	var box := ListObjectsInBox( nwx, nwy, -50, sex, sey, 50, sign.realm );
 	DestroyItem(builtdeed);
 	foreach item in box
-	  if(item.objtype == 0x8889)
+	  if(item.objtype == 0x18889)
 	    DestroyItem(item);
 	  else
 	      if(item.IsA(POLCLASS_DOOR))
