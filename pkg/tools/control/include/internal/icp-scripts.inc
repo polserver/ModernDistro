@@ -1,4 +1,4 @@
-/* $Id: icp-scripts.inc 375 2006-06-17 19:26:32Z austinheilman $
+/* $Id$
  *
  */
 function ICP_ScriptsGump(pkg_name)
@@ -16,10 +16,10 @@ function ICP_ScriptsGump(pkg_name)
 	var btn_num := 0;
 	var page_num := 1;
 	if ( script_list.Size() > 0 )
-		foreach script in script_list
-			btn_num := btn_num+1;
-			counter := counter+1;
-			y_pos := y_pos+20;
+		foreach script in ( script_list )
+			btn_num += 1;
+			counter += 1;
+			y_pos += 20;
 			ICP_AddScriptLine(gump, script, btn_num, y_pos, counter, page_num);
 			SleepMS(2);
 		endforeach

@@ -24,25 +24,32 @@ function ICP_GumpHeader(byref gump, cur_menu)
 		GFAddButton(gump, 41, 43, 2151, 2154, GF_CLOSE_BTN, GENERAL_BTN);
 	endif
 
-	GFTextLine(gump, 155, 20, 2100, "Scripts");
+	GFTextLine(gump, 105, 20, 2100, "Scripts");
 	if ( cur_menu == SCRIPTS_BTN )
-		GFGumpPic(gump, 167, 43, 2154);
+		GFGumpPic(gump, 117, 43, 2154);
 	else
-		GFAddButton(gump, 167, 43, 2151, 2154, GF_CLOSE_BTN, SCRIPTS_BTN);
+		GFAddButton(gump, 117, 43, 2151, 2154, GF_CLOSE_BTN, SCRIPTS_BTN);
 	endif
 	
-	GFTextLine(gump, 270, 20, 2100, "Commands");
+	GFTextLine(gump, 190, 20, 2100, "Commands");
 	if ( cur_menu == COMMANDS_BTN )
-		GFGumpPic(gump, 288, 43, 2154);
+		GFGumpPic(gump, 208, 43, 2154);
 	else
-		GFAddButton(gump, 288, 43, 2151, 2154, GF_CLOSE_BTN, COMMANDS_BTN);
+		GFAddButton(gump, 208, 43, 2151, 2154, GF_CLOSE_BTN, COMMANDS_BTN);
 	endif
 	
-	GFTextLine(gump, 390, 20, 2100, "Itemdesc.cfg");
+	GFTextLine(gump, 290, 20, 2100, "Itemdesc.cfg");
 	if ( cur_menu == ITEMDESC_BTN )
+		GFGumpPic(gump, 315, 43, 2154);
+	else
+		GFAddButton(gump, 315, 43, 2151, 2154, GF_CLOSE_BTN, ITEMDESC_BTN);
+	endif
+	
+	GFTextLine(gump, 390, 20, 2100, "NPCdesc.cfg");
+	if ( cur_menu == NPCDESC_BTN )
 		GFGumpPic(gump, 415, 43, 2154);
 	else
-		GFAddButton(gump, 415, 43, 2151, 2154, GF_CLOSE_BTN, ITEMDESC_BTN);
+		GFAddButton(gump, 415, 43, 2151, 2154, GF_CLOSE_BTN, NPCDESC_BTN);
 	endif
 	
 	//Bottom

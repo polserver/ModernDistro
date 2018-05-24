@@ -1,0 +1,83 @@
+use uo;
+use os;
+
+include ":datafile:datafile";
+
+program textcmd_color( who )
+// Will read a data file in, if not present the flag DF_CREATE will automatically create it.
+	var data_file := DFOpenDataFile( ":commands:TestMyData", DF_CREATE );
+	if ( !data_file )
+		SendSYsMessage ( who, data_file.errortext, 0x3, 0x22 );
+		return 0;
+	endif
+// Will try to grab an element within a data file and if not present it will create a new entry matching the element name given.
+	var elem := DFFindElement ( data_file, "TestElement", DF_CREATE );
+	
+// Test an Array of Arrays see if it saves properly
+	var test_array := TestArrayWithinArrayToDataFile ( elem );
+	if ( !test_array )
+		SendSysMessage ( who, test_array.errortext, 0x3, 0x22 );
+	endif
+	Sleep ( 2 );
+// Test saving a struct cause, why not?
+	var test_struct := TestStructToDataFile ( elem );
+	if ( !test_struct )
+		SendSysMessage ( who, test_struct.errortext, 0x3, 0x22 );
+	endif
+
+	var get_test_array_key := DFGetProp ( elem, "TestArray", DF_NO_CREATE );
+	if ( !get_test_array_key )
+		SendSysMessage ( who, get_test_array_key.errortext, 0x3, 0x22 );
+		return 0;
+	endif
+	
+	var get_test_struct_key := DFGetProp ( elem, "TestStruct", DF_NO_CREATE );
+	if ( !get_test_struct_key )
+		SendSysMessage ( who, get_test_struct_key.errortext, 0x3, 0x22 );
+		return 0;
+	endif
+	
+	foreach test_array in get_test_array_key
+		foreach entry in test_array
+			SendSysMessage ( who, CStr ( entry ), 0x3, 0x42 );
+			Sleep ( 1 );
+		endforeach
+	endforeach
+	
+	//Sleep ( 2 );
+	SendSysMessage ( who, get_test_struct_key.name+" died at the age of "+get_test_struct_key.age+" on "+get_test_struct_key.deathdate+".", 0x3, 0x42 );
+endprogram
+
+function TestArrayWithinArrayToDataFile ( byref elem )
+	var master_array := array;
+	var primary_array := array;
+	var secondary_array := array;
+	var tertiary_array := array;
+	
+	primary_array.Append ( "Jack" );
+    primary_array.Append ( "Jill" );
+    primary_array.Append ( "Harry" );
+	
+    secondary_array.Append ( 33 );
+    secondary_array.Append ( 333 );
+    secondary_array.Append ( 3333 );
+    secondary_array.Append ( 33333 );
+	
+    tertiary_array.Append ( 777 );
+    tertiary_array.Append ( "Avacyn" );
+    tertiary_array.Append ( 8 );
+	
+	master_array.Append ( primary_array );
+	master_array.Append ( secondary_array );
+	master_array.Append ( tertiary_array );
+	
+	return DFSetProp ( elem, "TestArray", master_array );
+endfunction
+
+function TestStructToDataFile ( byref elem )
+	var info := struct;
+		info.+name := "David Bowie";
+		info.+age := 69;
+		info.+deathdate := "10 January 2016";
+	return DFSetProp ( elem, "TestStruct", info );	
+endfunction

@@ -1,4 +1,4 @@
-/* $Id: icp-pkgpanel.inc 375 2006-06-17 19:26:32Z austinheilman $
+/* $Id$
  *
  */
 function ICP_PackagePanels(who, pkg_name)
@@ -11,11 +11,12 @@ function ICP_PackagePanels(who, pkg_name)
 	var cur_menu := GENERAL_BTN;
 	var input := GENERAL_BTN;
 	var gump := 0;
+
 	while ( 1 )
 		if ( input )
 			if ( input > START_ID )
 				cur_menu := input;
-				gump := ICP_GetPkgGump(who, pkg_name, cur_menu);
+				gump := ICP_GetPkgGump(who, pkg_name, info_elem, cur_menu);
 			else
 				ICP_PkgPanelInput(who, pkg_name, cur_menu, info_elem, input);
 			endif
@@ -39,16 +40,18 @@ function ICP_PackagePanels(who, pkg_name)
 endfunction
 
 function ICP_PkgPanelInput(who, pkg_name, cur_menu, info_elem, input)
-	// Used to fix unused var report in ecompile: pkg_name;
 	pkg_name := pkg_name;
 	if ( cur_menu == SCRIPTS_BTN )
 		ICP_StartScript(who, input, info_elem);
 		return 1;
 	elseif ( cur_menu == COMMANDS_BTN )
-		ICP_StartCommand(who, input, info_elem);
+		ICP_StartCommand(who, input, info_elem, pkg_name);
 		return 1;
 	elseif ( cur_menu == ITEMDESC_BTN )
 		ICP_CreateItem(who, input);
+		return 1;
+	elseif ( cur_menu == NPCDESC_BTN )
+		ICP_CreateNPC(who, input, pkg_name);
 		return 1;
 	else
 		//SendSysMessage(who, "Error - Unknown input ["+input+"]");
@@ -56,7 +59,7 @@ function ICP_PkgPanelInput(who, pkg_name, cur_menu, info_elem, input)
 	endif
 endfunction
 
-function ICP_GetPkgGump(who, pkg_name, btn_number)
+function ICP_GetPkgGump(who, pkg_name, info_elem, btn_number)
 	// Used to fix unused var report in ecompile: who;
 	who := who;
 	var gump := 0;
@@ -78,17 +81,25 @@ function ICP_GetPkgGump(who, pkg_name, btn_number)
 		gump := ICP_RetrieveGump(pkg_name, "commands");
 		if ( !gump )
 			//SendSysMessage(who, "Building package ["+pkg_name+"] commands gump...");
-			gump := ICP_CommandsGump(pkg_name);
+			gump := ICP_CommandsGump(pkg_name, info_elem);
 			ICP_SaveGump(pkg_name, gump, "commands");
 		endif
 	elseif ( btn_number == ITEMDESC_BTN )
 		gump := ICP_RetrieveGump(pkg_name, "itemdesc");
 		if ( !gump )
 			//SendSysMessage(who, "Building package ["+pkg_name+"] itemdesc gump...");
-			gump := ICP_ItemDescGump(pkg_name);
+			gump := ICP_ItemDescGump(pkg_name, info_elem);
 			ICP_SaveGump(pkg_name, gump, "itemdesc");
 		endif
+	elseif ( btn_number == NPCDESC_BTN )
+		gump := ICP_RetrieveGump(pkg_name, "npcdesc");
+		if ( !gump )
+			//SendSysMessage(who, "Building package ["+pkg_name+"] npcdesc gump...");
+			gump := ICP_NPCDescGump(pkg_name, info_elem);
+			ICP_SaveGump(pkg_name, gump, "npcdesc");
+		endif
 	endif
+
 
 	return gump;
 endfunction

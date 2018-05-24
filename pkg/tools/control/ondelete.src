@@ -1,0 +1,13 @@
+/* $Id$
+ *
+ */
+use datafile;
+
+include ":datafile:datafile";
+
+program onDelete(who)
+	var data_file := DFOpenDataFile(":control:usrsettings", DF_CREATE);
+	data_file.DeleteElement(Hex(who.serial));
+
+	return 1;
+endprogram

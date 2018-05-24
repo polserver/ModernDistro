@@ -1,0 +1,296 @@
+/* $Id$
+ *
+ */
+
+use uo;
+use os;
+use polsys;
+
+include ":control:internal/cmdbar";
+include ":control:internal/icp-util";
+include ":datafile:datafile";
+include ":gumps:gumpprompt";
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+include "include/arrays";
+
+//
+// This script is pretty ugly, but atleast all the work is only done once.
+// After that the gumps are saved and loaded very quickly.
+//
+
+unload_scripts("");
+
+program CmdBarMenus()
+	// Run 255 lines before going to the next script.
+	// Its as close as it gets to critical without the console whining about it.
+	Set_Priority(255);
+	Set_Script_Option(SCRIPTOPT_NO_RUNAWAY, 1);
+
+	var data_file := DFOpenDataFile(":control:cmdbar", DF_CREATE);
+	DFPurgeFile(data_file);
+
+	var commands := ListTextCommands();
+
+	SetupMainData(data_file, commands);
+
+	// Number of command levels.
+	var cmd_cfg := ReadConfigFile("::cmds");
+	var num_levels := GetConfigStringKeys(cmd_cfg).Size();
+	var i := 0;
+	// This loop is done to make a gump set for every command level.
+	// This way no one sees commands above their own level.
+	for ( i:=0; i<=num_levels; i+=1 )
+		var data_elem := DFFindElement(data_file, "CmdBarMain", DF_CREATE);
+		var gump := PkgListMenu(0, commands, i);
+		GFOptimizeGump(gump);
+		data_elem.SetProp("CmdLvl-"+i+"PkgList", gump);
+
+		gump := PkgListMenu(TRANSPARENT, commands, i);
+		//GFOptimizeGump(gump);
+		data_elem.SetProp("CmdLvl-"+i+"PkgListTrans", gump);
+
+		SetupPackageData(data_file, commands, i);
+	endfor
+
+	return 1;
+endprogram
+
+function SetupMainData(data_file, byref commands)
+	var data_elem, gump;
+	data_elem := DFFindElement(data_file, "CmdBarMain", DF_CREATE);
+	data_elem.SetProp("Commands", commands);
+
+	gump := ICP_ExpandedMenuBar();
+	GFOptimizeGump(gump);
+	data_elem.SetProp("Expanded", gump);
+
+	gump := ICP_ExpandedMenuBar(TRANSPARENT);
+	GFOptimizeGump(gump);
+	data_elem.SetProp("ExpandedTrans", gump);
+
+	gump := CollapsedMenuBar();
+	GFOptimizeGump(gump);
+	data_elem.SetProp("Collapsed", gump);
+
+	gump := CollapsedMenuBar(TRANSPARENT);
+	GFOptimizeGump(gump);
+	data_elem.SetProp("CollapsedTrans", gump);
+
+	gump := CommandLevelInfoMenu();
+	GFOptimizeGump(gump);
+	data_elem.SetProp("Levels", gump);
+
+	gump := CommandLevelInfoMenu(TRANSPARENT);
+	GFOptimizeGump(gump);
+	data_elem.SetProp("LevelsTrans", gump);
+
+	return 1;
+endfunction
+
+function SetupPackageData(data_file, byref commands, byref max_level)
+	var data_elem, gump;
+	foreach package in ( commands )
+		data_elem := DFFindElement(data_file, "CmdLvl-"+max_level+_package_iter, DF_CREATE);
+		foreach level in ( package )
+			if ( CInt(_level_iter) > max_level )
+				break;
+			endif
+
+			level := level; // Stops unused var compiler warning.
+			gump := CmdLevelMenu(0, _package_iter, commands, max_level);
+			GFOptimizeGump(gump);
+			data_elem.SetProp("Levels", gump);
+
+			gump := CmdLevelMenu(TRANSPARENT, _package_iter, commands, max_level);
+			GFOptimizeGump(gump);
+			data_elem.SetProp("LevelsTrans", gump);
+
+			gump := CommandsListMenu(0, _package_iter, _level_iter, commands, max_level);
+			GFOptimizeGump(gump);
+			data_elem.SetProp(_level_iter+"-Commands", gump);
+
+			gump := CommandsListMenu(TRANSPARENT, _package_iter, _level_iter, commands, max_level);
+			GFOptimizeGump(gump);
+			data_elem.SetProp(_level_iter+"-CommandsTrans", gump);
+		endforeach
+	endforeach
+
+	return 1;
+endfunction
+
+function CollapsedMenuBar(transparency:=0)
+	var gump := GFCreateGump();
+	GFResizePic(gump, 0, 0, GFGetCfgConst("BackGrounds", "STONESLAB"), 30, 30);
+	if ( transparency )
+		GFAddAlphaRegion(gump, 0, 0, 30, 30);
+	endif
+	GFAddButton(gump, 5, 5, 0x15A1, 0x15A1, GF_CLOSE_BTN, EXPAND_BTN);
+
+	return gump;
+endfunction
+
+function PkgListMenu(transparency:=0, byref commands, byref max_level)
+	var gump := ICP_ExpandedMenuBar(transparency);
+
+	var pkg_list := GetPackagesWithCommands(commands, max_level);
+	var new_list := BreakArray(pkg_list, 21);
+	pkg_list := 0;
+
+	var y_pos := 35;
+	GFPage(gump, 0);
+	foreach page_list in ( new_list )
+		GFPage(gump, gump.cur_page+1);
+		var y_length := (page_list.Size() * 20)+10;
+		GFResizePic(gump, 35, 30, GFGetCfgConst("BackGrounds", "STONESLAB"), 150, y_length);
+		if ( transparency )
+			GFAddAlphaRegion(gump, 35, 30, 150, y_length);
+		endif
+
+		if ( _page_list_iter > 1 )
+			if ( _page_list_iter < (page_list.Size()) )
+				GFPage(gump, gump.cur_page-1);
+				GFAddButton(gump, 35, 441, 0xA92, 0xA93, GF_PAGE_BTN, gump.cur_page+1);
+			endif
+			GFPage(gump, gump.cur_page+1);
+			GFAddButton(gump, 35, 30, 0xA90, 0xA91, GF_PAGE_BTN, gump.cur_page-1);
+			y_pos := 35;
+		endif
+
+		foreach package in ( page_list )
+			if ( package.name == "" )
+				package.name := "Non-Packaged";
+			endif
+			GFTextLine(gump, 50, y_pos, 2100, package.name);
+			GFAddButton(gump, 165, y_pos+3, 5224, 5224, GF_CLOSE_BTN, PKG_START+package.id);
+			y_pos += 20;
+		endforeach
+	endforeach
+
+	return gump;
+endfunction
+
+function CmdLevelMenu(transparency:=0, cur_pkg, byref commands, max_level)
+	var cmd_lvls := commands[cur_pkg].Keys();
+
+	var gump := PkgListMenu(transparency, commands, max_level);
+	GFPage(gump, 0);
+	var num_levels := 0;
+	foreach level in ( cmd_lvls )
+		if ( CInt(level) > max_level )
+			break;
+		else
+			num_levels += 1;
+		endif
+	endforeach
+	var y_length := (num_levels * 20)+25;
+	GFResizePic(gump, 185, 30, GFGetCfgConst("BackGrounds", "STONESLAB"), 150, y_length);
+	if ( transparency )
+		GFAddAlphaRegion(gump, 185, 30, 150, y_length);
+	endif
+
+	if ( cur_pkg == "" )
+		cur_pkg := "Non-Packaged";
+	endif
+	GFTextMid(gump, 185, 35, 150, 1000, cur_pkg);
+
+	var y_pos := 50;
+	foreach level_id in ( cmd_lvls )
+		if ( CInt(level_id) > max_level )
+			break;
+		endif
+
+		GFTextLine(gump, 200, y_pos, 2100, GetCmdLevelName(level_id));
+		GFAddButton(gump, 315, y_pos+3, 5224, 5224, GF_CLOSE_BTN, LVL_START+_level_id_iter);
+		y_pos += 20;
+	endforeach
+
+	return gump;
+endfunction
+
+function CommandsListMenu(transparency:=0, cur_pkg, cur_lvl, byref commands, byref max_level)
+	var gump := CmdLevelMenu(transparency, cur_pkg, commands, max_level);
+
+	var scripts := commands[cur_pkg][cur_lvl];
+	var script_list := BreakArray(scripts, 20);
+	scripts := 0;
+
+	var y_pos := 55;
+	GFPage(gump, 0);
+	var script_id := 0;
+	foreach page_list in ( script_list )
+		GFPage(gump, gump.cur_page+1);
+		var y_length := (page_list.Size() * 20)+30;
+		GFResizePic(gump, 335, 30, GFGetCfgConst("BackGrounds", "STONESLAB"), 150, y_length);
+		if ( transparency )
+			GFAddAlphaRegion(gump, 335, 30, 150, y_length);
+		endif
+		GFTextMid(gump, 335, 35, 150, 1000, GetCmdLevelName(cur_lvl));
+
+		if ( _page_list_iter > 1 )
+			if ( _page_list_iter < (page_list.Size()) )
+				GFPage(gump, gump.cur_page-1);
+				GFAddButton(gump, 335, 441, 0xA92, 0xA93, GF_PAGE_BTN, gump.cur_page+1);
+			endif
+			GFPage(gump, gump.cur_page+1);
+			GFAddButton(gump, 335, 60, 0xA90, 0xA91, GF_PAGE_BTN, gump.cur_page-1);
+			y_pos := 55;
+		endif
+
+		foreach script in ( page_list )
+			script_id += 1;
+			GFAddButton(gump, 350, y_pos+3, 2117, 2118, GF_CLOSE_BTN, CMD_START+script_id);
+			var name := ICP_GetScriptName(script.script);
+			GFTextLine(gump, 370, y_pos, 2100, "."+name);
+			y_pos += 20;
+		endforeach
+	endforeach
+
+	return gump;
+endfunction
+
+function CommandLevelInfoMenu(transparency:=0)
+	var cmd_cfg := ReadConfigFile("::cmds");
+	var num_levels := GetConfigStringKeys(cmd_cfg).Size();
+
+	var gump := ICP_ExpandedMenuBar(transparency);
+	var y_length := (num_levels * 20)+10;
+	GFResizePic(gump, 150, 30, GFGetCfgConst("BackGrounds", "STONESLAB"), 140, y_length);
+	if ( transparency )
+		GFAddAlphaRegion(gump, 150, 30, 140, y_length);
+	endif
+
+	var i;
+	var y_pos := 35;
+	for ( i:=0; i<num_levels; i+=1 )
+		GFTextLine(gump, 155, y_pos, 2100, i+" - "+GetCmdLevelName(i));
+		y_pos += 20;
+	endfor
+
+	return gump;
+endfunction
+
+function GetPackagesWithCommands(byref commands, byref max_level)
+	var pkg_list := array;
+
+	foreach package in ( commands.Keys() )
+		var num_commands := HasUsableCommands(package, commands, max_level);
+		if ( num_commands > 0 )
+			// Dont want to lose the package's original commands position id.
+			// It gets lost when the size of the package list is changed.
+			var temp := struct{"name":=package, "id":=_package_iter};
+			pkg_list.Append(temp);
+		endif
+	endforeach
+
+	return pkg_list;
+endfunction
+
+function HasUsableCommands(pkg_name, byref commands, byref max_level)
+	// Looks to see if there is atleast 1 command that can be used
+	foreach level in ( commands[pkg_name].Keys() )
+		if ( CInt(level) <= max_level )
+			return 1;
+		endif
+	endforeach
+endfunction

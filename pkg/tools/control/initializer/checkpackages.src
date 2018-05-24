@@ -1,13 +1,14 @@
-/* $Id: checkpackages.src 375 2006-06-17 19:26:32Z austinheilman $
+/* $Id$
  *
  */
 use uo;
 use os;
+use polsys;
 use cfgfile;
 
-include "include/string";
-include ":datafile:include/datafile";
 include ":control:report";
+include ":datafile:datafile";
+include "include/string";
 
 // Run 255 lines before going to the next script.
 // Its as close as it gets to critical without the console whining about it.
@@ -16,7 +17,7 @@ Set_Script_Option(SCRIPTOPT_NO_RUNAWAY, 1);
 
 program CheckPackages()
 	ICP_ReportText("---=[ ICP SETUP HAS STARTED UP ]=---", ICP_REPORT_SYSLOG);
-	
+
 	var pkg_info := DFOpenDataFile(":control:packages", DF_CREATE);
 	var pkg_gumps := DFOpenDataFile(":control:gumps", DF_CREATE);
 
@@ -24,18 +25,28 @@ program CheckPackages()
 	// Its purpose is to wipe the datafile so its updated for the new package settings.
 	DFPurgeFile(pkg_info);
 	pkg_gumps.DeleteElement("index");
-	
+
 	DF_DEBUG_MODE := 0;
 
+	var cmd_list := ListTextCommands();
 	// Run through each package -
 	// If it has an icp.cfg in its 'config' folder, get the settings we want from it.
 	// If not, it'll go on the gump as packagename [Not ICP compliant]
-	foreach package in (POLCore().packages)
+	var pkg_list := POLCore().packages;
+	pkg_list.Insert(1, ""); // For pol/config/* stuff
+
+	foreach package in ( pkg_list )
 		var temp_info := struct;
 
-		var data_elem := DFFindElement(pkg_info, package, DF_CREATE);
+		var pkg_name := package;
+		if ( !pkg_name )
+			pkg_name := "::config (main configs)";
+		endif
 
-		var icp_cfg := ReadConfigFile(":"+package+":config/icp");
+		var data_elem := DFFindElement(pkg_info, pkg_name, DF_CREATE);
+		data_elem.SetProp("TextCommands", cmd_list[package]);
+
+		var icp_cfg := ReadConfigFile(":"+package+":icp");
 		icp_cfg := icp_cfg["Register"];
 
 		if ( icp_cfg )
@@ -45,33 +56,34 @@ program CheckPackages()
 			temp_info.+C_Email := GetCfgValue(icp_cfg, "C_Email");
 			temp_info.+Maintainer := GetCfgValue(icp_cfg, "Maintainer");
 			temp_info.+M_Email := GetCfgValue(icp_cfg, "M_Email");
-			
+
 			var description := "";
 			foreach line in  GetConfigStringArray(icp_cfg, "Description")
 				description := description + line+" ";
 				SleepMS(2);
 			endforeach
 			temp_info.+Description := description;
-			
+
 			// Makes a list of scripts and text commands that will be on the gump.
 			var script_list := GetConfigStringArray(icp_cfg, "Script");
-			var cmd_list := GetConfigStringArray(icp_cfg, "TextCmd");
 
 			data_elem.SetProp("Main", temp_info);
 			data_elem.SetProp("Scripts", script_list);
-			data_elem.SetProp("TextCommands", cmd_list);
 		else
-			ICP_ReportText("Warning: Package ["+package+"] has no ICP support!", ICP_REPORT_SYSLOG);
-			temp_info.+Name := package;
+			ICP_ReportText("Warning: Package ["+pkg_name+"] has no ICP support!", ICP_REPORT_SYSLOG);
+			temp_info.+Name := pkg_name;
 			temp_info.+NoSupport := 1;
+			if ( package == "" )
+				temp_info.+Main := 1;
+			endif
 			data_elem.SetProp("Main", temp_info);
 		endif
 
-		UnloadConfigFile(":"+package+":config/icp");
+		UnloadConfigFile(":"+package+":icp");
 	endforeach
 
 	ICP_ReportText("ICP setup has completed.", ICP_REPORT_SYSLOG);
-	
+
 	return 1;
 endprogram
 

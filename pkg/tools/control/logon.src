@@ -1,0 +1,17 @@
+/* $Id$
+ *
+ */
+
+use uo;
+use os;
+
+include ":control:internal/icp-util";
+include ":control:internal/cmdbar";
+
+program Logon(who)
+	if ( !ICP_LoadUserSetting(who, "NoCmdBarLogin") )
+		Start_Script(":control:commands/player/cmdbar", who);
+	endif
+
+	return 1;
+endprogram
