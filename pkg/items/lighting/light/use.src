@@ -2,9 +2,9 @@ use uo;
 
 include ":itemutils:itemUtil";
 
-program useLight( mobile, light )
-
-       	if( !useItem_check( mobile, light, DEFAULT_ITEM ))
+program useLight( who, light )
+	SendSysMessage(who, "In 'use' script.", 3, 88);
+	if( !useItem_check( who, light, DEFAULT_ITEM ))
 		return 0;
 	endif
  

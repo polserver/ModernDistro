@@ -115,7 +115,7 @@ function GetObjTypeGraphic( obj_type )
 	obj_type := CInt( obj_type );
 
 	var cfg_info := GetItemDescInfo( obj_type );
-	if(( !cfg_info ) && ( obj_type >= 0x4000 ))
+	if(( !cfg_info ) && ( obj_type >= 0x10000 ))
 		return cfg_info; // Contains an error
 	endif
 

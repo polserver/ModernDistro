@@ -3,9 +3,11 @@
 
 use uo;
 
-include ":daynight:dayNight";
+//include ":daynight:dayNight";
+include "include/clock";
 
-program UseScript(user, item)
-	PrintTextAbovePrivate(item, GetGameHour()+":"+GetGameMinute(), user);
+program UseScript(who, item)
+//	PrintTextAbovePrivate(item, GetGameHour()+":"+GetGameMinute(), who);
+	PrintTextAbovePrivate(item, ("Time of Day: " + GetTimeofDay()), who);
 	return 1;
 endprogram

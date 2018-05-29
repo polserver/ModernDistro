@@ -1,0 +1,25 @@
+/* $Id: encodeMap.src 998 2007-01-23 12:59:19Z sroyalty $
+ *
+ */
+use uo;
+use os;
+
+program create_encodeMap( the_map )
+
+	// NOTE: At this time maps dont support realms in the core!
+	var RealmName := "";
+	var area_name := GetObjProperty(the_map, "Area");
+	//the_map.SetForArea(area_name, "britannia");
+	case(area_name)
+		"Map of Felucca":	RealmName := "britannia";
+		"Map of Trammel":	RealmName := "britannia_alt";
+		"Map of Ilshenar":	RealmName := "ilshenar";
+		"Map of Malas":		RealmName := "malas";
+		"Map of Tokuno":	RealmName := "tokuno";
+		"Map of Termur":	RealmName := "termur";
+	endcase
+	the_map.SetForArea(area_name, RealmName);
+
+	return 1;
+
+endprogram 

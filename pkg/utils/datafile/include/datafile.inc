@@ -240,3 +240,15 @@ function DF_OutPut(text)
 	
 	return 1;
 endfunction
+
+function DFSetProp(byref elem_ref, prop_name, assign_val:=0)
+
+  var temp := elem_ref.SetProp(prop_name, assign_val);
+  if(!temp)
+    var errmsg := error{"errortext":="Error::DFSetProp() - Could not set data file property "+prop_name+":"+temp.errortext};
+    DF_OutPut(errmsg.errortext);
+    return errmsg;
+  endif
+ 
+  return 1;
+endfunction

@@ -1,0 +1,72 @@
+/* $Id: method.src 998 2007-01-23 12:59:19Z sroyalty $
+ *
+ */
+ 
+//////////////////////////////////////////////////////////
+//
+// Version 02
+// Multiple facet support added by Yukiko 2018-05-31
+//
+/////////////////////////////////////////////////////////
+
+use uo;
+use cfgfile;
+
+program Install()
+	return 1;
+endprogram
+
+exported function SetForArea(map, area_name, realm_name)
+
+	var config := ReadConfigFile(":maps:areas-"+realm_name);
+	var FacetNum := 0,
+		FacetName:= "Felucca";
+	if ( !config )
+		return config; // Contains an error.
+	endif
+
+	var elem := config[area_name];
+	if ( !elem )
+		Print("maps --> method no area_name");
+		return elem; // Contains an error.
+	endif
+	case( realm_name )
+		"britannia":		FacetNum :=0;
+		"britannia_alt":	FacetNum :=1;
+		"ilshenar":			FacetNum :=2;
+		"malas":			FacetNum :=3;
+		"tokuno":			FacetNum :=4;
+		"termur":			FacetNum :=5;
+	endcase
+
+	map.xeast		:= elem.XEast;
+	map.xwest		:= elem.XWest;
+	map.ynorth		:= elem.YNorth;
+	map.ysouth		:= elem.YSouth;
+	map.facetid		:= FacetNum;
+	map.gumpwidth	:= elem.GumpWidth;
+	map.gumpheight	:= elem.GumpHeight;
+	return 1;
+endfunction
+
+exported function encodeMap(map, map_definitions)
+	// NOTE: At this time maps does not support realms in the core!
+
+	if( map_definitions[2] < 0 )
+		map_definitions[2] := 0;
+	endif
+	if( map_definitions[3] < 0 )
+		map_definitions[3] := 0;
+	endif
+
+
+	map.xwest		:= map_definitions[2];
+	map.ynorth		:= map_definitions[3];
+	map.xeast		:= map_definitions[4];
+	map.ysouth		:= map_definitions[5];
+	map.facetid		:= map_definitions[6];
+	map.gumpwidth	:= map_definitions[7];
+	map.gumpheight	:= map_definitions[8];
+	return 1;
+
+endfunction

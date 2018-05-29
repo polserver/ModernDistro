@@ -1,0 +1,7 @@
+use uo;
+
+include "include/clock";
+
+program time(character)
+  SendSysMessage(character, ("Time of Day: " + GetTimeofDay()));
+endprogram

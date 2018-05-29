@@ -15,11 +15,26 @@ use uo;
 
 program textcmd_goxyz( who, text )
 	var params := SplitWords( text );
-    if (len(params) < 3) // didn't pass Z
-        params[3] := GetMapInfo( CInt(params[1]), CInt(params[2]), who.realm ).z;
+	var facets := {"britannia", "britannia_alt", "ilshenar", "malas", "tokuno", "termur"};
+	var ZCoord := 0;
+	// Always default to the user's facet if they do not specify a facet.
+	var facet := who.realm;
+	// The user only passed X and Y but didn't pass Z.
+    if (len(params) < 3)
+        ZCoord := GetMapInfo( CInt(params[1]), CInt(params[2]), facet ).z;
+	elseif(Len(params) == 4)
+		ZCoord := CInt(params[3]);
     endif
+	// If the user specified a Z and a facet then check to make sure they spelled the facet correctly.
+	if(Lower(params[4]) in facets)
+		facet := Lower(params[4]);
+	endif
+	// If the user doesn't specify a Z but passed a facet as the 3rd parameter then check to make sure they spelled it correctly.
+	if(Lower(params[3]) in facets)
+		facet := Lower(params[3]);
+	endif
 
-	var res := MoveObjectToLocation( who, CInt(params[1]), CInt(params[2]), CInt(params[3]), who.realm, MOVEOBJECT_FORCELOCATION );
+	var res := MoveObjectToLocation( who, CInt(params[1]), CInt(params[2]), CInt(ZCoord), facet, MOVEOBJECT_FORCELOCATION );
 
     if (!res)
         SendSysMessage( who, "Unable to go there: " + res.errortext );

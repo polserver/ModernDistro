@@ -1,0 +1,150 @@
+/* $Id: mapmakersPen.src 1482 2009-03-12 19:19:53Z muaddib_pol $
+ *
+ */
+use uo;
+use os;
+
+include ":attributes:attributeConstants";
+include ":attributes:attributes";
+include ":attributes:skillCheck";
+include ":crafting:crafting";
+include ":crafting:toolWear";
+
+var item_config     := ReadConfigFile(":cartography:itemdesc");
+var craft_config    := ReadConfigFile(":cartography:cartography");
+
+program use_MapmakersPen(who, tool)
+
+	if ( !ReserveItem(tool) || !tool.movable )
+		SendSysMessage(who, "You cannot use that.");
+		return 0;
+	elseif( !(tool in EnumerateItemsInContainer(who.backpack)) )
+		SendSysMessage(who, "That item is not in your backpack.");
+		return 0;
+	endif
+
+	EraseObjProperty(who, "#IsMeditating");
+	EraseObjProperty(who, "#HealTimer");
+
+	var rinfo := sendCraftGump(who, CARTOGRAPHY);
+
+	// OK was pressed, close it on out
+	if(rinfo == 0)
+		return 0;
+	endif
+
+	var the_objtype := rinfo[1];
+	var amt         := rinfo[2];
+
+	makeCartographyMap(who, the_objtype, amt, tool);
+
+	return 1;
+
+endprogram
+
+
+function makeCartographyMap(who, objtype, amt, tool)
+
+	if(!objtype)
+		SendSysMessage(who, "Cancelled");
+		return 0;
+	endif
+/*
+	if( (who.realm != "britannia") )
+		SendSysMessage(who, "Sorry, only britannia is chartable.");
+		return 0;
+	endif
+*/
+	if( (who.x > 5120) && (who.y < 2304) )
+		SendSysMessage(who, "You cannot chart dungeons.");
+		return 0;
+	endif
+
+	// ResourceList entry type.
+	var itemchk := MaterialSelection(who, craft_skill, lower(craft_config[objtype].type));
+	if(!itemchk)
+		return 0;
+	endif
+	var use_on := itemchk[1];
+	var ptmod := itemchk[3];
+
+	var num, theitem;
+	var itemname := craft_config[objtype].name;
+	var material := Cint(craft_config[objtype].material);
+	var reqd := Cint(craft_config[objtype].skill);
+	var diff := Cint(craft_config[objtype].difficulty);
+	var pts  := Cint(craft_config[objtype].points);
+	pts      := CInt(pts + ptmod);
+	var counter := 0, x := who.x, y := who.y;
+
+	while(counter < amt)
+		if((who.x != x) || (who.y != y))
+			SendSysMessage(who, "You stop drawing.");
+			break;
+		endif
+		if(!tool)
+			break;
+		endif
+
+		if(GetAmount(use_on) >= material)
+			if(CraftCheckSkill(who, craft_skill, diff, pts))
+				theitem := CreateCraftItem(who, craft_skill, use_on, use_on.objtype, objtype, material, itemname, reqd);
+				if( TypeOf(theitem) != "ItemRef" )
+					SubtractAmount(use_on, (material / 2));
+					SendSysMessage(who, "You failed to create the item, and some of your materials are lost.");
+					counter := counter + 1;
+					continue;
+				else
+					var props;
+					var FacetNum := 0;
+					case( who.realm )
+						"britannia":		FacetNum :=0;
+						"britannia_alt":	FacetNum :=1;
+						"ilshenar":			FacetNum :=2;
+						"malas":			FacetNum :=3;
+						"tokuno":			FacetNum :=4;
+						"termur":			FacetNum :=5;
+					endcase
+						
+					case(theitem.objtype)
+						0x16500:	case(FacetNum)
+										0:
+										1:	props := array("local", who.x - 265, who.y - 260, who.x + 265, who.y + 260, FacetNum, 400, 400);
+										2:	props := array("local", who.x - 64, who.y - 64, who.x + 64, who.y + 64, FacetNum, 400, 400);
+										3:	props := array("local", who.x - 64, who.y - 64, who.x + 64, who.y + 64, FacetNum, 400, 400);
+										4:	props := array("local", who.x - 64, who.y - 64, who.x + 64, who.y + 64, FacetNum, 400, 400);
+										5:	props := array("local", who.x - 64, who.y - 64, who.x + 64, who.y + 64, FacetNum, 400, 400);
+									endcase
+									theitem.encodeMap(props);
+							//theitem.encodeMap(theitem, props);
+							//theitem.encodeMap(props, theitem);
+						0x16501:	case(FacetNum)
+										0:
+										1:	props := array("regional", who.x - 850, who.y - 800, who.x + 850, who.y + 800, FacetNum, 600, 600);
+										2:	props := array("regional", who.x - 128, who.y - 128, who.x + 128, who.y + 128, FacetNum, 600, 600);
+										3:	props := array("regional", who.x - 128, who.y - 128, who.x + 128, who.y + 128, FacetNum, 600, 600);
+										4:	props := array("regional", who.x - 128, who.y - 128, who.x + 128, who.y + 128, FacetNum, 600, 600);
+										5:	props := array("regional", who.x - 128, who.y - 128, who.x + 128, who.y + 128, FacetNum, 600, 600);
+									endcase
+									theitem.encodeMap(props);
+									//theitem.encodeMap(theitem, props);
+									//theitem.encodeMap(props, theitem);
+					endcase
+				endif
+			else
+				num := CInt(RandomInt(material)/2) + 1;
+				if(SubtractAmount(use_on, num))
+					SendSysMessage(who, "You lost some material");
+				endif
+			endif
+			CheckToolWear (who, tool, craft_skill);
+		else
+			SendSysMessage(who, "You don't have the resources required to make that item.");
+			return 0;
+		endif
+		counter := counter + 1;
+	endwhile
+
+	return 0;
+
+endfunction
