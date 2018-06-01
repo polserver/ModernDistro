@@ -14,8 +14,8 @@ function RandomName(character)
 	var newname := " ";
 	case( character.graphic )
 	    OBJ_BIRD:		newname := AssignName( character, BIRD_IDX );
-	    OBJ_DEMON:		newname := AssignName( character, DEMON_IDX );
-	    OBJ_DEMON_SWORD:	newname := AssignName( character, DEMON_IDX );
+	    OBJ_DAEMON:		newname := AssignName( character, DAEMON_IDX );
+	    OBJ_DAEMON_SWORD:	newname := AssignName( character, DAEMON_IDX );
 	    OBJ_DRAGON_RED:	newname := AssignName( character, DRAGON_IDX );
 	    OBJ_DRAGON_GREY: 	newname := AssignName( character, DRAGON_IDX );
 	    OBJ_MALE: 		newname := AssignName( character, MALE_IDX );

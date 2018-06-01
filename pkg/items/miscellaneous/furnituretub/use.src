@@ -1,0 +1,36 @@
+use os;
+use uo;
+use cliloc;
+
+include "include/canAccess";
+
+program dyecheck( who, dyetub )
+  EraseObjProperty(who, "IsMeditating");
+  if(!can_access(who, dyetub))
+    return;
+  endif
+  ReserveItem(dyetub);
+  SendSysMessageCL(who, 501019, color := 88);	// Select the furniture to dye.
+  var item := Target(who, TGTOPT_NOCHECK_LOS );
+  if(!ReserveItem(item))
+    return;
+  endif
+  if(!item)
+    SendSysMessageCL(who, 1042021, color := 33);	// Cancelled.
+    return;
+  endif
+  if(!can_access(who, item))
+    return;
+  endif
+  if(item.movable)
+     SendSysMessageCL(who, 1042271, color := 33);	// That is not locked down.
+     return;
+  endif
+  var allowdye := GetObjProperty(item, "YeableFurniture");
+  if(allowdye == 1)
+    item.color := dyetub.color;
+    return;
+  else
+    SendSysMessageCL(who, 1042083, color := 33);	// You cannot dye that.
+  endif
+endprogram

@@ -1,0 +1,171 @@
+/* $Id: use.src 814 2006-09-14 07:21:18Z austinheilman $
+ *
+ */
+
+use uo;
+use os;
+
+include ":attributes:attributes";
+include ":mining:settings";
+include ":mining:mining";
+include ":itemutils:itemdesc";
+include "include/client";
+include "include/sounds";
+include "include/facings";
+
+program use_PickAxe(who, pick)
+
+	SendSysMessage(who, "Select a place to mine.");
+	var targ := TargetCoordinates(who);
+	if ( !targ )
+		SendSysMessage(who, "Cancelled.");
+		return 0;
+	elseif ( !IsMinable(targ.x, targ.y, who.realm, targ.objtype) )
+		SendSysMessage(who, "You can not mine there.");
+		return 0;
+	elseif ( CoordinateDistance(who.x, who.y, targ.x, targ.y) > 5 )
+		SendSysMessage(who, "That is too far away.");
+		return 0;
+	endif
+
+	var orig_x := who.x;
+	var orig_y := who.y;
+
+	var num_loops := RandomInt(5)+1;
+	for ( num_loops; num_loops>=0; num_loops-=1 )
+		if ( !DoMining(who, pick, targ, orig_x, orig_y) )
+			break;
+		endif
+		// Wear down tool function call goes here.
+		Sleep(3);
+	endfor
+
+	SendSysMessage(who, "You stop mining.");
+
+	return 1;
+endprogram
+
+function DoMining(who, tool, targ, orig_x, orig_y)
+	var i:=1;//RandomDiceRoll("3d3");
+	for ( i; i>=0; i-=1 )
+		if ( !CanMine(who, tool, targ, orig_x, orig_y) )
+			return 0;
+		endif
+
+		PerformAction(who, ANIM_ATTACK_1HAND_DOWN);
+		PlaySoundEffect(who, SFX_HAMMER);
+		Sleep(1);
+	endfor
+
+	var range := CInt(AP_GetSkill(who, MINING) / 20)+1;
+	var found_ore := CheckOreVeins(who, targ, range);
+	if ( !found_ore )
+		found_ore := CheckGlobalOre(who, targ);
+	endif
+
+	if ( !found_ore )
+		SendSysMessage(who, "You are unable to find any ore here.");
+		return 0;
+	endif
+
+	return 1;
+endfunction
+
+function CheckOreVeins(who, targ, range)
+	var found_ore := 0;
+
+	var vein_list := ListVeinsNearMobile(targ, range);
+	if ( who.cmdlevel >= 2 )
+		SendSysMessage(who, "Number of veins found "+vein_list.Size());
+	endif
+
+	foreach ore_vein in ( vein_list )
+		var remaining_ore := ore_vein.GetRemainingOre();
+		if ( remaining_ore > 0 )
+			if ( SkillCheck(who, MINING, ore_vein.GetDifficulty()) > 0 )
+				var yield := ore_vein.GetYield();
+				if ( remaining_ore < yield )
+					yield := remaining_ore;
+				endif
+
+				var ore := CreateItemInBackpack(who, ore_vein.GetOreType(), yield);
+				if ( ore.errortext )
+					SendSysMessage(who, "Unable to create "+ore_vein.GetOreType()+"->"+ore.errortext);
+					continue;
+				endif
+
+				SendSysMessage(who, "You mine some "+GetObjTypeDesc(ore.objtype)+".");
+				remaining_ore := remaining_ore-yield;
+				ore_vein.SetRemainingOre(remaining_ore);
+
+				found_ore += 1;
+			endif
+		else
+			vein_list.Erase(_ore_vein_iter);
+		endif
+
+		SleepMS(2);
+	endforeach
+
+	return found_ore;
+endfunction
+
+function CheckGlobalOre(who, targ)
+	var data_file := DFOpenDataFile(who.realm+"-OreSpots", DF_CREATE);
+	// Breaks the world into smaller zones
+	var x_pos := CInt(targ.x/3);
+	var y_pos := CInt(targ.y/3);
+	var elem_name := "X["+x_pos+"] Y["+y_pos+"]";
+
+	var data_elem := DFFindElement(data_file, elem_name, DF_CREATE);
+	if ( !data_elem.GetProp("Type") )
+		// Initialize a new global ore vein.
+		var type_list := ListOreTypes();
+		data_elem.SetProp("Type", type_list[RandomInt(type_list.Size())+1]);
+		data_elem.SetProp("RemainingOre", 30);
+	endif
+
+	var type := data_elem.GetProp("Type");
+	var amount := CInt(data_elem.GetProp("RemainingOre"));
+	if ( amount < 1 )
+		return 0;
+	else
+		amount -= 1;
+		data_elem.SetProp("RemainingOre", amount);
+	endif
+
+	var difficulty := CInt(100 - (amount * 100 / 30));
+	if ( SkillCheck(who, MINING, difficulty) > 0 )
+		var ore := CreateItemInBackpack(who, type, 1);
+		if ( ore.errortext )
+			SendSysMessage(who, "Unable to create "+type+"->"+ore.errortext);
+			return 0;
+		endif
+
+		SendSysMessage(who, "You mine some "+GetObjTypeDesc(ore.objtype)+".");
+	endif
+
+	return 1;
+endfunction
+
+function CanMine(who, tool, targ, orig_x, orig_y)
+	if ( who.hidden )
+		SendSysMessage(who, "You stop mining to remain hidden.");
+		return 0;
+	elseif ( CoordinateDistance(who.x, who.y, orig_x, orig_y) > 3 )
+		SendSysMessage(who, "You turn your attention away from mining.");
+		return 0;
+//	elseif ( !IsFacing(who, targ.x, targ.y) )
+//		SendSysMessage(who, "You turn your attention away from mining.");
+//		return 0;
+	elseif ( !(tool in ListEquippedItems(who)) )
+		SendSysMessage(who, "You put the tool away and stop mining.");
+		return 0;
+	elseif ( GetEquipmentByLayer(who, LAYER_MOUNT) )
+		SendSysMessage(who, "You can't mine while mounted.");
+		return 0;
+	else
+		return 1;
+	endif
+endfunction
+

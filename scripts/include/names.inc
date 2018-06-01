@@ -21,7 +21,7 @@ use uo;
 
 // Nametypes
 const NAME_BIRD_SMALL           :=  1;
-const NAME_DEMON                :=  2;
+const NAME_DAEMON               :=  2;
 const NAME_DRAGON               :=  3;
 const NAME_HUMAN_EVIL_MAGE      :=  4;
 const NAME_HUMAN_FEMALE         :=  5;

@@ -160,16 +160,16 @@ function CheckTempProtections(attacker, defender, rawdamage)
 		return 0;
 	endif
 
-// Protection from demons?
-	ProtCheck := CInt(GetObjProperty(defender, "Protdemon") );
-	if ( (ProtCheck != error) and (elemental == "demonic") )
+// Protection from daemons?
+	ProtCheck := CInt(GetObjProperty(defender, "Protdaemon") );
+	if ( (ProtCheck != error) and (elemental == "daemonic") )
 		if (ProtCheck >= ReadGameClock() )
 			PlaySoundEffect(defender, 0x01f9);
 			PlayObjectCenteredEffect(defender, 0x376a, 7, 0x10);
 			PrintTextAbove(defender, "The fiend's attack has no effect!");
 			rawdamage := 0;
 		else
-			EraseObjProperty(defender, "Protdemon");
+			EraseObjProperty(defender, "Protdaemon");
 		endif
 	endif
 	if (rawdamage == 0)

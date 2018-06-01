@@ -6,7 +6,7 @@ include ":magery:spells";
 include "include/client";
 include "include/sounds";
 
-program summon_demon( parms )
+program summon_daemon( parms )
   var caster := parms[1];
   var info := parms[2];
   var cast_on := MS_TargetCoordinates(caster, info.targ, "Select a target.");
@@ -21,5 +21,5 @@ program summon_demon( parms )
         return 0;
   endif
 
-  summon_creature( caster, 8, "summoneddemon", cast_on, 70, "demon"  );
+  summon_creature( caster, 8, "summoneddaemon", cast_on, 70, "daemon"  );
 endprogram

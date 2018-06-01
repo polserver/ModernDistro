@@ -1,5 +1,15 @@
 use os;
-program Start_OreCore()
-  print("Starting ore core");
-  start_script("oreCore");
-endprogram
+
+var script := Start_Script("oreVein/regenVeins");
+if ( script.errortext )
+	SysLog("Error starting ore vein regen ->"+script.errortext);
+else
+	Print("Starting ore vein regeneration controller... OK.");
+endif
+
+script := Start_Script("oreGlobal/regenOre");
+if ( script.errortext )
+	SysLog("Error starting global ore vein regen ->"+script.errortext);
+else
+	Print("Starting global ore regeneration controller... OK.");
+endif

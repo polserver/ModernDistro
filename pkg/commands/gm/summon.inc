@@ -14,7 +14,7 @@ function summon_creature( caster, circle := 8, npctemplate, cast_loc, gate)
   Detach();
   sleep(2);
   thecritter := CreateNpcFromTemplate(npctemplate, 5849, 1207, 0, parms, caster.realm);
-  if(npctemplate == "demon")
+  if(npctemplate == "daemon")
     thecritter.setCriminal(1);w
     caster.setCriminal(1);
   endif

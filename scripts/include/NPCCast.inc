@@ -78,7 +78,7 @@ function GetSpellID(spellname)
     "vortex"        : spellid := 58;
     "resurrect"     : spellid := 59;
     "summonair"     : spellid := 60;
-    "summondemon"   : spellid := 61;
+    "summondaemon"   : spellid := 61;
     "summonearth"   : spellid := 62;
     "summonfire"    : spellid := 63;
     "summonwater"   : spellid := 64;

@@ -64,9 +64,9 @@ program cast_poly( parms )
 		1: thecreature := 4;	//gargoyle
 		2: thecreature := 24;	//lich
 		3: thecreature := 150;	//seaserp
-		4: thecreature := 9;	//demon
+		4: thecreature := 9;	//daemon
 		5: thecreature := 12;	//dragon
-		6: thecreature := 10;	//demon with sword
+		6: thecreature := 10;	//daemon with sword
 		7: thecreature := 58;	//wisp
 	  endcase
   endcase

@@ -1,0 +1,13 @@
+/*$Id: onDestroy.src 373 2006-06-17 18:27:33Z austinheilman $
+ *  
+ */
+ 
+use uo;
+
+include ":datafile:datafile";
+
+program onDestroy(vein)
+	vein.DeleteVeinDataInfo();
+	
+	return 1;
+endprogram

@@ -1,0 +1,106 @@
+/* $Id: method.src 373 2006-06-17 18:27:33Z austinheilman $
+ *
+ */
+ 
+use uo;
+
+include ":datafile:datafile";
+
+program Install()
+	return 1;
+endprogram
+
+exported function IsOreVein(item)
+	item := item; // avoid compiler warning
+	
+	return 1;
+endfunction
+
+exported function GetOreType(vein)
+	var data_elem := GetVeinDataInfo(vein);
+	var type := data_elem.GetProp("Type");
+	if ( !type )
+		type := "";
+	endif
+	
+	return type;
+endfunction
+
+exported function SetOreType(vein, type)
+	var data_elem := GetVeinDataInfo(vein);
+	return data_elem.SetProp("Type", CStr(type));
+endfunction
+
+exported function GetDifficulty(vein)
+	var data_elem := GetVeinDataInfo(vein);
+	var difficulty := data_elem.GetProp("Difficulty");
+	if ( !difficulty )
+		difficulty := 0.0;
+	endif
+	
+	return CDbl(difficulty);
+endfunction
+
+exported function SetDifficulty(vein, difficulty)
+	var data_elem := GetVeinDataInfo(vein);
+	return data_elem.SetProp("Difficulty", CDbl(difficulty));
+endfunction
+
+exported function GetYield(vein)
+	var data_elem := GetVeinDataInfo(vein);
+	var yield := data_elem.GetProp("Yield");
+	if ( !yield )
+		yield := 0;
+	endif
+	
+	return CInt(yield);
+endfunction
+
+exported function SetYield(vein, yield)
+	var data_elem := GetVeinDataInfo(vein);
+	return data_elem.SetProp("Yield", CInt(yield));
+endfunction
+
+exported function GetMaxOre(vein)
+	var data_elem := GetVeinDataInfo(vein);
+	var max_ore := data_elem.GetProp("MaxOre");
+	if ( !max_ore )
+		max_ore := 0;
+	endif
+	
+	return CInt(max_ore);
+endfunction
+
+exported function SetMaxOre(vein, max_ore)
+	var data_elem := GetVeinDataInfo(vein);
+	return data_elem.SetProp("MaxOre", CInt(max_ore));
+endfunction
+
+exported function GetRemainingOre(vein)
+	var data_elem := GetVeinDataInfo(vein);
+	var remaining := data_elem.GetProp("RemainingOre");
+	if ( !remaining )
+		remaining := 0;
+	endif
+	
+	return CInt(remaining);
+endfunction
+
+exported function SetRemainingOre(vein, remaining)
+	var data_elem := GetVeinDataInfo(vein);
+	return data_elem.SetProp("RemainingOre", CInt(remaining));
+endfunction
+
+exported function GetVeinDataInfo(vein)
+	var data_file := DFOpenDataFile("VeinInfo", DF_CREATE);
+	var data_elem := DFFindElement(data_file, Hex(vein.serial), DF_CREATE);
+	
+	return data_elem;
+endfunction
+
+exported function DeleteVeinDataInfo(vein)
+	var data_file := DFOpenDataFile("VeinInfo", DF_CREATE);
+	data_file.DeleteElement(Hex(vein.serial));
+	
+	return 1;
+endfunction

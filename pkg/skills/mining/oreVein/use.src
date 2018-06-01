@@ -1,0 +1,61 @@
+use uo;
+use cfgfile;
+use os;
+
+include ":datafile:datafile";
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+
+CONST CANCEL_BTN	:= 0xA00;
+CONST UPDATE_BTN	:= 0xA01;
+
+program use_OreVein(who, vein)
+	var gump := GFCreateGump();
+	GFResizePic(gump, 0, 0, GFGetCfgConst("Defaults", "BackGround"), 310, 410);
+	GFResizePic(gump, 15, 15, GFGetCfgConst("Defaults", "ForeGround"), 280, 380);
+
+	GFGumpPic(gump, 20, 90, 2434);
+
+	var ore_type := GFTextEntry(gump, 25, 90, 160, 20, 2100, vein.GetOreType());
+	GFTextLine(gump, 195, 90, 2100, "Ore Type");
+
+	var difficulty := GFTextEntry(gump, 25, 108, 160, 20, 2100, vein.GetDifficulty());
+	GFTextLine(gump, 195, 108, 2100, "Difficulty");
+
+	var yield := GFTextEntry(gump, 25, 125, 160, 20, 2100, vein.GetYield());
+	GFTextLine(gump, 195, 125, 2100, "Yield");
+
+	var max_ore := GFTextEntry(gump, 25, 145, 160, 20, 2100, vein.GetMaxOre());
+	GFTextLine(gump, 195, 145, 2100, "Max Ore");
+
+	var remaining_ore := GFTextEntry(gump, 25, 165, 160, 20, 2100, vein.GetRemainingOre());
+	GFTextLine(gump, 195, 165, 2100, "Remaining");
+
+	GFAddButton(gump, 25, 303, 2117, 2118, GF_CLOSE_BTN, UPDATE_BTN);
+	GFTextLine(gump, 45, 300, 2100, "Update Vein");
+
+	GFAddButton(gump, 25, 323, 2117, 2118, GF_CLOSE_BTN, CANCEL_BTN);
+	GFTextLine(gump, 45, 320, 2100, "Cancel");
+
+	var input := GFSendGump(who, gump);
+	if ( input[UPDATE_BTN] )
+		var type := GFExtractData(input, ore_type);
+		if ( !type )
+			type := "IronOre";
+		endif
+		
+		vein.SetOreType(type);
+		vein.SetDifficulty(GFExtractData(input, difficulty));
+		vein.SetYield(GFExtractData(input, yield));
+		vein.SetMaxOre(GFExtractData(input, max_ore));
+		vein.SetRemainingOre(GFExtractData(input, remaining_ore));
+		
+		SendSysMessage(who, "Saving vein settings...");
+		SetName(vein, "an ore vein ["+type+"]");
+		
+		return 1;
+	else
+		SendSysMessage(who, "Cancelled");
+		return 0;
+	endif
+endprogram

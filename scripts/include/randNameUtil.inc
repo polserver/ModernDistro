@@ -1,5 +1,5 @@
 const BIRD_IDX := 1;
-const DEMON_IDX := 2;
+const DAEMON_IDX := 2;
 const DRAGON_IDX := 3;
 //Const EVILMAGE_IDX := 4;
 const MALE_IDX := 5;
@@ -12,8 +12,8 @@ const OGRE_IDX := 11;
 const RATMAN_IDX := 12;
 
 const OBJ_BIRD := 0x6;
-const OBJ_DEMON := 0x9;
-const OBJ_DEMON_SWORD := 0xa;
+const OBJ_DAEMON := 0x9;
+const OBJ_DAEMON_SWORD := 0xa;
 const OBJ_DRAGON_RED := 0x3d;
 const OBJ_DRAGON_GREY := 0xc;
 //Const OBJ_EVILMAGE :=
