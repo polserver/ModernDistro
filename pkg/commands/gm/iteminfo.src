@@ -15,7 +15,7 @@ include ":gumps:gumps_ex";
 include ":gumps:gumpPrompt";
 include ":gumps:requestGump";
 include ":gumps:yesNo";
-include "include/weaponInfo";
+include ":weapons:weaponInfo";
 include "include/uo_extend";
 
 CONST START_Y	:= 55;   // These are to track the display area height.

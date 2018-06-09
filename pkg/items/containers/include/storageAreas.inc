@@ -28,8 +28,8 @@ CONST CP_NOCREATE	:= 0x0;
 CONST CP_CREATE		:= 0x1;
 
 CONST CP_DEFAULT_AREA	:= "World Bank";
-//CONST CP_DEFAULT_PREFIX	:= "[Root Container] ";
-CONST CP_DEFAULT_PREFIX	:= "Bankbox of ";
+CONST CP_DEFAULT_PREFIX	:= "[Root Container] ";
+//CONST CP_DEFAULT_PREFIX	:= "Bankbox of ";
 
 /*
  * Set the 'box_type' variable to the object name of the container type

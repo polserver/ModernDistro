@@ -5,6 +5,7 @@
  *
  * Presents information about a mobile.
  *
+ *
  */
 
 use uo;
@@ -17,7 +18,8 @@ include ":gumps:gumps";
 include ":gumps:gumpPrompt";
 include ":gumps:requestGump";
 include ":gumps:yesNo";
-include "include/storageAreas";
+//include "include/storageAreas";
+include ":containers:storageAreas";
 include "include/weaponInfo";
 include "include/arrays";
 
@@ -51,7 +53,7 @@ program textcmd_Info(who, serial)
 	if ( serial )
 		targ := SystemFindObjectBySerial(CInt(serial));
 	else
-		targ := Target(who, TGTOPT_NOCHECK_LOS );
+		targ := Target(who, TGTOPT_NOCHECK_LOS);
 	endif
 	if ( targ.IsA(POLCLASS_ITEM) )
 		start_script(":commands:/gm/iteminfo", {who, targ.serial});
@@ -113,7 +115,7 @@ function BuildEntries(targ, byref gump, byref cfg_elem, byref y_pos)
 
 	if ( cfg_elem.AutoBox )
 		var num_entries := entries.Size();
-		GFResizePic(gump, 145, y_pos, GetCfgConst("Defaults", "ForeGround"), 340, (num_entries*20));
+		GFResizePic(gump, 195, y_pos, GetCfgConst("Defaults", "ForeGround"), 340, (num_entries*20));
 	endif
 
 	foreach entry in ( entries )
@@ -138,7 +140,7 @@ function BuildEntries(targ, byref gump, byref cfg_elem, byref y_pos)
 					text := text+" "+line;
 					SleepMS(2);
 				endforeach
-				GFTextLine(gump, 175, y_pos, 2100, text);
+				GFTextLine(gump, 225, y_pos, 2100, text);
 				y_pos := y_pos + 20;
 				break;
 			"storageareas":
@@ -155,7 +157,7 @@ function BuildEntries(targ, byref gump, byref cfg_elem, byref y_pos)
 				DisplayReportables(targ, gump, y_pos);
 				break;
 			default:
-				GFTextLine(gump, 175, y_pos, 32, entry);
+				GFTextLine(gump, 225, y_pos, 32, entry);
 				y_pos := y_pos +  20;
 				break;
 		endcase
@@ -168,11 +170,11 @@ endfunction
 
 function DisplayMember(targ, byref gump, byref entry, byref y_pos)
 	if ( entry[5] )
-		var btn_id := GFAddButton(gump, 150, (y_pos+3), 2117, 2118, GF_CLOSE_BTN);
+		var btn_id := GFAddButton(gump, 200, (y_pos+3), 2117, 2118, GF_CLOSE_BTN);
 		RegisterButton(btn_id, entry[3], entry[5]);
 	endif
 
-	GFTextLine(gump, 175, y_pos, 2100, ParseEntryName(entry[2]));
+	GFTextLine(gump, 225, y_pos, 2100, ParseEntryName(entry[2]));
 
 	var value := "";
 	if ( Lower(entry[1]) == "member" )
@@ -195,7 +197,7 @@ function DisplayMember(targ, byref gump, byref entry, byref y_pos)
 			value := ParseScriptName(value);
 			break;
 	endcase
-	GFTextRight(gump, 480, y_pos, 2100, value);
+	GFTextRight(gump, 530, y_pos, 2100, value);
 
 	y_pos := y_pos +  20;
 	return 1;
@@ -205,14 +207,14 @@ function DisplayVitals(targ, byref gump, byref y_pos)
 	var vitals := AP_GetVitalNames();
 	var num_vitals := vitals.Size();
 
-	GFResizePic(gump, 145, y_pos, GetCfgConst("Defaults", "ForeGround"), 340, (num_vitals*20));
+	GFResizePic(gump, 195, y_pos, GetCfgConst("Defaults", "ForeGround"), 340, (num_vitals*20));
 	foreach vital_name in ( vitals )
-		var btn_id := GFAddButton(gump, 150, (y_pos+3), 2117, 2118, GF_CLOSE_BTN);
+		var btn_id := GFAddButton(gump, 200, (y_pos+3), 2117, 2118, GF_CLOSE_BTN);
 		RegisterButton(btn_id, vital_name, "vitalEdit");
-		GFTextLine(gump, 175, y_pos, 2100, vital_name);
+		GFTextLine(gump, 225, y_pos, 2100, vital_name);
 		var value := CDbl(GetVital(targ, vital_name)) / 100;
 		var max_value := CDbl(GetVitalMaximumValue(targ, vital_name)) / 100;
-		GFTextRight(gump, 480, y_pos, 2100, value+" / "+max_value);
+		GFTextRight(gump, 530, y_pos, 2100, value+" / "+max_value);
 		y_pos := y_pos +  20;
 		SleepMS(2);
 	endforeach
@@ -223,8 +225,7 @@ endfunction
 function DisplayAttributes(targ, byref gump, byref entry, byref y_pos)
 	var type := entry[2];
 	var attributes := AP_ListAttributesByType(type);
-        var attrib_cfg := ReadConfigFile(":*:attributes"); 
-//        var attributes := GetConfigStringKeys(attrib_cfg); 
+	var attrib_cfg := ReadConfigFile(":*:attributes"); 
 	//
 	// Notes about the first page of showing attributes:
 	// 1. The Y position they start showing on is dynamic.
@@ -255,26 +256,26 @@ function DisplayAttributes(targ, byref gump, byref entry, byref y_pos)
 			y_stretch := y_stretch + 10;
 		endif
 
-		GFResizePic(gump, 145, y_pos, GetCfgConst("Defaults", "ForeGround"), 340, y_stretch);
+		GFResizePic(gump, 195, y_pos, GetCfgConst("Defaults", "ForeGround"), 340, y_stretch);
 		if ( _group_iter > 1 )
-			GFAddButton(gump, 460, START_Y+5, 2650, 2651, GF_PAGE_BTN, gump.cur_page-1);
+			GFAddButton(gump, 510, START_Y+5, 2650, 2651, GF_PAGE_BTN, gump.cur_page-1);
 		endif
 
 		foreach attrib_name in ( group )
-			var btn_id := GFAddButton(gump, 150, (y_pos+3), 2117, 2118, GF_CLOSE_BTN);
+			var btn_id := GFAddButton(gump, 200, (y_pos+3), 2117, 2118, GF_CLOSE_BTN);
 			RegisterButton(btn_id, attrib_name, "attribEdit");
 
-			GFTextLine(gump, 175, y_pos, 2100, attrib_name);
+			GFTextLine(gump, 225, y_pos, 2100, attrib_name);
                         var value := CDbl(GetAttributeBaseValue(targ, attrib_name)) / 10.0;
                         var mod_value := CDbl(GetAttributeTemporaryMod(targ, attrib_name)) / 10.0;
 
-			GFTextRight(gump, 465, y_pos, 2100, value+" (+"+mod_value+")");
+			GFTextRight(gump, 515, y_pos, 2100, value+" (+"+mod_value+")");
 			y_pos := y_pos +  20;
 			SleepMS(2);
 		endforeach
 
 		if ( _group_iter < num_groups )
-			GFAddButton(gump, 460, 430, 2648, 2649, GF_PAGE_BTN, gump.cur_page+1);
+			GFAddButton(gump, 510, 430, 2648, 2649, GF_PAGE_BTN, gump.cur_page+1);
 			GFPage(gump, gump.cur_page+1);
 			y_pos := START_Y;
 		endif
@@ -290,19 +291,19 @@ function DisplayPrivileges(targ, byref gump, byref y_pos)
 	privs := GetConfigStringArray(privs, "Priv");
 
 	var num_privs := privs.Size();
-	GFResizePic(gump, 145, y_pos, GetCfgConst("Defaults", "ForeGround"), 340, (num_privs*20));
+	GFResizePic(gump, 195, y_pos, GetCfgConst("Defaults", "ForeGround"), 340, (num_privs*20));
 	foreach priv_name in ( privs )
-		var btn_id := GFAddButton(gump, 150, (y_pos+3), 2117, 2118, GF_CLOSE_BTN);
+		var btn_id := GFAddButton(gump, 200, (y_pos+3), 2117, 2118, GF_CLOSE_BTN);
 		RegisterButton(btn_id, priv_name, "privEdit");
 
-		GFTextLine(gump, 175, y_pos, 2100, priv_name);
+		GFTextLine(gump, 225, y_pos, 2100, priv_name);
 
 		var status := "Disabled";
 		if ( targ.Enabled(priv_name) )
 			status := "Enabled";
 		endif
 
-		GFTextRight(gump, 480, y_pos, 2100, status);
+		GFTextRight(gump, 520, y_pos, 2100, status);
 		y_pos := y_pos +  20;
 		SleepMS(2);
 	endforeach
@@ -315,18 +316,18 @@ function DisplayStorageAreas(targ, byref gump, byref y_pos)
 	var storage_areas := CP_GetStorageAreaNames();
 	var num_areas := storage_areas.Size();
 
-	GFResizePic(gump, 145, y_pos, GetCfgConst("Defaults", "ForeGround"), 340, (num_areas*20));
+	GFResizePic(gump, 195, y_pos, GetCfgConst("Defaults", "ForeGround"), 340, (num_areas*20));
 	foreach area_name in ( storage_areas )
 		var container := CP_GetStorageContainerForMobile(targ, area_name, CP_NOCREATE);
 		var name := area_name;
 		if ( container )
-			var btn_id := GFAddButton(gump, 150, (y_pos+3), 2117, 2118, GF_CLOSE_BTN);
+			var btn_id := GFAddButton(gump, 200, (y_pos+3), 2117, 2118, GF_CLOSE_BTN);
 			RegisterButton(btn_id, area_name, "openStorage");
 		else
-			GFTextRight(gump, 480, y_pos, 2100, "(no container)");
+			GFTextRight(gump, 530, y_pos, 2100, "(no container)");
 		endif
 
-		GFTextLine(gump, 175, y_pos, 2100, name);
+		GFTextLine(gump, 225, y_pos, 2100, name);
 		y_pos := y_pos +  20;
 		SleepMS(2);
 	endforeach
@@ -335,13 +336,13 @@ function DisplayStorageAreas(targ, byref gump, byref y_pos)
 endfunction
 
 function DisplayReportables(targ, byref gump, byref y_pos)
-	GFResizePic(gump, 145, y_pos, GetCfgConst("BackGrounds", "GoldTrim"), 340, 200);
+	GFResizePic(gump, 195, y_pos, GetCfgConst("BackGrounds", "GoldTrim"), 340, 200);
 	var lines := "<CENTER><U>Reportables</U></CENTER><BR>";
 	foreach line in ( targ.reportables )
 		lines := "<B>o</B>"+lines+line+"<BR>";
 		SleepMS(2);
 	endforeach
-	GFHTMLArea(gump, 155, y_pos+7, 325, 186, lines, 0, 1);
+	GFHTMLArea(gump, 205, y_pos+7, 325, 186, lines, 0, 1);
 
 	y_pos := y_pos+340;
 
@@ -411,6 +412,8 @@ function GetCustom(targ, property)
 			return CS_GetWeaponInfo(targ.weapon, "Damage");
 		"average_damage":
 			return CS_GetAverageDamage(targ.weapon);
+		"average_damage_per_swing":
+			return CS_GetADPS(targ, targ.weapon);
 		"gotten_item_name":
 			return targ.GetGottenItem().desc;
 		"gotten_item_serial":
@@ -434,20 +437,20 @@ endfunction
 function GumpTemplate(targ)
 	var gump := GFCreateGump();
 	GFPage(gump, 0);
-	GFResizePic(gump, 0, 0, GetCfgConst("Defaults", "BackGround"), 500, 480);
+	GFResizePic(gump, 0, 0, GetCfgConst("Defaults", "BackGround"), 550, 480);
 
-	GFResizePic(gump, 15, 15, GetCfgConst("Defaults", "ForeGround"), 470, 35);
+	GFResizePic(gump, 15, 15, GetCfgConst("Defaults", "ForeGround"), 520, 35);
 	GFTextLine(gump, 25, 22, 2100, "Info on "+targ.name);
 
 	if ( targ.npctemplate )
-		GFTextRight(gump, 475, 22, 2100, "[NPC]");
+		GFTextRight(gump, 525, 22, 2100, "[NPC]");
 	elseif ( targ.connected )
-		GFTextRight(gump, 475, 22, 2100, "[Player]");
+		GFTextRight(gump, 525, 22, 2100, "[Player]");
 	else
-		GFTextRight(gump, 475, 22, 2100, "[Offline Player]");
+		GFTextRight(gump, 525, 22, 2100, "[Offline Player]");
 	endif
 
-	GFResizePic(gump, 15, START_Y, GetCfgConst("Defaults", "ForeGround"), 125, END_Y);
+	GFResizePic(gump, 15, START_Y, GetCfgConst("Defaults", "ForeGround"), 175, END_Y);
 
 	var y_pos := 60;
 	foreach entry in ( index_list )
@@ -630,7 +633,7 @@ function OpenStorage(who, targ, input_info)
 
 	// Kind of a kludge, but oh well, deal with it!
 	if ( storage_area == "backpack" )
-		SendOpenSpecialContainer(who, targ.backpack);
+		SendViewContainer(who, targ.backpack);
 		return 1;
 	else
 		var container := CP_GetStorageContainerForMobile(targ, storage_area, CP_NOCREATE);

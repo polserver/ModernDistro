@@ -19,5 +19,5 @@ program textcmd_pack( who )
       MoveItemToContainer(item, me.backpack);
     endif
   endforeach
-  SendOpenspecialContainer( who, me.backpack );
+  SendViewContainer( who, me.backpack );
 endprogram
