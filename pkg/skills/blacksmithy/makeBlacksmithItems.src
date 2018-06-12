@@ -7,6 +7,9 @@ include ":attributes:attributes";
 include ":crafting:crafting";
 include ":crafting:craftingRepair";
 include ":crafting:toolWear";
+include ":itemutils:itemUtil";
+include ":itemutils:itemdesc";
+
 
 var item_config     := ReadConfigFile(":*:itemdesc");
 var craft_config    := ReadConfigFile(":blacksmithy:blacksmithy");
@@ -107,6 +110,8 @@ function makeBlacksmithItems(who, what, amt, tool)
 					SendSysMessage(who, "You failed to create the item, and some of your materials are lost.");
 					counter := counter + 1;
 					continue;
+				else
+					AddAnyMods(material, theitem);
 				endif
 			else
 				num := CInt(randomint(material)/2) + 1;
@@ -125,3 +130,29 @@ function makeBlacksmithItems(who, what, amt, tool)
 	return 0;
 
 endfunction
+
+function AddAnyMods(material_objtype, an_item)
+
+	var material_ref := GetItemDescInfo(material_objtype);
+	// Damages
+	if(an_item.IsA(POLCLASS_WEAPON))
+		an_item.damage_cold_mod := CInt(material_ref.ColdDamage);
+		an_item.damage_energy_mod := CInt(material_ref.EnergyDamage);
+		an_item.damage_fire_mod := CInt(material_ref.FireDamage);
+		an_item.damage_physical_mod := CInt(material_ref.PhysicalDamage);
+		an_item.damage_poison_mod := CInt(material_ref.PoisonDamage);
+	endif
+	
+	// Resistances
+	if(an_item.IsA(POLCLASS_ARMOR))
+		an_item.resist_cold_mod := CInt(material_ref.ColdResist);
+		an_item.resist_energy_mod := CInt(material_ref.EnergyResist);
+		an_item.resist_fire_mod := CInt(material_ref.FireResist);
+		an_item.resist_physical_mod := CInt(material_ref.PhysicalResist);
+		an_item.resist_poison_mod := CInt(material_ref.PoisonResist);
+	endif
+
+	return 1;
+endfunction
+
+
