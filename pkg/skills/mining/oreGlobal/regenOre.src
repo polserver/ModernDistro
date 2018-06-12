@@ -10,10 +10,11 @@ include ":datafile:datafile";
 include ":mining:settings";
 include ":mining:report";
 
+var settings := MSP_GetSettingsCfgElem("Settings");
+
 program GlobalControl()
 	MSP_ReportText("---=[ GLOBAL ORE REGENERATOR HAS STARTED UP ]=---", MSP_REPORT_SYSLOG);
 
-	var settings := MSP_GetSettingsCfgElem("Settings");
 	var cycle_wait := CInt(settings.RegenWait);
 	if ( cycle_wait < 1 )
 		cycle_wait := 30;
@@ -38,9 +39,11 @@ function RegenVeins(realm_name)
 	foreach elem_name in DFGetElemNames(data_file)
 		var data_elem := DFFIndElement(data_file, elem_name);
 		var amount := CInt(data_elem.GetProp("RemainingOre"));
+		var max_avail_global_ore := CInt((settings."MaxAvalGlobalOre"));
+	if(CInt(data_elem.GetProp("RemainingOre", amount)) < max_avail_global_ore)
 		amount += 1;
-
 		data_elem.SetProp("RemainingOre", amount);
+	endif
 
 		Sleep(1);
 	endforeach

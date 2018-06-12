@@ -19,5 +19,7 @@ program textcmd_pack( who )
       MoveItemToContainer(item, me.backpack);
     endif
   endforeach
-  SendViewContainer( who, me.backpack );
+  //SendViewContainer( who, me.backpack );
+  SendOpenSpecialContainer( who, me.backpack );
+  UpdateMobile( me, UPDATEMOBILE_RECREATE );
 endprogram

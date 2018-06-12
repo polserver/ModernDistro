@@ -9,10 +9,11 @@ include ":datafile:datafile";
 include ":mining:settings";
 include ":mining:report";
 
+var settings := MSP_GetSettingsCfgElem("Settings");
+
 program GlobalControl()
 	MSP_ReportText("---=[ ORE VEIN REGENERATOR HAS STARTED UP ]=---", MSP_REPORT_SYSLOG);
 	
-	var settings := MSP_GetSettingsCfgElem("Settings");
 	var cycle_wait := CInt(settings.RegenWait);
 	if ( cycle_wait < 1 )
 		cycle_wait := 30;
@@ -33,11 +34,13 @@ function RegenVeins()
 	var data_file := DFOpenDataFile("VeinInfo", DF_CREATE);
 	
 	foreach elem_name in ( DFGetElemNames(data_file) )
-		var ore_vein := SystemFindObjectBySerial(elem_name);
+		var ore_vein := SystemFindObjectBySerial(CInt(elem_name));
 		var amount := ore_vein.GetRemainingOre();
-		amount += 1;
-		
-		ore_vein.SetRemainingOre(amount);
+		var max_avail_vein_ore := CInt((settings."MavAvailVeinOre"));
+		if(amount < max_avail_vein_ore)
+			amount += 1;
+			ore_vein.SetRemainingOre(amount);
+		endif
 		
 		Sleep(1);
 	endforeach

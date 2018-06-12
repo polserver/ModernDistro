@@ -10,13 +10,13 @@ program textcmd_kill( who )
 
 		if((mob.cmdlevel) && mob.cmdlevel > who.cmdlevel)
 			RevokePrivilege( who, "invul" );
-			ApplyDamage( who, GetHp(who) + 100 );
+			ApplyRawDamage( who, CInt(AP_GetStat(mob, "Strength")) + 100 );
 			return;
 		endif
 
 		if (!mob.dead)
 			RevokePrivilege( mob, "invul" );
-			ApplyDamage( mob, GetHp(mob) + 100 );
+			ApplyRawDamage( mob, CInt(AP_GetStat(mob, "Strength")) + 100 );
 		endif
 
 	endif

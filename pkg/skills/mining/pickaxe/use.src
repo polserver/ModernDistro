@@ -13,6 +13,8 @@ include "include/client";
 include "include/sounds";
 include "include/facings";
 
+var settings := MSP_GetSettingsCfgElem("Settings");
+
 program use_PickAxe(who, pick)
 
 	SendSysMessage(who, "Select a place to mine.");
@@ -53,7 +55,7 @@ function DoMining(who, tool, targ, orig_x, orig_y)
 		endif
 
 		PerformAction(who, ANIM_ATTACK_1HAND_DOWN);
-		PlaySoundEffect(who, SFX_HAMMER);
+		PlaySoundEffect(who, SFX_PICK);
 		Sleep(1);
 	endfor
 
@@ -120,9 +122,10 @@ function CheckGlobalOre(who, targ)
 	var data_elem := DFFindElement(data_file, elem_name, DF_CREATE);
 	if ( !data_elem.GetProp("Type") )
 		// Initialize a new global ore vein.
+		var max_avail_global_ore := CInt((settings."MaxAvalGlobalOre"));
 		var type_list := ListOreTypes();
 		data_elem.SetProp("Type", type_list[RandomInt(type_list.Size())+1]);
-		data_elem.SetProp("RemainingOre", 30);
+		data_elem.SetProp("RemainingOre", max_avail_global_ore);
 	endif
 
 	var type := data_elem.GetProp("Type");
