@@ -638,7 +638,7 @@ function OpenStorage(who, targ, input_info)
 	else
 		var container := CP_GetStorageContainerForMobile(targ, storage_area, CP_NOCREATE);
 		SendOpenSpecialContainer(who, container);
-		UpdateMobile( who/ , UPDATEMOBILE_RECREATE );
+		UpdateMobile( who, UPDATEMOBILE_RECREATE );
 		return;
 	endif
 endfunction

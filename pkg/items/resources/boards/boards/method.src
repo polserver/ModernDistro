@@ -1,0 +1,43 @@
+/*
+        Created by *Edwards
+        
+        2009-08-13
+        
+        Last Modifications 2009-11-19
+             * Added GetRessourceName() && GetRessourceDifficulty()
+*/
+use uo;
+
+include ":itemUtils:itemdesc";
+
+program Install()
+	return 1;
+endprogram
+
+exported function IsLog( item )
+	item := item; // Avoid compiler warnings.
+	
+	return 1;
+endfunction
+
+exported function GetRessourceName( item )
+
+        var item_elem := GetItemDescInfo( item.objtype );
+        if( item_elem.errortext )
+                PrintTextAbove( item, "Error reading description of item -->"+item_elem.errortext );
+                return 0;
+        endif
+
+	return CStr( item_elem.IName );
+endfunction
+
+exported function GetRessourceDifficulty( item )
+
+        var item_elem := GetItemDescInfo( item.objtype );
+        if( item_elem.errortext )
+                PrintTextAbove( item, "Error reading description of item -->"+item_elem.errortext );
+                return 0;
+        endif
+
+	return CInt( item_elem.Difficulty );
+endfunction

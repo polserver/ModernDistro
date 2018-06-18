@@ -1,0 +1,12 @@
+use uo;
+use os;
+
+include "include/client";
+
+
+program graphic(who, textline)
+
+	var item := target(who, TGTOPT_NOCHECK_LOS);
+	item.graphic := CINT (textline);
+
+endprogram

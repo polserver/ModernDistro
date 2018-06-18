@@ -91,7 +91,7 @@ function LJ_GetDataFile()
 endfunction
 
 /*
- * LJ_GetDataFile()
+ * LJ_GetDataElem()
  *
  * Purpose
  * Retrieves an elem from the lumberjacking data file.
