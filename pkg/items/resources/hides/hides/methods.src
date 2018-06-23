@@ -1,0 +1,18 @@
+use uo;
+use os;
+use cfgfile;
+
+include ":itemutils:itemdesc";
+
+program Install()
+
+	return 1;
+endprogram
+
+exported function IsHide( item )
+
+	item := item; // Avoid compiler warnings.
+
+	return 1;
+endfunction
+
