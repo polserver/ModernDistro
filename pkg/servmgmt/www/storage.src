@@ -1,0 +1,106 @@
+/* $Id: storage.src 892 2006-10-30 17:37:49Z austinheilman $
+ *
+ */
+
+use uo;
+use os;
+use http;
+use polsys;
+use storage;
+
+include ":servmgmt:header";
+
+
+program HTMLPage()
+	DoHeader("Server Management Storage");
+	WriteHTML("<DIV ID='container'>");
+	WriteHTML("<DIV ID='header'></DIV>");
+	WriteHTML("<DIV ID='content'>");
+	TableHeader("Storage");
+
+	var storage_area := QueryParam("Area");
+	var container := QueryParam("Root");
+
+	if ( storage_area && container )
+		ShowContainer(storage_area, container);
+	elseif ( storage_area )
+		ShowStorageArea(storage_area);
+	else
+		ListStorageAreas();
+	endif
+
+	WriteHTML("</DIV>");
+
+	DoFooter();
+
+	return 1;
+endprogram
+
+function ShowContainer(storage_area, container)
+	container := SystemFindObjectBySerial(CInt(container));
+
+	WriteHTML("<P>Storage Area - <A HREF='?Area="+storage_area+"'>"+storage_area+"</A><BR>");
+	WriteHTML("Root Container - "+container.desc+"</P>");
+
+	WriteHTML("<TABLE CELLSPACING='1' CELLPADDING='2' WIDTH='400'>");
+	WriteHTML("<TR>");
+	WriteHTML("<TH><B>Name</B></TH><TH><B>Serial</B></TH>");
+	WriteHTML("</TR>");
+	foreach item in ( EnumerateItemsInContainer(container) )
+		WriteHTML("<TR>");
+		WriteHTML("<TD>"+item.desc+"</TD>");
+		WriteHTML("<TD>"+Hex(item.serial)+"</TD>");
+		WriteHTML("</TR>");
+		SleepMS(2);
+	endforeach
+	WriteHTML("</TABLE>");
+
+	return 1;
+endfunction
+
+function ShowStorageArea(storage_area)
+	var storage_areas := StorageAreas();
+	var area := storage_areas[storage_area];
+
+	WriteHTML("<P>Storage Area - "+storage_area+"</P>");
+	WriteHTML("<P>Root Items: "+area.count+"<BR>");
+	WriteHTML("Total Items: "+area.totalcount+"</P>");
+
+	WriteHTML("<TABLE CELLSPACING='1' CELLPADDING='2' WIDTH='400'>");
+	WriteHTML("<TR>");
+	WriteHTML("<TH><B>Name</B></TH><TH><B>Item Count</B></TH>");
+	WriteHTML("</TR>");
+	foreach container in ( area )
+		WriteHTML("<TR>");
+		WriteHTML("<TD><A HREF='?Area="+storage_area+"&Root="+Hex(container.serial)+"'>"+container.desc+"</TD>");
+		WriteHTML("<TD>"+container.item_count+"</TD>");
+		WriteHTML("</TR>");
+		SleepMS(2);
+	endforeach
+
+	WriteHTML("</TABLE>");
+
+	return 1;
+endfunction
+
+function ListStorageAreas()
+	WriteHTML("<P>Storage Areas</P>");
+
+	WriteHTML("<TABLE CELLSPACING='1' CELLPADDING='2' WIDTH='400'>");
+	WriteHTML("<TR>");
+	WriteHTML("<TH><B>Area Name</B></TH>");
+	WriteHTML("<TH><B>Root Item Count</B></TH>");
+	WriteHTML("<TH><B>Total Items</B></TH>");
+	foreach area in ( StorageAreas() )
+		WriteHTML("<TR>");
+		WriteHTML("<TD><A HREF='?Area="+area+"'>"+area+"</A></TD>");
+		WriteHTML("<TD>"+area.count+"</TD>");
+		WriteHTML("<TD>"+area.totalcount+"</TD>");
+		WriteHTML("</TR>");
+		SleepMS(2);
+	endforeach
+
+	WriteHTML("</TABLE>");
+
+	return 1;
+endfunction

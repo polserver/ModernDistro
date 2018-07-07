@@ -1,0 +1,101 @@
+use uo;
+use os;
+use cfgfile;
+
+include "include/client";
+include ":attributes:attributes";
+
+const EVID_UNEQUIP   := 0x123456;
+const EVID_DISCHARGE := 0x123457;
+
+program destroy(item)
+  set_critical(1);
+  var ser := GetObjProperty(item, "#equipped");
+  var who := SystemFindObjectBySerial(cint(ser), SYSFIND_SEARCH_OFFLINE_MOBILES);
+  var itemdesc := ReadConfigFile("itemdesc");
+  var penalty := CInt(itemdesc[item.objtype].DexPenalty);
+  if(penalty)
+    EraseObjProperty(item, "#equipped");
+    SetDexterityMod(who, GetDexterityMod(who) + penalty);
+  endif
+  var type := GetObjProperty(item,"type");
+  var val := 0;
+  case(type)
+    "accuracy":     val := accuracy(who,item);
+    "cursed":       val := cursed(who,item);
+    "sight":        val := sight(who,item);
+    "reflect":      val := reflect(who,item);
+    "protection":   val := protection(who,item);
+    "wizzohat":     val := wizzohat(who,item);
+    "strength":     val := strgth(who,item);
+    "invisibility": val := invisibility(who, item);
+    default:        val := 1;
+  endcase
+  return val;
+  set_critical(0);
+endprogram
+
+function strgth(who,item)
+  return 1;
+endfunction
+
+function wizzohat(who,item)
+  SetIntelligenceMod(who, GetIntelligenceMod(who) - 10);
+  SetStrengthMod(who, GetStrengthMod(who) + 5);
+  SetDexterityMod(who, GetDexterityMod(who) + 5);
+  EraseObjProperty(item, "#equipped");
+  return 1;
+endfunction
+
+function cursed(who,item)
+  return 0;
+endfunction
+
+function invisibility(who,item)
+  RemoveMods(who, item);
+  return 1;
+endfunction
+
+function sight(who,item)
+  RemoveMods(who, item);
+  return 1;
+endfunction
+
+function reflect(who,item)
+  RemoveMods(who, item);
+  return 1;
+endfunction
+
+function accuracy(who,item)
+  var amt := CInt(GetObjProperty(item,"gain"));
+  amt := (0 - amt);
+  if((!amt) || (amt == 0))
+    amt := (0 - 5);
+  endif
+  var cfg := ReadConfigFile(":combat:itemdesc");
+  var attrib := cfg[item.objtype].Attribute;
+  case(attrib)
+    "Wrestling": ModifyAttributeTemporaryMod(who, WRESTLING,     amt);
+    "Fencing":   ModifyAttributeTemporaryMod(who, FENCING,       amt);
+    "Archery":   ModifyAttributeTemporaryMod(who, ARCHERY,       amt);
+    "Swords":    ModifyAttributeTemporaryMod(who, SWORDSMANSHIP, amt);
+    "Mace":      ModifyAttributeTemporaryMod(who, MACEFIGHTING,  amt);
+  endcase
+  EraseObjProperty(item, "#equipped");
+  return 1;
+endfunction
+
+function protection(who,item)
+  RemoveMods(who, item);
+  return 1;
+endfunction
+
+function RemoveMods(who, item)
+  var proc := GetProcess(Cint(GetObjProperty(item, "Pid")));
+  if(proc)
+    var ev := {};
+    ev.+type := EVID_UNEQUIP;
+    proc.sendevent(ev);
+  endif
+  EraseObjProperty(item, "#equipped");
+endfunction

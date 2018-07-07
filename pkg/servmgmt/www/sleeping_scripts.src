@@ -1,0 +1,60 @@
+/* $Id: sleeping_scripts.src 1155 2008-01-27 04:43:36Z AustinHeilman $
+ *
+ */
+
+use uo;
+use os;
+use http;
+
+include ":servmgmt:header";
+
+program HTMLPage()
+	DoHeader("Server Management Sleeping-Scripts");
+	WriteHTML("<DIV ID='container'>");
+	WriteHTML("<DIV ID='header'></DIV>");
+	WriteHTML("<DIV ID='content'>");
+	TableHeader("Sleeping-Scripts");
+
+	WriteHTML("<P>Sleeping Scripts</P>");
+
+	WriteHTML("<TABLE CELLSPACING='1' CELLPADDING='2' WIDTH='90%'>");
+	WriteHTML("<TR>");
+	WriteHTML("<TH><B>PID</B></TH>");
+	WriteHTML("<TH><B>Script Name</B></TH>");
+	WriteHTML("<TH><B>Cycles</B></TH>");
+	WriteHTML("<TH><B>Cycles Since Sleep</B></TH>");
+	WriteHTML("<TH><B>Prog Counter</B></TH>");
+	WriteHTML("<TH><B>Call Depth</B></TH>");
+	WriteHTML("<TH><B>Globals</B></TH>");
+	WriteHTML("<TH><B>Var Size</B></TH>");
+	WriteHTML("<TH><B>State</B></TH>");
+	WriteHTML("</TR>");
+
+	var scripts := POLCore().all_scripts;
+	scripts.Sort();
+	foreach script in ( scripts )
+		if ( script.state != "Sleeping" )
+			continue;
+		endif
+
+		WriteHTML("<TR>");
+		WriteHTML("<TD><A HREF='scriptex.ecl?PID="+script.pid+"'>"+script.pid+"</A></TD>");
+		WriteHTML("<TD>"+script.name+"</TD>");
+		WriteHTML("<TD>"+script.instr_cycles+"</TD>");
+		WriteHTML("<TD>"+script.sleep_cycles+"</TD>");
+		WriteHTML("<TD>"+script.PC+"</TD>");
+		WriteHTML("<TD>"+script.call_depth+"</TD>");
+		WriteHTML("<TD>"+script.num_globals+"</TD>");
+		WriteHTML("<TD>"+script.var_size+"</TD>");
+		WriteHTML("<TD>"+script.state+"</TD>");
+		WriteHTML("</TR>");
+		SleepMS(2);
+	endforeach
+	WriteHTML("</TABLE>");
+
+	WriteHTML("</DIV>");
+
+	DoFooter();
+
+	return 1;
+endprogram

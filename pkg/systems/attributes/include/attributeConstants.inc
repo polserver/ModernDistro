@@ -1,9 +1,3 @@
-/* $Id: attributeConstants.inc 373 2006-06-17 18:27:33Z austinheilman $
- *
- * Purpose
- * Provide various functions and CONSTants for the attribute system.
- *
- */
 use uo;
 
 const ATTRIBUTEID_DEXTERITY        := "Dexterity";
@@ -14,10 +8,13 @@ const HITS                         := VITALID_LIFE;
 const VITALID_MANA                 := "Mana";
 const VITALID_STAMINA              := "Stamina";
 
+
+
 enum VITALS
 	HITS			:= "Hits",
 	MANA			:= "Mana",
-	STAMINA			:= "Stamina"
+	STAMINA			:= "Stamina",
+	HUNGER			:= "Hunger"
 endenum
 
 enum STATS
@@ -85,13 +82,10 @@ enum SKILLS
   MYSTICISM     := "Mysticism",
   IMBUING       := "Imbuing",
   THROWING      := "Throwing"
-  
-  
-  
+
 endenum
 
-
-
+//const SKILLID__HIGHEST := 48;
 var List_of_Skills := array{"Alchemy", "Anatomy", "AnimalLore", "ItemIdentification", "ArmsLore", "Parry", "Begging", "Blacksmithy", "BowcraftFletching", "Peacemaking",
                   "Camping", "Carpentry", "Cartography", "Cooking", "DetectingHidden", "Discordance", "EvaluatingIntelligence", "Healing", "Fishing",
                   "ForensicEvaluation", "Herding", "Hiding", "Provocation", "Inscription", "Lockpicking", "Magery", "ResistingSpells", "Tactics", "Snooping",

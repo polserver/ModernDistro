@@ -12,12 +12,7 @@
 
 use uo;
 
-const CORE_SETTINGS_MIN_ATTRIBUTE  := 0;
-const CORE_SETTINGS_MAX_ATTRIBUTE  := 60000;
-const CORE_SETTINGS_MIN_VITAL      := 100;
-const CORE_SETTINGS_MAX_VITAL      := 10000000;
-
-
+include "include/eventID";
 
 /*
  * AP_GetSkill(mobile, skill_name)
@@ -33,8 +28,9 @@ const CORE_SETTINGS_MAX_VITAL      := 10000000;
  * Returns an integer.
  *
  */
-function AP_GetSkill(who, skill_name)
-	return AP_GetTrueSkill(who, skill_name)+AP_GetSkillMod(who, skill_name);
+function AP_GetSkill( who, skill_name )
+
+	return AP_GetTrueSkill( who, skill_name )+AP_GetSkillMod( who, skill_name );
 endfunction
 
 /*
@@ -51,8 +47,9 @@ endfunction
  * Returns a double.
  *
  */
-function AP_GetTrueSkill(who, skill_name)
-	return CDbl(GetAttributeBaseValue(who, skill_name)) / 10.0;
+function AP_GetTrueSkill( who, skill_name )
+
+	return CDbl( GetAttributeBaseValue( who, skill_name )) / 10.0;
 endfunction
 
 /*
@@ -69,8 +66,9 @@ endfunction
  * Returns a double.
  *
  */
-function AP_GetSkillMod(who, skill_name)
-	return CDbl(GetAttributeTemporaryMod(who, skill_name)) / 10.0;
+function AP_GetSkillMod( who, skill_name )
+
+	return CDbl( GetAttributeTemporaryMod( who, skill_name )) / 10.0;
 endfunction
 
 /*
@@ -89,9 +87,16 @@ endfunction
  * The result of SetAttributeBaseValue()
  *
  */
-function AP_SetTrueSkill(mobile, skill_name, points)
-	var result := SetAttributeBaseValue(mobile, skill_name, CInt(CDbl(points) * 10.0));
-	RecalcVitals(mobile);
+function AP_SetTrueSkill( mobile, skill_name, points )
+
+        var result;
+	if( points >= 0 )
+		result := SetAttributeBaseValue( mobile, skill_name, CInt( CDbl( points ) * 10.0 + 0.1 ));
+	else
+		result := SetAttributeBaseValue( mobile, skill_name, CInt( CDbl( points ) * 10.0 - 0.1 ));
+	endif
+ 
+	RecalcVitals( mobile );
 	return result;
 endfunction
 
@@ -111,9 +116,10 @@ endfunction
  * The result of SetAttributeBaseValue()
  *
  */
-function AP_SetSkillMod(mobile, skill_name, points)
-	var result := SetAttributeTemporaryMod(mobile, skill_name, CInt(CDbl(points) * 10.0));
-	RecalcVitals(mobile);
+function AP_SetSkillMod( mobile, skill_name, points )
+
+	var result := SetAttributeTemporaryMod( mobile, skill_name, CInt( CDbl( points ) * 10 ));
+	RecalcVitals( mobile );
 	return result;
 endfunction
 
@@ -133,18 +139,18 @@ endfunction
  * Returns the previous value
  *
  */
-function AP_ModifySkillMod(mobile, stat_name, points)
-	var orig_mod := AP_GetStatMod(mobile, stat_name);
-	var new_mod := CDbl(points)+CDbl(orig_mod);
+function AP_ModifySkillMod( mobile, stat_name, points )
 
-	AP_SetSkillMod(mobile, stat_name, new_mod);
+	var orig_mod := AP_GetStatMod( mobile, stat_name );
+	var new_mod := CDbl( points ) + CDbl( orig_mod );
+
+	AP_SetSkillMod( mobile, stat_name, new_mod );
 
 	return orig_mod;
 endfunction
 
-
 /*
- * AP_SetSkillScript(attribute_name)
+ * AP_GetSkillScript(attribute_name)
  *
  * Purpose
  * Gets the script that a skill uses.
@@ -156,8 +162,9 @@ endfunction
  * Returns a string.
  *
  */
-function AP_GetSkillScript(attribute_name)
-	var cfg := AP_GetAttributeCfgElem(attribute_name);
+function AP_GetSkillScript( attribute_name )
+
+	var cfg := AP_GetAttributeCfgElem( attribute_name );
 	return cfg.Script;
 endfunction
 
@@ -176,15 +183,30 @@ endfunction
  * Returns a dictionary.
  *
  */
-function AP_GetSkillStats(attribute_name)
-	var cfg_elem := AP_GetAttributeCfgElem(attribute_name);
-	var stat_entries := GetConfigStringDictionary(cfg_elem, "StatCheck");
-	foreach textline in (stat_entries)
-		textline := SplitWords(textline);
+function AP_GetSkillStats( attribute_name )
+
+	var cfg_elem := AP_GetAttributeCfgElem( attribute_name );
+	var stat_entries := GetConfigStringDictionary( cfg_elem, "StatCheck" );
+	foreach textline in ( stat_entries )
+		textline := SplitWords( textline );
 		SleepMS(2);
 	endforeach
 
 	return stat_entries;
+endfunction
+
+function AP_GetSkillDefaultAward( skill_name )
+
+	var elem_info := AP_GetAttributeCfgElem( skill_name );
+	if( !elem_info )
+		return elem_info;
+	endif
+
+	if( elem_info.Title )
+		return CInt( elem_info.AwardDefault / 5 );
+	else
+		return error{"errortext":="Attribute does not have a 'AwardDefault' entry."};
+	endif
 endfunction
 
 /*
@@ -200,7 +222,7 @@ endfunction
  * Returns a number or error
  *
  */
-function AP_GetSkillCap(skill_name:="")
+function AP_GetSkillCapByName(skill_name:="")
 	var cfg_elem := AP_GetSettingsCfgElem("Skills");
 	var cap_val;
 	
@@ -219,71 +241,7 @@ function AP_GetSkillCap(skill_name:="")
 	return cap_val;
 endfunction
 
-/*
- * AP_CheckSkillCap(mobile, skill_name)
- *
- * Purpose
- * Checks if a skill is greater than or equal to its maximum value in settings.cfg
- * If no skill_name is passed, it will check the totals.
- *
- * Parameters
- * mobile:	Mobile to check the skills on
- * stat_name:	Optional parameter - name of the skill to check.
- *
- * Return value
- * Returns 1 if skill(s) >= to the cap
- *
- */
-function AP_CheckSkillCap(mobile, skill_name:="")
-	var cfg_elem := AP_GetSettingsCfgElem("Skills");
 
-	if ( skill_name )
-		var cap_val := AP_GetSkillCap(skill_name);
-
-		if ( cap_val != error )
-			return ( AP_GetTrueSkill(mobile, skill_name) >= cap_val );
-		endif
-	else
-		var total := 0.0;
-		foreach attribute_name in ( AP_ListAttributesByType("Skill") )
-			total += AP_GetTrueSkill(mobile, attribute_name);
-			SleepMS(2);
-		endforeach
-
-		var cap_val := GetConfigReal(cfg_elem, "TotalCap");
-		if ( cap_val != error )
-			return ( total >= cap_val );
-		endif
-	endif
-
-	return 0;
-endfunction
-
-
-/*
- * AP_CheckSkillTotal(mobile)
- *
- * Purpose
- * Checks the total sum of all skills a mobile has.
- *
- * Parameters
- * mobile:	Mobile to check the skills on
- *
- * Return value
- * Returns Integer of the sum total of skill points
- *
- */
-function AP_CheckSkillsTotal(mobile)
-
-	var total := 0.0;
-	foreach attribute_name in ( AP_ListAttributesByType("Skill") )
-		total += AP_GetTrueSkill(mobile, attribute_name);
-		SleepMS(2);
-	endforeach
-
-	return total;
-
-endfunction
 
 //////////////////////////////////////////////////////
 //
@@ -296,6 +254,12 @@ endfunction
 // to the proper functions.
 //
 //////////////////////////////////////////////////////
+const CORE_SETTINGS_MIN_ATTRIBUTE  := 0;
+const CORE_SETTINGS_MAX_ATTRIBUTE  := 60000;
+const CORE_SETTINGS_MIN_VITAL      := 100;
+const CORE_SETTINGS_MAX_VITAL      := 10000000;
+
+
 
 
 /////////////////////////////////////////////////////////

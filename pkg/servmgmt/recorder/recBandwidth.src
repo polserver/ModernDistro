@@ -1,0 +1,43 @@
+/* $Id: recbandwidth.src 663 2006-08-09 10:49:43Z austinheilman $
+ *
+ * Purpose:
+ * This program records the bandwidth used per minute
+ * Samples are stored for the last HISTORY_MINUTES minutes
+ * each element contains { bytes_received, bytes_sent } for that minute
+ *
+ */
+
+use os;
+use uo;
+
+// Number of minutes to store the history for
+CONST HISTORY_MINUTES := 10;
+
+program record_Bandwidth_used()
+
+	var results := array{array{0, 0}};
+	var system := POLCore();
+
+	var last_received := system.bytes_received;
+	var last_sent := system.bytes_sent;
+
+	while (1)
+		var this_received := system.bytes_received;
+		var this_sent := system.bytes_sent;
+
+		var recv_diff := this_received - last_received;
+		var sent_diff := this_sent - last_sent;
+
+		results.Insert(1, array{recv_diff, sent_diff});
+		results.Shrink(HISTORY_MINUTES);
+
+		last_received := this_received;
+		last_sent := this_sent;
+
+		SetGlobalProperty("#:servmgmt:bandwidth", results);
+
+		Sleep(60);
+	endwhile
+
+	return 1;
+endprogram

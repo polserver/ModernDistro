@@ -58,7 +58,8 @@ exported function HandleSendSkillLock(character, byref packet)
 			if ( mode == MODE_FULL_LIST_CAP )
 				// Use 9 here because byte[2] id + byte[2] skill value + byte[2] unmodified value + byte skillLock + byte[2] cap = 9
 				packet.SetInt8((OFFSET_SEND_SKILLLOCK + (9 * i)), state);
-				packet.SetInt16((OFFSET_SEND_CAP + (9 * i)), CInt(AP_GetSkillCap(AP_SkillIdToAttributeName(i))));
+				//packet.SetInt16((OFFSET_SEND_CAP + (9 * i)), CInt(AP_GetSkillCap(AP_SkillIdToAttributeName(i)))); // Austin's
+				packet.SetInt16((OFFSET_SEND_CAP + (9 * i)), CInt(AP_GetSkillCapByName(AP_SkillIdToAttributeName(i)))); // Modded Austin's
 			else
 				// byte[2] id + byte[2] skill value + byte[2] unmodified value + byte skillLock = 7
 				packet.SetInt8((OFFSET_SEND_SKILLLOCK + (7 * i)), state);
@@ -71,7 +72,8 @@ exported function HandleSendSkillLock(character, byref packet)
 
 		// If it is requested, include skill cap information
 		if ( mode == MODE_SINGLE_SKILL_CAP )
-			packet.SetInt16(OFFSET_SEND_CAP, CInt(AP_GetSkillCap(AP_SkillIdToAttributeName(skill_id))));
+			//packet.SetInt16(OFFSET_SEND_CAP, CInt(AP_GetSkillCap(AP_SkillIdToAttributeName(skill_id)))); // Austin's
+			packet.SetInt16(OFFSET_SEND_CAP, CInt(AP_GetSkillCapByName(AP_SkillIdToAttributeName(skill_id)))); // Modded Austin's
 		endif
 	else
 		if ( DEBUG )

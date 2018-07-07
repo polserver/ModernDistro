@@ -1,0 +1,43 @@
+/* $Id: iostats.src 892 2006-10-30 17:37:49Z austinheilman $
+ *
+ */
+
+use uo;
+use os;
+use http;
+use polsys;
+use storage;
+
+include ":servmgmt:header";
+
+Program HTMLPage()
+	DoHeader("Server Management I/O Stats");
+	WriteHTML("<DIV ID='container'>");
+	WriteHTML("<DIV ID='header'></DIV>");
+	WriteHTML("<DIV ID='content'>");
+	TableHeader("I/O Stats");
+
+	WriteHTML("<P>Packets Sent</P>");
+
+	WriteHTML("<TABLE CELLSPACING='1' CELLPADDING='2' WIDTH='400'>");
+	WriteHTML("<TR>");
+	WriteHTML("<TH><B>Mesage Type</B></TH><TH><B>Count</B></TH><TH><B>Bytes</B></TH>");
+	WriteHTML("</TR>");
+	var iostats := POLCore().iostats;
+	for msgtype := 0 to 255
+		if ( iostats.sent[msgtype+1].count )
+			WriteHTML("<TR>");
+			WriteHTML("<TD>"+msgtype+" ("+Hex(msgtype)+")</TD>");
+			WriteHTML("<TD>"+iostats.sent[msgtype+1].count+"</TD>");
+			WriteHTML("<TD>"+iostats.sent[msgtype+1].bytes+"</TD>");
+			WriteHTML("</TR>");
+		endif
+		SleepMS(2);
+	endfor
+	WriteHTML("</TABLE>");
+
+	WriteHTML("</DIV>");
+	DoFooter();
+
+	return 1;
+endprogram

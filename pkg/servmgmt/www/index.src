@@ -1,0 +1,93 @@
+/* $Id: index.src 892 2006-10-30 17:37:49Z austinheilman $
+ *
+ */
+
+use uo;
+use os;
+use http;
+use polsys;
+use storage;
+
+include ":servmgmt:header";
+
+Program HTMLPage()
+	DoHeader("Server Management Index");
+
+	WriteHTML("<DIV ID='container'>");
+	WriteHTML("<DIV ID='header'></DIV>");
+	WriteHTML("<DIV ID='content'>");
+	TableHeader("Server Management Index");
+
+	var core_ref := POLCore();
+
+	WriteHTML("<P>POL Server Performance</P>");
+	WriteHTML("<P>Core Version: "+core_ref.verstr+"<BR>");
+	WriteHTML("Compile Date: "+core_ref.compiledate+"<BR>");
+	WriteHTML("Compile Time: "+core_ref.compiletime+"</P>");
+
+	WriteHTML("<TABLE CELLSPACING='1' CELLPADDING='2'>");
+	TableDataHeader("Object Counts");
+	TableData("Mobile Count", core_ref.mobilecount);
+	TableData("Top Level Item Count", core_ref.itemcount);
+	TableData("Online Player Count", EnumerateOnlineCharacters().Size());
+	TableData("Storage Area Count", StorageAreas().count);
+	TableDataHeader("Load Information");
+	TableData("System Load", core_ref.sysload+"% ("+core_ref.sysload_severity+")");
+	TableData("Priority Divider", core_ref.priority_divide);
+	TableData("Instructions Per Minute", core_ref.instr_per_min);
+	TableData("Scripts On Time Per Minute", core_ref.scripts_ontime_per_min);
+	TableData("Scripts Late Per Minute", core_ref.scripts_late_per_min);
+	TableData("Tasks On Time Per Minute", core_ref.tasks_ontime_per_min);
+	TableData("Tasks Late Per Minute", core_ref.tasks_late_per_min+" ("+core_ref.tasks_late_ticks_per_min+" ticks)");
+	TableDataHeader("Data Transfer");
+	TableData("Bytes Received", core_ref.bytes_received);
+	TableData("Bytes Sent", core_ref.bytes_sent);
+	TableDataHeader("Miscellaneous Information");
+	TableData("Error Creations Per Minute", core_ref.error_creations_per_min);
+	TableData("Events Per Minute", core_ref.events_per_min);
+	TableData("Skill Checks Per Minute", core_ref.skill_checks_per_min);
+	TableData("Combat Operations Per Minute", core_ref.combat_operations_per_min);
+	WriteHTML("</TABLE>");
+
+	WriteHTML("<P>");
+	WriteHTML("<UL>");
+	WriteHTML("<LI><A HREF='objviewer.ecl'>Object Viewer</A>");
+	WriteHTML("<LI><A HREF='bandwidth.ecl'>Bandwidth Usage</A>");
+	WriteHTML("<LI><A HREF='iostats.ecl'>I/O Stats</A>");
+	WriteHTML("<LI><A HREF='script_profiles.ecl'>Script Profiles</A>");
+	WriteHTML("<LI><A HREF='all_scripts.ecl'>All Scripts</A>");
+	WriteHTML("<LI><A HREF='running_scripts.ecl'>Running Scripts</A>");
+	WriteHTML("<LI><A HREF='long_running_scripts.ecl'>Long Running Scripts</A>");
+	WriteHTML("<LI><A HREF='sleeping_scripts.ecl'>Sleeping Scripts</A>");
+	WriteHTML("<LI><A HREF='storage.ecl'>Storage</A>");
+	WriteHTML("<LI><A HREF='datafiles.ecl'>Data Files</A>");
+	WriteHTML("</UL>");
+	WriteHTML("</P>");
+
+	WriteHTML("<P>");
+	WriteHTML("<UL>");
+	WriteHTML("<LI><A HREF='unloadecl.ecl'>Script Unloader</A>");
+	WriteHTML("<LI><A HREF='unloadcfg.ecl'>Config Unloader</A>");
+	WriteHTML("</UL>");
+	WriteHTML("</P>");
+
+	WriteHTML("</DIV>");
+
+	DoFooter();
+
+	return 1;
+endprogram
+
+function TableData(name, data)
+	WriteHTML("<TR>");
+	WriteHTML("<TD>"+name+"</TD><TD>"+data+"</TD>");
+	WriteHTML("</TR>");
+
+	return 1;
+endfunction
+
+function TableDataHeader(data)
+	WriteHTML("<TR><TH COLSPAN='2' ALIGN='LEFT'>"+data+"</TH></TR>");
+
+	return 1;
+endfunction

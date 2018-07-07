@@ -16,16 +16,17 @@ use cfgfile;
 use vitals;
 use attributes;
 
+include ":attributes:advanceCheck";
+include ":attributes:attributeConstants";
+include ":attributes:caps";
 include ":attributes:regen";
 include ":attributes:settings";
+include ":attributes:skillCheck";
 include ":attributes:skills";
 include ":attributes:stats";
 include ":attributes:vitals";
-include ":attributes:attributeConstants";
-include ":attributes:skillCheck";
-include ":attributes:advanceCheck";
+include ":attributes:titles";
 include ":datafile:datafile";
-include "include/eventID";
 
 /* AP_GetAttributesCfgFile()
  * 
@@ -39,9 +40,10 @@ include "include/eventID";
  *
  */
 function AP_GetAttributesCfgFile()
-	var cfg_file := ReadConfigFile(":attributes:attributes");
-	if ( cfg_file.errortext )
-		SysLog("Error::AP_GetAttributesCfgFile() - Unable to open attributes.cfg ->"+cfg_file.errortext);
+
+	var cfg_file := ReadConfigFile( ":attributes:attributes" );
+	if( cfg_file.errortext )
+		SysLog( "Error::AP_GetAttributesCfgFile() - Unable to open attributes.cfg ->"+cfg_file.errortext );
 	endif
 
 	return cfg_file;
@@ -61,20 +63,21 @@ endfunction
  * Returns a config file elem.
  *
  */
-function AP_GetAttributeCfgElem(attribute_name, byref cfg_file:=0)
-	if ( !cfg_file )
+function AP_GetAttributeCfgElem( attribute_name, byref cfg_file:=0 )
+
+	if( !cfg_file )
 		cfg_file := AP_GetAttributesCfgFile();
 	endif
-	
+
 	var cfg_elem := cfg_file[attribute_name];
-	if ( cfg_elem.errortext )
-		SysLog("Error::AP_GetAttributeCfgElem() - unable to find cfg elem ["+attribute_name+"] ->"+cfg_elem.errortext);
+	if( cfg_elem.errortext )
+		SysLog( "Error::AP_GetAttributeCfgElem() - unable to find cfg elem ["+attribute_name+"] ->"+cfg_elem.errortext );
 	endif
-	
+
 	return cfg_elem;
 endfunction
 
-/* AP_GetAttributesCfgFile()
+/* AP_GetAttributesDataFile()
  * 
  * Purpose
  * Loads the attributes datafile.
@@ -86,9 +89,10 @@ endfunction
  *
  */
 function AP_GetAttributesDataFile()
-	var data_file := DFOpenDataFile(":attributes:attributes", DF_CREATE);
-	if ( data_file.errortext )
-		SysLog("Error::AP_GetAttributesDataFile() - Unable to open attributes.txt ->"+data_file.errortext);
+
+	var data_file := DFOpenDataFile( ":attributes:attributes", DF_CREATE );
+	if( data_file.errortext )
+		SysLog( "Error::AP_GetAttributesDataFile() - Unable to open attributes.txt ->"+data_file.errortext );
 	endif
 
 	return data_file;
@@ -107,14 +111,15 @@ endfunction
  * Returns a datafile elem.
  *
  */
-function AP_GetAttributeDataElem(elem_name)
+function AP_GetAttributeDataElem( elem_name )
+
 	var data_file := AP_GetAttributesDataFile();
-	var data_elem := DFFindElement(data_file, elem_name, DF_CREATE);
-	
-	if ( data_elem.errortext )
-		SysLog("Error::AP_GetAttributeDataElem() - unable to find elem ["+elem_name+"] ->"+data_elem.errortext);
+	var data_elem := DFFindElement( data_file, elem_name, DF_CREATE );
+
+	if( data_elem.errortext )
+		SysLog( "Error::AP_GetAttributeDataElem() - unable to find elem ["+elem_name+"] ->"+data_elem.errortext );
 	endif
-	
+
 	return data_elem;
 endfunction
 
@@ -131,51 +136,14 @@ endfunction
  * Returns an array
  *
  */
-function AP_ListAttributesByType(type:="")
-	if ( !type )
-		var cfg_file := ReadConfigFile(":attributes:attributes");
-		return GetConfigStringKeys(cfg_file);
+function AP_ListAttributesByType( type:="" )
+
+	if( !type )
+		var cfg_file := ReadConfigFile( ":attributes:attributes" );
+		return GetConfigStringKeys( cfg_file );
 	endif
-	
-	type := Lower(type);
-	var data_elem := AP_GetAttributeDataElem("Categories");
-	return data_elem.GetProp(type);
-endfunction
 
-/*
- * AP_PrecisionFixer(original, new)
- *
- * Purpose
- * Sometimes when you have a skill at say 72.4 and you try to move it +0.1 for 72.5
- * it will stay at 72.4. This ensures a skill goes up or down certain amounts.
- *
- * Parameters
- * mobile: Mobile to change the attribute on.
- * attrib: Attribute name to change.
- * change: Amount to change the attribute by (ex. 0.3, -2.4)
- *
- * Return Value
- * Returns a double - the finalized value of the attribute
- * 
- */
-
-function AP_PrecisionFixer(mobile, attrib, change)
-	var attrib_val := APGetTrueStat(mobile, attrib);
-	var temp := attrib_val + change;
-	if ( CInt(change) == 0 )
-		return temp;
-	
-	while ( temp == AP_GetTrueStat(mobile, attrib) )
-		// Kludge for an old core precision bug.
-		// Usually only loops once when there is an issue.
-		if ( change > 0 )
-			temp += 0.1;
-		else if ( change < 0 )
-			temp -= 0.1;
-		endif
-		
-		SleepMS(10);
-	endwhile
-	
-	return temp;
+	type := Lower( type );
+	var data_elem := AP_GetAttributeDataElem( "Categories" );
+	return data_elem.GetProp( type );
 endfunction

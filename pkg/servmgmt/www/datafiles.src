@@ -1,0 +1,109 @@
+/* $Id: datafiles.src 892 2006-10-30 17:37:49Z austinheilman $
+ *
+ */
+
+use uo;
+use os;
+use http;
+use datafile;
+
+include ":datafile:datafile";
+include ":servmgmt:header";
+
+program HTMLPage()
+	DoHeader("Server Management Data Files");
+	WriteHTML("<DIV ID='container'>");
+	WriteHTML("<DIV ID='header'></DIV>");
+	WriteHTML("<DIV ID='content'>");
+	TableHeader("Data Files");
+
+	var data_file := QueryParam("File");
+	var data_elem := QueryParam("Elem");
+
+	if ( data_file && data_elem )
+		ShowDataElem(data_file, data_elem);
+	elseif ( data_file )
+		ShowDataFile(data_file);
+	else
+		DataFileList();
+	endif
+
+	WriteHTML("</DIV>");
+
+	DoFooter();
+
+	return 1;
+endprogram
+
+function ShowDataElem(descriptor, elem_name)
+	var the_file := DFOpenDataFile(descriptor);
+	var the_elem := DFFindElement(the_file, elem_name);
+	if ( !the_elem )
+		WriteHTML("Unable to open '"+descriptor+"' '"+elem_name+"' -> "+the_elem.errortext);
+		return 0;
+	endif
+
+	WriteHTML("<P>Data File - <A HREF='?File="+descriptor+"'>"+descriptor+"</A><BR>");
+	WriteHTML("Data Elem - "+elem_name+"</P>");
+
+	WriteHTML("<TABLE CELLSPACING='1' CELLPADDING='2'>");
+	WriteHTML("<TR>");
+	WriteHTML("<TH><B>Prop Name</B></TH><TH><B>Prop Value</B></TH>");
+	WriteHTML("</TR>");
+	foreach prop_name in ( the_elem.PropNames() )
+		WriteHTML("<TR>");
+		WriteHTML("<TD>"+prop_name+"</TD>");
+		WriteHTML("<TD>"+the_elem.GetProp(prop_name)+"</TD>");
+		WriteHTML("</TR>");
+		SleepMS(2);
+	endforeach
+	WriteHTML("</TABLE>");
+
+	return 1;
+endfunction
+
+function ShowDataFile(descriptor)
+	var the_file := DFOpenDataFile(descriptor);
+	if ( !the_file )
+		WriteHTML("Unable to open '"+descriptor+"' -> "+the_file.errortext);
+		return 0;
+	endif
+
+	WriteHTML("<P><A HREF=?>File List</A><BR>");
+	WriteHTML("Descriptor - "+descriptor+"</P>");
+
+	WriteHTML("<TABLE WIDTH='400' CELLSPACING='1' CELLPADDING='2'>");
+	WriteHTML("<TR>");
+	WriteHTML("<TH><B>Elem list</B></TH>");
+	WriteHTML("</TR>");
+	foreach elem_name in ( DFGetElemNames(the_file) )
+		WriteHTML("<TR>");
+		WriteHTML("<TD><A HREF='?File="+descriptor+"&Elem="+elem_name+"'>"+elem_name+"</A></TD>");
+		WriteHTML("</TR>");
+		SleepMS(2);
+	endforeach
+	WriteHTML("</TABLE>");
+
+	return 1;
+endfunction
+
+function DataFileList()
+	WriteHTML("<P>Data Files</P>");
+
+	WriteHTML("<TABLE WIDTH='400' CELLSPACING='1' CELLPADDING='2' WIDTH='400'>");
+	WriteHTML("<TR>");
+	WriteHTML("<TH><B>Descriptor</B></TH>");
+	WriteHTML("<TH><B>Package</B></TH>");
+	WriteHTML("<TH><B>File Name</B></TH>");
+	foreach entry in ( ListDataFiles() )
+		WriteHTML("<TR>");
+		WriteHTML("<TD><A HREF='?File="+entry.descriptor+"'>"+entry.descriptor+"</A></TD>");
+		WriteHTML("<TD>"+entry.pkg+"</TD>");
+		WriteHTML("<TD>"+entry.name+"</TD>");
+		WriteHTML("</TR>");
+		SleepMS(2);
+	endforeach
+	WriteHTML("</TABLE>");
+
+	return 1;
+endfunction

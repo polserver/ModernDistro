@@ -1,0 +1,79 @@
+/*
+        Created by *Edwards
+
+        2010-04-12
+*/
+use uo;
+use os;
+
+include ":attributes:attributes";
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+include ":gumps:yesNo";
+
+program textcmd_dropSkill( mobile )
+
+	if( GetProcess( CInt( GetObjProperty( mobile, "#CmdDropSkillPid" ))))
+		return 0;
+	else
+		SetObjProperty( mobile, "#CmdDropSkillPid", GetPid() );
+	endif
+ 
+	//Initialize the gump
+        var gump := GFCreateGump();
+
+        //Load Main Background
+	GFResizePic( gump, 0, 0, GFGetCfgConst( "Defaults", "BackGround" ), 250, 425 );
+
+        GFResizePic( gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 220, 25 );
+	GFTextMid( gump, 15, 17, 250, 1720, "Drop Skill" );
+
+        //BackgroundAreas
+	GFResizePic( gump, 15, 45, GFGetCfgConst( "Defaults", "ForeGround" ), 220, 370 );
+
+        var skills_list := AP_ListAttributesByType( "Skill" ),
+	    num := skills_list.Size();
+
+	var counter := 0,
+	    y_pos := 70;
+
+	GFPage( gump, 1 );
+	foreach skill in ( skills_list )
+
+		GFTextLine( gump, 30, y_pos, 2100, skill );
+		GFAddButton( gump, 180, y_pos+3, 2117, 2118, GF_CLOSE_BTN, _skill_iter );
+
+		y_pos += 20;
+		counter += 1;
+
+		if( counter >= 17 && _skill_iter < num )
+			GFAddButton( gump, 220, 390, 0xA92, 0xA93, GF_PAGE_BTN, gump.cur_page+1 );
+			GFPage( gump, gump.cur_page+1 );
+			GFAddButton( gump, 220, 70, 0xA90, 0xA91, GF_PAGE_BTN, gump.cur_page-1 );
+			counter := 0;
+			y_pos := 70;
+		endif
+		SleepMS(2);
+	endforeach
+
+        //And now we need to know the answer...
+        var input := GFSendGump( mobile, gump );
+        if( !input || input[0xA00] )
+                 SendSysMessage( mobile, "Cancelled." );
+                 return 0;
+        endif
+
+        input := input[0];
+        var option := skills_list[input];
+        
+        if( !YesNo( mobile, "Are you sure you want to drop your "+option+"?", "Yes, drop my "+option+" to 0.", "It's a mistake, do not drop my "+option+"!" ))
+                SendSysMessage( mobile, "Cancelled." );
+                return 0;
+        endif
+        
+        AP_SetTrueSkill( mobile, option, 0 );
+        SendSysMessage( mobile, "You dropped your "+option+"." );
+        
+        
+        return 1;
+endprogram

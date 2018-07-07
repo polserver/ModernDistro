@@ -15,11 +15,6 @@ use os;
 use vitals;
 use cfgfile;
 
-const CORE_SETTINGS_MIN_REGEN_RATE := -30000;
-const CORE_SETTINGS_MAX_REGEN_RATE := 30000;
-const CPROP_NAME_PREFIX_REGEN_RATE := "NewRegenRateFor";
-
-
 /* AP_GetVitalsCfgFile()
  * 
  * Purpose
@@ -32,9 +27,10 @@ const CPROP_NAME_PREFIX_REGEN_RATE := "NewRegenRateFor";
  *
  */
 function AP_GetVitalsCfgFile()
-	var cfg_file := ReadConfigFile(":attributes:vitals");
-	if ( cfg_file.errortext )
-		SysLog("Error::AP_GetVitalsCfgFile() - Unable to open vitals.cfg ->"+cfg_file.errortext);
+
+	var cfg_file := ReadConfigFile( ":attributes:vitals" );
+	if( cfg_file.errortext )
+		SysLog( "Error::AP_GetVitalsCfgFile() - Unable to open vitals.cfg ->"+cfg_file.errortext );
 	endif
 
 	return cfg_file;
@@ -54,16 +50,17 @@ endfunction
  * Returns a config file elem.
  *
  */
-function AP_GetVitalCfgElem(vital_name, byref cfg_file:=0)
-	if ( !cfg_file )
+function AP_GetVitalCfgElem( vital_name, byref cfg_file:=0 )
+
+	if( !cfg_file )
 		cfg_file := AP_GetVitalsCfgFile();
 	endif
-	
+
 	var cfg_elem := cfg_file[vital_name];
-	if ( cfg_elem.errortext )
-		SysLog("Error::AP_GetVitalsCfgElem() - unable to find cfg elem ["+vital_name+"] ->"+cfg_elem.errortext);
+	if( cfg_elem.errortext )
+		SysLog( "Error::AP_GetVitalsCfgElem() - unable to find cfg elem ["+vital_name+"] ->"+cfg_elem.errortext );
 	endif
-	
+
 	return cfg_elem;
 endfunction
 
@@ -80,7 +77,8 @@ endfunction
  *
  */
 function AP_GetVitalNames()
-	return GetConfigStringKeys(AP_GetVitalsCfgFile());
+
+	return GetConfigStringKeys( AP_GetVitalsCfgFile() );
 endfunction
 
 /*
@@ -97,8 +95,9 @@ endfunction
  * Returns a double.
  *
  */
-function AP_GetVital(mobile, vital_name)
-	return CDbl(GetVital(mobile, vital_name)) / 100.0;
+function AP_GetVital( mobile, vital_name )
+
+	return CDbl( GetVital( mobile, vital_name )) / 100.0;
 endfunction
 
 /*
@@ -115,8 +114,9 @@ endfunction
  * Returns an integer.
  *
  */
-function AP_GetVitalMaximumValue(mobile, vital_name)
-	return CDbl(GetVitalMaximumValue(mobile, vital_name)) / 100.0;
+function AP_GetVitalMaximumValue( mobile, vital_name )
+
+	return CDbl( GetVitalMaximumValue( mobile, vital_name )) / 100.0;
 endfunction
 
 /*
@@ -133,8 +133,9 @@ endfunction
  * Returns an integer.
  *
  */
-function AP_GetVitalRegenRate(mobile, vital_name)
-	return GetVitalRegenRate(mobile, vital_name);
+function AP_GetVitalRegenRate( mobile, vital_name )
+
+	return GetVitalRegenRate( mobile, vital_name );
 endfunction
 
 /*
@@ -152,8 +153,9 @@ endfunction
  * Returns result of the SetVital() core function.
  *
  */
-function AP_SetVital(mobile, vital_name, amount)
-	return SetVital(mobile, vital_name, CInt(CDbl(amount)*100.0));
+function AP_SetVital( mobile, vital_name, amount )
+
+	return SetVital( mobile, vital_name, CInt( CDbl( amount ) * 100.0 ));
 endfunction
 
 /*
@@ -171,15 +173,16 @@ endfunction
  * Returns 1 on success
  *
  */
-function AP_ConsumeVital(mobile, vital_name, points)
-	points := CDbl(points);
-	var cur_amount := AP_GetVital(mobile, vital_name);
-	
-	if ( points > cur_amount )
-		return error{"errortext":="Insufficient points - unable to consume."};
+function AP_ConsumeVital( mobile, vital_name, points )
+
+	points := CDbl( points );
+	var cur_amount := AP_GetVital( mobile, vital_name );
+
+	if( points > cur_amount )
+		return error{ "errortext":="Insufficient points - unable to consume." };
 	else
-		cur_amount := cur_amount-points;
-		AP_SetVital(mobile, vital_name, cur_amount);
+		cur_amount := cur_amount - points;
+		AP_SetVital( mobile, vital_name, cur_amount );
 		return 1;
 	endif
 endfunction
@@ -197,15 +200,18 @@ endfunction
  * Returns 1
  *
  */
-function AP_RefreshVitals(mobile)
-	var vital_cfg := ReadConfigFile(":attributes:vitals");
-	foreach elem_name in GetConfigStringKeys(vital_cfg)
-		AP_SetVital(mobile, elem_name, AP_GetVitalMaximumValue(mobile, elem_name));
+function AP_RefreshVitals( mobile )
+
+	var vital_cfg := ReadConfigFile( ":attributes:vitals" );
+	foreach elem_name in GetConfigStringKeys( vital_cfg )
+		AP_SetVital( mobile, elem_name, AP_GetVitalMaximumValue( mobile, elem_name ));
 		SleepMS(2);
 	endforeach
 
 	return 1;
 endfunction
+
+
 
 //////////////////////////////////////////////////////
 //
@@ -218,6 +224,12 @@ endfunction
 // to the proper functions.
 //
 //////////////////////////////////////////////////////
+
+const CORE_SETTINGS_MIN_REGEN_RATE := -30000;
+const CORE_SETTINGS_MAX_REGEN_RATE := 30000;
+const CPROP_NAME_PREFIX_REGEN_RATE := "NewRegenRateFor";
+
+
 
 function GetHP(who)
   return AP_GetVital(who, VITALID_LIFE);

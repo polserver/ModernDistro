@@ -1,0 +1,69 @@
+/* $Id: unloadcfg.src 892 2006-10-30 17:37:49Z austinheilman $
+ *
+ */
+
+use uo;
+use http;
+use cfgfile;
+
+include ":servmgmt:header";
+
+Program HTMLPage()
+	DoHeader("Server Management Config Unloader");
+	WriteHTML("<DIV ID='container'>");
+	WriteHTML("<DIV ID='header'></DIV>");
+	WriteHTML("<DIV ID='content'>");
+	TableHeader("Config Unloader");
+
+	var fname := QueryParam("file");
+	if ( Len(fname) > 1 || QueryParam("Unload") )
+		if ( fname == "*ALL*" )
+			fname := "";
+		else
+			while ( fname["#"] )
+				fname["#"] := ":";
+			endwhile
+			while ( fname["%"] )
+				fname["%"] := "/";
+			endwhile
+		endif
+		var res := UnloadConfigFile(fname);
+
+		WriteHTML("<BR><BR>");
+
+		WriteHTML("<TABLE WIDTH='400' CELLSPACING='1' CELLPADDING='2'>");
+		WriteHTML("<TR><TH>Unload Result</TH></TR>");
+		if ( res == error )
+			WriteHTML("<TR><TD>Error unloading config file: "+res.errortext+"</TD></TR>");
+		elseif ( res < 0 )
+			WriteHTML("<TR><TD>That config file is not loaded.</TD></TR>");
+		else
+			WriteHTML("<TR><TD>Config file unloaded. "+res+" reference(s) to config file exist.</TD></TR>");
+		endif
+		WriteHTML("</TABLE>");
+	endif
+
+	ShowForms();
+	WriteHTML("</DIV>");
+	DoFooter();
+
+
+	return 1;
+endprogram
+
+function ShowForms()
+	WriteHTML("<BR><BR>");
+
+	WriteHTML("<TABLE WIDTH='400' CELLSPACING='1' CELLPADDING='2'>");
+	WriteHTML("<FORM NAME='FRM' METHOD='GET'>");
+	WriteHTML("<TR><TH COLSPAN='2'>Which config file do you want to unload?</TD></TR>");
+	WriteHTML("<TR><TD COLSPAN='2'>Use '#'s instead of ':'s and ommit the '.cfg'</TD></TR>");
+	WriteHTMLRaw("<TR>");
+	WriteHTMLRaw("<TD><INPUT TYPE='TEXT' NAME='file' SIZE='40'></TD>");
+	WriteHTMLRaw("<TD><INPUT TYPE='SUBMIT' NAME='Unload' VALUE='Unload'></TD>");
+	WriteHTML("</TR>");
+	WriteHTML("</FORM>");
+	WriteHTML("</TABLE>");
+
+	return 1;
+endfunction

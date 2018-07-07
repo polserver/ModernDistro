@@ -39,7 +39,7 @@ program	text_command_createnpc(who, template)
 		node := "none";
 	endif
 	
-	if(node != "none")
+/*	if(node != "none")
 		GumpPrompt(who, "The NPC you want to create requires a listening node. Therefore I will create one instead of the NPC.
 						Target the location for the node. Use (double-click) the node to create the NPC.", 1, hue:=1153);
 	endif
@@ -52,7 +52,8 @@ program	text_command_createnpc(who, template)
 		"gard":	createguard(who);
 	
 	endcase
-		
+*/
+createthenpc(who, template);
 	return;
 	
 endprogram
@@ -69,8 +70,7 @@ endprogram
 			SendSysMessage(who, "Cancelled.", color := 33);
 			return 0;
 		endif
-		//var props := struct; // CHANGE BACK TO STRUCT FOR 096
-		var props := 0; // CHANGE BACK TO STRUCT FOR 096
+		var props := struct;
 		props.+facing := who.facing;
 		var result := CreateNpcFromTemplate( template, loc.x, loc.y, loc.z, props, loc.realm );
 		if (!result)

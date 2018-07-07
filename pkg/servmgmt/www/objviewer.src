@@ -1,0 +1,722 @@
+/* $Id: objviewer.src 1437 2009-03-02 02:29:57Z rozenblit $
+ *
+ */
+
+use uo;
+use os;
+use http;
+use polsys;
+
+include ":servmgmt:header";
+include ":attributes:attributes";
+include ":containers:storageAreas";
+include "include/uo_extend";
+
+program HTMLPage()
+	DoHeader("Server Management Object Viewer");
+	WriteHTML("<DIV ID='container'>");
+	WriteHTML("<DIV ID='header'></DIV>");
+	WriteHTML("<DIV ID='content'>");
+	TableHeader("Object Viewer");
+
+	var list := QueryParam("List");
+	var serial := CInt(QueryParam("Serial"));
+	var acct_name := QueryParam("Account");
+	var search := QueryParam("SubmitSearch");
+	if ( search )
+		ShowSearchResults();
+	elseif ( acct_name )
+		ShowAccountInfo(acct_name);
+	elseif ( serial )
+		ShowSerialInfo(serial);
+	elseif ( list )
+		case ( list )
+			"Accounts":
+				AcctLister();
+				break;
+			"Online":
+				OnlineLister();
+				break;
+			"Storage":
+				StorageLister(QueryParam("StorageArea"));
+				break;
+			default:
+				DoError("Unknown 'List' type!");
+				break;
+		endcase
+	else
+		StartPoint();
+	endif
+
+	DoFooter();
+	return 1;
+endprogram
+
+function StartPoint()
+	WriteHTML("<BR>");
+
+	WriteHTML("<TABLE WIDTH='400' CELLSPACING='1' CELLPADDING='2'>");
+	WriteHTML("<TR>");
+	WriteHTML("<TH ALIGN='LEFT'>Select a start point.</TH>");
+	WriteHTML("</TR>");
+	WriteHTML("<TR>");
+	WriteHTML("<TD>");
+	WriteHTML("<LI><A HREF='?List=Accounts'>Accounts</A></LI>");
+	WriteHTML("<LI><A HREF='?List=Online'>Online Characters</A></LI>");
+	WriteHTML("<LI><A HREF='?List=Storage'>Storage Areas</A></LI>");
+	WriteHTML("<BR>");
+	WriteHTML("</TD>");
+	WriteHTML("</TR>");
+	WriteHTML("</TABLE>");
+
+	WriteHTML("<BR>");
+
+	SearchForms();
+
+	return 1;
+endfunction
+
+function SearchForms()
+	WriteHTML("<FORM METHOD='GET'>");
+	WriteHTML("<TABLE WIDTH='400' CELLSPACING='1' CELLPADDING='2'>");
+	WriteHTML("<TR>");
+	WriteHTML("<TH COLSPAN='2' ALIGN='LEFT'>Search</TH>");
+	WriteHTML("</TR>");
+	WriteHTML("<TR>");
+	WriteHTML("<TD>Search Text</TD><TD><INPUT TYPE='TEXT' SIZE='45' NAME='SearchText'></TD>");
+	WriteHTML("</TR>");
+
+	WriteHTML("<TR>");
+	WriteHTML("<TD>Search Where</TD><TD><SELECT NAME='SearchWhere'>");
+	WriteHTML("<OPTION VALUE='Accounts'>Accounts</OPTION>");
+	WriteHTML("<OPTION VALUE='TLIs'>Top Level Items</OPTION>");
+	WriteHTML("<OPTION VALUE='Storage'>Storage Areas</OPTION>");
+	WriteHTML("<OPTION VALUE='Online'>Online Players</OPTION>");
+	WriteHTML("<OPTION VALUE='AllPlayers'>All Player-Characters</OPTION>");
+	WriteHTML("<OPTION VALUE='NPCs'>NonPlayer Characters</OPTION>");
+	WriteHTML("</SELECT>");
+	WriteHTML("</TD>");
+	WriteHTML("</TR>");
+	WriteHTML("<TR>");
+	WriteHTML("<TD>Search What</TD><TD><SELECT NAME='SearchWhat'>");
+	WriteHTML("<OPTION VALUE='Name'>Name</OPTION>");
+	WriteHTML("<OPTION VALUE='Desc'>Desc</OPTION>");
+	WriteHTML("<OPTION VALUE='Graphic'>Graphic</OPTION>");
+	WriteHTML("<OPTION VALUE='ObjType'>Object Type</OPTION>");
+	WriteHTML("<OPTION VALUE='Realm'>Realm</OPTION>");
+	WriteHTML("<OPTION VALUE='Serial'>Serial Number</OPTION>");
+	WriteHTML("</SELECT>");
+	WriteHTML("</TD>");
+
+	WriteHTML("<TR>");
+	WriteHTML("<TD COLSPAN='2' ALIGN='CENTER'><INPUT TYPE='SUBMIT' NAME='SubmitSearch' VALUE='Submit'></TD>");
+	WriteHTML("</TR>");
+
+	WriteHTML("</FORM>");
+	WriteHTML("</TABLE>");
+
+	return 1;
+endfunction
+
+function DoError(text)
+	WriteHTML("<TABLE>");
+	WriteHTML("<TR>");
+	WriteHTML("<TD><B>!! ERROR !!</B></TD>");
+	WriteHTML("</TR>");
+	WriteHTML("<TD><FONT COLOR='RED'>"+text+"</FONT></TD>");
+	WriteHTML("</TR>");
+	WriteHTML("</TABLE>");
+
+	return 1;
+endfunction
+
+function LocationBar(tree:=0)
+	WriteHTML("<TABLE WIDTH='100%' CELLSPACING='1' CELLPADDING='2'>");
+	WriteHTML("<TR>");
+	WriteHTMLRaw("<TD>");
+	WriteHTMLRaw("<A HREF='?'>Index</A>");
+
+	var tree_size := tree.Size();
+	var i := 1;
+	for ( i:=1; i<=tree_size; i+=2 )
+		WriteHTMLRaw("<B> -> </B>");
+		WriteHTMLRaw(" <A HREF='?"+tree[i]+"'>"+tree[i+1]+"</A>");
+		SleepMS(2);
+	endfor
+	WriteHTML("</TD>");
+	WriteHTML("</TR>");
+	WriteHTML("</TABLE>");
+	WriteHTML("<BR>");
+
+	return 1;
+endfunction
+
+function FilterBar(selected)
+	WriteHTML("<TABLE WIDTH='100%' CELLSPACING='1' CELLPADDING='2'>");
+	WriteHTML("<TR>");
+	WriteHTMLRaw("<TD>");
+	var link := "<A HREF='?List=Accounts&Ext=%23'>#</A> ";
+	if ( selected == "#" )
+		link := "<B><I>"+link+"</I></B>";
+	endif
+	WriteHTMLRaw(link);
+	var i;
+	for ( i:=65; i<=90; i+=1 )
+		var letter := CChr(i);
+		link := "<A HREF='?List=Accounts&Ext="+letter+"'>"+letter+"</A>";
+		if ( letter == selected )
+			link := "<B><I>"+link+"</I></B>";
+		endif
+		WriteHTMLRaw(link+" ");
+		SleepMS(2);
+	endfor
+	link := "<A HREF='?List=Accounts&Ext=All'>All</A> ";
+	if ( selected == "All" )
+		link := "<B><I>"+link+"</I></B>";
+	endif
+	WriteHTMLRaw(link);
+	WriteHTML("</TD>");
+	WriteHTML("</TR>");
+	WriteHTML("</TABLE>");
+
+	WriteHTML("<BR>");
+
+	return 1;
+endfunction
+
+function MakeSafeLink(url, name)
+	while ( url["'"] )
+		url["'"] := "&#39;";
+		SleepMS(2);
+	endwhile
+
+	return "<A HREF='"+url+"'>"+name+"</A>";
+endfunction
+
+function SortList(byref string_array, letter:="")
+	letter := Upper(letter);
+	var dict := dictionary;
+
+	foreach entry in ( string_array )
+		entry[1] := Upper(entry[1]);
+		var first_letter := entry[1];
+		if ( first_letter == letter )
+			if ( !dict.Exists(first_letter) )
+				dict[first_letter] := array;
+			endif
+			dict[first_letter].Append(entry);
+		elseif ( letter == "#" )
+			first_letter := CAsc(entry[1]);
+			if ( first_letter >= CAsc("0") && first_letter <= CAsc("9") )
+				if ( !dict.Exists(first_letter) )
+					dict["#"] := array;
+				endif
+				dict["#"].Append(entry);
+			endif
+		elseif ( letter == "ALL" )
+			if ( CAsc(first_letter) >= CAsc("0") && CAsc(first_letter) <= CAsc("9") )
+				first_letter := "#";
+			endif
+
+			if ( !dict.Exists(first_letter) )
+				dict[first_letter] := array;
+			endif
+
+			dict[first_letter].Append(entry);
+		endif
+
+		SleepMS(2);
+	endforeach
+
+	return dict;
+endfunction
+
+function DoSearch(where, what, text)
+	var matches := array;
+	if ( what == "Serial" )
+		var object := SystemFindObjectBySerial(CInt(text));
+		return array{object};
+	elseif ( where == "Accounts" )
+		foreach acct_name in ( ListAccounts() )
+			if ( Lower(acct_name)[text] )
+				matches.Append(acct_name);
+			endif
+			SleepMS(2);
+		endforeach
+	elseif ( where == "AllPlayers" )
+		foreach acct_name in ( ListAccounts() )
+			var account := FindAccount(acct_name);
+			for i:=1 to 6
+				var character := account.GetCharacter(i);
+				if ( !character )
+					continue;
+				elseif ( Lower(character.Get_Member(what))[text] )
+					matches.Append(character);
+				endif
+				SleepMS(2);
+			endfor
+			SleepMS(2);
+		endforeach
+	elseif ( where == "Online" )
+		foreach player in ( EnumerateOnlineCharactersABC() )
+			if ( Lower(player.Get_Member(what))[text] )
+				matches.Append(player);
+			endif
+			SleepMS(2);
+		endforeach
+	elseif ( where == "TLIs" )
+		foreach realm in ( Realms() )
+			foreach object in ( ListObjectsInBox(0, 0, -130, realm.width, realm.height, 130, _realm_iter) )
+				SleepMS(2);
+				if ( !object.IsA(POLCLASS_ITEM) )
+					continue;
+				elseif ( Lower(object.Get_Member(what))[text] )
+					matches.Append(object);
+				endif
+			endforeach
+			SleepMS(2);
+		endforeach
+	elseif ( where == "NPCs" )
+		foreach realm in ( Realms() )
+			foreach object in ( ListObjectsInBox(0, 0, -130, realm.width, realm.height, 130, _realm_iter) )
+				SleepMS(2);
+				if ( !object.IsA(POLCLASS_NPC) )
+					continue;
+				elseif ( Lower(object.Get_Member(what))[text] )
+					matches.Append(object);
+				endif
+			endforeach
+			SleepMS(2);
+		endforeach
+	elseif ( where == "Storage" )
+		foreach storage_area in ( StorageAreas() )
+			if ( Lower(_storage_area_iter)[text] )
+				matches.Append(_storage_area_iter);
+			endif
+			foreach root_item in ( storage_area )
+				if ( Lower(root_item.Get_Member(what))[text] )
+					matches.Append(root_item);
+				endif
+				/* Searching inside the root containers...
+				 * This may need to be commented out as this search type could
+				 * end up taking a long time! - Austin
+				 */
+				foreach item in ( EnumerateItemsInContainer(root_item) )
+					if ( Lower(item.Get_member(what))[text] )
+						matches.Append(item);
+					endif
+					SleepMS(2);
+				endforeach
+				SleepMS(2);
+			endforeach
+			SleepMS(2);
+		endforeach
+	else
+		DoError("Invalid search!<BR>Where = "+where+"<BR>What = "+what+"<BR>Text = "+text);
+		return 0;
+	endif
+
+	return matches;
+endfunction
+
+function ShowSearchResults()
+	var search_where := QueryParam("SearchWhere");
+	var search_what := QueryParam("SearchWhat");
+	var search_text := Lower(QueryParam("SearchText"));
+	if ( search_what == "Serial" )
+		search_where := 0;
+	endif
+
+	var matches := DoSearch(search_where, search_what, search_text);
+
+	LocationBar();
+
+	WriteHTML("<TABLE WIDTH='400' CELLSPACING='1' CELLPADDING='2'>");
+	WriteHTML("<TR><TH>Search Results ("+matches.Size()+" matches)</TH></TR>");
+	foreach entry in ( matches )
+		if ( search_where == "Accounts" )
+			WriteHTML("<TR><TD><A HREF='?Account="+entry+"'>"+entry+"</A></TD></TR>");
+		elseif ( search_where == "Storage" && TypeOf(entry) == "String" )
+			WriteHTML("<TR><TD><A HREF='?List=Storage&StorageArea="+entry+"'>"+entry+"</A></TD></TR>");
+		else
+			if ( entry.desc )
+				WriteHTML("<TR><TD><A HREF='?Serial="+entry.serial+"'>"+entry.desc+"</A></TD></TR>");
+			else
+				WriteHTML("<TR><TD><A HREF='?Serial="+entry.serial+"'>"+entry.name+"</A></TD></TR>");
+			endif
+		endif
+		SleepMS(2);
+	endforeach
+	WriteHTML("</TABLE>");
+
+	return 1;
+endfunction
+
+function AcctLister()
+	LocationBar();
+
+	var selected := QueryParam("Ext");
+	if ( !selected )
+		selected := "All";
+	endif
+	FilterBar(selected);
+	var acct_list := SortList(ListAccounts(), selected);
+
+	WriteHTML("<TABLE WIDTH='400' CELLSPACING='1' CELLPADDING='2'>");
+	WriteHTML("<TR>");
+	WriteHTMLRaw("<TH>");
+	WriteHTMLRaw("Accounts ("+acct_list.Size()+")");
+	WriteHTML("</TH>");
+	WriteHTML("</TR>");
+	foreach list in ( acct_list )
+		WriteHTML("<TR>");
+		WriteHTML("<TD>");
+		WriteHTML("<B>"+_list_iter+"</B><BR>");
+
+		foreach account in ( list )
+			WriteHTML("<LI>"+MakeSafeLink("?Account="+account, account)+"</LI>");
+			SleepMS(2);
+		endforeach
+		WriteHTML("</TD>");
+		WriteHTML("</TR>");
+		sleepms(2);
+	endforeach
+	WriteHTML("</TABLE>");
+
+	return 1;
+endfunction
+
+function ShowAccountInfo(acct_name)
+	LocationBar(array{"List=Accounts", "Accounts"});
+
+	var account := FindAccount(acct_name);
+	if ( !account )
+		DoError("Could not get account "+acct_name+"<BR> "+account.errortext);
+		return 0;
+	endif
+
+	AccountCharacters(account);
+	ShowCPropInfo(account);
+
+	return 1;
+endfunction
+
+function AccountCharacters(account, highlight:=0)
+	WriteHTML("<TABLE WIDTH='400' CELLSPACING='1' CELLPADDING='2'>");
+	WriteHTML("<TR>");
+	WriteHTML("<TH>Characters on account "+account.name+"</TH>");
+	WriteHTML("</TR>");
+
+	for i:=1 to 6
+		var character := account.GetCharacter(i);
+		WriteHTMLRaw("<TR>");
+		WriteHTMLRaw("<TD>");
+		if ( character )
+			var line := "<A HREF='?Serial="+character.serial+"'>"+character.name+"</A>";
+			if ( highlight == character )
+				line := "<B><I>"+line+"</I></B>";
+			endif
+			WriteHTMLRaw(line);
+		else
+			WriteHTMLRaw("Empty Slot");
+		endif
+		WriteHTMLRaw("</TD>");
+		WriteHTML("</TR>");
+		SleepMS(2);
+	endfor
+	WriteHTML("</TABLE>");
+
+	WriteHTML("<BR><BR>");
+
+	return 1;
+endfunction
+
+function OnlineLister()
+	LocationBar();
+
+	var online := EnumerateOnlineCharactersABC();
+	WriteHTML("<TABLE WIDTH='400' CELLSPACING='1' CELLPADDING='2'>");
+	WriteHTML("<TR>");
+	WriteHTML("<TD>");
+	WriteHTML("Online Characters ("+online.Size()+")");
+	WriteHTML("</TD>");
+	WriteHTML("</TR>");
+	WriteHTML("<TR>");
+	WriteHTML("<TD>");
+	foreach player in ( online )
+		WriteHTML("<LI><A HREF='?Serial="+player.serial+"'>"+player.name+"</A></LI>");
+		SleepMS(2);
+	endforeach
+	WriteHTML("</TD>");
+	WriteHTML("</TR>");
+	WriteHTML("</TABLE>");
+
+	return 1;
+endfunction
+
+function StorageLister(area_name:="")
+	if ( !area_name )
+		LocationBar();
+		var areas := CP_GetStorageAreaNames();
+		WriteHTML("<TABLE WIDTH='400' CELLSPACING='1' CELLPADDING='2'>");
+		WriteHTML("<TR><TH>Storage Areas ("+areas.Size()+")</TH></TR>");
+		foreach area_name in ( areas )
+			WriteHTMLRaw("<TR>");
+			WriteHTMLRaw("<TD><A HREF='?List=Storage&StorageArea="+area_name+"'>"+area_name+"</A></TD>");
+			WriteHTML("</TR>");
+			SleepMS(2);
+		endforeach
+		WriteHTML("</TABLE>");
+	else
+		var areas := StorageAreas();
+		var area := areas[area_name];
+		if ( !area )
+			DoError("Unable to find storage area "+area_name+"<BR> "+area.errortext);
+			return 0;
+		endif
+
+		LocationBar(array{"List=Storage", "Storage Areas"});
+
+		WriteHTML("<TABLE WIDTH='400' CELLSPACING='1' CELLPADDING='2'>");
+		WriteHTML("<TR><TH>Root Items ("+area.Count+")</TH></TR>");
+		foreach root_item in ( area )
+			WriteHTMLRaw("<TR>");
+			WriteHTMLRaw("<TD><A HREF='?Serial="+root_item.serial+"'>"+root_item.desc+"</A></TD>");
+			WriteHTML("</TR>");
+			SleepMS(2);
+		endforeach
+		WriteHTML("</TABLE>");
+	endif
+
+	return 1;
+endfunction
+
+function ShowSerialInfo(serial)
+	var object := SystemFindObjectBySerial(serial, SYSFIND_SEARCH_OFFLINE_MOBILES);
+	if ( object.errortext )
+		DoError("Could not find serial "+serial+"<BR> "+object.errortext);
+		return 0;
+	endif
+
+	if ( object.IsA(POLCLASS_MOBILE) )
+		ShowCharacterInfo(object);
+	else
+		ShowItemInfo(object);
+	endif
+
+	ShowCPropInfo(object);
+
+	return 1;
+endfunction
+
+function ShowCharacterInfo(object)
+	if ( object.acctname )
+		LocationBar(array{"List=Accounts", "Accounts", "Account="+object.acctname, object.acctname});
+
+		AccountCharacters(object.acct, object);
+	endif
+
+	WriteHTML("<TABLE WIDTH='400' CELLSPACING='1' CELLPADDING='2'>");
+	WriteHTML("<TR><TH COLSPAN='2'>General Info</TH></TR>");
+	WriteHTML("<TR>");
+	WriteHTML("<TD>Name</TD><TD>Value</TD>");
+	WriteHTML("</TR>");
+	WriteHTML("<TR><TD>Serial</TD><TD>"+Hex(object.serial)+"</TD></TR>");
+	WriteHTML("<TR><TD>Command Level</TD><TD>"+object.cmdlevel+" ("+GetCmdLevelName(object.cmdlevel)+")</TD></TR>");
+	WriteHTML("<TR><TD>IP Address</TD><TD>"+object.IP+"</TD></TR>");
+	WriteHTML("<TR><TD>X Y Z Realm</TD><TD>"+object.x+", "+object.y+", "+object.z+", "+object.realm+"</TD></TR>");
+	WriteHTML("</TABLE>");
+
+	WriteHTML("<BR><BR>");
+
+	WriteHTML("<TABLE WIDTH='400' CELLSPACING='1' CELLPADDING='2'>");
+	WriteHTML("<TR><TH COLSPAN='2'>Privileges</TH></TR>");
+	WriteHTML("<TR>");
+	WriteHTML("<TD>Name</TD><TD>Value</TD>");
+	WriteHTML("</TR>");
+	foreach priv in ( object.Privileges() )
+		WriteHTMLRaw("<TR>");
+		WriteHTMLRaw("<TD>"+_priv_iter+"</TD>");
+		var status := "Enabled";
+		if ( !priv )
+			status := "Disabled";
+		endif
+		WriteHTMLRaw("<TD>"+status+"</TD>");
+		WriteHTML("</TR>");
+		SleepMS(2);
+	endforeach
+	WriteHTML("</TABLE>");
+
+	WriteHTML("<BR><BR>");
+
+	WriteHTML("<TABLE WIDTH='400' CELLSPACING='1' CELLPADDING='2'>");
+	WriteHTML("<TR><TH COLSPAN='3'>Vitals Info</TH></TR>");
+	WriteHTML("<TR>");
+	WriteHTML("<TD>Name</TD><TD>Value</TD><TD>Regen Mod</TD>");
+	WriteHTML("</TR>");
+	foreach vital_name in ( AP_GetVitalNames() )
+		WriteHTMLRaw("<TR>");
+		WriteHTMLRaw("<TD>"+vital_name+"</TD>");
+		WriteHTMLRaw("<TD>"+AP_GetVital(object, vital_name)+"/"+AP_GetVitalMaximumValue(object, vital_name)+"</TD>");
+		WriteHTMLRaw("<TD>"+AP_GetVitalRegenRateMod(object, vital_name)+"</TD>");
+		WriteHTML("</TR>");
+		SleepMS(2);
+	endforeach
+	WriteHTML("</TABLE>");
+
+	WriteHTML("<BR><BR>");
+
+	WriteHTML("<TABLE WIDTH='400' CELLSPACING='1' CELLPADDING='2'>");
+	WriteHTML("<TR><TH COLSPAN='3'>Attribute Info</TH></TR>");
+	WriteHTML("<TR>");
+	WriteHTML("<TD>Name</TD><TD>Value</TD><TD>Modifier</TD>");
+	WriteHTML("</TR>");
+	foreach attrib_name in ( AP_ListAttributesByType() )
+		WriteHTMLRaw("<TR>");
+		WriteHTMLRaw("<TD>"+attrib_name+"</TD>");
+		WriteHTMLRaw("<TD>"+AP_GetTrueSkill(object, attrib_name)+"</TD>");
+		WriteHTMLRaw("<TD>"+AP_GetSkillMod(object, attrib_name)+"</TD>");
+		WriteHTML("</TR>");
+		SleepMS(2);
+	endforeach
+	WriteHTML("</TABLE>");
+
+	WriteHTML("<BR><BR>");
+
+	WriteHTML("<TABLE WIDTH='400' CELLSPACING='1' CELLPADDING='2'>");
+	WriteHTML("<TR><TH>Equipment</TH></TR>");
+	foreach item in ( ListEquippedItems(object) )
+		WriteHTMLRaw("<TR>");
+		WriteHTMLRaw("<TD><A HREF='?Serial="+item.serial+"'>"+item.desc+"</A></TD>");
+		WriteHTML("</TR>");
+		SleepMS(2);
+	endforeach
+	WriteHTML("</TABLE>");
+
+	WriteHTML("<BR><BR>");
+
+	WriteHTML("<TABLE WIDTH='400' CELLSPACING='1' CELLPADDING='2'>");
+	WriteHTML("<TR><TH>Storage Areas</TH></TR>");
+	foreach area_name in ( CP_GetStorageAreaNames() )
+		var container := CP_GetStorageContainerForMobile(object, area_name, CP_NOCREATE);
+		if ( !container )
+			continue;
+		endif
+		WriteHTMLRaw("<TR>");
+		WriteHTML("<TD><A HREF='?Serial="+container.serial+"'>"+area_name+"</A></TD>");
+		WriteHTML("</TR>");
+		SleepMS(2);
+	endforeach
+	WriteHTML("</TABLE>");
+
+	WriteHTML("<BR><BR>");
+
+
+	return 1;
+endfunction
+
+function ShowItemInfo(object)
+	if ( object.container )
+		var tree_array := array;
+		var temp := object;
+		while ( temp )
+			var name := temp.desc;
+			if ( !name )
+				name := temp.name;
+			endif
+
+			tree_array.Insert(1, name);
+			tree_array.Insert(1, "Serial="+temp.serial);
+			temp := temp.container;
+			SleepMS(2);
+		endwhile
+		LocationBar(tree_array);
+	else
+		LocationBar();
+	endif
+
+	WriteHTML("<TABLE WIDTH='400' CELLSPACING='1' CELLPADDING='2'>");
+	WriteHTML("<TR><TH COLSPAN='2'>General Info</TH></TR>");
+	WriteHTML("<TR>");
+	WriteHTML("<TD>Name</TD><TD>Value</TD>");
+	WriteHTML("</TR>");
+	WriteHTML("<TR><TD>Desc</TD><TD>"+object.desc+"</TD></TR>");
+	WriteHTML("<TR><TD>Name</TD><TD>"+object.name+"</TD></TR>");
+	WriteHTML("<TR><TD>Color</TD><TD>"+object.color+"</TD></TR>");
+	WriteHTML("<TR><TD>Graphic</TD><TD>"+object.graphic+"</TD></TR>");
+	WriteHTML("<TR><TD>Object Type</TD><TD>"+Hex(object.objtype)+"</TD></TR>");
+	WriteHTML("<TR><TD>Serial</TD><TD>"+Hex(object.serial)+"</TD></TR>");
+	WriteHTML("<TR><TD>X Y Z Realm</TD><TD>"+object.x+", "+object.y+", "+object.z+", "+object.realm+"</TD></TR>");
+	if ( object.container )
+		WriteHTML("<TR><TD>Container</TD><TD><A HREF='?Serial="+object.container.serial+"'>"+Hex(object.container.serial)+"</A></TD></TR>");
+	endif
+	if ( object.IsA(POLCLASS_ARMOR) )
+		WriteHTML("<TR><TD>AR</TD><TD>"+Hex(object.ar)+"</TD></TR>");
+		WriteHTML("<TR><TD>AR Mod</TD><TD>"+Hex(object.ar_mod)+"</TD></TR>");
+	elseif ( object.IsA(POLCLASS_WEAPON) )
+		WriteHTML("<TR><TD>Damage Mod</TD><TD>"+object.dmg_mod+"</TD></TR>");
+	endif
+	if ( object.IsA(POLCLASS_EQUIPMENT) )
+		WriteHTML("<TR><TD>Quality</TD><TD>"+object.quality+"</TD></TR>");
+		WriteHTML("<TR><TD>HP/MaxHP</TD><TD>"+object.hp+"/"+object.maxhp+"</TD></TR>");
+	endif
+	WriteHTML("<TR><TD>Newbie</TD><TD>"+object.newbie+"</TD></TR>");
+	WriteHTML("<TR><TD>Amount</TD><TD>"+object.amount+"</TD></TR>");
+	WriteHTML("</TABLE>");
+
+	WriteHTML("<BR><BR>");
+
+	if ( object.IsA(POLCLASS_CONTAINER) )
+		WriteHTML("<TABLE WIDTH='400' CELLSPACING='1' CELLPADDING='2'>");
+		WriteHTML("<TR><TH>Container Contents</TH></TR>");
+		foreach item in ( EnumerateItemsInContainer(object) )
+			if ( item.container != object )
+				continue;
+			endif
+			WriteHTMLRaw("<TR>");
+			WriteHTMLRaw("<TD>");
+			if ( item.IsA(POLCLASS_CONTAINER) )
+				WriteHTMLRaw("-> ");
+			endif
+			WriteHTMLRaw("<A HREF='?Serial="+item.serial+"'>"+item.desc+"</A></TD>");
+			WriteHTML("</TR>");
+			SleepMS(2);
+		endforeach
+		WriteHTML("</TABLE>");
+
+		WriteHTML("<BR><BR>");
+	endif
+
+	return 1;
+endfunction
+
+function ShowCpropInfo(object)
+	WriteHTML("<TABLE WIDTH='400' CELLSPACING='1' CELLPADDING='2'>");
+	WriteHTML("<TR>");
+	WriteHTML("<TH COLSPAN='2'>");
+	if ( object.name )
+		WriteHTML("CProps on "+object.name);
+	else
+		WriteHTML("CProps on "+object.desc);
+	endif
+	WriteHTML("</TH>");
+	WriteHTML("</TR>");
+
+	WriteHTML("<TR>");
+	WriteHTML("<TD>Prop Name</TD>");
+	WriteHTML("<TD>Prop Value</TD>");
+	WriteHTML("</TR>");
+
+	foreach prop_name in ( object.PropNames() )
+		WriteHTML("<TR>");
+		WriteHTMLRaw("<TD>"+prop_name+"</TD>");
+		WriteHTML("<TD>"+object.GetProp(prop_name)+"</TD>");
+		WriteHTML("</TR>");
+		SleepMS(2);
+	endforeach
+	WriteHTML("</TABLE>");
+
+	WriteHTML("<BR>");
+
+	return 1;
+endfunction

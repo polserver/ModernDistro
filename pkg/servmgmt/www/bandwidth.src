@@ -1,0 +1,51 @@
+/* $Id: bandwidth.src 1043 2007-04-19 01:57:00Z tekproxy $
+ *
+ */
+
+use uo;
+use os;
+use http;
+
+include ":servmgmt:header";
+
+program HTMLPage()
+	DoHeader("Server Management Index");
+
+	WriteHTML("<DIV ID='container'>");
+	WriteHTML("<DIV ID='header'></DIV>");
+	WriteHTML("<DIV ID='content'>");
+	DoHeader("Server Management Bandwidth");
+
+	TableHeader("Bandwidth");
+
+	WriteHTML("<BR>");
+
+	WriteHTML("<TABLE CELLSPACING='1' CELLPADDING='2' WIDTH='400'>");
+	WriteHTML("<TR>");
+	WriteHTMLRaw("<TH><B>Minute</B></TH>");
+	WriteHTMLRaw("<TH><B>Bytes Sent</B></TH>");
+	WriteHTMLRaw("<TH><B>bps Out</B></TH>");
+	WriteHTMLRaw("<TH><B>Bytes Received</B></TH>");
+	WriteHTML("<TH><B>bps In</B></TH>");
+	WriteHTML("</TR>");
+
+	var gprop := GetGlobalProperty("#:servmgmt:bandwidth");
+	foreach index in ( gprop )
+		WriteHTML("<TR>");
+		WriteHTMLRaw("<TD>"+_index_iter+"</TD>");
+		WriteHTMLRaw("<TD>"+index[2]+"</TD>");
+		WriteHTMLRaw("<TD>"+index[2]/6+"</TD>");
+		WriteHTMLRaw("<TD>"+index[1]+"</TD>");
+		WriteHTML("<TD>"+index[1]/6+"</TD>");
+		WriteHTML("</TR>");
+
+		SleepMS(2);
+	endforeach
+
+	WriteHTML("</TABLE>");
+
+	WriteHTML("</DIV>");
+	DoFooter();
+
+	return 1;
+endprogram

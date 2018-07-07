@@ -1,0 +1,18 @@
+/*
+        Created by *Edwards
+        
+        2010-07-06
+*/
+use uo;
+
+include ":datafile:datafile";
+
+program attributes_onDelete( who )
+
+	var cp_data_file  := DFOpenDataFile( ":attributes:capskills", DF_NO_CREATE );
+	if( cp_data_file )
+		return cp_data_file.DeleteElement( Hex( who.serial ));
+	endif
+ 
+	return 1;
+endprogram

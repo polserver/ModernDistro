@@ -1,0 +1,13 @@
+use uo;
+use os;
+use cfgfile;
+
+include "include/client";
+include ":attributes:attributes";
+include ":combat:equip";
+
+program equip(who, item)
+
+    var val := HandleMods(who, item);
+    return val;
+endprogram

@@ -1,0 +1,27 @@
+/*
+        Maintened by *Edwards
+
+        2009-02-09
+*/
+use uo;
+
+include ":attributes:attributes";
+
+program textcmd_RefreshVitals( who, text )
+
+	var targ;
+	if( text == "me" )
+		targ := who;
+	else
+		SendSysMessage( who, "Select a mobile." );
+		targ := Target( who, TGTOPT_NOCHECK_LOS );
+		if( !targ.IsA( POLCLASS_MOBILE ))
+			SendSysMessage( who, "Cancelled." );
+			return 0;
+		endif
+	endif
+	
+	AP_RefreshVitals( targ );
+	
+	SendSysMessage( who, "Done." );
+endprogram

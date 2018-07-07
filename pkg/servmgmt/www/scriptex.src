@@ -1,0 +1,76 @@
+/* $Id: scriptex.src 892 2006-10-30 17:37:49Z austinheilman $
+ *
+ */
+
+use uo;
+use os;
+use http;
+use polsys;
+
+include ":servmgmt:header";
+
+unload_scripts("");
+
+program HTMLPage()
+	DoHeader("Server Management Executing Script");
+	WriteHTML("<DIV ID='container'>");
+	WriteHTML("<DIV ID='header'></DIV>");
+	WriteHTML("<DIV ID='content'>");
+	TableHeader("Executing Script");
+
+	var pid := CInt(QueryParam("PID"));
+	var script := GetProcess(pid);
+
+	WriteHTML("<P>Executing Script Information</P>");
+
+	WriteHTML("<TABLE WIDTH='400' CELLSPACING='1' CELLPADDING='2'>");
+	WriteHTML("<TR>");
+	WriteHTML("<TH COLSPAN='2'><B>Script Status</B></TH>");
+	WriteHTML("</TR>");
+
+	WriteHTML("<TR><TD>Script Name</TD><TD>"+script.name+"</TD></TR>");
+	WriteHTML("<TR><TD>PID</TD><TD>"+script.pid+"</TD></TR>");
+	WriteHTML("<TR><TD>Cycles</TD><TD>"+script.instr_cycles+"</TD></TR>");
+	WriteHTML("<TR><TD>State</TD><TD>"+script.state+"</TD></TR>");
+	WriteHTML("<TR><TD>Cycles Since Sleep</TD><TD>"+script.consec_cycles+"</TD></TR>");
+	WriteHTML("<TR><TD>Prog Counter</TD><TD>"+script.PC+"</TD></TR>");
+	WriteHTML("<TR><TD>Call Depth</TD><TD>"+script.call_depth+"</TD></TR>");
+	WriteHTML("<TR><TD>Number of Variables</TD><TD>"+script.var_size+"</TD></TR>");
+	WriteHTML("<TR><TD>Attached To</TD><TD>"+Hex(CInt(script.attached_to.serial))+"</TD></TR>");
+	WriteHTML("<TR><TD>Controller</TD><TD>"+Hex(CInt(script.controller.serial))+"</TD></TR>");
+	WriteHTML("<TR><TD>Actions</TD><TD>N/A</TD></TR>");
+
+	WriteHTML("</TABLE>");
+
+	WriteHTML("<P />");
+
+	WriteHTML("<TABLE WIDTH='400' CELLSPACING='1' CELLPADDING='2'>");
+	WriteHTML("<TR>");
+	WriteHTML("<TH COLSPAN='4'><B>Global Variables</B></TH>");
+	WriteHTML("</TR>");
+	WriteHTML("<TR>");
+	WriteHTML("<TH ALIGN='LEFT'>Name</TH>");
+	WriteHTML("<TH ALIGN='LEFT'>Type</TH>");
+	WriteHTML("<TH ALIGN='LEFT'>Size</TH>");
+	WriteHTML("<TH ALIGN='LEFT'>Value</TH>");
+	WriteHTML("</TR>");
+
+	foreach global in ( script.globals )
+		WriteHTML("<TR>");
+		WriteHTML("<TD>"+_global_iter+"</TD>");
+		WriteHTML("<TD>"+TypeOf(global)+"</TD>");
+		WriteHTML("<TD>"+SizeOf(global)+"</TD>");
+		WriteHTML("<TD>"+global+"</TD>");
+		WriteHTML("</TR>");
+
+		SleepMS(2);
+	endforeach
+
+	WriteHTML("</TABLE>");
+
+	WriteHTML("</DIV>");
+
+	DoFooter();
+
+	return 1;
+endprogram

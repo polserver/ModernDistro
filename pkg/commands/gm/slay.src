@@ -7,16 +7,9 @@ program textcmd_kill( who )
 
 	var mob := Target( who, TGTOPT_NOCHECK_LOS );
 	if (mob)
-
-		if((mob.cmdlevel) && mob.cmdlevel > who.cmdlevel)
-			RevokePrivilege( who, "invul" );
-			ApplyRawDamage( who, CInt(AP_GetStat(mob, "Strength")) + 100 );
-			return;
-		endif
-
 		if (!mob.dead)
 			RevokePrivilege( mob, "invul" );
-			ApplyRawDamage( mob, CInt(AP_GetStat(mob, "Strength")) + 100 );
+			ApplyRawDamage( mob, CInt(AP_GetVital(mob, HITS)) + 100 );
 		endif
 
 	endif

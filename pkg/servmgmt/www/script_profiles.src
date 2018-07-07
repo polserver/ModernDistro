@@ -1,0 +1,57 @@
+/* $Id: script_profiles.src 1155 2008-01-27 04:43:36Z AustinHeilman $
+ *
+ */
+
+use uo;
+use os;
+use http;
+
+include ":servmgmt:header";
+
+program HTMLPage()
+	var reload := QueryParam("Action");
+	if ( reload == "Reset Counters" )
+		POLCore().clear_script_profile_counters();
+		WriteHTML("<META HTTP-EQUIV='REFRESH' CONTENT='1; URL=?'>");
+		WriteHTML("Counters have been reset.<BR><BR>");
+		WriteHTML("Reloading page....");
+		return 1;
+	endif
+
+	DoHeader("Server Management Script Profiles");
+	WriteHTML("<DIV ID='container'>");
+	WriteHTML("<DIV ID='header'></DIV>");
+	WriteHTML("<DIV ID='content'>");
+	TableHeader("Script Profiles");
+
+	var core := polcore();
+
+	WriteHTML("<P>");
+	WriteHTML("<FORM><INPUT TYPE='SUBMIT' NAME='Action' VALUE='Reset Counters'></FORM>");
+	WriteHTML("<A HREF='?'>Reload Page</A><BR><BR>");
+	WriteHTML("Online Players: "+EnumerateOnlineCharacters().Size()+"<BR>");
+	WriteHTML("NPCs: "+polcore().mobilecount+"<BR>");
+	WriteHTML("Current Load: " + core.sysload+"%<BR>");
+	WriteHTML("Scripts Late Per Minute: " + core.scripts_late_per_min +"<BR>");
+	WriteHTML("Scripts On Time Per Minute: " + core.scripts_ontime_per_min +"<BR>");
+	WriteHTML("</P>");
+
+	WriteHTML("<TABLE CELLSPACING='1' CELLPADDING='2' WIDTH='90%'>");
+	WriteHTML("<TR>");
+	WriteHTML("<TH><B>Name</B></TH><TH><B>Instructions</B></TH><TH><B>Invocations</B></TH><TH><B>Instr Per Invoc</B></TH><TH><B>% of sysload</B></TH>");
+	WriteHTML("</TR>");
+
+	foreach profile in ( core.script_profiles )
+		WriteHTML("<TR>");
+		WriteHTML("<TD>"+profile.name+"</TD><TD>"+profile.instr+"</TD><TD>"+profile.invocations+"</TD><TD>"+profile.instr_per_invoc+"</TD><TD>"+profile.instr_percent+"%</TD>");
+		WriteHTML("</TR>");
+		SleepMS(2);
+	endforeach
+
+	WriteHTML("</TABLE>");
+
+	WriteHTML("</DIV>");
+	DoFooter();
+
+	return 1;
+endprogram

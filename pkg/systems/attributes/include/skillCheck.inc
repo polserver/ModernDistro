@@ -15,12 +15,10 @@ use os;
 use util;
 use cfgfile;
 
-CONST ADV_SKILL		:= 0x1;
-CONST ADV_STATS		:= 0x2;
-CONST ADV_ALL		:= ADV_SKILL+ADV_STATS; // 3
-CONST ADV_DISABLE	:= 0x4; // 4 - because the default is ADV_ALL.
-
-var g_skill_debug	:= 0;
+const ADV_SKILL		:= 0x1;
+const ADV_STATS		:= 0x2;
+const ADV_ALL		:= ADV_SKILL+ADV_STATS; // 3
+const ADV_DISABLE	:= 0x4; // 4 - because the default is ADV_ALL.
 
 /*
  * SkillCheck(mobile, attrib_name, difficulty, award_diff, advance_flags)
@@ -32,6 +30,7 @@ var g_skill_debug	:= 0;
  * Parameters
  * mobile:		Mobile reference to do the skill check for.
  * attribute_name:	Name of the attribute to perform the check on.
+ * difficulty:  
  * award_diff:		Advanced as if the difficulty were this value - defaults to difficulty.
  * advance_flags:	Controls the turning on/off of stat and skill advancements for the check.
  *
@@ -39,70 +38,64 @@ var g_skill_debug	:= 0;
  * Returns > 0 if the skill check was successful
  *
  */
-function SkillCheck(mobile, attrib_name, difficulty, award_diff:="", advance_flags:=ADV_ALL)
-	if ( mobile.dead )
-		SendSysMessage(mobile, "You can't use skills while dead.");
+function SkillCheck( mobile, attrib_name, difficulty, award_diff:="", advance_flags:=ADV_ALL )
+
+	if( mobile.dead )
+		SendSysMessage( mobile, "You can't use skills while dead." );
 		return -100;
-	elseif ( GetObjProperty(mobile, "DisableSkills") )
-		SendSysMessage(mobile, "Your skills are disabled.");
+	elseif( GetObjProperty( mobile, "NoGains" ))
+		SendSysMessage( mobile, "Your skills are disabled." );
 		return -100;
-	elseif ( GetObjProperty(mobile, "NoGains") )
-		advance_flags := ADV_DISABLE;
+	elseif( mobile.IsA( POLCLASS_NPC ))
+    if( GetObjProperty( mobile, "CanTrain" ))
+			advance_flags := ADV_STATS;
+    else
+			advance_flags := ADV_DISABLE;
+    endif
 	endif
-	
-	// Global skill-debug ( for SkillDbgMsg() )
-	g_skill_debug := (GetObjProperty(mobile, "SkillDebug") != error);
-	
-	var effective_skill := AP_GetTrueSkill(mobile, attrib_name);
-	
+
 	// Difficulty checks
-	if ( difficulty == -1 )
-		// -1 = Check skill against its self.
-		SkillDbgMsg(mobile, "Skill based check. Difficulty = -1");
-  elseif( difficulty == -3 )
-		SkillDbgMsg(mobile, "Skill based check. Difficulty = -3");
-	else
-		difficulty := CDbl(difficulty);
+	if( difficulty != -1 )
+		difficulty := CDbl( difficulty );
 	endif
-	
-	var pass_chance := CalcSuccessPercent(mobile, attrib_name, difficulty, effective_skill);
-	var check_roll := RandomInt(100)+1;
-	var pass_success := (pass_chance - check_roll)+1;
+
+        var effective_skill := AP_GetSkill( mobile, attrib_name ),
+	    pass_chance := CalcSuccessPercent( mobile, attrib_name, difficulty, effective_skill ),
+	    check_roll := RandomDiceRoll( "1d100+1" );
+
+        if( !mobile.IsA( POLCLASS_NPC ) && !mobile.cmdlevel )
+                var hunger := CInt( AP_GetVital( mobile, HUNGER ));
+                if( !hunger )
+                        hunger := 1;
+                endif
+
+		var hc_settings := AP_GetSettingsCfgElem( "Hunger" ),
+                    hunger_setting := CInt( hc_settings.MaxHungerAffect ),
+                    hunger_value := CInt( pass_chance * CDbl( hunger_setting ));
+
+                pass_chance -= CInt( hunger_value - CDbl( hunger_value * CDbl( hunger / 10 )));
+        endif
+
 	// Ensure skill- and stat-gain if it's a -1 skillcheck
 	// Do this AFTER the CalcSuccessPercent() call so '-1' isn't messed up
-	if ( difficulty == -1 )
+
+	if( difficulty == -1 )
 		difficulty := effective_skill;
 	endif
-	if ( award_diff == "" )
-		award_diff := difficulty;
+
+	if( award_diff == "" )
+		award_diff := AP_GetSkillDefaultAward( attrib_name );
 	endif
-	
-	if ( award_diff == -3 )
-		award_diff := CInt(AP_GetAttributeCfgElem(attrib_name).AwardDefault);
-    //SendSysMessage(mobile, "Award default for " + attrib_name + " is " + CStr(award_diff), 2, 88);
+
+	if( advance_flags & ADV_SKILL )
+		CheckSkillAdvance( mobile, attrib_name, difficulty, CInt( award_diff ));
 	endif
-	
-	SkillDbgMsg(mobile, "--");
-	SkillDbgMsg(mobile, "Difficulty: "+difficulty+"% (Award: "+award_diff+")");
-	SkillDbgMsg(mobile, "Effective Skill: "+effective_skill+"%");
-	SkillDbgMsg(mobile, "Success Chance: "+pass_chance+"%");
-	SkillDbgMsg(mobile, "Check Roll: "+check_roll);
-	SkillDbgMsg(mobile, "Success: "+pass_success);
-	SkillDbgMsg(mobile, "---");
-	
-	if ( !(advance_flags & ADV_SKILL) )
-		SkillDbgMsg(mobile, "Skill advance disabled.");
-	else
-		CheckSkillAdvance(mobile, attrib_name, award_diff, pass_chance);
+
+	if( advance_flags & ADV_STATS )
+		CheckStatsForSkill( mobile, attrib_name );
 	endif
-		
-	if ( !(advance_flags & ADV_STATS) )
-		SkillDbgMsg(mobile, "Stat advancement disabled.");
-	else
-		CheckStatsForSkill(mobile, attrib_name);
-	endif
-	
-	return pass_success;
+
+	return (( pass_chance - check_roll ) + 1 );
 endfunction
 
 /*
@@ -117,38 +110,37 @@ endfunction
  * Returns 1
  *
  */
-function CalcSuccessPercent(mobile, attrib_name, difficulty, effective_skill)
-	var settings := AP_GetSettingsCfgElem("Skills");
-	
-	var percent := 0;
-	if ( difficulty == -1 )
-		var max_skill := AP_GetSkillCap(attrib_name);
-		var neg1chance := CDbl(settings.MaxNeg1Chance);
-		
-		percent := CInt(neg1chance * effective_skill / max_skill);
-	elseif ( DifficultyTooHard(effective_skill, difficulty) )
-		SkillDbgMsg(mobile, "Too hard.");
-		percent := 0;
-	elseif ( DifficultyTooEasy(effective_skill, difficulty) )
-		SkillDbgMsg(mobile, "Too easy.");
-		percent := 100;
-	else
-		// For every 5 points difference there will be a +-10 for percent
-		percent := CInt(50.0 + ((effective_skill - difficulty) * 2.5));
+function CalcSuccessPercent( mobile, attrib_name, difficulty, effective_skill )
+
+	var sc_settings := AP_GetSettingsCfgElem( "Skills" ),
+  min_chance := CInt( sc_settings.MinChance ),
+  max_chance := CInt( sc_settings.MaxChance ),
+  percent := CInt( 50.0 + (( effective_skill - difficulty ) * 1.5 )); // For every 5 points difference there will be a +-10 for percent
+            
+	if( difficulty == -1 )
+		var neg1chance := CInt( sc_settings.MaxNeg1Chance ),
+		percent := CInt( neg1chance * effective_skill / 150 );
+  endif
+
+	if( percent < min_chance )
+		percent := min_chance;
+	elseif( percent > max_chance )
+		percent := max_chance;
 	endif
-	
-	if ( percent < settings.MinChance )
-		percent := CInt(settings.MinChance);
-	elseif ( percent > settings.MaxChance )
-		percent := CInt(settings.MaxChance);
-	endif
-	
+
 	return percent;
 endfunction
 
-function DifficultyTooEasy(effective_skill, difficulty)
-	var settings := AP_GetSettingsCfgElem("Skills");
-	return ( (effective_skill + CDbl(settings.TooEasy)) > difficulty );
+function DifficultyTooEasy( effective_skill, difficulty )
+
+	var sc_settings := AP_GetSettingsCfgElem( "Skills" );
+
+        var max_diff := difficulty + CDbl( sc_settings.TooEasy );
+        if( max_diff > effective_skill )
+                return 0;
+        endif
+
+	return 1;
 endfunction
 
 function DifficultyTooHard(effective_skill, difficulty)
@@ -156,24 +148,3 @@ function DifficultyTooHard(effective_skill, difficulty)
 	return ( (effective_skill + CDbl(settings.TooHard)) < difficulty );
 endfunction
 
-/*
- * SkillDbgMsg(mobile, message)
- *
- * Purpose
- * Checks to see if it should send a skill debug message to a mobile.
- *
- * Parameters
- * mobile:	Mobile to send the messages to.
- * message:	Debug message.
- *
- * Return value
- * Returns 1
- *
- */
-function SkillDbgMsg(mobile, message)
-	if ( g_skill_debug )
-		SendSysMessage(mobile, "Skill Debug: "+message);
-	endif
-	
-	return 1;
-endfunction

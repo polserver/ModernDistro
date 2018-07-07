@@ -26,8 +26,9 @@ use uo;
  * Returns an integer.
  *
  */
-function AP_GetStat(who, stat_name)
-	return AP_GetTrueStat(who, stat_name)+AP_GetStatMod(who, stat_name);
+function AP_GetStat( who, stat_name )
+
+	return AP_GetTrueStat( who, stat_name ) + AP_GetStatMod( who, stat_name );
 endfunction
 
 /*
@@ -44,8 +45,9 @@ endfunction
  * Returns a double.
  *
  */
-function AP_GetTrueStat(who, stat_name)
-	return CDbl(GetAttributeBaseValue(who, stat_name)) / 10.0;
+function AP_GetTrueStat( who, stat_name )
+
+	return CDbl( GetAttributeBaseValue( who, stat_name )) / 10.0;
 endfunction
 
 /*
@@ -62,8 +64,9 @@ endfunction
  * Returns a double.
  *
  */
-function AP_GetStatMod(who, stat_name)
-	return CDbl(GetAttributeTemporaryMod(who, stat_name)) / 10.0;
+function AP_GetStatMod( who, stat_name )
+
+	return CDbl( GetAttributeTemporaryMod( who, stat_name )) / 10.0;
 endfunction
 
 /*
@@ -82,14 +85,17 @@ endfunction
  * Returns a double.
  *
  */
+function AP_SetTrueStat( mobile, attributeid, points )
 
-function AP_SetTrueStat(mobile, attributeid, points)
-	if ( points >= 0 )
-		SetAttributeBaseValue(mobile, attributeid, CInt(CDbl(points) * 10.0 + 0.1));
+        var result;
+	if( points >= 0 )
+		result := SetAttributeBaseValue( mobile, attributeid, CInt( CDbl( points ) * 10 + 0.1 ));
 	else
-		SetAttributeBaseValue(mobile, attributeid, CInt(CDbl(points) * 10.0 - 0.1));
+		result := SetAttributeBaseValue( mobile, attributeid, CInt( CDbl( points ) * 10 ));
 	endif
-	RecalcVitals(mobile);
+ 
+	RecalcVitals( mobile );
+        return result;
 endfunction
 
 /*
@@ -108,9 +114,10 @@ endfunction
  * Returns a double.
  *
  */
-function AP_SetStatMod(mobile, stat_name, points)
-	SetAttributeTemporaryMod(mobile, stat_name, CInt(CDbl(points) * 10.0));
-	RecalcVitals(mobile);
+function AP_SetStatMod( mobile, stat_name, points )
+
+	SetAttributeTemporaryMod( mobile, stat_name, CInt( CDbl( points ) * 10.0 ));
+	RecalcVitals( mobile );
 endfunction
 
 /*
@@ -129,11 +136,12 @@ endfunction
  * Returns the previous value
  *
  */
-function AP_ModifyStatMod(mobile, stat_name, points)
-	var orig_mod := AP_GetStatMod(mobile, stat_name);
-	var new_mod := CDbl(points)+CDbl(orig_mod);
+function AP_ModifyStatMod( mobile, stat_name, points )
 
-	AP_SetStatMod(mobile, stat_name, new_mod);
+	var orig_mod := AP_GetStatMod( mobile, stat_name );
+	var new_mod := CDbl( points ) + CDbl( orig_mod );
+
+	AP_SetStatMod( mobile, stat_name, new_mod );
 
 	return orig_mod;
 endfunction
@@ -191,6 +199,8 @@ function AP_CheckStatCap(mobile, stat_name:="")
 		return ( total >= GetConfigReal(cfg_elem, "TotalCap") );
 	endif
 endfunction
+
+
 
 //////////////////////////////////////////////////////
 //

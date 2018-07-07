@@ -1,0 +1,29 @@
+/*
+        Maintened by *Edwards
+
+        2009-02-09
+*/
+use os;
+use uo;
+
+include ":attributes:attributes";
+include ":gumps:requestGump";
+
+program textcmd_PowerUp( who, level )
+
+	if( !level )
+		level := CDbl( RequestGump( who, "Power up level", "", 100 ));
+	else
+		level := CDbl( level );
+	endif
+		
+	foreach attrib_name in AP_ListAttributesByType()
+		AP_SetTrueSkill( who, attrib_name, level );
+		SleepMS(10);
+	endforeach
+	
+	AP_RefreshVitals( who );
+	
+	SendSysMessage( who, "Done." );
+	return 1;
+endprogram
