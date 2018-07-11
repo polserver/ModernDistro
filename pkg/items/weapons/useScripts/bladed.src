@@ -43,7 +43,7 @@ program use_blade(who, blade)
           process_wool(who, blade, use_on.mobile, craftingbag);
   elseif(use_on.item.objtype == UOBJ_CORPSE)
     ReleaseItem(blade);
-    Carve_Corpse(who, use_on.item, craftingbag);
+    Carve_Corpse(who, use_on.item, blade, craftingbag);
   elseif(is_fish(checkme))
     CarveFish(who, blade, use_on.item, craftingbag);
   elseif (is_tree(use_on.objtype ))
@@ -130,7 +130,10 @@ function CreatableObjects( who, blade, logs )
   return objtypes;
 endfunction
 
-function Carve_Corpse(who, cadaver, craftingbag)
+function Carve_Corpse(who, cadaver, blade, craftingbag)
+  var thingobjtype := 0;
+  var hidetype;
+  var createdthing;
   craftingbag := craftingbag;
   Detach();
   if((!Accessible(who, cadaver)) or (!CheckLineOfSight(who, cadaver)))
@@ -226,8 +229,16 @@ function Carve_Corpse(who, cadaver, craftingbag)
       var i := 1;
       corpseitm := SplitWords(corpseitm);
       corpseamt := SplitWords(corpseamt);
+	  Print("About to create corpse items.");
       foreach thing in corpseitm
-        CreateItemInContainer(cadaver, thing, Cint(corpseamt[i]));
+		createdthing := CreateItemInContainer(cadaver, thing, Cint(corpseamt[i]));
+		// If we are using a skinning knife convert the hides to cut leather.
+		if(blade.objtype == 0xEC4 && createdthing.IsHide())
+			thingobjtype := GetObjtypeByName(thing);
+			hidetype := GetItemDescInfo(thingobjtype);
+			CreateItemInContainer(cadaver, CInt(hidetype.LeatherType), Cint(corpseamt[i]));
+			DestroyItem(createdthing);
+		endif
         i := i + 1;
       endforeach
       SendSysMessage(who, "You place the items on the corpse.");

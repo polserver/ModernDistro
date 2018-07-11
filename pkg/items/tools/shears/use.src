@@ -1,0 +1,44 @@
+//////////////////////////////////////////
+// Use script for shears to shear sheep //
+//////////////////////////////////////////
+
+use uo;
+
+
+include ":attributes:attributes";
+include "include/client";
+include "include/dist";
+include "include/toolWear";
+
+program shears(who, shears, craftingbag)
+	craftingbag := who.backpack; // Will add craft bag support some day soon.
+	shears := shears;
+	var sheep := TargetCoordinates(who);
+
+	if(!sheep)
+		SendSysMessage(who, "Cancelled.", 3, 33);
+		return;
+	endif
+
+	if((!CheckLineOfSight(who, sheep)) or (dist(who, sheep) > 2))
+		SendSysMessage(who, "That sheep is too far away!", color := 33);
+		return 0;
+	endif
+
+
+	if (sheep.mobile.graphic == CID_SHEERED_SHEEP)
+		SendSysMessage(who, "You cannot get any more wool from that sheep", color := 33);
+		return 0;
+	elseif(sheep.mobile.graphic == CID_SHEEP)
+		if(sheep.graphic == 207)
+			sheep.graphic := 223;
+			CreateItemInContainer(craftingbag, 0xdf8, 3);
+		endif
+	else
+		SendSysMessage(who, "You can only use shears on sheep.", 3, 33);
+		return 0;
+	endif
+	CheckToolWear (who, shears, TAILORING);
+
+endprogram
+
