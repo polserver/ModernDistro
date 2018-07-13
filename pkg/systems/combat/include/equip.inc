@@ -33,6 +33,9 @@ function HandleMods(who, item)
     "invisibility": val := invisibility(who,item);
     default:        val := 1;
   endcase
+  if(item.resist_physical)
+    ModifyResistance(who, DMG_PHYSICAL, item.resist_physical);
+  endif
   if(item.resist_fire)
     ModifyResistance(who, DMG_FIRE, item.resist_fire);
   endif
@@ -44,9 +47,6 @@ function HandleMods(who, item)
   endif
   if(item.resist_energy)
     ModifyResistance(who, DMG_ENERGY, item.resist_energy);
-  endif
-  if(item.resist_physical)
-    ModifyResistance(who, DMG_PHYSICAL, item.resist_physical);
   endif
 
   return val;

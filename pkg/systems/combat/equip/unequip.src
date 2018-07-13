@@ -29,7 +29,10 @@ program unequip(who, item)
     "invisibility": val := invisibility(who, item);
     default:        val := 1;
   endcase
-    if(item.resist_fire)
+  if(item.resist_physical)
+    ModifyResistance(who, DMG_PHYSICAL, item.resist_physical * -1);
+  endif
+  if(item.resist_fire)
     ModifyResistance(who, DMG_FIRE, item.resist_fire * -1);
   endif
   if(item.resist_cold)
@@ -40,9 +43,6 @@ program unequip(who, item)
   endif
   if(item.resist_energy)
     ModifyResistance(who, DMG_ENERGY, item.resist_energy * -1);
-  endif
-  if(item.resist_physical)
-    ModifyResistance(who, DMG_PHYSICAL, item.resist_physical * -1);
   endif
 
 
@@ -64,6 +64,9 @@ function wizzohat(who,item)
 endfunction
 
 function cursed(who,item)
+// Someday items will have a cursed property and this function will be relevant.
+who := who;
+item := item;
   return 0;
 endfunction
 
@@ -113,6 +116,7 @@ endfunction
 
 function RemoveMods(who, item)
   var proc := GetProcess(Cint(GetObjProperty(item, "Pid")));
+  who := who;
   if(proc)
     var ev := {};
     ev.+type := EVID_UNEQUIP;
