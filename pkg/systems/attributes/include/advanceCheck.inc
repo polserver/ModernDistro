@@ -153,9 +153,11 @@ function CheckSkillAdvance( mobile, attrib_name, difficulty, award_diff )
 	endif
 
 	var advance := CDbl( 0.1 );
-	if( true_skill < 35 )
-		advance := CDbl((( 30 - true_skill ) / 2 ) * 0.1 );
-	endif
+  if( csa_settings.EnableLowSkillBonus ) 
+    if( true_skill < CInt(csa_settings.LowSkillThreshold) )
+      advance := CDbl((( 30 - true_skill ) / CInt(csa_settings.SkillBonusMod) ) * 0.1 );
+    endif
+  endif
 
 	if( advance > limit_left )
 		advance := limit_left;

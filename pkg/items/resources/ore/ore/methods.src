@@ -16,3 +16,10 @@ exported function IsOre( item )
 	return 1;
 endfunction
 
+exported function IsSmeltable( item )
+
+	item := item; // Avoid compiler warnings.
+
+	return 1;
+endfunction
+

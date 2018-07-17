@@ -1,6 +1,7 @@
 // //$Id: makeBlacksmithItems.src 1473 2009-03-12 01:26:41Z muaddib_pol $
 
 use cfgfile;
+use cliloc;
 use util;
 
 include ":attributes:attributes";
@@ -15,22 +16,24 @@ var item_config     := ReadConfigFile(":*:itemdesc");
 var craft_config    := ReadConfigFile(":blacksmithy:blacksmithy");
 
 program use_SmithTool(who, tool)
+	// If meditating stop meditation.
+	EraseObjProperty(who, "IsMeditating");
+	SendSysMessageCL(who, 500134, {}, 3, 33); // You stop meditating.
+	// If healing with bandages, stop healing.
+	EraseObjProperty(who, "HealTimer");
 
 	if ( !ReserveItem(tool) )
-		SendSysMessage(who, "That is already in use.");
+		SendSysMessageCL(who, 501973, {}, 3, 33); // You cannot use that.
 		return 0;
-	elseif( (!tool.movable) || !ReserveItem(tool) )
-		SendSysMessage(who, "You cannot use that");
+	elseif( (!tool.movable) )
+		SendSysMessageCL(who, 1042597, {}, 3, 33); // That is locked down.
 		return 0;
 	elseif( !tool in ListEquippedItems(who) )
 		if( !(tool in EnumerateItemsInContainer(who.backpack)) )
-			SendSysMessage(who, "That item is not in your backpack nor equipped.");
+			SendSysMessage(who, "That item is not in your backpack nor equipped.", 3, 33);
 			return 0;
 		endif
 	endif
-
-	EraseObjProperty(who, "#IsMeditating");
-	EraseObjProperty(who, "#HealTimer");
 
 	var rinfo := sendCraftGump(who, "Blacksmithy");
 
@@ -64,14 +67,41 @@ function makeBlacksmithItems(who, what, amt, tool)
 	endif
 
 	var anvil_near := 0;
-	foreach item in ( ListItemsNearLocation(who.x, who.y, who.z, 3) )
-		if( (item.objtype == 0xFAF) || (item.objtype == 0xFB0) )
+	foreach item in ( ListStaticsNearLocation( who.x, who.y, who.z, 3, 02, who.realm ))
+		if( (item.objtype == 0xFAF) || (item.objtype == 0xFB0 || item.objtype == 0x2DD5 || item.objtype == 0x2DD6) )
 			anvil_near := 1;
 			break;
 		endif
 	endforeach
-	if( anvil_near == 0 )
-		SendSysMessage(who, "You must be near an anvil to smith items.");
+	if( !anvil_near )
+		foreach item in ListItemsNearLocation(who.x, who.y, who.z, 3, who.realm)
+			if( (item.objtype == 0xFAF) || (item.objtype == 0xFB0 || item.objtype == 0x2DD5 || item.objtype == 0x2DD6) )
+				anvil_near := 1;
+				break;
+			endif
+		endforeach
+	endif
+	if( !anvil_near )
+		SendSysMessageCL(who, 1044267, {}, 3, 33); // You must be near an anvil and a forge to smith items.
+		return 0;
+	endif
+	var forge_near := 0;
+	foreach item in ( ListStaticsNearLocation( who.x, who.y, who.z, 3, 02, who.realm ))
+		if( (item.objtype == 0xfb1) || item.objtype := 0x2DD8|| ((item.objtype >= 0x197a) && (item.objtype <= 0x19a9)) )
+			forge_near := 1;
+			break;
+		endif
+	endforeach
+	if( !forge_near )
+		foreach item in ( ListItemsNearLocation(who.x, who.y, who.z, 3, who.realm) )
+			if( (item.objtype == 0xfb1) || item.objtype := 0x2DD8|| ((item.objtype >= 0x197a) && (item.objtype <= 0x19a9)) )
+				forge_near := 1;
+				break;
+			endif
+		endforeach
+	endif
+	if( !forge_near )
+		SendSysMessageCL(who, 1044267, {}, 3, 33); // You must be near an anvil and a forge to smith items.
 		return 0;
 	endif
 
@@ -107,7 +137,7 @@ function makeBlacksmithItems(who, what, amt, tool)
 				theitem := CreateCraftItem(who, craft_skill, use_on, use_on.objtype, what, material, itemname, reqd);
 				if( TypeOf(theitem) != "ItemRef" )
 					SubtractAmount(use_on, (material / 2));
-					SendSysMessage(who, "You failed to create the item, and some of your materials are lost.");
+					SendSysMessageCL(who, 1044043, {}, 3, 33); // You failed to create the item, and some of your materials are lost.
 					counter := counter + 1;
 					continue;
 				else
@@ -116,12 +146,12 @@ function makeBlacksmithItems(who, what, amt, tool)
 			else
 				num := CInt(randomint(material)/2) + 1;
 				if(SubtractAmount(use_on, num))
-					SendSysMessage(who, "You lost some metal");
+					SendSysMessageCL(who, 500441, {}, 3, 33); // You lost some metal.
 				endif
 			endif
 			CheckToolWear (who, tool, craft_skill);
 		else
-			SendSysMessage(who, "You don't have the resources required to make that item.");
+			SendSysMessageCL(who, 500439, {}, 3, 33); // There is not enough metal there to make that item.
 			return 0;
 		endif
 		counter := counter + 1;
