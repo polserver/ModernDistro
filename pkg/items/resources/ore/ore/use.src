@@ -41,15 +41,27 @@ function SmeltOre(who, ore, ingot, difficulty)
 	endif
 	var forge := TargetCoordinates(who);
 	var dist := CoordinateDistance(who.x, who.y, forge.x, forge.y);
+	// If there is a dynamic item at the location TargetCoordinates() returns the item reference
+	// and we make the variable "forge" equal to that.
+	// I have to admit eScript's weak variable typing simplifies this and I took advantage of this :P
 	if(forge.item)
 		forge := forge.item;
 	endif
-	SendSysMessage(who, CStr(Hex(forge.objtype)));
+	// If there was no item reference then we are still OK because if there was a static item at the location
+	// TargetCoordinates() gives the ObjType number of that static item.
+	// So we check to see if the ObjType of either the dynamic item or static item matches the ObjTypes of known forges.
 	if((forge.objtype == 0xfb1) || forge.objtype := 0x2DD8|| ((forge.objtype >= CInt(0x197a)) && (forge.objtype <= CInt(0x19a9))))
+		// We have to check Line Of Sight (LOS) to the targetted location because TargetCoordinates() has no
+		// flags for LOS check as does Target().
 		if(!CheckLosBetween( who.x, who.y, who.z, forge.x, forge.y, forge.z, who.realm ))
 			SendSysMessageCL(who,500876, {}, 3, 33); // You can't see that.
 			return;
 		endif
+		// If the distance between the player and the forge is greater than 2 squares
+		// send the cliloc message "That is too far away." in font 3 colour red.
+		// The empty array in SendSysMessageCL is necessary because some cliloc
+		// messages can have text inserted in them. See the cliloc.em documentation
+		// for more information.
 		if(dist > 2)
 		SendSysMessageCL(who, 501975, {}, 3, 33); // That is too far away.
 			return;
