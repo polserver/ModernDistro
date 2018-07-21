@@ -17,8 +17,10 @@ var craft_config    := ReadConfigFile(":blacksmithy:blacksmithy");
 
 program use_SmithTool(who, tool)
 	// If meditating stop meditation.
-	EraseObjProperty(who, "IsMeditating");
-	SendSysMessageCL(who, 500134, {}, 3, 33); // You stop meditating.
+	if( GetObjProperty(who, "IsMeditating" ) )
+		EraseObjProperty(who, "IsMeditating");
+		SendSysMessageCL(who, 500134, {}, 3, 33); // You stop meditating.
+	endif
 	// If healing with bandages, stop healing.
 	EraseObjProperty(who, "HealTimer");
 

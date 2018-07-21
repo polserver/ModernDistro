@@ -1,102 +1,110 @@
-use uo;
+// $Id: alchemy.src 1473 2009-03-12 01:26:41Z muaddib_pol $
+
 use cfgfile;
+use cliloc;
 use util;
-use basic;
-use os;
 
-include "include/client";
-include ":alchemy:potion";
-include "include/canAccess";
-include "include/noto";
+include ":attributes:attributes";
+include ":crafting:crafting";
+include ":crafting:craftingRepair";
+include ":crafting:toolWear";
 
-const REAGENT_START := 0x0f78;
-const REAGENT_STOP := 0x0f91;
-const SOUND_EFFECT_GRIND := 0x243;
-const SOUND_EFFECT_POUR := 0x241;
-const SOUND_EFFECT_BUBBLE :=  0x4f;
-const UOBJECT_EMPTY_BOTTLE := 0x0f0e;
+var item_config     := ReadConfigFile(":*:itemdesc");
+var craft_config    := ReadConfigFile(":alchemy:alchemy");
 
-var conf := ReadConfigFile("alchemy");
+program use_AlchTool(who, tool)
 
-program use_mortar (who, mortar)
-  EraseObjProperty(who, "IsMeditating");
-  EraseObjProperty(who, "HealTimer");
-  if(!can_access(who, mortar))
-    return;
-  endif
-  if(!ReserveItem(mortar))
-    SendSysMessage(who, "That is already in use.");
-    return;
-  endif
-  Detach();
-  if(GetObjProperty(mortar, "contents"))
-	PourPotion(who, mortar);
-  else
-    SendSysMessage( who, "What would you like to use that on?" );
-    make_the_potion(who, mortar);
-  endif
-  EraseObjProperty(mortar, "#IsMixing");
+	if ( !ReserveItem(tool) )
+		SendSysMessage(who, "That is already in use.");
+		return 0;
+	elseif( (!tool.movable) || !ReserveItem(tool) )
+		SendSysMessage(who, "You cannot use that");
+		return 0;
+	elseif( !(tool in EnumerateItemsInContainer(who.backpack)) )
+		SendSysMessage(who, "That item is not in your backpack.");
+		return 0;
+	endif
+	if( GetObjProperty(who, "#IsMeditating") )
+		SendSysMessageCL(who, 500134, {}, 3, 33); // You stop meditating.
+		EraseObjProperty(who, "#IsMeditating");
+	endif
+	EraseObjProperty(who, "#HealTimer");
+
+	var rinfo := sendCraftGump(who, ALCHEMY);
+
+	// OK was pressed, close it on out
+	if(rinfo == 0)
+		return 0;
+	endif
+
+	var the_objtype := rinfo[1];
+	var amt         := rinfo[2];
+
+	if(craft_config[Hex(the_objtype)].Assemble == 1)
+		CraftAssembly(who, ALCHEMY, tool, the_objtype, amt);
+	else
+		makeAlchemyItems(who, the_objtype, amt, tool);
+	endif
+
 endprogram
 
-function ExceptionalFameMod(who, skill, diff, points)
-  if(skill > diff - 20)
-    diff := diff + 20;
-    if((skill - diff) <= 5)
-      points := points;
-    elseif((skill - diff) <= 10)
-      points := (points * 3) / 4;
-    elseif((skill - diff) <= 15)
-      points := points / 2;
-    elseif((skill - diff) <= 20)
-      points := points / 4;
-    else
-      points := 0;
-    endif
-    points := Cint(points);
-    var fame := Cint(GetObjProperty(who, "Fame"));
-    var famegain := fame + points;
-    SetObjProperty(who, "Fame", famegain);
-    var msgtext := "You have ";
-    if(points < 0)
-      msgtext := msgtext + "lost ";
-      points := Abs(points);
-    else
-      msgtext := msgtext + "gained ";
-    endif
-    if(points > 150)
-      msgtext := msgtext + "a great amount of ";
-    elseif(points > 125)
-      msgtext := msgtext + "alot of ";
-    elseif(points > 75)
-      msgtext := msgtext + "a good amount of ";
-    elseif(points > 30)
-      msgtext := msgtext + "some ";
-    elseif(points > 0)
-      msgtext := msgtext + "a little ";
-    else
-      return 0;
-    endif
-    msgtext := msgtext + "Fame.";
-    SendSysMessage(who, msgtext);
-    var karma := Cint(GetObjProperty(who, "Karma"));
-    var kmod := GetKarmaLevel(karma);
-    var fmod := GetFameLevel(famegain);
-    var newtitle := nototitles[ (kmod) ];
-    newtitle := "The " + CStr(newtitle[fmod]) + " ";
-    if(newtitle["None"])
-      newtitle := "";
-    endif
-    if(fmod == 5)
-      if(who.gender == 1)
-        newtitle := newtitle + "Lady ";
-      else
-        newtitle := newtitle + "Lord ";
-      endif
-    endif
-    if(newtitle != who.title_prefix)
-      who.title_prefix := newtitle;
-      SendSysMessage(who, "you are now known as " + newtitle + who.name);
-    endif
-    SetNotoTitle(who, karma, fame);
-  endif
+function makeAlchemyItems(who, what, amt, tool)
+
+	if(!what)
+		SendSysMessage(who, "Cancelled");
+		return 0;
+	endif
+
+	// what's type is sent for the ResourceList entry type.
+	var itemchk := MaterialSelection(who, craft_skill, lower(craft_config[what].type));
+	if(!itemchk)
+		return 0;
+	endif
+	var use_on := itemchk[1];
+	var ptmod := itemchk[3];
+
+	var num, theitem;
+	var itemname := craft_config[what].name;
+	var material := Cint(craft_config[what].material);
+	var reqd := Cint(craft_config[what].skill);
+	var diff := Cint(craft_config[what].difficulty);
+	var pts  := Cint(craft_config[what].points);
+	pts      := CInt(pts + ptmod);
+	var counter := 0, x := who.x, y := who.y;
+
+	while(counter < amt)
+		if((who.x != x) || (who.y != y))
+			SendSysMessage(who, "You stop brewing.");
+			break;
+		endif
+		if(!tool)
+			break;
+		endif
+
+
+		if(GetAmount(use_on) >= material)
+			if(CraftCheckSkill(who, craft_skill, diff, pts))
+				theitem := CreateCraftItem(who, craft_skill, use_on, use_on.objtype, what, material, itemname, reqd);
+				if( TypeOf(theitem) != "ItemRef" )
+					SubtractAmount(use_on, (material / 2));
+					SendSysMessage(who, "You failed to create the item, and some of your materials are lost.");
+					counter := counter + 1;
+					continue;
+				endif
+			else
+				num := CInt(randomint(material)/2) + 1;
+				if(SubtractAmount(use_on, num))
+					SendSysMessage(who, "You lost some material");
+				endif
+			endif
+			CheckToolWear (who, tool, craft_skill);
+		else
+			SendSysMessage(who, "You don't have the resources required to make that item.");
+			return 0;
+		endif
+		counter := counter + 1;
+	endwhile
+
+	return 0;
+
 endfunction

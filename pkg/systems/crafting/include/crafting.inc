@@ -323,8 +323,8 @@ function CraftAssembly(who, craft_skill, tool, objtype, amt)
 			foreach material_objtype in ( parts_list.Keys() )
 				var amount := parts_list[material_objtype];
         var UsedPart := GetItemDescInfo(CInt(material_objtype));
-        SendSysMessage(who, "Debug msg: Crafting.inc --> UsedPart name is " + UsedPart.Name, 3, 88);
-        SendSysMessage(who, "Debug msg: Crafting.inc --> UsedPart name is " + CStr(UsedPart.ChangeTo), 3, 88);
+//        SendSysMessage(who, "Debug msg: Crafting.inc --> UsedPart name is " + UsedPart.Name, 3, 88);
+//        SendSysMessage(who, "Debug msg: Crafting.inc --> UsedPart name is " + CStr(UsedPart.ChangeTo), 3, 88);
         var ChangeTo := CInt(UsedPart.ChangeTo);
 				if ( amount > 0 )
 					if( !ConsumeSubstance(who.backpack, material_objtype, amount) )
@@ -487,36 +487,39 @@ endfunction
 // sound, the loops to do it in, and the delay between loops.
 // All delays are in seconds.
 function playCraftWork(who, craft_skill, sound_type)
-
 	var craftSound;
 	case (sound_type)
-		1: craftSound := menu_config[craft_skill].CraftSound1;
-		2: craftSound := menu_config[craft_skill].CraftSound2;
-		3: craftSound := menu_config[craft_skill].CraftSound3;
-		default: craftSound := menu_config[craft_skill].CraftSound1;
+		1: craftSound := CInt(menu_config[craft_skill].CraftSound1);
+		2: craftSound := CInt(menu_config[craft_skill].CraftSound2);
+		3: craftSound := CInt(menu_config[craft_skill].CraftSound3);
+		default: craftSound := CInt(menu_config[craft_skill].CraftSound1);
 	endcase
 
-	var loops	:= menu_config[craft_skill].CraftLoops;
-	var delay	:= menu_config[craft_skill].CraftDelay;
-	var craftAction := menu_config[craft_skill].CraftAnim;
+	var loops	:= CInt(menu_config[craft_skill].CraftLoops);
+	var delay	:= CInt(menu_config[craft_skill].CraftDelay);
+	var craftAction := CInt(menu_config[craft_skill].CraftAnim);
 
 	if( loops )
 		for i := 1 to loops
 			Sleep(delay);
 			if( craftAction )
 				PerformAction( who, craftAction );
+        Sleepms(500);
 			endif
 			if( craftSound )
 				PlaySoundEffect(who, craftSound);
+        Sleepms(500);
 			endif
 		endfor
 	else
 		Sleep(delay);
 		if( craftAction )
 			PerformAction( who, craftAction );
+      Sleepms(500);
 		endif
 		if( craftSound )
 			PlaySoundEffect(who, craftSound);
+      Sleepms(500);
 		endif
 		Sleep(delay);
 	endif

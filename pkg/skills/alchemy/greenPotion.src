@@ -1,23 +1,42 @@
-use os;
-use uo;
-use util;
-use cfgfile;
-include ":alchemy:drinkPotion";
-include "include/canAccess";
+// $Id: greenPotion.src 1059 2007-05-11 15:34:30Z tekproxy $
 
-program drink_blue(who, potion)
-  EraseObjProperty(who, "IsMeditating");
-  EraseObjProperty(who, "HealTimer");
-  if(!can_access(who, potion))
-    return;
-  endif
-  if(potion.movable == 0)
-    SendSysMessage(who, "You cannot drink that.");
-    return;
-  endif
-  if(!checkifcandrink(who, "green_potion"))
-    return;
-  endif
-  do_poison(who, potion);
-  Detach();
+use cfgfile;
+use cliloc;
+
+include ":alchemy:drinkPotion";
+include ":timedscripts:timedScripts";
+include ":itemUtils:itemdesc";
+
+program use_greenpotion(who, potion)
+	if( (!potion.movable) || !ReserveItem(potion) )
+		SendSysMessageCL(who, 501973, {}, 3, 33); // You cannot use that.
+		return 0;
+	elseif( !(potion in EnumerateItemsInContainer(who.backpack)) )
+		SendSysMessageCL(who, 1042593, {}, 3, 33); // That is not in your backpack.
+		return 0;
+	endif
+
+	EraseObjProperty(who, "#IsMeditating");
+	EraseObjProperty(who, "#HealTimer");
+
+	if ( !CheckToDrink(who, "#green_potion") )
+		return 0;
+	endif
+
+	do_poison(who, potion);
 endprogram
+
+function do_poison(who, potion)
+	var item_config := ReadConfigFile(":alchemy:itemdesc");
+	var config_elem := FindConfigElem(item_config, potion.objtype);
+	var strength := GetConfigInt(config_elem, "strength");
+
+	empty_bottle(who, potion);
+	PrintTextAbovePrivateCL(who, 1010512, {}, 3, 33, who); // You have been poisoned!
+
+	if ( who.cmdlevel > 1 )
+		return 0;
+	endif
+	
+	TS_StartTimer(who, "defaultPoison", 120, strength, who);
+endfunction

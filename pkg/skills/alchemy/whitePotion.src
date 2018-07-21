@@ -1,34 +1,45 @@
-use os;
-use uo;
-use util;
-use cfgfile;
-include ":alchemy:drinkPotion";
-include "include/statMod";
-include "include/canAccess";
+use cliloc;
 
-program drink_blue (who, potion)
-  EraseObjProperty(who, "IsMeditating");
-  EraseObjProperty(who, "HealTimer");
-  if(!can_access(who, potion))
-    return;
-  endif
-  if(potion.movable == 0)
-    SendSysMessage(who, "You cannot drink that.");
-    return;
-  endif
-  if(!CanMod(who, "str"))
-	SendSysMessage(who,"Already under the influence!");
-	return;
-  endif
-  if(!checkifcandrink(who, "white"))
-    return;
-  endif
-  var obj := potion.objtype;
-  empty_bottle(who, potion);
-  PlaySoundEffect(who, 0x1ef);
-  PlayObjectCenteredEffect(who, 0x373a, 7,7);
-  case(obj)
-    0x1DC11: DoTempMod(who, "str", 10,  60);
-    0x1DC12: DoTempMod(who, "str", 20, 180);
-  endcase
+include ":alchemy:drinkPotion";
+include ":timedscripts:timedScripts";
+include ":itemUtils:itemdesc";
+
+program use_whitepotion(who, potion)
+
+	if( (!potion.movable) || !ReserveItem(potion) )
+		SendSysMessageCL(who, 501973, {}, 3, 33); // You cannot use that.
+		return 0;
+	elseif( !(potion in EnumerateItemsInContainer(who.backpack)) )
+		SendSysMessageCL(who, 1042593, {}, 3, 33); // That is not in your backpack.
+		return 0;
+	endif
+	var potion_info := GetItemDescInfo(GetObjtype( potion ));
+
+
+	EraseObjProperty(who, "#IsMeditating");
+	EraseObjProperty(who, "#HealTimer");
+
+	if( !CheckToDrink(who, "#white") )
+		return 0;
+	endif
+
+	// Prevents mod from being applied twice.
+	// Uses the same as Magery Strength, to keep them from stacking.
+	if ( GetObjProperty(who, "StrengthMod") )
+		SendSysMessage(who, "You are already under the influence.");
+		return 0;
+	endif
+
+	case(Lower(potion_info.Name))
+		"strengthpotion":  empty_bottle(who, potion);
+			 TS_StartTimer(who, "strengthpotion", 60, 10, who);
+		"greaterstrength":  empty_bottle(who, potion);
+			 TS_StartTimer(who, "strengthpotion", 180, 20, who);
+	endcase
+	
+	PlaySoundEffect(who, 0x1ef);
+	PlayObjectCenteredEffect(who, 0x373a, 7,7);
+
+	return 1;
+
 endprogram
