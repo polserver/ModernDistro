@@ -56,7 +56,7 @@ function FindSkillId(name)
     "parrying":                 return  5;
     "begging":                  return  6;
     "blacksmithy":              return  7;
-    "bowcraft":                 return  8;
+    "bowcraftFletching":                 return  8;
     "peacemaking":              return  9;
     "camping":                  return 10;
     "carpentry":                return 11;

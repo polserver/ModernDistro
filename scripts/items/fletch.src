@@ -12,7 +12,7 @@ program on_fletch(who, shafts)
   if(!can_access(who, shafts))
     return;
   endif
-  var thepoints := GetAttribute(who, BOWCRAFT) / 2;
+  var thepoints := GetAttribute(who, BOWCRAFTFLETCHING) / 2;
   if(thepoints < 10)
     thepoints := 10;
   endif
@@ -55,7 +55,7 @@ program on_fletch(who, shafts)
     SendSysMessage(who, "Cancelled");
     return;
   endif
-  if(SkillCheck(who, BOWCRAFT, -1, thepoints))
+  if(SkillCheck(who, BOWCRAFTFLETCHING, -1, thepoints))
     var num_to_make := Min(GetAmount(shafts), GetAmount(feathers));
     if((SubtractAmount(shafts, num_to_make)) && (SubtractAmount(feathers, num_to_make)))
       var arrows := CreateItemInBackpack(who, choice.objtype, num_to_make);

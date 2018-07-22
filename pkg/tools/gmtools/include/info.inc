@@ -317,7 +317,7 @@ var infodata := array(
        "",
        "BLACKSMITHY",          //44
        "",
-       "BOWCRAFT",             //46
+       "BOWCRAFTFLETCHING",   //46
        "",
        "PEACEMAKING",          //48
        "",

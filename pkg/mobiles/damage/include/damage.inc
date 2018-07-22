@@ -4,6 +4,11 @@
  * Handles damages and resistances to damage types
  *
  */
+// Version 2
+// 20171-11-15  Yukiko changed resistances from using a CProp to use built-in members'
+//
+// To do: Add the ability to have custom resistances through the use of a CProp.
+//
 
 use uo;
 use os;
@@ -22,15 +27,43 @@ include ":magery:spells";
  * Damage constants listed here to prevent typos in scripts.
  *
  */
-enum DAMAGE_TYPES
-	DMG_FORCED	:= -1, // Ignores resistance
-	DMG_PHYSICAL	:= "Physical",
-	DMG_FIRE	:= "Fire",
-	DMG_COLD	:= "Cold",
-	DMG_POISON	:= "Poison",
-	DMG_ENERGY	:= "Energy"
+
+// Read only members
+enum DAMAGE_MEMBERS
+  DMG_FORCED         := -1,                    // This isn't an official member. It's used for applying damage without taking resistances into account.
+  DMG_COLD              := "Cold",
+  DMG_ENERGY            := "Energy",
+  DMG_FIRE              := "Fire",
+  DMG_PHYSICAL          := "Physical",
+  DMG_POISON            := "Poison"
 endenum
 
+// Read only members
+enum RESISTANCE_MEMBERS
+  RES_COLD              := "resist_cold",
+  RES_ENERGY            := "resist_energy",
+  RES_FIRE              := "resist_fire",
+  RES_PHYSICAL          := "resist_physical",
+  RES_POISON            := "resist_poison"
+endenum
+
+// Read write members
+enum DAMAGE_MOD_MEMBERS
+  DMG_COLD_MOD          := "damage_cold_mod",
+  DMG_ENERGY_MOD        := "damage_energy_mod",
+  DMG_FIRE_MOD          := "damage_fire_mod",
+  DMG_PHYSICAL_MOD      := "damage_physical_mod",
+  DMG_POISON_MOD        := "damage_poison_mod"
+endenum
+
+// Read write members
+enum Res_mod_members
+  RES_COLD_MOD          := "resist_cold_mod",
+  RES_ENERGY_MOD        := "resist_energy_mod",
+  RES_FIRE_MOD          := "resist_fire_mod",
+  RES_PHYSICAL_MOD      := "resist_physical_mod",
+  RES_POISON_MOD        := "resist_poison_mod"
+endenum
 /*
  * ApplyDamageEX(mobile, amount, type, source)
  *
@@ -156,7 +189,7 @@ function ApplySpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circle 
 
 	// Check to see if we will take standard resistances into account against spell damage.
 	settings := DMG_GetSettingsCfgElem("Settings");
-	if ( settings.UseDamageTypes )
+	if ( settings.UseDamageMembers )
       amount := CalcDamageAmount(mobile, amount, type);
 	endif
 
@@ -213,8 +246,8 @@ function ApplyRawSpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circ
 	endif
 
 	settings := DMG_GetSettingsCfgElem("Settings");
-	if ( settings.UseDamageTypes )
-            amount := CalcDamageAmount(mobile, amount, type);
+	if ( settings.UseDamageMembers )
+    amount := CalcDamageAmount(mobile, amount, type);
 	endif
 
 
@@ -303,12 +336,13 @@ endfunction
  */
 function CalcDamageAmount(mobile, amount, type)
 	amount := CInt(amount);
-	
+  // If type == DMG_FORCED we don't take resistances into account.
 	if ( type == DMG_FORCED )
 		return amount;
 	endif
 
 	var resistance := CDbl(GetResistance(mobile, type));
+
 	if ( resistance == error )
 		// Do nothing, there is no resistance.
 	else
@@ -390,7 +424,7 @@ endfunction
  *
  */
 function GetResistanceNames()
-	var cfg_elem := DMG_GetSettingsCfgElem("DamageTypes");
+	var cfg_elem := DMG_GetSettingsCfgElem("DamageMembers");
 
 	return GetConfigStringArray(cfg_elem, "Type");
 endfunction
@@ -414,24 +448,20 @@ endfunction
  *
  */
 function GetResistance(mobile, type:=0)
-	var resistances;
-	if ( mobile.IsA(POLCLASS_NPC) )
-		resistances := GetNPCResistance(mobile, type);
-	else
-		resistances := GetObjProperty(mobile, "%Resistances%");
-	endif
-	if ( Lower(TypeOf(resistances)) != "dictionary" )
-		resistances := dictionary;
-	endif
-
-	if ( type )
-		return resistances[type];
-	else
-		return resistances;
-	endif
+    var amt := 0;
+    // We use the damage type to check if the mobile has a
+    // corresponding resistance and return the amount of resistance.
+    case(type)
+      DMG_COLD: amt := mobile.resist_cold;
+      DMG_ENERGY: amt := mobile.resist_energy;
+      DMG_FIRE: amt := mobile.resist_fire;
+      DMG_PHYSICAL: amt := mobile.resist_physical;
+      DMG_POISON: amt := mobile.resist_poison;
+    endcase
+		return amt;
 endfunction
 
-/*
+/* Not used.
  * GetNPCResistance(template, type)
  *
  * Purpose
@@ -474,6 +504,8 @@ function GetNPCResistance(template, type:=0)
 	endif
 endfunction
 
+
+
 /*
  * SetResistance(mobile, name, value)
  *
@@ -490,14 +522,15 @@ endfunction
  *
  */
 function SetResistance(mobile, name, value)
-	var resistances := GetObjProperty(mobile, "%Resistances%");
-	if ( Lower(TypeOf(resistances)) != "dictionary" )
-		resistances := dictionary;
-	endif
-
-	resistances[name] := CDbl(value);
-
-	return SetObjProperty(mobile, "%Resistances%", resistances);
+  value := CInt(value);
+  case(name)
+    RES_COLD_MOD: mobile.resist_cold_mod := value;
+    RES_ENERGY_MOD: mobile.resist_energy_mod := value;
+    RES_FIRE_MOD: mobile.resist_fire_mod := value;
+    RES_PHYSICAL_MOD: mobile.resist_physical_mod := value;
+    RES_POISON_MOD: mobile.resist_poison_mod := value;
+  endcase
+	return
 endfunction
 
 /*
@@ -514,48 +547,49 @@ endfunction
  *
  */
 function ModifyResistance(mobile, name, value)
-	var resistances := GetObjProperty(mobile, "%Resistances%");
-	if ( Lower(TypeOf(resistances)) != "dictionary" )
-		resistances := dictionary;
-	endif
-  var adjustment := value;
-  var cur_value := CDbl(resistances[name]);
-	value := cur_value + CDbl(value);
-
-	resistances[name] := value;
-  SendSysMessage(mobile, "Your " + name + " resistance has changed by " + CStr(adjustment)+ ".", 2, 88);
-	return SetObjProperty(mobile, "%Resistances%", resistances);
+  value := CInt(value);
+  case(name)
+    RES_COLD_MOD: mobile.resist_cold_mod := mobile.resist_cold_mod + value;
+    RES_ENERGY_MOD: mobile.resist_energy_mod := mobile.resist_energy_mod + value;
+    RES_FIRE_MOD: mobile.resist_fire_mod := mobile.resist_fire_mod + value;
+    RES_PHYSICAL_MOD: mobile.resist_physical_mod := mobile.resist_physical_mod + value;
+    RES_POISON_MOD: mobile.resist_poison_mod := mobile.resist_poison_mod + value;
+  endcase
+	return value;
 endfunction
 
+
+
 /*
- * GetDamageTypes(mobile)
+ * GetDamageMembers(mobile)
  *
  * Purpose
- * Retrieves the DamageTypes prop from the mobile if NPC, from the mobile.weapon if not
- * If no DamageTypes is found, returns all damage as physical
+ * Retrieves the Damage member value from the mobile, if an NPC, from the mobile.weapon if not
+ * If no damage member values are found, returns all damage as physical
  *
  * mobile: mobile refrence
  *
  * Return value:
- * Dictionary with the type of damage and porcentage, eg.: "DMG_FIRE -> 0.5 DMG_COLD -> 0.5"
+ * Dictionary with the type of damage and porcentage, eg.: "DAMAGE_FIRE -> 0.5 DAMAGE_COLD -> 0.5"
 */
 
-function GetDamageTypes(mobile)
-	var damage_types := dictionary;
+function GetDamageMembers(mobile)
+	var damage_members := struct;
 
-	if ( mobile.npctemplate )
-		damage_types := GetObjProperty(mobile, "DamageTypes");
-	else
-		damage_types := GetObjProperty(mobile.weapon, "DamageTypes");
+    damage_members.+"damage_cold" := mobile.npctemplate.damage_cold;
+    damage_members.+"damage_energy" := mobile.npctemplate.damage_energy;
+    damage_members.+"damage_fire" := mobile.npctemplate.damage_fire;
+    damage_members.+"damage_physical" := mobile.npctemplate.damage_physical;
+    damage_members.+"damage_poison" := mobile.npctemplate.damage_poison;
+
+	if ( !damage_members )
+		damage_members := struct;
+		damage_members.+"DAMAGE_PHYSICAL" := 1.0;
 	endif
 
-	if ( !damage_types )
-		damage_types := dictionary;
-		damage_types[DMG_PHYSICAL] := 1.0;
-	endif
-
-	return damage_types;
+	return damage_members;
 endfunction
+
 
 /*
  * ResistancePercentToMult(percent)
@@ -661,9 +695,4 @@ function LifeDrain(source, damage, percent)
     return amt;
     
 endfunction
-
-
-
-
-
 

@@ -94,7 +94,7 @@ function CreateRepairDeed(who, scroll, craft_skill)
 	var type, title, color;
 	case( craft_skill )
 		 BLACKSMITHY: 		type := "Blacksmith"; color := CInt(2110);
-		 BOWCRAFT: 	type := "Bowyer"; color := CInt(2116);
+		 BOWCRAFTFLETCHING: 	type := "Bowyer"; color := CInt(2116);
 		 CARPENTRY: 		type := "Carpenter"; color := CInt(2113);
 		 TAILORING: 		type := "Tailor"; color := CInt(2128);
 	endcase
@@ -152,7 +152,7 @@ function repair_this(who, craft_skill := BLACKSMITHY)
 	if(CInt(use_on.objtype) == CInt(0xe34))
 		case( craft_skill )
 			 BLACKSMITHY:		CreateRepairDeed(who, use_on, craft_skill); break;
-			 BOWCRAFT:	CreateRepairDeed(who, use_on, craft_skill); break;
+			 BOWCRAFTFLETCHING:	CreateRepairDeed(who, use_on, craft_skill); break;
 			 CARPENTRY:		CreateRepairDeed(who, use_on, craft_skill); break;
 			 TAILORING:		CreateRepairDeed(who, use_on, craft_skill); break;
 		endcase

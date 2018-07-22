@@ -492,32 +492,32 @@ function CarveLogs(who, blade, logs)
   PlaySoundEffect(who, 0x5a);
   PerformAction(who, 0x021);
   sleep(2);
-  if(SkillCheck(who, BOWCRAFT, difficulty, pointvalue))
+  if(SkillCheck(who, BOWCRAFTFLETCHING, difficulty, pointvalue))
     if(what == UOBJ_SHAFTS)
       var amt := logs.amount;
       if(DestroyItem(logs))
         CreateItemInBackpack(who, what, amt);
-        CheckToolWear (who, blade, BOWCRAFT);
+        CheckToolWear (who, blade, BOWCRAFTFLETCHING);
         SendSysMessage(who, "You create some shafts and place them in your pack." );
       endif
     elseif (what == UOBJ_BOW)
       if(SubtractAmount(logs, material))
         bow := CreateItemInBackpack(who, what);
-        CheckToolWear (who, blade, BOWCRAFT);
+        CheckToolWear (who, blade, BOWCRAFTFLETCHING);
         SendSysMessage(who, "You create a bow and place it in your pack.");
         SetName(bow, "a bow");
       endif
     elseif (what == UOBJ_XBOW)
       if(SubtractAmount(logs, material))
         bow := CreateItemInBackpack(who, what);
-        CheckToolWear (who, blade, BOWCRAFT);
+        CheckToolWear (who, blade, BOWCRAFTFLETCHING);
         SendSysMessage(who, "You create a crossbow and place it in your pack.");
         SetName(bow, "a crossbow");
       endif
     elseif (what == UOBJ_HEAVY_XBOW)
       if(SubtractAmount(logs, material))
         bow := CreateItemInBackpack(who, what);
-        CheckToolWear (who, blade, BOWCRAFT);
+        CheckToolWear (who, blade, BOWCRAFTFLETCHING);
         SendSysMessage(who, "You create a heavy crossbow and place it in your pack.");
         SetName(bow, "a heavy crossbow");
       endif
@@ -525,7 +525,7 @@ function CarveLogs(who, blade, logs)
       SendSysMessage(who, "I don't know how to make that.");
       return;
     endif
-    var myskill := CInt(AP_GetSkill(who, BOWCRAFT));
+    var myskill := CInt(AP_GetSkill(who, BOWCRAFTFLETCHING));
     var modpts := 0;
     if(myskill >=  difficulty)
       modpts := (myskill - difficulty);
@@ -543,7 +543,7 @@ endfunction
 
 function setquality(who, bow)
   var tname := TruncateArticle(bow.name);
-  if(CInt(AP_GetSkill(who, BOWCRAFT)) >= 99)
+  if(CInt(AP_GetSkill(who, BOWCRAFTFLETCHING)) >= 99)
     bow.name := "an exceptional " + tname + " [crafted by " + who.name + "]";
   else
     bow.name := "an exceptional " + tname;
