@@ -164,27 +164,3 @@ function makeBlacksmithItems(who, what, amt, tool)
 
 endfunction
 
-function AddAnyMods(source_material, an_item)
-
-	// Damages
-	if(an_item.IsA(POLCLASS_WEAPON))
-		an_item.damage_physical_mod := CInt(source_material.damage_physical);
-		an_item.damage_fire_mod := CInt(source_material.damage_fire);
-		an_item.damage_cold_mod := CInt(source_material.damage_cold);
-		an_item.damage_poison_mod := CInt(source_material.damage_poison);
-		an_item.damage_energy_mod := CInt(source_material.damage_energy);
-	endif
-	Broadcast(CStr(source_material.damage_cold));
-	// Resistances
-	if(an_item.IsA(POLCLASS_ARMOR))
-		an_item.resist_physical_mod := CInt(source_material.resist_physical);
-		an_item.resist_fire_mod := CInt(source_material.resist_fire);
-		an_item.resist_cold_mod := CInt(source_material.resist_cold);
-		an_item.resist_poison_mod := CInt(source_material.resist_poison);
-		an_item.resist_energy_mod := CInt(source_material.resist_energy);
-	endif
-
-	return 1;
-endfunction
-
-

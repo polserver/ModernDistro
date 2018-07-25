@@ -335,6 +335,7 @@ endfunction
  *
  */
 function CalcDamageAmount(mobile, amount, type)
+
 	amount := CInt(amount);
   // If type == DMG_FORCED we don't take resistances into account.
 	if ( type == DMG_FORCED )
@@ -342,7 +343,9 @@ function CalcDamageAmount(mobile, amount, type)
 	endif
 
 	var resistance := CDbl(GetResistance(mobile, type));
-
+// Broadcast("mobile = " + mobile.name);
+// Broadcast("resistance is = " + CStr(resistance));
+// Broadcast("damage before resist = " + CStr(amount));
 	if ( resistance == error )
 		// Do nothing, there is no resistance.
 	else
@@ -355,6 +358,7 @@ function CalcDamageAmount(mobile, amount, type)
 		// [ Resistance = 47.3 so Resisted = 23.65, Amount = 26.35 ]
 		var resistd := (resistance * 0.010) * CDbl(amount);
 		amount := amount - resistd;
+// Broadcast("damage after resist = " + CStr(amount));
 	endif
 
 	return CInt(amount);
@@ -554,6 +558,59 @@ function ModifyResistance(mobile, name, value)
     RES_FIRE_MOD: mobile.resist_fire_mod := mobile.resist_fire_mod + value;
     RES_PHYSICAL_MOD: mobile.resist_physical_mod := mobile.resist_physical_mod + value;
     RES_POISON_MOD: mobile.resist_poison_mod := mobile.resist_poison_mod + value;
+  endcase
+	return value;
+endfunction
+
+
+/*
+ * SetDamage(mobile, name, value)
+ *
+ * Purpose
+ * Sets a damage value on a mobile.
+ *
+ * Parameters
+ * mobile:	Mobile to set the damage value for.
+ * name:	Name of the damage type to set.
+ * value:	Value for the damage.
+ *
+ * Return value
+ * Returns none
+ *
+ */
+function SetDamage(mobile, name, value)
+  value := CInt(value);
+  case(name)
+    DMG_COLD_MOD: mobile.damage_cold_mod := value;
+    DMG_ENERGY_MOD: mobile.damage_energy_mod := value;
+    DMG_FIRE_MOD: mobile.damage_fire_mod := value;
+    DMG_PHYSICAL_MOD: mobile.damage_physical_mod := value;
+    DMG_POISON_MOD: mobile.damage_poison_mod := value;
+  endcase
+	return
+endfunction
+
+/*
+ * ModifyDamage(mobile, name, value)
+ * Purpose
+ * Modifies a damage value on a mobile.
+ *
+ * mobile:	Mobile to set the damage value for.
+ * name:	Name of the damage type to change.
+ * value:	Adjustment to the value.
+ *
+ * Return value
+ * Returns nothing
+ *
+ */
+function ModifyDamage(mobile, name, value)
+  value := CInt(value);
+  case(name)
+    DMG_COLD_MOD: mobile.damage_cold_mod := mobile.damage_cold_mod + value;
+    DMG_ENERGY_MOD: mobile.damage_energy_mod := mobile.damage_energy_mod + value;
+    DMG_FIRE_MOD: mobile.damage_fire_mod := mobile.damage_fire_mod + value;
+    DMG_PHYSICAL_MOD: mobile.damage_physical_mod := mobile.damage_physical_mod + value;
+    DMG_POISON_MOD: mobile.damage_poison_mod := mobile.damage_poison_mod + value;
   endcase
 	return value;
 endfunction

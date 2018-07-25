@@ -27,6 +27,7 @@ include ":damage:damage";
 var item_cfg := ReadConfigFile(":*:itemdesc");
 
 program MainHitScript(attacker, defender, weapon, armor, basedamage, rawdamage)
+
 	//
 	// Cheat checker
 	//

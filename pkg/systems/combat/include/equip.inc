@@ -33,21 +33,38 @@ function HandleMods(who, item)
     "invisibility": val := invisibility(who,item);
     default:        val := 1;
   endcase
-  if(item.resist_physical)
-    ModifyResistance(who, DMG_PHYSICAL, item.resist_physical);
-  endif
-  if(item.resist_fire)
-    ModifyResistance(who, DMG_FIRE, item.resist_fire);
-  endif
-  if(item.resist_cold)
-    ModifyResistance(who, DMG_COLD, item.resist_cold);
-  endif
-  if(item.resist_poison)
-    ModifyResistance(who, DMG_POISON, item.resist_poison);
-  endif
-  if(item.resist_energy)
-    ModifyResistance(who, DMG_ENERGY, item.resist_energy);
-  endif
+  // if(item.resist_physical)
+    // ModifyResistance(who, RES_PHYSICAL, item.resist_physical);
+  // endif
+  // if(item.resist_fire)
+    // ModifyResistance(who, RES_FIRE, item.resist_fire);
+  // endif
+  // if(item.resist_cold)
+    // ModifyResistance(who, RES_COLD, item.resist_cold);
+  // endif
+  // if(item.resist_poison)
+    // ModifyResistance(who, RES_POISON, item.resist_poison);
+  // endif
+  // if(item.resist_energy)
+    // ModifyResistance(who, RES_ENERGY, item.resist_energy);
+  // endif
+
+  // if(item.damage_physical)
+    // ModifyDamage(who, DMG_PHYSICAL_MOD, item.damage_physical);
+    // SendSysMessage(who, CStr(item.damage_physical));
+  // endif
+  // if(item.damage_fire)
+    // ModifyDamage(who, DMG_FIRE_MOD, item.damage_fire);
+  // endif
+  // if(item.damage_cold)
+    // ModifyDamage(who, DMG_COLD_MOD, item.damage_cold);
+  // endif
+  // if(item.damage_poison)
+    // ModifyDamage(who, DMG_POISON_MOD, item.damage_poison);
+  // endif
+  // if(item.damage_energy)
+    // ModifyDamage(who, DMG_ENERGY_MOD, item.damage_energy);
+  // endif
 
   return val;
   set_critical(0);
@@ -144,3 +161,5 @@ function reflect(who,item)
   start_script("chargeUpkeep", parms);
   return 1;
 endfunction
+
+
