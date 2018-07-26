@@ -543,3 +543,43 @@ function CalcSpellDamage(circle, caster, cast_on)
   return dmg;
 endfunction
 
+// Function for quickly grabbing nearby mobiles that are not in excludes or that are in includes
+function MS_GetValidTargets(targ, area_size:=1, check_los:=1, excludes:=array{}, includes:=array{})
+	var targs := array{};
+	
+	if ( !targ.realm )
+		targs := ListMobilesNearLocation(targ.x, targ.y, targ.z, area_size);
+	else
+		targs := ListMobilesNearLocation(targ.x, targ.y, targ.z, area_size, targ.realm);
+	endif
+	
+	// Remove targs with serial in exclude if exclude exists or not in includes if includes exists
+	for i := 1 to ( targs.Size() )
+		if ( (excludes.Size() > 0 && targs[i].serial in excludes) || (includes.Size() > 0 && !(targs[i].serial in includes)))
+			targs.Erase(i);
+		endif
+	endfor
+	
+	return targs;
+endfunction
+
+
+// Find friendlies and add them to the list of includes
+// Note: A friendly is anything non-criminal and non-murderer. I guess.
+function MS_GetFriendlies(targ, area_size:=1)
+	var friendlies;
+	if ( !targ.realm )
+		friendlies := ListMobilesNearLocation(targ.x, targ.y, targ.z, area_size);
+	else
+		friendlies := ListMobilesNearLocation(targ.x, targ.y, targ.z, area_size, targ.realm);
+	endif
+	
+	for i := 1 to friendlies.Size()
+		if ( friendlies[i].criminal || friendlies[1].murderer )
+				friendlies.Erase(i);
+		endif
+	endfor
+	
+	return friendlies;
+endfunction
+

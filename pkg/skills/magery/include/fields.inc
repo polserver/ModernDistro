@@ -1,5 +1,40 @@
+use util;
+
+include "include/shapes";
+include ":timedscripts:timedScripts";
+
 CONST FIELD_SHAPE_VERTICAL := 1;
 CONST FIELD_SHAPE_HORIZONTAL := 2;
+
+function GetDirectionByFacing(mobile)
+	case ( mobile.facing )
+		0: return FIELD_SHAPE_HORIZONTAL; break; //N
+		2: return FIELD_SHAPE_VERTICAL; break;   //E
+		4: return FIELD_SHAPE_HORIZONTAL; break; //S
+		6: return FIELD_SHAPE_VERTICAL; break;   //W
+	endcase
+
+	return (RandomInt(2)+1); // Diagonal - pick a random direction
+endfunction
+
+function GetCoordinatesForField(x, y, direction, size)
+	var x2 := x, y2 := y;
+
+	if ( direction == FIELD_SHAPE_VERTICAL )
+		y -= size;
+		y2 += size;
+	elseif ( direction == FIELD_SHAPE_HORIZONTAL )
+		x -= size;
+		x2 += size;
+	else
+		x -= size;
+		y -= size;
+		x2 += size;
+		y2 += size;
+	endif
+
+	return GetCoordsInRect(x, y, x2, y2);
+endfunction
 
 function CreateField(targ, shape, objtype, size, duration, cprops:="", mobile:="", check_los:=1, delay:=2)
 	var start_cord, stop_cord, object;

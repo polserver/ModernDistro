@@ -1,0 +1,21 @@
+/* $Id: gmJail.src 373 2006-06-17 18:27:33Z austinheilman $
+ *
+ */
+
+use uo;
+
+program EnterRegionZone(mobile, region_name)
+	
+	mobile.GrantPrivilege("invul");
+	mobile.Enable("invul");
+	
+	if ( mobile.cmdlevel )
+		SendSysMessage(mobile, "Ahh another hard day of work in the office. (Entering "+region_name+")");
+		return 1;
+	else 
+		SendSysMessage(mobile, "You are in the GM jail. Please wait for someone to assist you.");
+		return 1;
+	endif
+	
+        return 1;
+endprogram

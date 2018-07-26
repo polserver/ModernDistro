@@ -58,7 +58,7 @@ function maintaingump(who)
    18: standard_trap(who, 3);
    19: standard_trap(who, 2);
    20: standard_trap(who, 1);
-   21: remove_trap(who);
+   21: removetrap(who);
    22: hideinferno(who, 5);
    23: hideinferno(who, 10);
    24: showinferno(who, 5);
@@ -249,7 +249,7 @@ function showinferno(who, range)
   maintaingump(who);
 endfunction
 
-function remove_trap(who)
+function removetrap(who)
   SendSysMessage(who,"select the item to remove traps from");
   var chest := Target(who);
   if(!chest)

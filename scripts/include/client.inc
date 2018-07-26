@@ -778,6 +778,7 @@ const FX_SPLASH         :=  0x352d; //
 const FX_EXPLODE_1      :=  0x36ca; //
 const FX_EXPLODE_2      :=  0x36bd; //
 const FX_EXPLODE_3      :=  0x36b0; //
+const FX_EXPLODE_4      :=  0x36CB; //
 const FX_FIREBALL       :=  0x36d4; //
 const FX_MAGIC_ARROW    :=  0x36e4; //
 const FX_FIRE_BOLT      :=  0x36f4; // Firesnake. (pagan?)

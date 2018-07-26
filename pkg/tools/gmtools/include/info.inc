@@ -397,7 +397,7 @@ var infodata := array(
        "",
        "STEALTH",              //124
        "",
-       "REMOVETRAP",           //126
+       "REMOVE_TRAP",           //126
        "",
        "Edit",                 //127
        "Freeze",

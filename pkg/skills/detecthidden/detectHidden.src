@@ -32,7 +32,7 @@ program detect_hidden ( who )
     item_cfg := ReadConfigFile( "::itemdesc" );
     SendSysMessage(who,"target the location to search");
     var targ := TargetCoordinates( who );
-    var range := getDetectRange( GetAttribute( who, DETECTINGHIDDEN  ) );
+    var range := getDetectRange( GetAttribute( who, DETECTING_HIDDEN  ) );
     var hiders := ListMobilesNearLocationEx( cint(targ.x), cint(targ.y), cint(targ.z), range, LISTEX_FLAG_HIDDEN, who.realm );
     var items  := ListItemsNearLocation( cint(targ.x), cint(targ.y), cint(targ.z), range, who.realm );
     var elem;
@@ -59,7 +59,7 @@ program detect_hidden ( who )
      var trapstrength := GetObjProperty(item,"trap_strength");
      thepoints := trapstrength *2;
 	 if( dtct )
-        if(SkillCheck( who, DETECTINGHIDDEN, -1, thepoints ))
+        if(SkillCheck( who, DETECTING_HIDDEN, -1, thepoints ))
 	      PrintTextAbovePrivate( item, "Trapped", who);
         else
           var results := RandomInt(9) + 1;
@@ -88,7 +88,7 @@ program detect_hidden ( who )
           endif
         endif
       elseif( data == TRAP)
-        if(SkillCheck( who, DETECTINGHIDDEN, -1, thepoints ))
+        if(SkillCheck( who, DETECTING_HIDDEN, -1, thepoints ))
 	      PrintTextAbovePrivate( item, "Trap", who );
           SetObjProperty( item, "trapped", 1 );
         else
@@ -123,7 +123,7 @@ program detect_hidden ( who )
           endif
         endif
      elseif( prop )
-        if(SkillCheck( who, DETECTINGHIDDEN, -1, thepoints ))
+        if(SkillCheck( who, DETECTING_HIDDEN, -1, thepoints ))
 	      PrintTextAbovePrivate( item, "Trapped", who);
 	      SetObjProperty( item, "trapped", 1 );
         else
@@ -176,7 +176,7 @@ endprogram
 
 function Found( finder, hider ) //FIXME: should not be 100% certain to find a hider if your skill is greater
   var hide_skill := GetAttribute( hider, HIDING );
-  if (SkillCheck( finder, DETECTINGHIDDEN, hide_skill, thepoints ) )
+  if (SkillCheck( finder, DETECTING_HIDDEN, hide_skill, thepoints ) )
     return 1;
   else
     return 0;
