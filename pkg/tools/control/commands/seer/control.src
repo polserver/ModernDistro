@@ -17,7 +17,7 @@ include ":datafile:datafile";
 include ":gumps:gumpPrompt";
 include ":gumps:gumps";
 include ":gumps:gumps_ex";
-include ":gumps:yesno";
+include ":gumps:yesNo";
 
 // Arbitrary button return (id) values.
 CONST START_ID		:= 0xA00000; // Anything above this value is a button.
