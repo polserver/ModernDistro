@@ -17,7 +17,7 @@ program angry_bees (bees)
 	var start_time := ReadGameClock();
 	var current_time := ReadGameClock();
 
-	var creator_serial := GetObjProperty(bees, "creator");
+	var creator_serial := CInt(GetObjProperty(bees, "creator"));
 	var creator := SystemFindObjectBySerial(creator_serial);
 	if (creator)
 		SetScriptController(creator);

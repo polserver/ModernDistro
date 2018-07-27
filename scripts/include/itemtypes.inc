@@ -20,7 +20,7 @@ use cfgfile;
 include "include/objtype";
 include "include/client";
 
-var tiles_cfg := ReadConfigFile("tiles");
+var tiles_cfg := ReadConfigFile("::tiles");
 
 // New IsDoor
 function IsDoor (byref item)

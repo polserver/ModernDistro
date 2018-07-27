@@ -35,7 +35,7 @@ function CreateTeleporters(facet)
         // Not sure why either of the following lines were used but left them here just in case.
     //		fromz := GetMapInfo(fromx, fromy).z;
     //		fromz := GetMapInfo(fromx, fromy, fromrealm).z;
-        fromz := GetStandingHeight( fromx, fromy, fromz, fromrealm ).z;
+        fromz := CInt(GetStandingHeight( fromx, fromy, fromz, fromrealm ).z);
         foreach thing in ListItemsNearLocationOfType(fromx, fromy, fromz, 0, 0x16200, fromrealm);
           thing := thing; // Stop stupid 'unused variable' compiler warning!
           checker := 1;
