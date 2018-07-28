@@ -3,11 +3,7 @@
         
         2009-07-29
         
-        Last Modifications 2009-11-05
-             * Added Accessible()
-             
-        Last Modifications 2010-03-09
-             * Added EmptyHands_Check() but not activated
+        Added EmptyHands_Check() but not activated
         
         To use:
        	if( !useItem_check( mobile, item, flags ))

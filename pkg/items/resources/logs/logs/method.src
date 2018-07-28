@@ -2,9 +2,6 @@
         Created by *Edwards
         
         2009-08-13
-        
-        Last Modifications 2009-11-19
-             * Added GetRessourceName() && GetRessourceDifficulty()
 */
 use uo;
 

@@ -1,10 +1,8 @@
 /*
-        Maintened by *Edwards
+        Maintained by The POL Distro Team
 
-        2008-09-24
+        2018-07-25
 
-        A security in a serious project is a priority for the players.
-        Thanks to the DistroTeam for the wonderfull idea.
 */
 use uo;
 use os;

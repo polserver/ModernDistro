@@ -1,9 +1,6 @@
 /*
         2009-10-20
         
-        Last Modifications 2009-10-28
-             * Added CP_ListRootItemsInContainer(container)
-        
         Author: Austin
         
         Purpose

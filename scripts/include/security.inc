@@ -3,8 +3,6 @@
         
         2008-09-28
         
-        Last Modifications 2009-12-20
-             * Cleaned codes for better performances
 */
 use uo;
 use os;

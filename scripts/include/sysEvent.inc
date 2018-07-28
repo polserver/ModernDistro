@@ -9,7 +9,6 @@
 // eventid.inc, and must have more than one bit set (ie not be any of the
 // values found in this file)
 //
-// Last modification: 11/16/2000
 //
 
 

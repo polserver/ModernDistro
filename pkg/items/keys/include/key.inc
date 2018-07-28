@@ -1,7 +1,7 @@
 /*
-        Maintened by *Edwards
+        Maintained by The POL Distro Team
         
-        2009-10-18
+        2018-07-25
 */
 use uo;
 

@@ -1,13 +1,8 @@
 /*
-        Maintened by *Edwards
+        Maintained by The POL Distro Team
 
-        2008-08-30
+        2018-07-25
 
-        Last Modification 2009-10-26
-             * Cleaned codes for better performances
-
-        Last Modification 2009-11-19
-             * Added physical protection checks since it has been removed from combat process..
 */
 use uo;
 use os;

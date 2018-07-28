@@ -8,7 +8,6 @@
 //
 // Author: ens
 //
-// Last modification: 01/22/1999
 //
 
 

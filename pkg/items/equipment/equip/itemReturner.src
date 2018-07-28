@@ -1,11 +1,8 @@
 /*
-        Maintened by *Edwards
+        Maintained by The POL Distro Team
 
-        2008-08-30
+        2018-07-25
         
-        Last Modifications 2009-10-21
-             * Changed error will now be displayed with printextabove()
-
         Original Idea from ZuluHotel
 */
 use uo;
