@@ -11,7 +11,7 @@ use polsys;
 
 include "include/skills";
 include "include/math";
-include "include/itemtypes";
+include ":itemUtils:itemtypes";
 
 // Charges: 1049116
 program itemdata(xObject)
@@ -24,53 +24,55 @@ program itemdata(xObject)
 	
 	var owner := GetObjProperty(xObject, "ownername");
 	if (owner)
-		prop.clilocid := 1072304;
+		prop.clilocid := 1072304; // Owned by ~1_name~
 		prop.values := array {owner};
 		allprops.append(prop);
 	endif
 	owner := GetObjProperty(xObject, "craftername");
 	if (owner)
-		prop.clilocid := 1050043;
+		prop.clilocid := 1050043; // crafted by ~1_NAME~
 		prop.values := array {owner};
 		allprops.append(prop);
 	endif
 	if ( xObject.newbie )
-		prop.clilocid := 1038021;
+		prop.clilocid := 1038021; // Blessed
 		prop.values := array {};
 		allprops.append (prop);
 	endif
 	if (xObject.isa(POLCLASS_CONTAINER) and !xObject.isa(POLCLASS_CORPSE) and !(GetObjProperty (xObject, "lockpicking") and xObject.locked))
-		if (xObject.objtype == UOBJ_RUNEBOOK)
+		if (xObject.IsRunebook())
 			// 1049116, 1061837, 1075217, 1076207,
 			// 1112590, 
 			var charges := GetObjProperty (xObject, "%Charges%");
-			prop.clilocid := 1061837;
+			prop.clilocid := 1061837; // arcane charges: ~1_val~ / ~2_val~
 			prop.values := array {charges.charges, charges.max_charges};
 			allprops.append (prop);
-			prop.clilocid := 1070722;
+			prop.clilocid := 1070722; // ~1_NOTHING~
 			prop.values := array {CINT ((GetObjProperty (xObject, "%RuneList%")).size()) + " runes"};
 			allprops.append(prop);
 		else
-			prop.clilocid := 1073839;
+			prop.clilocid := 1073839; // Contents: ~1_COUNT~ items, ~2_WEIGHT~ stones
 			prop.values := array {CINT(xObject.item_count-1), xObject.weight};
 			allprops.append (prop);
 		endif
 	elseif (!xObject.isa(POLCLASS_CORPSE) and !IsSign(xObject))
-		prop.clilocid := 1072225;
+		prop.clilocid := 1072225; // Weight: ~1_WEIGHT~ stones
 		prop.values := array {xObject.weight};
 		allprops.append (prop);
 	endif
-	if (IsGargishItem (xObject))
-		prop.clilocid := 1111709;
+	if (xObject.IsGargishItem()) // As of 2018-07-28 the Distro does not have any Gargish equippables defined.
+								 // Note: Every Gargish equippable will need, in its method script an IsGargishItem() function for
+								 // the 'if' statement above to work as intended.
+		prop.clilocid := 1111709; // Gargoyles Only
 		prop.values := array {};
 		allprops.append(prop);
 	elseif (IsForAnyRace (xObject))
-		prop.clilocid := 1070722;
+		prop.clilocid := 1070722; // ~1_NOTHING~
 		prop.values := array {"For Any Race"};
 		allprops.append(prop);
 	endif 
 	if (GetObjProperty(xObject, "unidentified"))
-		prop.clilocid := 1038000;
+		prop.clilocid := 1038000; // Unidentified
 		prop.values := array {};
 		allprops.append(prop);
 	else
@@ -78,19 +80,19 @@ program itemdata(xObject)
 			if (xObject.isa(POLCLASS_ARMOR))
 				var armordesc := GetItemDescriptor(xObject.objtype);
 				if (xObject.ar_mod > 0)
-					prop.clilocid := 1072382;
+					prop.clilocid := 1072382; // physical resist +~1_val~%
 					prop.values := array {xObject.ar_mod};
 					allprops.append (prop);
-					prop.clilocid := 1080361;
+					prop.clilocid := 1080361; // physical resist ~1_val~% (total)
 					prop.values := array {xObject.ar};
 					allprops.append (prop);
 				else
-					prop.clilocid := 1060448;
+					prop.clilocid := 1060448; // physical resist ~1_val~%
 					prop.values := array {xObject.ar};
 					allprops.append (prop);
 				endif
 				if (armordesc.strrequired)
-					prop.clilocid := 1061170;
+					prop.clilocid := 1061170; // strength requirement ~1_val~
 					prop.values := array {CINT(armordesc.strrequired/10)};
 					allprops.append (prop);
 				endif
@@ -99,13 +101,13 @@ program itemdata(xObject)
 //					xDesc := xDesc + Html + "-" + CINT(armordesc.DexPenalty/10) + " Dexterity" + "<br>";
 //				endif
 				if (IsMedableArmor (xObject))
-					prop.clilocid := 1060437;
+					prop.clilocid := 1060437; // mage armor
 					prop.values := array {};
 					allprops.append (prop);
 				endif
 			elseif (xObject.isa (POLCLASS_WEAPON))
 				if (GetObjProperty(xObject, "silver"))
-					prop.clilocid := 1060479;
+					prop.clilocid := 1060479; // undead slayer
 					prop.values := array {};
 					allprops.append (prop);
 				endif
@@ -113,39 +115,39 @@ program itemdata(xObject)
 				//Damage
 				var damagefactor := (xObject.hp * xObject.quality)/xObject.maxhp;
 				if (xObject.dmg_mod > 0)
-					prop.clilocid := 1074762;
+					prop.clilocid := 1074762; // Damage modifier: ~1_PERCENT~%
 					prop.values := array {xObject.dmg_mod};
 					allprops.append (prop);
 				endif
-				prop.clilocid := 1061168;
+				prop.clilocid := 1061168; // weapon damage ~1_val~ - ~2_val~
 				prop.values := array {CINT((weapondesc.MinDamage + xObject.dmg_mod)*damagefactor), CINT((weapondesc.MaxDamage + xObject.dmg_mod)*damagefactor)};
 				allprops.append (prop);
 				//Speed
-				prop.clilocid := 1061167;
+				prop.clilocid := 1061167; // weapon speed ~1_val~
 				prop.values := array {weapondesc.Speed};
 				allprops.append (prop);
 				//Handedness
 				if (weapondesc.TwoHanded)
-					prop.clilocid := 1061171;
+					prop.clilocid := 1061171; // two-handed weapon
 				else
-					prop.clilocid := 1061824;
+					prop.clilocid := 1061824; // one-handed weapon
 				endif
 				prop.values := array {};
 				allprops.append (prop);	
 				//Mage weapon
 				if (weapondesc.BlocksCastingIfInHand == 0)
-					prop.clilocid := 1062755;
+					prop.clilocid := 1062755; // mage weapon
 					prop.values := array {};
 					allprops.append (prop);
 				endif
 				//Skill
 				case (lower(xObject.attribute))
-					"swordsmanship": prop.clilocid := 1061172;
-					"macefighting": prop.clilocid := 1061173;
-					"fencing": prop.clilocid := 1061174;
-					"archery": prop.clilocid := 1061175;
-					"throwing": prop.clilocid := 1112075;
-					default: prop.clilocid := 1060400;
+					"swordsmanship": prop.clilocid := 1061172; // skill required: swordsmanship
+					"macefighting": prop.clilocid := 1061173; // skill required: mace fighting
+					"fencing": prop.clilocid := 1061174; // skill required: fencing
+					"archery": prop.clilocid := 1061175; // skill required: archery
+					"throwing": prop.clilocid := 1112075; // skill required: throwing
+					default: prop.clilocid := 1060400; // use best weapon skill
 				endcase
 				prop.values := array {};
 				allprops.append(prop);
@@ -154,12 +156,12 @@ program itemdata(xObject)
 			var skillid := GetObjProperty(xObject, "skilladv");
 			if (GetObjProperty (xObject, "skill"+skillid))
 				var skillname := GetSkillName(skillid);
-				prop.clilocid := 1060451;
+				prop.clilocid := 1060451; // ~1_skillname~ +~2_val~
 				prop.values := array {skillname, GetObjProperty (xObject, "skill"+skillid)};
 				allprops.append (prop);
 			endif
 			if (xobject.resist_poison)
-				prop.clilocid := 1072385;
+				prop.clilocid := 1072385; // poison resist +~1_val~%
 				prop.values := array {xObject.resist_poison};
 				allprops.append (prop);
 			endif
@@ -167,19 +169,19 @@ program itemdata(xObject)
 			if (charges)
 				var spell := "";
 				if (xobject.resist_fire)
-					prop.clilocid := 1072383;
+					prop.clilocid := 1072383; // fire resist +~1_val~%
 					prop.values := array {xObject.resist_fire};
 					allprops.append (prop);
 					spell := "f";
 				endif
 				if (xobject.resist_cold)
-					prop.clilocid := 1072384;
+					prop.clilocid := 1072384; // cold resist +~1_val~%
 					prop.values := array {xObject.resist_cold};
 					allprops.append (prop);
 					spell := "c";
 				endif
 				if (xobject.resist_energy)
-					prop.clilocid := 1072386;
+					prop.clilocid := 1072386; // energy resist +~1_val~%
 					prop.values := array {xObject.resist_energy};
 					allprops.append (prop);
 					spell := "e";
@@ -196,29 +198,29 @@ program itemdata(xObject)
 					else
 						case (lower (spell))
 							"clumsiness":
-								prop.clilocid := 1017326;
+								prop.clilocid := 1017326; // clumsiness charges: ~1_val~
 							"feeblemindedness":
-								prop.clilocid := 1017327;
+								prop.clilocid := 1017327; // feeblemind charges: ~1_val~
 							"weakness":
-								prop.clilocid := 1017328;
+								prop.clilocid := 1017328; // weakness charges: ~1_val~
 							"harming":
-								prop.clilocid := 1017334;
+								prop.clilocid := 1017334; // harm charges: ~1_val~
 							"cursing":
-								prop.clilocid := 1017335;
+								prop.clilocid := 1017335; // curse charges: ~1_val~
 							"draining":
-								prop.clilocid := 1017339;
+								prop.clilocid := 1017339; // mana drain charges: ~1_val~
 							"paralyzation":
-								prop.clilocid := 1017340;
+								prop.clilocid := 1017340; // paralyzation charges: ~1_val~
 							"dispelling":
-								prop.clilocid := 1060417;
+								prop.clilocid := 1060417; // hit dispel ~1_val~%
 							"flametongue":
-								prop.clilocid := 1060487;
+								prop.clilocid := 1060487; // fireball charges: ~1_val~
 							"lightning":
-								prop.clilocid := 1060491;
+								prop.clilocid := 1060491; // lightning charges: ~1_val~
 							default:
-								prop.clilocid := 1075217;
+								prop.clilocid := 1075217; // ~1_val~ charges remaining
 						endcase
-						if (prop.clilocid == 1075217)
+						if (prop.clilocid == 1075217) // ~1_val~ charges remaining
 							prop.values := array {charges + " " + spell};
 						else
 							prop.values := array {charges};
@@ -228,13 +230,13 @@ program itemdata(xObject)
 				endif
 			endif
 			//Durability
-			prop.clilocid := 1060639;
+			prop.clilocid := 1060639; // durability ~1_val~ / ~2_val~
 			prop.values := array {xObject.hp, xObject.maxhp};
 			allprops.append (prop);
 		elseif (IsMusicalInstrument(xObject))
 			var skillbonus := GetObjProperty(xObject, "skillbonus");
 			if (skillbonus)
-				prop.clilocid := 1060451;
+				prop.clilocid := 1060451; // ~1_skillname~ +~2_val~
 				prop.values := array {"Barding Skills", skillbonus};
 				allprops.append (prop);
 			endif
@@ -242,42 +244,42 @@ program itemdata(xObject)
 		//1060485, 1060409, 1060432, 1075846, 1075842, 1075844
 			var stat_bonus := GetObjProperty (xObject, "str");
 			if (stat_bonus)
-				prop.clilocid := 1060485;
+				prop.clilocid := 1060485; // strength bonus ~1_val~
 				prop.values := array {stat_bonus};
 				allprops.append (prop);
 			endif
 			stat_bonus := GetObjProperty (xObject, "dex");
 			if (stat_bonus)
-				prop.clilocid := 1060409;
+				prop.clilocid := 1060409; // dexterity bonus ~1_val~
 				prop.values := array {stat_bonus};
 				allprops.append (prop);
 			endif
 			stat_bonus := GetObjProperty (xObject, "int");
 			if (stat_bonus)
-				prop.clilocid := 1060432;
+				prop.clilocid := 1060432; // intelligence bonus ~1_val~
 				prop.values := array {stat_bonus};
 				allprops.append (prop);
 			endif
 		// Parse for spellbooks starts here.
 		elseif (xObject.isa(POLCLASS_SPELLBOOK))
-			prop.clilocid := 1042886;
+			prop.clilocid := 1042886; // ~1_NUMBERS_OF_SPELLS~ Spells
 			prop.values := array {xObject.spells().size()};
 			allprops.append (prop);
 		// Necro spellbook
 		elseif (xObject.objtype == 0xA100)
-			prop.clilocid := 1042886;
+			prop.clilocid := 1042886; // ~1_NUMBERS_OF_SPELLS~ Spells
 			prop.values := array {NecroSpellCount(xObject)};
 			allprops.append (prop);
 		// Currently a druid bag I assume
 		elseif (xObject.objtype == 0x1706b)
-			prop.clilocid := 1042886;
+			prop.clilocid := 1042886; // ~1_NUMBERS_OF_SPELLS~ Spells
 			prop.values := array {DruidSpellCount(xObject)};
 			allprops.append (prop);
 		// House sign
 		elseif (IsSign(xObject))
 			owner := GetObjProperty (xObject, "lastownername");
 			if (owner)
-				prop.clilocid := 1041602;
+				prop.clilocid := 1041602; // Owner: ~1_val~
 				prop.values := array {owner};
 				allprops.append (prop);
 			endif
@@ -306,28 +308,6 @@ function DruidSpellCount(bag)
 	var runes := GetObjProperty (bag, "runes");
 	if (runes)
 		return runes.size();
-	endif
-	return 0;
-endfunction
-
-function IsSign (item)
-	case (item.objtype)
-		0xb95:
-		0xb96:
-		0xbd0:
-		0xbd2:
-		0xc43:
-		0xc44:
-		0x1f28:
-		0x1f29:
-		0x17060:
-		0x1708a:
-			return 1;
-	endcase
-	if (item.objtype >= 0xba3 and item.objtype <= 0xc0e)
-		return 1;
-	elseif (item.objtype >= 0x1297 and item.objtype <= 0x129e)
-		return 1;
 	endif
 	return 0;
 endfunction

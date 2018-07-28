@@ -6,12 +6,13 @@ use uo;
 
 
 include ":attributes:attributes";
+include ":crafting:crafting";
 include "include/client";
 include "include/dist";
 include "include/toolWear";
 
-program shears(who, shears, craftingbag)
-	craftingbag := who.backpack; // Will add craft bag support some day soon.
+program shears(who, shears)
+	var craftingbag := FindCraftingbag (who);
 	shears := shears;
 	var sheep := TargetCoordinates(who);
 

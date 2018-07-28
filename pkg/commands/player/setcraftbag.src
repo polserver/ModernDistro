@@ -1,0 +1,66 @@
+
+use uo;
+use os;
+
+include "include/client";
+include "include/objtype";
+include "include/itemtypes";
+include "util/bank";
+
+///////////////////
+//  set the bag into which the crafted items will go
+///////////////////
+
+program SetCraftBag (me)
+	SendSysMessage (me, "Select a container in which to place crafted or harvested items.", color := 88);
+	SendSysMessage (me, "Target yourself or press <esc> to use your main pack.", color := 88);
+	var bag := Target(me);
+	if (!bag)
+		SendSysMessage (me, "Crafted or harvested items will be placed in your backpack.", color := 66);
+                EraseObjProperty (me, "craftingbagserial");
+		return;
+	endif
+
+        if (bag == me)
+		SendSysMessage (me, "Crafted or harvested items will be placed in your main backpack.", color := 66);
+                EraseObjProperty (me, "craftingbagserial");
+		return;
+	endif
+	
+	if (!InInventory (me.backpack, bag) )
+		SendSysMessage (me, "That is not in your inventory.");
+		return;
+	endif
+
+        if (bag.objtype == 0x26699) // magic bag of holding check
+            if (CInt(GetObjProperty (bag, "Owner")) == me.serial)
+                SetObjProperty (me, "craftingbagserial", bag.serial );
+                SendSysMessage (me, "Items crafted or harvested will now be placed in your magic bag of holding.", color := 66);
+                return 1;
+            else
+                SendSysMessage (me, "That magic bag of holding doesn't belong to you.", color := 33);
+                return 0;
+            endif
+        endif
+
+        if (!bag.isa (POLCLASS_CONTAINER) )
+                    SendSysMessage (me, "You can't put anything in that!");
+                    return 0;
+        endif
+
+	SetObjProperty (me, "craftingbagserial", bag.serial);
+	SendSysMessage (me, "Anything you craft or harvest will now go into that container.");
+endprogram
+/*
+function InInventory(byref inventory, byref it)
+
+	foreach item in EnumerateItemsInContainer(inventory)
+		if (item == it)
+			return 1;
+		endif
+	endforeach
+
+	return 0;
+
+endfunction
+*/

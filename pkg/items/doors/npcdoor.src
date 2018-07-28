@@ -8,7 +8,6 @@ use util;
 
 include "include/client";
 include "include/objtype";
-include "include/itemtypes";
 include "../pkg/items/doors/doors";
 
 program open_door_for_npc (me)

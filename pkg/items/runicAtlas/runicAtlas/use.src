@@ -7,7 +7,7 @@ include ":gumps:gumps";
 include ":gumps:gumps_ex";
 include ":runicatlas:runicAtlasFunctions";
 include ":runicatlas:customSpells";
-include "include/itemUtil";
+include ":itemUtils:itemUtil";
 
 program use_Runebook( who, book )
 	if( !useItem_check( who, book, DEFAULT_ITEM ))

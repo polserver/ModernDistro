@@ -9,6 +9,8 @@
 //	Purpose: Functions for creating crafting menus, info menus, item creation, resource selection,
 //					 skill gain, etc.
 //
+//  2018-07-28 - Yukiko added FindCraftingbag function
+//
 //	To-Do:	1.) Create some cusotmized crafting includes for inscription, etc that require it.
 //			2.) Create textcmds for editing the Menu and item configs, to add new items ingame.
 //			3.) Create MethodScript system for Toolwear!
@@ -526,3 +528,36 @@ function playCraftWork(who, craft_skill, sound_type)
 
 	return 0;
 endfunction
+
+///////////////////
+//  Tries to find the bag that crafted items will go into, if not the character's main backpack.
+//  Set with .setcraftbag
+///////////////////
+
+function FindCraftingBag (who)
+	//Make absolutely certain that they have a backpack
+	if (!who.backpack)
+		var newbackpack := CreateItemAtLocation (5288, 1176, 0, "BackPackCore", 1, "britannia");
+		if (!EquipItem (who, newbackpack))
+			DestroyItem (newbackpack);
+		endif
+	endif
+
+	var craftingbagserial := CInt(GetObjProperty (who, "craftingbagserial"));
+	if (!craftingbagserial)
+		return who.backpack;
+	endif
+	
+	foreach item in EnumerateItemsInContainer (who.backpack)
+		if (item.serial == craftingbagserial)
+			if (item.isa (POLCLASS_CONTAINER))
+				return item;
+			endif
+		endif
+	endforeach
+
+	//Still can't find it
+	EraseObjProperty (who, "craftingbagserial");
+	return who.backpack;
+endfunction
+

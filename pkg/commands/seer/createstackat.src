@@ -10,7 +10,7 @@ use uo;
 use file;
 
 include ":timeutils:time";
-include "include/crafting";
+include ":itemUtils:itemdesc";
 
 program textcmd_create( who, text )
     var dmy, month, hms;
@@ -37,7 +37,7 @@ program textcmd_create( who, text )
 	    dmy := FormatTime(GetTimeStruct(GetTime()), "<DAY>-<MON>-<YY>");
 	    month := FormatTime(GetTimeStruct(GetTime()), "<MON>-<YY>");
 	    LogToFile("::log/createstack_" + month + ".log", "On " + dmy + " at " + hms + " " + who.name +" on account " + who.acctname + 
-	    " created  " + amount + " of " + get_item_name(item.objtype, 1));
+	    " created  " + amount + " of " + GetObjTypeDesc(item.objtype, 1));
 
     else
         var selection := SelectMenuItem2( who, "ItemCreation" );
@@ -53,7 +53,7 @@ program textcmd_create( who, text )
 	    hms := FormatTime(GetTimeStruct(GetTime()), "<HH>:<MM>:<SS>");
 	    month := FormatTime(GetTimeStruct(GetTime()), "<MON>-<YY>");
 	    LogToFile("::log/createstack_" + month + ".log", "On " + dmy + " at " + hms + " " + who.name + " on account " + who.acctname + 
-	    " created  " + created.amount + " of " + get_item_name(created.objtype, 1));
+	    " created  " + created.amount + " of " + GetObjTypeDesc(created.objtype, 1));
         endif
     endif
 endprogram

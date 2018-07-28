@@ -9,7 +9,6 @@ include "include/noto";
 include "include/reportMurder";
 include ":poisonwatcher:poisons";
 include "include/utility";
-include "include/itemtypes";
 
 var allmyjunk := {};
 var stackstuff := 0;

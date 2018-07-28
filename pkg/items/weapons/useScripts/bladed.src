@@ -10,7 +10,7 @@ include "include/canAccess";
 include "include/dist";
 include "include/toolWear";
 include "include/noto";
-include "include/crafting";
+include ":crafting:crafting";
 include ":gumps:requestGump";
 
 

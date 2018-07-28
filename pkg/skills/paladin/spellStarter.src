@@ -9,9 +9,8 @@ use cfgfile;
 
 include ":attributes:attributes";
 include ":magery:spells";
-
 include "include/containers";
-include "include/itemdesc";
+include ":itemUtils:itemdesc";
 include "include/client";
 include "include/sounds";
 

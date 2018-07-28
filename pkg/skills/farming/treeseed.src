@@ -4,7 +4,6 @@ use cfgfile;
 
 include "include/eventID";
 include "include/myUtil";
-include "include/itemtypes";
 // include "../pkg/items/housing/house";
 
 var plant_cfg_file := ReadConfigFile("itemdesc");
@@ -164,7 +163,7 @@ function PlantFlowers(character, seed)
 	endif */
 
 	foreach item in ListItemsNearLocation(character.x, character.y, character.z, 1, character.realm)
- 		if (IsDoor(item))
+ 		if (item.IsDoor())
     			SendSysMessage(character, "You are too close to a door!");
     			return;
   		endif

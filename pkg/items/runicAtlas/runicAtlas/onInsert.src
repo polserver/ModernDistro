@@ -2,7 +2,7 @@ use uo;
 use os;
 
 include ":runicatlas:runicAtlasFunctions";
-include "include/itemUtil";
+include ":itemUtils:itemUtil";
 
 program on_insert( who, book, movetype, inserttype, item, existing_stack, amt );
 	amt            := amt;

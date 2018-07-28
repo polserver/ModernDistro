@@ -2,7 +2,7 @@ use uo;
 use file;
 
 include ":timeutils:time";
-include "include/crafting";
+include ":itemUtils:itemdesc";
 
 program textcmd_createstack( who, text )
     var dmy, month, hms, junk, what;
@@ -31,7 +31,7 @@ program textcmd_createstack( who, text )
 		dmy := FormatTime(GetTimeStruct(GetTime()), "<DAY>-<MON>-<YY>");
 		hms := FormatTime(GetTimeStruct(GetTime()), "<HH>:<MM>:<SS>");
 		month := FormatTime(GetTimeStruct(GetTime()), "<MON>-<YY>");
-		LogToFile("::log/createstack_" + month + ".log", "On " + dmy + " at " + hms + " " +  who.name +" on account " + who.acctname + " created  " + amount + " of " + get_item_name(what.objtype, 1));
+		LogToFile("::log/createstack_" + month + ".log", "On " + dmy + " at " + hms + " " +  who.name +" on account " + who.acctname + " created  " + amount + " of " + GetObjTypeDesc(what.objtype, 1));
 	
 		else
 			PrintTextAbovePrivate( who, "Couldn't create that: " + what.errortext, who );

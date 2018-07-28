@@ -1278,6 +1278,28 @@ function IsABoard(byref use_on)
     endif
 endfunction
 
+function IsSign (item)
+	case (item.objtype)
+		0xb95:
+		0xb96:
+		0xbd0:
+		0xbd2:
+		0xc43:
+		0xc44:
+		0x1f28:
+		0x1f29:
+		0x17060:
+		0x1708a:
+			return 1;
+	endcase
+	if (item.objtype >= 0xba3 and item.objtype <= 0xc0e)
+		return 1;
+	elseif (item.objtype >= 0x1297 and item.objtype <= 0x129e)
+		return 1;
+	endif
+	return 0;
+endfunction
+
 
 //////////////////////////////////////////////////////////////////
 //                                                              //

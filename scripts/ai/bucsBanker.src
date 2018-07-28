@@ -13,7 +13,7 @@ include "include/dist";
 include "include/begging";
 include "include/string";
 include "include/findCity";
-include "include/itemdesc";
+include ":itemUtils:itemdesc";
 include ":gumps:gumps";
 include ":gumps:requestGump";
 include ":gumps:yesNoSizable";

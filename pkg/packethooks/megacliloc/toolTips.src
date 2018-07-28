@@ -10,7 +10,6 @@ use polsys;
 
 include "include/skills";
 include "include/math";
-include "include/itemtypes";
 
 const OFFSET_OBJECT_SERIAL   := 0x05;
 const OFFSET_CLILOC_ID       := 0x0F;
@@ -35,7 +34,7 @@ exported function MegaCliloc( who, byref packet )
 		
 		var Object_Name := xObject.desc;
 		Object_Name := CAscZ(Object_Name);
-		packet.SetInt32(OFFSET_CLILOC_ID, 1042971);
+		packet.SetInt32(OFFSET_CLILOC_ID, 1042971); // ~1_NOTHING~
 		packet.SetUnicodeString(OFFSET_UNICODE_TEXT, Object_Name, 1);
 		// I've noticed that this packet is only sent if this value has changed
 		// from the last time it was checked. And using html to change the size doesn't work

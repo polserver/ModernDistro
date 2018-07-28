@@ -3,11 +3,12 @@ use cfgfile;
 use os;
 use util;
 
+include ":attributes:attributes";
+include ":crafting:crafting";
 include "include/client";
 include "include/objtype";
 include "include/utility";
-//include "include/yesNo";
-include "include/crafting";
+include ":gumps:yesNo";
 
 const UACTION_CHOP := 0x0d;
 
