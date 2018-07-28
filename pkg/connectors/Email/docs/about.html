@@ -1,0 +1,53 @@
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+	<meta http-equiv="Content-Language" content="en-us">
+	<title>EmailConnector Documentation</title>
+	<link rel="stylesheet" type="text/css" href="docs.css" />
+</head>
+<body>
+<div id="container">
+	<div id="header">
+		<h1>EmailConnector DOCUMENTATION</h1>
+		<p>Version 1, codename <b>"Mr. Anderson"</b>, by <a href="mailto:gib@zuluhotel.com.au">Dev GIB</a>.</p>
+		<hr>
+		<h2>About</h2>
+	</div>
+
+	<div id="content">
+		<p>This package is designed to be an easy drop in package that enables emailing support direct from the server.
+			It takes advantages of some core changes to the OpenConnection() function from the OS.em file which were also
+			implemented specifically whilst designing this package, so if you are having issues or getting errors, please
+			make sure that your core is up to date first.</br><b>Make sure your CORE version is commit 09d5da5 or later(release date 2017-10-22)</b></p>
+			
+		<p>This package was written for the POL Distro headed by Yukiko and was designed with the intention of reducing and
+			documenting any entry or exit points of the package to make custom or sister packages directly replaceable using those same entry and exit points.
+			</p>
+			
+			<p>For basic usage it only requires 2 lines in any other script.
+				<ul>
+					<li>include ":email:emailer";</li>
+					<li>SendEmail( ToEmail, Subject, Body);</li>
+					</ul><br/>
+					There is additional information that the SendEmail() function can take however that is listed in the include files section.<br/><br/>
+					I've also done the best I can(be bothered) to make sure that the src and inc files are as documented as possible. 
+					If you don't understand something please don't hesitate to let me know and i can assist you in why I've done something
+					a certain way and then maybe document the scripts more.
+					</p>
+
+		<hr>
+		<h2>Thanks</h2>
+		<p>I would like the thank the following people who have contributed in some way or another.
+				<ul>
+					<li><b>Turley</b> - For assisting me in knowing how to change the core as required, and making me submit a million commits.</li>
+					<li><b>Kevin_</b> - For writing the original OpenConnection() code.</li>
+					<li><b>Yukiko</b> - For assisting me with some basic testing and heading the Distro.</li>
+					<li><b>Austin</b> -  I stole these docs from your brainAI package</li>
+					</ul><br/>
+			</p>
+	</div>
+
+	<div id="footer">
+		<p>Last Update: $Id: about.html 61 2017-10-21 06:23 DevGIB $</p>
+	</div>
+</div>
+</body>

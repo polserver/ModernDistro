@@ -1,0 +1,17 @@
+Use uo;
+use os;
+use cfgfile;
+use file;
+
+include ":email:emailer";
+
+program textcmd_testsmtp(who)
+	
+	var toAddress := RequestInput(who, who.backpack, "Enter email address:" );
+	var outbound := SendEmail( toAddress, "Test Email from UO Server", "Test was successful");
+	  	
+	if(outbound == error)
+		SendsysMessage( who, outbound.errortext );
+	endif
+
+endprogram
