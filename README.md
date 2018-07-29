@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/polserver/Distro.svg?branch=master)](https://travis-ci.org/polserver/Distro)
+[![Build Status](https://travis-ci.org/polserver/ModernDistro.svg?branch=master)](https://travis-ci.org/polserver/ModernDistro)
 
 # POL-Distro
 
