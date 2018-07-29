@@ -42,4 +42,4 @@ script:
 
 notifications:
   email:
-    #    - polteam@polserver.com
+    - hopelives@outlook.com
