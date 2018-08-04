@@ -3,6 +3,7 @@ use os;
 use util;
 
 include ":attributes:attributes";
+include ":timedScripts:timedScripts";
 include ":magery:spells";
 include "include/client";
 include "include/sounds";
@@ -22,22 +23,29 @@ program cast_FEEBLEMIND( parms )
     if ( !MS_MobileCheck(caster, cast_on) )
         return 0;
     endif
-  SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "feeblemind" });
-    
-  PlaySoundEffect(cast_on, SFX_SPELL_FEEBLEMIND);
-  PlayObjectCenteredEffect( cast_on, FX_CURSE_EFFECT, 7, 7 );
-        SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "feeblemind" });
-  if (Reflected(cast_on))
-	SendSysMessage (caster, "The spell was reflected back onto you!!!", color := 33);
-	cast_on := caster;
-  endif
-  if (!CanMod(cast_on, "int"))
-	SendSysMessage(caster,"Already under the influence!");
-	return;
-  endif
-  var magery := GetAttribute(caster, MAGERY);
-  var mod_amount := Resisted(info.circle,caster,cast_on,(GetModAmount( magery )));
-  var duration := GetModDuration( magery );
-  DoTempMod(cast_on, "int", 0 - mod_amount, duration);
+	SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "feeblemind" });
+ 	MS_PlaySpellSFX(info.spell_id, cast_on);
+	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
+	SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "feeblemind" });
+	if (Reflected(cast_on))
+		SendSysMessage (caster, "The spell was reflected back onto you!!!", color := 33);
+		cast_on := caster;
+	endif
+/*	if (!CanMod(cast_on, "int"))
+		SendSysMessage(caster,"Already under the influence!");
+		return;
+	endif
+	var magery := GetAttribute(caster, MAGERY);
+	var mod_amount := Resisted(info.circle,caster,cast_on,(GetModAmount( magery )));
+	var duration := GetModDuration( magery );
+	DoTempMod(cast_on, "int", 0 - mod_amount, duration);
+*/
+	// Int decrease % = (Eval / 10) + 8) - (Resist / 10)
+	var percent := CDbl((AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 10) + 8) - (AP_GetSkill(cast_on, RESISTING_SPELLS) / 10);
+	var points := CInt(AP_GetStat(cast_on, INTELLIGENCE) * (percent / 100));
+	
+	// Duration: ((Eval / 5) + 1) * 6
+	var duration := ((AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 5) + 1) * 6;
+	TS_StartTimer(cast_on, "FeebleMind", duration, points, caster);
 
 endprogram

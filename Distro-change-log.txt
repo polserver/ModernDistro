@@ -1,0 +1,12 @@
+I am starting this Distro change log for the Modern Distro. Up until now all changes/fixes have been in the commit notes. However, I think they should be in a change log file as well. Hopefully I will be as diligent in entering changes here as the Core developers are with core-changes.
+
+2018-08-03	Fixed SkillCheck in :attributes:skillCheck.inc. It could possibly return a negative number. Skill scripts test for zero or a value.
+			This was returning false positives (passing) on a SkillCheck function call.
+2018-08-04	Added buff icon support to timedScripts.
+2018-08-04	Added timedScripts to the clumsy spell for initial buff icon test. It works!
+2018-08-04	Added timedScripts to the rest of Circle 01 spells.
+2018-08-04	Removed stupid references to "little girl's panties" from the :magery:settings.cfg file.
+2018-08-04	Added PlyrScrollsReqRegs, PlyrScrollsReqMana, PlyrSpellsReqRegs, PlyrSpellsReqMana settings to :magery:settings.cfg for customization.
+2018-08-04	Added support for the new :magery:settings.cfg settings to :magery:spellStarter.src.
+2018-08-04	Moved timedScripts pkg from /pkg/mobiles folder to /pkg/utils folder.
+2018-08-04	Added my good ol' stanby test script target.src to /pkg/commands/test.

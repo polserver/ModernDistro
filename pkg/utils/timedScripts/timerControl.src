@@ -10,6 +10,7 @@ use cfgfile;
 
 include ":timedscripts:report";
 include ":timedscripts:timedScripts";
+include ":timedscripts:buffIcon";
 
 program TimerControl(mobile)
 	if ( !mobile.IsA(POLCLASS_MOBILE) )
@@ -179,6 +180,8 @@ function AddNewTimer(mobile, byref event, byref timer_list, byref num_poisons)
 		num_poisons += 1;
 	endif
 
+	UpdateBuffIcon( mobile, elem_info, event );
+
 	return 1;
 endfunction
 
@@ -237,6 +240,7 @@ function AddExistingTimer(mobile, byref event, byref timer_list, byref num_poiso
 	endif
 
 	timer_list[event.name].endtime := duration+ReadGameClock();
+	UpdateBuffIcon( mobile, elem_info, event );
 
 	return 1;
 endfunction
@@ -277,7 +281,7 @@ function LowerDuration(mobile, byref event, byref timer_list, byref num_poisons)
 	var timer_info := timer_list[event.name];
 
 	if ( event.amount == -1 )
-		EndTimedScript(mobile, event.name, num_poisons);
+		EndTimedScript(mobile, event.name, num_poisons, event);
 		KillTimedScript(mobile, timer_info.pid, timer_list, event.name);
 		return 1;
 	endif
@@ -286,7 +290,7 @@ function LowerDuration(mobile, byref event, byref timer_list, byref num_poisons)
 	duration -= event.amount;
 
 	if ( duration <= 0 )
-		EndTimedScript(mobile, event.name, num_poisons);
+		EndTimedScript(mobile, event.name, num_poisons, event);
 		KillTimedScript(mobile, timer_info.pid, timer_list, event.name);
 	endif
 
@@ -325,7 +329,7 @@ function PlayerDeath(mobile, byref timer_list, byref num_poisons)
 	return 1;
 endfunction
 
-function EndTimedScript(mobile, byref timer_name, byref num_poisons)
+function EndTimedScript(mobile, byref timer_name, byref num_poisons, event)
 	var elem_info := TS_GetCfgElem(timer_name);
 	if ( elem_info.errortext )
 		TS_ReportText("Error::EndTimedScript() - Unable to find config elem ["+timer_name+"] - "+elem_info.errortext, TS_REPORT_SYSLOG);
@@ -339,6 +343,9 @@ function EndTimedScript(mobile, byref timer_name, byref num_poisons)
 	if( elem_info.EndMessage )
 		SendSysMessage(mobile, elem_info.EndMessage);
 	endif
+
+        event.amount := 0;
+        UpdateBuffIcon( mobile, elem_info, event );
 
 	if( elem_info.EndScript )
 		var script := Start_Script(elem_info.EndScript, mobile);

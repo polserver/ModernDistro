@@ -46,14 +46,23 @@ program SpellStarter(params)
 	var requires_mana := 1;
 	var requires_regs := 1;
 	var settings_elem := MS_GetSettingsCfgElem("Settings");
-	if (scroll)
-		requires_regs := 0;
-	endif
-
-	if ( !mobile.IsA(POLCLASS_NPC) && (mobile.cmdlevel >= settings_elem.StaffCmdLvl) )
+	// Check for scroll casting requirements for reagents and mana for players.
+	if(scroll && (mobile.cmdlevel >= CInt(settings_elem.StaffCmdLvl)))
 		requires_mana := CInt(settings_elem.StaffRequiresMana);
 		requires_regs := CInt(settings_elem.StaffRequiresReagents);
-	else
+	elseif(scroll && !mobile.cmdlevel)
+		requires_mana := CInt(settings_elem.PlyrScrollsReqMana);
+		requires_regs := CInt(settings_elem.PlyrScrollsReqRegs);
+	endif
+	// Check for staff requirement of reagents and mana for casting spells.
+	if ( !mobile.IsA(POLCLASS_NPC) && (mobile.cmdlevel >= CInt(settings_elem.StaffCmdLvl)) && !scroll )
+		requires_mana := CInt(settings_elem.StaffRequiresMana);
+		requires_regs := CInt(settings_elem.StaffRequiresReagents);
+	// Check for player requirement of reagents and mana for casting spells.
+	elseif(!mobile.IsA(POLCLASS_NPC) && !scroll )
+		requires_mana := CInt(settings_elem.PlyrSpellsReqMana);
+		requires_regs := CInt(settings_elem.PlyrSpellsReqRegs);
+	else // This is an NPC casting the spell
 		requires_regs := 0;
 		requires_mana := 1;
 	endif
@@ -186,7 +195,7 @@ program SpellStarter(params)
 	mobile.frozen := 0;
         
 	// skill_check > 0 on success
-	if ( skill_check)
+	if ( skill_check )
 		var info := struct;
 		info.+script := spell_elem.script;
 		info.+attribute := attribute;

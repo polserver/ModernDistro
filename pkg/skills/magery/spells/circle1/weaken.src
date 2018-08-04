@@ -3,6 +3,7 @@ use uo;
 use util;
 
 include ":attributes:attributes";
+include ":timedscripts:timedScripts";
 include ":magery:spells";
 include "include/client";
 include "include/sounds";
@@ -23,6 +24,8 @@ program cast_WEAKEN( parms )
         return 0;
     endif
   SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "weaken" });
+
+/*
   PlaySoundEffect(cast_on, SFX_SPELL_WEAKEN);
   PlayObjectCenteredEffect( cast_on, FX_CURSE_EFFECT, 7,7);
     
@@ -37,4 +40,17 @@ program cast_WEAKEN( parms )
   var mod_amount := Resisted(info.circle,caster,cast_on,(GetModAmount( magery )));
   var duration := GetModDuration( magery );
   DoTempMod(cast_on, "str", 0 - mod_amount, duration);
+*/
+	MS_PlaySpellSFX(info.spell_id, cast_on);
+	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
+
+	// Str decrease % = (Eval / 10) + 8) - (Resist / 10)
+	var percent := CDbl((AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 10) + 8) - (AP_GetSkill(cast_on, RESISTING_SPELLS) / 10);
+	var points := CInt(AP_GetStat(cast_on, STRENGTH) * (percent / 100));
+	
+	// Duration: ((Eval / 5) + 1) * 6
+	var duration := ((AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 5) + 1) * 6;
+	TS_StartTimer(cast_on, "Weaken", duration, points, caster);
+	
+
 endprogram
