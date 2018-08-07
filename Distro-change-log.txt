@@ -10,3 +10,6 @@ I am starting this Distro change log for the Modern Distro. Up until now all cha
 2018-08-04	Added support for the new :magery:settings.cfg settings to :magery:spellStarter.src.
 2018-08-04	Moved timedScripts pkg from /pkg/mobiles folder to /pkg/utils folder.
 2018-08-04	Added my good ol' stanby test script target.src to /pkg/commands/test.
+2018-08-06	Fixed missing graphics for garden shed deed.
+2018-08-06	Removed location checks for multi housing. I may add them back in at a later date but facet support was needed and right now I did not need the distraction.
+2018-08-06	Fixed missing flags in CreateMultiAtLocation function calls in houseDeed.src in :housing:.

@@ -553,11 +553,11 @@ endfunction
 function ModifyResistance(mobile, name, value)
   value := CInt(value);
   case(name)
-    RES_COLD_MOD: mobile.resist_cold_mod := mobile.resist_cold_mod + value;
-    RES_ENERGY_MOD: mobile.resist_energy_mod := mobile.resist_energy_mod + value;
-    RES_FIRE_MOD: mobile.resist_fire_mod := mobile.resist_fire_mod + value;
     RES_PHYSICAL_MOD: mobile.resist_physical_mod := mobile.resist_physical_mod + value;
+    RES_FIRE_MOD: mobile.resist_fire_mod := mobile.resist_fire_mod + value;
+    RES_COLD_MOD: mobile.resist_cold_mod := mobile.resist_cold_mod + value;
     RES_POISON_MOD: mobile.resist_poison_mod := mobile.resist_poison_mod + value;
+    RES_ENERGY_MOD: mobile.resist_energy_mod := mobile.resist_energy_mod + value;
   endcase
 	return value;
 endfunction

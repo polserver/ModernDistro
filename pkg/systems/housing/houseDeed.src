@@ -25,10 +25,6 @@ program usehousedeed(who, deed)
   if(!can_access(who, deed))
     return;
   endif
-  if(!CanBuildHere(who)&& !who.cmdlevel)
-      SendSysMessage(who, "You are not authorized to build a house here.", color := 33);
-      return 0;
-  endif
   EraseObjProperty(who, "IsMeditating");
   if(deed.movable == 0)
     SendSysMessage(who, "You cannot use that.");
@@ -139,25 +135,25 @@ function CreatehouseKeysAndBuiltDeed2(character, housetype, where, deed)
 	if( character.cmdlevel > 2)
 		house := CreateMultiAtLocation(x, y, z, housetype, CRMULTI_IGNORE_ALL, map);
 	else
-		house := CreateMultiAtLocation(x, y, z, housetype, map);
+		house := CreateMultiAtLocation(x, y, z, housetype, 0, map);
 	endif
 	if( !house)
-		house :=CreateMultiAtLocation(x + 10, y, z, housetype, map);
+		house :=CreateMultiAtLocation(x + 10, y, z, housetype, 0, map);
 	endif
 	if( !house)
-		house :=CreateMultiAtLocation(x, y+10, z, housetype, map);
+		house :=CreateMultiAtLocation(x, y+10, z, housetype, 0, map);
 	endif
 	if( !house)
-		house :=CreateMultiAtLocation(x - 10, y, z, housetype, map);
+		house :=CreateMultiAtLocation(x - 10, y, z, housetype, 0, map);
 	endif
 	if( !house)
-		house :=CreateMultiAtLocation(x, y - 10, z, housetype, map);
+		house :=CreateMultiAtLocation(x, y - 10, z, housetype, 0, map);
 	endif
 	if( !house)
-		house :=CreateMultiAtLocation(x + 10, y+10, z, housetype, map);
+		house :=CreateMultiAtLocation(x + 10, y+10, z, housetype, 0, map);
 	endif
 	if( !house)
-		house :=CreateMultiAtLocation(x - 10, y - 10, z, housetype, map);
+		house :=CreateMultiAtLocation(x - 10, y - 10, z, housetype, 0, map);
 	endif
 
 	var footage := FindBoxArray(housetype, house);
