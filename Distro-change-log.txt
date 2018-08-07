@@ -13,3 +13,8 @@ I am starting this Distro change log for the Modern Distro. Up until now all cha
 2018-08-06	Fixed missing graphics for garden shed deed.
 2018-08-06	Removed location checks for multi housing. I may add them back in at a later date but facet support was needed and right now I did not need the distraction.
 2018-08-06	Fixed missing flags in CreateMultiAtLocation function calls in houseDeed.src in :housing:.
+2018-08-07	Removed constants for resists. We'll just use damage constants. Makes it easier to import some scripts from 098 Distro.
+2018-08-07	Changed the element spellId to spell_Id for the info struct in spellStarter that is sent to the spell scripts.
+2018-08-07	Added a 6th parameter, explode := 0, to MS_PlaySpellGFX function is spells.inc.
+2018-08-07	Fixed a bug in function MS_PlaySpellGFX in which it was sending targ.realm as the last parameter (explode) to uo.em function PlayMovingEffect.
+2018-08-07	Added some missing sound definitions to /scripts/include/sounds.inc.

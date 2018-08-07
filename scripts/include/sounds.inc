@@ -1,5 +1,11 @@
 // SOUNDS ABC order by insideUO
 // NOTE: Any number over 0xFF (255) will not work in older clients.
+
+
+
+
+
+
 enum PRIMARY_SOUNDS
 	SFX_AGILITY		:= 0x1E8,
 	SFX_AGILITY2		:= 0x28F,
@@ -103,19 +109,26 @@ enum PRIMARY_SOUNDS
 	SFX_HIT_21		:= 0x14A,
 	SFX_HIT_22		:= 0x14B,
 	SFX_LIGHTNING		:= 0x2A,
-	SFX_MAGIC_ARROW		:= 0x1E6,
+	SFX_LOCKPICK		:= 0x242,
+  SFX_MAGIC_ARROW		:= 0x1E6,
 	SFX_MYSTERY_3		:= 0x246,
+	SFX_PARALYZED		:= 0x20C,
 	SFX_RESURRECT		:= 0x215,
 	SFX_SPIRIT_SPEAK	:= 0x24B,
 	SFX_STRENGTH		:= 0x1EF,
 	SFX_TELEPORT		:= 0x1FF,
+	SFX_UNLOCK		:= 0x200,
 	SFX_WAVE_1		:= 0x13,
 	SFX_WAVE_2		:= 0x14,
 	SFX_WEAKEN		:= 0x1E7
 endenum
 
 enum CUSTOM_SOUNDS
-	SFX_SPELL_FAIL		:= 0x5D // Really SFX_ALIGATOR_1
+  SFX_SLICE           := 0x57,
+	SFX_SOUND_SCRUNCH	:= 0x58,
+	SFX_USE_LEATHER		:= 0x5A,
+	SFX_SPELL_FAIL		:= 0x5D, // Really SFX_ALIGATOR_1
+	SFX_ITEM_SWARM		:= 0x91b
 endenum
 
 enum DOOR_SOUNDS

@@ -202,7 +202,7 @@ program SpellStarter(params)
 		info.+skill_check := skill_check;
 		info.+targ := targ;
 		info.+pid := GetPid();
-		info.+spellId := spell_id;
+		info.+spell_Id := spell_id;
 		info.+circle := spell_elem.Circle;
 		info.+spell_config := spell_elem;
 		info.+damage_typ := spell_elem.DamageType;

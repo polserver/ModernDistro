@@ -38,32 +38,6 @@ enum DAMAGE_MEMBERS
   DMG_POISON            := "Poison"
 endenum
 
-// Read only members
-enum RESISTANCE_MEMBERS
-  RES_COLD              := "resist_cold",
-  RES_ENERGY            := "resist_energy",
-  RES_FIRE              := "resist_fire",
-  RES_PHYSICAL          := "resist_physical",
-  RES_POISON            := "resist_poison"
-endenum
-
-// Read write members
-enum DAMAGE_MOD_MEMBERS
-  DMG_COLD_MOD          := "damage_cold_mod",
-  DMG_ENERGY_MOD        := "damage_energy_mod",
-  DMG_FIRE_MOD          := "damage_fire_mod",
-  DMG_PHYSICAL_MOD      := "damage_physical_mod",
-  DMG_POISON_MOD        := "damage_poison_mod"
-endenum
-
-// Read write members
-enum Res_mod_members
-  RES_COLD_MOD          := "resist_cold_mod",
-  RES_ENERGY_MOD        := "resist_energy_mod",
-  RES_FIRE_MOD          := "resist_fire_mod",
-  RES_PHYSICAL_MOD      := "resist_physical_mod",
-  RES_POISON_MOD        := "resist_poison_mod"
-endenum
 /*
  * ApplyDamageEX(mobile, amount, type, source)
  *
@@ -528,11 +502,11 @@ endfunction
 function SetResistance(mobile, name, value)
   value := CInt(value);
   case(name)
-    RES_COLD_MOD: mobile.resist_cold_mod := value;
-    RES_ENERGY_MOD: mobile.resist_energy_mod := value;
-    RES_FIRE_MOD: mobile.resist_fire_mod := value;
-    RES_PHYSICAL_MOD: mobile.resist_physical_mod := value;
-    RES_POISON_MOD: mobile.resist_poison_mod := value;
+    DMG_COLD: mobile.resist_cold_mod := value;
+    DMG_ENERGY: mobile.resist_energy_mod := value;
+    DMG_FIRE: mobile.resist_fire_mod := value;
+    DMG_PHYSICAL: mobile.resist_physical_mod := value;
+    DMG_POISON: mobile.resist_poison_mod := value;
   endcase
 	return
 endfunction
@@ -553,11 +527,11 @@ endfunction
 function ModifyResistance(mobile, name, value)
   value := CInt(value);
   case(name)
-    RES_PHYSICAL_MOD: mobile.resist_physical_mod := mobile.resist_physical_mod + value;
-    RES_FIRE_MOD: mobile.resist_fire_mod := mobile.resist_fire_mod + value;
-    RES_COLD_MOD: mobile.resist_cold_mod := mobile.resist_cold_mod + value;
-    RES_POISON_MOD: mobile.resist_poison_mod := mobile.resist_poison_mod + value;
-    RES_ENERGY_MOD: mobile.resist_energy_mod := mobile.resist_energy_mod + value;
+    DMG_PHYSICAL: mobile.resist_physical_mod := mobile.resist_physical_mod + value;
+    DMG_FIRE: mobile.resist_fire_mod := mobile.resist_fire_mod + value;
+    DMG_COLD: mobile.resist_cold_mod := mobile.resist_cold_mod + value;
+    DMG_POISON: mobile.resist_poison_mod := mobile.resist_poison_mod + value;
+    DMG_ENERGY: mobile.resist_energy_mod := mobile.resist_energy_mod + value;
   endcase
 	return value;
 endfunction
@@ -581,11 +555,11 @@ endfunction
 function SetDamage(mobile, name, value)
   value := CInt(value);
   case(name)
-    DMG_COLD_MOD: mobile.damage_cold_mod := value;
-    DMG_ENERGY_MOD: mobile.damage_energy_mod := value;
-    DMG_FIRE_MOD: mobile.damage_fire_mod := value;
-    DMG_PHYSICAL_MOD: mobile.damage_physical_mod := value;
-    DMG_POISON_MOD: mobile.damage_poison_mod := value;
+    DMG_COLD: mobile.damage_cold_mod := value;
+    DMG_ENERGY: mobile.damage_energy_mod := value;
+    DMG_FIRE: mobile.damage_fire_mod := value;
+    DMG_PHYSICAL: mobile.damage_physical_mod := value;
+    DMG_POISON: mobile.damage_poison_mod := value;
   endcase
 	return
 endfunction
@@ -606,11 +580,11 @@ endfunction
 function ModifyDamage(mobile, name, value)
   value := CInt(value);
   case(name)
-    DMG_COLD_MOD: mobile.damage_cold_mod := mobile.damage_cold_mod + value;
-    DMG_ENERGY_MOD: mobile.damage_energy_mod := mobile.damage_energy_mod + value;
-    DMG_FIRE_MOD: mobile.damage_fire_mod := mobile.damage_fire_mod + value;
-    DMG_PHYSICAL_MOD: mobile.damage_physical_mod := mobile.damage_physical_mod + value;
-    DMG_POISON_MOD: mobile.damage_poison_mod := mobile.damage_poison_mod + value;
+    DMG_COLD: mobile.damage_cold_mod := mobile.damage_cold_mod + value;
+    DMG_ENERGY: mobile.damage_energy_mod := mobile.damage_energy_mod + value;
+    DMG_FIRE: mobile.damage_fire_mod := mobile.damage_fire_mod + value;
+    DMG_PHYSICAL: mobile.damage_physical_mod := mobile.damage_physical_mod + value;
+    DMG_POISON: mobile.damage_poison_mod := mobile.damage_poison_mod + value;
   endcase
 	return value;
 endfunction

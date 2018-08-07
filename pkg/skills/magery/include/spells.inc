@@ -359,7 +359,7 @@ endfunction
 
 function MS_PlaySpellSFX(spellid, targ, success:=1)
 	var cfg_elem := MS_GetSpellsCfgElem(spellid);
-	var sfx := CInt(GetConfigInt(cfg_elem, "sFX"));
+	var sfx := CInt(GetConfigInt(cfg_elem, "SFX"));
 	
 	Print("Playing SFX:"+sfx+" for spellid:"+spellid);
 	PlaySoundEffect(targ, sfx);
@@ -368,7 +368,7 @@ function MS_PlaySpellSFX(spellid, targ, success:=1)
 endfunction
 
 
-function MS_PlaySpellGFX(spellid, targ, caster, speed:=7, loop:=14)
+function MS_PlaySpellGFX(spellid, targ, caster, speed:=7, loop:=14, explode := 0)
 	var cfg_elem := MS_GetSpellsCfgElem(spellid);
 	var gfx := CInt(GetConfigInt(cfg_elem, "GFX"));
 	
@@ -376,7 +376,7 @@ function MS_PlaySpellGFX(spellid, targ, caster, speed:=7, loop:=14)
 	case ( CInt(cfg_elem.GFXType) )
 		0: return 1;
 		1: PlayObjectCenteredEffect(targ, gfx, speed, loop);
-		2: PlayMovingEffect(caster, targ, gfx, speed, loop, targ.realm);
+		2: PlayMovingEffect(caster, targ, gfx, speed, loop, explode);
 		3: PlayStationaryEffect( targ.x, targ.y, targ.z, gfx, speed, loop, 0, targ.realm );
 	endcase
 	
