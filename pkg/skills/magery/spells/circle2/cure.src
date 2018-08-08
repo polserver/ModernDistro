@@ -2,13 +2,10 @@ use vitals;
 use uo;
 use cfgfile;
 
-include "include/eventID";
-include ":poisonwatcher:poisons";
 include ":attributes:attributes";
+include ":timedscripts:timedScripts";
+include ":timedscripts:poisonUtil";
 include ":magery:spells";
-include "include/client";
-include "include/sounds";
-include ":damage:damage";
 
 var npccfg := ReadConfigFile("npcdesc");
 
@@ -28,34 +25,27 @@ program cast_cure( parms )
         return 0;
     endif
     
+	// Get poison level
+	var poison_names := TS_GetTimerNames(cast_on, "P");
+	var poison_level := 1;
+	
+	foreach timer_name in ( poison_names )
+		var timer_info := TS_GetTimerInfo(cast_on, timer_name);
+		if ( timer_info.level > poison_level )
+				poison_level := timer_info.level;
+		endif
+	endforeach
 
-  PlaySoundEffect(caster, SFX_SPELL_CURE);
-  PlayObjectCenteredEffect( cast_on, FX_BLESS_EFFECT, 10,10);
-  var potency := CInt(GetAttribute(caster, MAGERY) / 33) +1;
-  if(cast_on.isA(POLCLASS_NPC))
-    var element := npccfg[cast_on.npctemplate].elemental;
-    if(element == "poison")
-      var ev := array;
-      ev.+ type;
-      ev.+ source;
-      ev.type := EVID_PEACEMADE;
-      SendEvent(cast_on, ev);
-      ev.source := caster;
-      SendEvent(cast_on, ev);
-      ev.type := EVID_ENGAGED;
-      SendEvent(cast_on, ev);
-      ApplyRawDamageEX(cast_on, potency, DMG_FORCED, caster);
+	//% Chance to cure: (Magery * 0.75) + (110 - (Poison level * 33)) .
+	var chance := CInt(AP_GetSkill(caster, MAGERY) * 0.75) + (110 - (poison_level * 33));
+	if ( chance >= RandomInt(100) + 1 )
+		// NOTE: There is still a 1 in 100 chance that this wont work..
+		TS_CurePoison(cast_on, 10000, "P", poison_level);
+	endif
+	
+	MS_PlaySpellSFX(info.spell_id, cast_on);
+	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
 
-    endif
-  endif
-  if (ListPoisonsByType(cast_on, "defaultPoison").size() > 0)
-    CurePoison(cast_on, 120, "defaultPoison", potency);
-    if (ListPoisonsByType(cast_on, "defaultPoison").size() > 0)
-      SendSysMessage(caster, "You cure some poison.");  
-      SendSysMessage(cast_on, caster.name + " has partially cured you!");
-    else
-      SendSysMessage(caster, cast_on.name + " cured.");
-      SendSysMessage(cast_on, caster.name + " has cured you completely!");
-    endif
-  endif
+	return 1;
+
 endprogram

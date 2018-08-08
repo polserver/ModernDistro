@@ -1,0 +1,18 @@
+/*
+ * $Id: control.src 1162 2008-02-03 22:30:41Z AustinHeilman $
+ *
+ */
+
+use uo;
+use os;
+
+program ControlScript(field)
+	while ( field )
+		Sleep(1);
+		if ( field.IsExpired() )
+			DestroyItem(field);
+		endif
+	endwhile
+
+	return 1;
+endprogram

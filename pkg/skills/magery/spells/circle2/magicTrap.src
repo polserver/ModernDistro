@@ -2,11 +2,8 @@ use os;
 use uo;
 use util;
 
-include ":attributes:attributes";
 include ":magery:spells";
-include "include/client";
-include "include/sounds";
-include "include/findCity";
+include ":traps:traps";
 
 program cast_strength(parms)
   var caster := parms[1];
@@ -21,17 +18,17 @@ program cast_strength(parms)
         return 0;
     endif
 
-  if((cast_on.isa(POLCLASS_DOOR)) || (cast_on.objtype == 0xe79) || ((cast_on.graphic<=0x9ab) &&(cast_on.graphic>=0x9a8)) ||((cast_on.graphic<=0xe43) &&(cast_on.graphic>=0xe3c)) ||((cast_on.graphic<=0xe80) &&(cast_on.graphic>=0xe7c)))
+/*  if((cast_on.isa(POLCLASS_DOOR)) || (cast_on.objtype == 0xe79) || ((cast_on.graphic<=0x9ab) &&(cast_on.graphic>=0x9a8)) ||((cast_on.graphic<=0xe43) &&(cast_on.graphic>=0xe3c)) ||((cast_on.graphic<=0xe80) &&(cast_on.graphic>=0xe7c)))
     var magery := GetAttribute(caster, MAGERY);
     var trapstr := CInt(magery/5);
-    /* Will add this later. Assume crim if cast within a city.
-    if(findcity(cast_on) != "no city")
-      caster.setCriminal(1);
-    endif
-    if(findcity(caster) != "no city")
-      caster.setCriminal(1);
-    endif
-    */
+    // Will add this later. Assume crim if cast within a city.
+    //if(findcity(cast_on) != "no city")
+    //  caster.setCriminal(1);
+    //endif
+    //if(findcity(caster) != "no city")
+    // caster.setCriminal(1);
+    //endif
+
     if(trapstr<1)
       trapstr:=1;
     endif
@@ -47,4 +44,25 @@ program cast_strength(parms)
   else
     SendSysMessage(caster, "That cannot be magic trapped!");
   endif
+*/
+	if ( !cast_on.IsA(POLCLASS_CONTAINER) )
+		SendSysMessage(caster, "This spell wont work on that!"); // what is the cliloc?
+		return 0;
+	endif
+
+	foreach trap_info in (GetTrapList(cast_on))
+		if ( trap_info.Name == "magicTrap" )
+			SendSysMessage(caster, "This container is already trapped!");
+			return 0;
+		endif
+	endforeach
+	
+	MS_PlaySpellSFX(info.spell_id, cast_on);
+	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
+	
+	// uo.com says 10-50 damage
+	AddTrap(cast_on, "magicTrap", "10d5");
+	
+	return 1;
+
 endprogram

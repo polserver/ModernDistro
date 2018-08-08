@@ -1,0 +1,17 @@
+/*
+ * $Id: control.src 373 2006-06-17 18:27:33Z austinheilman $
+ *
+ */
+
+use uo;
+use os;
+
+program RemoveWeb(web)
+	while ( web )
+		Sleep(1);
+		if ( web.IsExpired() )
+			DestroyItem(web);
+			break;
+		endif
+	endwhile
+endprogram

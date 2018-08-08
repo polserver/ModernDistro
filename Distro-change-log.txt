@@ -18,3 +18,7 @@ I am starting this Distro change log for the Modern Distro. Up until now all cha
 2018-08-07	Added a 6th parameter, explode := 0, to MS_PlaySpellGFX function is spells.inc.
 2018-08-07	Fixed a bug in function MS_PlaySpellGFX in which it was sending targ.realm as the last parameter (explode) to uo.em function PlayMovingEffect.
 2018-08-07	Added some missing sound definitions to /scripts/include/sounds.inc.
+2018-08-08	Disabled the party packet hook as the Core now handles parties internally. Will remove the packet hook at a later date.
+2018-08-08	Added walkOn pkg rom 098 Distro to /pkg/items folder.
+2018-08-08	Changed pkg name of food&drink to food_drink. Also changed /pkg/items/food to /pkg/items/food_drink.
+2018-08-08	Completed upgrading spell circles 1 through 4. I want to add more cliloc support to them. Teleport and telekinisis needs support for Static Housing added.

@@ -6,9 +6,9 @@ use os;
 use cfgfile;
 
 include ":attributes:attributes";
+include ":timedscripts:timedScripts";
+include ":damage:damage";
 include ":magery:spells";
-include "include/client";
-include "include/sounds";
 
 program cast_protection(parms)
     var caster := parms[1];
@@ -26,25 +26,34 @@ program cast_protection(parms)
         return 0;
     endif
     
+	if ( GetObjProperty(caster, "Protection") )
+		RemoveProtection(caster);
+	else
+		ApplyProtection(caster);
+	endif
+	
+	MS_PlaySpellSFX(info.spell_id, caster);
+	MS_PlaySpellGFX(info.spell_id, caster, caster);
 
-  PlaySoundEffect(cast_on, SFX_SPELL_PROTECTION);
-  PlayObjectCenteredEffect(cast_on, FX_BLESS_EFFECT, 7,7);
-  if (!CanMod(cast_on, "ar"))
-	SendSysMessage(caster,"Already under the influence!");
-	return;
-  endif
-  var magery := GetAttribute(caster, MAGERY);
-  var mod_amount := (GetModAmount(magery) * 2);
-  var duration := GetModDuration(magery);
-  var itmcfg := ReadConfigFile(":*:itemdesc");
-  var arpoints := 0;
-  foreach thing in ListEquippedItems(cast_on)
-    arpoints := arpoints + (CInt(itmcfg[thing.objtype].AR) / 12);
-  endforeach
-  if(mod_amount > arpoints)
-    mod_amount := mod_amount - arpoints;
-  else
-    mod_amount := 0;
-  endif
-  DoTempMod(cast_on, "ar", mod_amount, duration);
+	return 1;
 endprogram
+
+function ApplyProtection(caster)
+	ModifyResistance(caster, DMG_PHYSICAL, -35);
+	AP_ModifySkillMod(caster, RESISTING_SPELLS, -35);
+	
+	// At present there is no determined way to modify casting speed and other stats:
+	// ModifyMagicProperties(caster, "FasterCastSpeed", -2);
+	
+	SetObjProperty(caster, "Protection", 1);
+endfunction
+
+function RemoveProtection(caster)
+	ModifyResistance(caster, DMG_PHYSICAL, 35);
+	AP_ModifySkillMod(caster, RESISTING_SPELLS, 35);
+	
+	// At present there is no determined way to modify casting speed and other stats:
+	// ModifyMagicProperties(caster, "FasterCastSpeed", 2);
+	
+	EraseObjProperty(caster, "Protection");
+endfunction

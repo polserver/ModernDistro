@@ -1,12 +1,11 @@
 use os;
 use uo;
 use util;
+use cliloc;
 
-include ":attributes:attributes";
-include ":magery:spells";
 include "include/client";
-include "include/sounds";
-include "include/fields";
+include ":magery:spells";
+include ":magery:fields";
 
 program stonewall( parms )
   var caster := parms[1];
@@ -17,32 +16,47 @@ program stonewall( parms )
         cast_on := parms[4];
     endif
     if (!cast_on)
-        SendSysMessage (caster, "Cancelled.", color := 33);
+        SendSysMessageCL(caster, 1042023, color := 33); // Cancelled.
         return 0;
     endif
 
-  var fields := {};
-  var duration;
-  var listeners := {};
-  var sufferers := {};
-  var x := cast_on.x;
-  var y := cast_on.y;
-  var z := cast_on.z;
-  case(get_direction(caster))
-	"NS" : fields:= CreateNorthSouthField(caster, 0x80, x, y, z, 5);
-	"EW" : fields:= CreateEastWestField(caster, 0x80, x, y, z, 5);
-  endcase
-  Detach();
-  duration := CInt(AP_GetSkill( caster, MAGERY ) )/2;
-  if (duration < 20)
-    duration := 20;
-  endif
-  var i;
-  for (i := 1; i <= 5; i := i + 1)
-    PlaySoundEffect(fields[i], SFX_SPELL_WALL_OF_STONE);
-  endfor
-  sleep(duration);
-  foreach fieldpart in fields
-    DestroyItem(fieldpart);
-  endforeach
+	MS_PlaySpellSFX(info.spell_id, cast_on);
+
+	var objtype := 0x80;
+	var direction := GetDirectionByFacing(caster);
+	case ( direction )
+		FIELD_SHAPE_HORIZONTAL: objtype := "WallofStoneEW"; break;
+		FIELD_SHAPE_VERTICAL: objtype := "WallofStoneNS"; break;
+	endcase
+
+	var size := GetConfigInt(info.spell_config, "AreaSize");
+	var coordinates := GetCoordinatesForField(cast_on.x, cast_on.y, direction, CInt(size/2));
+
+	foreach coord in ( coordinates )
+		var z := cast_on.z;
+		if ( z < GetStandingHeight(coord.x, coord.y, cast_on.z, caster.realm) )
+			z := GetStandingHeight(coord.x, coord.y, cast_on.z, caster.realm);
+		endif
+
+		var mobiles := ListMobilesNearLocationEx(coord.x, coord.y, z, 0, LISTEX_FLAG_NORMAL+LISTEX_FLAG_HIDDEN, caster.realm);
+		if (  mobiles.Size() > 0 )
+			continue; // Dont create walls on top of mobiles.
+		elseif ( !CheckLosAt(caster, coord.x, coord.y, z ) )
+			continue; // Only create a field piece if the caster has line of sight.
+		endif
+
+		var item := CreateItemAtLocation(coord.x, coord.y, z, objtype, 1, caster.realm);
+		if ( item.errortext )
+			SendSysMessage(caster, "Error - "+item.errortext);
+			continue;
+		endif
+
+		SetObjProperty(item, "SummonedField", caster.serial);
+		item.SetOwner(caster);
+		item.SetDuration(10);
+
+		SleepMS(2);
+	endforeach
+
+	return 1;
 endprogram

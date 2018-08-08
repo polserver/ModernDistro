@@ -1,10 +1,10 @@
 use uo;
 use util;
+use cliloc;
 
 include ":attributes:attributes";
+include ":timedScripts:timedScripts";
 include ":magery:spells";
-include "include/client";
-include "include/sounds";
 
 
 program mana_drain ( parms )
@@ -16,32 +16,32 @@ program mana_drain ( parms )
         cast_on := parms[4];
     endif
     if (!cast_on)
-        SendSysMessage (caster, "Cancelled.", color := 33);
+        SendSysMessageCL(caster, 1042023, color := 33); // Cancelled.
         return 0;
     endif
     if ( !MS_MobileCheck(caster, cast_on) )
         return 0;
     endif
     
-    PlaySoundEffect( caster, SFX_SPELL_MANA_DRAIN );
-    PlayObjectCenteredEffect( cast_on, FX_HEAL_EFFECT, 7,0x10 );
+	if ( caster.serial == cast_on.serial )
+		SendSysMessage(caster, "You cannot mana drain yourself!");
+		return 0;
+	endif
+	
+	MS_PlaySpellSFX(info.spell_id, cast_on);
+	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
 
-    SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "mana drain" });
-        if(Reflected(cast_on))
-            SendSysMessage (caster, "The spell was reflected back onto you!!!", color := 33);
-            var tmp := cast_on;
-            cast_on := caster;
-            caster := tmp;
-        endif
-        var dmg := Cint(GetAttribute(caster, "magery") / 2);
-        var diff := Resisted(info.circle, caster, cast_on, dmg);
-        if(diff)
-            if(diff > GetMana(cast_on))
-              SetMana(cast_on, 0);
-            else
-              SetMana(cast_on, GetMana(cast_on) - diff);
-            endif
-        endif
-        return 1;
+	// Mana drained = 40 + evaluating intelligence - target's resisting spells
+	var mana_drained := 40 + AP_GetSkill(caster, EVALUATING_INTELLIGENCE) - AP_GetSkill(cast_on, RESISTING_SPELLS);
+	var cast_on_mana := AP_GetVital(cast_on, MANA);
 
+	// Can not drain more mana than the target has
+	if ( mana_drained > cast_on_mana )
+		mana_drained := cast_on_mana;
+	endif
+	
+	// Drain mana from cast_on and restore lost points after 4 seconds
+	TS_StartTimer(cast_on, "ManaDrain", 4, mana_drained, caster);
+	
+	return 1;
 endprogram

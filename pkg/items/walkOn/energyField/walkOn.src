@@ -1,0 +1,15 @@
+/*
+ * $Id: walkOn.src 373 2006-06-17 18:27:33Z austinheilman $
+ *
+ */
+ 
+use uo;
+
+
+program walkOn(mobile, tile, last_x, last_y, last_z)
+	tile := tile; // Compiler warning
+	MoveObjectToLocation(mobile, last_x, last_y, last_z, mobile.realm);
+	return 1;
+endprogram
+
+	

@@ -1,0 +1,66 @@
+/*
+ * $Id: control.src 1162 2008-02-03 22:30:41Z AustinHeilman $
+ *
+ */
+
+use uo;
+use os;
+use util;
+
+include ":damage:damage";
+
+program ControlScript(field)
+	SetObjProperty(field, "#PID", GetPid());
+
+	var creator := field.GetOwner();
+	if ( creator )
+		SetScriptController(creator);
+	endif
+
+	// Kludge to keep this script from running before cprops are set
+	SleepMS(60);
+
+	var dmg_dice := GetObjProperty(field, "DamageDice");
+	if ( !dmg_dice )
+		dmg_dice := "1d5";
+	endif
+
+	while ( field )
+		BurnNearbyMobiles(field, dmg_dice);
+
+		if ( ReadGameClock() % 3 == 0 )
+			// Play once every 3 seconds.
+			PlaySoundEffect(field, 0x1DE);
+		endif
+
+		var event := Wait_For_Event(1);
+		if ( event )
+			//Someone just walked onto the tile.
+			BurnMobile(event, dmg_dice);
+		endif
+
+		if ( field.IsExpired() )
+			DestroyItem(field);
+		endif
+	endwhile
+
+	return 1;
+endprogram
+
+function BurnNearbyMobiles(field, dmg_dice)
+	var nearby := ListMobilesNearLocationEX(field.x, field.y, field.z, 0, LISTEX_FLAG_NORMAL+LISTEX_FLAG_HIDDEN, field.realm);
+	foreach mobile in ( nearby )
+		BurnMobile(mobile, dmg_dice);
+
+		SleepMS(2);
+	endforeach
+
+	return (nearby.Size());
+endfunction
+
+function BurnMobile(mobile, dmg_dice)
+	var dmg := RandomDiceRoll(dmg_dice); // - resistance ?
+	ApplyDamageEX(mobile, dmg, DMG_FIRE);
+
+	return 1;
+endfunction

@@ -1,0 +1,20 @@
+/*
+ * $Id: walkOn.src 373 2006-06-17 18:27:33Z austinheilman $
+ *
+ */
+
+use uo;
+use os;
+use util;
+
+program walkOn(mobile, tile)
+	var pid := CInt(GetObjProperty(tile, "#PID"));
+	if ( pid )
+		var process := GetProcess(pid);
+		process.SendEvent(mobile);
+		
+		return 1;
+	endif
+	
+	return 0;
+endprogram

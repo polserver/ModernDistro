@@ -3,9 +3,8 @@ use os;
 use util;
 
 include ":attributes:attributes";
+include ":timedscripts:timedScripts";
 include ":magery:spells";
-include "include/client";
-include "include/sounds";
 
 program cast_CUNNING( parms )
     var caster := parms[1];
@@ -22,15 +21,18 @@ program cast_CUNNING( parms )
     if ( !MS_MobileCheck(caster, cast_on) )
         return 0;
     endif
-  PlaySoundEffect(cast_on, SFX_SPELL_CUNNING);
-  PlayObjectCenteredEffect( cast_on, FX_BLESS_EFFECT, 7,7);
-    
-  if (!CanMod(cast_on, "int"))
-	SendSysMessage(caster,"Already under the influence!");
-	return;
-  endif
-  var magery := GetAttribute(caster, MAGERY);
-  var mod_amount := GetModAmount( magery );
-  var duration := GetModDuration( magery );
-  DoTempMod(cast_on, "int", mod_amount, duration);
+
+	MS_PlaySpellSFX(info.spell_id, cast_on);
+	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
+	
+	// Int increase % = (Eval / 10 + 1)
+	var percent := CDbl(AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 10) + 1;
+	var points := CInt(AP_GetStat(cast_on, INTELLIGENCE) * (percent / 100));
+	
+	// Duration: ((Eval / 5) + 1) * 6
+	var duration := ((AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 5) + 1) * 6;
+	TS_StartTimer(cast_on, "Cunning", duration, points, caster);
+	
+	return 1;
+
 endprogram

@@ -4,8 +4,6 @@ use util;
 
 include ":attributes:attributes";
 include ":magery:spells";
-include "include/client";
-include "include/sounds";
 
 program cast_heal(parms)
     var caster := parms[1];
@@ -22,14 +20,11 @@ program cast_heal(parms)
     if ( !MS_MobileCheck(caster, cast_on) )
         return 0;
     endif
-  PlayObjectCenteredEffect(cast_on, FX_SPARK_EFFECT, 7, 0x10);
-  PlaySoundEffect(cast_on, SFX_SPELL_HEAL);
-    
-	// Amount healed: ((Magery / 10) + (1 to 10))
-	var points := (CInt(AP_GetSkill(caster, MAGERY)) / 10) + RandomDiceRoll("1d10");
+	// Amount healed: ((Magery / 10) + (1 to 3))
+	var points := (CInt(AP_GetSkill(caster, MAGERY)) / 10) + ( RandomInt(3) + 1 );
 	
-//	MS_PlaySpellSFX(info.spell_id, cast_on);
-//	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
+	MS_PlaySpellSFX(info.spell_id, cast_on);
+	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
 
 	var healed := AP_GetVital(cast_on, HITS);
 	HealDamage(cast_on, points);
@@ -42,15 +37,4 @@ program cast_heal(parms)
 	endif
 	
 	return 1;
-/*
-  var healed := CInt(GetAttribute(caster, MAGERY) / 20) + 5;
-  if(healed > 20)
-	healed := 20;
-  endif
-  if(cast_on.isA(POLCLASS_NPC))
-    healed := healed * 2;
-  endif
-  HealDamage(cast_on, healed);
-  SendSysMessage(caster, "You healed " + healed + " damage.");
-  */
 endprogram

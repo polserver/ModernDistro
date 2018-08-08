@@ -3,8 +3,8 @@ use uo;
 use util;
 
 include ":magery:spells";
-include "include/client";
-include "include/sounds";
+include ":attributes:attributes";
+//include ":keys:key";
 
 program cast_strength( parms )
   var caster := parms[1];
@@ -18,76 +18,32 @@ program cast_strength( parms )
         SendSysMessage (caster, "Cancelled.", color := 33);
         return 0;
     endif
-  
-  if (!cast_on.locked)
-    SendSysMessage(caster,"That is not locked!");
-    return;
-  endif
-  if ((cast_on.multi) || (GetObjProperty(cast_on,"houseserial")) || (GetObjProperty(cast_on,"house_serial")))
-    SendSysMessage(caster, "You cannot magic unlock that!");
-    PlayLightningBoltEffect(caster);
-    return;
-  endif
-  if (GetObjProperty(cast_on, "#U"))
-    if (GetObjProperty(cast_on, "#U") > ReadGameClock())
-      SendSysMessage(caster, "You must wait to pick this lock!");
-      return;
-    endif
-  endif
-  var diff := CInt(GetObjProperty(cast_on,"MLockPickDiff"));
-  if(diff)
-    PlaySoundEffect(caster, SFX_SPELL_UNLOCK);
-    if(diff <= 25)
-      cast_on.locked := 0;
-      PrintTextAbovePrivate(cast_on, "*Unlocked!*", caster);
-      EraseObjProperty(cast_on, "MLockPickDiff");
-      return;
-    else
-      SendSysMessage(caster, "Your spell doesnt seem to work on that lock");
-      return;
-    endif
-  else
-    var diffi := CInt(GetObjProperty(cast_on,"LockPickDiff"));
-    if(diffi)
-      PlaySoundEffect(caster, SFX_SPELL_UNLOCK);
-      if(diffi <= 25)
-        cast_on.locked := 0;
-        PrintTextAbovePrivate(cast_on, "*Unlocked!*", caster);
-        return;
-      else
-        SendSysMessage(caster, "Your spell doesnt seem to work on that lock");
-        return;
-      endif
-    else
-      if(GetObjProperty(cast_on, "level"))
-        PickTreasureChest(caster, cast_on);
-      else
-        SendSysMessage(cast_on, "You can't seem to unlock that!");
-        return;
-      endif
-    endif
-  endif
-endprogram
+	if ( cast_on.IsA(POLCLASS_CONTAINER) )
+		SendSysMessage(caster, "That is not a container.", 3, 33);
+		return 0;
+	endif
+	if (!cast_on.locked)
+		SendSysMessage(caster,"That is not locked!", 3, 33);
+		return;
+	endif
+// Do not know what the authors were thinking with this.
+// I would think Magic Unlock wouldn't be concerned if a container
+// was lockable. After all we are using magick here :)
+/*	if ( !KP_IsLockable(targ) )
+		SendSysMessage(caster, "That is not lockable.");
+		return 0;
+	endif
+*/
+	if ( cast_on.locked )
+		// Note: No lock levels, but you could if ( CInt(GetObjProperty(cast_on, "LockLevel")) <= 1 )
+		if ( GetObjProperty(cast_on, "MagicLock") != error )
+			PlaySoundEffect(caster, SFX_SPELL_UNLOCK);
+		    PrintTextAbovePrivate(cast_on, "*Unlocked!*", caster, color := 66);	
+			EraseObjProperty(cast_on, "MagicLock");
+			cast_on.locked := 0;
+		endif
+	endif
+	
+	return 1;
 
-function PickTreasureChest(me, chest)
-  var lvl := GetObjProperty(chest,"level");
-  if(!lvl)
-    SendSysMessage(me, "You cannot pick that.");
-    return;
-  endif
-  if(!chest.locked)
-    SendSysMessage(me,"That doesn't appear to be locked");
-    return;
-  endif
-  PlaySoundEffect(me, SFX_242);
-  sleep(1);
-  var diff := (lvl * 25) - 10;
-  if(diff <= 25)
-    PlaySoundEffect(chest,SFX_200);
-    PrintTextAbovePrivate(chest, "*Unlocked!*", me);
-    chest.locked := 0;
-  else
-    SendSysMessage(me, "Your spell doesnt seem to work on that lock");
-    return;
-  endif
-endfunction
+endprogram

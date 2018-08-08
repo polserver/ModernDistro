@@ -1,0 +1,21 @@
+/*
+ * $Id: walkOn.src 814 2006-09-14 07:21:18Z austinheilman $
+ *
+ */
+
+use uo;
+
+include ":timedscripts:timedScripts";
+
+program WalkOn(mobile, spiderweb)
+	if ( mobile.cmdlevel >= 2 )
+		return 0;
+	elseif ( mobile.dead )
+		return 0;
+	endif
+
+	SendSysMessage(mobile, "You become caught in the sticky web.");
+	TS_StartTimer(mobile, "paralysis", 30);
+
+	return 1;
+endprogram

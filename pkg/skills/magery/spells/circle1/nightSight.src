@@ -3,8 +3,6 @@ use util;
 
 include ":attributes:attributes";
 include ":magery:spells";
-include "include/client";
-include "include/sounds";
 
 program cast_nightsight(parms)
     var caster := parms[1];
@@ -23,8 +21,14 @@ program cast_nightsight(parms)
     endif
     
 
-  PlaySoundEffect(cast_on, SFX_SPELL_NIGHT_SIGHT );
-  var magery := GetAttribute(caster, MAGERY);
-  cast_on.setlightlevel( 0, magery * 60 );
-  PlayObjectCenteredEffect( cast_on, FX_BLESS_EFFECT, 10,10);
+	MS_PlaySpellSFX(info.spell_id, cast_on);
+	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
+		
+	// If target magery < 10, no effect
+	// Note: On OSI, spell duration is until next dawn or dusk
+	if ( AP_GetSkill(cast_on, MAGERY) > 10.0 )
+		cast_on.SetLightLevel(0, CInt(AP_GetSkill(caster, MAGERY)) * 60);
+	endif
+	
+	return 1;
 endprogram

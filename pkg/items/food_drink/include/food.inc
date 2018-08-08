@@ -21,7 +21,7 @@ use cfgfile;
  *
  */
 function RandomFoodObjType(category:=0)
-	var cfg_file := ReadConfigFile(":food&drink:food");
+	var cfg_file := ReadConfigFile(":food_drink:food");
 	if ( cfg_file.errortext )
 		return error{"errortext":="Unable to read food.cfg ->"+cfg_file.errortext};
 	endif

@@ -3,6 +3,7 @@ use uo;
 use util;
 
 include ":attributes:attributes";
+include ":timedscripts:timedScripts";
 include ":magery:spells";
 include "include/client";
 include "include/sounds";
@@ -23,29 +24,48 @@ program cast_curse( parms )
         return 0;
     endif
     
+	// Note: Skill gain is a little too easy
+	var resist_skill := AP_GetSkill(caster, RESISTING_SPELLS);
+	Print("diff b:"+(15 * (resist_skill / 100.0)));
+	var diff := info.difficulty + (15 * (resist_skill / 100.0));
+	var adv_diff_bonus := info.difficulty + CInt(((RandomInt(150) + 1.0) - (15 * (resist_skill / 100.0) * 10)) / 10.0);
+	if ( adv_diff_bonus < 0 )
+			adv_diff_bonus := 0;
+	endif
+	var adv_diff := resist_skill + adv_diff_bonus;
+	Print("diff:"+diff+" adv_diff:"+adv_diff);
+// Not sure what tekproxy was thinking with the following but he commented it out so I am leaving it in.
+/*
+	for i := 1 to 1000
+		diff := info.difficulty + (15 * (resist_skill / 100.0));
+		adv_diff_bonus := info.difficulty + CInt(((RandomInt(150) + 1.0) - (15 * (resist_skill / 100.0) * 10)) / 10.0);
+		if ( adv_diff_bonus < 0 )
+				adv_diff_bonus := 0;
+		endif
+		adv_diff := resist_skill + adv_diff_bonus;
+		SkillCheck(caster, RESISTING_SPELLS, diff, adv_diff);
+		SleepMS(2);
+	endfor
+*/
+	MS_PlaySpellSFX(info.spell_id, cast_on);
+	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
+	
+	// Duration: 120% Magery, up to 144 seconds
+	var duration := CInt(AP_GetSkill(caster, MAGERY) * 1.2);
+	if ( duration > 144 )
+			duration := 144;
+	endif
+	
+	// Decrease % = (Caster Magery / 10) + 1) - (Target Resist / 15)
+	// Note: OSI says resist scales down potency but doesn't explain HOW
+	var percent := CDbl((AP_GetSkill(caster, MAGERY) / 10) + 1) - (AP_GetSkill(cast_on, RESISTING_SPELLS) / 15);
+	var dex_points := CInt(AP_GetStat(cast_on, DEXTERITY) * (percent / 100));
+	var int_points := CInt(AP_GetStat(cast_on, INTELLIGENCE) * (percent / 100));
+	var str_points := CInt(AP_GetStat(cast_on, STRENGTH) * (percent / 100));
+	
+	TS_StartTimer(cast_on, "Clumsy", duration, dex_points, caster);
+	TS_StartTimer(cast_on, "FeebleMind", duration, int_points, caster);
+	TS_StartTimer(cast_on, "Weaken", duration, str_points, caster);
 
-        // Do one reflection check first
-        if(Reflected(cast_on))
-            SendSysMessage (caster, "The spell was reflected back onto you!!!", color := 33);
-            cast_on := caster;
-        endif
-        
-  PlaySoundEffect(cast_on, SFX_SPELL_CURSE);
-  PlayObjectCenteredEffect( cast_on, FX_CURSE_EFFECT, 10,10);
-  var magery := GetAttribute(caster, MAGERY);
-  var mod_amount := Resisted(info.circle,caster,cast_on,GetModAmount( magery ));
-  var duration := GetModDuration( magery );
-	SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "curse" });
-  if(Reflected(cast_on))
-	cast_on := caster;
-  endif
-  if (CanMod(cast_on, "str"))
-	DoTempMod(cast_on, "str", 0- mod_amount, duration);
-  endif
-  if (CanMod(cast_on, "dex"))
-	DoTempMod(cast_on, "dex", 0- mod_amount, duration);
-  endif
-  if (CanMod(cast_on, "int"))
-	DoTempMod(cast_on, "int", 0- mod_amount, duration);
-  endif
+	return 1;
 endprogram

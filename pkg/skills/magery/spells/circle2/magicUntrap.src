@@ -2,10 +2,8 @@ use os;
 use uo;
 use util;
 
-include ":attributes:attributes";
 include ":magery:spells";
-include "include/client";
-include "include/sounds";
+include ":traps:traps";
 
 program cast_strength(parms)
   var caster := parms[1];
@@ -20,14 +18,30 @@ program cast_strength(parms)
         return 0;
     endif
 
-  if(GetObjProperty(cast_on, "trap_strength") > 25)
-    SendSysMessage(caster, "You couldn't disarm the trap.");
-  else
-    var oldscript := GetObjProperty(cast_on, "oldscript");
-    PlaySoundEffect(caster, SFX_SPELL_MAGIC_UNTRAP);
-    PlayStationaryEffect(cast_on.x, cast_on.y, cast_on.z, 0x376a, 30, 30, 0, cast_on.realm);
-    EraseObjProperty(cast_on, "trap_type");
-    EraseObjProperty(cast_on, "trap_strength");
-    cast_on.usescript := oldscript;
-  endif
+	if ( !cast_on.IsA(POLCLASS_CONTAINER) )
+		SendSysMessage(caster, "This spell wont work on that!"); // what is the cliloc?
+		return 0;
+	endif
+	
+	var trap_list := GetTrapList(cast_on);
+	var index := 0;
+	
+	for i := 1 to trap_list.Size()
+		if ( (trap_list[i]).Name == "magicTrap" )
+			index := i;
+			break;
+		endif
+	endfor
+	
+	if ( !index )
+		SendSysMessage(caster, "This container isn't trapped!");
+		return 0;
+	endif
+	
+	MS_PlaySpellSFX(info.spell_id, cast_on);
+	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
+	
+	RemoveTrap(cast_on, index);
+	
+	return 1;
 endprogram

@@ -3,37 +3,57 @@ use os;
 
 
 include ":attributes:attributes";
+include ":timedScripts:timedScripts";
 include ":magery:spells";
-include "include/client";
-include "include/sounds";
+include ":damage:damage";
 
 program cast_archprot( parms )
     var caster := parms[1];
     var info := parms[2];
-    var cast_on;
-    cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_HELPFUL);
-    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
-        cast_on := parms[4];
-    endif
-    if (!cast_on)
-        SendSysMessage (caster, "Cancelled.", color := 33);
-        return 0;
-    endif
-    if ( !MS_MobileCheck(caster, cast_on) )
-        return 0;
-    endif
-    
-
-  PlaySoundEffect(caster, SFX_SPELL_PROTECTION);
-  var magery := GetAttribute(caster, MAGERY);
-  var mod_amount := CInt(RandomInt(6) + 5);
-  var duration := GetModDuration( magery );
-  foreach cast_on in ListMobilesNearLocation( cast_on.x, cast_on.y, cast_on.z, CInt(magery/15), caster.realm );
-    if((CheckLineOfSight(cast_on, caster)) and (cast_on.cmdlevel < 2))
-	  if(CanMod(cast_on, "ar"))
-	    PlayObjectCenteredEffect( cast_on, FX_BLESS_EFFECT, 7,7);
-	    DoTempMod(cast_on, "ar", mod_amount, duration);
-	  endif
+	// Get all targets in area that are in party.
+	var area_size := GetConfigInt(info.spell_config, "AreaSize");
+	var includes := caster.party;
+	if ( includes == error )
+			includes := array{caster.serial};
+	else
+			includes.Append(caster.serial);
 	endif
-  endforeach
+
+	var friendlies := MS_GetFriendlies(caster, area_size);
+	if ( friendlies != error )
+			includes += friendlies;
+	endif
+	
+	var targs := MS_GetValidTargets(caster, area_size, 1, "", includes);
+	foreach vtarg in targs
+		if ( !GetObjProperty(vtarg, "Protection") )
+			ApplyArchProtection(vtarg);
+		else
+			RemoveArchProtection(vtarg);
+		endif
+
+		MS_PlaySpellGFX(info.spell_id, vtarg, caster);
+	endforeach
+	
+	return 1;
 endprogram
+
+function ApplyArchProtection(mobile)
+	ModifyResistance(mobile, DMG_PHYSICAL, -35);
+	AP_ModifySkillMod(mobile, RESISTING_SPELLS, -35);
+	
+	// At present there is no determined way to modify casting speed and other stats:
+	// ModifyMagicProperties(caster, "FasterCastSpeed", -2);
+	
+	SetObjProperty(mobile, "Protection", 1);
+endfunction
+
+function RemoveArchProtection(mobile)
+	ModifyResistance(mobile, DMG_PHYSICAL, 35);
+	AP_ModifySkillMod(mobile, RESISTING_SPELLS, 35);
+	
+	// At present there is no determined way to modify casting speed and other stats:
+	// ModifyMagicProperties(caster, "FasterCastSpeed", 2);
+	
+	EraseObjProperty(mobile, "Protection");
+endfunction

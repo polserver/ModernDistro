@@ -1,0 +1,19 @@
+// $Id: walkOn.src 373 2006-06-17 18:27:33Z austinheilman $
+
+use uo;
+use os;
+
+program walkon(mobile, tile)
+
+	// Used to fix unused var report by ecompile: tile;
+	tile := tile;
+
+	if( mobile.dead )
+		Resurrect(mobile);
+	else
+		SendSysMessage(mobile, "You are at peace...");
+	endif
+
+	return 1;
+
+endprogram

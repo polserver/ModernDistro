@@ -1,10 +1,9 @@
 use uo;
 use os;
+use cliloc;
 
 include ":magery:spells";
-include "include/client";
-include "include/sounds";
-include "include/isValidLoc";
+include ":attributes:attributes";
 
 program cast_teleport( parms )
   var caster := parms[1];
@@ -16,56 +15,42 @@ program cast_teleport( parms )
         cast_on := parms[4];
     endif
     if (!cast_on)
-        SendSysMessage (caster, "Cancelled.", color := 33);
+        SendSysMessageCL(caster, 1042023, color := 33); // Cancelled.
         return 0;
     endif
 
-  if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
-        return 0;
-  endif
-
-  if (!isValidLoc(cast_on.x, cast_on.y))
-    SendSysMessage(caster, "You cannot teleport there.");
-    return;
-  endif
-  
-// Start Interdiction
-  interdiction := ListItemsNearLocationOfType(caster.x, caster.y, caster.z, 20, 0xaa07, caster.realm);
-  foreach i in interdiction
-    if (Distance(caster, i) <= CInt( GetObjProperty(i, "Range")))
-	SendSysMessage(caster, "Something interferes with this spell.");
-	return 0;
+	if ( CoordinateDistance(caster.x, caster.y, cast_on.x, cast_on.y) > 11 )
+		SendSysMessageCL(caster, 501975, color := 33); // That is too far away.
+		return 0;
 	endif
-  endforeach
-  interdiction := ListItemsNearLocationOfType(cast_on.x, cast_on.y, cast_on.z, 20, 0xaa07, caster.realm);
-  var j := CreateItemAtLocation(cast_on.x, cast_on.y, cast_on.z, 0xeed, 1, caster.realm);
-  foreach i in interdiction
-    if (Distance(j, i) <= CInt( GetObjProperty(j, "Range")))
-	SendSysMessage(caster, "Something interferes with this spell.");
-	DestroyItem(j);
-	return 0;
+	
+	if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+		SendSysMessageCL(caster, 500876, color := 33); // You can't see that.
+		return 0;
 	endif
-  endforeach
-  DestroyItem(j);
-// End Interdiction
+	
+	// Have to add check for Static Housing.
+	
+	if ( cast_on.multi )
+		SendSysMessageCL(caster, 503361, color := 33); // This ability cannot be used to teleport in houses or boats.
+		return 0;
+	endif
+	
+	var orig_pos := struct;
+	orig_pos.+x := caster.x;
+	orig_pos.+y := caster.y;
+	orig_pos.+z := caster.z;
+	orig_pos.+realm := caster.realm;
+	
+	if ( !MoveObjectToLocation(caster, cast_on.x, cast_on.y, cast_on.z, cast_on.realm) );
+		SendSysMessageCL(caster, 502457, color := 33); // Not a supported teleporter location.
+		return 0;
+	endif
 
-  
-  var sx := caster.x, sy := caster.y, sz := caster.z; 
-  var multicheck := CreateItemAtLocation(cast_on.x, cast_on.y, cast_on.z, 0xeed, 1, caster.realm);
-  multicheck.hidden := 1;
-  if (multicheck.multi.serial != error)
-    SendSysMessage(caster,"You cannot teleport there.");
-    DestroyItem(multicheck);
-    return;
-  else
-    if((multicheck.x > 5120) && (multicheck.x < 6133) && (multicheck.y > 2063) && (multicheck.y < 2303))
-      DestroyItem(multicheck);
-      return;
-    endif
-    DestroyItem(multicheck);
-    MoveObjectToLocation( caster, cast_on.x, cast_on.y, cast_on.z, caster.realm );
-    PlayStationaryEffect( sx, sy, sz, FX_SMOKE, speed:=0xa, loop:=0xa, explode := 0, realm := caster.realm );
-    PlayStationaryEffect( caster.x, caster.y, caster.z, FX_SMOKE, speed:=0xa, loop:=0xa, explode := 0, realm := caster.realm );
-    PlaySoundEffect( caster, SFX_SPELL_TELEPORT );
-  endif
+	MS_PlaySpellSFX(info.spell_id, cast_on);
+	MS_PlaySpellGFX(info.spell_id, orig_pos, caster);
+	MS_PlaySpellGFX(info.spell_id, caster, caster);
+
+	//PlayStationaryEffect( caster.x, caster.y, caster.z, GFX_SMOKE, 10, 10, 0, caster.realm );
+
 endprogram

@@ -1,13 +1,9 @@
 use uo;
 use cfgfile;
-
-include "include/eventID";
-include ":attributes:attributes";
+use cliloc;
 include ":magery:spells";
-include "include/client";
-include "include/sounds";
-include ":poisonwatcher:poisons";
-include ":damage:damage";
+include ":attributes:attributes";
+include ":timedScripts:poisonUtil";
 
 var npccfg := ReadConfigFile("npcdesc");
 
@@ -15,51 +11,47 @@ var npccfg := ReadConfigFile("npcdesc");
 program cast_archcure(parms)
     var caster := parms[1];
     var info := parms[2];
-    var cast_on;
-    cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_HELPFUL);
-    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
-        cast_on := parms[4];
-    endif
-    if (!cast_on)
-        SendSysMessage (caster, "Cancelled.", color := 33);
-        return 0;
-    endif
-    if ( !MS_MobileCheck(caster, cast_on) )
-        return 0;
-    endif
-    
+	MS_PlaySpellSFX(info.spell_id, caster);
 
-  PlaySoundEffect(caster, SFX_SPELL_ARCH_CURE);
-  var magery := GetAttribute(caster, MAGERY);
-  var potency := CInt(GetAttribute( caster, MAGERY ) /33)+1;
-  foreach cast_on in ListMobilesNearLocation( cast_on.x, cast_on.y, cast_on.z, CInt(magery/15), caster.realm );
-    if((CheckLineOfSight(cast_on, caster)) and (cast_on.cmdlevel < 2))
-	  PlayObjectCenteredEffect( cast_on, FX_BLESS_EFFECT, 10,10);
-      if(cast_on.isA(POLCLASS_NPC))
-        var element := npccfg[cast_on.npctemplate].elemental;
-        if(element == "poison")
-          var ev := array;
-          ev.+ type;
-          ev.+ source;
-          ev.type := EVID_PEACEMADE;
-          SendEvent(cast_on, ev);
-          ev.source := caster;
-          SendEvent(cast_on, ev);
-          ev.type := EVID_ENGAGED;
-          SendEvent(cast_on, ev);
-          ApplyRawSpellDamageEX(cast_on, potency, DMG_POISON, caster, info.Circle);
-        endif
-      endif
-      if (ListPoisonsByType(cast_on, "defaultPoison").size() > 0)
-        CurePoison(cast_on, 180, "defaultPoison", potency);
-        if (ListPoisonsByType(cast_on, "defaultPoison").size() > 0)
-          SendSysMessage(caster, "You cure some poison.");  
-          SendSysMessage(cast_on, caster.name + " has partially cured you!");
-        else
-          SendSysMessage(caster, cast_on.name + " cured.");
-          SendSysMessage(cast_on, caster.name + " has cured you completely!");
-        endif
-      endif
-    endif
-  endforeach
+	// Get all targets in area that are in party.
+	var area_size := GetConfigInt(info.spell_config, "AreaSize");
+	var includes := caster.party;
+	if ( includes == error )
+			includes := array{caster.serial};
+	else
+			includes.Append(caster.serial);
+	endif
+
+	var friendlies := MS_GetFriendlies(caster, area_size);
+	if ( friendlies != error )
+			includes += friendlies;
+	endif
+	
+	var targs := MS_GetValidTargets(caster, area_size, 1, "", includes);
+	foreach vtarg in targs
+		// Get poison level
+		var poison_names := TS_GetTimerNames(vtarg, "P");
+		var poison_level := 1;
+		
+		foreach timer_name in ( poison_names )
+			var timer_info := TS_GetTimerInfo(vtarg, timer_name);
+			if ( timer_info.level > poison_level )
+					poison_level := timer_info.level;
+			endif
+		endforeach
+	
+		//% Chance to cure: (Magery * 1.42) + (110 - (Poison level * 33)) (87% chance for level 5 poison at GM magery)
+		var chance := CInt(AP_GetSkill(caster, MAGERY) * 1.42) + (110 - (poison_level * 33));
+		if ( chance >= RandomInt(100) + 1 )
+			// NOTE: There is still a 1 in 100 chance that this wont work..
+			TS_CurePoison(vtarg, 10000, "P", poison_level);
+			PrintTextAbovePrivateCL(vtarg, vtarg, 1008072, color := 33); // You have been cured of all poisons.
+		else
+			PrintTextAbovePrivateCL(vtarg, vtarg, 1008073, color := 33); // The attempt to cure you has failed.
+		endif
+		
+		MS_PlaySpellGFX(info.spell_id, vtarg, caster);
+	endforeach
+
+	return 1;
 endprogram

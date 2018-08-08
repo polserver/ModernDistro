@@ -3,6 +3,7 @@ use os;
 use util;
 
 include ":attributes:attributes";
+include ":timedscripts:timedScripts";
 include ":magery:spells";
 include "include/client";
 include "include/sounds";
@@ -22,14 +23,18 @@ program cast_AGILITY( parms )
     if ( !MS_MobileCheck(caster, cast_on) )
         return 0;
     endif
-  PlaySoundEffect(caster, 0x1e8);
-  PlayObjectCenteredEffect(caster, 0x373a, 7,7);
-  if(!CanMod(cast_on, "dex"))
-    SendSysMessage(caster,"Another existing effect negates your spell!");
-    return;
-  endif
-  var magery := GetAttribute(caster, MAGERY);
-  var mod_amount := GetModAmount( magery );
-  var duration := GetModDuration( magery );
-  DoTempMod(cast_on, "dex", mod_amount, duration);
+	MS_PlaySpellSFX(info.spell_id, cast_on);
+	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
+	
+	// Dex increase % = (Eval / 10 + 1)
+	var percent := CDbl(AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 10) + 1;
+	var points := CInt(AP_GetStat(cast_on, DEXTERITY) * (percent / 100));
+	
+	// Duration: ((Eval / 5) + 1) * 6
+	var duration := ((AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 5) + 1) * 6;
+	TS_StartTimer(cast_on, "Agility", duration, points, caster);
+	
+	return 1;
+
+
 endprogram
