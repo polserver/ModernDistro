@@ -27,3 +27,4 @@ I am starting this Distro change log for the Modern Distro. Up until now all cha
 2018-08-09	Fixed an error in determining party members in archProtection.src and archCure.src.
 2018-08-08	Added a cliloc YsyMessage to fireField.src if caster does not have LOS to targetted location.
 2018-08-09	Upgraded mos9t 5, 6, and 7 circle spells to work with the spell casting and timedScripts in the Modern Distro. Some 5, 6, and 7 circle spells are better left as is.
+2018-08-09	Removed all references to fire field, parafield, and poison field from the main itemdesc.cfg file in /config.
