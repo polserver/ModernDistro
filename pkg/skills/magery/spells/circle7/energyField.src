@@ -1,13 +1,13 @@
 use os;
 use uo;
 use util;
+use cliloc;
 
 include ":attributes:attributes";
+include ":timedScripts:timedScripts";
 include ":magery:spells";
-include "include/client";
-include "include/sounds";
-include "include/fields";
-include "include/objtype";
+include ":magery:fields";
+include "include/facings";
 
 program efield( parms )
   var caster := parms[1];
@@ -17,29 +17,53 @@ program efield( parms )
         cast_on := parms[4];
     endif
     if (!cast_on)
-        SendSysMessage (caster, "Cancelled.", color := 33);
+        SendSysMessageCL(caster, 1042023, color := 33); // Cancelled.
         return 0;
     endif
+	if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+		SendSysMessageCL(caster, 500979, color:= 33); // You cannot see that location.
+		return 0;
+	endif
 
-  PlaySoundEffect(caster,0x20c);
+	MS_PlaySpellSFX(info.spell_id, cast_on);
+	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
 
-  var fields := {};
-  var listeners := {};
-  var sufferers := {};
-  var x := cast_on.x;
-  var y := cast_on.y;
-  var z := cast_on.z;
-  case(get_direction(caster))
-	"NS" : fields := CreateNorthSouthField(caster, UOBJ_EFIELD_NS, x, y, z, 5);
-	"EW" : fields := CreateEastWestField(caster, UOBJ_EFIELD_EW, x, y, z, 5);
-  endcase
-  PlaySoundEffect(caster,0x20c);
-  Detach();
-  var duration := 20 + ( CInt(GetAttribute( caster, MAGERY ) ) / 3 );
-  var i;
-  sleep(duration);
-  foreach fieldpart in fields
-    DestroyItem(fieldpart);
-  endforeach
+	var objtype;
+	var direction := GetDirectionByFacing(caster);
+	case ( direction )
+		FIELD_SHAPE_HORIZONTAL: objtype := "EnergyFieldEW"; break;
+		FIELD_SHAPE_VERTICAL: objtype := "EnergyFieldNS"; break;
+	endcase
 
+	// Duration: 28% Magery +2 seconds
+	// On OSI the duration max is 35.6, but this probably wont work without some tweaking
+	var duration := CInt((AP_GetSkill(caster, MAGERY) * 0.28) + 2);
+	var area_size := GetConfigInt(info.spell_config, "AreaSize");
+
+	var coordinates := GetCoordinatesForField(cast_on.x, cast_on.y, direction, CInt(area_size/2));
+	foreach coord in ( coordinates )
+		var cast_on_z := cast_on.z;
+		var standing_z := struct;
+		standing_z := GetStandingHeight(coord.x, coord.y, cast_on.z, caster.realm);
+		if ( cast_on_z < standing_z )
+			cast_on_z := GetStandingHeight(coord.x, coord.y, cast_on.z, caster.realm);
+		endif
+
+		if ( CheckLosAt(caster, coord.x, coord.y, cast_on_z ) )
+			continue; // Only create a field piece if the caster has line of sight.
+		endif
+		var item := CreateItemAtLocation(coord.x, coord.y, cast_on_z.z, objtype, 1, caster.realm);
+		if ( item.errortext )
+			SendSysMessage(caster, "Error - "+item.errortext);
+			continue;
+		endif
+
+		SetObjProperty(item, "SummonedField", caster.serial);
+		item.SetOwner(caster);
+		item.SetDuration(duration);
+
+		SleepMS(2);
+	endforeach
+
+	return 1;
 endprogram

@@ -12,11 +12,14 @@ program cast_archprot( parms )
     var info := parms[2];
 	// Get all targets in area that are in party.
 	var area_size := GetConfigInt(info.spell_config, "AreaSize");
-	var includes := caster.party;
-	if ( includes == error )
+	var party_members := caster.party.members;
+	var includes := {};
+	if ( party_members == error )
 			includes := array{caster.serial};
 	else
-			includes.Append(caster.serial);
+		foreach member in party_members
+			includes.Append(member.serial);
+		endforeach
 	endif
 
 	var friendlies := MS_GetFriendlies(caster, area_size);

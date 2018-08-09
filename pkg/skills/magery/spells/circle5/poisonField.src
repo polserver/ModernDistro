@@ -1,12 +1,12 @@
 use os;
 use uo;
 use util;
+use cliloc;
 
-include ":attributes:attributes";
 include ":magery:spells";
-include "include/objtype";
-include "include/fields";
-
+include ":magery:fields";
+include ":attributes:attributes";
+include "include/facings";
 
 program poisonfield( parms )
   var caster := parms[1];
@@ -16,28 +16,52 @@ program poisonfield( parms )
         cast_on := parms[4];
     endif
     if (!cast_on)
-        SendSysMessage (caster, "Cancelled.", color := 33);
+        SendSysMessageCL(caster, 1042023, color := 33); // Cancelled.
         return 0;
     endif
   if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
-        SendSysMessage (caster, "You cannot see that location.", color := 33);
+        SendSysMessageCL(caster, 500979, color := 33); // You cannot see that location.
         return 0;
   endif
   
-  var fields := {};
-  var listeners := {};
-  var sufferers := {};
-  var x := cast_on.x;
-  var y := cast_on.y;
-  var z := cast_on.z;
-  case(get_direction(caster))
-	"NS" : fields:= CreateNorthSouthField(caster, UOBJ_POISONFIELD_NS, x, y, z, 5);
-	"EW" : fields:= CreateEastWestField(caster, UOBJ_POISONFIELD_EW, x, y, z, 5);
-  endcase
-  Detach();
-  var duration := 20 + ( CInt(GetAttribute( caster, MAGERY ) ) / 3 );
-  sleep(duration);
-  foreach fieldpart in fields
-    DestroyItem(fieldpart);
-  endforeach
+	var objtype;
+	var direction := GetDirectionByFacing(caster);
+	case ( direction )
+		FIELD_SHAPE_HORIZONTAL: objtype := "PoisonFieldEW"; break;
+		FIELD_SHAPE_VERTICAL: objtype := "PoisonFieldNS"; break;
+	endcase
+
+	// Duration: (3 + (Magery * 0.4)) seconds
+	var duration := CInt(3 + AP_GetSkill(caster, MAGERY) * 0.4);
+	// Level is the same as Poison spell
+	var poison_level := MS_GetPoisonLevel(caster, cast_on);
+	var area_size := GetConfigInt(info.spell_config, "AreaSize");
+
+	var coordinates := GetCoordinatesForField(cast_on.x, cast_on.y, direction, CInt(area_size/2));
+	foreach coord in ( coordinates )
+		var cast_on_z := cast_on.z;
+		var standing_z := struct;
+		standing_z := GetStandingHeight(coord.x, coord.y, cast_on.z, caster.realm);
+		if ( cast_on_z < standing_z )
+			cast_on_z := GetStandingHeight(coord.x, coord.y, cast_on.z, caster.realm);
+		endif
+
+		if ( CheckLosAt(caster, coord.x, coord.y, cast_on_z ) )
+			continue; // Only create a field piece if the caster has line of sight.
+		endif
+		var item := CreateItemAtLocation(coord.x, coord.y, cast_on_z.z, objtype, 1, caster.realm);
+		if ( item.errortext )
+			SendSysMessage(caster, "Error - "+item.errortext);
+			continue;
+		endif
+
+		SetObjProperty(item, "SummonedField", caster.serial);
+		SetObjProperty(item, "Poisonlevel", poison_level);
+		item.SetOwner(caster);
+		item.SetDuration(duration);
+
+		SleepMS(2);
+	endforeach
+
+	return 1;
 endprogram

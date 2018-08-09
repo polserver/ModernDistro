@@ -1,11 +1,10 @@
 use vitals;
 use uo;
 use cfgfile;
+use cliloc;
 
-include "include/eventID";
 include ":attributes:attributes";
 include ":magery:spells";
-include "include/spellAttack";
 
 var npccfg := ReadConfigFile("npcdesc");
 
@@ -19,7 +18,7 @@ program dispel ( parms )
         cast_on := parms[4];
     endif
     if (!cast_on)
-        SendSysMessage (caster, "Cancelled.", color := 33);
+        SendSysMessageCL(caster, 1042023, color := 33); // Cancelled.
         return 0;
     endif
     if ( !MS_MobileCheck(caster, cast_on) )

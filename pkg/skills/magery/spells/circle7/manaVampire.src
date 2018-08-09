@@ -1,9 +1,8 @@
 use uo;
+use cliloc;
 
 include ":attributes:attributes";
 include ":magery:spells";
-include "include/client";
-include "include/sounds";
 
 program mana_drain ( parms )
     var caster := parms[1];
@@ -14,45 +13,49 @@ program mana_drain ( parms )
         cast_on := parms[4];
     endif
     if (!cast_on)
-        SendSysMessage (caster, "Cancelled.", color := 33);
+        SendSysMessageCL(caster, 1042023, color := 33); // Cancelled.
         return 0;
     endif
     if ( !MS_MobileCheck(caster, cast_on) )
         return 0;
     endif
 
-  SetObjProperty(cast_on, "LastHit", {caster.name, caster.serial, "mana vampire"});
 
-// Using POL 0.95 Distro code here
-
- if(Reflected(cast_on))
-	var tmp := cast_on;
-        SendSysMessage (caster, "The spell was reflected back onto you!!!", color := 33);
-	cast_on := caster;
-        caster := tmp;
-  endif
-  if(!cast_on.isA(POLCLASS_MOBILE))
-    SendSysMessage (caster, "That thing doesn't have any mana.");
-    return;
-  endif
-  var dmg := Cint(GetAttribute(caster, "magery") / 3);
-  var diff := Resisted(info.circle, caster, cast_on, dmg);
-  if(diff)
-    PlaySoundEffect(caster, SFX_SPELL_MANA_VAMPIRE);
-    PlayObjectCenteredEffect(cast_on, FX_GLOW, 7,0x10);
-    var gain := 0;
-	if(diff > GetMana(cast_on))
-	  gain := GetMana(cast_on);
-	  SetMana(cast_on, 0);
-	else
-	  gain := diff;
-	  SetMana(cast_on, GetMana(cast_on) - diff);
+	if ( caster.serial == cast_on.serial )
+		SendSysMessageCL(caster, 502649, color := 33); // You cannot cast that on yourself.
+		return 0;
 	endif
-	SetMana(caster, GetMana(caster) + gain);
-	if(GetMana(caster) > GetMaxMana(caster))
-	  SetMana(caster, GetMaxMana(caster));
-	endif
-  endif
 
-  return 1;
+	SetObjProperty(cast_on, "LastHit", {caster.name, caster.serial, "mana vampire"});
+
+	// Mana drained = caster's eval - target's resist
+	var mana_drained := AP_GetSkill(caster, EVALUATING_INTELLIGENCE) - AP_GetSkill(cast_on, RESISTING_SPELLS);
+	var cast_on_mana := AP_GetVital(cast_on, MANA);
+
+	// Can not drain more mana than the target has
+	if ( mana_drained > cast_on_mana )
+		mana_drained := cast_on_mana;
+	endif
+	
+	AP_ConsumeVital(cast_on, MANA, mana_drained);
+	
+	// Can not go above vital cap on caster
+	var caster_mana := AP_GetVital(caster, MANA);
+	var max_mana := AP_GetVitalMaximumValue(caster, MANA);
+
+	if ( mana_drained + caster_mana > max_mana )
+		mana_drained := max_mana - caster_mana;
+	endif
+	
+	// Make sure we don't negatively drain mana.. just in case.
+	if ( mana_drained < 0 )
+		mana_drained := 0;
+	endif
+	
+	AP_SetVital(caster, MANA, caster_mana + mana_drained);
+
+	MS_PlaySpellSFX(info.spell_id, cast_on);
+	MS_PlaySpellGFX(info.spell_id, cast_on, caster);	
+	
+	return 1;
 endprogram

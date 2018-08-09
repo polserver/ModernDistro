@@ -1,4 +1,5 @@
 use uo;
+use cliloc;
 
 include "include/eventID";
 include ":attributes:attributes";
@@ -20,7 +21,7 @@ program mass_dispel ( parms )
         cast_on := parms[4];
     endif
     if (!cast_on)
-        SendSysMessage (caster, "Cancelled.", color := 33);
+        SendSysMessageCL(caster, 1042023, color := 33); // Cancelled.
         return 0;
     endif
   if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )

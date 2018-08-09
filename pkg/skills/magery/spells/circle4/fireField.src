@@ -17,9 +17,10 @@ program spell_firefield( parms )
         SendSysMessageCL(caster, 1042023, color := 33); // Cancelled.
         return 0;
     endif
-  if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
-        return 0;
-  endif
+	if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+		SendSysMessageCL(caster, 500979, color:= 33); // You cannot see that location.
+		return 0;
+	endif
   
 	MS_PlaySpellSFX(info.spell_id, cast_on);
 	MS_PlaySpellGFX(info.spell_id, cast_on, caster);

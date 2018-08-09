@@ -64,7 +64,7 @@ program TimedScript_Incognito(params)
 	// Get name template and if it's a male, get random beard and color and equip it.
 	var name_template;
 	if ( mobile.gender == 0 )
-		name_template := "Human_Male";
+		name_template := "5"; // Human Male names
 		DestroyItem(GetEquipmentByLayer(mobile, LAYER_BEARD));
 		var new_beard := CreateItemInBackpack(mobile, beard_types[RandomInt(beard_types.Size()) + 1]);
 		var new_beard_color := GetConfigStringArray(color_cfg[categories[RandomInt(categories.Size()) + 1]], "Color");
@@ -73,7 +73,7 @@ program TimedScript_Incognito(params)
 		
 		EquipItem(mobile, new_beard);
 	else
-		name_template := "Human_Female";
+		name_template := "6"; // Human Female names
 	endif
 	
 	// Give mobile a random name

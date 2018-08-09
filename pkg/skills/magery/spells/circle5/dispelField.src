@@ -3,9 +3,6 @@ use os;
 
 include ":attributes:attributes";
 include ":magery:spells";
-include "include/client";
-include "include/sounds";
-include "include/fields";
 
 program dispel_field( parms )
   var caster := parms[1];
@@ -19,14 +16,17 @@ program dispel_field( parms )
         return 0;
     endif
 
-  var magery := GetAttribute(caster, MAGERY);
-  var therange := CInt(magery / 10 );
-  var items := ListItemsNearLocation(cast_on.x, cast_on.y, cast_on.z, therange, caster.realm);
-  PlaySoundEffect( caster, SFX_SPELL_DISPEL );
-  foreach item in items
-	if (GetObjProperty(item, "f") == "1")
-	  PlayStationaryEffect( item.x, item.y, item.z, FX_SMOKE, 0xa, 0xa, 0, item.realm );
-      DestroyItem(item);
-	endif
-  endforeach
+	MS_PlaySpellSFX(info.spell_id, cast_on);
+	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
+
+	var area_size := GetConfigInt(info.spell_config, "AreaSize");
+	var items := ListItemsNearLocation(cast_on.x, cast_on.y, cast_on.z, area_size, cast_on.realm);
+	
+	foreach item in items
+		if ( GetObjProperty(item, "SummonedField") )
+			DestroyItem(item);
+		endif
+	endforeach
+	
+	return 1;
 endprogram

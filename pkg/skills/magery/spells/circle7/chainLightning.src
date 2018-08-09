@@ -2,6 +2,7 @@ use vitals;
 use uo;
 use os;
 use util;
+use cliloc;
 
 include ":attributes:attributes";
 include ":magery:spells";
@@ -12,20 +13,8 @@ include ":damage:damage";
 
 
 program cast_chainlightning( parms )
-  var caster := parms[1];
-  var info := parms[2];
-  var cast_on := MS_TargetCoordinates(caster, info.targ, "Select a target.");
-    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
-        cast_on := parms[4];
-    endif
-    if (!cast_on)
-        SendSysMessage (caster, "Cancelled.", color := 33);
-        return 0;
-    endif
-  if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
-        return 0;
-  endif
-/////////////////////// Distro 0.97 stuff here /////////////////////////////////  
+	var caster := parms[1];
+	var info := parms[2];
 
 	// Base damage is a decimal number in between min and max damage
 	var min_damage := CInt(GetConfigInt(info.spell_config, "MinBaseDamage"));
@@ -35,9 +24,17 @@ program cast_chainlightning( parms )
 
 	// Get all targets in area excluding party and self. Damaged is divided by number of valid targets.
 	var area_size := CInt(GetConfigInt(info.spell_config, "AreaSize"));
-	var exclude := GetObjProperty(caster, "#Party");
-	exclude.Append(caster.serial);
-	var targs := MS_GetVaildTargets(caster, area_size, 1, exclude);
+	var party_members := caster.party.members;
+	var excludes := {};
+	if ( party_members == error )
+			excludes := array{caster.serial};
+	else
+		foreach member in party_members
+			excludes.Append(member.serial);
+		endforeach
+	endif
+
+	var targs := MS_GetVaildTargets(caster, area_size, 1, excludes);
 
 	foreach vtarg in targs
                 if((CheckLineOfSight(vtarg, caster)) and (vtarg.cmdlevel < 2))

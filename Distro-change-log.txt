@@ -22,3 +22,8 @@ I am starting this Distro change log for the Modern Distro. Up until now all cha
 2018-08-08	Added walkOn pkg rom 098 Distro to /pkg/items folder.
 2018-08-08	Changed pkg name of food&drink to food_drink. Also changed /pkg/items/food to /pkg/items/food_drink.
 2018-08-08	Completed upgrading spell circles 1 through 4. I want to add more cliloc support to them. Teleport and telekinisis needs support for Static Housing added.
+2018-08-08	Changed the name of the spell script spellReflect.src to magicReflection.src to match the actual name of the spell in the spellbook.
+2018-08-08	Changed the reference to spellReflect to magicReflection in spells.cfg.
+2018-08-09	Fixed an error in determining party members in archProtection.src and archCure.src.
+2018-08-08	Added a cliloc YsyMessage to fireField.src if caster does not have LOS to targetted location.
+2018-08-09	Upgraded mos9t 5, 6, and 7 circle spells to work with the spell casting and timedScripts in the Modern Distro. Some 5, 6, and 7 circle spells are better left as is.

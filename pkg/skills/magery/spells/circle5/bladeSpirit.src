@@ -22,16 +22,20 @@ program cast_summon( parms )
     if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
         return 0;
     endif
-    
+	MS_PlaySpellSFX(info.spell_id, cast_on);
+	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
+
+	// Duration = 120 seconds
+	var duration := CInt( CDbl(GetAttribute(caster, MAGERY)) * 1.25 ) ;
+
     var thecritter := CreateNpcFromTemplate("bladespirit", cast_on.x, cast_on.y, cast_on.z, 0, caster.realm);
-    PlaySoundEffect(thecritter,SFX_SPELL_BLADE_SPIRITS);
     SetObjProperty(thecritter, "summoned",1);
     SetObjProperty(thecritter, "master", caster.serial);
     Detach();
-    sleep( (GetAttribute( caster, MAGERY ) ) );
+    sleep(duration);
     PlaySoundEffect( thecritter, SFX_SPELL_MANA_VAMPIRE );
     PlayStationaryEffect( thecritter.x, thecritter.y, thecritter.z, FX_SMOKE, 0xa, 0xa, 0, thecritter.realm );
-    MoveObjectToLocation(thecritter,0,0,0, "britannia", MOVEOBJECT_FORCELOCATION); // newmap problem
-    ApplyRawDamage(thecritter, GetHp(thecritter) + 3);
+    MoveObjectToLocation(thecritter,0,0,0, "britannia", MOVEOBJECT_FORCELOCATION);
+    ApplyRawDamage(thecritter, GetHp(thecritter) + 3000);
 endprogram
 

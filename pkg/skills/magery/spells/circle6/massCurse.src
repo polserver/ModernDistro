@@ -1,12 +1,11 @@
 use os;
 use uo;
 use util;
+use cliloc;
 
 include ":attributes:attributes";
+include ":timedScripts:timedScripts";
 include ":magery:spells";
-include "include/client";
-include "include/sounds";
-include "include/spellAttack";
 
 program cast_curse( parms )
   var caster := parms[1];
@@ -16,38 +15,34 @@ program cast_curse( parms )
         cast_on := parms[4];
     endif
     if (!cast_on)
-        SendSysMessage (caster, "Cancelled.", color := 33);
+        SendSysMessageCL(caster, 1042023, color := 33); // Cancelled.
         return 0;
     endif
   if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
         return 0;
   endif
   
-  PlaySoundEffect(caster, SFX_SPELL_MASS_CURSE);
-  var magery := GetAttribute(caster, MAGERY);
-  var mod_amount := GetModAmount( magery );
-  var duration := GetModDuration( magery );
-  Detach();
-  foreach cast_on in ListMobilesNearLocation( cast_on.x, cast_on.y, cast_on.z, 4, caster.realm );
-	SetObjProperty(cast_on, "LastHit", {caster.name, caster.serial, "mass curse"});
-    if(Reflected(cast_on))
-	  cast_on := caster;
-    endif
-    PlaySoundEffect(cast_on, SFX_SPELL_MASS_CURSE);
-    PlayObjectCenteredEffect( cast_on, FX_CURSE_EFFECT, 10,10);
-	send_attack(cast_on,caster, 46);
-    if(cast_on.criminal == 0)
-      caster.setCriminal(1);
-    endif
-    mod_amount := Resisted(info.circle,caster,cast_on, GetModAmount( magery ));
-	if (CanMod(cast_on, "str"))
-	  DoTempMod(cast_on, "str", 0- mod_amount, duration);
+	MS_PlaySpellSFX(info.spell_id, cast_on);
+
+	// Get all targets in area excluding party and self.
+	var area_size := GetConfigInt(info.spell_config, "AreaSize");
+	var party_members := caster.party.members;
+	var excludes := {};
+	if ( party_members == error )
+			excludes := array{caster.serial};
+	else
+		foreach member in party_members
+			excludes.Append(member.serial);
+		endforeach
 	endif
-	if (CanMod(cast_on, "dex"))
-	  DoTempMod(cast_on, "dex", 0- mod_amount, duration);
-	endif
-	if (CanMod(cast_on, "int"))
-	  DoTempMod(cast_on, "int", 0- mod_amount, duration);
-	endif
-  endforeach
+
+	// Duration: 120% Magery
+	var duration := CInt(AP_GetSkill(caster, MAGERY) * 1.2);
+	var targs := MS_GetValidTargets(cast_on, area_size, 1, excludes);
+	foreach vtarg in targs
+		MS_PlaySpellGFX(info.spell_id, vtarg, caster);
+		TS_StartTimer(vtarg, "Curse", duration, 0, caster);
+	endforeach
+	
+	return 1;
 endprogram

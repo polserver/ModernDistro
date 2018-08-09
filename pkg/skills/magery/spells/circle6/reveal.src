@@ -4,6 +4,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 use uo;
+use cliloc;
 
 include ":attributes:attributes";
 include ":magery:spells";
@@ -19,42 +20,31 @@ program reveal_hider ( parms )
         cast_on := parms[4];
     endif
     if (!cast_on)
-        SendSysMessage (caster, "Cancelled.", color := 33);
+        SendSysMessageCL(caster, 1042023, color := 33); // Cancelled.
         return 0;
     endif
   if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
         return 0;
   endif
   
-  var range := ( GetAttribute( caster, MAGERY  )/10 ) - 5;
-  if (range < 1)
-	range := 1;
-  endif
-  var hiders := ListMobilesNearLocationEx( caster.x, caster.y, caster.z, range, LISTEX_FLAG_HIDDEN, caster.realm );
-  var numfound := 0;
-  PlaySoundEffect(caster, SFX_1FE);
-  if(len(hiders) > 0)
-	foreach mobile in hiders
-	  if( Found( caster,  mobile) )
-		numfound := 1;
-		mobile.hidden := 0;
-		PrintTextAbovePrivate( mobile, "You have been revealed!", mobile );
-		PrintTextAbovePrivate( mobile, "You have found someone!!", caster );
-		PlaySoundEffect(mobile, SFX_1FE);
-	  endif
-	endforeach
-  endif
-  if (!numfound)
-    PrintTextAbovePrivate( caster, "You didnt find any anyone.", caster );
-  endif
-endprogram
+	MS_PlaySpellSFX(info.spell_id, cast_on);
+	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
 
-function Found( finder, hider )
-  var magic_skill := Resisted(6, finder, hider, GetAttribute( finder, MAGERY ));
-  var resist := (GetAttribute( finder, RESISTING_SPELLS)/1.5);
-  if ( magic_skill > resist )
+	var area_size := CInt(GetConfigInt(info.spell_config, "AreaSize"));
+	var targs := ListMobilesNearLocationEx(cast_on.x, cast_on.y, cast_on.z, area_size, LISTEX_FLAG_HIDDEN, cast_on.realm);
+
+	foreach targ in targs
+		if ( GetObjProperty(targ, "Invisibile") )
+			targ.hidden := 0;
+		else
+			// I just made these up. uo.stratics and uo.com didn't give any good info.
+			var caster_skill := AP_GetSkill(caster, MAGERY) + AP_GetSkill(caster, DETECTING_HIDDEN);
+			var hider_skill := AP_GetSkill(targ, HIDING) + AP_GetSkill(targ, STEALTH);
+			if ( caster_skill >= hider_skill )
+				targ.hidden := 0;
+			endif
+		endif
+	endforeach
+	
 	return 1;
-  else
-	return 0;
-  endif
-endfunction
+endprogram
