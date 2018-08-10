@@ -39,8 +39,8 @@ program earthquake( parms )
 			endif
 		endif
 
-                PlaySoundEffect( vtarg, SFX_SPELL_EARTHQUAKE );
-                PlayObjectCenteredEffect( vtarg, FX_SMOKE, 7, 7);
+		MS_PlaySpellGFX(info.spell_id, vtarg, caster);
+		MS_PlaySpellSFX(info.spell_id, vtarg, caster);
 		ApplyRawSpellDamageEX(vtarg, damage, info.damage_type, caster, info.circle);
 	endforeach
 

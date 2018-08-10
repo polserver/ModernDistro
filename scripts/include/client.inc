@@ -1117,3 +1117,16 @@ const MESSAGE_COLOR_GOOD	:= 268;
 const MESSAGE_COLOR_WARNING	:= 54;
 const MESSAGE_COLOR_BAD		:= 34;
 const MESSAGE_COLOR_MESSAGE	:= 1320;
+
+/////////////////////////////////////////////
+// Added from 098 Distro for compatibility
+// with pkgs added from it. There will be
+// duplication of values.
+////////////////////////////////////////////
+const	GFX_MAGICAL_SPARKLES_EW	:= 0x1153;
+const	GFX_MAGICAL_SPARKLES_NS	:= 0x1159;
+const	GFX_BLUE_SPARKLES	:= 0x373A;
+const	GFX_RED_SPARKLES	:= 0x374A;
+const	GFX_BLUE_SPARKLE_SWIRL	:= 0x375A;
+const	GFX_BLUE_SPARKLE_BORDER	:= 0x376A;
+const	GFX_BLUE_SPARKLE_GROUND	:= 0x3779;

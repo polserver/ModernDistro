@@ -29,6 +29,11 @@ program cast_meteor( parms )
 	endif
 
 	var targs := MS_GetValidTargets(caster, area_size, 1, excludes);
+	
+	if(targs.size() > 1)
+		base_damage := base_damage * 2;
+	endif
+	
 	foreach vtarg in targs
 		damage := MS_GetSpellDamage(caster, vtarg, base_damage) / targs.Size();
 		MS_PlaySpellGFX(info.spell_id, vtarg, caster);

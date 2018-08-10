@@ -35,9 +35,13 @@ program cast_chainlightning( parms )
 	endif
 
 	var targs := MS_GetVaildTargets(caster, area_size, 1, excludes);
-
+	if(targs.size() > 1)
+		base_damage := base_damage * 2;
+	endif
+	
 	foreach vtarg in targs
-                if((CheckLineOfSight(vtarg, caster)) and (vtarg.cmdlevel < 2))
+				// uoguide.com does not mention LOS needed for damage to target. That is why this if is commented out.
+                //if((CheckLineOfSight(vtarg, caster)) and (vtarg.cmdlevel < 2))
                     SetObjProperty(vtarg, "LastHit", {caster.name, caster.serial, "chain lightning"});
                         if(Reflected(vtarg))
                             SendSysMessage (caster, "The spell was reflected back onto you!!!", color := 33);
@@ -50,7 +54,7 @@ program cast_chainlightning( parms )
                     PlaySoundEffect(vtarg, SFX_SPELL_LIGHTNING);
                     ApplyRawSpellDamageEX(vtarg, damage, info.damage_type, caster);
                     sleepms(600);
-                endif
+                //endif
 	endforeach
 
 	return 1;

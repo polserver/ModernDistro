@@ -28,3 +28,10 @@ I am starting this Distro change log for the Modern Distro. Up until now all cha
 2018-08-08	Added a cliloc YsyMessage to fireField.src if caster does not have LOS to targetted location.
 2018-08-09	Upgraded mos9t 5, 6, and 7 circle spells to work with the spell casting and timedScripts in the Modern Distro. Some 5, 6, and 7 circle spells are better left as is.
 2018-08-09	Removed all references to fire field, parafield, and poison field from the main itemdesc.cfg file in /config.
+2018-08-10	Fixed some missing or incorrect damage amounts in spells.cfg. Also some reformatting for readability. More of that to be done later.
+2018-08-10	Fixed damage dealt in chain lightning spell if more than one target. Also removed LOS to targets check.
+2018-08-10	Fixed damage dealt in meteor swarm spell if more than one target.
+2018-08-10	Changed direct calls to PlaySoundEffect and PlayObjectCenteredEffect to MS_PlaySpellSFX and MS_PlaySpellGFX in earthquake spell.
+2018-08-10	Changed SendSysMessage for cancelled message in energyVortex to SendSysMessageCL with proper cliloc number.
+2018-08-10	Replaced the resurrection spell with the 098 Distro version and changed most, if not all, system messages to cliloc messages.
+2018-08-10	Added some constants from 098 Distro client.inc file to the Modern Distro client.inc file for compatibility with some spell scripts.
