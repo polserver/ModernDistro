@@ -1,0 +1,32 @@
+/*
+ * $Id: resurrect.src 373 2006-06-17 18:27:33Z austinheilman $
+ *
+ */
+
+use uo;
+
+include ":death:resurrection";
+
+
+program textcmd_ResGump(who)
+	var targ;
+	if ( who.dead )
+		targ := who;
+	else
+		targ := Target(who);
+		if ( targ.IsA(POLCLASS_CORPSE) )
+			targ := SystemFindObjectBySerial(targ.ownerserial);
+			if ( !targ )
+				SendSysMessage(who, "No owner could be found for that corpse.");
+				return 0;
+			endif
+		endif
+		
+		if ( !targ.dead )
+			SendSysMessage(who, "Target is not dead.");
+			return 0;
+		endif
+	endif
+	
+	Resurrect(targ);
+endprogram

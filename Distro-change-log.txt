@@ -1,37 +1,39 @@
 I am starting this Distro change log for the Modern Distro. Up until now all changes/fixes have been in the commit notes. However, I think they should be in a change log file as well. Hopefully I will be as diligent in entering changes here as the Core developers are with core-changes.
 
-2018-08-03	Fixed SkillCheck in :attributes:skillCheck.inc. It could possibly return a negative number. Skill scripts test for zero or a value.
-			This was returning false positives (passing) on a SkillCheck function call.
-2018-08-04	Added buff icon support to timedScripts.
-2018-08-04	Added timedScripts to the clumsy spell for initial buff icon test. It works!
-2018-08-04	Added timedScripts to the rest of Circle 01 spells.
-2018-08-04	Removed stupid references to "little girl's panties" from the :magery:settings.cfg file.
-2018-08-04	Added PlyrScrollsReqRegs, PlyrScrollsReqMana, PlyrSpellsReqRegs, PlyrSpellsReqMana settings to :magery:settings.cfg for customization.
-2018-08-04	Added support for the new :magery:settings.cfg settings to :magery:spellStarter.src.
-2018-08-04	Moved timedScripts pkg from /pkg/mobiles folder to /pkg/utils folder.
-2018-08-04	Added my good ol' stanby test script target.src to /pkg/commands/test.
-2018-08-06	Fixed missing graphics for garden shed deed.
-2018-08-06	Removed location checks for multi housing. I may add them back in at a later date but facet support was needed and right now I did not need the distraction.
-2018-08-06	Fixed missing flags in CreateMultiAtLocation function calls in houseDeed.src in :housing:.
-2018-08-07	Removed constants for resists. We'll just use damage constants. Makes it easier to import some scripts from 098 Distro.
-2018-08-07	Changed the element spellId to spell_Id for the info struct in spellStarter that is sent to the spell scripts.
-2018-08-07	Added a 6th parameter, explode := 0, to MS_PlaySpellGFX function is spells.inc.
-2018-08-07	Fixed a bug in function MS_PlaySpellGFX in which it was sending targ.realm as the last parameter (explode) to uo.em function PlayMovingEffect.
-2018-08-07	Added some missing sound definitions to /scripts/include/sounds.inc.
-2018-08-08	Disabled the party packet hook as the Core now handles parties internally. Will remove the packet hook at a later date.
-2018-08-08	Added walkOn pkg rom 098 Distro to /pkg/items folder.
-2018-08-08	Changed pkg name of food&drink to food_drink. Also changed /pkg/items/food to /pkg/items/food_drink.
-2018-08-08	Completed upgrading spell circles 1 through 4. I want to add more cliloc support to them. Teleport and telekinisis needs support for Static Housing added.
-2018-08-08	Changed the name of the spell script spellReflect.src to magicReflection.src to match the actual name of the spell in the spellbook.
-2018-08-08	Changed the reference to spellReflect to magicReflection in spells.cfg.
-2018-08-09	Fixed an error in determining party members in archProtection.src and archCure.src.
-2018-08-08	Added a cliloc YsyMessage to fireField.src if caster does not have LOS to targetted location.
-2018-08-09	Upgraded mos9t 5, 6, and 7 circle spells to work with the spell casting and timedScripts in the Modern Distro. Some 5, 6, and 7 circle spells are better left as is.
-2018-08-09	Removed all references to fire field, parafield, and poison field from the main itemdesc.cfg file in /config.
-2018-08-10	Fixed some missing or incorrect damage amounts in spells.cfg. Also some reformatting for readability. More of that to be done later.
-2018-08-10	Fixed damage dealt in chain lightning spell if more than one target. Also removed LOS to targets check.
-2018-08-10	Fixed damage dealt in meteor swarm spell if more than one target.
-2018-08-10	Changed direct calls to PlaySoundEffect and PlayObjectCenteredEffect to MS_PlaySpellSFX and MS_PlaySpellGFX in earthquake spell.
-2018-08-10	Changed SendSysMessage for cancelled message in energyVortex to SendSysMessageCL with proper cliloc number.
-2018-08-10	Replaced the resurrection spell with the 098 Distro version and changed most, if not all, system messages to cliloc messages.
-2018-08-10	Added some constants from 098 Distro client.inc file to the Modern Distro client.inc file for compatibility with some spell scripts.
+2018-08-03	Yukiko -	Fixed SkillCheck in :attributes:skillCheck.inc. It could possibly return a negative number. Skill scripts test for zero or a value.
+						This was returning false positives (passing) on a SkillCheck function call.
+2018-08-04	Yukiko -	Added buff icon support to timedScripts.
+2018-08-04	Yukiko -	Added timedScripts to the clumsy spell for initial buff icon test. It works!
+2018-08-04	Yukiko -	Added timedScripts to the rest of Circle 01 spells.
+2018-08-04	Yukiko -	Removed stupid references to "little girl's panties" from the :magery:settings.cfg file.
+2018-08-04	Yukiko -	Added PlyrScrollsReqRegs, PlyrScrollsReqMana, PlyrSpellsReqRegs, PlyrSpellsReqMana settings to :magery:settings.cfg for customization.
+2018-08-04	Yukiko -	Added support for the new :magery:settings.cfg settings to :magery:spellStarter.src.
+2018-08-04	Yukiko -	Moved timedScripts pkg from /pkg/mobiles folder to /pkg/utils folder.
+2018-08-04	Yukiko -	Added my good ol' stanby test script target.src to /pkg/commands/test.
+2018-08-06	Yukiko -	Fixed missing graphics for garden shed deed.
+2018-08-06	Yukiko -	Removed location checks for multi housing. I may add them back in at a later date but facet support was needed and right now I did not need the distraction.
+2018-08-06	Yukiko -	Fixed missing flags in CreateMultiAtLocation function calls in houseDeed.src in :housing:.
+2018-08-07	Yukiko -	Removed constants for resists. We'll just use damage constants. Makes it easier to import some scripts from 098 Distro.
+2018-08-07	Yukiko -	Changed the element spellId to spell_Id for the info struct in spellStarter that is sent to the spell scripts.
+2018-08-07	Yukiko -	Added a 6th parameter, explode := 0, to MS_PlaySpellGFX function is spells.inc.
+2018-08-07	Yukiko -	Fixed a bug in function MS_PlaySpellGFX in which it was sending targ.realm as the last parameter (explode) to uo.em function PlayMovingEffect.
+2018-08-07	Yukiko -	Added some missing sound definitions to /scripts/include/sounds.inc.
+2018-08-08	Yukiko -	Disabled the party packet hook as the Core now handles parties internally. Will remove the packet hook at a later date.
+2018-08-08	Yukiko -	Added walkOn pkg rom 098 Distro to /pkg/items folder.
+2018-08-08	Yukiko -	Changed pkg name of food&drink to food_drink. Also changed /pkg/items/food to /pkg/items/food_drink.
+2018-08-08	Yukiko -	Completed upgrading spell circles 1 through 4. I want to add more cliloc support to them. Teleport and telekinisis needs support for Static Housing added.
+2018-08-08	Yukiko -	Changed the name of the spell script spellReflect.src to magicReflection.src to match the actual name of the spell in the spellbook.
+2018-08-08	Yukiko -	Changed the reference to spellReflect to magicReflection in spells.cfg.
+2018-08-09	Yukiko -	Fixed an error in determining party members in archProtection.src and archCure.src.
+2018-08-08	Yukiko -	Added a cliloc YsyMessage to fireField.src if caster does not have LOS to targetted location.
+2018-08-09	Yukiko -	Upgraded mos9t 5, 6, and 7 circle spells to work with the spell casting and timedScripts in the Modern Distro. Some 5, 6, and 7 circle spells are better left as is.
+2018-08-09	Yukiko -	Removed all references to fire field, parafield, and poison field from the main itemdesc.cfg file in /config.
+2018-08-10	Yukiko -	Fixed some missing or incorrect damage amounts in spells.cfg. Also some reformatting for readability. More of that to be done later.
+2018-08-10	Yukiko -	Fixed damage dealt in chain lightning spell if more than one target. Also removed LOS to targets check.
+2018-08-10	Yukiko -	Fixed damage dealt in meteor swarm spell if more than one target.
+2018-08-10	Yukiko -	Changed direct calls to PlaySoundEffect and PlayObjectCenteredEffect to MS_PlaySpellSFX and MS_PlaySpellGFX in earthquake spell.
+2018-08-10	Yukiko -	Changed SendSysMessage for cancelled message in energyVortex to SendSysMessageCL with proper cliloc number.
+2018-08-10	Yukiko -	Replaced the resurrection spell with the 098 Distro version and changed most, if not all, system messages to cliloc messages.
+2018-08-10	Yukiko -	Added some constants from 098 Distro client.inc file to the Modern Distro client.inc file for compatibility with some spell scripts.
+2018-08-10	Yukiko -	Added part of the death pkg from 098 Distro that is used by the resurrect spell.
+						I may want to add the rest of the death pkg but it will require some major rewrites of parts of the Modern Distro.
