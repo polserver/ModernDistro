@@ -20,7 +20,7 @@ CONST CANCEL_BTN_ON	:= 0x1;
  * RequestGump(mobile, question, option, pre_val, cancel_btn)
  *
  * Purpose
- * Template to create a single field input gump.
+ * Template to create a single field, single line, input gump.
  *
  * Parameters
  * mobile:	Mobile to send the gump to.
@@ -94,7 +94,7 @@ endfunction
  * RequestGump2(mobile, question, option, pre_val, cancel_btn)
  *
  * Purpose
- * Template to create a single field input gump.
+ * Template to create a single field, 3 line, input gump.
  *
  * Parameters
  * mobile:	Mobile to send the gump to.

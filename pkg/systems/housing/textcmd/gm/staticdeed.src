@@ -56,7 +56,7 @@ program textcmd_staticdeed( who, textline)
 	var unit_price, stories;
 	var	elem := FindConfigElem( housing_cfg, "Settings" );
 	var	default_price := CInt(GetConfigInt( elem, "Price_Per_Square" ));
-	var	multi_level_discount := CInt(GetConfigInt( elem, "Multi_level_Discount" ));
+	var	multi_level_discount := CInt(GetConfigInt( elem, "Multiple_Story_Discount" ));
 
 	unit_price := CInt(textline);
 	if(!unit_price)

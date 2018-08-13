@@ -1,0 +1,81 @@
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// PKG: housing                                                                                                 //
+// version: 1.0                                                                                                 //
+// Maintainer: POL Distro Team                                                                                  //
+// email: distro@polserver.com                                                                                  //
+//                                                                                                              //
+// notes:                                                                                                       //
+//   This is the command to add valid multi house locations to the file :housing:buildlocs.cfg                  //
+//                                                                                                              //
+// Use:                                                                                                         //
+//  After entering the command you will be presented with a gump requesting a name for the area.                //
+//  After entering the name target the upper (North West) corner of the area Then target the lower (South East) //
+//  corner of the area. This area will be appended to :housing:buildlocs.cfg.                                   //
+//  This command is "facet aware". In other words it stores the realm as well as the coordinates in the file.   //
+//                                                                                                              //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//
+//
+use uo;
+use os;
+use util;
+use basicio;
+use basic;
+use cfgfile;
+use cliloc;
+
+include ":gumps:requestGump";
+
+UnloadConfigFile(":housing:buildlocs");
+UnloadConfigFile( ":housing:settings" );
+var	housing_cfg := ReadConfigFile(":housing:settings");
+if(!housing_cfg)
+	Broadcast("No housing settings file found.");
+endif
+
+program textcmd_valid_multi_locs(who)
+
+	SendSysMessage(who, "The multi placement restrictions are NOT implemented yet.", color := 33);
+	return 1;
+	
+    var prop1 := {};
+    var log1 := {};
+    var description, elemkey, X1, Y1, X2, Y2;
+	var coords := struct;
+	description := RequestGump(who, "Enter a name for this area:", "", "", 1);
+
+	if(description == 0)
+		SendSysMessage(who, "You must enter a location name.", color := 33);
+		return 0;
+	endif
+
+	SendSysMessage(who,"Target the North-West corner of the house (Upper corner)", color := 88);
+	coords := TargetCoordinates(who);
+
+	if(!coords)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+	endif
+
+	X1 := coords.x;
+	Y1 := coords.y;
+
+	SendSysMessage(who,"Target the South-East corner of the house (Lower corner)", color := 88);
+	coords := TargetCoordinates(who);
+
+	if(!coords)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+	endif
+
+	X2 := coords.x;
+	Y2 := coords.y;
+	prop1.+ pname := "rect";
+	prop1 .+ pvalue := X1 + " " + Y1 + " " + X2 + " " + Y2 + " " + coords.realm;
+
+    elemkey := description;
+    log1[1] := prop1;
+    AppendConfigFileElem( ":housing:buildlocs", "Location", elemkey, log1 );
+    UnloadConfigFile(":housing:buildlocs");
+	return 1;
+
+endprogram

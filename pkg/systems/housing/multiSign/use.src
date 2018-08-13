@@ -3,7 +3,7 @@ use uo;
 use os;
 
 include ":keys:key";
-include "include/yesNo";
+include ":gumps:yesNoSizable";
 include ":containers:storageAreas";
 
 const UOBJECT_DOORS_START := 0x0675;
@@ -819,7 +819,7 @@ program Mulit_House_sign(who, sign)
 			5: ListFriend(house, who);                                    //list friends
 			6: AddFriend(house, who);                                     //add friend
 			7: DeleteFriend(house, who);                                  //delete friend
-			8:	if(YesNo(who,"Clear List?"))                               //clear friend list
+			8:	if(SmallYesNo(who,"Clear List?"))                               //clear friend list
 					EraseObjProperty(house, "friendlist");
 					SendSysMessage(who,"Friend list has been cleared.");
 				else
@@ -839,7 +839,7 @@ program Mulit_House_sign(who, sign)
 					endif
 				endif
 			14:	if(oserial == who.serial)                                   //demolish house
-					if(YesNo(who, "are you sure?"))
+					if(SmallYesNo(who, "are you sure?"))
 						demolish(house, sign, who, bank_region);
 					else
 						SendSysMessage(who, "Cancelled");
@@ -849,7 +849,7 @@ program Mulit_House_sign(who, sign)
 			16:	if(oserial == who.serial)                                   //change locks
 					ChangeLocks(who, house);
 				endif
-			17:	if(YesNo(who,"Clear List?"))                               //clear co-owner list
+			17:	if(SmallYesNo(who,"Clear List?"))                               //clear co-owner list
 					EraseObjProperty(house, "coownlist");
 					SendSysMessage(who,"Co-owner list has been cleared.");
 				else

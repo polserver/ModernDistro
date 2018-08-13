@@ -37,3 +37,13 @@ I am starting this Distro change log for the Modern Distro. Up until now all cha
 2018-08-10	Yukiko -	Added some constants from 098 Distro client.inc file to the Modern Distro client.inc file for compatibility with some spell scripts.
 2018-08-10	Yukiko -	Added part of the death pkg from 098 Distro that is used by the resurrect spell.
 						I may want to add the rest of the death pkg but it will require some major rewrites of parts of the Modern Distro.
+2018-08-13	Yukiko -	Fixed /pkg/items/containers/backPack/use.src from spamming the console with "back pack" everytime a backpack was used.
+2018-08-13	Yukiko -	Reorganizing housing pkg scripts.
+2018-08-13	Yukiko -	Changed a setting name in housing settings file from Multi_Level_Discount to Multiple_Story_Discount to avoid confusion with "multi" type houses.
+2018-08-13	Yukiko -	Changed the reference in :housing:multiSign/use.src from include/yesNo.inc to :gumps:yesNoSizable.inc and replaced all calls to yesNo function to SmallYesNo.
+2018-08-13	Yukiko -	Changed the reference in staticDeed.src to the newly renamed Multiple_Story_Discount.
+2018-08-13	Yukiko -	Added back in the buildlocs.cfg to the housing pkg. This is part of the restriction for placing multi houses. It is not finished yet.
+2018-08-13	Yukiko -	Added validmultilocs.src text command to the housing pkg. This is part of the restriction for placing multi houses. It is not finished yet.
+2018-08-13	Yukiko -	Added a setting to housing pkg settings.cfg file to allow restricting multi house placement.  This is part of the restriction for placing multi houses. It is not finished yet.
+2018-08-13	Yukiko -	Added back in to :housing:housing.inc 
+2018-08-13	Yukiko -	Changed 2 comments in :gumps:requestGump.inc.The CanBuildHere function. This is part of the restriction for placing multi houses. It is not finished yet.

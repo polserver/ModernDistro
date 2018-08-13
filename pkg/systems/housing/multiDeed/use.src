@@ -1,4 +1,5 @@
 use cfgfile;
+use cliloc;
 use uo;
 use os;
 
@@ -27,22 +28,21 @@ program usehousedeed(who, deed)
   endif
   EraseObjProperty(who, "IsMeditating");
   if(deed.movable == 0)
-    SendSysMessage(who, "You cannot use that.");
+    SendSysMessageCL(who, 1010515, color := 33); // You cannot use that while it is locked down.
+    return;
+  endif
+  if(!IsInContainer(who.backpack, deed))
+    SendSysMessageCL(who, 1045156, color := 33); // You must have the deed in your backpack to use it.
     return;
   endif
   if(DeedAlreadyBuiltFrom(deed))
     PrintTextAbovePrivate(deed, "That house has already been built.", who);
-    DestroyItem(deed);
   else
     Buildhouse(who, deed);
   endif
 endprogram
 
 function Buildhouse(who, deed)
-  if(!IsInContainer(who.backpack, deed))
-    SendSysMessage(who, "The deed has to be in your backpack.");
-    return;
-  endif
   if(!ReserveItem(deed))
     return;
   endif
@@ -52,12 +52,15 @@ function Buildhouse(who, deed)
     syslog("Deed " + deed.serial + " had no housetype property!");
     return;
   endif
+  SendSysMessageCL(who, 501274, color := 88); // Where do you wish to build the house?
   var where := TargetMultiPlacement(who, housetype);
   if(!where)
+	SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
     return;
   endif
   if((FindCity(who) != "no city") || (FindCity(where) != "no city"))
-    PrintTextAbovePrivate(deed, "You can't build in cities.", who);
+	SendSysMessageCL(who, 500269, color := 33); // You cannot build that there.
+    PrintTextAbovePrivate(deed, "You can't build in cities.", who, color := 33);
     return;
   endif
   if (Distance(who,where) > 50)

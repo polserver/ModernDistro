@@ -16,7 +16,6 @@ program useContainer( mobile, container )
 	
 	var item_cfg := ReadConfigFile( ":*:itemdesc" );
 	item_cfg := item_cfg[container.graphic];
-	Print(container.name);
  	if( container.container.IsA( POLCLASS_CORPSE ))
 		SendSysMessage( mobile, "You can't open this while it is in a corpse." );
                 return 0;
