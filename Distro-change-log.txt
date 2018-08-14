@@ -47,3 +47,5 @@ I am starting this Distro change log for the Modern Distro. Up until now all cha
 2018-08-13	Yukiko -	Added a setting to housing pkg settings.cfg file to allow restricting multi house placement.  This is part of the restriction for placing multi houses. It is not finished yet.
 2018-08-13	Yukiko -	Added back in to :housing:housing.inc 
 2018-08-13	Yukiko -	Changed 2 comments in :gumps:requestGump.inc.The CanBuildHere function. This is part of the restriction for placing multi houses. It is not finished yet.
+2018-08-14	Yukiko -	Removed duplicate entries for PoisonField_NS, rescob1, rescob2, rescob3, and rescob4 from the main itemdesc.cfg file in the /config/ directory.
+2018-08-14	Yukiko -	Added OldObjType 0xEE01 to restile in :walkOn:itemdesc.cfg because I changed the ObjType to 0x1EE01. I will remove the OldObjType entry in a week.
