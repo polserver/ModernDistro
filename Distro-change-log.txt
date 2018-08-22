@@ -50,3 +50,4 @@ I am starting this Distro change log for the Modern Distro. Up until now all cha
 2018-08-14	Yukiko -	Removed duplicate entries for PoisonField_NS, rescob1, rescob2, rescob3, and rescob4 from the main itemdesc.cfg file in the /config/ directory.
 2018-08-14	Yukiko -	Added OldObjType 0xEE01 to restile in :walkOn:itemdesc.cfg because I changed the ObjType to 0x1EE01. I will remove the OldObjType entry in a week.
 2018-08-18	Yukiko -	Fixed misspelling of multiDeed reference to multiDeed/use.src in :housing:itemdesc.cfg.
+2018-08-22	Yukiko -	Fixed Script definitions in :miscellaneous:itemdesc.cfg for dyetub and furnituredyetub.
