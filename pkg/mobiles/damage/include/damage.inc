@@ -150,11 +150,11 @@ endfunction
  */
 function ApplySpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circle := 1)
 	amount := CInt(amount);
-	
+
 	if( mobile.IsA(POLCLASS_NPC) )
 	    amount := amount * 2;
 	endif
-	
+
 	// Check to see if we are using magic resistance with damage spells.
 	var settings := DMG_GetSettingsCfgElem("Settings");
 	if ( settings.UseMRInAllSpells )
@@ -508,7 +508,7 @@ function SetResistance(mobile, name, value)
     DMG_PHYSICAL: mobile.resist_physical_mod := value;
     DMG_POISON: mobile.resist_poison_mod := value;
   endcase
-	return
+	return value;
 endfunction
 
 /*
@@ -561,7 +561,7 @@ function SetDamage(mobile, name, value)
     DMG_PHYSICAL: mobile.damage_physical_mod := value;
     DMG_POISON: mobile.damage_poison_mod := value;
   endcase
-	return
+	return value;
 endfunction
 
 /*
@@ -722,8 +722,8 @@ function LifeDrain(source, damage, percent)
     var amt := CInt(CDbl(damage) * percent);
     HealDamage(source, amt);
     SendSysMessage(source, amt + " life force from your opponent was applied to heal you.", 2, 66);
-    
+
     return amt;
-    
+
 endfunction
 
