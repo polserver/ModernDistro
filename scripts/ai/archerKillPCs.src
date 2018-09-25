@@ -1,0 +1,88 @@
+
+/////////////////////////////////////////////////////////////////////////////
+//
+//  archerkillpcs.src: Archer AI
+//
+//
+//  Author: DCT, stealing most from ENS's killpc.src
+//
+//  Created: 6/98
+//
+//  there are 2 things you need to have in the npcdesc tu use this AI: missileweapon, which is the template in equip.cfg 
+//  that has a missile weapon. and ammotype, the objtype of the ammo used by this weapon
+//
+/////////////////////////////////////////////////////////////////////////////
+
+use npc;
+use os;
+use uo;
+use cfgfile;
+
+include "include/eventID";
+include "include/sysEvent";
+include "include/randName";
+include "include/NPCUtil";
+include "include/objtype";
+include "include/anchors";
+//include "include/dist";
+include "ai/main/meanLoop";
+include "ai/combat/fight";
+//include "include/dist";
+include "include/speech";
+include "ai/main/defaultNonCombatEvent";
+include "ai/combat/defaultCombatEvent";
+include "ai/main/setup";
+include "ai/main/loot";
+include "ai/main/sleepMode";
+
+const HALT_THRESHOLD := 15; // how close before he attacks?
+var npccfgfile := ReadConfigFile( "npcdesc" );
+var idlesnd1 := CInt(npccfgfile[me.npctemplate].idlesound1);
+var idlesnd2 := CInt(npccfgfile[me.npctemplate].idlesound2);
+if( me.name["<random>"] )
+   SetName( me, RandomName( me ) );
+endif
+
+program KillPlayers()
+  drop_anchor();
+  var next_wander := ReadGameClock() + 10;
+  var npccfg := ReadConfigFile("npcdesc");
+  EnableEvents( EVID_ENGAGED );
+  EnableEvents( EVID_DISENGAGED );
+  EnableEvents( EVID_DAMAGED );
+  EnableEvents( EVID_ENTEREDAREA + EVID_LEFTAREA, HALT_THRESHOLD );
+  EnableEvents( EVID_OPPONENT_MOVED );
+  if (GetObjProperty(me, "frozen"))
+    me.frozen := 1;
+  endif
+  SetWarMode( 0 );
+  main_AI_loop(ReadGameClock() + 10);   
+endprogram
+
+function CloseDistance( opponent )
+  if (theammo.amount)
+    if (Distance(me, opponent) <= 4)
+      RunAwayFrom(opponent);
+	  sleepms(500);
+	  return 0;
+    else
+      return 1;
+    endif
+  else
+    sleepms(2);
+    ammotype := 0;
+    case (Distance( me, opponent ))
+      1:
+      0:       return 0;
+      default: RunToward( opponent );
+		       sleepms(500);
+               return 0;
+    endcase
+  endif
+endfunction
+
+function cleareventque()
+	var ev;
+	repeat
+	until (! (ev := os::wait_for_event(0)) );
+endfunction

@@ -5,17 +5,21 @@ include "include/client";
 
 
 program color(who, textline)
-        if (!textline)
-            SendSysMessage (who, "Usage is: color [integer] or 'none' (without the quotes)", color := 88);
-            return;
-        endif
+	if (!textline)
+		SendSysMessage (who, "Usage is: color [integer] or 'none' (without the quotes)", color := 88);
+		return;
+	endif
+
 	var item := target(who);
-        if (textline == "none")
-            item.color := 0;
-            return;
-        endif
-        item.color := CINT (textline);
-        return;
-        
+
+	if (textline == "none")
+		item.color := 0;
+		return;
+	endif
+
+	item.color := CInt(textline);
+
+	return;
+
 
 endprogram

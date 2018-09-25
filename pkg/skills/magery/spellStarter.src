@@ -23,7 +23,7 @@ program SpellStarter(params)
         if (scroll == 1)
         endif
 	if ( !Attach(mobile) )
-		SendSysMessage(mobile, "You are already doing something.");
+		SendSysMessage(mobile, "You are already doing something.", color := 33);
 		return 0;
 	endif
 
@@ -33,7 +33,7 @@ program SpellStarter(params)
 	if ( spell_elem.TestOnly and !mobile.cmdlevel )
 		// TestOnly spell, check for #SpellTester
 		if ( !GetObjProperty(mobile, "#SpellTester") )
-			SendSysMessage(mobile, "This spell has been temporarily disabled.");
+			SendSysMessage(mobile, "This spell has been temporarily disabled.", color := 33);
 			FailSpell(mobile);
 			return 0;
 		endif
@@ -70,16 +70,20 @@ program SpellStarter(params)
 	if ( GetObjProperty(mobile, "#Casting") )
 		SendSysMessage(mobile, "You cannot cast right now.", color := 33);
 		return 0;
+	elseif ( mobile.frozen )
+		SendSysMessage(mobile, "You cannot cast a spell while frozen.", color := 33);
+		FailSpell(mobile);
+		return 0;
+	elseif ( mobile.paralyzed )
+		SendSysMessage(mobile, "You cannot cast a spell while paralyzed.", color := 33);
+		FailSpell(mobile);
+		return 0;
 	elseif ( mobile.squelched && !mobile.npctemplate )
 		SendSysMessage(mobile, "Something prevents you from casting.", color := 33);
 		FailSpell(mobile);
 		return 0;
 	elseif ( !EquipmentCheck(mobile) )
 		SendSysMessage(mobile, "Your hands must be free to cast spells.", color := 33);
-		FailSpell(mobile);
-		return 0;
-	elseif ( mobile.frozen )
-		SendSysMessage(mobile, "You cannot cast a spell while frozen.", color := 33);
 		FailSpell(mobile);
 		return 0;
 	endif
@@ -140,7 +144,7 @@ program SpellStarter(params)
 	var orig_hp := AP_GetVital(mobile, "Hits");
 	var delay := spell_elem.Delay;
 	var protection := GetObjProperty(mobile, "Protection");
-        // Added to work around a problem with mages being unable to cast while under the influence of 
+        // Added to work around a problem with mages being unable to cast while under the influence of
         // strength mods.
 //	if ( AP_GetStatMod(mobile, ATTRIBUTEID_STRENGTH) )
 //		protection := 1;
@@ -172,7 +176,7 @@ program SpellStarter(params)
 
 	endwhile
 ////////////////////////////////////////////////////
-	
+
 	var attribute := Lower(spell_elem.Attribute);
 
 	if ( !attribute )
@@ -184,7 +188,7 @@ program SpellStarter(params)
 	if ( !difficulty )
 		difficulty := -1;
 	endif
-		
+
 //	var skill_check := SkillCheck(mobile, attribute, difficulty, 50);
 	var skill_check := SkillCheck(mobile, attribute, difficulty, 30);
 
@@ -193,7 +197,7 @@ program SpellStarter(params)
 		skill_check := 1;
 	endif
 	mobile.frozen := 0;
-        
+
 	// skill_check > 0 on success
 	if ( skill_check )
 		var info := struct;
@@ -235,7 +239,7 @@ endprogram
 function EquipmentCheck(mobile)
 	var hand1 := GetEquipmentByLayer(mobile, LAYER_HAND1);
 	var hand2 := GetEquipmentByLayer(mobile, LAYER_HAND2);
-	
+
 	// On OSI there are spell weaving weapons that mages can hold while casting spells
 	// But they are not implemented yet. Maybe later.
 	if ( (hand2 && !hand1.IsA(POLCLASS_SPELLBOOK)) || (hand2 && !hand2.IsA(POLCLASS_SPELLBOOK)) )
@@ -270,7 +274,7 @@ function CheckReagents(mobile, byref spell_elem, scroll)
 			objtype := CInt(_amount_iter);
 		endif
 		var properties := dictionary{"objtype"->objtype};
-		
+
 		if ( AmountInContainer(mobile.backpack, properties) < amount )
 			if ( mobile.cmdlevel )
 				SendSysMessage(mobile, "You do not have enough "+GetObjTypeDesc(objtype, (amount>1))+".");
@@ -291,7 +295,9 @@ function CheckReagents(mobile, byref spell_elem, scroll)
 endfunction
 
 function FailSpell(mobile)
-	mobile.frozen := 0;
+	if(GetObjProperty(mobile, "#Casting"));
+		mobile.frozen := 1;
+	endif
 	EraseObjProperty(mobile, "#Medding");
 	EraseObjProperty(mobile, "#Casting");
 
