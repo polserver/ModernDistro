@@ -321,7 +321,8 @@ endfunction
  *
  * Return value
  * Return value is the button value.
- *
+ * A return value of 0 means cancelled or the client force closed it
+ * or a right click to close. For this reason you cannot have a button value of zero (0).
  */
 function GFAddButton(byref gump, x, y, off_id, on_id, btn_type:=GF_PAGE_BTN, btn_value:=0)
 	var line := "Button "+CStr(x)+" "+CStr(y)+" "+CStr(off_id)+" "+CStr(on_id);
@@ -389,9 +390,9 @@ function GFAddImageTileButton ( byref gump, x, y, off_id, on_id, btn_type:=GF_PA
 	else // Assume GF_PAGE_BTN
 		line += " 0 "+CStr(btn_value);
 	endif
-  
+
   line += " "+CStr(tilepic_id)+" "+CStr(hue)+" "+CStr(width_x)+" "+CStr(height_y);
-  
+
 	(gump.layout).Append(line);
 
 	return (btn_value);
@@ -723,7 +724,7 @@ endfunction
  * ini_text:	The initial string that is to be exposed.
  * txt_id:	The location of the text entry's input data.
  * lmt: The total length of text allowed to be entered into the text entry element.
- *      ( 0 is unlimited. ) 
+ *      ( 0 is unlimited. )
  *
  * Notes:
  * Use GFExtractData() in gumps_ex.inc to easily remove the leading "#: "
@@ -742,7 +743,7 @@ function GFTextEntry(byref gump, x, y, width, height, txt_color, ini_text:="", t
 		gump.data_id += 1;
 		txt_id := gump.data_id;
 	endif
-  
+
   if ( !lmt )
     (gump.layout).Append("TextEntry "+CStr(CInt(x))+" "+CStr(CInt(y))+" "
           + CStr(CInt(width))+" "+CStr(CInt(height))+" "
@@ -842,7 +843,7 @@ function GFPicTiled(byref gump, x, y, width, height, gump_id)
 	if ( !height )
 		height := gump.base.width;
 	endif
-  
+
 	(gump.layout).Append("gumppictiled "+CStr(CInt(x))+" "+CStr(CInt(y))+" "
 				+ CStr(width)+" "+CStr(height) +" "+ CStr(CInt(gump_id)));
 	return 1;
