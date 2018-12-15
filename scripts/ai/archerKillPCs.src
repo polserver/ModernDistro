@@ -8,7 +8,7 @@
 //
 //  Created: 6/98
 //
-//  there are 2 things you need to have in the npcdesc tu use this AI: missileweapon, which is the template in equip.cfg 
+//  there are 2 things you need to have in the npcdesc to use this AI: missileweapon, which is the template in equip.cfg
 //  that has a missile weapon. and ammotype, the objtype of the ammo used by this weapon
 //
 /////////////////////////////////////////////////////////////////////////////
@@ -56,7 +56,7 @@ program KillPlayers()
     me.frozen := 1;
   endif
   SetWarMode( 0 );
-  main_AI_loop(ReadGameClock() + 10);   
+  main_AI_loop(ReadGameClock() + 10);
 endprogram
 
 function CloseDistance( opponent )
