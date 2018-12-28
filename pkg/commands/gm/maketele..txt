@@ -1,0 +1,8 @@
+To create a portal perform  the folloeing steps:
+1. Create a recall rune using the command .create recallrune
+2. Go to the destination for one side of the portal. You can use .goxyz <x coordinate>, <y coordinate>, <z coordinate> if you know the x, y, and z coordinates for that location. The z coordinate is optional.
+3. Mark the rune using the command .mark
+4. Got to the destination for the other side of the portal.
+5. Use the command .maketele and target the rune.
+
+A portal will be created at your location and at the location marked on the runed.
