@@ -1,0 +1,73 @@
+/*
+*
+*	Fountain of Life
+*	This programme is the controller for a the Fountain of Life.
+*	It turns regular bandages into enhanced bandages per an interval
+*	of time specified in the settings file located in /FountainOfLife/config
+*
+*	The custom canInsert programme (script) prevents
+*	anything but bandages from being placed in the fountain.
+*
+*/
+
+use uo;
+use cfgfile;
+use os;
+
+include ":FountainOfLife:settings";
+
+
+program FountainOfLife(FountainOfLife)
+
+	// Time in seconds until next bandage conversion.
+	var time_until_done := CInt(FoL_GetSettingsCfgElem("FountainOfLife").TimeUntilDone);
+	var maximum_conversions := CInt(FoL_GetSettingsCfgElem("FountainOfLife").MaximumConversions);
+	var bonus_healing_points := CInt(FoL_GetSettingsCfgElem("FountainOfLife").BonusHealingPoints);
+	var num_to_convert := 0;
+	var bandies := 0;
+	var converted_bandies;
+	var total_bandies := 0;
+	// Loop until the fountain ceases to be instantiated in the world
+	while(FountainOfLife)
+		// Wait for the next conversion cycle.
+		Sleep(time_until_done);
+		total_bandies := {};
+		// Get the number of stacks, or individual, clean bandages in the fountain.
+		bandies := EnumerateItemsInContainer(FountainOfLife, ENUMERATE_ROOT_ONLY);
+
+		// Get the total of all plain bandages from each stack, or individual bandage.
+		foreach bandy in bandies
+			if(bandy.IsEnhancedBandage())
+				continue;
+			endif
+			total_bandies := total_bandies + bandy.amount;
+		endforeach
+
+		// Convert up to ten bandages per conversion cycle.
+		// If the total of all regular bandages is less than 10 then that is all we can convert.
+		if(total_bandies < maximum_conversions)
+			num_to_convert := total_bandies;
+		// Oterwise we will create 10 bandages to Enhanced Bandages.
+		else
+			num_to_convert := maximum_conversions;
+		endif
+
+		// Create the Enhanced Bandages.
+		converted_bandies := CreateItemInContainer(FountainOfLife, 0xC1000, num_to_convert);
+
+		// If they were successfully created then destroy the equivalent amount of plain bandages.
+		// If they were not created do not destroy any plain bandages but log an error.
+		if(converted_bandies)
+			ConsumeSubstance(FountainOfLife, 0x0e21, num_to_convert);
+			SetObjProperty(converted_bandies, "HealingBonus", bonus_healing_points);
+		else
+			SysLog("Error: Fountain of Life unable to create Enhanced Bandages --> :FountainOfLifecontrol");
+		endif
+
+
+	endwhile
+
+endprogram
+
+
+

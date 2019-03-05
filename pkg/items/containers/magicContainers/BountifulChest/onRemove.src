@@ -1,0 +1,35 @@
+/*
+        Maintained by The POL Distro Team
+
+        2018-07-25
+*/
+use uo;
+use os;
+
+program onRemove( mobile, BountifulChest, item, item_amount, movetype )
+
+	// ItemsHeld is the number of items the player has placed in the chest.
+	var ItemsHeld := CInt(GetObjProperty(BountifulChest, "ItemsHeld"));
+
+	//Avoid compiler warnings
+	mobile := mobile;
+	BountifulChest := BountifulChest;
+	item := item;
+	item_amount := item_amount;
+	movetype := movetype;
+
+	if(GetObjProperty(item, "next_dupe"))
+		EraseObjProperty(item, "num_duplicates");
+		EraseObjProperty(item, "next_dupe");
+		ItemsHeld -= 1;
+		if(ItemsHeld < 0)
+			ItemsHeld := 0;
+		endif
+		SetObjProperty(BountifulChest, "ItemsHeld", ItemsHeld);
+	endif
+
+	//To-do
+	//Play sound effect now that item is being removed.
+
+	return 1;
+endprogram

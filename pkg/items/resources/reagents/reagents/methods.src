@@ -11,7 +11,27 @@ endprogram
 
 exported function IsReagent( item )
 
-	item := item; // Avoid compiler warnings.
+	item := item;
+
+	return 1;
+endfunction
+
+exported function IsPlant( item )
+
+	item := item;
+	return 1;
+endfunction
+
+exported function IsOrganic( item )
+
+	item := item;
+
+	return 1;
+endfunction
+
+exported function IsInorganic( item )
+
+	item := item;
 
 	return 1;
 endfunction

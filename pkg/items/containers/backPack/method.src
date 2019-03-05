@@ -10,7 +10,14 @@ exported function IsContainer( container )
 
 	// object.IsA(POLCLASS_CONTAINER) is more ideal but this allows for securable containers without checking for objtypes
 	container := container; //Avoid compiler warnings
- 
+
+	return 1;
+endfunction
+
+exported function IsBackpack( container )
+
+	container := container; //Avoid compiler warnings
+
 	return 1;
 endfunction
 

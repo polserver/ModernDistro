@@ -1,0 +1,62 @@
+/*
+        Maintained by The POL Distro Team
+
+        2018-07-25
+*/
+use uo;
+use cliloc;
+
+include ":BountifulChest:settings";
+include ":containers:checks";
+include ":housing:housing";
+
+program canInsert( mobile, BountifulChest, move_type, inserttype, adding_item, existing_stack, amount_to_add )
+
+	//Avoid compiler warnings
+	amount_to_add := amount_to_add;
+	existing_stack := existing_stack;
+	adding_item := adding_item;
+	inserttype := inserttype;
+
+	var max_items := CInt(BC_GetSettingsCfgElem("BountifulChest").MaxItems);
+
+	if( move_type == MOVETYPE_COREMOVE )
+		return 1;
+	elseif( mobile.cmdlevel >= 2 )
+		return 1;
+	elseif( CP_IsLocked( BountifulChest ))
+		SendSysMessage( mobile, "You can't insert items into locked containers." );
+		return 0;
+	elseif( ContainerIsSecured( mobile, BountifulChest ) )
+		SendSysMessageCL ( mobile, 1010565, color := 33 ); // You do not have permission to place things in this container.
+		return 0;
+	// We only allow herbal reagents to be added to the chest.
+	elseif(!adding_item.IsReagent() && !adding_item.IsPlant())
+		SendSysMessage(mobile, "That is not an herb.", color := 33);
+		return 0;
+	// Sorry, no stacked herbs.
+	elseif(adding_item.amount > 1)
+		SendSysMessage(mobile, "You must add one herb at a time.", color := 33);
+		return 0;
+	// We only allow the player to place a maximum of max_items in the chest.
+	elseif(CInt(GetObjProperty(BountifulChest, "ItemsHeld")) == max_items)
+		SendSysMessage(mobile, "You can only place a maximum of " + CStr(max_items) + " items in this chest.", color := 33);
+		return 0;
+	endif
+
+
+	return 1;
+endprogram
+
+function ContainerIsSecured( mobile, container )
+
+	var sign := FindHouseSign ( mobile );
+	if ( !container.IsSecured() )
+		// Nothing to worry about.
+		return 0;
+	elseif ( sign.IsAffiliated( mobile ) >= container.GetSecureLevel() )
+		return 0;
+	else
+		return 1;
+	endif
+endfunction

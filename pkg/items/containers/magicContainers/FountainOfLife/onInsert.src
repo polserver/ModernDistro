@@ -1,0 +1,39 @@
+/*
+
+		Created by Yukiko.
+        Maintained by The POL Distro Team
+
+        2018-07-25
+*/
+use uo;
+use os;
+
+include ":BountifulChest:settings";
+
+program onInsert( mobile, FountainOfLife, move_type, insert_type, adding_item, existing_stack, amount_to_add )
+
+	//Avoid compiler warnings
+	mobile := mobile;
+	FountainOfLife := FountainOfLife;
+	move_type := move_type;
+	insert_type := insert_type;
+	adding_item := adding_item;
+	existing_stack := existing_stack;
+	amount_to_add := amount_to_add;
+	// Variable to hold the created bandage(s).
+	var bandage := 0;
+	// If, for some reason, the player drops a bandage into the fountain with
+	// the alternate bandage graphic, then convert it to the standard "bandage".
+	// This was done to simplify the control programme.
+	if(adding_item.graphic == 0x0EE9)
+		bandage := CreateItemInContainer(FountainOfLife, "bandage", adding_item.amount);
+		if(!bandage)
+			SysLog("Error: Unable to create normal graphic bandage(s) - :FountainOfLife:onInsert");
+			return 0;
+		endif
+		ConsumeSubstance(FountainOfLife, adding_item.objtype, adding_item.amount);
+	endif
+	PlaySoundEffect(FountainOfLife, 0x5A5);
+
+	return 1;
+endprogram

@@ -19,6 +19,9 @@ var Anatomy;
 program use_bandages(who, item)
 	healing := GetAttribute(who, HEALING);
 	Anatomy := GetAttribute(who, ANATOMY);
+	if(item.IsEnhancedBandage())
+		healing := healing + CInt(GetObjProperty(item, "HealingBonus"));
+	endif
 	EraseObjProperty(who, "IsMeditating");
 	if(!can_access(who, item))
 		return;
@@ -128,13 +131,13 @@ program use_bandages(who, item)
 			SendSysMessage(who, "You cannot use those bandages.", color := 33);
 		endif
 		return;
-		
+
 // Send the animals to vet.
 	elseif(patient.npctemplate)
 		if(dist(who, patient) >= 2)
 			SendSysMessage(who, "Your patient is too far away.", color := 33);
 		elseif(SubtractAmount(Item, 1))
-			var parms := array(patient, who);
+			var parms := array(patient, who, item);
 			start_script(":veterinary:vet", parms);
 		else
 			SendSysMessage(who, "You cannot use those bandages.", color := 33);
@@ -149,7 +152,7 @@ function heal(who, patient, counter, healing)
 	var basehealamt := healamt;
 	var cycles;
 	var count := 0;
-	
+
 	// Determine how many attempts are made to heal.
 	if(patient == who)
 		var dexcheck := (GetBaseDexterity(who) / 20);
@@ -163,7 +166,7 @@ function heal(who, patient, counter, healing)
 			cycles := 3;
 		endif
 	endif
-	
+
 	// This loop has two functions:
 	//	1- provide wait-states for healing, during which, if it's interrupted, no healing occurs.
 	//	2- test for fumbles during the healing process and lower the amount of healing
@@ -178,7 +181,7 @@ function heal(who, patient, counter, healing)
 			SendSysMessage(patient, who.name + " continues to heal you.", color := 56);
 		    endif
 		endif
-		
+
 		// break out if anyone does anything that should cause heal to stop.
 		if(!GetObjProperty(who, "HealTimer"))
 		    if(who==patient)
@@ -229,8 +232,8 @@ function heal(who, patient, counter, healing)
 			    cure(who, patient, counter, healing);
 		    endif
 		    break;
-	    
-		// Testing to see if things are fumbled.  If they fumble too badly, 
+
+		// Testing to see if things are fumbled.  If they fumble too badly,
 		elseif(GetHP(who) < chp)
 		    if((RandomInt(basehealamt) + 1) >= GetDexterity(who))
 			    SendSysMessage(who, "Your fingers slip.", color := 33);
@@ -241,7 +244,7 @@ function heal(who, patient, counter, healing)
 				    count := count + 1;
 			    endif
 		    endif
-		
+
 		// The last cycle of the loop.  All actual healing is done here.
 		elseif(counter >= cycles)
 		    var diff := 100 - Cint((GetHP(patient) * 100.0) / GetMaxHP(patient));
@@ -272,7 +275,7 @@ function heal(who, patient, counter, healing)
 			    break;
 		    endif
 		endif
-		
+
 		counter := counter + 1;
 	endwhile
 endfunction

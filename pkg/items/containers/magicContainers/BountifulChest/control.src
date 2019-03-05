@@ -1,0 +1,94 @@
+/*
+*
+*	Bountiful Chest
+*	This programme is the controller for a chest that copies
+*	an herbal reagent placed into it by a player.
+*	The number of copies and the time interval between copies
+*	is in the settings file located in /BountifulChest/config
+*
+*	The custom canInsert programme (script) prevents
+*	anything but plant based reagents from being placed
+*	in the box. It also prevents a stack of plant based
+*	reagents from being placed in the chest.
+*
+*	The custom onInsert programme only adds the required CProps
+*	to items placed in the box by a player.
+*
+*/
+
+
+
+
+
+use uo;
+use cfgfile;
+use os;
+
+include ":BountifulChest:settings";
+
+
+program BountifulChest(BountifulChest)
+
+	// Maximum copies of the herb that will be made.
+	var max_duplicates := CInt(BC_GetSettingsCfgElem("BountifulChest").MaxDuplicates);
+
+	// The time between duplications of a reagent.
+	var time_until_next_dupe := CInt(BC_GetSettingsCfgElem("BountifulChest").TimeUntilNextDupe);
+
+	// plants holds the contents of the root container.
+	var plants := {};
+
+	// num_duplicates is a CProp placed on the herbal reagent placed in the chest by the player.
+	// It holds the number of times that herbal reagent has been copied.
+	var num_duplicates := 0;
+
+	// next_dupe is a CProp placed on the herbal reagent placed in the chest by the player.
+	// It holds the next time the herbal reagent will be duplicated.
+	var next_dupe := 0;
+
+	// dupe is a temporary variable that holds the ObjRef of the duplicated herbal reagent.
+	// It is used for error checking in the event the item cannot be created in the chest.
+	var dupe := 0;
+
+	// Loop until the chest ceases to be instantiated in the world
+	while(BountifulChest)
+
+		// As the chest only accepts .IsPlant reagents the flag ENUMERATE_ROOT_ONLY
+		// is redundant but I used it anyway. :P
+		plants := EnumerateItemsInContainer(BountifulChest, ENUMERATE_ROOT_ONLY);
+		foreach plant in plants
+			num_duplicates := CInt(GetObjProperty(plant, "num_duplicates"));
+			next_dupe := CInt(GetObjProperty(plant, "next_dupe"));
+			// This checks to make sure the item qualifies to be duplicated.
+			// If the item does not have the CProp "next_dupe" we skip it
+			// because it is not one placed in the chest by the player.
+			// It was one created by this programme.
+			if(next_dupe)
+				// Check the herb to see if we have made max_duplicates. If not do next section.
+				if(num_duplicates < max_duplicates)
+					// Check the time since last copy was made.
+					// If the game clock is greater than or equal to the time to make the next
+					// copy then try to create the item.
+					if(ReadGameClock() >= next_dupe)
+						// Copy it herb.
+						dupe := CreateItemInContainer(BountifulChest, plant.objtype, 1);
+						// If it was not created then SysLog it.
+						if(!dupe)
+							SysLog("BountifulChest was unable to dupicate a plant --> in pkg BountifulChest");
+						else
+							// Update the CProps..
+							SetObjProperty(plant, "num_duplicates", num_duplicates += 1);
+							SetObjProperty(plant, "next_dupe", ReadGameClock() + time_until_next_dupe);
+						endif
+					endif
+				endif
+			endif
+			Sleepms(20);
+		endforeach
+
+	endwhile
+
+endprogram
+
+
+

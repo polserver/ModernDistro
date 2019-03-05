@@ -16,6 +16,7 @@ var clock := ReadGameClock();
 program use_bandages (parms)
   var patient := parms[1];
   var who := parms[2];
+  var bandage := parms[3];
   EraseObjProperty(who, "IsMeditating");
   var sleeptime;
   var anatomy:= GetAttribute(who, ANATOMY);
@@ -38,7 +39,7 @@ program use_bandages (parms)
     endif
     if(dist(who, patient) <= 2)
       SendSysMessage(who,"You start to cure "+patient.name+".");
-      cure(who, patient);
+      cure(who, patient, bandage);
     else
       SendSysMessage(who, "Your patient is too far away.", color := 33);
       return;
@@ -50,7 +51,7 @@ program use_bandages (parms)
     endif
     if(dist(who, patient) <= 2)
       SendSysMessage(who,"You start to heal "+patient.name + ".", color := 66);
-      heal(who, patient);
+      heal(who, patient, bandage);
     else
       SendSysMessage(who, "Your Patient is too far away.", color := 33);
       return;
@@ -58,11 +59,15 @@ program use_bandages (parms)
   endif
 endprogram
 
-function heal(who, patient)
+function heal(who, patient, bandy)
   var wx:= who.x;
   var wy:= who.y;
   var chp;
-  var healing := (CInt(AP_GetSkill(who, VETERINARY)) / 2);
+  var healing := AP_GetSkill(who, VETERINARY);
+	if(bandy.IsEnhancedBandage())
+		healing := healing + CInt(GetObjProperty(bandy, "HealingBonus"));
+	endif
+  healing := (CInt(healing) / 2);
   var anatomy := (CInt(AP_GetSkill(who, ANATOMY)) / 5);
   var healamt := healing + anatomy + 10;
   var counter := 0;
@@ -104,7 +109,7 @@ function heal(who, patient)
       endif
     endif
     if(ListPoisonsByType(patient,"defaultPoison").size() > 0)
-      cure(who, patient);
+      cure(who, patient, bandy);
       break;
     endif
     if(counter >= cycles)
@@ -134,11 +139,15 @@ function heal(who, patient)
   endwhile
 endfunction
 
-function cure(who, patient)
+function cure(who, patient, bandy)
   var wx:= who.x;
   var wy:= who.y;
   var chp;
-  var healing := (CInt(AP_GetSkill(who, VETERINARY)) / 2);
+  var healing := AP_GetSkill(who, VETERINARY);
+	if(bandy.IsEnhancedBandage())
+		healing := healing + 10;
+	endif
+  healing := (CInt(healing) / 2);
   var anatomy := (CInt(AP_GetSkill(who, ANATOMY)) / 5);
   var healamt := healing + anatomy + 10;
   var counter := 0;

@@ -19,6 +19,17 @@ program onInsert( mobile, container, move_type, insert_type, adding_item, existi
 
 	//To-do
 	//Play sound effect now that item is being added.
+	if((adding_item.objtype == 0xEEA) || (adding_item.objtype == 0xEED) || (adding_item.objtype == 0xEF0))
+		if((container.IsBackpack()) || (container.name == "PouchEast") || (container.name == "PouchSouth")
+			|| (container.name == "PouchEast") || (container.name == "PouchSouth")
+			|| (container.name == "Bag") || (container.name == "SmallBagBall") || (container.name == "LargeBagBall"))
+				PlaySoundEffect(container, 0x2E5);
+		else
+			PlaySoundEffect(container, 0x037);
+		endif
+	else
+		PlaySoundEffect(container, 0x049);
+	endif
 
 	return 1;
 endprogram

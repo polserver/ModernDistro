@@ -1,0 +1,12 @@
+////////////////////////////////////////////////
+// onCreate programme for Enhanced Bandages   //
+////////////////////////////////////////////////
+
+use uo;
+
+program OnCreateEnhancedBandages(EBandage)
+
+	var bonus_healing_points := 10;
+	SetObjProperty(EBandage, "HealingBonus", bonus_healing_points);
+
+endprogram

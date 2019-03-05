@@ -1,0 +1,39 @@
+/*
+
+		Created by Yukiko.
+        Maintained by The POL Distro Team
+
+        2018-07-25
+*/
+use uo;
+use os;
+
+include ":BountifulChest:settings";
+
+program onInsert( mobile, BountifulChest, move_type, insert_type, adding_item, existing_stack, amount_to_add )
+
+	// ItemsHeld is the number of items the player has placed in the chest.
+	var ItemsHeld := CInt(GetObjProperty(BountifulChest, "ItemsHeld"));
+
+	//Avoid compiler warnings
+	mobile := mobile;
+	BountifulChest := BountifulChest;
+	move_type := move_type;
+	insert_type := insert_type;
+	adding_item := adding_item;
+	existing_stack := existing_stack;
+	amount_to_add := amount_to_add;
+
+	// We only want to add the CProps to items placed in the BountifulChest
+	// by the player. Otherwise the controller programme will make
+	// copies of the copies.
+	if(move_type == MOVETYPE_PLAYER )
+		SetObjProperty(adding_item, "num_duplicates", 0);
+		SetObjProperty(adding_item, "next_dupe", ReadGameClock() + CInt(BC_GetSettingsCfgElem("BountifulChest").TimeUntilNextDupe));
+		// Increase the ItemsHeld by one.
+		SetObjProperty(BountifulChest, "ItemsHeld", ItemsHeld += 1);
+	endif
+	PlaySoundEffect(BountifulChest, 0x058);
+
+	return 1;
+endprogram
