@@ -6,29 +6,24 @@
 use uo;
 use os;
 
-program onInsert( mobile, container, move_type, insert_type, adding_item, existing_stack, amount_to_add )
+program onInsert( unused mobile, container, unused move_type, unused insert_type, adding_item, unused existing_stack, unused amount_to_add )
 
-        //Avoid compiler warnings
-        mobile := mobile;
-        container := container;
-        move_type := move_type;
-        insert_type := insert_type;
-        adding_item := adding_item;
-        existing_stack := existing_stack;
-        amount_to_add := amount_to_add;
-
-	//To-do
-	//Play sound effect now that item is being added.
-	if((adding_item.objtype == 0xEEA) || (adding_item.objtype == 0xEED) || (adding_item.objtype == 0xEF0))
-		if((container.IsBackpack()) || (container.name == "PouchEast") || (container.name == "PouchSouth")
-			|| (container.name == "PouchEast") || (container.name == "PouchSouth")
-			|| (container.name == "Bag") || (container.name == "SmallBagBall") || (container.name == "LargeBagBall"))
-				PlaySoundEffect(container, 0x2E5);
-		else
-			PlaySoundEffect(container, 0x037);
-		endif
+	// This still needs fine tuned for more items but it is a start.
+	var ContainerMaterial := container.GetBaseMaterial();
+	var Sound := 0;
+	if(adding_item.IsCoin())
+		case(ContainerMaterial)
+			"Leather":	Sound := 0x2E5;
+			"Wood":		Sound := 0x037;
+			"Metal":	Sound := 0x2E4;
+			"Straw":	Sound := 0x2E6;
+			"Bones":	Sound := 0x035;
+			default:	Sound := 0x2E3;
+		endcase
+	elseif(adding_item.IsGem())
+		Sound := adding_item.GetDropSound();
 	else
-		PlaySoundEffect(container, 0x049);
+		PlaySoundEffect(container, 0x3AF);
 	endif
 
 	return 1;

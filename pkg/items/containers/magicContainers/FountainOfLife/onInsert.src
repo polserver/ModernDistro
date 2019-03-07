@@ -10,16 +10,8 @@ use os;
 
 include ":BountifulChest:settings";
 
-program onInsert( mobile, FountainOfLife, move_type, insert_type, adding_item, existing_stack, amount_to_add )
+program onInsert( unused mobile, FountainOfLife, unused move_type, unused insert_type, adding_item, unused existing_stack, unused amount_to_add )
 
-	//Avoid compiler warnings
-	mobile := mobile;
-	FountainOfLife := FountainOfLife;
-	move_type := move_type;
-	insert_type := insert_type;
-	adding_item := adding_item;
-	existing_stack := existing_stack;
-	amount_to_add := amount_to_add;
 	// Variable to hold the created bandage(s).
 	var bandage := 0;
 	// If, for some reason, the player drops a bandage into the fountain with

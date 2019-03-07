@@ -6,17 +6,10 @@
 use uo;
 use os;
 
-program onRemove( mobile, BountifulChest, item, item_amount, movetype )
+program onRemove( unused mobile, BountifulChest, item, unused item_amount, unused movetype )
 
 	// ItemsHeld is the number of items the player has placed in the chest.
 	var ItemsHeld := CInt(GetObjProperty(BountifulChest, "ItemsHeld"));
-
-	//Avoid compiler warnings
-	mobile := mobile;
-	BountifulChest := BountifulChest;
-	item := item;
-	item_amount := item_amount;
-	movetype := movetype;
 
 	if(GetObjProperty(item, "next_dupe"))
 		EraseObjProperty(item, "num_duplicates");

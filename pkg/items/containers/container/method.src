@@ -1,5 +1,6 @@
 use uo;
 use os;
+use cfgfile;
 
 program Install()
 
@@ -10,8 +11,15 @@ exported function IsContainer( container )
 
 	// object.IsA(POLCLASS_CONTAINER) is more ideal but this allows for securable containers without checking for objtypes
 	container := container; //Avoid compiler warnings
- 
+
 	return 1;
+endfunction
+
+exported function GetBaseMaterial( container )
+	var itemdesc := ReadConfigFile(":containers:itemdesc");
+	var object := FindConfigElem( itemdesc, container.objtype );
+	var BaseMaterial := object.BaseMaterial;
+	return BaseMaterial;
 endfunction
 
 exported function IsSecured( container )

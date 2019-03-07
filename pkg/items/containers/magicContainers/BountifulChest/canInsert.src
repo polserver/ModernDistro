@@ -10,13 +10,7 @@ include ":BountifulChest:settings";
 include ":containers:checks";
 include ":housing:housing";
 
-program canInsert( mobile, BountifulChest, move_type, inserttype, adding_item, existing_stack, amount_to_add )
-
-	//Avoid compiler warnings
-	amount_to_add := amount_to_add;
-	existing_stack := existing_stack;
-	adding_item := adding_item;
-	inserttype := inserttype;
+program canInsert( mobile, BountifulChest, move_type, unused inserttype, adding_item, unused existing_stack, unused amount_to_add )
 
 	var max_items := CInt(BC_GetSettingsCfgElem("BountifulChest").MaxItems);
 
