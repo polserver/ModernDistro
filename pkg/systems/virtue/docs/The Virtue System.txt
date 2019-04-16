@@ -88,5 +88,9 @@ Each virtue shrine has its own script that is started when the player chooses to
 except for their program name. I chose to have eight different scripts rather than one universal script for flexibility
 in the event the developer wanted to allow different events to occur depending on which virtue was being accessed.
 
+The virtue button at the top of the paper doll is now implemented. Double-clicking that button will now open the virtue gump.
+Please note that the gump is not completely finished. It is supposed to display a colour in each virtue corresponding to
+the player's virtuescore. That part needs to be completed.
+
 It should be noted that I do not know how the virtue system is implemented on OSI. I am certain this system does not
 function like the official system does.
