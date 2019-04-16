@@ -49,28 +49,14 @@ function FindMatchesInContainer( container, properties )
 	return item_list;
 endfunction
 
-function ListRootItemsInContainer( container )
-
-	var item_list := array{};
-
-        foreach item in ( EnumerateItemsInContainer( container ))
-		if( item.container == container )
-			item_list.Append( item );
-		endif
-		SleepMS(2);
-	endforeach
-
-	return item_list;
-endfunction
-
 function CreateLockID()
 
 	var lock_id := GetGlobalProperty( "NextLockID" );
 	if( !lock_id || lock_id.errortext )
 		lock_id := 1;
 	endif
- 
+
 	SetGlobalProperty( "NextLockID", lock_id+1 );
- 
+
 	return lock_id;
 endfunction

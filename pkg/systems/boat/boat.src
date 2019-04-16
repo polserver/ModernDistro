@@ -43,7 +43,7 @@ program autostart_boat (param)
 	if (!tillerman)
 		tillerman := wheel[1];
 	endif
-	
+
 	owner := GetObjProperty (boat.hold, "owner");
 	if (!owner)
 		owner := GetObjProperty (tillerman, "owner");
@@ -63,7 +63,7 @@ program autostart_boat (param)
 					PlayBoatSounds ();
 					nextsound := ReadGameClock() + 5;
 				endif
-			
+
 				x := boat.x;
 				y := boat.y;
 				MoveBoatRelative (boat, relative_direction);
@@ -84,11 +84,11 @@ program autostart_boat (param)
 									MoveBoatXY (boat, 1390, boat.y);
 							endcase
 						endif
-					elseif (boat.x > 5100 and boat.realm == "britannia") 
+					elseif (boat.x > 5100 and boat.realm == "britannia")
 						if (boat.x > x)
 							MoveBoatXY (boat, 10, boat.y);
 						endif
-					elseif (boat.x > 1390 and boat.realm == "tokuno") 
+					elseif (boat.x > 1390 and boat.realm == "tokuno")
 						if (boat.x > x)
 							MoveBoatXY (boat, 15, boat.y);
 						endif
@@ -323,7 +323,7 @@ function process_event (event)
 				if (boat.x > x)
 					MoveBoatXY (boat, 6, boat.y);
 				endif
-			elseif (boat.x > 1390 and boat.realm == "tokuno") 
+			elseif (boat.x > 1390 and boat.realm == "tokuno")
 				if (boat.x > x)
 					MoveBoatXY (boat, 15, boat.y);
 				endif
@@ -390,7 +390,7 @@ function DryDock (event)
 	if (!owner)
 		owner := GetObjProperty (tillerman, "owner");
 	endif
-	
+
 	if (owner != player.serial and !player.cmdlevel)
 		return;
 	endif
@@ -424,7 +424,7 @@ function DryDock (event)
 	var oldmovable;
 	foreach item in (boat.items)
 		if (item.objtype == UOBJ_CORPSE)
-			foreach item2 in ListRootItemsInContainer (item)
+			foreach item2 in EnumerateItemsInContainer(item, ENUMERATE_ROOT_ONLY)
 				if (!item2.newbie and item2.movable)
 					if (item2.objtype < UOBJ_STARTHAIR or item2.objtype > UOBJ_ENDHAIR)
 						MoveObjectToLocation( item2, player.x, player.y, player.z, player.realm, MOVEOBJECT_FORCELOCATION );
@@ -440,7 +440,7 @@ function DryDock (event)
 		endif
 	endforeach
 
-	foreach item in ListRootItemsInContainer (boat.hold)
+	foreach item in EnumerateItemsInContainer(boat.hold, ENUMERATE_ROOT_ONLY)
 		MoveObjectToLocation( item, player.x, player.y, player.z, player.realm, MOVEOBJECT_FORCELOCATION );
 	endforeach
 
@@ -675,7 +675,7 @@ function CheckForBeingLostAtSea ()
 	var oldmovable;
 	foreach item in (boat.items)
 		if (item.objtype = UOBJ_CORPSE)
-			foreach item2 in ListRootItemsInContainer (item)
+			foreach item2 in EnumerateItemsInContainer(item, ENUMERATE_ROOT_ONLY)
 				if (!item2.newbie and item2.movable)
 					if (item2.objtype < UOBJ_STARTHAIR or item2.objtype > UOBJ_ENDHAIR)
 						MoveItemToLocation (item2, owner.x, owner.y, owner.z, MOVEITEM_FORCELOCATION);
@@ -691,7 +691,7 @@ function CheckForBeingLostAtSea ()
 		endif
 	endforeach
 
-	foreach item in ListRootItemsInContainer (boat.hold)
+	foreach item in EnumerateItemsInContainer(boat.hold, ENUMERATE_ROOT_ONLY)
 		moveitemtolocation (item, owner.x, owner.y, owner.z, MOVEITEM_FORCELOCATION);
 	endforeach
 
@@ -723,7 +723,7 @@ function AddBoatToGlobalRegistry ();
 		set_critical (0);
 		return;
 	endif
-	
+
 	boat_prop.insert (boat.serial, owner);
 	SetGlobalProperty ("#boat_registry", boat_prop);
 	set_critical (0);

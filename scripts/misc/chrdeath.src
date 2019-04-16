@@ -5,7 +5,7 @@ use util;
 include "include/NPCBackpacks";
 include ":attributes:attributes";
 include "include/statMod";
-include "include/noto";
+include ":virtue:noto";
 include "include/reportMurder";
 include ":poisonwatcher:poisons";
 include "include/utility";
@@ -50,7 +50,7 @@ program chrdeath(corpse,ghost)
     Sleepms(1);
   endforeach
   marker.name := "The place where " + ghost.name + " fell.";
-    foreach item in ListRootItemsInContainer(corpse)
+    foreach item in EnumerateItemsInContainer(corpse, ENUMERATE_ROOT_ONLY)
 	if (item != marker && !item.newbie)
 	    if (!ReserveItem(item) )
 		return;
@@ -65,7 +65,7 @@ program chrdeath(corpse,ghost)
   if(len(ghost.reportables)>0)
 	SendReportGump(ghost);
   endif
-  
+
 
 endprogram
 
@@ -138,7 +138,7 @@ function remove_poison (cast_on)
         CurePoison(cast_on, 120, "defaultPoison", 4);
     endif
   endif
-  
+
 endfunction
 
 ///////////////////

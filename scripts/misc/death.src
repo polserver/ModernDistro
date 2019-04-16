@@ -7,7 +7,7 @@ use cfgfile;
 include "include/client";
 include ":attributes:attributes";
 include "include/NPCBackpacks";
-include "include/noto";
+include ":virtue:noto";
 //include "systems:spawnregion:spawnRegion";
 //include ":spawnregion:spawnRegion";
 
@@ -19,10 +19,11 @@ program npcdeath(corpse)
     var stocklist := SystemFindObjectBySerial(CInt(GetObjProperty(corpse, "restockserial")));
     DestroyItem(stocklist);
   endif
-  
+
   var killer := GetObjProperty(corpse, "LastHit");
       if (killer != error)
         i := SystemFindObjectBySerial(killer[2]);
+		AdjustNoto(i, corpse);
         if (GetObjProperty(i, "CursedLoot") )
             SetObjProperty(corpse, "guardkill", 1);
         elseif (GetObjProperty(i, "BlessedLoot") )
@@ -59,19 +60,19 @@ program npcdeath(corpse)
   dismount(corpse);
 
 // The following piece of code reports to new regional spawner the death of any NPCs spawned by it.
-     Set_Critical(1); 
-      if ( GetObjProperty(corpse, "regspawn") ) 
-         var SpawnName := GetObjProperty(corpse, "regspawn"); 
-         var numspawns := CInt(GetGlobalProperty(SpawnName)); 
-         if ( numspawns and numspawns > 1 ) 
-            numspawns := numspawns - 1; 
-            SetGlobalProperty(SpawnName, numspawns); 
-         else 
-            EraseGlobalProperty(SpawnName); 
-         endif 
-      elseif ( !GetObjProperty(corpse, "guardkill") ) 
-//         AddToSpawner(corpse, npctemplate); 
-      endif 
+     Set_Critical(1);
+      if ( GetObjProperty(corpse, "regspawn") )
+         var SpawnName := GetObjProperty(corpse, "regspawn");
+         var numspawns := CInt(GetGlobalProperty(SpawnName));
+         if ( numspawns and numspawns > 1 )
+            numspawns := numspawns - 1;
+            SetGlobalProperty(SpawnName, numspawns);
+         else
+            EraseGlobalProperty(SpawnName);
+         endif
+      elseif ( !GetObjProperty(corpse, "guardkill") )
+//         AddToSpawner(corpse, npctemplate);
+      endif
    Set_Critical(0);
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -178,21 +179,11 @@ function dismountme(who, corpse)
     endif
   endforeach
   contain.name := corpse.name;
-  foreach item in ListRootItemsInContainer(corpse)
+  foreach item in EnumerateItemsInContainer(corpse, ENUMERATE_ROOT_ONLY)
     MoveItemToContainer(item, contain);
   endforeach
   DestroyItem(corpse);
   DestroyItem(mount);
-endfunction
-
-function ListRootItemsInContainer(container)
-  var ret := { };
-  foreach item in EnumerateItemsInContainer(container)
-    if ( item.container.serial == container.serial )
-	  ret[len(ret)+1] := item;
-    endif
-  endforeach
-  return ret;
 endfunction
 
 ///////////////////
@@ -205,7 +196,7 @@ function RemakeTotem(corpse, npctemplate)
 	PlayStationaryEffect(corpse.x, corpse.y, corpse.z, FX_SMOKE, 0xa, 0xa );
 
 	if (RandomInt(10) == 1)
-		foreach item in ListRootItemsInContainer(corpse)
+		foreach item in EnumerateItemsInContainer(corpse, ENUMERATE_ROOT_ONLY)
 			MoveObjectToLocation(item, corpse.x, corpse.y, corpse.z, MOVEOBJECT_FORCELOCATION );
 		endforeach
 		DestroyItem(corpse);
@@ -219,7 +210,7 @@ function RemakeTotem(corpse, npctemplate)
 	set_critical(1);
 	var totem := CreateItemAtLocation(corpse.x, corpse.y, corpse.z, totemtype, 1);
 	if (!totem)
-		foreach item in ListRootItemsInContainer(corpse)
+		foreach item in EnumerateItemsInContainer(corpse, ENUMERATE_ROOT_ONLY)
 			MoveObjectToLocation(item, corpse.x, corpse.y, corpse.z, corpse.realm, MOVEOBJECT_FORCELOCATION );
 		endforeach
 		DestroyItem(corpse);
@@ -247,7 +238,7 @@ function RemakeTotem(corpse, npctemplate)
 	SetObjProperty(totem, "totemhp", 170);
 	SetObjProperty(totem, "broken", RandomInt(20) + 20);
 
-	foreach item in ListRootItemsInContainer(corpse)
+	foreach item in EnumerateItemsInContainer(corpse, ENUMERATE_ROOT_ONLY)
 		MoveObjectToLocation(item, corpse.x, corpse.y, corpse.z, MOVEOBJECT_FORCELOCATION );
 	endforeach
 	DestroyItem(corpse);

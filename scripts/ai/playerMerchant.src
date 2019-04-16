@@ -52,7 +52,7 @@ program merchant()
     MoveObjectToLocation(oldpack, 5851, 1161, 0, "britannia_alt", MOVEOBJECT_FORCELOCATION);
     var newpack := CreateItemAtLocation(5851, 1162, 0, 0x1966c, 1);
     EquipItem(me, newpack);
-    foreach thing in ListRootItemsInContainer(oldpack)
+    foreach thing in EnumerateItemsInContainer(oldpack, ENUMERATE_ROOT_ONLY)
       MoveItemToContainer(thing, newpack);
     endforeach
     DestroyItem(oldpack);
@@ -502,10 +502,10 @@ function Fireme()
     endwhile
     CreateItemInContainer(mypack, UOBJ_GOLD_COIN, mygold);
   endif
-  foreach thing in ListRootItemsInContainer(inv_fs)
+  foreach thing in EnumerateItemsInContainer(inv_fs, ENUMERATE_ROOT_ONLY)
     MoveItemToContainer(thing, mypack);
   endforeach
-  foreach thingy in ListRootItemsInContainer(inv_pb)
+  foreach thingy in EnumerateItemsInContainer(inv_pb, ENUMERATE_ROOT_ONLY)
     MoveItemToContainer(thingy, mypack);
   endforeach
   RevokePrivilege( me, "invul" );
@@ -742,7 +742,7 @@ endfunction
 function find_or_create_in_pack(name, objtype);
   var mypack := me.backpack;
   var check := 0;
-  foreach thing in ListRootItemsInContainer(mypack)
+  foreach thing in EnumerateItemsInContainer(mypack, ENUMERATE_ROOT_ONLY)
     if(thing.name == name)
       check := thing;
       break;

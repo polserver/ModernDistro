@@ -120,7 +120,7 @@ program merchant()
                                   PlaySoundEffect(me, 0x38);
         SYSEVENT_MERCHANT_SOLD:   TurnToward(ev.source);
                                   PrintTextAbovePrivate(me, "The total of thy purchase is " + ev.amount, ev.source);
-                                  foreach thing in ListRootItemsInContainer((ev.source).backpack)
+                                  foreach thing in EnumerateItemsInContainer((ev.source).backpack, ENUMERATE_ROOT_ONLY)
                                     EraseObjProperty(thing, "ClearRestock");
                                   endforeach
                                   if(lower(merchant_type) != "appraiser")
@@ -239,7 +239,7 @@ function BuyBag (byref you)
 		PrintTextAbovePrivate (me, "But that's not even a bag!", you);
 		return;
 	endif
-	
+
 	if (bag != you.backpack)
 		if (!InInventory (you.backpack, bag) )
 			PrintTextAbovePrivate (me, "That bag isn't in your inventory.", you);
@@ -256,7 +256,7 @@ function BuyBag (byref you)
 	var itemdesc := ReadConfigFile (":*:itemdesc");
 	var totalsale := 0;
 
-	foreach item in ListRootItemsInContainer (bag)
+	foreach item in EnumerateItemsInContainer(bag, ENUMERATE_ROOT_ONLY)
 		if (IsBuyableItem (you, item, 1) )
 			elem := FindConfigElem (itemdesc, item.objtype);
 			if (elem)

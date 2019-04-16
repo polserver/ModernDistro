@@ -285,7 +285,7 @@ function DyeItems(character, dyetub)
 	endif
 
 	if (IsContainer(what) && (what != character.backpack) )
-		foreach item in ListRootItemsInContainer(what)
+		foreach item in EnumerateItemsInContainer(what, ENUMERATE_ROOT_ONLY)
 			if ( IsDyableItem(character, item))
 				item.color := dyetub.color;
 				PlaySoundEffect(character, 0x023f);

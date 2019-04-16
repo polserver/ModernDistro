@@ -10,7 +10,7 @@ function HLEnumerateOnlineCharacters (ex_staff := 0, ex_concealed_staff := 0);
         var index, index2, ignore;
         list := EnumerateOnlineCharacters ();
         index2 := 1;
-        
+
         for (index := 1; index <= list.size(); index := index + 1)
             ignore := 0;
             if (list[index].cmdlevel)
@@ -31,8 +31,8 @@ function HLEnumerateOnlineCharacters (ex_staff := 0, ex_concealed_staff := 0);
         endfor
         return processedList;
 endfunction
-                
-        
+
+
 
 //returns all the items in container of objtype
 function EnumerateItemsInContainerOfObjtype(container, objtype)
@@ -48,26 +48,12 @@ function EnumerateItemsInContainerOfObjtype(container, objtype)
 
 endfunction
 
-//returns all the 'top-level' items in container
-function ListRootItemsInContainer(container)
-
-	var ret := { };
-        foreach item in EnumerateItemsInContainer(container)
-		if ( item.container == container )
-			ret.append(item);
-		endif
-	endforeach
-
-	return ret;
-
-endfunction
-
 //returns all the 'top-level' items in container of objtype
 function ListRootItemsInContainerOfObjtype(container, objtype)
 
 	var ret := { };
-        foreach item in EnumerateItemsInContainer(container)
-		if ( (item.container == container) && (item.objtype == objtype) )
+        foreach item in EnumerateItemsInContainer(container, ENUMERATE_ROOT_ONLY)
+		if (item.objtype == objtype)
 			ret.append(item);
 		endif
 	endforeach

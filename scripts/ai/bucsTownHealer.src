@@ -84,7 +84,7 @@ set_priority(50);
                                       TurnToward(ev.source);
                                       var res := SendBuyWindow(ev.source, inv_fs, Self(), inv_pb);
 									  res := res;
-                                      foreach thing in ListRootItemsInContainer((ev.source).backpack)
+                                      foreach thing in EnumerateItemsInContainer((ev.source).backpack, ENUMERATE_ROOT_ONLY)
                                         EraseObjProperty(thing, "ClearRestock");
                                       endforeach
                                     elseif (ev.text["sell"])

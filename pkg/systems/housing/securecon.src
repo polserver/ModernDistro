@@ -45,7 +45,7 @@ program use_securecont( character, item )
       SendSysMessage( character, "You can't use this." );
       return;
     endif
-    var boxin := ListRootItemsInContainer(item);
+    var boxin := EnumerateItemsInContainer(item, ENUMERATE_ROOT_ONLY);
     var boxs := GetObjProperty( item, "boxserial" );
     var boxo := SystemFindObjectBySerial(boxs);
     SendOpenSpecialContainer( character, boxo);
@@ -67,12 +67,3 @@ function returnindex(friendinfo, information)
   return 0;
 endfunction
 
-function ListRootItemsInContainer(container)
-  var ret := { };
-  foreach item in EnumerateItemsInContainer(container)
-    if ( item.container.serial == container.serial )
-	  ret[len(ret)+1] := item;
-    endif
-  endforeach
-  return ret;
-endfunction

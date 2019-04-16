@@ -1,18 +1,17 @@
 /*
         2009-10-20
-        
+
         Author: Austin
-        
+
         Purpose
         Assists in the use of storage areas.
-        
+
         CP_GetStorageContainerForMobile(container_id, storage_area_name:=0)
         CP_GetStorageAreaContainer(mobile, storage_area_name:=0, create:=CP_NOCREATE)
         CP_CreateStorageAreaContainer(container_id, storage_area_name:=0)
         CP_RegisterStorageArea(storage_area_name)
         CP_RemoveStorageAreaContainer(container_id, storage_area_name)
         CP_StorageDebugMsg(text)
-        CP_ListRootItemsInContainer(container)
 */
 use uo;
 use os;
@@ -113,7 +112,7 @@ function CP_GetStorageAreaContainer( container_id, storage_area_name:=0, create:
 	if(( !storage_area_name ) || ( storage_area_name == error ))
 		storage_area_name := CP_DEFAULT_AREA;
 	endif
- 
+
 	var container_name := CP_DEFAULT_PREFIX + container_id;
 //	var container_name := container_id;
 
@@ -265,15 +264,3 @@ function CP_StorageDebugMsg( report_text )
 	return 1;
 endfunction
 
-function CP_ListRootItemsInContainer( container )
-
-	var root_items := array{};
-        foreach item in EnumerateItemsInContainer( container )
-		if( item.container == container )
-			root_items.Append( item );
-		endif
-		SleepMS(2);
-	endforeach
-
-	return root_items;
-endfunction

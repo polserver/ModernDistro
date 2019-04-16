@@ -29,7 +29,7 @@ program onlogon(who)
       MoveObjectToLocation(oldpack, 5851, 1161, 0, "britannia_alt", MOVEOBJECT_FORCELOCATION); // newmap problem
       var newpack := CreateItemAtLocation(5851, 1162, 0, 0xE75, 1, "britannia_alt"); // newmap problem
       EquipItem(who, newpack);
-      foreach thing in ListRootItemsInContainer(oldpack)
+      foreach thing in EnumerateItemsInContainer(oldpack, ENUMERATE_ROOT_ONLY)
         MoveItemToContainer(thing, newpack);
       endforeach
     endif
@@ -134,7 +134,7 @@ program onlogon(who)
   var acct := who.acct;
   acct.SetProp ("lastlogon", ReadGameClock() );
   staffnotify(who);
-  
+
     // Seasons addon
     sleepms (3000);
     var gseason := GetGlobalProperty("gseason");
@@ -145,7 +145,7 @@ program onlogon(who)
         "SEASON_SUMMER":     SetSeasonForPlayer( who, SEASON_SUMMER);
         "SEASON_SPRING":     SetSeasonForPlayer( who, SEASON_SPRING);
     endcase
-    
+
     // Record the gameclock time player logs in.
     SetObjProperty(who, "logontime",ReadGameClock());
     SetObjProperty(who, "Real_Life_login_Time", time);
@@ -506,12 +506,12 @@ function RecordPlayerLogin (character)
 			logon_record.erase (logon_keys[1]);
 		endif
 	endif
-	
+
 	var newlogon := {};
 	newlogon[1] := Systime_GetReadableTimeString();
 	newlogon[2] := character.ip;
 	newlogon[3] := character.name;
-	
+
 	logon_record.insert (ReadGameClock(), newlogon);
 	SetAccountProperty (character.acctname, "logon_record", logon_record);
 endfunction
