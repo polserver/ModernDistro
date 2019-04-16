@@ -14,26 +14,48 @@
 use uo;
 
 program textcmd_goxyz( who, text )
+	if(text == "" || text == "?" || Lower(text) == "help")
+		SendSysMessage(who, "No help is available for this command yet.", color := 88);
+		return;
+	endif
 	var params := SplitWords( text );
 	var facets := {"britannia", "britannia_alt", "ilshenar", "malas", "tokuno", "termur"};
 	var ZCoord := 0;
 	// Always default to the user's facet if they do not specify a facet.
 	var facet := who.realm;
-	// The user only passed X and Y but didn't pass Z.
-    if (len(params) < 3)
+	// The user only specified X and Y but didn't pass Z or a facet.
+    if (Len(params) == 2)
         ZCoord := GetMapInfo( CInt(params[1]), CInt(params[2]), facet ).z;
-	elseif(Len(params) == 4)
+	endif
+	// If the user entered 3 parameters determine if param 3
+	// is a facet. If not assume param 3 is a valid Z coordinate for X an Y.
+	if(Len(params) == 3)
+		if((params[3] in facets))
+			facet := Lower(params[3]);
+			ZCoord := GetMapInfo( CInt(params[1]), CInt(params[2]), facet ).z;
+		else
+			ZCoord := CInt(params[3]);
+		endif
+	endif
+	if(Len(params) == 4)
 		ZCoord := CInt(params[3]);
+		if(Lower(params[4]) in facets)
+			facet := Lower(params[4]);
+		else
+			facet := who.realm;
+		endif
     endif
+
 	// If the user specified a Z and a facet then check to make sure they spelled the facet correctly.
-	if(Lower(params[4]) in facets)
+/*	if(Lower(params[4]) in facets)
 		facet := Lower(params[4]);
 	endif
 	// If the user doesn't specify a Z but passed a facet as the 3rd parameter then check to make sure they spelled it correctly.
 	if(Lower(params[3]) in facets)
 		facet := Lower(params[3]);
 	endif
-
+*/
+	 SendSysMessage(who, CStr(params[1]) + " " +  CStr(params[1]) + " " +  CStr(ZCoord) + " "/* +  params[4]*/, color := 88);
 	var res := MoveObjectToLocation( who, CInt(params[1]), CInt(params[2]), CInt(ZCoord), facet, MOVEOBJECT_FORCELOCATION );
 
     if (!res)

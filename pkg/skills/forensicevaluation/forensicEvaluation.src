@@ -1,9 +1,9 @@
 use uo;
 
 include "include/client";
-include "include/noto";
+include ":virtue:noto";
 include "include/trainingskill";
-
+include ":attributes:attributes";
 
 const UOBJ_PROOF := 0x1BE34;
 
@@ -14,7 +14,7 @@ program forensic(who)
         data[3] := 19;
         SetObjProperty(who, "LastUsedSkill", data );
         TrainingSkill(who, data[3]);
-       
+
   EraseObjProperty(who, "IsMeditating");
 //  EraseObjProperty(who, "HealTimer");
   SendSysMessage(who, "What would you like to evaluate?");

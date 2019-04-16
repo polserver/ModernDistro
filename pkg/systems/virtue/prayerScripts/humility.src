@@ -1,0 +1,148 @@
+use uo;
+use os;
+use basic;
+
+include ":gumps:yesNoSizable";
+include ":gumps:yesNo";
+include ":attributes:attributes";
+include "include/client";
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+include ":gumps:gumpPrompt";
+include ":gumps:/requestGump";
+include ":virtue:virtue";
+
+program humilityshrine(params)
+
+	var res;
+	var message := "";
+	var who := params[1];
+
+	var virtue_shrine := params[2];												// String - The name of the virtue.
+	var mantra := GetMantra(virtue_shrine);										// String - The word that must be entered by the player to activate the shrine.
+	var max_range := CInt(VS_GetSettingsCfgElem("Settings").MaxRange);			// Integer - The maximum range that a virtue score can achieve, expressed as an absolute value.
+	var virtue_rating := GetVirtueAmount(who, virtue_shrine);					// Integer - The current score the player posseses in the virtue.
+	var prayer_delay := CInt(VS_GetSettingsCfgElem("Settings").PrayerDelay);	// Integer - The delay a player must wait. in seconds, between "prayers" at a shine.
+
+	// Prevents "praying" at a shrine too often.
+	if ( CInt(GetObjProperty(who, "NextPrayer") ) > ReadGameClock() )
+		SendSysMessage(who, "You must rest before attempting to meditate again.", color := MSG_ERROR);
+		return 0;
+	endif
+
+	var spirituality_rating := GetVirtueAmount(who, "spirituality");
+
+	if (!spirituality_rating)
+		spirituality_rating := 0;
+	endif
+
+	if (spirituality_rating < -max_range)
+		spirituality_rating := -max_range;
+	elseif (spirituality_rating > max_range)
+		spirituality_rating := max_range;
+	endif
+
+	if (!virtue_rating)
+		virtue_rating := 0;
+	endif
+	if (virtue_rating < -max_range)
+		virtue_rating := -max_range;
+	elseif (virtue_rating > max_range)
+		virtue_rating := max_range;
+	endif
+
+	SendSysMessage(who, "Speak now the mantra of " + VS_Capitalize(virtue_shrine) + ".", color := 88);
+	var entry := RequestInput(who, who.backpack, "");
+	if ( (lower(entry) != mantra) || (Distance(who, virtue_shrine) > 4) )
+		SendSysMessage(who, "You feel disheartened.");
+		PlaySoundEffect(who, 0xf9);
+		spirituality_rating := spirituality_rating - 3;
+
+		SetVirtueAmount(who, "spirituality", spirituality_rating);
+		SetVirtueAmount(who, virtue_shrine, virtue_rating);
+		return 0;
+	endif
+
+	who.frozen := 1;
+	spirituality_rating := spirituality_rating + 1;
+	// Wave hands and speak the "Ari Zakaliasalova" "prayer".
+	PrintTextAbove(who, VS_Capitalize(mantra));
+	PerformAction(who, 0x0011);
+	PlaySoundEffect(who, 0x24b);
+	sleep(3);
+	PrintTextAbove(who, VS_Capitalize(mantra));
+	PerformAction(who, 0x0011);
+	PlaySoundEffect(who, 0x24b);
+	sleep(3);
+	PrintTextAbove(who, VS_Capitalize(mantra));
+	PerformAction(who, 0x0011);
+	PlaySoundEffect(who, 0x24b);
+	sleep(3);
+	who.frozen := 0;
+	PlaySoundEffect(who, 0x101);
+	SetObjProperty(who, "NextPrayer", (ReadGameClock() + prayer_delay) );
+
+	if (virtue_rating < CInt(-(0.75 * max_range)))
+		message := VS_GetSettingsCfgString(VS_Capitalize(virtue_shrine + "ShrineMsg"), "Neg4");
+	elseif (virtue_rating < CInt(-(0.50 * max_range)))
+		message := VS_GetSettingsCfgString(VS_Capitalize(virtue_shrine + "ShrineMsg"), "Neg3");
+	elseif (virtue_rating < CInt(-(0.25 * max_range)))
+		message := VS_GetSettingsCfgString(VS_Capitalize(virtue_shrine + "ShrineMsg"), "Neg2");
+	elseif (virtue_rating < 0)
+		message := VS_GetSettingsCfgString(VS_Capitalize(virtue_shrine + "ShrineMsg"), "Neg1");
+	endif
+
+	// If any of the preceeding if statements were executed,
+	// message length will be greter than 0.
+	if(message.Length() != 0)
+		PrintTextAbove(who, message, 2, MSG_ERROR);	// Print in red - bad message.
+		return 1;
+	endif
+
+	// This is separate from the above ifs because of the MSG_NEUTRAL
+	// text colour.
+	if (virtue_rating == 0)
+		message := VS_GetSettingsCfgString(VS_Capitalize(virtue_shrine) + "ShrineMsg", "Zero");
+		PrintTextAbove(who, message, 1, MSG_NEUTRAL);	// Print in blue - neutral message.
+		return 1;
+	endif
+
+	var grantquest := 0;
+	var grantitem := 0;
+	var grantblessing := 0;
+
+	if (virtue_rating < CInt(0.25 * max_range))
+		message := VS_GetSettingsCfgString(VS_Capitalize(virtue_shrine + "ShrineMsg"), "Pos1");
+	elseif (virtue_rating < CInt(0.50 * max_range))
+		message := VS_GetSettingsCfgString(VS_Capitalize(virtue_shrine + "ShrineMsg"), "Pos2");
+		grantblessing := 1;
+	elseif (virtue_rating < CInt(0.75 * max_range))
+		message := VS_GetSettingsCfgString(VS_Capitalize(virtue_shrine + "ShrineMsg"), "Pos3");
+		grantblessing := 1;
+		grantitem := 1;
+	else
+		message := VS_GetSettingsCfgString(VS_Capitalize(virtue_shrine + "ShrineMsg"), "Pos4");
+		grantblessing := 1;
+		grantquest := 1;
+	endif
+
+	PrintTextAbove(who, message, 1, MSG_SUCCESS);	// Print in green - good message.
+
+	SetVirtueAmount(who, "spirituality", spirituality_rating);
+	// I realize the next line is  not currently necvessary.
+	// I added it in the event we might want to modify the value in the future.
+	SetVirtueAmount(who, virtue_shrine, virtue_rating);
+
+	if (grantblessing)
+		res := YesNoSizable(who, "Do you wish to receive the blessings of " + virtue_shrine + "?", 88);
+		if (res)
+			PlayObjectCenteredEffect(who, 0x373a, 0x10, 0x10);
+			PlaySoundEffect(who, 0x1ec);
+			SetHp(who, who.strength);
+			SetMana(who, who.intelligence);
+			SetStamina(who, who.dexterity);
+			EraseObjProperty(who, "poison_level");
+		endif
+	endif
+
+endprogram

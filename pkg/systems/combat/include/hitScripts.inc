@@ -80,3 +80,45 @@ function GetArmorHitScripts(mobile, armor)
 
 	return hit_scripts;
 endfunction
+
+// This is not called from within any script as of yet. - Yukiko
+// AdjustNoto(attacker, defender)
+// Applies Karma and Fame to the attacker and defender, only if the
+// defender is killed as a result of the attacker.  Yes, NPCs can
+// have their Karma and Fame adjusted as a result of their actions.
+// Note: "evil" characters NEVER gain Karma for killing other evil
+// characters.
+/*
+function AdjustNoto(attacker, defender)
+
+    if !(defender.dead)
+        return 0;
+    endif
+
+    var karma := CInt(GetObjProperty(attacker, "Karma") );
+    var fame := CInt(GetObjProperty(attacker, "Fame") );
+    var vkarma := CInt(GetObjProperty(defender, "Karma") );
+    var vfame := CInt(GetObjProperty(defender, "Fame") );
+    var kmod := 1;
+
+    fame := fame + CInt( (vfame / 10) / ( CInt(Log10(fame)) + 1 ) );
+    if !(defender.npctemplate)
+        vfame := CInt(vfame * 0.9);
+    endif
+
+    if ( (karma < -15) && (vkarma < -15) )
+        return;
+    endif
+
+    if (vkarma > 15)
+        kmod := -1;
+        karma := Abs(karma);
+    else
+        vkarma := Abs(vkarma);
+    endif
+
+    kmod := kmod * CInt( (vkarma / 10) / ( CInt(Log10(karma)) + 1 ) );
+    karma := karma + kmod;
+
+endfunction
+*/

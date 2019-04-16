@@ -1,0 +1,92 @@
+The Virtue System.
+
+There are eight virtues: valor, honor, compassion, justice, honesty, spirituality, sacrifice, humility.
+This system has functions to set a value for a specific virtue on a character, retrieve a value for a
+specific virtue from a character or add an amount to a player's virtuescroe for a specific virtue.
+The functions are contained in :virtue:virtue.inc.
+Here are the details for each function:
+///////////////////////////////
+//
+// GetMantra(virtue_name)
+//
+// Purpose: Get the mantra based on the virtue.
+//
+//
+// virtue_name - a string containing the name of a virtue.
+//
+// Purpose: Returns the mantra for the specified virtue. The correct
+//          mantra for a virtue must be spoken by the player at the
+//          shrine for that virtue.
+//
+// returns: String. The mantra for the virtue passeed to the function or
+//          the string "_Error" if the virtue could not be found. a 0.
+//
+///////////////////////////////
+
+///////////////////////////////
+//
+// GetVirtueAmount(who, virtue)
+//
+// who - ref to a mobile
+//
+// virtue - a string containing the name of a virtue with the first
+//          letter capitalised, ie. Compassion
+//
+// Purpose: Retrieves a player's virtuescrore for the specified virtue.
+//
+// returns the integer value attached to the CProp "Virtue_" + <virtue>
+///////////////////////////////
+
+///////////////////////////////
+//
+// AdjustVirtue(who, virtue, amt := 0, prob := 102)
+//
+// who - ref to a mobile
+//
+// virtue - a string containing the name of a virtue with the first
+//          letter capitalised, ie. Compassion
+//
+// amt - The amount of virtue points to award.
+//
+// prob - Probability that virtue points will be awarded.
+//        This is an optional value that a calling programme can
+//        use if the programmer wants to add some randomness to
+//        the awarding of virtue points. This is a percentile amount.
+//        If the calling programme specifies a probability it also
+//        MUST specify an amount for amt.
+//
+// Purpose: Adds the amount sent in amt to a player's virtuescrore.
+//
+// returns 1 if points are awarded, 0 if no points awarded.
+//         It should always return a 1 unless prob is used. In which
+//         case, if the percentile dice roll fails it will return a 0.
+//
+///////////////////////////////
+
+///////////////////////////////
+//
+// SetVirtueAmount(who, virtue)
+//
+// who - ref to a mobile
+//
+// virtue - a string containing the name of a virtue with the first
+//          letter capitalised, ie. Compassion
+//
+// Purpose: Set a player's virtuescore for the specified virtue.
+//
+// returns the integer value attached to the CProp "Virtue_" + <virtue>
+///////////////////////////////
+
+There are also the Virtue Shrine markers. One is placed at each of the shrines in Felucca, Trammel, and Ilshenar.
+Each marker is tied to its shrine by a CProp set on the marker with the name of the shrine where it is located.
+If the player uses the meditation skill and is in close proximity to the shrine they are presented with a gump
+asking if they wish to pray. If the player responds with "yes" and speaks the appropriate mantra for that shrine
+he or she will receive a message about his or her current standing in that virtue. If the player does not wish to
+pray then the normal meditation script will complete.
+
+Each virtue shrine has its own script that is started when the player chooses to pray. All eight scripts are identical
+except for their program name. I chose to have eight different scripts rather than one universal script for flexibility
+in the event the developer wanted to allow different events to occur depending on which virtue was being accessed.
+
+It should be noted that I do not know how the virtue system is implemented on OSI. I am certain this system does not
+function like the official system does.

@@ -9,14 +9,14 @@ include "include/objtype";
 include "include/canAccess";
 include "include/dist";
 include "include/toolWear";
-include "include/noto";
+include ":virtue:noto";
 include ":crafting:crafting";
 include ":gumps:requestGump";
 
 
 program use_blade(who, blade)
   var craftingbag := FindCraftingbag (who);
-  
+
   EraseObjProperty(who, "IsMeditating");
   EraseObjProperty(who, "HealTimer");
   if(!can_access(who, blade))
@@ -288,4 +288,3 @@ function make_jack_o_latern(who, blade, pumpkin)
      SendSysMessage(who,"That ain't no pumpkin.");
    endif
  endfunction
- 

@@ -760,7 +760,7 @@ const ANIM_HORSE_ATTACK_BOW     :=  0x001B; // Horseback: Attack with a bow
 const ANIM_HORSE_ATTACK_XBOW    :=  0x001C; // Horseback: Attack with a crossbow
 const ANIM_HORSE_SLAP           :=  0x001D; // Horseback: Slap horse
 const ANIM_TWIST_DODGE          :=  0x001E; // Twist (dodge hit?)
-const ANIM_ATTACK_PUNCH         :=  0x001F; // Attack - punch 
+const ANIM_ATTACK_PUNCH         :=  0x001F; // Attack - punch
 const ANIM_BOW                  :=  0x0020; // Bow.
 const ANIM_SALUTE               :=  0x0021; // Salute.
 const ANIM_EAT                  :=  0x0022; // Eat.
@@ -982,7 +982,7 @@ const DIR_W             :=  0x06;   // West.
 const DIR_NW            :=  0x07;   // Northwest.
 
 // * Colors *
-// This is not suposed to be a "complete" colorchart, but a
+// This is not supposed to be a "complete" colorchart, but a
 // quick way to access normal colors.
 const COLOR_DEFAULT         := 0x0000;
 const COLOR_BLACK           := 0x0001;
@@ -1036,6 +1036,19 @@ const FONTCOLOR_LAVENDER := 20;
 const FONTCOLOR_BLACK := 1;
 const FONTCOLOR_BROWN := 46;
 const FONTCOLOR_YELLOW := 53;
+const MSG_ERROR         := 33;
+const MSG_FAIL          := MSG_ERROR;
+const MSG_SUCCESS       := 66;
+const MSG_GOOD          := MSG_SUCCESS;
+const MSG_NEUTRAL       := 88;
+
+//////////////////////////////////////
+// Canned colours
+//////////////////////////////////////
+const MESSAGE_COLOR_GOOD    := 268;
+const MESSAGE_COLOR_WARNING := 54;
+const MESSAGE_COLOR_BAD     := 34;
+const MESSAGE_COLOR_MESSAGE := 1320;
 
 ////
 // SkillIDs
@@ -1109,14 +1122,6 @@ const ILSHENAR_REALM            := "ilshenar";
 const MALAS_REALM               := "malas";
 const TOKUNO_REALM              := "tokuno";
 const TERMUR_REALM              := "termur";
-
-//////////////////////////////////////
-// Canned colours
-//////////////////////////////////////
-const MESSAGE_COLOR_GOOD	:= 268;
-const MESSAGE_COLOR_WARNING	:= 54;
-const MESSAGE_COLOR_BAD		:= 34;
-const MESSAGE_COLOR_MESSAGE	:= 1320;
 
 /////////////////////////////////////////////
 // Added from 098 Distro for compatibility

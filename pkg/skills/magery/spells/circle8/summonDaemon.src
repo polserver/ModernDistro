@@ -5,11 +5,12 @@ include ":attributes:attributes";
 include ":magery:spells";
 include "include/client";
 include "include/sounds";
+include ":virtue:virtue";
 
 program summon_daemon( parms )
-  var caster := parms[1];
-  var info := parms[2];
-  var cast_on := MS_TargetCoordinates(caster, info.targ, "Select a target.");
+	var caster := parms[1];
+	var info := parms[2];
+	var cast_on := MS_TargetCoordinates(caster, info.targ, "Select a target.");
     if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
         cast_on := parms[4];
     endif
@@ -17,9 +18,11 @@ program summon_daemon( parms )
         SendSysMessage (caster, "Cancelled.", color := 33);
         return 0;
     endif
-  if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
-        return 0;
-  endif
-
-  summon_creature( caster, 8, "summoneddaemon", cast_on, 70, "daemon"  );
+	if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+		return 0;
+	endif
+	if (caster.acctname)
+		AdjustVirtue(caster, "Spirituality", -1, 100);
+	endif
+	summon_creature( caster, 8, "summoneddaemon", cast_on, 70, "daemon"  );
 endprogram

@@ -11,7 +11,7 @@ include "include/canAccess";
 include "include/utility";
 include "include/dist";
 include ":itemutils:toolWear";
-include "include/noto";
+include ":virtue:noto";
 include ":damage:damage";
 
 const UACTION_CHOP := 0x0d;

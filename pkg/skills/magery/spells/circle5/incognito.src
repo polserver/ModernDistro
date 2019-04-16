@@ -6,18 +6,20 @@ use cfgfile;
 include ":attributes:attributes";
 include ":timedscripts:timedScripts";
 include ":magery:spells";
+include ":virtue:virtue";
 
 program cast_incognito(parms)
 	var caster := parms[1];
     var info := parms[2];
 
-  
+
 	MS_PlaySpellSFX(info.spell_id, caster);
 	MS_PlaySpellGFX(info.spell_id, caster, caster);
 
 	// Duration: ((Eval / 5) + 1) * 6
 	var duration := AP_GetSkill(caster, MAGERY) * 1.2;
 	TS_StartTimer(caster, "Incognito", duration, 0, caster);
+	AdjustVirtue(caster, "Honesty", -1, 100);
 
 	return 1;
 endprogram

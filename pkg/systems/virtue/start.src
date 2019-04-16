@@ -1,0 +1,23 @@
+use os;
+use uo;
+
+include ":virtue:virtue";
+
+program VirtueSystemStart()
+
+	print("Starting Virtue system");
+
+	var facets := {"Felucca", "Trammel", "Ilshenar"};
+	var relms := {"britannia", "britannia_alt", "ilshenar"};
+	var coordinates := {};
+	var shrine_marker;
+
+	foreach facet in facets
+		foreach virtue in virtues
+			coordinates := SplitWords(VS_GetSettingsCfgString("ShrineLocs" + facet, VS_Capitalize(virtue)));
+			shrine_marker := CreateItemAtLocation(CInt(coordinates[1]), CInt(coordinates[2]), CInt(coordinates[3]), "shrine_marker", 1, relms[_facet_iter]);
+			SetObjProperty(shrine_marker, "Virtue", virtue);
+		endforeach
+	endforeach
+
+endprogram

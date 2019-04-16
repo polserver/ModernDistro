@@ -5,6 +5,7 @@ use cliloc;
 include ":magery:spells";
 include ":death:resurrection";
 include "include/client";
+include ":virtue:noto";
 
 program spell_resurrect( parms )
     var caster := parms[1];
@@ -44,17 +45,30 @@ program spell_resurrect( parms )
 	endif
 
 	var settings_elem := MS_GetSettingsCfgElem("Settings");
-	
+
 	// Ask targ if they want to res
 	if ( CInt(settings_elem.AskToRes) )
 		if ( !ResurrectionGump(cast_on) )
 			return 0;
 		else
+			AdjustVirtue(caster, "Compassion", 1, 100);
+			var karma := CInt( GetObjProperty(caster, "Karma") );
+			if (!karma)
+				karma := 0;
+			endif
+
+			if ( ( karma > -15) && (!cast_on.criminal) && (!cast_on.murderer) )
+				karma := karma + 20;
+				SetObjProperty(caster, "Karma", karma);
+				SendGainMessage(caster, "Karma", 20);
+				SetNotoTitle(caster);
+			endif
+
 			MS_PlaySpellSFX(info.spell_id, cast_on);
 			MS_PlaySpellGFX(info.spell_id, cast_on, caster);
 		endif
 	endif
-	
+
 	// Make the caster criminal for ressing a criminal
 	if ( Resurrection(cast_on) )
 		if ( cast_on.criminal )

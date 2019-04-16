@@ -1,6 +1,6 @@
 // Some comments added by Yukiko - denoted by capital 'Y'
-
 use cfgfile;
+
 include ":attributes:attributes";
 include "include/utility";
 
@@ -173,7 +173,7 @@ function RestockMyInventory(source, destination)
 		var chk := CountExisting(destination, thing.objtype); // to see what we got *really* for sale
 		items := chk[2];// returns all of a particular item, stacked or unstacked. (array)
 		amt := chk[1];
-		
+
 		// determine whether to increase or decrease stock.
 		if(amt >= (thing.amount * multiplier))
 			multiplier := multiplier - 1;
@@ -187,9 +187,9 @@ function RestockMyInventory(source, destination)
 			endif
 		endif
 		SetObjProperty(thing, "Multiplier", multiplier);
-		
+
 		mlt := Cint(thing.amount * multiplier); // mlt is the amount that should be in stock
-		
+
 		if(amt != mlt)
 			// define characteristics of the items
 			var buyprice := Cint(thing.buyprice);
@@ -245,31 +245,31 @@ function CountExisting(container, objtype)
 endfunction
 
 function ModifyPCSellList(merchanttype, customer)
-	var backpackitems := ListRootItemsInContainer(customer.backpack);
+	var backpackitems := EnumerateItemsInContainer(customer.backpack, ENUMERATE_ROOT_ONLY);
 	var prodgroups := FindConfigElem(mrcspawn_cfg, merchanttype);
 	var buys := GetConfigStringArray(prodgroups, "Buys");
 	var normcost, normsell, percentage;
-	
+
 	//  If not buying lets call the whole thing off.
 	if(buys.size() < 1)
 		return 0;
 	endif
 
 	var itemmark := -1;
-	
+
 	// set buy price for each item to be 0 to start. This means it won't be sellable.
         // Commented out by Yukiko - This section prevented us from setting custom buy prices for items
-/*        
+/*
 	var iteminit := 0;
-        
+
 	foreach item in backpackitems
 		item.buyprice := iteminit;
 	endforeach
-*/	
-	var buynobuyable := { }; 
+*/
+	var buynobuyable := { };
 	var objtype;
 	var counter := 0;
-	
+
 	// Populate the array of items the vendor will buy.
 	foreach prodgroup in buys
 		foreach itemstr in GetConfigStringArray(FindConfigElem(mrcspawn_cfg, prodgroup), "Item")
@@ -283,7 +283,7 @@ function ModifyPCSellList(merchanttype, customer)
 			buynobuyable.append(objtype);
 		endforeach
 	endforeach
-	
+
 	// compare all the items in the top level of the backpack to things the vendor can buy and set the price.
 	if(buynobuyable.size()) // Y - If the vendor has anything in her list of buyables
             foreach item in backpackitems

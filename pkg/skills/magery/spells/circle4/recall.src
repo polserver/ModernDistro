@@ -9,13 +9,14 @@ include "include/client";
 include "include/sounds";
 include "include/objtype";
 include "include/isValidLoc";
+include ":virtue:virtue";
 
 program recall(parms)
   var failure := 0;
   var caster := parms[1];
   var info := parms[2];
   var success := 0;
-  
+
   var cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_NEUTRAL);
 
     if (!cast_on)
@@ -55,7 +56,7 @@ program recall(parms)
   var toy := CInt(dest.y);
   var toz := CInt(dest.z);
   var torealm := dest.realm;
-  if (torealm) 
+  if (torealm)
         if (torealm != caster.realm)
             SendSysMessageCL(caster, 1005568, color := 33); // You cannot recall to another facet.
             return;
@@ -83,7 +84,7 @@ program recall(parms)
     SendSysMessageCL(caster,501025, color := 33); // Something is blocking the location.
     chk := 1;
   endif
-  
+
 
 // Check for static houses
     var signs := ListItemsNearLocationOfType( tox, toy, toz, 30, 0x160ff);
@@ -101,8 +102,12 @@ program recall(parms)
   if(chk == 1)
     return;
   endif
+	var monsterlist := ListHostiles(caster, 20);
+	if ( (monsterlist[1] != error) and (monsterlist[1] != {} ) )
+		AdjustVirtue(caster, "Valor", -1, 100);
+	endif
 	MoveObjectToLocation( caster, tox, toy, toz );
-  
+
   PlaySoundEffect(caster, 0x1fd);
   return 1;
 endprogram

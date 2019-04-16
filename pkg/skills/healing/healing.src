@@ -8,6 +8,8 @@ include "include/dist";
 include "include/client";
 include "include/res";
 include "include/resPenalty";
+//include ":virtue:virtue";
+include ":virtue:noto";
 include "include/canAccess";
 include ":attributes:attributes";
 include ":poisonwatcher:poisons";
@@ -389,6 +391,18 @@ function resurrect_pc(who, patient, counter)
 			if(SkillCheck(who, HEALING, healamt, 100))
 				AwardPoints(who, SKILLID_HEALING, 400);
 				if(do_res(who, patient))
+				AdjustVirtue(who, "Compassion", 1, 100);
+				var karma := CInt( GetObjProperty(who, "Karma") );
+					if (!karma)
+						karma := 0;
+					endif
+
+				if ( ( karma > -15) && (!patient.criminal) && (!patient.murderer) )
+					karma := karma + 20;
+					SetObjProperty(who, "Karma", karma);
+					SendGainMessage(who, "Karma", 20);
+					SetNotoTitle(who);
+				endif
 					SendSysMessage(who, "You have resurrected " + patient.name + ".");
 				else
 					SendSysMessage(who, "The patient refused resurrection." );

@@ -2,12 +2,13 @@ use util;
 
 include ":attributes:attributes";
 include ":magery:spells";
+include ":virtue:virtue";
 
 program cast_poly( parms )
   var caster := parms[1];
   var info := parms[2];
   var cast_on := caster;
-	
+
   var origform := caster.graphic;
   var magery     := CInt(GetAttribute(caster, MAGERY));
   var meditation := CInt(GetAttribute(caster, MEDITATION));
@@ -76,6 +77,7 @@ program cast_poly( parms )
   else
 	caster.color := 0;
   endif
+  AdjustVirtue(caster, "Honesty", -1, 50);
   var magerydur := magery/2;
   var meditadur := magerydur + meditation/10;
   var duration  := meditadur + evalint/10;

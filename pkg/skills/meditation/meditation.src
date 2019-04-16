@@ -4,38 +4,29 @@ use util;
 use cfgfile;
 
 include "include/client";
+include "include/objtype";
 include ":attributes:attributes";
-include "include/yesNo";
+include ":gumps:yesNoSizable";
+include ":virtue:virtue";
 
-const SFX_MEDITATION := 0xfa;
-const UOBJ_WAYPOINT := 0xa40a;
+const SFX_MEDITATION := SFX_FA;
 
+var shrine_marker := GetObjtypeByName("shrine_marker");
 var combatcfg := ReadConfigFile(":*:itemdesc");
 
 program meditation(who)
 
-	var shrinelist := ListItemsNearLocationOfType(who.x, who.y, who.z, 3, UOBJ_WAYPOINT, who.realm);
-	if ( GetObjProperty(shrinelist[1], "LocationType") == "Shrine" )
-		SendSysMessage(who, "Do you wish to pray at this shrine?");
-		if (yesno(who, "Pray here?") )
-//			var theshrine := shrinelist[1];
-			start_script( (GetObjProperty(shrinelist[1], "Virtue") ), { who, shrinelist[1] } );
-			return 1;
-		else
-			PrintTextAbove(who, "Just meditating...");
-		endif
-	endif
-	
 
 	var poisoned := CInt( GetObjProperty(who,"poison_level") );
+	if (poisoned >= 1)
+		SendSysMessage( who, "You cannot meditate while poisoned." );
+		return 0;
+	endif
+
 	var lastmed := CInt( GetObjProperty(who, "LastMeditation") );
 	if (lastmed > ReadGameClock() )
 		EraseObjProperty(who, "#ISMEDITATING");
 		SendSysMessage(who, "You must rest for a bit.");
-		return 0;
-	endif
-	if (poisoned >= 1)
-		SendSysMessage( who, "You cannot meditate while poisoned." ); 
 		return 0;
 	endif
 
@@ -50,16 +41,25 @@ program meditation(who)
 		return 0;
 	endif
 
-	if ( GetAttribute(who,MEDITATION) < 5.0 )
-//		loss := SkillCheck(who, MEDITATION, 10, 50);
-		loss := SkillCheck(who, MEDITATION, 10, 20);
+	var shrinelist := ListItemsNearLocationOfType(who.x, who.y, who.z, 3, shrine_marker, who.realm);
+		if (YesNoSizable(who, "Do you wish to pray at the shrine of " + VS_Capitalize(GetObjProperty(shrinelist[1], "Virtue")) + "?", 88) )
+			var theshrine := shrinelist[1];
+			start_script( ":virtue:prayerScripts/" + (GetObjProperty(shrinelist[1], "Virtue") ), { who, GetObjProperty(theshrine, "Virtue") } );
+			return 1;
+		else
+			PrintTextAbove(who, "Just meditating...");
+		endif
+
+
+	if ( GetAttribute(who, MEDITATION) < 5.0 )
+		loss := SkillCheck(who, MEDITATION, 10, 50);
 		SendSysMessage(who, "You cannot focus your concentration.");
 		lastmed := CInt(ReadGameClock()) + 15;
 		SetObjProperty(who, "LastMeditation", lastmed);
 		EraseObjProperty(who, "#ISMEDITATING");
 	endif
 
-	var diff := CInt(GetAttribute(who,MEDITATION) - GetMana(who)) + (loss / 1000);
+	var diff := CInt(GetAttribute(who, MEDITATION) - GetMana(who)) + (loss / 1000);
 	if (diff < 0)
 		diff := 0;
 	elseif (diff > 110)
@@ -69,8 +69,8 @@ program meditation(who)
 	if(pts > 35)
 		pts := 35;
 	endif
-	
-//	if(SkillCheck(who, MEDITATION, diff, (CInt(GetAttribute(who,MEDITATION)) * 5) ))
+
+//	if(SkillCheck(who, ATTRIBUTEID_MEDITATION, diff, (CInt(GetAttribute(who,ATTRIBUTEID_MEDITATION)) * 5) ))
 	if(SkillCheck(who, MEDITATION, diff, pts))
 		var oldx := who.x;
 		var oldy := who.y;
@@ -102,7 +102,7 @@ program meditation(who)
 				EraseObjProperty(who, "#ISMEDITATING");
 				return 0;
 			endif
-			sleepms( CInt(50000 / GetAttribute(who,MEDITATION) ) );
+			sleepms( CInt(50000 / GetAttribute(who, MEDITATION) ) );
 			SetMana(who, GetMana(who) + 1);
 			chp := GetHp(who);
 			cmana := GetMana(who);
@@ -122,17 +122,35 @@ program meditation(who)
 
 endprogram
 
+//////////////////////////////////////////////////
+// Checks for items equipped in the hands that might interfere with meditation.
+//
+// Legal items are: Black Staff, Shepherd's Crook, Gnarled Staff, Quarter Staff,
+// 									Spellbook, Paladin Spellbook, Codex Damnorum (necro tome), Book of Arms and
+//									Book of Spellweaving.
+//
+// Parameters: Mobile object reference
+//
+// Returned value: zero if no interferring items are in a hand or 1 if the item interferes.
+//
+//////////////////////////////////////////////////
+
+
 function IsThingOnHand(who)
   var hand1 := (GetEquipmentByLayer(who, 1));
   var hand2 := (GetEquipmentByLayer(who, 2));
   if(hand1)
-    if ((hand1.graphic == 0x0df0) || (hand1.graphic == 0x0e81) || (hand1.graphic == 0x13f9) || (hand1.graphic == 0x13f8) || (hand1.graphic == 0x0e8a) || (hand1.graphic == 0x0efa))
+    if ((hand1.graphic == 0x0df0) || (hand1.graphic == 0x0e81) || (hand1.graphic == 0x13f9) || (hand1.graphic == 0x13f8)
+		|| (hand1.graphic == 0x0e8a) || (hand1.graphic == 0x0efa) || (hand1.graphic == 0x2252) || (hand1.graphic == 0x2253)
+		|| (hand1.graphic == 0x2254) || (hand1.graphic == 0x2D50))
 	else
       SendSysMessage(who,"Your equipment prevents meditation.", color := 33);
       return 1;
 	endif
   elseif (hand2)
-    if((hand2.graphic == 0x0df0) || (hand2.graphic == 0x0e81) || (hand2.graphic == 0x13f9) || (hand2.graphic == 0x13f8) || (hand2.graphic == 0x0e8a) || (hand1.graphic == 0x0efa))
+    if ((hand1.graphic == 0x0df0) || (hand1.graphic == 0x0e81) || (hand1.graphic == 0x13f9) || (hand1.graphic == 0x13f8)
+		|| (hand1.graphic == 0x0e8a) || (hand1.graphic == 0x0efa) || (hand1.graphic == 0x2252) || (hand1.graphic == 0x2253)
+		|| (hand1.graphic == 0x2254) || (hand1.graphic == 0x2D50))
 	else
       SendSysMessage(who,"Your equipment prevents meditation.", color := 33);
       return 1;
@@ -142,8 +160,16 @@ function IsThingOnHand(who)
   endif
 endfunction
 
+//////////////////////////////////////////////////////////////
+// Checks equipped items for the member "medloss".
+//
+// Parameters: mobile object reference
+//
+// Returned value: Either the string "nomed" or the numeric value zero
+///////////////////////////////////////////////////////////////
+
 function manaloss(who)
-//  var medit := GetAttribute(who,MEDITATION);
+//  var medit := GetAttribute(who,ATTRIBUTEID_MEDITATION);
   var elem;
   var loss := 0;
   foreach thing in ListEquippedItems(who)
