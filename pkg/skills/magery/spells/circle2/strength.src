@@ -27,11 +27,11 @@ program cast_strength( parms )
 	// Str increase % = (Eval / 10 + 1)
 	var percent := CDbl(AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 10) + 1;
 	var points := CInt(AP_GetStat(cast_on, STRENGTH) * (percent / 100));
-	
-	// Duration: 120% Magery seconds
-	var duration := CInt(AP_GetSkill(caster, MAGERY) * 1.2);
+
+	// Duration: ((Evaluating Intelligence / 5) + 1) * 6 seconds.
+	var duration := CInt(((AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 5) + 1) * 6);
 	TS_StartTimer(cast_on, "Strength", duration, points, caster);
 
 	return 1;
-	
+
 endprogram

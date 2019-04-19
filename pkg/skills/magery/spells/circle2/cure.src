@@ -6,6 +6,7 @@ include ":attributes:attributes";
 include ":timedscripts:timedScripts";
 include ":timedscripts:poisonUtil";
 include ":magery:spells";
+include ":virtue:noto";
 
 var npccfg := ReadConfigFile("npcdesc");
 
@@ -24,11 +25,11 @@ program cast_cure( parms )
     if ( !MS_MobileCheck(caster, cast_on) )
         return 0;
     endif
-    
+
 	// Get poison level
 	var poison_names := TS_GetTimerNames(cast_on, "P");
 	var poison_level := 1;
-	
+
 	foreach timer_name in ( poison_names )
 		var timer_info := TS_GetTimerInfo(cast_on, timer_name);
 		if ( timer_info.level > poison_level )
@@ -41,8 +42,15 @@ program cast_cure( parms )
 	if ( chance >= RandomInt(100) + 1 )
 		// NOTE: There is still a 1 in 100 chance that this wont work..
 		TS_CurePoison(cast_on, 10000, "P", poison_level);
+		if(cast_on != caster)
+			AdjustVirtue(caster, "compassion", 1, 100);
+		endif
+		if(cast_on != caster)
+			AdjustVirtue(caster, "compassion", 1, 35);
+		endif
+
 	endif
-	
+
 	MS_PlaySpellSFX(info.spell_id, cast_on);
 	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
 

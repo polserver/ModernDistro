@@ -8,6 +8,7 @@ include ":attributes:attributes";
 include ":crafting:crafting";
 include ":crafting:craftingRepair";
 include ":crafting:toolWear";
+include ":virtue:noto";
 
 var item_config     := ReadConfigFile(":*:itemdesc");
 var craft_config    := ReadConfigFile(":alchemy:alchemy");
@@ -91,6 +92,16 @@ function makeAlchemyItems(who, what, amt, tool)
 					counter := counter + 1;
 					continue;
 				endif
+				case(theitem.objtype)
+					0x2DC04:	AdjustVirtue(who, "honor", -1, prob := 25);
+								AdjustVirtue(who, "compassion", -1, 25);
+					0x2DC05:	AdjustVirtue(who, "honor", -1, 40);
+								AdjustVirtue(who, "compassion", -1, 40);
+					0x2DC06:	AdjustVirtue(who, "honor", -1, 55);
+								AdjustVirtue(who, "compassion", -1, 55);
+					0x2DC07:	AdjustVirtue(who, "honor", -1, 70);
+								AdjustVirtue(who, "compassion", -1, 70);
+				endcase
 			else
 				num := CInt(randomint(material)/2) + 1;
 				if(SubtractAmount(use_on, num))

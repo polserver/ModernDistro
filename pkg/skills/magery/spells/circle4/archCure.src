@@ -2,6 +2,7 @@ use uo;
 use cfgfile;
 use cliloc;
 include ":magery:spells";
+include ":virtue:noto";
 include ":attributes:attributes";
 include ":timedScripts:poisonUtil";
 
@@ -29,30 +30,32 @@ program cast_archcure(parms)
 	if ( friendlies != error )
 			includes += friendlies;
 	endif
-	
+
 	var targs := MS_GetValidTargets(caster, area_size, 1, "", includes);
 	foreach vtarg in targs
 		// Get poison level
 		var poison_names := TS_GetTimerNames(vtarg, "P");
 		var poison_level := 1;
-		
+
 		foreach timer_name in ( poison_names )
 			var timer_info := TS_GetTimerInfo(vtarg, timer_name);
 			if ( timer_info.level > poison_level )
 					poison_level := timer_info.level;
 			endif
 		endforeach
-	
+
 		//% Chance to cure: (Magery * 1.42) + (110 - (Poison level * 33)) (87% chance for level 5 poison at GM magery)
 		var chance := CInt(AP_GetSkill(caster, MAGERY) * 1.42) + (110 - (poison_level * 33));
 		if ( chance >= RandomInt(100) + 1 )
 			// NOTE: There is still a 1 in 100 chance that this wont work..
 			TS_CurePoison(vtarg, 10000, "P", poison_level);
 			PrintTextAbovePrivateCL(vtarg, vtarg, 1008072, color := 33); // You have been cured of all poisons.
+			AdjustVirtue(caster, "compassion", 1, 100);
 		else
 			PrintTextAbovePrivateCL(vtarg, vtarg, 1008073, color := 33); // The attempt to cure you has failed.
+			AdjustVirtue(caster, "compassion", 1, 35);
 		endif
-		
+
 		MS_PlaySpellGFX(info.spell_id, vtarg, caster);
 	endforeach
 

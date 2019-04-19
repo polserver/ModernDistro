@@ -2,8 +2,10 @@ use uo;
 use os;
 
 include "include/client";
+include ":virtue:noto";
 include ":attributes:attributes";
 include "include/trainingskill";
+include ":timedScripts:timedScripts";
 
 program spiritspeak(who)
         var data := {};
@@ -18,7 +20,7 @@ program spiritspeak(who)
 		PlaySoundEffect(who, 587);
 		sleepms(2500);
 	endfor
-       
+
   EraseObjProperty(who, "IsMeditating");
   EraseObjProperty(who, "HealTimer");
 //  var pts := (CInt(GetAttribute(who, SPIRITSPEAK)) * 2) + 20;
@@ -26,16 +28,19 @@ program spiritspeak(who)
 	if(pts > 35)
 		pts := 35;
 	endif
-	
+
   if(SkillCheck(who, SPIRITSPEAK, -1,  pts))
     SendSysMessage(who, "You contact the netherworld.", color := 66);
-    Detach();
+	AdjustVirtue(who, "spirituality", 1, 50);
+	TS_StartTimer(who, "SpiritSpeak", 60);
+// Remove commented lines after testing.
+/*    Detach();
     GrantPrivilege(who, "hearghosts");
     who.enable("hearghosts");
     PerformAction(who, 17);
     PlaySoundEffect(who, SFX_SKILL_SPIRITSPEAK);
     sleep(30);
-    RevokePrivilege(who, "hearghosts");
+    RevokePrivilege(who, "hearghosts"); */
   else
     SendSysMessage(who, "You fail to communicate with the netherworld.", color := 33);
   endif

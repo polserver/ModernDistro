@@ -7,6 +7,7 @@ include ":magery:spells";
 include ":magery:fields";
 include ":attributes:attributes";
 include "include/facings";
+include ":virtue:noto";
 
 program poisonfield( parms )
   var caster := parms[1];
@@ -23,7 +24,7 @@ program poisonfield( parms )
         SendSysMessageCL(caster, 500979, color := 33); // You cannot see that location.
         return 0;
   endif
-  
+
 	var objtype;
 	var direction := GetDirectionByFacing(caster);
 	case ( direction )
@@ -62,6 +63,8 @@ program poisonfield( parms )
 
 		SleepMS(2);
 	endforeach
+	AdjustVirtue(caster, "honor", -1, 100);
+	AdjustVirtue(caster, "compassion", -1, 100);
 
 	return 1;
 endprogram

@@ -30,8 +30,9 @@ program cast_poison(parms)
 
 	MS_PlaySpellSFX(info.spell_id, caster);
 	MS_PlaySpellGFX(info.spell_id, caster, caster);
-	AdjustVirtue(caster, "Honor", -1, 100);
-	AdjustVirtue(caster, "Compassion", -1, 100);
+	AdjustVirtue(caster, "honor", -1, 100);
+	AdjustVirtue(caster, "compassion", -1, 100);
+
 	return 1;
 
 

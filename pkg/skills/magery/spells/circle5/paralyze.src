@@ -4,6 +4,7 @@ use os;
 include ":attributes:attributes";
 include ":timedscripts:timedScripts";
 include ":magery:spells";
+include ":virtue:noto";
 
 program cast_paralyze( parms )
     var caster := parms[1];
@@ -33,6 +34,9 @@ program cast_paralyze( parms )
 	var defense := AP_GetSkill(cast_on, RESISTING_SPELLS) / 10;
 	var duration := CInt((attack - defense) * 3);
 
+	// Commented out the virtue drop until I can find some practical way in scripts to
+	// provide a way to raise valor.
+	//AdjustVirtue(caster, "valor", -1, 100);
 	TS_StartTimer(cast_on, "Paralysis", duration);
 
 	return 1;
