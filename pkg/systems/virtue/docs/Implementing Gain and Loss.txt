@@ -1,0 +1,223 @@
+Implementing virtue gain and loss.
+
+Though initially, most, if not all, of the information contained in this document was taken from UO Guide
+(http://www.uoguide.com/Virtues), it is my hope that it will be used as a starting point for implementing
+a more complete virtue system for the Distro. I have left out a lot more information about the virtues,
+in particular the shrines because this document is longer than I thought it would be when I started
+creating it and also because this document is primarily concerned with gaining and losing in a virtue.
+
+
+Compassion
+Note: The following information on Compassion is taken directly from UO Guide (uoguide.com/Compassion).
+Any reference to spawn locations, gains, or time limits is official OSI and may not apply to the Distro
+implementation. It is included here for the purpose of developing ideas for implementation.
+
+Gaining in the Virtue of Compassion is accomplished by escorting NPCs or Prisoners to their requested
+destination. This is done either via Gate Travel or simply walking and will reward you with 500 gold and
+rogress towards achieving a level of Compassion. Rescuing Prisoners from NPC brigand camps, orcs, lizardmen
+etc. will reward you with more progress (roughly double) than NPC's escorted from towns.
+
+As you make progress, the dots at the top of the Virtue of Compassion status gump will begin to fill after
+completed escorts or rescues. When all ten dots are completed per level, you advance a level in the Virtue.
+At each completed level of Compassion, the Virtue icon will fill-in with a darker color and the title will
+change to indicate your current level of achievement when you mouse-over the Virtue icon from the main Virtue
+menu. Your level of achievement in each Virtue is publicly viewable by other players if they double-click the
+Virtue menu in your paperdoll.
+
+Higher levels of Compassion confer increasingly higher benefits, which is discussed below. You can only gain
+from five NPCs per 24 hours, therefore rescuing prisoners will speed your progress versus doing just town escorts.
+Additionally, after you have completed five in a 24 hour window, there will be a system messaging indicating you
+must wait a day until you will gain again (although you can still continue doing more that day, but will only
+receive the gold reward).
+
+As of January 24, 2000 you can only escort or rescue one NPC at a time. Once you have achieved the highest level
+of Compassion, a system message will be displayed indicating "You have achieved the highest path of compassion
+and can no longer gain any further". This maximum cap will be roughly one dot's worth of gains past Knight of Compassion.
+
+Research shows that using the fastest method of prisoner rescues, i.e., a gate casting mage, you will perform roughly:
+
+    2 NPC prisoner rescues per dot working towards Seeker of Compassion (Level 1)
+    3 NPC prisoner rescues per dot working towards Follower of Compassion (Level 2)
+    4 NPC prisoner rescues per dot working towards Knight of Compassion (Level 3)
+
+At each level of Compassion, people resurrected by you will return to life with additional hit points
+(without Compassion, they resurrect with just one hit point). Resurrections by either the Magery spell of Resurrection
+or from bandages with the Healing skill will add the additional hit points. At this time, resurrections via
+the Chivalry spell of Noble Sacrifice do not confer the hit point bonuses of Compassion. (How about resurrections through Sacrifice?)
+
+Additional hit point bonuses after resurrections from a player with Compassion:
+
+    Seeker of Compassion (Level 1): 20% of their hit points restored
+    Follower of Compassion (Level 2): 40% of their hit points restored
+    Knight of Compassion (Level 3): 80% of their hit points restored
+
+At only 25-30 minutes a day for a few weeks working on raising Compassion, its not really that much of an effort.
+Additionally, at 500 gold per escort, doing escorts is a safe, easy and profitable way for new players to make gold.
+
+The fastest and easiest way to gain in compassion is to drink a bottle of Compassion Sage daily.
+Drinking one bottle can give as much compassion as 5 NPC escorts.
+
+As a side note, there are often several NPC brigand camps (many with Prisoners to rescue) on the little island just
+outside of Trinsic to the east. There is also a jail cell which always spawns a prisoner in the Orc Cave to the
+northwest of Britain.
+
+As a minor note, there is a five minute time limit (lowered from 15 minutes on June 29, 2000) between escort quests.
+Prisoners found in NPC brigand camps and the orc dungeon used to be available for immediate rescue, but this was changed
+to the standard 5 minute timer in late 2010. 
+-----------------------------------------------------------------------------------------------------------------
+
+Honesty
+Lost items are spawned on the ground in Felucca and Trammel.
+Lost items are facet specific, ie. the owner of an item spawned in Felucca will live in Felucca and vice versa.
+They are never spawned in dungeons or within guard zones.
+The items will bear the text  "Lost Item (Return To Gain Honesty)."
+
+Once a player picks up the item he has 3 hours to return it.
+Presumably you are given this message when it is picked up
+"You have three hours to turn this item in for Honesty credit, otherwise it will cease to be a quest item.".
+
+It can be returned to any "virtue" city (Britain, Yew, Moonglow, Trinsic, Skara Brae, New Magincia, Jhelom and Minoc)
+for Honesty credit. There are Lost and Found boxes located in the banks in each town. If the owner of the item hails
+from the town it is returned to, the player receives double credit. If it is returned to the actual owner the player
+receives quadruple credit.
+
+Forensic Evaluation is almost essential to helping to gain honesty. A value of around 40 in forensics will reveal the
+town. A value of about 65 will reveal the owner as well.
+-----------------------------------------------------------------------------------------------------------------
+
+Honor
+When activated via the Virtues Menu, you may target a given creature that is entirely undamaged (that is, it's Hit Points,
+Stamina and Mana levels must be at their maximum). It could originally be used against players in addition to creatures,
+though this was removed in a later publish.
+
+If you then kill the creature you are granted honor in accordance to its fame level and how "honorably" you fought it.
+Allowing your target the first blow and staying close to it will grant you higher levels of honor than using ranged attacks
+from a distance. For tamers, stay close, do not cast spells (they will lower your gain). Daemons will get you well into the
+Follower level, Balrons are good for reaching Knight, some would suggest Succubi, but their area attack can be bothersome.
+
+Honor is an excellent complement to Taming. Building Honor will allow you to tame pets without being attacked.
+The follower level will keep you safe for 90 seconds and the Knight level will provide 5 minutes of unmolested taming
+(very useful with Greater Dragons). Stay just off screen from your intended target, Activate the virtue, a macro key of
+[invoke virtue][honor] works well, or the pentagram on the top of the paperdoll, double click the Honor button and target yourself
+and click ok. Word of warning, if the intended pet targets you before you click the OK gump, you will be attacked, and you must hide
+to reset it.
+
+Honor works hand in hand with Bushido in that activating it with a skill of 50 points or more also initiates the Perfection system.
+
+It also allows you to return to a monster infested area to retrieve your items off your dead body.
+
+Rewards
+The reward for honorable combat is the ability to move amongst monsters without them becoming hostile to you. To do this,
+you must activate the virtue and target yourself. The effect ends after a certain time or when you next perform a hostile action.
+According to developer Logrus, using Honor on oneself grants a shortly durated damage bonus of 25% (source: Stratics UO Warrior Profession Forum).
+
+You can invoke honor once every 5 minutes. The duration it lasts depends on how high your honor is. A knight of Honor will last 3 times as long
+as a seeker. This virtue only drains as you use it (as opposed to others such as Valor, which drain over time).
+
+When using the Bushido skill Honorable Execution on an honored opponent, if successful you will be granted an honorable damage bonus.
+-----------------------------------------------------------------------------------------------------------------
+
+Justice
+Justice is one of the virtues for which there is a game mechanic. The only way to earn Justice is through PVP combat by killing murderers.
+Justice is expended at Champion Spawns to increase the number of Power Scrolls that are awarded.
+
+Gaining Justice
+Justice is awarded to the person who delivers the killing blow to a murderer, or red, character in Felucca. There is a timeframe of 5 minutes
+between being able to receive Justice again. This is to prevent people from "farming" Justice by continuously res-killing a red.
+
+The amount of Justice gained from each kill varies with the amount of skill points of the killed character and the level of Justice their killer
+is currently at. After each kill, a message stating "You have gained in Justice" will be displayed. Once you have fully maxed out the number
+progress points you can earn a message will be displayed stating "You cannot gain more Justice" which for Justice is two kills past reaching
+the Knight level.
+
+Roughly speaking, killing a skill capped murderer will award up to 3 progress points while attaining Seeker of Justice, a point and a half
+while working towards Follower of Justice and a point for each kill while attaining Knight level.
+
+Expending Justice
+Justice allows you to "protect" another player in Felucca. While one is under the protection of another, the protector has a chance of receiving
+a Scroll of Power when the recipient receives one. The chance of receiving a "protection scroll" depends on your Justice level.
+
+        Seeker of Justice: 60% chance of scroll
+        Follower of Justice: 80% chance of scroll
+        Knight of Justice: 100% chance of scroll
+
+The maximum number of scrolls that can be received from the Champion is 12 (6 from the Champion itself, 6 from Justice protection).
+The protection system is used in the vast majority of Feluccan Champion spawns as a way to maximize the profitability of a spawn.
+Felucca champ guilds often consider receiving 12 scrolls as the mark for a successful spawn. It is virtually unheard of for established guilds
+to use anyone below Knight of Justice for the protector. Protection scroll distribution is a spot of contention in many guilds.
+There are many different methods of scroll distribution with many people trumpeting the benefits and disadvantages of their own.
+
+It is a common misconception that the protection scroll will be a duplicate of the recipient's scroll, at least in intensity if not the covered skill.
+This is not the case. The scroll received by the protector is random.
+-----------------------------------------------------------------------------------------------------------------
+
+Sacrifice
+Sacrifice is a Virtue that is gained through sacrificing all of one's Fame to a monster in order to redeem it. The monster will
+then recognize its wrong-doing and vanish into thin air. The monsters you can sacrifice to include Demons, Enslaved Gargoyles,
+Evil Mages, Gargoyle Enforcers, Liches and Succubi. In order to sacrifice to a monster it has to be completely unharmed.
+You also must have a minimal amount of fame, which is greater than 2000, probably 4000 total.
+
+Sacrificing may only be done once per 24 hour period. You have to be at least "Great" to be able to sacrifice - the higher your
+reputation level, the further you advance on your Virtue path. Sacrificing a Lord/Lady title will yield far more progress than
+just a Great or Glorious status. Also, the more powerful a monster is you sacrifice to, the more you gain. You will have no fame
+remaining after a successful sacrifice.
+
+Once per week your Sacrifice level will drop by a small amount automatically.
+
+Alternatively, a small amount can also be gained by completing the quest given by Grizelda the Hag. Completing the Hag's Quest a few
+times a week will counter the weekly losses in Sacrifice, so that you don't have to lose all your well earned fame regularly.
+
+Rewards
+The reward for your sacrifice is the ability to Resurrect yourself. For each level you reach on your way, you will be able to do so
+once a week. Thus as a Knight of Sacrifice (level 3) you can resurrect yourself 3 times a week.
+
+After resurrecting yourself you will find all your belongings back in your backpack, except for any items that were looted in the time
+it took you to resurrect. The items will not be returend if you crossed a serverline (e.g. walked out of a dungeon) before resurrection.
+A message will warn you if this is the case.
+
+It is wise to only use this ability when in an emergency. You will not lose any virtue by doing so, but only one of your weekly resurrections. 
+-----------------------------------------------------------------------------------------------------------------
+
+Valor
+Valor is the Virtue that enables characters to start a Champion Spawn. When the third level, or Knight of Valor, is reached, the character can
+invoke the virtue and target a Champion Spawn altar, thus activating it.
+
+Altars can be targeted only once per spawn: to activate it if inactive, or to add more red candles according to the user's amount of Valor.
+The higher the amount of Valor, the better the chance to gain more red candles. Altar advancing is often used to finish the harder levels more quickly,
+especially at the Lord Oaks, Semidar and Neira spawns.
+
+Valor is obtained by killing creatures in a Champion Spawn. One random Felluca spawn will activate upon server-up so Valor may be obtained to
+start the rest of the altars.
+
+Valor can be gained at Ilshenar Champion Spawns, as well as the new Mondain's Legacy champion spawns. However, it does not appear that Valor
+can be gained in the Labyrinth.
+-----------------------------------------------------------------------------------------------------------------
+
+Humility
+Not much to be found UO Guide about this one but here is the pertinent info.
+
+Humility by killing evil-aligned creatures during the Humility Hunt.
+
+Reward
+When activated via the Virtues Menu the player receives a targeting cursor. Targeting a pet will provide that pet with a 20 minute
+Hit Point Regeneration buff based on Humility path and consume some Humility points:
+
+    Seeker: +10 HPR
+    Follower: +20 HPR
+    Knight: +30 HPR
+
+
+Spirituality
+Spirituality is gained by using targeted heals and resurrections on other players including bandages, close wounds, heal, greater heal,
+gift of renewal, cleansing winds, and rejuvenate. Spirituality is expended through the virtue menu, double click the humility virtue to
+bring up a targeting cursor. 
+
+Reward
+Targeting a living player or pet will grant a Spirituality shield that will absorb incoming damage based on Spirituality path and
+consume some Spirituality points,
+
+    Seeker: 5% shield, with 50 shield HP
+    Follower: 10% shield, with 100 shield HP
+    Knight: 20% shield, with 200 shield HP
+-----------------------------------------------------------------------------------------------------------------	
+	

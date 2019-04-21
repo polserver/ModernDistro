@@ -1,0 +1,16 @@
+use vitals;
+use uo;
+use os;
+
+include ":damage:damage";
+
+program MediumPoison(params)
+	
+	var who := params[1];
+	
+	while(1)
+		SendSysMessage(who, "You're taking poison damage!");
+	 	ApplyRawDamageEX(who,3, DMG_POISON);
+		sleep(3);
+	endwhile
+endprogram

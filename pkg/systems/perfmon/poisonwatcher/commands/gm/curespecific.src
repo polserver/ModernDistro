@@ -1,0 +1,27 @@
+use uo;
+
+include ":poisonwatcher:poisons";
+
+program CmdCureSpecific(who, text)
+	text := SplitWords(text);
+	
+	var p_name := text[1];
+	var amount := CInt(text[2]);
+	var level := CInt(text[3]);
+	
+	if ( !p_name || !amount )
+		SendSysMessage(who, "Syntax: .curespecific <poison name> <amount>");
+		return;
+	endif
+
+	if (!level)
+		level := 1;
+	endif
+	
+	SendSysMessage(who, "Who do you want to cure?");
+	var targ := target(who);
+	
+	if ( targ.IsA(POLCLASS_MOBILE) )
+		CureSpecific(targ, p_name, amount, level);
+	endif
+endprogram

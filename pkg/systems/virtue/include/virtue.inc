@@ -18,6 +18,10 @@ var virtues :=	{"valor", "honor", "compassion", "justice", "honesty", "spiritual
 // Summ at the Honor shrint etc.
 var mantras :=  {"Ra",    "Summ",   "Mu",        "Beh",     "Ahm",     "Om",           "Cah",       "Lum"};
 
+// words_of_power - These are never used in game but they are documented and are included here
+// for possible future expansion of the Distro. Their order corresponds to the order of the virtues above.
+var words_of_power := {"Inopia", "Infama", "Vilis", "Malum", "Fallax", "Ignavus", "Avidus", "Veramocor"};
+
 var settings := VS_GetSettingsCfgElem("Settings");
 
 // virtuemax is the maximum absolute virtuescore a player can earn

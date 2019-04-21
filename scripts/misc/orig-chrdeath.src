@@ -5,7 +5,7 @@ use util;
 include "include/NPCBackpacks";
 include ":attributes:attributes";
 include "include/statMod";
-include "include/noto";
+include ":virtue:noto";
 include "include/reportMurder";
 include ":poisonwatcher:poisons";
 
@@ -107,6 +107,6 @@ function remove_poison (cast_on)
         CurePoison(cast_on, 120, "defaultPoison", 4);
     endif
   endif
-  
+
 endfunction
 

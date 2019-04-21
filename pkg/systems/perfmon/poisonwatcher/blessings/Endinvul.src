@@ -1,0 +1,8 @@
+use uo;
+
+program Invulnerable(params)
+	var who := params[1];
+	
+	who.Disable("invul");
+	RevokePrivilege(who, "invul");	
+endprogram
