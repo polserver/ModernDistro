@@ -10,7 +10,7 @@ include "include/NPCBackpacks";
 include "include/NPCCast";
 include "include/randName";
 include "include/dist";
-include ":poisonwatcher:poisons";
+include ":timedScripts:timedScripts";
 
 set_priority(5);
 
@@ -358,7 +358,7 @@ function meditationloop()
     SetMana(me, GetMana(me) + 2);
 	ev := wait_for_event(2);
 	case (ev.type)
-      EVID_DAMAGED: if(ListPoisonsByType(me, "defaultPoison").size() > 1)
+      EVID_DAMAGED: if(TS_GetTimerNames(me, "P").size() > 1)
                       say("An Nox");
                       start_script( ":spells:cure", healparms );
                       sleep(2);

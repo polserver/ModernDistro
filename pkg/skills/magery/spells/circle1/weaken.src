@@ -3,7 +3,7 @@ use uo;
 use util;
 
 include ":attributes:attributes";
-include ":timedscripts:timedScripts";
+include ":timedScripts:timedScripts";
 include ":magery:spells";
 
 program cast_WEAKEN( parms )
@@ -29,10 +29,10 @@ program cast_WEAKEN( parms )
 	// Str decrease % = (Eval / 10) + 8) - (Resist / 10)
 	var percent := CDbl((AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 10) + 8) - (AP_GetSkill(cast_on, RESISTING_SPELLS) / 10);
 	var points := CInt(AP_GetStat(cast_on, STRENGTH) * (percent / 100));
-	
+
 	// Duration: ((Eval / 5) + 1) * 6
 	var duration := ((AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 5) + 1) * 6;
 	TS_StartTimer(cast_on, "Weaken", duration, points, caster);
-	
+
 
 endprogram

@@ -19,7 +19,7 @@ include ":attributes:attributes";
 include "include/hitscriptinc";
 include ":combat:hitScripts";
 include ":combat:settings";
-include ":timedscripts:timedScripts";
+include ":timedScripts:timedScripts";
 include "include/client";
 include "include/facings";
 include ":damage:damage";
@@ -208,7 +208,7 @@ function WeaponHitScripts(attacker, defender, weapon, armor, basedamage, rawdama
 	elseif ( weapon.IsA(POLCLASS_WEAPON) )
 		weapon_scripts := GetWeaponHitScripts(weapon);
 	endif
-	
+
 	foreach hitscript in ( weapon_scripts )
 		var script := Start_Script(hitscript, array{attacker, defender, weapon, armor, basedamage, rawdamage});
 		if ( !script || script.errortext )

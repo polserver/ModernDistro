@@ -8,9 +8,9 @@ use os;
 use util;
 use cfgfile;
 
-include ":timedscripts:report";
-include ":timedscripts:timedScripts";
-include ":timedscripts:buffIcon";
+include ":timedScripts:report";
+include ":timedScripts:timedScripts";
+include ":timedScripts:buffIcon";
 
 program TimerControl(mobile)
 	if ( !mobile.IsA(POLCLASS_MOBILE) )

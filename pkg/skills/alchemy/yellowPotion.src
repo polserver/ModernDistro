@@ -1,7 +1,7 @@
 use cliloc;
 
 include ":alchemy:drinkPotion";
-include ":timedscripts:timedScripts";
+include ":timedScripts:timedScripts";
 include ":itemUtils:itemdesc";
 
 program use_bluepotion(who, potion)
@@ -22,7 +22,7 @@ program use_bluepotion(who, potion)
 	if( !CheckToDrink(who, "#yellow") )
 		return 0;
 	endif
-	
+
 	if( TS_GetTimerNames(who, "P").size() > 0 )
 		SendSysMessageCL(who, 1156868, {}, 3, 33); // You may not use this while poisoned!
 		return 0;
@@ -38,7 +38,7 @@ program use_bluepotion(who, potion)
 	endcase
 	PlaySoundEffect( who,  SOUND_EFFECT_HEAL );
 	PlayObjectCenteredEffect(who, EFFECT_SPARKLE, 10,10);
-	
+
 	return 1;
-	
+
 endprogram

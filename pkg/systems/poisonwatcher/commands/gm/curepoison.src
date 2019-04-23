@@ -1,6 +1,6 @@
 use uo;
 
-include ":poisonwatcher:poisons";
+include ":timedScripts:poisonUtil";
 
 program CmdCurePoison(who, text)
 	text := splitwords(text);
@@ -18,8 +18,8 @@ program CmdCurePoison(who, text)
 
 	SendSysMessage(who, "Who do you want to cure?");
 	var targ := target(who);
-	
+
 	if ( targ )
-		CurePoison(targ, amount, pname, level);
+		TS_CurePoison(targ, amount, pname, level);
 	endif
 endprogram

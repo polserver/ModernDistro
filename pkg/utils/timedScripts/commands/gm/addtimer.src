@@ -3,7 +3,7 @@
  */
 use uo;
 
-include ":timedscripts:timedScripts";
+include ":timedScripts:timedScripts";
 
 program textcmd_AddTimer(who, params)
 	params := SplitWords(params);

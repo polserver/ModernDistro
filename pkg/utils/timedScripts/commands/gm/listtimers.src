@@ -4,7 +4,7 @@
 use uo;
 use os;
 
-include ":timedscripts:timedScripts";
+include ":timedScripts:timedScripts";
 
 program textcmd_listTimers(who, type)
 	SendSysMessage(who, "Select a mobile.");

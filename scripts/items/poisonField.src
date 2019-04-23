@@ -5,7 +5,7 @@ use cfgfile;
 include ":attributes:attributes";
 include "include/spellRestrictions";
 include "include/spellAttack";
-include ":poisonwatcher:poisons";
+include ":timedScripts:poisonUtil";
 
 program mpoisonfield(character, item)
   if(character.dead)

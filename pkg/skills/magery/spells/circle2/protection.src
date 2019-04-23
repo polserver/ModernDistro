@@ -7,7 +7,7 @@ use os;
 use cfgfile;
 
 include ":attributes:attributes";
-include ":timedscripts:timedScripts";
+include ":timedScripts:timedScripts";
 include ":damage:damage";
 include ":magery:spells";
 

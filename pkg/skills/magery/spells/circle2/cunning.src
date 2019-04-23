@@ -3,7 +3,7 @@ use os;
 use util;
 
 include ":attributes:attributes";
-include ":timedscripts:timedScripts";
+include ":timedScripts:timedScripts";
 include ":magery:spells";
 
 program cast_CUNNING( parms )

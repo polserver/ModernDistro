@@ -2,7 +2,7 @@ use uo;
 use os;
 
 include ":attributes:attributes";
-include ":timedscripts:timedScripts";
+include ":timedScripts:timedScripts";
 include ":magery:spells";
 include ":virtue:noto";
 

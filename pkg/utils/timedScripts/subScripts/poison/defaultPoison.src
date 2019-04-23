@@ -2,7 +2,7 @@ use uo;
 use os;
 
 include ":attributes:attributes";
-include ":timedscripts:timedScripts";
+include ":timedScripts:timedScripts";
 include ":damage:damage";
 
 program TimedScript_DefaultPoison(params)
@@ -33,7 +33,7 @@ program TimedScript_DefaultPoison(params)
 		   poisonedmsg := "You feel a bit nauseous.";
 		   viewermsg := "* - "+who.name+" looks ill. - *";
 		   break;
-		   
+
 		2: dmg := Cint(AP_GetVitalMaximumValue(who, "Hits") / 32);
 		   if ( dmg < 5 )
 			dmg := 5;
@@ -42,7 +42,7 @@ program TimedScript_DefaultPoison(params)
 		   viewermsg := "* - "+who.name+" looks extremely ill. - *";
 		   time := 12;
 		   break;
-		   
+
 		3: dmg := Cint(AP_GetVitalMaximumValue(who, "Hits") / 16);
 		   if ( dmg < 7 )
 			dmg := 7;
@@ -52,7 +52,7 @@ program TimedScript_DefaultPoison(params)
 		   viewermsg := "* - "+who.name+" stumbles around in confusion and pain. - *";
 		   time := 10;
 		   break;
-		   
+
 		4: dmg := Cint(AP_GetVitalMaximumValue(who, "Hits") / 8);
 		   if ( dmg < 6 )
 			dmg := 6;
@@ -62,7 +62,7 @@ program TimedScript_DefaultPoison(params)
 		   viewermsg := "* - "+who.name+" is wracked with extreme pain! - *";
 		   time := 5;
 		   break;
-		   
+
 		5: dmg := Cint(AP_GetVitalMaximumValue(who, "Hits") / 4);
 		   if ( dmg < 12 )
 			dmg := 12;
@@ -81,8 +81,8 @@ program TimedScript_DefaultPoison(params)
 				PrintTextAbovePrivate(who, viewermsg, mobile);
 			endif
 			SleepMS(2);
-		endforeach		
-		
+		endforeach
+
 		ApplyRawDamageEX(who, dmg, DMG_POISON, attacker);
 
 		Set_Critical(1);
@@ -93,7 +93,7 @@ program TimedScript_DefaultPoison(params)
 			AP_SetVital(who, "Stamina", 0);
 		endif
 		Set_Critical(0);
-		
+
 		Sleep(time);
 	endwhile
 

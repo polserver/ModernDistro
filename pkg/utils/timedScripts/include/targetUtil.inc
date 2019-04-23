@@ -5,7 +5,7 @@
 use uo;
 use os;
 
-include ":timedscripts:timedScripts";
+include ":timedScripts:timedScripts";
 
 /*
  * TargetEX(mobile, duration, flags)

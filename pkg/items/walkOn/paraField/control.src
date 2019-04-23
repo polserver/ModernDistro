@@ -8,7 +8,7 @@ use os;
 use util;
 
 include "include/sounds";
-include ":timedscripts:timedScripts";
+include ":timedScripts:timedScripts";
 
 program controlScript(field)
 	SetObjProperty(field, "#PID", GetPid());

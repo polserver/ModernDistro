@@ -6,12 +6,12 @@
 use uo;
 use os;
 
-include ":timedscripts:report";
-include ":timedscripts:timedScripts";
+include ":timedScripts:report";
+include ":timedScripts:timedScripts";
 include ":attributes:attributes";
 
 /*
- * TS_CurePoisons()
+ * TS_CurePoison(mobile, cure_amount, cure_type:="", cure_level:=1)
  *
  * Purpose
  * Will take in a cure amount and try to cure / lower the duration

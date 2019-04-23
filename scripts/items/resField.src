@@ -3,7 +3,7 @@ use uo;
 
 include "include/res";
 include "include/resPenalty";
-include ":poisonwatcher:poisons";
+include ":timedScripts:poisonUtil";
 
 const EFFECT_SPARKLE := 0x373a;
 const SOUND_EFFECT_RES := 0x215;

@@ -5,7 +5,7 @@
 
 use uo;
 
-include ":timedscripts:timedScripts";
+include ":timedScripts:timedScripts";
 
 program WalkOn(mobile, spiderweb)
 	if ( mobile.cmdlevel >= 2 )

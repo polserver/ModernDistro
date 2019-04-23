@@ -7,7 +7,7 @@ use util;
 
 include "include/client";
 include ":damage:damage";
-include ":timedscripts:timedScripts";
+include ":timedScripts:timedScripts";
 
 program trapScript(params)
 	var mobile := params[1];
@@ -15,10 +15,10 @@ program trapScript(params)
 	var trap_info := params[3];
 	//var trap_index := params[4];
 	params := 0; // Not needed anymore.
-	
-	SendSysMessage(mobile, "You set off a poison gas trap!");
+
+	SendSysMessage(mobile, "You set off a poison gas trap!", color := 33);
 	PlayStationaryEffect(object.x, object.y, object.z, FX_POISON_GAS, 10,10, 0, object.realm);
 	TS_StartTimer(mobile, "defaultPoison", 15, trap_info.Strength);
-	
+
 	return 1;
 endprogram

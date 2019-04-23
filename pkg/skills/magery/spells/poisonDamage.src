@@ -4,7 +4,7 @@ use util;
 
 include "include/client";
 include ":attributes:attributes";
-include ":poisonwatcher:poisons";
+include ":timedScripts:poisonUtil";
 include ":damage:damage";
 
 program poisondamage (passparms)
@@ -21,7 +21,7 @@ program poisondamage (passparms)
   elseif(who.cmdlevel > 1)
     return;
   endif
-  AddPoison(who, "defaultPoison", 120, attacker, level);
+  TS_StartTimer(who, "defaultPoison", 120, level, attacker);
   if(pfield == 1)
     PrintTextAbovePrivate(who, "You choke on the noxious fumes!", who);
 //    var dmg := Resisted(5, attacker, who, CInt(GetAttribute(attacker, "magery") / 25));
