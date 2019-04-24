@@ -3,8 +3,8 @@ use os;
 use cfgfile;
 
 include ":attributes:attributes";
-include ":poisonwatcher:poisons";
 include "include/trainingskill";
+include ":timedScripts:timedScripts";
 
 var cfg := ReadConfigFile("::npcdesc");
 
@@ -19,7 +19,7 @@ program animal_lore(who)
   EraseObjProperty(who, "HealTimer");
   var targ := Target(who);
   if(!targ.isA(POLCLASS_NPC))
-	SendSysMessage(who, "You must target a creature");
+	SendSysMessage(who, "You must target a creature", color := 33);
 	return;
   endif
   var elem := cfg[targ.npctemplate];
@@ -39,7 +39,7 @@ program animal_lore(who)
   if(SkillCheck(who,ANIMALLORE, -1, pts/3))
     phisical := GetStr(GetStrength(targ)/20);
     health := GetHealth(10*GetHp(targ)/GetMaxHp(targ));
-    if (ListPoisonsByType(targ, "defaultPoison").size() > 0 )
+    if (TS_GetTimerNames(targ, "P").size() > 0 )
       poison := ", but is poisoned";
     endif
     foodinfo := FindFood(foodtype);

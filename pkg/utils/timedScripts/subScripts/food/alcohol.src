@@ -7,7 +7,7 @@ use os;
 use util;
 
 include "include/client";
-include ":timedscripts:timedScripts";
+include ":timedScripts:timedScripts";
 
 program TimedScript_Alcohol(params)
 	var mobile := params[1];
@@ -43,9 +43,9 @@ program TimedScript_Alcohol(params)
 				CreateItemAtLocation(mobile.x, mobile.y, mobile.z, "vomit", 1, mobile.realm);
 			endif
 		endif
-		
+
 		Sleep(RandomInt(4)+3);
 	endwhile
-	
+
 	return 1;
 endprogram

@@ -4,7 +4,7 @@
 
 use uo;
 
-include ":timedscripts:timedScripts";
+include ":timedScripts:timedScripts";
 include ":itemutils:itemdesc";
 include "include/client";
 include "include/sounds";

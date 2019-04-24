@@ -3,7 +3,7 @@ use util;
 include ":attributes:attributes";
 include ":magery:spells";
 include ":virtue:virtue";
-include ":timedscripts:timedScripts";
+include ":timedScripts:timedScripts";
 
 program cast_polymorph( parms )
 

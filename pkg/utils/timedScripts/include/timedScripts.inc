@@ -7,7 +7,7 @@ use uo;
 use cfgfile;
 use os;
 
-include ":timedscripts:report";
+include ":timedScripts:report";
 
 // Event flags
 CONST EVENT_ADD_TIMER			:= 0x1;
@@ -34,10 +34,10 @@ CONST START_CONTROLLER			:= 0x1;
  *
  */
 function TS_GetCfgFile()
-	var cfg := ReadConfigFile(":timedscripts:timedScripts");
+	var cfg := ReadConfigFile(":timedScripts:timedScripts");
 
 	if ( cfg.errortext )
-		TS_ReportText("Error::TS_GetSettingsCfgFile() - Unable to open [:timedscripts:timedScripts] ->"+cfg.errortext, TS_REPORT_SYSLOG);
+		TS_ReportText("Error::TS_GetSettingsCfgFile() - Unable to open [:timedScripts:timedScripts] ->"+cfg.errortext, TS_REPORT_SYSLOG);
 	endif
 
 	return cfg;
@@ -119,7 +119,7 @@ function TS_StartController(mobile)
 		return error{"errortext":="Error::TS_StartController() - Controller is already running."};
 	endif
 
-	var script := Start_Script(":timedscripts:timerControl", mobile);
+	var script := Start_Script(":timedScripts:timerControl", mobile);
 	if ( script.errortext )
 		TS_ReportText("Error::TS_StartController() ->"+script.errortext, TS_REPORT_SYSLOG);
 	endif

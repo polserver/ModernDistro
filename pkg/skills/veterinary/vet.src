@@ -6,7 +6,7 @@ use os;
 include "include/client";
 include ":attributes:attributes";
 include "include/dist";
-include ":poisonwatcher:poisons";
+include ":timedScripts:poisonUtil";
 
 var config;
 var elem;
@@ -26,13 +26,13 @@ program use_bandages (parms)
   elseif(!CheckLineOfSight(who,patient))
 	SendSysMessage(who,"You cant see your patient.", color := 33);
 	return;
-  elseif((GetHp(patient) >= GetStrength(patient)) && (ListPoisonsByType(patient, "defaultPoison").size() == 0))
+  elseif((GetHp(patient) >= GetStrength(patient)) && (TS_GetTimerNames(patient, "P").size() == 0))
 	SendSysMessage(who,"Your patient is at full heath", color := 66);
 	return;
   endif
   Detach();
   SetObjProperty(who, "HealTimer", clock);
-  if(ListPoisonsByType(patient, "defaultPoison").size() > 0)
+  if(TS_GetTimerNames(patient, "P").size() > 0)
     if(!CheckLineOfSight(who,patient))
       SendSysMessage(who,"You can't see your patient.", color := 33);
       return;
@@ -108,7 +108,7 @@ function heal(who, patient, bandy)
         healamt := (healamt / 2);
       endif
     endif
-    if(ListPoisonsByType(patient,"defaultPoison").size() > 0)
+    if(TS_GetTimerNames(patient, "P").size() > 0)
       cure(who, patient, bandy);
       break;
     endif
@@ -190,9 +190,9 @@ function cure(who, patient, bandy)
 	endif
     if(counter >= cycles)
       if(SkillCheck(who, VETERINARY, 80, 0) && (CInt(GetAttribute(who, ANATOMY)) >= 61))
-        if((RandomInt(100) + 1) < healamt);
-          CurePoison(patient,(healamt/40),"defaultPoison");
-          if (ListPoisonsByType(patient, "defaultPoison").size() > 0)
+        if((RandomInt(100) + 1) < healamt)
+			TS_CurePoison(patient, healamt/40, "P", 1);
+          if (TS_GetTimerNames(patient, "P").size() > 0)
             SendSysMessage(who, "You have partially cured your patient.", color := 88);
           else
             SendSysMessage(who, "You have cured your patient completely.", color := 66);

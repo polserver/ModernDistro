@@ -7,21 +7,21 @@ include ":attributes:attributes";
 include "include/statMod";
 include ":virtue:noto";
 include "include/reportMurder";
-include ":poisonwatcher:poisons";
+include ":timedScripts:poisonUtil";
 include "include/utility";
 
 var allmyjunk := {};
 var stackstuff := 0;
 
 
-program chrdeath(corpse,ghost)
+program chrdeath(corpse, ghost)
 //  var marker, num;
     AdjustVirtue(ghost, "Sacrifice", 1, 75);
 	EraseObjProperty(ghost, "IsMeditating");
 	EraseObjProperty(ghost, "Protection");
 	ghost.SetPoisoned(0);
-	while(ListPoisonsByType(ghost, "defaultPoison").size() > 0)
-		CurePoison(ghost, "defaultPoison", 120, 1);
+	while(TS_GetTimerNames(ghost, "P").size() > 0)
+		TS_CurePoison(ghost, 100000, "P", 5);
 	endwhile
 	var killer := GetObjProperty(ghost, "LastHit");
 	if(killer != error)
@@ -134,10 +134,10 @@ endfunction
 
 function remove_poison (cast_on)
 
-  if (ListPoisonsByType(cast_on, "defaultPoison").size() > 0)
-    CurePoison(cast_on, 120, "defaultPoison", 4);
-    if (ListPoisonsByType(cast_on, "defaultPoison").size() > 0)
-        CurePoison(cast_on, 120, "defaultPoison", 4);
+  if (TS_GetTimerNames(cast_on, "P").size() > 0)
+    TS_CurePoison(cast_on, 100000, "P", 5);
+    if (TS_GetTimerNames(cast_on, "P").size() > 0)
+        TS_CurePoison(cast_on, 100000, "P", 5);
     endif
   endif
 

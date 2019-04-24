@@ -7,7 +7,7 @@ use uo;
 use os;
 use util;
 
-include ":timedscripts:timedScripts";
+include ":timedScripts:timedScripts";
 
 program controlScript(field)
 	SetObjProperty(field, "#PID", GetPid());
@@ -38,7 +38,7 @@ program controlScript(field)
 			//Someone just walked onto the tile.
 			PoisonMobile(event, poison_level, creator);
 		endif
-		
+
 		if ( field.IsExpired() )
 			DestroyItem(field);
 			return 1;

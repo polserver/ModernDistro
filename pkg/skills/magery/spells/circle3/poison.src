@@ -3,7 +3,7 @@ use uo;
 use cfgfile;
 
 include ":attributes:attributes";
-include ":timedscripts:timedScripts";
+include ":timedScripts:timedScripts";
 include ":magery:spells";
 include ":virtue:virtue";
 

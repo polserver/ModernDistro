@@ -5,7 +5,7 @@ use cfgfile;
 
 include ":attributes:attributes";
 include "include/spellAttack";
-include ":poisonwatcher:poisons";
+include ":timedScripts:poisonUtil";
 include ":damage:damage";
 
 program field_control(item)

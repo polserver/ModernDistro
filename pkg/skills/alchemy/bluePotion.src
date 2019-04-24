@@ -1,7 +1,7 @@
 use cliloc;
 
 include ":alchemy:drinkPotion";
-include ":timedscripts:timedScripts";
+include ":timedScripts:timedScripts";
 include ":itemUtils:itemdesc";
 
 program use_bluepotion(who, potion)
@@ -25,7 +25,7 @@ program use_bluepotion(who, potion)
 		SendSysMessage(who, "You are already under the influence.");
 		return 0;
 	endif
-	
+
 	if( !CheckToDrink(who, "#blue") )
 		return 0;
 	endif
@@ -35,8 +35,8 @@ program use_bluepotion(who, potion)
 		"greateragility":  empty_bottle(who, potion);
 			 TS_StartTimer(who, "agilitypotion", 180, 20, who);
 	endcase
-	
+
 	return 1;
-	
+
 endprogram
 

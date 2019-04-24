@@ -12,7 +12,7 @@ include "include/resPenalty";
 include ":virtue:noto";
 include "include/canAccess";
 include ":attributes:attributes";
-include ":poisonwatcher:poisons";
+include ":timedScripts:poisonUtil";
 
 var clock := ReadGameClock();
 var healing;
@@ -34,7 +34,7 @@ program use_bandages(who, item)
 		SendSysMessage(who, "Cancelled.", color := 33);
 		return;
 	endif
-	var poisons := ListPoisonsByType(patient, "defaultPoisons");
+	var poisons := TS_GetTimerNames(patient, "P");
 	if(dist(who, patient) > 1)
 		SendSysMessage(who, "Your patient is too far away.", color := 33);
 		return;
@@ -213,7 +213,7 @@ function heal(who, patient, counter, healing)
 		    SendSysMessage(patient, who.name + " starts to resurrect you.", color := 56);
 		    resurrect_pc(who, patient, counter);
 		    break;
-		elseif(ListPoisonsByType(patient, "defaultPoison").size() > 0)
+		elseif(TS_GetTimerNames(patient, "P").size() > 0)
 		// can't heal a patient who is poisoned.
 		    if((healing < 60) or (anatomy < 60))
 			if(who==patient)
@@ -316,7 +316,7 @@ function cure(who, patient, counter, healing)
 			SendSysMessage(patient, who.name + " starts to resurrect you.");
 			resurrect_pc(who, patient, counter);
 			break;
-		elseif(ListPoisonsByType(patient, "defaultPoison").size() == 0)
+		elseif(TS_GetTimerNames(patient, "P").size() == 0)
 			SendSysMessage(who,"You start to heal " + patient.name + ".");
 			if(patient != who)
 				SendSysMessage(patient, who.name + " starts to heal you.");
@@ -338,8 +338,8 @@ function cure(who, patient, counter, healing)
 				if(!healamt)
 				    healamt := 1;
 				endif
-				CurePoison(patient, 120, "defaultPoison", healamt);
-				if (ListPoisonsByType(patient, "defaultPoison").size() == 0)
+				TS_CurePoison(patient, 120, "P", healamt);
+				if (TS_GetTimerNames(patient, "P").size() == 0)
 					SendSysMessage(who,"You have cured your patient completely.");
 					SendSysMessage(patient, who.name + " has cured you completely.");
 					AwardPoints(who, SKILLID_HEALING, (healamt * 100));

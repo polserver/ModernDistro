@@ -4,7 +4,7 @@
 
 use uo;
 
-include ":timedscripts:timedScripts";
+include ":timedScripts:timedScripts";
 include ":itemutils:itemdesc";
 include "include/client";
 include "include/sounds";
@@ -14,7 +14,7 @@ program use_Drink(character, drink)
 		SendSysMessage(character, "You cannot drink that.");
 		return 0;
 	endif
-	
+
 	var cfg_elem := GetItemDescInfo(drink.objtype);
 	var proof := GetConfigInt(cfg_elem, "Proof");
 	var poison := CInt(GetObjProperty(drink, "PoisonLevel"));

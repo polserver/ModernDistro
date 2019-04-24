@@ -3,8 +3,8 @@ use uo;
 use cfgfile;
 
 include ":attributes:attributes";
-include ":timedscripts:timedScripts";
-include ":timedscripts:poisonUtil";
+include ":timedScripts:timedScripts";
+include ":timedScripts:poisonUtil";
 include ":magery:spells";
 include ":virtue:noto";
 

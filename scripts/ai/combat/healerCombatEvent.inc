@@ -1,12 +1,12 @@
 include ":attributes:attributes";
-include ":poisonwatcher:poisons";
+include ":timedScripts:timedScripts";
 
 function process_combat_event(opponent)
   spellattack(opponent);
   if ( GetHp(me) < (GetStrength(me)/2))
     CastSpell(me,me,"greaterHeal");
-    if (ListPoisonsByType(me, "defaultPoison").size() > 0)
-      CastSpell(me,me,"cure");
+    if (TS_GetTimerNames(me, "P").size() > 0)
+      CastSpell(me, me, "cure");
     endif
   endif
   if ((GetHp(me) * 100/GetMaxHp(me)) < flee_point)
@@ -64,7 +64,7 @@ function healerstuff(mobile)
   if (!mobile.npctemplate || mobile.npctemplate["guard"] || mobile.script == "tamed")
     return;
   endif
-    if( ListPoisonsByType(mobile, "defaultPoison").size() > 0 && CheckLineOfSight(me,mobile) )
+    if( TS_GetTimerNames(me, "P").size() > 0 && CheckLineOfSight(me,mobile) )
     TurnToward(mobile);
     CastSpell(me,mobile,"cure");
   elseif( (GetHp(mobile) < (GetMaxHp(mobile)/2)) && (CheckLineOfSight(me,mobile))  )

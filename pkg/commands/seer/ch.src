@@ -2,19 +2,19 @@ use uo;
 use os;
 use util;
 
-// include "include/spellRestrictions";
 include ":attributes:attributes";
-include ":poisonwatcher:poisons";
+include ":timedScripts:poisonUtil";
 include "include/client";
 
-program heal(who, amount)
+program cure_and_heal(who, amount)
   var targ :=  Target( who, TGTOPT_NOCHECK_LOS );
   amount := CInt(amount);
   if(!amount)
     amount := 100;
   endif
   HealDamage(targ, amount);
-  CurePoison(targ, 180, "defaultPoison", 5);
+  TS_CurePoison(targ, 10000, "P", 6);
+  //CurePoison(targ, 180, "defaultPoison", 5);
   PlayObjectCenteredEffect(targ, FX_SPARK_EFFECT, 7, 0x10);
   PlaySoundEffect(targ, SFX_SPELL_HEAL);
 endprogram

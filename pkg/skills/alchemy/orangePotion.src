@@ -1,8 +1,8 @@
 use cliloc;
 
 include ":alchemy:drinkPotion";
-include ":timedscripts:timedScripts";
-include ":timedscripts:poisonUtil";
+include ":timedScripts:timedScripts";
+include ":timedScripts:poisonUtil";
 include ":itemUtils:itemdesc";
 
 program use_orangepotion(who, potion)

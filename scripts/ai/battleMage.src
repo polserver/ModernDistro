@@ -14,7 +14,7 @@ include "include/dist";
 include "include/anchors";
 include "include/NPCBackpacks";
 include "include/skillLists";
-include ":poisonwatcher:poisons";
+include ":timedScripts:poisonUtil";
 include ":damage:damage";
 
 var flee_point := 0;
@@ -162,7 +162,7 @@ function Fight(opponent)
   PlayLightningBoltEffect(opponent);
   sleepms(100);
   PlayLightningBoltEffect(opponent);
-  sleepms(100);	
+  sleepms(100);
   PlayLightningBoltEffect(opponent);
   sleepms(100);
   PlayLightningBoltEffect(opponent);
@@ -195,16 +195,15 @@ function post_combat()
   SetWarMode(0);
   SetOpponent(0);
   lookiehere();
-  var allpoisons := GetAllPoisons(me);
-  if(allpoisons.size() > 0)
-    sleep(1);
-    PerformAction(me, 0x22);
-    foreach poison in allpoisons
-      CureSpecific(me, poison, -1);
-    endforeach
-    PlaySoundEffect(me, 0x31);
-    sleep(1);
-  endif
+	var allpoisons := TS_GetTimerNames(me, "P");
+	if(allpoisons.Size() > 0)
+		foreach poison in allpoisons
+			TS_CurePoison(me, 100000, "P", 5);
+		endforeach
+
+		PlaySoundEffect(me, 0x31);
+		sleep(1);
+	endif
   if(GetHp(me) < GetStrength(me))
     sleep(1);
     PerformAction(me, 0x22);
