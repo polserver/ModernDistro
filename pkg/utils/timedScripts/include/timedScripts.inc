@@ -72,7 +72,7 @@ function TS_GetCfgElem(elem_name, byref cfg_file:=0)
 endfunction
 
 /*
- * TS_GetControllerProcess(mobile, start)
+ * TS_GetControllerProcess(mobile, start := NOSTART_CONTROLLER)
  *
  * Purpose
  * Retrieves a script reference to the timer controller for a mobile.
@@ -88,7 +88,7 @@ endfunction
  * Returns an error the controller is not running.
  *
  */
-function TS_GetControllerProcess(mobile, start:=NOSTART_CONTROLLER)
+function TS_GetControllerProcess(mobile, start := NOSTART_CONTROLLER)
 	var pid := CInt(GetObjProperty(mobile, "#TimerControlPID"));
 	var process := GetProcess(pid);
 	if ( !process )
@@ -250,7 +250,7 @@ function TS_GetTimerDuration(mobile, timer_name)
 endfunction
 
 /*
- * TS_StartTimer(mobile, timer_name, duration, level, attacker)
+ * TS_StartTimer(mobile, timer_name, duration, level := 0, attacker := 0)
  *
  * Purpose
  * Starts a timed script on a mobile. If it is already running, it adds to the time it runs.
@@ -260,14 +260,15 @@ endfunction
  * timer_name:	Name of the timer (elem name from timedScripts.cfg) to start.
  * duration:	Number of seconds to add to the timer's run time.
  * attacker:	Optional - Sets an attacker.
- * level:	Optional - Sets the level of the timer (for poisons)
+ * level:	Optional - Sets the level of the timer (for poisons) or
+ *			level is also the amount to boost a skill or stat for timed scripts that require it.
  *
  * Return value
  * Returns 1 on success.
  * Returns error on failure.
  *
  */
-function TS_StartTimer(mobile, timer_name, duration, level:=0, attacker:=0)
+function TS_StartTimer(mobile, timer_name, duration, level := 0, attacker := 0)
 	duration := CInt(duration);
 	if ( duration < 1 )
 		return error{"errortext":="Error::TS_StartTimer() - Duration must be greater than 0."};
