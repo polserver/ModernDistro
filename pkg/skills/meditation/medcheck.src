@@ -3,7 +3,7 @@ use os;
 use cfgfile;
 
 include "include/client";
-include "include/attributes";
+include ":attributes:attributes";
 
 program medcheck(who)
   var skill,waittime,loss;

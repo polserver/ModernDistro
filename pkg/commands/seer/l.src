@@ -1,13 +1,14 @@
 /////////////////////////////////////////////////////////////////////////////
 //
-//  ".l" -	Toggles between full light level and the 
+//  ".l" -	Toggles between full light level and the
 //			Region light level at character's X, Y, realm location.
 //
 //
 /////////////////////////////////////////////////////////////////////////////
 
 use uo;
-include "include/attributes";
+
+//include "include/attributes";
 
 program textcmd_refreshme( who, text )
     var ll := 0;
@@ -25,5 +26,5 @@ program textcmd_refreshme( who, text )
 		who.setlightlevel (ll, 10800);
 		SendSysMessage(who, "Light level set to region light level.", 3, 88);
 	endif
-    
+
 endprogram

@@ -23,13 +23,13 @@ program spiritspeak(who)
 
   EraseObjProperty(who, "IsMeditating");
   EraseObjProperty(who, "HealTimer");
-//  var pts := (CInt(GetAttribute(who, SPIRITSPEAK)) * 2) + 20;
-	var pts := CInt(GetAttribute(who, SPIRITSPEAK) / 10) + 15;
+//  var pts := (CInt(GetAttribute(who, SPIRIT_SPEAK)) * 2) + 20;
+	var pts := CInt(GetAttribute(who, SPIRIT_SPEAK) / 10) + 15;
 	if(pts > 35)
 		pts := 35;
 	endif
 
-  if(SkillCheck(who, SPIRITSPEAK, -1,  pts))
+  if(SkillCheck(who, SPIRIT_SPEAK, -1,  pts))
     SendSysMessage(who, "You contact the netherworld.", color := 66);
 	AdjustVirtue(who, "spirituality", 1, 50);
 	TS_StartTimer(who, "SpiritSpeak", 60);
@@ -38,7 +38,7 @@ program spiritspeak(who)
     GrantPrivilege(who, "hearghosts");
     who.enable("hearghosts");
     PerformAction(who, 17);
-    PlaySoundEffect(who, SFX_SKILL_SPIRITSPEAK);
+    PlaySoundEffect(who, SFX_SKILL_SPIRIT_SPEAK);
     sleep(30);
     RevokePrivilege(who, "hearghosts"); */
   else

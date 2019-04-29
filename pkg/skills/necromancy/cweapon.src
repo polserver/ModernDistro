@@ -10,7 +10,7 @@ program curse_weapon( params )
 	var cast_on := params[4]; 			// Target of spell if required.
 
 	var necroskill := Cint(GetAttribute(caster, NECROMANCY));
-	var sspeak := Cint(GetAttribute(caster, SPIRITSPEAK));
+	var sspeak := Cint(GetAttribute(caster, SPIRIT_SPEAK));
 	var int := GetIntelligence(caster);
 	var duration := ((sspeak * 10) / 34) + 1;
 
@@ -19,7 +19,7 @@ program curse_weapon( params )
 	PlayObjectCenteredEffectEx( caster, 0x3779, 1, 15, 9905, 32, 0, 2 );
 	Sleep(1);
 	PlayObjectCenteredEffectEx( caster, 0x37B9, 1, 14, 9902, 32, 255, 5 );
-	
+
 	if(GetObjProperty(caster.weapon, "cursed"))
 		SendSysMessage(caster, "This weapon has already been cursed!");
 		return 0;

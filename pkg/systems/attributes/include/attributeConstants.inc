@@ -24,15 +24,15 @@ enum STATS
 endenum
 
 enum SKILLS
-	ALCHEMY			:= "Alchemy",
-	ANATOMY			:= "Anatomy",
-	ANIMALLORE		:= "AnimalLore",
+	ALCHEMY				:= "Alchemy",
+	ANATOMY				:= "Anatomy",
+	ANIMAL_LORE			:= "AnimalLore",
 	ITEM_IDENTIFICATION	:= "ItemIdentification",
-	ARMSLORE		:= "ArmsLore",
+	ARMS_LORE		:= "ArmsLore",
 	PARRYING			:= "Parry",
 	BEGGING			:= "Begging",
 	BLACKSMITHY		:= "Blacksmithy",
-	BOWCRAFTFLETCHING	:= "BowcraftFletching",
+	BOWCRAFT_FLETCHING	:= "BowcraftFletching",
 	PEACEMAKING		:= "Peacemaking",
 	CAMPING			:= "Camping",
 	CARPENTRY		:= "Carpentry",
@@ -56,7 +56,7 @@ enum SKILLS
 	MUSICIANSHIP		:= "Musicianship",
 	POISONING		:= "Poisoning",
 	ARCHERY			:= "Archery",
-	SPIRITSPEAK		:= "SpiritSpeak",
+	SPIRIT_SPEAK		:= "SpiritSpeak",
 	STEALING		:= "Stealing",
 	TAILORING		:= "Tailoring",
 	TAMING		:= "AnimalTaming",
@@ -76,12 +76,12 @@ enum SKILLS
 	NECROMANCY		:= "Necromancy",
 	FOCUS		:= "BattleFocus",
 	CHIVALRY		:= "Chivalry",
-  BUSHIDO       := "Bushido",
-  NINJITSU      := "Ninjitsu",
-  SPELLWEAVING := "Spellweaving",
-  MYSTICISM     := "Mysticism",
-  IMBUING       := "Imbuing",
-  THROWING      := "Throwing"
+	BUSHIDO       := "Bushido",
+	NINJITSU      := "Ninjitsu",
+	SPELLWEAVING := "Spellweaving",
+	MYSTICISM     := "Mysticism",
+	IMBUING       := "Imbuing",
+	THROWING      := "Throwing"
 
 endenum
 

@@ -1,3 +1,4 @@
+
 use uo;
 use util;
 
@@ -29,9 +30,9 @@ program skill_stealth( who )
     PrintTextAbovePrivate( who, "You cant stealth while riding a horse!", who );
     return;
   endif
-//  var skill := CInt(GetAttribute(who, STEALTH) / 10) + 20;
+  var skill := CInt(GetAttribute(who, STEALTH) / 10) + 20;
 
-  var skill := CInt(GetAttribute(who, ARMSLORE) / 10) + 15;
+//  var skill := CInt(GetAttribute(who, ARMS_LORE) / 10) + 15;
   if(skill > 35)
     skill := 35;
   endif

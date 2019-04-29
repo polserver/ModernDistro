@@ -673,7 +673,7 @@ function DoManaSuck(defender, attacker, amount)
   // Added for necro wraith form
   // Get Spirit Speak skill level from the attacker and divide it by 5.
   // Then convert to percent (div by 100) and determine the mana amount to suck from defender.
-    var sspeak := GetAttribute(attacker, SPIRITSPEAK);
+    var sspeak := GetAttribute(attacker, SPIRIT_SPEAK);
     sspeak := CDbl(sspeak);
     sspeak := sspeak/5;
     if(sspeak < 8)
