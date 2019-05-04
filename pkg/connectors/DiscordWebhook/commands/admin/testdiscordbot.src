@@ -1,0 +1,18 @@
+Use uo;
+use os;
+use cfgfile;
+use file;
+
+include ":discordbot:outbound";
+
+program textcmd_testdiscordbot(who)
+	
+	var presetType := RequestInput(who, who.backpack, "Which preset to use(blank for default):" );
+	var message := RequestInput(who, who.backpack, "What should the message be:" );
+	var outbound := PresetDiscordMessage( message, presetType);
+	  	
+	if(outbound == error)
+		SendsysMessage( who, outbound.errortext );
+	endif
+
+endprogram

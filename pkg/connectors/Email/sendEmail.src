@@ -1,0 +1,179 @@
+use uo;
+use os;
+use cfgfile;
+use file;
+
+program testconnection( connection, params )
+	
+var ev;
+var i:=1;
+var LogLevel := params.LL;
+broadcast("LL: "+LogLevel);
+
+	while (connection)
+		ev := wait_for_event( 5 );
+		if (ev)
+			if( LogLevel >= 4 )
+			LogToFile("::log/emailer.log", "[Recieved]: "+ev.value, LOG_DATETIME);
+			endif
+			if( LogLevel >= 10 )
+				print("[:Emailer:Recieved] "+ev.value);
+			endif
+			if(ev.errortext)
+				if( LogLevel >= 1 )
+					LogToFile("::log/emailer.log", "[Recieve Error]: "+ev.errortext, LOG_DATETIME);
+				endif
+				if( LogLevel >= 10 )
+					print("[:Emailer:Recieved:Error] "+ev.errortext);
+				endif
+				break;
+			endif
+			case(i)
+				1: if( SubStr(ev.value, 1, 3) == "220" ) ProccessTransmit(connection, "HELO", LogLevel); else ProccessError(ev.value, LogLevel);  endif
+			  2: if( SubStr(ev.value, 1, 3) == "250" ) ProccessTransmit(connection, "MAIL FROM: "+params.FromEmail, LogLevel); else ProccessError(ev.value, LogLevel);   endif
+				3: if( SubStr(ev.value, 1, 3) == "250" ) SendRecipients( connection, params ); else ProccessError(ev.value, LogLevel);   endif
+				4: if( SubStr(ev.value, 1, 3) == "250" ) ProccessTransmit(connection, "DATA", LogLevel); else ProccessError(ev.value, LogLevel);   endif
+				5: if( SubStr(ev.value, 1, 3) == "354" ) SendContents( connection, params ); else ProccessError(ev.value, LogLevel);   endif	
+				6: break;
+			endcase
+			if( i == 7 )
+				break;
+			endif
+			i+= 1;
+		endif
+	endwhile
+endprogram
+
+/*
+ * SendRecipients( connection, params )
+ *
+ * Purpose
+ * Transmits all the recipient email addresses to the server before building the DATA.
+ * This converts all ToEmail, CC, and BCC addresses to simple RCPT TO: addresses.
+ *
+ * Parameters
+ * connection:   This is a reference to the open SMTP connection from the parent script.
+ * params:       This is a copy of the params struct which contains all the email data.
+ *
+ * Return value
+ * Nothing, error checking is done after this by the parent function.
+ *
+ */
+
+function SendRecipients( connection, params )
+	
+	ProccessTransmit(connection, "RCPT TO:<"+params.ToEmail+">", params.LL);
+	if( params.CC )
+		ProccessTransmit(connection, "RCPT TO:<"+params.CC+">", params.LL);
+	endif 
+	
+	if( params.BCC )
+		ProccessTransmit(connection, "RCPT TO:<"+params.BCC+">", params.LL);
+	endif
+	return 1;
+	
+endfunction
+
+/*
+ * SendContents( connection, params )
+ *
+ * Purpose
+ * Transmits all the data to the server for the DATA section of the SMTP connection.
+ * This builds things like subject and body, to, reply-to, cc and bcc headers
+ *
+ * Parameters
+ * connection:   This is a reference to the open SMTP connection from the parent script.
+ * params:       This is a copy of the params struct which contains all the email data.
+ *
+ * Return value
+ * Nothing, error checking is done after this by the parent script.
+ *
+ */
+ 
+function SendContents( connection, params )
+	
+	var tostring;
+	if( params.ToContactName )
+		tostring :=  params.ToContactName+"<"+params.ToEmail+">";
+	else
+		tostring := "<"+params.ToEmail+">";
+	endif
+		ProccessTransmit(connection, "To: "+tostring, params.LL);
+	if( params.CC )
+		ProccessTransmit(connection, "cc: "+params.CC, params.LL);
+	endif 
+	
+	if( params.BCC )
+		ProccessTransmit(connection, "bcc: "+params.BCC, params.LL);
+	endif
+	
+	if( params.ReplyTo )
+		ProccessTransmit(connection, "Reply-To: "+params.ReplyTo, params.LL);
+	endif
+		
+	
+	ProccessTransmit(connection, "SUBJECT: "+params.Subject, params.LL);
+	
+	ProccessTransmit(connection, params.Body, params.LL);
+	//Closure Block - This is currently not logged//
+	connection.transmit("");
+	connection.transmit(".");
+endfunction
+
+/*
+ * ProccessTransmit(connection, command, LogLevel)
+ *
+ * Purpose
+ * Transmits the data to the SMTP server connection.
+ * Also checks the log level and logs/prints data if needed.
+ *
+ * Parameters
+ * connection:   This is a reference to the open SMTP connection from the parent script.
+ * command:      This is the actual data to be sent to the SMTP connection.
+ * LogLevel:     This is used to determin if data needs to be logged or printed to console.
+ *
+ * Return value
+ * Nothing, error checking is done after this by the parent function.
+ *
+ */
+ 
+function ProccessTransmit(connection, command, LogLevel)
+		
+		if( LogLevel >= 3 )
+			LogToFile("::log/emailer.log", "[Transmit]: "+command, LOG_DATETIME);
+		endif
+		if( LogLevel >= 10 )
+			Print("[:Emailer:Transmit]: "+command);
+		endif
+		
+		connection.transmit(command); 
+		
+		
+endfunction
+
+/*
+ * ProccessTransmit(connection, command, LogLevel)
+ *
+ * Purpose
+ * Sends SMTP errors to the logfile.
+ * --Further processing might be done here at a later date--.
+ *
+ * Parameters
+ * ErrorMessage:   This is the string response from the SMTP server which doesn't match what is expected.
+ * LogLevel:       This is used to determin if data needs to be logged or printed to console.
+ *
+ * Return value
+ * Nothing, error checking shouldn't be required, the error has already happened.
+ *
+ */
+ 
+function ProccessError(ErrorMessage, LogLevel)
+		
+		if( LogLevel >= 1 )
+			LogToFile("::log/emailer.log", "[Error] "+ErrorMessage, LOG_DATETIME);
+		endif
+		if( LogLevel >= 10 )
+			Print("[:Emailer:Error] "+ErrorMessage);
+		endif
+		
+endfunction

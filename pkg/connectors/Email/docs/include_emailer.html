@@ -1,0 +1,139 @@
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+	<meta http-equiv="Content-Language" content="en-us">
+	<title>EmailConnector Documentation</title>
+	<link rel="stylesheet" type="text/css" href="docs.css" />
+</head>
+<body>
+<div id="container">
+	<div id="header">
+		<h1>EmailConnector DOCUMENTATION</h1>
+		<p>Version 1, codename <b>"Mr. Anderson"</b>, by <a href="mailto:gib@zuluhotel.com.au">Dev GIB</a>.</p>
+		<hr>
+		<h2>emailer.inc</h2>
+	</div>
+
+	<div id="content">
+		<div id="table">
+			<h3>SendEmail( ToAddress, Subject, Body, Modifiers:=0)</h3>
+
+			<table border="0" cellspacing="0" style="border-bottom-width: 2px;border-collapse: collapse" bordercolor="#111111" width="100%" id="AutoNumber1" cellpadding="2">
+				<!-- PURPOSE -->
+				<tr><td width="100%" bgcolor="#808080" style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1" colspan="2">
+        <b><font face="Tahoma" size="2">Purpose</font></b></td></tr>
+      <tr>
+        <td width="274%" bgcolor="#C0C0C0" colspan="2" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium">
+        <strong style="font-weight: 400"><font face="Tahoma" size="2">Sends an email to address or addresses based on information given to the function.<br/>
+Modifiers is the only non-required parameter.</font></strong></td>
+      </tr>
+      
+			<!-- PARAMS -->
+      <tr><td width="100%" bgcolor="#808080" style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1" colspan="2">
+        <b><font face="Tahoma" size="2">Parameters</font></b></td>
+      </tr>
+      <tr>
+        <td width="2%" bgcolor="#C0C0C0" style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium">
+        <strong style="font-weight: 400"><font face="Tahoma" size="2">ToAddress</font></strong></td>
+        <td width="274%" bgcolor="#C0C0C0" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium">
+        <strong style="font-weight: 400"><font face="Tahoma" size="2"><b>String - </b>The email address the email is being sent to.</font></strong></td>
+      </tr>
+      <tr>
+        <td width="2%" bgcolor="#C0C0C0" style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium">
+        <strong style="font-weight: 400"><font face="Tahoma" size="2">Subject</font></strong></td>
+        <td width="274%" bgcolor="#C0C0C0" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium">
+        <strong style="font-weight: 400"><font face="Tahoma" size="2"><b>String - </b>The subject line of the email body.</font></strong></td>
+      </tr>
+      <tr>
+        <td width="2%" bgcolor="#C0C0C0" style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium">
+        <strong style="font-weight: 400"><font face="Tahoma" size="2">Body</font></strong></td>
+        <td width="274%" bgcolor="#C0C0C0" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium">
+        <strong style="font-weight: 400"><font face="Tahoma" size="2"><b>String - </b>The text to be put into the body.</font></strong></td>
+      </tr>
+      <tr>
+        <td width="2%" bgcolor="#C0C0C0" style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium">
+        <strong style="font-weight: 400"><font face="Tahoma" size="2">Modifiers</font></strong></td>
+        <td width="274%" bgcolor="#C0C0C0" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium">
+        <strong style="font-weight: 400"><font face="Tahoma" size="2"><b>Struct - </b>A struct of modifiers that SMTP connections support.</font></strong></td>
+      </tr>
+      
+			<!-- MODS -->
+			<tr><td width="100%" bgcolor="#808080" style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1" colspan="2">
+        <b><font face="Tahoma" size="2">Optional Modifiers(Struct)</font></b></td>
+      </tr>
+      <tr>
+        <td width="2%" bgcolor="#C0C0C0" style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium">
+        <strong style="font-weight: 400"><font face="Tahoma" size="2">FromEmail</font></strong></td>
+        <td width="274%" bgcolor="#C0C0C0" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium">
+        <strong style="font-weight: 400"><font face="Tahoma" size="2"><b>String - </b>To define an email address that the email is from otherwise default from the settings file will be used.</font></strong></td>
+      </tr>
+      <tr>
+        <td width="2%" bgcolor="#C0C0C0" style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium">
+        <strong style="font-weight: 400"><font face="Tahoma" size="2">ToContactName</font></strong></td>
+        <td width="274%" bgcolor="#C0C0C0" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium">
+        <strong style="font-weight: 400"><font face="Tahoma" size="2"><b>String - </b>To define a name which will be displayed next to the email in the recipients mail client.</font></strong></td>
+      </tr>
+      <tr>
+        <td width="2%" bgcolor="#C0C0C0" style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium">
+        <strong style="font-weight: 400"><font face="Tahoma" size="2">CC</font></strong></td>
+        <td width="274%" bgcolor="#C0C0C0" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium">
+        <strong style="font-weight: 400"><font face="Tahoma" size="2"><b>String - </b>To define carbon copy emails to be sent, carbon copy email addresses can be seen by all recipients.</font></strong></td>
+      </tr>
+      <tr>
+        <td width="2%" bgcolor="#C0C0C0" style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium">
+        <strong style="font-weight: 400"><font face="Tahoma" size="2">BCC</font></strong></td>
+        <td width="274%" bgcolor="#C0C0C0" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium">
+        <strong style="font-weight: 400"><font face="Tahoma" size="2"><b>String - </b>To define blind carbon copy emails to be sent, the same as above only other receipients can't see who was BCC'ed.</font></strong></td>
+      </tr>
+      <tr>
+        <td width="2%" bgcolor="#C0C0C0" style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium">
+        <strong style="font-weight: 400"><font face="Tahoma" size="2">ReplyTo</font></strong></td>
+        <td width="274%" bgcolor="#C0C0C0" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium">
+        <strong style="font-weight: 400"><font face="Tahoma" size="2"><b>String - </b>To define a different email address to be replied to. This is different to FromEmail, when a client replies to an email sent this email address would be used in place of FromEmail.</font></strong></td>
+      </tr>
+				<!-- Returns -->
+				<tr><td width="100%" bgcolor="#808080" style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1" colspan="2">
+        <b><font face="Tahoma" size="2">Returns</font></b></td></tr>
+      <tr>
+        <td width="274%" bgcolor="#C0C0C0" colspan="2" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium">
+        <strong style="font-weight: 400"><font face="Tahoma" size="2"><b>Success - </b> Integer 1<br/><b>Failure - </b> Errortext</font></strong></td>
+      </tr>
+				</table>
+
+		<h3>ValidateEmail( Address )</h3>
+
+			<table border="0" b cellspacing="0" style="border-bottom-width: 2px;border-collapse: collapse" bordercolor="#111111" width="100%" id="AutoNumber1" cellpadding="2">
+				<!-- PURPOSE -->
+				<tr><td width="100%" bgcolor="#808080" style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1" colspan="2">
+        <b><font face="Tahoma" size="2">Purpose</font></b></td></tr>
+      <tr>
+        <td width="274%" bgcolor="#C0C0C0" colspan="2" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium">
+        <strong style="font-weight: 400"><font face="Tahoma" size="2">Checks a string to make sure it contains an @ symbol and a full stop.</font></strong></td>
+      </tr>
+      
+			<!-- PARAMS -->
+      <tr><td width="100%" bgcolor="#808080" style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1" colspan="2">
+        <b><font face="Tahoma" size="2">Parameters</font></b></td>
+      </tr>
+      <tr>
+        <td width="2%" bgcolor="#C0C0C0" style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium">
+        <strong style="font-weight: 400"><font face="Tahoma" size="2">Address</font></strong></td>
+        <td width="274%" bgcolor="#C0C0C0" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium">
+        <strong style="font-weight: 400"><font face="Tahoma" size="2"><b>String - </b>The email address that is to be checked for validity.</font></strong></td>
+      </tr>
+      <!-- Returns -->
+				<tr><td width="100%" bgcolor="#808080" style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1" colspan="2">
+        <b><font face="Tahoma" size="2">Returns</font></b></td></tr>
+      <tr>
+        <td width="274%" bgcolor="#C0C0C0" colspan="2" style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium">
+        <strong style="font-weight: 400"><font face="Tahoma" size="2"><b>Success - </b> Integer 1<br/><b>Failure - </b> Integer 0 - (Later will update to error message)</strong></td>
+      </tr>
+				</table>
+		</div>
+	</div>
+
+
+	<div id="footer">
+		<p>Last Update: $Id: include_emailer.html 61 2017-10-22 23:12 DevGIB $</p>
+	</div>
+</div>
+</body>

@@ -1,0 +1,58 @@
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+	<meta http-equiv="Content-Language" content="en-us">
+	<title>Discord Webhook Documentation</title>
+	<link rel="stylesheet" type="text/css" href="docs.css" />
+</head>
+<body>
+<div id="container">
+	<div id="header">
+		<h1>Discord Webhook DOCUMENTATION</h1>
+		<p>Version 1, codename <b>"Arsenic"</b>, by <a href="mailto:gib@zuluhotel.com.au">Dev GIB</a>.</p>
+		<hr>
+		<h2>About</h2>
+	</div>
+
+	<div id="content">
+		<p>This package is designed to be an easy drop in package that enables sending messages to discord webhooks system.
+			It takes advantages of some core changes which implemented a HTTPRequest() function, so if you are having issues or getting errors, please
+			make sure that your core is up to date first.</br><b>Make sure your CORE version is commit defbbe1 or later(release date 2018-01-05)</b></p>
+			
+		<p>This package was written for the POL Distro headed by Yukiko and was designed with the intention of reducing and
+			documenting any entry or exit points of the package to make custom or sister packages directly replaceable using those same entry and exit points.
+			</p>
+			
+			<p>For basic usage it only requires 1 config file to be setup, and 2 lines injected into scripts.
+				<ul>
+					<li>include ":discordwebhook:outbound";</li>
+					<li>PresetDiscordMessage( message, presetType);</li>
+					</ul><br/>
+					<b>Message</b> is the content that will be displayed in Discord.<br/>
+					<b>presetType</b> is the name of the settings element in the config file.<br/><br/>
+					I've also done the best I can(be bothered) to make sure that the src and inc files are as documented as possible. 
+					If you don't understand something please don't hesitate to let me know and i can assist you in why I've done something
+					a certain way and then maybe document the scripts more.
+					</p>
+					<p>For more information on the discord side of things there are 2 pieces of documentation that i recommend reading.<br/>
+						First is the documenation for setting up a webhook inside discord:<br/>
+						<a href="https://support.discordapp.com/hc/en-us/articles/228383668-Intro-to-Webhooks">Intro To Webhooks</a><br/>
+						Secondly is the developer documentation which contains info that the webhook can accept:<br/>
+						<a href="https://discordapp.com/developers/docs/resources/webhook">Developer Documentation</a><br/>
+						
+						</p>
+
+		<hr>
+		<h2>Thanks</h2>
+		<p>I would like the thank the following people who have contributed in some way or another.
+				<ul>
+					<li><b>Kevin_</b> - For writing the HTTPRequest() code.</li>
+					<li><b>Austin</b> -  I stole these docs from your brainAI package</li>
+					</ul><br/>
+			</p>
+	</div>
+
+	<div id="footer">
+		<p>Last Update: $Id: changelog.html 61 2018-02-05 21:56 DevGIB $</p>
+	</div>
+</div>
+</body>
