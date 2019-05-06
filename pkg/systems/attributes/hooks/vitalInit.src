@@ -28,7 +28,7 @@ endprogram
 exported function GetHitsRegenRate(mobile)
 	var base_regen := CInt(AP_GetSettingsCfgElem("Regen").Hits) * 100;
 
-	return base_regen + AP_GetVitalRegenRateMod(mobile, "hits");
+	return base_regen + AP_GetVitalRegenRateMod(mobile, "Hits");
 endfunction
 
 exported function GetHitsMaximumValue(mobile)
@@ -46,7 +46,7 @@ endfunction
 exported function GetManaRegenRate(mobile)
 	var base_regen := CInt(AP_GetSettingsCfgElem("Regen").Mana) * 100;
 
-	return base_regen + AP_GetVitalRegenRateMod(mobile, "mana");
+	return base_regen + AP_GetVitalRegenRateMod(mobile, "Mana");
 endfunction
 
 exported function GetManaMaximumValue(mobile)
@@ -64,7 +64,7 @@ endfunction
 exported function GetStaminaRegenRate(mobile)
 	var base_regen := CInt(AP_GetSettingsCfgElem("Regen").Stamina) * 100;
 
-	return base_regen + AP_GetVitalRegenRateMod(mobile, "stamina");
+	return base_regen + AP_GetVitalRegenRateMod(mobile, "Stamina");
 endfunction
 
 exported function GetStaminaMaximumValue(mobile)

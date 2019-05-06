@@ -1,0 +1,21 @@
+/*
+ * $Id: endSpellDmgBoost.src 968 2019-04-28 01:23:24Z Yukiko $
+ *
+ */
+
+use uo;
+use os;
+
+include ":attributes:attributes";
+include ":damage:damage";
+
+program TimedScript_endSpellDmgBoost(params)
+	var mobile := params[1];
+	var points := CInt(GetObjProperty(mobile, "FishSpellDmgBoost"));
+	SetObjProperty(mobile, "SpellDamageIncrease", CInt(GetObjProperty(mobile, "SpellDamageIncrease")) - points);
+	//mobile.spell_damage_increase_mod := mobile.spell_damage_increase_mod - points;
+	EraseObjProperty(mobile, "FishSpellDmgBoost");
+
+	return 1;
+endprogram
+

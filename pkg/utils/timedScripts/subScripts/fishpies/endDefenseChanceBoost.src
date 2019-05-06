@@ -1,0 +1,20 @@
+/*
+ * $Id: endDefenseChanceBoost.src 968 2019-04-28 01:23:24Z Yukiko $
+ *
+ */
+
+use uo;
+use os;
+
+include ":attributes:attributes";
+include ":damage:damage";
+
+program TimedScript_endDefenseChanceBoost(params)
+	var mobile := params[1];
+	var points := CInt(GetObjProperty(mobile, "FishDefenseChanceBoost"));
+	mobile.defence_increase_mod := mobile.defence_increase_mod - points;
+	EraseObjProperty(mobile, "FishDefenseChanceBoost");
+
+	return 1;
+endprogram
+

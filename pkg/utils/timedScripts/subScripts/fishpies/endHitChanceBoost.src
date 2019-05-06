@@ -1,0 +1,21 @@
+/*
+ * $Id: endHitChanceBoost.src 968 2019-04-28 01:23:24Z Yukiko $
+ *
+ */
+
+use uo;
+use os;
+
+include ":attributes:attributes";
+include ":damage:damage";
+
+program TimedScript_endHitChanceBoost(params)
+	var mobile := params[1];
+	var points := CInt(GetObjProperty(mobile, "FishHitChanceBoost"));
+	SetObjProperty(mobile, "HitChance", CInt(GetObjProperty(mobile, "HitChance")) - points);
+	//mobile.hit_chance_mod := mobile.hit_chance_mod - points;
+	EraseObjProperty(mobile, "FishHitChanceBoost");
+
+	return 1;
+endprogram
+

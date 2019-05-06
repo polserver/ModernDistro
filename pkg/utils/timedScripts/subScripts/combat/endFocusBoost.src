@@ -1,0 +1,21 @@
+/*
+ * $Id: endFocusBoost.src 968 2019-04-28 01:23:24Z Yukiko $
+ *
+ */
+
+use uo;
+use os;
+
+include ":attributes:attributes";
+
+program TimedScript_endFocusBoost(params)
+	var mobile := params[1];
+
+	var points := CInt(GetObjProperty(mobile, "FocusBoost"));
+	var skill_points := -1 * points;
+	AP_ModifySkillMod(mobile, FOCUS, skill_points);
+	EraseObjProperty(mobile, "FocusBoost");
+
+	return 1;
+endprogram
+

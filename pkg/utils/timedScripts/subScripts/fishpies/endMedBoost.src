@@ -11,10 +11,10 @@ include ":attributes:attributes";
 program TimedScript_endMedBoost(params)
 	var mobile := params[1];
 
-	var points := CInt(GetObjProperty(mobile, "MedBoost"));
+	var points := CInt(GetObjProperty(mobile, "FishMedBoost"));
 	points := -1 * points;
 	AP_ModifySkillMod(mobile, MEDITATION, points);
-	EraseObjProperty(mobile, "MedBoost");
+	EraseObjProperty(mobile, "FishMedBoost");
 
 	return 1;
 endprogram

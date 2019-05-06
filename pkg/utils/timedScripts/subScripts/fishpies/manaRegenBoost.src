@@ -1,0 +1,32 @@
+/*
+ * $Id: manaRegenBoost.src 968 2019-04-28 01:23:24Z Yukiko $
+ *
+ */
+
+use uo;
+use os;
+
+include ":attributes:attributes";
+include ":damage:damage";
+include ":timedScripts:timedScripts";
+
+program TimedScript_manaRegenBoost(params)
+	var mobile := params[1];
+	var points := params[3];
+	params := 0;
+
+	// Prevents more than one fish pie mod from running on a character.
+	var timers := TS_GetTimerNames(mobile);
+	foreach timer in timers
+		if(timer[1,4] == "Fish")
+			Start_Script(":timedScripts/subScripts/fishpies/end" + timer, {mobile});
+			Sleepms(50);
+			break;
+		endif
+	endforeach
+	AP_SetVitalRegenRateMod( mobile, "Mana", AP_GetVitalRegenRateMod( mobile, "Mana" ) + points);
+	SetObjProperty(mobile, "FishManaRegenBoost", points);
+
+	return 1;
+endprogram
+
