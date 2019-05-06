@@ -1,0 +1,20 @@
+/*
+ * $Id: endManaRegenBoost.src 968 2019-04-28 01:23:24Z Yukiko $
+ *
+ */
+
+use uo;
+use os;
+
+include ":attributes:attributes";
+include ":damage:damage";
+
+program TimedScript_endManaRegenBoost(params)
+	var mobile := params[1];
+	var points := CInt(GetObjProperty(mobile, "FishManaRegenBoost"));
+	AP_SetVitalRegenRateMod( mobile, "Mana", AP_GetVitalRegenRateMod( mobile, "Mana" ) - points);
+	EraseObjProperty(mobile, "FishManaRegenBoost");
+
+	return 1;
+endprogram
+

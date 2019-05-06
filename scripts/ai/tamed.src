@@ -161,7 +161,7 @@ function MainAILoop()
       endcase
       if(master.dead)
         dismountme(master);
-      endif  
+      endif
       if(following)
         waittime := 0;
         Follow();
@@ -257,7 +257,7 @@ function Fight(opponent)
     endcase
     if(master.dead)
        dismountme(master);
-    endif 
+    endif
     if(following)
       SetWarMode(0);
       opponent := 0;
@@ -335,9 +335,9 @@ function Transfer()
   //var npccfgfile := ReadConfigFile("npcdesc"); // unneeded due to global 'npccfgfile'!!
   var tameskill  := CInt(npccfgfile[me.npctemplate].tameskill);
   var mastaming  := AP_GetSkill(master, TAMING);
-  var maslore    := AP_GetSkill(master, ANIMALLORE)/5;
+  var maslore    := AP_GetSkill(master, ANIMAL_LORE)/5;
   var tgttaming  := CInt(AP_GetSkill(whom, TAMING));
-  var tgtlore    := CInt(AP_GetSkill(whom, ANIMALLORE)/5);
+  var tgtlore    := CInt(AP_GetSkill(whom, ANIMAL_LORE)/5);
   happiness := GetObjProperty(me, "happiness");
   if(tgttaming <(tameskill - 50))
     PlaySoundEffect(me, dmgsound);
@@ -521,7 +521,7 @@ function Fetch()
   else
     PlaySoundEffect(me, dmgsound);
   endif
-endfunction 
+endfunction
 
 function Get()
   var tobj := Target(master);
@@ -546,7 +546,7 @@ function Get()
   else
     PlaySoundEffect(me, dmgsound);
   endif
-endfunction 
+endfunction
 
 function drop()
   foreach myitems in EnumerateItemsInContainer(me.backpack)
@@ -567,11 +567,11 @@ endfunction
 
 function OpenMyPack()
   var mounttype;
-  if((me.graphic == 0x123)||(me.graphic == 0x124)) 
-    if(Distance(me, master)> 2) 
-      return; 
-    endif 
-  return  SendOpenSpecialContainer(master, me.backpack); 
+  if((me.graphic == 0x123)||(me.graphic == 0x124))
+    if(Distance(me, master)> 2)
+      return;
+    endif
+  return  SendOpenSpecialContainer(master, me.backpack);
   else
     if(Distance(me, master)> 1)
       return;
@@ -639,22 +639,22 @@ function OpenMyPack()
         SendSysMessage (master, "The unicorn only allows females to mount it.", color := 88);
         return;
     endif
-    
+
     if (mounttype == 0x3ead and master.graphic == 0x191) // female attempting to ride a ki-rin
         SendSysMessage (master, "The ki-rin only allows males to mount it.", color := 88);
         return;
     endif
-    
+
     if (mounttype == 0x3e9d and master.graphic == 0x190) // male attempting to ride a unicorn
         SendSysMessage (master, "The unicorn only allows females to mount it.", color := 88);
         return;
     endif
-    
+
     if (mounttype == 0x3e9c and master.graphic == 0x191) // female attempting to ride a ki-rin
         SendSysMessage (master, "The ki-rin only allows males to mount it.", color := 88);
         return;
     endif
-    
+
     if(mounttype)
       if(MoveObjectToLocation(master,me.x,me.y,me.z,master.realm,0))
         master.facing := me.facing;
@@ -937,7 +937,7 @@ function obediencecheck()
   if(me.objtype in arry)
     return 1;
   endif
-  var maslore    := AP_GetSkill(master, ANIMALLORE)/5;
+  var maslore    := AP_GetSkill(master, ANIMAL_LORE)/5;
   var mastaming  := CInt(AP_GetSkill(master, TAMING)+ maslore);
   var checkvalue := CInt(mastaming - 20);
   happiness := GetObjProperty(me, "happiness");

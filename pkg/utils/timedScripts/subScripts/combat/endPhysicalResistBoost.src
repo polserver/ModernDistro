@@ -1,0 +1,21 @@
+/*
+ * $Id: endPhysicalResistBoost.src 968 2019-04-28 01:23:24Z Yukiko $
+ *
+ */
+
+use uo;
+use os;
+
+include ":attributes:attributes";
+include ":damage:damage";
+
+program TimedScript_endPhysicalResistBoost(params)
+	var mobile := params[1];
+	var points := CInt(GetObjProperty(mobile, "PhysicalResistBoost"));
+	points := -1 * points;
+	ModifyResistance(mobile, DMG_PHYSICAL, points);
+	EraseObjProperty(mobile, "PhysicalResistBoost");
+
+	return 1;
+endprogram
+

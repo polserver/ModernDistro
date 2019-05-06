@@ -12,10 +12,10 @@ program corpse_skin( params )
 
 	SendSysMessage(caster, "Select your victim:", 1, 88);
 	var cast_on := Target(caster);
-	
+
 
 	var targrs := Cint(GetAttribute(cast_on, RESISTING_SPELLS));
-	var sspeak := Cint(GetAttribute(caster, SPIRITSPEAK));
+	var sspeak := Cint(GetAttribute(caster, SPIRIT_SPEAK));
 
 
 	var duration := CInt(((sspeak - targrs) / 2.5) + 40);

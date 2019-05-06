@@ -1,0 +1,27 @@
+/*
+ * $Id: physicalResistBoost.src 968 2019-04-28 01:23:24Z Yukiko $
+ *
+ */
+
+use uo;
+use os;
+
+include ":attributes:attributes";
+include ":damage:damage";
+
+program TimedScript_physicalResistBoost(params)
+	var mobile := params[1];
+	var points := params[3];
+	params := 0;
+
+	// Prevents mod from being applied twice.
+	// Uses the same as Magery Agility, to keep them from stacking.
+	if ( GetObjProperty(mobile, "PhysicalResistBoost") )
+		return 0;
+	endif
+	SetObjProperty(mobile, "PhysicalResistBoost", points);
+	ModifyResistance(mobile, DMG_PHYSICAL, points);
+
+	return 1;
+endprogram
+

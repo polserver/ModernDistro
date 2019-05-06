@@ -1,0 +1,27 @@
+/*
+ * $Id: medBoost.src 968 2019-04-28 01:23:24Z Yukiko $
+ *
+ */
+
+use uo;
+use os;
+
+include ":attributes:attributes";
+
+program TimedScript_medBoost(params)
+	var mobile := params[1];
+	var points := params[3];
+	params := 0;
+
+	// Prevents mod from being applied twice.
+	// Uses the same as Magery Agility, to keep them from stacking.
+	if ( GetObjProperty(mobile, "MedBoost") )
+		return 0;
+	endif
+
+	SetObjProperty(mobile, "MedBoost", points);
+	AP_ModifySkillMod(mobile, MEDITATION, points);
+
+	return 1;
+endprogram
+

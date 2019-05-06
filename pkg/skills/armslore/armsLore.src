@@ -30,8 +30,8 @@ program do_armslore( who )
     SendSysMessage(who, "You can only use this skill on weapons or armor!");
     return;
   endif
-  var pts := CInt(GetAttribute(who, ARMSLORE)) + 15;
-  if(SkillCheck(who,ARMSLORE, -1, pts/3))
+  var pts := CInt(GetAttribute(who, ARMS_LORE)) + 15;
+  if(SkillCheck(who,ARMS_LORE, -1, pts/3))
     var item_max_hp := the_item.maxhp;
     var max_hp := item_max_hp;
     var hp := the_item.hp;

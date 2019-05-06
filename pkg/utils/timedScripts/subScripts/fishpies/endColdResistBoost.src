@@ -1,0 +1,21 @@
+/*
+ * $Id: endColdResistBoost.src 968 2019-04-28 01:23:24Z Yukiko $
+ *
+ */
+
+use uo;
+use os;
+
+include ":attributes:attributes";
+include ":damage:damage";
+
+program TimedScript_endColdResistBoost(params)
+	var mobile := params[1];
+	var points := CInt(GetObjProperty(mobile, "FishColdResistBoost"));
+	points := -1 * points;
+	ModifyResistance(mobile, DMG_COLD, points);
+	EraseObjProperty(mobile, "FishColdResistBoost");
+
+	return 1;
+endprogram
+

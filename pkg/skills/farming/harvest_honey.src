@@ -59,20 +59,20 @@ program harvest_honey (character, beehive)
 			else
 				SetObjProperty(beehive, "#harvested", CInt(already_harvested_amount + 1));
 			endif
-		
+
 			CreateItemInBackpack(character, UOBJ_HONEY, 1);
 			CreateItemInBackpack(character, UOBJ_WAX, 1);
 		endif
 
 		//See if they stir up any bees
-		if (!SkillCheck(character, ANIMALLORE, 50, 250))
+		if (!SkillCheck(character, ANIMAL_LORE, 50, 250))
 			if (RandomInt(4) == 1)
 				CreateItemAtLocation(beehive.x, beehive.y, beehive.z, ITEM_SWARM, 1, character.realm);
 				SendSysMessage(character, "Uh-oh...");
 				return;
 			endif
 		endif
-	
+
 		if (already_harvested_amount >= MAX_PER_HIVE)
 			SendSysMessage(character, "There's nothing left to harvest right now.");
 			return;

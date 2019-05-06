@@ -24,7 +24,7 @@ program use_FletchTool(who, tool)
 	EraseObjProperty(who, "#IsMeditating");
 	EraseObjProperty(who, "#HealTimer");
 
-	var rinfo := sendCraftGump(who, BOWCRAFTFLETCHING);
+	var rinfo := sendCraftGump(who, BOWCRAFT_FLETCHING);
 
 	// OK was pressed, close it on out
 	if(rinfo == 0)
@@ -41,7 +41,7 @@ program use_FletchTool(who, tool)
 	endif
 
 	if(craft_config[Hex(the_objtype)].assemble == 1)
-		CraftAssembly(who, BOWCRAFTFLETCHING, tool, the_objtype, amt);
+		CraftAssembly(who, BOWCRAFT_FLETCHING, tool, the_objtype, amt);
 	else
 		makeBowcraftItems(who, the_objtype, amt, tool);
 	endif

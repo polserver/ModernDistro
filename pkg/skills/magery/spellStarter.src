@@ -98,7 +98,7 @@ program SpellStarter(params)
 			endif
 		endif
 		if ( !AP_ConsumeVital(mobile, VITALID_MANA, manacost) )
-			SendSysMessage(mobile, "You don't have enough mana to cast that spell!");
+			SendSysMessage(mobile, "You don't have enough mana to cast that spell!", color := 33);
 			FailSpell(mobile);
 			return 0;
 		endif

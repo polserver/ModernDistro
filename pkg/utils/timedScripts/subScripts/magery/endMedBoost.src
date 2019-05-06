@@ -1,0 +1,21 @@
+/*
+ * $Id: endMedBoost.src 968 2019-04-28 01:23:24Z Yukiko $
+ *
+ */
+
+use uo;
+use os;
+
+include ":attributes:attributes";
+
+program TimedScript_endMedBoost(params)
+	var mobile := params[1];
+
+	var points := CInt(GetObjProperty(mobile, "MedBoost"));
+	points := -1 * points;
+	AP_ModifySkillMod(mobile, MEDITATION, points);
+	EraseObjProperty(mobile, "MedBoost");
+
+	return 1;
+endprogram
+

@@ -11,9 +11,9 @@ program vengeful_spirit( params )
 	var info := params[2]; // Struct containing additional info about the spell.
 	var spellID := params[3];
 	var cast_on := params[4]; // Target of spell if required.
-	
+
 	var necroskill := Cint(AP_GetSkill(caster, NECROMANCY));
-	var sspeak := Cint(AP_GetSkill(caster, SPIRITSPEAK));
+	var sspeak := Cint(AP_GetSkill(caster, SPIRIT_SPEAK));
 	var int := GetIntelligence(caster);
 
 	var bonus := 0;
@@ -31,7 +31,7 @@ program vengeful_spirit( params )
 	SetObjProperty(spirit, "summoned", 1);
 	PlayObjectCenteredEffectEx( spirit, 0x373A, 1, 15, 9909, 0, 3, 0 );
 	Playsoundeffect(spirit, 535);
-	
+
 	spirit.script := "vengspirit";
 	RestartScript(spirit);
 

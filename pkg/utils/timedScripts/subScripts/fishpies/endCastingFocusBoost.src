@@ -1,0 +1,21 @@
+/*
+ * $Id: endCastingFocusBoost.src 968 2019-04-28 01:23:24Z Yukiko $
+ *
+ */
+
+use uo;
+use os;
+
+include ":attributes:attributes";
+include ":damage:damage";
+
+program TimedScript_endCastingFocusBoost(params)
+	var mobile := params[1];
+	var points := CInt(GetObjProperty(mobile, "FishMeleeDmgBoost"));
+	points := -1 * points;
+	SetObjProperty(mobile, "CastingFocusIncrease", CInt(GetObjProperty(mobile, "CastingFocusIncrease")) - points);
+	EraseObjProperty(mobile, "FishCastingFocusBoost");
+
+	return 1;
+endprogram
+

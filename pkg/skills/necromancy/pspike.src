@@ -14,11 +14,11 @@ program pain_spike( params )
 
 	SendSysMessage(caster, "Select your victim:", 1, 88);
 	var cast_on := Target(caster);
-	
+
 	var dmg := 0;
 
 	var cast_onrs := Cint(AP_GetSkill(caster, RESISTING_SPELLS));
-	var sspeak := Cint(AP_GetSkill(caster, SPIRITSPEAK));
+	var sspeak := Cint(AP_GetSkill(caster, SPIRIT_SPEAK));
 
 	if(cast_on.isA(POLCLASS_NPC))
 		dmg :=  ((sspeak - cast_onrs) / 10) + 30;
@@ -33,7 +33,7 @@ program pain_spike( params )
 		SendSysMessage(caster, "You have to wait until the enemy heals some of the damage.",3,40);
 		return 0;
 	endif
-	
+
 	SetObjProperty(caster, "#pspike", 1);
 	PlaySoundEffect(cast_on, 0x210);
 	PlayObjectCenteredEffectEx( cast_on, 0x37C4, 1, 8, 9916, 39, 0, 3 );
@@ -42,7 +42,7 @@ program pain_spike( params )
 	ApplySpellDamageEX(cast_on, dmg, DMG_PHYSICAL, caster, circle);
 	Detach();
 	sleep(3);
-	
+
 	if(!cast_on.dead && cast_on.ip)
 		HealDamage(cast_on, dmg/4);
 		PrintTextAbove(cast_on, "+" + Cint(dmg/4),3,63);
@@ -50,6 +50,6 @@ program pain_spike( params )
 		HealDamage(cast_on, dmg/3);
 		PrintTextAbove(cast_on, "+" + Cint(dmg/3),3,63);
 	endif
-	
+
 	EraseObjProperty(caster, "#pspike");
 endprogram

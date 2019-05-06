@@ -18,6 +18,8 @@ program eat(who, food)
 		SendSysMessage(who, "Someone else is already using that.");
 		return 0;
 	endif
+	var magiceffect := {};
+	magiceffect := GetObjTypeArray( food.objtype, "MagicEffect" );
 
 	var cfg_elem := GetItemDescInfo(food.objtype);
 	var themsg;
@@ -93,6 +95,16 @@ program eat(who, food)
 	AP_SetVitalRegenRateMod(who, "Hunger", regen);
 
 	SendSysMessage(who, themsg);
+
+//	Print(CStr(modinfo.size()));
+//	SendSysMessage(who, modinfo[1] + " " + modinfo[2] + " " + modinfo[3] + " " + modinfo[4], color := 88);
+	if(magiceffect.size() > 0)
+		case(magiceffect[1])
+			"Timer":	TS_StartTimer(who, magiceffect[2], CInt(magiceffect[4]), CInt(magiceffect[3]));
+			default:
+		endcase
+	endif
+
 	if ( poison > 0 )
 		TS_StartTimer(who, "defaultPoison", 120, poison, who);
 	endif
