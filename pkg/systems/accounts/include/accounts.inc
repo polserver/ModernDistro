@@ -12,7 +12,7 @@ include ":accounts:settings";
 CONST ACCT_MAX_CHARACTERS	:= 6;
 
 /*
- * CreateNewAccount(username, password, cmdlevel, expansion, email)
+ * ACCT_CreateNewAccount(username, password, cmdlevel, expansion, email)
  *
  * Purpose
  * Used to create a new account and set appropriate settings on it.
@@ -29,7 +29,7 @@ CONST ACCT_MAX_CHARACTERS	:= 6;
  * Returns an account object on success.
  *
  */
-function CreateNewAccount(username, password, cmdlevel:=0, expansion:="ML", email:="")
+function ACCT_CreateNewAccount(username, password, cmdlevel:=0, expansion:="ML", email:="")
 	var account := CreateAccount(username, password, 1);
 	if ( account.errortext )
 		return account;
@@ -241,7 +241,7 @@ endfunction
 
 
 //////////////////////////////////////////////////////
-// FindValidPlayer(player)
+// ACCT_FindValidPlayer(player)
 //
 // Purpose: To validate that the player named actually
 //          exists on an account.
@@ -256,11 +256,12 @@ endfunction
 
 
 
-function FindValidPlayer(player)
-  var playerserial := 0;
+function ACCT_FindValidPlayer(player)
+
+	var playerserial := 0;
 	var acctlist := ListAccounts();
-  var i := 1;
-  
+	var i := 1;
+
 	// Stuff for verifying that the player exists
 	foreach acctnam in acctlist
 		var acctref := FindAccount(acctnam);
@@ -268,7 +269,7 @@ function FindValidPlayer(player)
 			var playername := CStr(acctref.GetCharacter(i).name);
 			if(!playername)
 				continue;
-			endif 
+			endif
 			if ( Lower(playername) == Lower(player) )
 				playerserial := acctref.GetCharacter(i).serial;
 				break;
@@ -277,5 +278,5 @@ function FindValidPlayer(player)
 	endforeach
 
   return playerserial;
-  
+
 endfunction

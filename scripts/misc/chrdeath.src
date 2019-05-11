@@ -16,7 +16,7 @@ var stackstuff := 0;
 
 program chrdeath(corpse, ghost)
 //  var marker, num;
-    AdjustVirtue(ghost, "Sacrifice", 1, 75);
+    VS_AdjustVirtue(ghost, "Sacrifice", 1, 75);
 	EraseObjProperty(ghost, "IsMeditating");
 	EraseObjProperty(ghost, "Protection");
 	ghost.SetPoisoned(0);

@@ -279,14 +279,14 @@ endfunction
 
 function getVirtueValues(who)
 var virtues := {"Valor", "Honor", "Compassion", "Justice", "Honesty", "Spirituality", "Sacrifice", "Humility"};
-	valorAmount := GetVirtueAmount(who, "Valor");
-	honorAmount := GetVirtueAmount(who, "Honor");
-	compassionAmount := GetVirtueAmount(who, "Compassion");
-	justiceAmount := GetVirtueAmount(who, "Justice");
-	honestyAmount := GetVirtueAmount(who, "Honesty");
-	spiritualityAmount := GetVirtueAmount(who, "Spirituality");
-	sacrificeAmount := GetVirtueAmount(who, "Sacrifice");
-	humilityAmount := GetVirtueAmount(who, "Humility");
+	valorAmount := VS_GetVirtueAmount(who, "Valor");
+	honorAmount := VS_GetVirtueAmount(who, "Honor");
+	compassionAmount := VS_GetVirtueAmount(who, "Compassion");
+	justiceAmount := VS_GetVirtueAmount(who, "Justice");
+	honestyAmount := VS_GetVirtueAmount(who, "Honesty");
+	spiritualityAmount := VS_GetVirtueAmount(who, "Spirituality");
+	sacrificeAmount := VS_GetVirtueAmount(who, "Sacrifice");
+	humilityAmount := VS_GetVirtueAmount(who, "Humility");
 endfunction
 
 

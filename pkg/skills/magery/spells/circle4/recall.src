@@ -104,7 +104,7 @@ program recall(parms)
   endif
 	var monsterlist := ListHostiles(caster, 20);
 	if ( (monsterlist[1] != error) and (monsterlist[1] != {} ) )
-		AdjustVirtue(caster, "Valor", -1, 100);
+		VS_AdjustVirtue(caster, "Valor", -1, 100);
 	endif
 	MoveObjectToLocation( caster, tox, toy, toz );
 

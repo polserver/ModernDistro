@@ -34,7 +34,7 @@ var virtueamt := CInt(settings.VirtueAdjustAmount);
 
 ///////////////////////////////
 //
-// GetMantra(virtue_name)
+// VS_GetMantra(virtue_name)
 //
 // Purpose: Get the mantra based on the virtue.
 //
@@ -50,7 +50,7 @@ var virtueamt := CInt(settings.VirtueAdjustAmount);
 //
 ///////////////////////////////
 
-function GetMantra(virtue_name)
+function VS_GetMantra(virtue_name)
 
 	foreach virtue in virtues
 		if(virtue_name == virtue)
@@ -63,7 +63,9 @@ endfunction
 
 ///////////////////////////////
 //
-// AdjustVirtue(who, virtue, amt := 0, prob := 102)
+// VS_AdjustVirtue(who, virtue, amt := 0, prob := 102)
+//
+// Purpose: Adds the amount sent in amt to a player's virtuescrore.
 //
 // who - ref to a mobile
 //
@@ -79,15 +81,13 @@ endfunction
 //        If the calling programme specifies a probability it also
 //        MUST specify an amount for amt.
 //
-// Purpose: Adds the amount sent in amt to a player's virtuescrore.
-//
 // returns 1 if points are awarded, 0 if no points awarded.
 //         It should always return a 1 unless prob is used. In which
 //         case, if the percentile dice roll fails it will return a 0.
 //
 ///////////////////////////////
 
-function AdjustVirtue(who, virtue, amt := 0, prob := 102)
+function VS_AdjustVirtue(who, virtue, amt := 0, prob := 102)
 
 	virtue := Lower(virtue);
 
@@ -96,11 +96,11 @@ function AdjustVirtue(who, virtue, amt := 0, prob := 102)
 		if(amt.Find("d",2))
 			amt := RandomDiceRoll(amt);
 			if(amt.errortext)
-				SysLog("The D-String string sent to AdjustVirtue() in :virtue:virtue.inc is improperly formatted.\n" + amt.errortext);
+				SysLog("The D-String string sent to VS_AdjustVirtue() in :virtue:virtue.inc is improperly formatted.\n" + amt.errortext);
 				return 0;
 			endif
 		else
-			SysLog("The value for 'amt' sent to AdjustVirtue() in :virtue:virtue.inc was a string but not properly formatted for RandomDiceRoll().");
+			SysLog("The value for 'amt' sent to VS_AdjustVirtue() in :virtue:virtue.inc was a string but not properly formatted for RandomDiceRoll().");
 		endif
 	endif
 
@@ -113,7 +113,7 @@ function AdjustVirtue(who, virtue, amt := 0, prob := 102)
 		amt := CInt(virtueamt);
 	endif
 
-	var virtuescore := GetVirtueAmount(who, virtue);
+	var virtuescore := VS_GetVirtueAmount(who, virtue);
 	if (!virtuescore)
 		virtuescore := 0;
 	endif
@@ -125,14 +125,14 @@ function AdjustVirtue(who, virtue, amt := 0, prob := 102)
 		virtuescore := (-1 * virtuemax);
 	endif
 
-	SetVirtueAmount(who, virtue, virtuescore);
+	VS_SetVirtueAmount(who, virtue, virtuescore);
 	return 1;
 
 endfunction
 
 ///////////////////////////////
 //
-// GetVirtueAmount(who, virtue)
+// VS_GetVirtueAmount(who, virtue)
 //
 // who - ref to a mobile
 //
@@ -144,7 +144,7 @@ endfunction
 // returns the integer value attached to the CProp "Virtue_" + <virtue>
 ///////////////////////////////
 
-function GetVirtueAmount(who, virtue)
+function VS_GetVirtueAmount(who, virtue)
 
   return CInt(GetObjProperty(who, "Virtue_" + VS_Capitalize(virtue)));
 
@@ -152,7 +152,7 @@ endfunction
 
 ///////////////////////////////
 //
-// SetVirtueAmount(who, virtue)
+// VS_SetVirtueAmount(who, virtue)
 //
 // who - ref to a mobile
 //
@@ -164,7 +164,7 @@ endfunction
 // returns the integer value attached to the CProp "Virtue_" + <virtue>
 ///////////////////////////////
 
-function SetVirtueAmount(who, virtue, virtuescore)
+function VS_SetVirtueAmount(who, virtue, virtuescore)
 
   return CInt(SetObjProperty(who, "Virtue_" + VS_Capitalize(virtue), virtuescore));
 

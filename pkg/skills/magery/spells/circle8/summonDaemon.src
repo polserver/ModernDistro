@@ -22,7 +22,7 @@ program summon_daemon( parms )
 		return 0;
 	endif
 	if (caster.acctname)
-		AdjustVirtue(caster, "Spirituality", -1, 100);
+		VS_AdjustVirtue(caster, "Spirituality", -1, 100);
 	endif
 	summon_creature( caster, 8, "summoneddaemon", cast_on, 70, "daemon"  );
 endprogram

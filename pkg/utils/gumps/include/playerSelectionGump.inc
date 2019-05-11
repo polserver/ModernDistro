@@ -12,7 +12,7 @@ function SelectCharacter( mobile, cmdlevel:=0 )
 
 	GFResizePic( gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 280, 25 );
 	GFResizePic( gump, 15, 45, GFGetCfgConst( "Defaults", "ForeGround" ), 280, 320 );
- 
+
         GFAddAlphaRegion( gump, 0, 0, 310, 380 );
 
 	GFTextLine( gump, 30, 15, 1720, "Select Player" );
@@ -60,7 +60,7 @@ endfunction
 
 function GetCharactersList( cmdlevel );
 
-	var the_list := dictionary; // Used to store names in ABC order
+	var the_list := dictionary; // Used to store names in alphabetical order
  	foreach acct_name in ( ListAccounts() )
 		var account := FindAccount( acct_name );
 		var i := 1;

@@ -29,7 +29,7 @@ program cast_magicarrow( parms )
 	var max_damage := GetConfigInt(info.spell_config, "MaxBaseDamage");
 	var base_damage := min_damage + (CDbl(RandomInt(CInt((max_damage - min_damage) * 10)) + 1) / 10);
 	var damage := MS_GetSpellDamage(caster, cast_on, base_damage);
-	ApplyDamageEX(cast_on, damage, info.damage_type, caster);
+	ApplySpellDamageEX(cast_on, damage, info.damage_type, caster);
 
 	SkillCheck(caster, EVALUATING_INTELLIGENCE, -1);
 

@@ -19,7 +19,7 @@ program cast_incognito(parms)
 	// Duration: ((Eval / 5) + 1) * 6
 	var duration := AP_GetSkill(caster, MAGERY) * 1.2;
 	TS_StartTimer(caster, "Incognito", duration, 0, caster);
-	AdjustVirtue(caster, "Honesty", -1, 100);
+	VS_AdjustVirtue(caster, "Honesty", -1, 100);
 
 	return 1;
 endprogram

@@ -43,7 +43,7 @@ function AP_SetVitalRegenRateMod( mobile, vital_name, number )
 	endif
 
 	AP_SaveVitalRegenRateProp( mobile, regen_prop );
- 
+
 	return 1;
 endfunction
 
@@ -70,17 +70,17 @@ function AP_GetVitalRegenRateMod( mobile, vital_name )
 endfunction
 
 /*
- * AP_GetVitalRegenRateMod(mobile, vital_name)
+ * AP_LoadVitalRegenRateProp( mobile )
  *
  * Purpose
- * Gets the regeneration rate modifier for a vital.
+ * Gets the regeneration rates dictionary from a character.
  *
  * Parameters
  * mobile:	Mobile reference to get the regen information from.
- * vital_name:	Name of the vital to get the regeneration rate for.
  *
  * Return value
- * Returns an integer.
+ * Returns a dictionary of regenerations rates or
+ * if none set returns an empty dictionary.
  *
  */
 function AP_LoadVitalRegenRateProp( mobile )

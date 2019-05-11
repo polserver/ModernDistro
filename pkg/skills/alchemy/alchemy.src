@@ -93,14 +93,14 @@ function makeAlchemyItems(who, what, amt, tool)
 					continue;
 				endif
 				case(theitem.objtype)
-					0x2DC04:	AdjustVirtue(who, "honor", -1, prob := 25);
-								AdjustVirtue(who, "compassion", -1, 25);
-					0x2DC05:	AdjustVirtue(who, "honor", -1, 40);
-								AdjustVirtue(who, "compassion", -1, 40);
-					0x2DC06:	AdjustVirtue(who, "honor", -1, 55);
-								AdjustVirtue(who, "compassion", -1, 55);
-					0x2DC07:	AdjustVirtue(who, "honor", -1, 70);
-								AdjustVirtue(who, "compassion", -1, 70);
+					0x2DC04:	VS_AdjustVirtue(who, "honor", -1, prob := 25);
+								VS_AdjustVirtue(who, "compassion", -1, 25);
+					0x2DC05:	VS_AdjustVirtue(who, "honor", -1, 40);
+								VS_AdjustVirtue(who, "compassion", -1, 40);
+					0x2DC06:	VS_AdjustVirtue(who, "honor", -1, 55);
+								VS_AdjustVirtue(who, "compassion", -1, 55);
+					0x2DC07:	VS_AdjustVirtue(who, "honor", -1, 70);
+								VS_AdjustVirtue(who, "compassion", -1, 70);
 				endcase
 			else
 				num := CInt(randomint(material)/2) + 1;

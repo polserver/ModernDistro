@@ -63,7 +63,7 @@ program herd(who)
                 ev.+type := EVID_HERDING;
                 ev.+data := holder;
                 SendEvent(npc, ev);
-				AdjustVirtue(who, "humility", 1, 50);
+				VS_AdjustVirtue(who, "humility", 1, 50);
         else
                 SendSysMessage(who, "You cant seem to convince " + npc.name + " to move");
                 return;

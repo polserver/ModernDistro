@@ -75,7 +75,7 @@ program cast_polymorph( parms )
 		SetObjProperty(caster, "MyGraphic", caster.graphic);
 		SetObjProperty(caster, "Polymorphed", 1);
 		caster.graphic := the_creature;
-		AdjustVirtue(caster, "Honesty", -1, 50);
+		VS_AdjustVirtue(caster, "Honesty", -1, 50);
 	else
 		caster.graphic := GetObjProperty(caster, "MyGraphic");
 		EraseObjProperty(caster, "MyGraphic");

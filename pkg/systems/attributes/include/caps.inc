@@ -4,7 +4,17 @@
         2010-07-06
 */
 use uo;
-
+/*
+ * AP_GetSkillsCap()
+ *
+ * Retrieves the default cap for skills.
+ *
+ * Parameters
+ * None
+ *
+ * Returns
+ * The cap as an integer.
+ */
 function AP_GetSkillsCap()
 
 	var cfg_elem := AP_GetSettingsCfgElem( "Skills" );
@@ -13,27 +23,27 @@ function AP_GetSkillsCap()
 	return CInt( cap_val );
 endfunction
 
-function NewSkillCaps( who )
+function AP_NewSkillCaps( who )
 
-         var cap_array := {},
-             attributes := AP_ListAttributesByType( "Skill" );
+	var cap_array := {},
+	attributes := AP_ListAttributesByType( "Skill" );
 
-         foreach skill in attributes
-                  var skill_id := AP_AttributeNameToSkillId( skill );
-		  cap_array[skill_id+1] := AP_GetSkillsCap();
-	 endforeach
-  
-         SetObjProperty( who, "SkillCaps", cap_array );
+	foreach skill in attributes
+		var skill_id := AP_AttributeNameToSkillId( skill );
+		cap_array[skill_id + 1] := AP_GetSkillsCap();
+	endforeach
 
-         return cap_array;
+	SetObjProperty( who, "SkillCaps", cap_array );
+
+	return cap_array;
 endfunction
 
 function AP_GetSkillCaps( who )
 
 	var caps := GetObjProperty( who, "SkillCaps" );
-        if( !caps )
-                caps := NewSkillCaps( who );
-        endif
+	if( !caps )
+		caps := AP_NewSkillCaps( who );
+	endif
 
 	return caps;
 endfunction
@@ -41,27 +51,27 @@ endfunction
 function AP_GetSkillCap( who, skill_name )
 
 	var caps := AP_GetSkillCaps( who ),
-            skill_id := AP_AttributeNameToSkillId( skill_name );
+	skill_id := AP_AttributeNameToSkillId( skill_name );
 
-	return CInt( caps[skill_id+1] );
+	return CInt( caps[skill_id + 1] );
 endfunction
 
 function AP_SetSkillCap( who, skill_name, points )
 
 	var caps := AP_GetSkillCaps( who ),
-            skill_id := AP_AttributeNameToSkillId( skill_name );
+	skill_id := AP_AttributeNameToSkillId( skill_name );
 
-        caps[skill_id+1] := CInt( points );
-        
-        var skill_cap := caps[skill_id+1];
-        if( skill_cap > 150 )
-                caps[skill_id+1] := 150;
-        elseif( skill_cap <= 0 )
-                caps[skill_id+1] := 0;
-        endif
+	caps[skill_id + 1] := CInt( points );
 
-        SetObjProperty( who, "SkillCaps", caps );
-        
+	var skill_cap := caps[skill_id+1];
+	if( skill_cap > 150 )
+		caps[skill_id + 1] := 150;
+	elseif( skill_cap <= 0 )
+		caps[skill_id + 1] := 0;
+	endif
+
+	SetObjProperty( who, "SkillCaps", caps );
+
 	return 1;
 endfunction
 

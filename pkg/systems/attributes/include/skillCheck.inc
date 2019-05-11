@@ -30,7 +30,7 @@ const ADV_DISABLE	:= 0x4; // 4 - because the default is ADV_ALL.
  * Parameters
  * mobile:		Mobile reference to do the skill check for.
  * attribute_name:	Name of the attribute to perform the check on.
- * difficulty:  
+ * difficulty:
  * award_diff:		Advanced as if the difficulty were this value - defaults to difficulty.
  * advance_flags:	Controls the turning on/off of stat and skill advancements for the check.
  *
@@ -100,7 +100,7 @@ function SkillCheck( mobile, attrib_name, difficulty, award_diff:="", advance_fl
   if( skill_check_result < 0)
     skill_check_result := 0;
   endif
-  
+
 	return skill_check_result;
 endfunction
 
@@ -122,7 +122,7 @@ function CalcSuccessPercent( mobile, attrib_name, difficulty, effective_skill )
   min_chance := CInt( sc_settings.MinChance ),
   max_chance := CInt( sc_settings.MaxChance ),
   percent := CInt( 50.0 + (( effective_skill - difficulty ) * 1.5 )); // For every 5 points difference there will be a +-10 for percent
-            
+
 	if( difficulty == -1 )
 		var neg1chance := CInt( sc_settings.MaxNeg1Chance ),
 		percent := CInt( neg1chance * effective_skill / 150 );
@@ -137,6 +137,21 @@ function CalcSuccessPercent( mobile, attrib_name, difficulty, effective_skill )
 	return percent;
 endfunction
 
+/*
+ * DifficultyTooEasy( effective_skill, difficulty )
+ *
+ * Purpose
+ * Determines if the efective_skill versus the difficulty
+ * is too easy to accomplish the task.
+ *
+ * Parameters
+ * effective_skill - The effective skill of the character.
+ * difficulty - The difficulty of the task.
+ *
+ * Return value
+ * Returns 0 if not too easy. Returns 1 if it is too easy.
+ *
+ */
 function DifficultyTooEasy( effective_skill, difficulty )
 
 	var sc_settings := AP_GetSettingsCfgElem( "Skills" );
@@ -149,8 +164,28 @@ function DifficultyTooEasy( effective_skill, difficulty )
 	return 1;
 endfunction
 
+/*
+ * DifficultyTooHard( effective_skill, difficulty )
+ *
+ * Purpose
+ * Determines if the efective_skill versus the difficulty
+ * is too hard to accomplish the task.
+ *
+ * Parameters
+ * effective_skill - The effective skill of the character.
+ * difficulty - The difficulty of the task.
+ *
+ * Return value
+ * Returns 0 if not too hard. Returns 1 if it is too hard.
+ *
+ */
 function DifficultyTooHard(effective_skill, difficulty)
 	var settings := AP_GetSettingsCfgElem("Skills");
-	return ( (effective_skill + CDbl(settings.TooHard)) < difficulty );
+	var max_diff := difficulty + CDbl( sc_settings.TooHard );
+	if( max_diff <= effective_skill )
+		return 0;
+	endif
+
+	return 1;
 endfunction
 

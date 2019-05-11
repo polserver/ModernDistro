@@ -14,7 +14,7 @@ include ":accounts:settings";
  * 2 - password (string)
  * 3 - default command level (integer)
  * 4 - expansion (string)
- * 5 - email ( string) 
+ * 5 - email ( string)
  * 6 - creation password (string) - if set in settings.cfg
  *
  */
@@ -27,7 +27,7 @@ program AuxService(connection)
 			connection.Transmit(report);
 			return 0;
 		endif
-	
+
 		var event := Wait_For_Event(5);
 		if ( event ) // New account to be made?
 			var username := event[1];
@@ -36,7 +36,7 @@ program AuxService(connection)
 			var expansion := event[4];
 			var email := event[5];
 			var admin_pw := event[6];
-			
+
 			if ( settings.AuxWebPassword )
 				if ( settings.AuxWebPassword != admin_pw )
 					report := array{"Error", "Invalid administration password."};
@@ -44,16 +44,16 @@ program AuxService(connection)
 					return 0;
 				endif
 			endif
-			
-			var result := CreateNewAccount(username, password, cmd_lvl, expansion, email);
+
+			var result := ACCT_CreateNewAccount(username, password, cmd_lvl, expansion, email);
 			if ( result.errortext )
 				report := array{"Error", result.errortext};
 			else
 				report := array{"Success", "The acount was created successfully."};
 			endif
-			
+
 			connection.Transmit(report);
-			
+
 			return 1;
 		else
 			report := array{"Error", "Connection timed out."};

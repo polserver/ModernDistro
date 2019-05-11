@@ -69,7 +69,7 @@ program command_newAccount(who)
 		var password := GFExtractData(input, PASS_TEXT_POS);
 		var cmd_lvl := CInt(GFExtractData(input, CMD_TEXT_POS));
 		var email := GFExtractData(input, EMAIL_TEXT_POS);
-		
+
 		var expansion;
 		foreach key in ( input.keys )
 			if ( key >= EXPANSION_START )
@@ -78,13 +78,13 @@ program command_newAccount(who)
 			endif
 			SleepMS(2);
 		endforeach
-		
-		var account := CreateNewAccount(acct_name, password, cmd_lvl, expansion, email);
+
+		var account := ACCT_CreateNewAccount(acct_name, password, cmd_lvl, expansion, email);
 		if ( account.errortext )
 			GumpPrompt(who, "Error Creating Account [P] "+account.errortext);
 			return 0;
 		else
-			GumpPrompt(who, "Account created successfully.");	
+			GumpPrompt(who, "Account created successfully.");
 			return 1;
 		endif
 	endif

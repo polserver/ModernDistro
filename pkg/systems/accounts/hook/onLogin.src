@@ -50,25 +50,25 @@ exported function LoginHook(who, byref packet)
 	var theft_level := AcctHackChecks(username, password);
 	case ( theft_level )
 		ACCT_NOT_EXIST:	 // Account doesn't yet exist.
-			break; 
+			break;
 		ACCT_LOGIN_OKAY: // Account credentials are valid.
 			return 0;
 			break;
 		ACCT_LOGIN_FAIL: // Account credentials are invalid.
-			return 0; 
+			return 0;
 			break;
 		ACCT_LOGIN_HACK: // Too many invalid logins. Leave user hanging.
 			return 1;
 			break;
 	endcase
-	
+
 	var settings := ACCT_GetSettingsCfgElem("Settings");
 	if ( !settings.AllowAutoAccounts )
 		// Automatic account creation is disabled.
 		return 0;
 	endif
-	
-	var account := CreateNewAccount(username, password, 0, settings.DefaultExpansion);
+
+	var account := ACCT_CreateNewAccount(username, password, 0, settings.DefaultExpansion);
 	// In theory this should only return an error saying "Invalid parameter type".
 	// Should never return "Account already exists" because we already looked for the
 	// account and let pol handle it. And when it does return "Invalid parameter type"
@@ -78,7 +78,7 @@ exported function LoginHook(who, byref packet)
 		SysLog("CreateAccount() Error: "+account.errortext);
 		return 0;
 	endif
-		
+
 	SysLog( "AutoAccount Created: "+username );
 
 	return 0;
@@ -114,13 +114,13 @@ function AcctHackChecks(username, password)
 		 		// Leave the user hanging at login for the next 10 minutes.
 		 		account.SetProp("#FailedLogin", {failed_login[1]+1, POLCore().systime+600});
 		  		return ACCT_LOGIN_HACK; // Leave user hanging.
-		 	
+
 		 	elseif ( failed_login[1] >= 5 && ( failed_login[2] << POLCore().systime ) )
 		  		// User attempted to login with the wrong password after 10 minutes.
 		 		// Reset user's wait time.
 		 		account.EraseProp("#FailedLogin");
 		  		return ACCT_LOGIN_FAIL; // Let pol tell the user it's an incorrect password.
-		 	
+
 		 	elseif ( failed_login[1] << 5 )
 		 		// Let pol tell user it's an incorrect password.
 		  		account.SetProp("#FailedLogin", {failed_login[1]+1, POLCore().systime+10});

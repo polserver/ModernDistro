@@ -87,64 +87,64 @@ endfunction
 
 
 /////////////////////////////////////////////////////////////
-// Yes/No with definable prompt and responses
+// Yes/No with definable prompt and responses.
 /////////////////////////////////////////////////////////////
 function yesno_ex(who, prompt:="", yestext:="Yes", notext:="No")
 	var yesnolayout :=
 	{
 		"page 0",
 		"noclose",
-		"resizepic 10 10 3600 300 140"	
+		"resizepic 10 10 3600 300 140"
 	};
 	var yesnodata :=	{};
 	yesnodata.append(prompt);
 	yesnolayout.append("text 30 25 500 " + (len(yesnodata)-1));
-	
+
 	yesnolayout.append("gumppic 70 50 96");
-	
+
 	yesnolayout.append("button 30 75 2103 2104 1 0 1");
 	yesnodata.append(yestext);
 	yesnolayout.append("text 45 70 500 " + (len(yesnodata)-1));
-	
+
 	yesnolayout.append("button 30 105 2103 2104 1 0 0");
 	yesnodata.append(notext);
-	yesnolayout.append("text 45 100 500 " + (len(yesnodata)-1));	
-	
+	yesnolayout.append("text 45 100 500 " + (len(yesnodata)-1));
+
 	var input := senddialoggump(who, yesnolayout, yesnodata);
-	
-	return input[0];	
+
+	return input[0];
 endfunction
 
 
-/* 
-* YesNo Gump by Kinetix 
-* Version 2.0 
-* This new gump will actually extend itself based on the length of your prompt text, which means 
-*  the text/gump overlap bug is gone. 
-*/ 
-use uo; 
-use util; 
+/*
+* YesNo Gump by Kinetix
+* Version 2.0
+* This new gump will actually extend itself based on the length of your prompt text, which means
+*  the text/gump overlap bug is gone.
+*/
+use uo;
+use util;
 
-function YesNoVar(me, prompt, color := "#FFFFFF") 
-  var lenny := cint(len(prompt) * 2)+160; 
-  if(lenny < 180) lenny := 180; endif 
-  var layout := array( 
-     "nodispose", 
-     "page 0", 
-     "resizepic 30 30 5054 "+ lenny +" 110", 
-     "gumppictiled 41 41 "+ (lenny - 22) +" 88 2624", 
-     "checkertrans 40 40 "+ (lenny - 20) +" 90", 
-     "htmlgump 40 45 "+ (lenny - 19) +" 59 0 0 0", 
-     "button 50 102 4023 4025 1 0 1", 
-     "button "+ (lenny - 20) +" 102 4017 4019 1 0 0" 
-  ); 
-  var data := array("<basefont color=\""+ color +"\"><center>"+ prompt +"</center></basefont"); 
-  var res := SendDialogGump( me, layout, data ); 
-  if (res) 
-     return 1; 
-  else 
-     return 0; 
-  endif 
+function YesNoVar(me, prompt, color := "#FFFFFF")
+  var lenny := cint(len(prompt) * 2)+160;
+  if(lenny < 180) lenny := 180; endif
+  var layout := array(
+     "nodispose",
+     "page 0",
+     "resizepic 30 30 5054 "+ lenny +" 110",
+     "gumppictiled 41 41 "+ (lenny - 22) +" 88 2624",
+     "checkertrans 40 40 "+ (lenny - 20) +" 90",
+     "htmlgump 40 45 "+ (lenny - 19) +" 59 0 0 0",
+     "button 50 102 4023 4025 1 0 1",
+     "button "+ (lenny - 20) +" 102 4017 4019 1 0 0"
+  );
+  var data := array("<basefont color=\""+ color +"\"><center>"+ prompt +"</center></basefont");
+  var res := SendDialogGump( me, layout, data );
+  if (res)
+     return 1;
+  else
+     return 0;
+  endif
 endfunction
 
 function packPromptToArray(prompt)
@@ -155,7 +155,7 @@ function packPromptToArray(prompt)
   for (i:=1; i<=MAX_YESNO_LINES; i:=i+1)
     theArray[i] := " ";
   endfor
-  
+
   i := 0;
 
   while ((len(theString) > 0) && (i <= MAX_YESNO_LINES))
@@ -176,20 +176,20 @@ function StripSubstring(byref theString, theSize)
     theString := "";
     return subString;
   endif
-  
+
   while ((theString[pos] != " ") && (pos > 1))
     pos := pos - 1;
   endwhile
-  
+
   if (pos == 1)
     pos := theSize;
   endif
-  
+
   subString := theString[pos+1, len(theString)];
   newString := theString[1,pos];
-  
+
   theString := subString;
-  
-  return newString; 
+
+  return newString;
 
 endfunction

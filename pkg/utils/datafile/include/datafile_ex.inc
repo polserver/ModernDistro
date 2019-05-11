@@ -88,7 +88,7 @@ function DataFileToConfig(data_file, cfg_path)
 	if ( Lower(TypeOf(cfg_path)) != "string" )
 		return error{"errortext":="Argument 'cfg_path' must be a string."};
 	endif
-	
+
 	if ( data_file.errortext )
 		return data_file;
 	endif
@@ -97,11 +97,11 @@ function DataFileToConfig(data_file, cfg_path)
 		var df_elem_ref := DFFindElement(data_file, df_elem_name);
 		var elem_info := array{};
 		var prop_line := struct{"name", "value"};
-		
+
 		foreach prop_name in ( DFGetElemProps(df_elem_ref) )
 			prop_line.name := prop_name;
 			var value := DFGetProp(df_elem_ref, prop_name);
-			
+
 			// Basic types can be stored just fine
 			// More advanced (arrays, structs, dicts, etc.) must be packed.
 			case ( Lower(TypeOf(value)) )
@@ -111,16 +111,16 @@ function DataFileToConfig(data_file, cfg_path)
 					break;
 				default:
 					value := Pack(value);
-			endcase				
-			
+			endcase
+
 			prop_line.value := value;
-			
+
 			SleepMS(2);
 		endforeach
-		
+
 		AppendConfigFileElem(cfg_path, "Elem", df_elem_name, elem_info);
 		SleepMS(2);
 	endforeach
-	
+
 	return 1;
 endfunction

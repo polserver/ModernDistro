@@ -19,8 +19,7 @@ program TimedScript_hitChanceBoost(params)
 	var timers := TS_GetTimerNames(mobile);
 	foreach timer in timers
 		if(timer[1,4] == "Fish")
-			Start_Script(":timedScripts/subScripts/fishpies/end" + timer, {mobile});
-			Sleepms(50);
+			Run_Script(":timedScripts/subScripts/fishpies/end" + timer, {mobile});
 			break;
 		endif
 	endforeach

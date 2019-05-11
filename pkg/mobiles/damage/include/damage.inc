@@ -160,7 +160,6 @@ function ApplySpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circle 
 	if ( settings.UseMRInAllSpells )
 	    amount := Resisted(circle, source, mobile, amount);
 	endif
-
 	// Check to see if we will take standard resistances into account against spell damage.
 	settings := DMG_GetSettingsCfgElem("Settings");
 	if ( settings.UseDamageMembers )
@@ -317,9 +316,6 @@ function CalcDamageAmount(mobile, amount, type)
 	endif
 
 	var resistance := CDbl(GetResistance(mobile, type));
-// Broadcast("mobile = " + mobile.name);
-// Broadcast("resistance is = " + CStr(resistance));
-// Broadcast("damage before resist = " + CStr(amount));
 	if ( resistance == error )
 		// Do nothing, there is no resistance.
 	else
@@ -332,7 +328,6 @@ function CalcDamageAmount(mobile, amount, type)
 		// [ Resistance = 47.3 so Resisted = 23.65, Amount = 26.35 ]
 		var resistd := (resistance * 0.010) * CDbl(amount);
 		amount := amount - resistd;
-// Broadcast("damage after resist = " + CStr(amount));
 	endif
 
 	return CInt(amount);

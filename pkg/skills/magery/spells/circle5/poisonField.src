@@ -63,8 +63,8 @@ program poisonfield( parms )
 
 		SleepMS(2);
 	endforeach
-	AdjustVirtue(caster, "honor", -1, 100);
-	AdjustVirtue(caster, "compassion", -1, 100);
+	VS_AdjustVirtue(caster, "honor", -1, 100);
+	VS_AdjustVirtue(caster, "compassion", -1, 100);
 
 	return 1;
 endprogram

@@ -19,15 +19,13 @@ program TimedScript_spellDmgBoost(params)
 	var timers := TS_GetTimerNames(mobile);
 	foreach timer in timers
 		if(timer[1,4] == "Fish")
-			Start_Script(":timedScripts/subScripts/fishpies/end" + timer, {mobile});
-			Sleepms(50);
+			Run_Script(":timedScripts/subScripts/fishpies/end" + timer, {mobile});
 			break;
 		endif
 	endforeach
 
 	SetObjProperty(mobile, "FishSpellDmgBoost", points);
-	SetObjProperty(mobile, "SpellDamageIncrease", CInt(GetObjProperty(mobile, "SpellDamageIncrease")) + points);
-	//mobile.spell_damage_increase_mod := mobile.spell_damage_increase_mod + points;
+	mobile.spell_damage_increase_mod := mobile.spell_damage_increase_mod + points;
 
 	return 1;
 endprogram

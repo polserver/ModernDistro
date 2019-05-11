@@ -391,7 +391,7 @@ function resurrect_pc(who, patient, counter)
 			if(SkillCheck(who, HEALING, healamt, 100))
 				AwardPoints(who, SKILLID_HEALING, 400);
 				if(do_res(who, patient))
-				AdjustVirtue(who, "Compassion", 1, 100);
+				VS_AdjustVirtue(who, "Compassion", 1, 100);
 				var karma := CInt( GetObjProperty(who, "Karma") );
 					if (!karma)
 						karma := 0;

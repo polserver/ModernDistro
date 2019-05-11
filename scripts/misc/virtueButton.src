@@ -8,10 +8,10 @@ include ":gumps:gumps";
 include ":virtue:virtue";
 
 		program gump_virtue_gump(who)
-		
+
 			var params := {who};
 			Start_Script(":virtue:virtueGump", params);
-			
+
 		endprogram
 //	var virtues :=	{"Valor", "Honor", "Compassion", "Justice", "Honesty", "Spirituality", "Sacrifice", "Humility"};
 
@@ -39,42 +39,42 @@ program gump_virtue_gump(who)
 	var choice := {};
 //	var virtuedesc := "";
 	var virtueinfo := "Click a Virtue symbol to see its description.";
-	
+
 	// valor info
 //	var valordesc := "valor is Courage to stand up against risks. That which answers when great deeds are called for and the cloak that protects the other virtues.";
 	var valorprin := "Pure Courage";
 	var valormantra := "Ra";
-	
+
 	// Courage info
 //	var honordesc := "honor is Courage to seek and uphold the Truth. that which shirks no duty.";
 	var honorprin := "Truth, Courage";
 	var honormantra := "Summ";
-	
+
 	// Compassion info
 //	var compassiondesc := "Compassion is Love of others. The quality that compels one to share the journeys of others.";
 	var compassionprin := "Pure Love";
 	var compassionmantra := "Mu";
-	
+
 	// Justice info
 //	var justicedesc := "Justice is Truth, tempered by Love. That which should be the same for nobles and serfs alike.";
 	var justiceprin := "Truth, Love";
 	var justicemantra := "Beh";
-	
+
 	// Honesty info
 //	var honestydesc := "Honesty is scrupulous respect for Truth - the willingness never to deceive oneself or another.";
 	var honestyprin := "Pure Truth ";
 	var honestymantra := "Ahm";
-	
+
 	// Sprituality info
 //	var spiritualitydesc := "Spirituality is to seek Truth, Love and Courage from one's own self and the world around. That which, in knowing the self, knows all.";
 	var spiritualityprin := "Truth, Love, and Courage";
 	var spiritualitymantra := "Om";
-	
+
 	// Sacrifice info
 //	var sacrificedesc := "Sacrifice is Courage to give oneself in name of Love. That which is loathe to place the self above all else.";
 	var sacrificeprin := "Love, Courage";
 	var sacrificemantra := "Cah";
-	
+
 	// Humility info
 //	var humilitydesc := "Humility is the opposite of Pride which is the absence of Truth, Love or Courage. That which serfs are born with, but nobles must strive to attain.";
 	var humilityprin := "Truth, Love, and Courage independently";
@@ -126,84 +126,84 @@ function showGump(who, virtuedesc)
 	var result :={};
 	result[0] := 0;
 	GFPage(virtue_gump, 0);
-	
+
 	//valor Button
 	GFAddButton(virtue_gump, 93, 9, 5545, 5545, GF_CLOSE_BTN, 2);
-	
+
 	//Humility Button
 	GFAddButton(virtue_gump, 32, 33, 5552, 5552, GF_CLOSE_BTN, 9);
-	
+
 	//Sacrifice Button
 	GFAddButton(virtue_gump, 6, 95, 5551, 5551, GF_CLOSE_BTN, 8);
-	
+
 	//Spirituality Button
 	GFAddButton(virtue_gump, 33, 158, 5550, 5550, GF_CLOSE_BTN, 7);
-	
+
 	//Honesty Button
 	GFAddButton(virtue_gump, 94, 184, 5549, 5549, GF_CLOSE_BTN, 6);
-	
+
 	//Justice Button
 	GFAddButton(virtue_gump, 156, 157, 5548, 5548, GF_CLOSE_BTN, 5);
-	
+
 	//Compassion Button
 	GFAddButton(virtue_gump, 183, 95, 5547, 5547, GF_CLOSE_BTN, 4);
-	
+
 	//honor Button
 	GFAddButton(virtue_gump, 158, 33, 5546, 5546, GF_CLOSE_BTN, 3);
-	
+
 	//Virtue Wheel
 	GFGumpPic(virtue_gump, 0, 0, 104, 0);
-	
+
 	//Humility Image: Humility
 	GFGumpPic(virtue_gump, 32, 32, 108, CStr(humilityHue));
 	GFTooltip(virtue_gump, 1012018);
-	
+
 	//Sacrifice Image: Sacrifice
 	GFGumpPic(virtue_gump, 5, 94, 110, CStr(sacrificeHue));
 	GFTooltip(virtue_gump, 1012020);
-	
+
 	//Spirituality Image: Spirituality
 	GFGumpPic(virtue_gump, 29, 155, 111, CStr(spiritualityHue));
 	GFTooltip(virtue_gump, 1012021);
-	
+
 	//Honesty Image: Honesty
 	GFGumpPic(virtue_gump, 92, 182, 106, CStr(honestyHue));
 	GFTooltip(virtue_gump, 1012016);
-	
+
 	//Justice Image: Justice
 	GFGumpPic(virtue_gump, 154, 155, 109, CStr(justiceHue));
 	GFTooltip(virtue_gump, 1012019);
-	
+
 	//Compassion Image
 	GFGumpPic(virtue_gump, 182, 93, 105, CStr(compassionHue));
 	GFTooltip(virtue_gump, 1012015);
-	
+
 	//honor Image: honor
 	GFGumpPic(virtue_gump, 156, 31, 107, CStr(honorHue));
 	GFTooltip(virtue_gump, 1012017);
-	
+
 	//valor Image: valor
 	GFGumpPic(virtue_gump, 93, 6, 112, CStr(valorHue));
 	GFTooltip(virtue_gump, 1012022);
-	
+
 	//Background 1
 	GFResizePic(virtue_gump, 12, 254, 9200, 217, 318);
-	
+
 	//Cancel Button: Cancel
 	GFAddButton(virtue_gump, 91, 529, 241, 241, GF_CLOSE_BTN, 10);
-	
+
 //	//HTML 1
 	GFHTMLArea(virtue_gump, 19, 324, 200, 150, virtuedesc, 0, 0);
-//	
+//
 	//Cliloc HTML 1
 	GFAddHTMLLocalized(virtue_gump, 19, 324, 200, 150, virtuedesc, 0, 0);
-	
+
 	//Label 1
 	GFTextLine(virtue_gump, 39, 265, 62, "Click a virtue icon to view");
-	
+
 	//Label 2
 	GFTextLine(virtue_gump, 45, 286, 62, "its description and status");
-	
+
 	return result := GFSendGump(who, virtue_gump);
 
 endfunction
@@ -231,7 +231,7 @@ function setVirtueHues(who)
 
 
 	getVirtueValues(who);
-	
+
 	if((valorAmount >= 1) && (valorAmount <= 1000))
 		valorHue := 234;
 	elseif((valorAmount >= 1001) && (valorAmount <= 2000))
@@ -301,14 +301,14 @@ endfunction
 
 function getVirtueValues(who)
 var virtues := {"Valor", "Honor", "Compassion", "Justice", "Honesty", "Spirituality", "Sacrifice", "Humility"};
-	valorAmount := GetVirtueAmount(who, "Valor");
-	honorAmount := GetVirtueAmount(who, "Honor");
-	compassionAmount := GetVirtueAmount(who, "Compassion");
-	justiceAmount := GetVirtueAmount(who, "Justice");
-	honestyAmount := GetVirtueAmount(who, "Honesty");
-	spiritualityAmount := GetVirtueAmount(who, "Spirituality");
-	sacrificeAmount := GetVirtueAmount(who, "Sacrifice");
-	humilityAmount := GetVirtueAmount(who, "Humility");
+	valorAmount := VS_GetVirtueAmount(who, "Valor");
+	honorAmount := VS_GetVirtueAmount(who, "Honor");
+	compassionAmount := VS_GetVirtueAmount(who, "Compassion");
+	justiceAmount := VS_GetVirtueAmount(who, "Justice");
+	honestyAmount := VS_GetVirtueAmount(who, "Honesty");
+	spiritualityAmount := VS_GetVirtueAmount(who, "Spirituality");
+	sacrificeAmount := VS_GetVirtueAmount(who, "Sacrifice");
+	humilityAmount := VS_GetVirtueAmount(who, "Humility");
 endfunction
 
 
@@ -319,6 +319,6 @@ function inRange(val, low, high)
 	else
 		return 0;
 	endif
-	
+
 endfunction
 */

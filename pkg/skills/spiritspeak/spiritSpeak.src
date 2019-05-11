@@ -31,7 +31,7 @@ program spiritspeak(who)
 
   if(SkillCheck(who, SPIRIT_SPEAK, -1,  pts))
     SendSysMessage(who, "You contact the netherworld.", color := 66);
-	AdjustVirtue(who, "spirituality", 1, 50);
+	VS_AdjustVirtue(who, "spirituality", 1, 50);
 	TS_StartTimer(who, "SpiritSpeak", 60);
 // Remove commented lines after testing.
 /*    Detach();

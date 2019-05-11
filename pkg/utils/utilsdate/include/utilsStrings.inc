@@ -12,7 +12,7 @@ use uo;
 
 // --------------------------------------------------------------------------
 //
-// Msg constants 
+// Msg constants
 //
 
 
@@ -22,11 +22,11 @@ use uo;
 //
 
 /**
- * This function inserts values from array into given format string. 
+ * This function inserts values from array into given format string.
  * <p>
  * Example: var s := Format("Do you, %s, want to continue?", {who.name});
- *  
- * @param formatstr       String which can have multiple %s and they are 
+ *
+ * @param formatstr       String which can have multiple %s and they are
  *                        replaced with the elements of strings in same order.
  * @param strings         Array of the values to be inserted.
  * @return                Resulting string value.
@@ -38,7 +38,7 @@ function Format(formatstr, strings)
     if (p)
       st := p + len(str);
       formatstr := CStr(formatstr[1 , p - 1]) + str + CStr(formatstr[p + 2, len(formatstr)]);
-    else 
+    else
       return formatstr;
     endif
   endforeach
@@ -47,10 +47,11 @@ endfunction
 
 /**
  * This function XOR encodes/decodes string with value given. If you XOR string
- * twice with same value you get the original string. Note, the string might 
- * result with unwanted control characters. You might want to use 
+ * twice with same value you get the original string. Note, the string might
+ * result with unwanted control characters. You might want to use
  * CAscZ(str) (and maybe Pack()) for it before storing.
- *  
+ * Note: Be advised, this is a weak form of encryption!
+ *
  * @param str             String which will be XOR'ed
  * @param value           The 'seed' value to use.
  * @return                Resulting string value.
@@ -68,11 +69,11 @@ endfunction
 var NumbersArray := array { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };  // preinitialize the array
 /**
  * removes numbers from a given string and returns the new string.
- *  
+ *
  * @param text            String from which all number characters
  *                        should be removed.
  * @return                Resulting string value.
- */ 
+ */
 function RemoveNumbers(text)
   var I;
   var r := "";
@@ -91,12 +92,14 @@ endfunction
  * delimeter character (instead of hardcoded space).
  * Note that the function doesn't remove eg. trailing/leading spaces like
  * the SplitWords() does.
- *  
+ * Note: SplitWords() allows specifying the delimiter.
+ * Except for not trimming white space this is identical to SplitWords().
+ *
  * @param str             String which to parse into components.
  * @param delimiter       Character which is used to cut the string (defaults to " ").
  *                        Should be just one character.
  * @return                Resulting array of the components.
- */ 
+ */
 function ParseDelimitedString(str, delimiter := " ")
 /*  if (delimiter == " ")
     return SplitWords(str);
@@ -115,12 +118,12 @@ endfunction
 
 /**
  * Returns string of given character.
- * Does not do check validity of  char parameter. This for effiency.
- *  
+ * Does not do check validity of char parameter. This for efficiency.
+ *
  * @param length          Length of the resulting string.
  * @param char            Character which is used to create the string.
  * @return                Resulting string value.
- */ 
+ */
 function StringOfChar(length, char)
   var R := char;
   if (length > 1)
@@ -134,12 +137,12 @@ endfunction
 
 /**
  * Pads string with given character (defaults to "0").
- *  
+ *
  * @param value           String to pad.
  * @param length          Length of the resulting string into which to pad.
  * @param padchar         Character which is used to padding. Defaults to "0".
  * @return                Resulting string value.
- */ 
+ */
 function CPadStr(value, length, padchar := "0")
   value := CStr(value);
   if (len(value) < length)
@@ -151,10 +154,10 @@ endfunction
 /**
  * Trims leading commas and spaces and ending spaces from a string.
  * Useful eg. with title_prefix, title_suffix properties.
- *  
+ *
  * @param text            String "cleap up".
  * @return                Resulting string value.
- */ 
+ */
 function CleanUp(text)
   if (text == error)
     return "";
@@ -162,14 +165,14 @@ function CleanUp(text)
   var I;
   var S := 1;
   // trim leading "," and " "
-  for (I := 1; I <= len(text); I := I + 1) 
+  for (I := 1; I <= len(text); I := I + 1)
     if (!(text[I] in {",", " "}))
       break;
     endif
     S := S + 1;
   endfor
   text := text[S, len(text)];
-  
+
   // trim ending " "
   var E := len(text);
   for (I := E; I > 0; I := I - 1)

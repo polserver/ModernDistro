@@ -122,13 +122,13 @@ function MS_Target(mobile, targ:=0, prompt := "Select a target.", flags:=TGTOPT_
 	var allow_precast := CInt(settings_elem.AllowPrecasting);
 
 	SendSysMessage(mobile, prompt, color := colour);
-	
+
 	targ := Target(mobile, flags);
 	if ( Distance(mobile, targ) > CInt(settings_elem.MaxRange) )
 		SendSysMessage(mobile, "That is too far away.", color := 33);
 		return 0;
 	endif
-	
+
 	if ( !allow_precast )
 		if ( mobile.x != orig_x || mobile.y != orig_y || mobile.realm != orig_realm )
 			SendSysMessage(mobile, "Your concentration is disturbed, thus ruining thy spell.", color := 33);
@@ -151,7 +151,7 @@ endfunction
  * mobile:		Mobile that is doing the targetting
  * targ:	Pre-selected target (for NPCs)
  * prompt:	Message the user receives when targeting.
- * 
+ *
  * Return value
  * Returns an object reference to what was targeted.
  *
@@ -170,7 +170,7 @@ function MS_TargetCoordinates(mobile, targ:=0, prompt := "Select a target.", col
 	var orig_realm := mobile.realm;
 	var settings_elem := MS_GetSettingsCfgElem("Settings");
 	var allow_precast := CInt(settings_elem.AllowPrecasting);
-	
+
 	SendSysMessage(mobile, prompt, color := colour);
 	targ := TargetCoordinates(mobile);
 
@@ -181,7 +181,7 @@ function MS_TargetCoordinates(mobile, targ:=0, prompt := "Select a target.", col
 		SendSysMessage(mobile, "That is too far away.", color := 33);
 		return 0;
 	endif
-	
+
 	if ( !allow_precast )
 		if ( mobile.x != orig_x || mobile.y != orig_y || mobile.realm != orig_realm )
 			SendSysMessage(mobile, "Your concentration is disturbed, thus ruining thy spell.", color := 33);
@@ -189,7 +189,7 @@ function MS_TargetCoordinates(mobile, targ:=0, prompt := "Select a target.", col
 			return 0;
 		endif
 	endif
-	
+
 	return targ;
 endfunction
 
@@ -214,7 +214,7 @@ endfunction
  */
 function MS_AdjustSpellPoints(mage, targ, points)
 	// TODO: fix this function -> http://guide.uo.com/skill_26.html
-	
+
 	var mage_skill := AP_GetSkill(mage, MAGERY);
 	var defense := AP_GetSkill(targ, RESISTING_SPELLS);
 
@@ -277,27 +277,31 @@ function MS_GetSpellDamage(mobile, targ, base_damage)
 	var eval_int_bonus := CInt((AP_GetSkill(mobile, EVALUATING_INTELLIGENCE) * 3) / 100) + 1;
 	var intel_bonus := CInt(AP_GetStat(mobile, "Intelligence") / 10);
 
-	// TODO: Get SDI items percentage
-	var sdi_bonus := 0;
-	
+	// TODO: I am assuming SDI will eventually become a member of the character.
+	//       At that time we'll switch from a CProp to proper member notation,
+	//       eg. mobile.SpellDamageIncrease - Yukiko.
+	var sdi_bonus := CInt(mobile.spell_damage_increase);
 	// SDI bonus capped at 15% for PvP
+	// This has changed according to uoguide.com/Spell_Damage_Increase as of 2018-05-06
+	// It is now capped at 25% - Yukiko
 	if ( mobile.IsA(POLCLASS_MOBILE) && !mobile.IsA(POLCLASS_NPC) && targ.IsA(POLCLASS_MOBILE) && !targ.IsA(POLCLASS_NPC) )
-		if ( sdi_bonus > 15 )
-			sdi_bonus := 15;
+		if ( sdi_bonus > 25 )
+			sdi_bonus := 25;
 		endif
 	endif
-	
+
 	var damage_increase := intel_bonus + sdi_bonus;
 
 	if ( AP_GetSkill(mobile, INSCRIPTION) >= 100 )
 		damage_increase := damage_increase + 10;
 	endif
-        
-        if (mobile.IsA(POLCLASS_NPC))
-            base_damage := base_damage * 2;
-        endif
-	
+
+	if (mobile.IsA(POLCLASS_NPC))
+		base_damage := base_damage * 2;
+	endif
+
 	var total_damage := CInt(base_damage * eval_int_bonus * ((CDbl(damage_increase) / 100) + 1));
+	Broadcast("Spell damage " + CStr(total_damage), color := 88);
 	return CDbl(total_damage);
 endfunction
 
@@ -317,7 +321,7 @@ function MS_MobileCheck(mobile, targ)
 		SendSysMessage(mobile, "This spell won't work on that!");
 		return 0;
 	endif
-	
+
 	return 1;
 endfunction
 
@@ -352,7 +356,7 @@ function MS_GetPoisonLevel(mobile, targ)
 	elseif ( poison_level >= 100 )
 		poison_level := 4;
 	endif
-	
+
 	return poison_level;
 endfunction
 
@@ -360,18 +364,18 @@ endfunction
 function MS_PlaySpellSFX(spellid, targ, success:=1)
 	var cfg_elem := MS_GetSpellsCfgElem(spellid);
 	var sfx := CInt(GetConfigInt(cfg_elem, "SFX"));
-	
+
 	Print("Playing SFX:"+sfx+" for spellid:"+spellid);
 	PlaySoundEffect(targ, sfx);
 
-	return 1;	
+	return 1;
 endfunction
 
 
 function MS_PlaySpellGFX(spellid, targ, caster, speed:=7, loop:=14, explode := 0)
 	var cfg_elem := MS_GetSpellsCfgElem(spellid);
 	var gfx := CInt(GetConfigInt(cfg_elem, "GFX"));
-	
+
 	Print("Playing GFX:"+gfx+" for spellid:"+spellid+" of gfx type:"+CInt(cfg_elem.GFXType));
 	case ( CInt(cfg_elem.GFXType) )
 		0: return 1;
@@ -379,7 +383,7 @@ function MS_PlaySpellGFX(spellid, targ, caster, speed:=7, loop:=14, explode := 0
 		2: PlayMovingEffect(caster, targ, gfx, speed, loop, explode);
 		3: PlayStationaryEffect( targ.x, targ.y, targ.z, gfx, speed, loop, 0, targ.realm );
 	endcase
-	
+
 	return 1;
 endfunction
 
@@ -389,21 +393,21 @@ function MS_GetVaildTargets(targ, area_size:=1, check_los:=1, exclude:="", inclu
         check_los := check_los;
         include_self := include_self;
         mself := mself;
-	
+
 	if ( !targ.realm )
 		targs := ListMobilesNearLocation(targ.x, targ.y, targ.z, area_size);
 	else
 		targs := ListMobilesNearLocation(targ.x, targ.y, targ.z, area_size, targ.realm);
 	endif
-	
+
 	// Remove targs with serial in exclude if exclude exists or not in includes if includes exists
 	for i := 1 to (targs.Size())
-		if ( (exclude != "" && (targs[i].serial in exclude || targs[i].serial == exclude )) || 
+		if ( (exclude != "" && (targs[i].serial in exclude || targs[i].serial == exclude )) ||
                 (includes != "" && (!(targs[i].serial in includes) || targs[i].serial != includes )))
 			targs.Erase(i);
 		endif
 	endfor
-	
+
 	return targs;
 endfunction
 
@@ -420,20 +424,20 @@ function Resisted(circle, caster, cast_on, amt)
         var magery := CInt(AP_GetSkill(caster, MAGERY));
         var evalint := CInt(AP_GetSkill(caster, EVALUATING_INTELLIGENCE));
         var resist := CInt(AP_GetSkill(cast_on, RESISTING_SPELLS));
-        
+
         // chk1 relates to the resist ability.
         var chk1 := (resist / 5);
         // chk2 relates to the difficulty level
         var chk2 := resist - (((magery - 20) / 5) + (circle * 5));
-        
+
         if(chk1 < 1)
                 chk1 := 1;
         endif
         if(chk2 < 1)
                 chk2 := 1;
         endif
-        
-        // What an odd construct.  
+
+        // What an odd construct.
         // If you're hit with an easy spell then you have a difficulty of your resist
         var diff := 0;
         if(chk1 > chk2)
@@ -441,7 +445,7 @@ function Resisted(circle, caster, cast_on, amt)
         else
                 diff := chk2;
         endif
-        
+
         var points := getresistpoints(circle, cast_on, SKILLID_RESISTING_SPELLS);
         if(cast_on.dead)
                 return 0;
@@ -546,20 +550,20 @@ endfunction
 // Function for quickly grabbing nearby mobiles that are not in excludes or that are in includes
 function MS_GetValidTargets(targ, area_size:=1, check_los:=1, excludes:=array{}, includes:=array{})
 	var targs := array{};
-	
+
 	if ( !targ.realm )
 		targs := ListMobilesNearLocation(targ.x, targ.y, targ.z, area_size);
 	else
 		targs := ListMobilesNearLocation(targ.x, targ.y, targ.z, area_size, targ.realm);
 	endif
-	
+
 	// Remove targs with serial in exclude if exclude exists or not in includes if includes exists
 	for i := 1 to ( targs.Size() )
 		if ( (excludes.Size() > 0 && targs[i].serial in excludes) || (includes.Size() > 0 && !(targs[i].serial in includes)))
 			targs.Erase(i);
 		endif
 	endfor
-	
+
 	return targs;
 endfunction
 
@@ -573,13 +577,13 @@ function MS_GetFriendlies(targ, area_size:=1)
 	else
 		friendlies := ListMobilesNearLocation(targ.x, targ.y, targ.z, area_size, targ.realm);
 	endif
-	
+
 	for i := 1 to friendlies.Size()
 		if ( friendlies[i].criminal || friendlies[1].murderer )
 				friendlies.Erase(i);
 		endif
 	endfor
-	
+
 	return friendlies;
 endfunction
 

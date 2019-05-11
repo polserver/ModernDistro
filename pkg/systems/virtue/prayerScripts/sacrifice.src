@@ -18,9 +18,9 @@ program sacrificeshrine(params)
 	var who := params[1];
 
 	var virtue_shrine := params[2];												// String - The name of the virtue.
-	var mantra := GetMantra(virtue_shrine);										// String - The word that must be entered by the player to activate the shrine.
+	var mantra := VS_GetMantra(virtue_shrine);									// String - The word that must be entered by the player to activate the shrine.
 	var max_range := CInt(VS_GetSettingsCfgElem("Settings").MaxRange);			// Integer - The maximum range that a virtue score can achieve, expressed as an absolute value.
-	var virtue_rating := GetVirtueAmount(who, virtue_shrine);					// Integer - The current score the player posseses in the virtue.
+	var virtue_rating := VS_GetVirtueAmount(who, virtue_shrine);				// Integer - The current score the player posseses in the virtue.
 	var prayer_delay := CInt(VS_GetSettingsCfgElem("Settings").PrayerDelay);	// Integer - The delay a player must wait. in seconds, between "prayers" at a shine.
 
 	// Prevents "praying" at a shrine too often.
@@ -29,7 +29,7 @@ program sacrificeshrine(params)
 		return 0;
 	endif
 
-	var spirituality_rating := GetVirtueAmount(who, "spirituality");
+	var spirituality_rating := VS_GetVirtueAmount(who, "spirituality");
 
 	if (!spirituality_rating)
 		spirituality_rating := 0;
@@ -57,8 +57,8 @@ program sacrificeshrine(params)
 		PlaySoundEffect(who, 0xf9);
 		spirituality_rating := spirituality_rating - 3;
 
-		SetVirtueAmount(who, "spirituality", spirituality_rating);
-		SetVirtueAmount(who, virtue_shrine, virtue_rating);
+		VS_SetVirtueAmount(who, "spirituality", spirituality_rating);
+		VS_SetVirtueAmount(who, virtue_shrine, virtue_rating);
 		return 0;
 	endif
 
@@ -127,10 +127,10 @@ program sacrificeshrine(params)
 
 	PrintTextAbove(who, message, 1, MSG_SUCCESS);	// Print in green - good message.
 
-	SetVirtueAmount(who, "spirituality", spirituality_rating);
+	VS_SetVirtueAmount(who, "spirituality", spirituality_rating);
 	// I realize the next line is  not currently necvessary.
 	// I added it in the event we might want to modify the value in the future.
-	SetVirtueAmount(who, virtue_shrine, virtue_rating);
+	VS_SetVirtueAmount(who, virtue_shrine, virtue_rating);
 
 	if (grantblessing)
 		res := YesNoSizable(who, "Do you wish to receive the blessings of " + virtue_shrine + "?", 88);

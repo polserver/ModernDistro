@@ -28,14 +28,14 @@ program HTTPScript()
 		WriteHTMLRaw("Error: Web account maker is disabled.");
 		return 0;
 	endif
-	
+
 	var username := QueryParam("username");
 	var password := QueryParam("password");
 	var cmd_lvl := QueryParam("cmdlevel");
 	var expansion := QueryParam("expansion");
 	var email := QueryParam("email");
 	var admin_pw := QueryParam("adminpw");
-	
+
 	if ( settings.AuxWebPassword )
 		if ( settings.AuxWebPassword != admin_pw )
 			 WriteHTMLRaw("Error: Invalid administration password.");
@@ -43,7 +43,7 @@ program HTTPScript()
 		endif
 	endif
 
-	var result := CreateNewAccount(username, password, cmd_lvl, expansion, email);
+	var result := ACCT_CreateNewAccount(username, password, cmd_lvl, expansion, email);
 	if ( result.errortext )
 		WriteHTMLRaw("Error: "+result.errortext);
 	else

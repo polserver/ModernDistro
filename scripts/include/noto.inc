@@ -57,12 +57,12 @@ function AdjustNoto(attacker, defender)
   if (dKarma > 15)
 //    kmod := -1;
 //    dKarma := Abs(Karma);
-    AdjustVirtue(attacker, "Compassion", -1, 100);
+    VS_AdjustVirtue(attacker, "Compassion", -1, 100);
   else
 //    dKarma := Abs(vKarma);
-    AdjustVirtue(attacker, "Valor", 1, 50);
+    VS_AdjustVirtue(attacker, "Valor", 1, 50);
     if (dKarma > 150)
-        AdjustVirtue(attacker, "Honor", 1, 10);
+        VS_AdjustVirtue(attacker, "Honor", 1, 10);
     endif
   endif
 /////////////////////////////////////////////////////////////////
