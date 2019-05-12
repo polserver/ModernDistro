@@ -4,6 +4,7 @@ use basic;
 
 include ":gumps:yesNoSizable";
 include ":attributes:attributes";
+include ":timedScripts:poisonUtil";
 include "include/client";
 include ":gumps:gumps";
 include ":gumps:gumps_ex";
@@ -140,7 +141,7 @@ program justiceshrine(params)
 			SetHp(who, who.strength);
 			SetMana(who, who.intelligence);
 			SetStamina(who, who.dexterity);
-			EraseObjProperty(who, "poison_level");
+			TS_CurePoison(who, 10000, "P", 5);
 		endif
 	endif
 

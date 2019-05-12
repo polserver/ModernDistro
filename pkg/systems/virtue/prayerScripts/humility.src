@@ -4,6 +4,7 @@ use basic;
 
 include ":gumps:yesNoSizable";
 include ":gumps:yesNo";
+include ":timedScripts:poisonUtil";
 include ":attributes:attributes";
 include "include/client";
 include ":gumps:gumps";
@@ -141,7 +142,7 @@ program humilityshrine(params)
 			SetHp(who, who.strength);
 			SetMana(who, who.intelligence);
 			SetStamina(who, who.dexterity);
-			EraseObjProperty(who, "poison_level");
+			TS_CurePoison(who, 10000, "P", 5);
 		endif
 	endif
 
