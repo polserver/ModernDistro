@@ -277,9 +277,6 @@ function MS_GetSpellDamage(mobile, targ, base_damage)
 	var eval_int_bonus := CInt((AP_GetSkill(mobile, EVALUATING_INTELLIGENCE) * 3) / 100) + 1;
 	var intel_bonus := CInt(AP_GetStat(mobile, "Intelligence") / 10);
 
-	// TODO: I am assuming SDI will eventually become a member of the character.
-	//       At that time we'll switch from a CProp to proper member notation,
-	//       eg. mobile.SpellDamageIncrease - Yukiko.
 	var sdi_bonus := CInt(mobile.spell_damage_increase);
 	// SDI bonus capped at 15% for PvP
 	// This has changed according to uoguide.com/Spell_Damage_Increase as of 2018-05-06
