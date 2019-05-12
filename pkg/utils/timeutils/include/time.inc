@@ -2,7 +2,7 @@
  *
  * Purpose
  * Provide various functions and CONSTants for time formats.
- * 
+ *
  * Created by Folko
  *
  */
@@ -210,13 +210,13 @@ endfunction
 
 
 /*
- * FormatTime(ts, format)
+ * FormatTime(time_struct, format)
  *
  * Purpose
  * Returns a formatted time string.
  *
  * Parameters
- * time:	The time struct to use as base
+ * time_struct:	The time struct to use as base
  * format:  The format string. The following tags will be expanded:
  *		  <YY>: Year, <MON>: Month name, <DAY>: Day number, <HH>: Hour, <MM>: Minute, <SS>: Second
  *
@@ -224,29 +224,29 @@ endfunction
  * The expanded format string
  *
  */
-function FormatTime(byref ts, format)
-	format["<YY>"] := CStr(ts.year);
-	format["<MON>"] := GetMonthName(ts.month);
-	format["<DAY>"] := CStr(ts.day);
-	
-	if(ts.hour > 9)
-		format["<HH>"] := CStr(ts.hour);
+function FormatTime(byref time_struct, format)
+	format["<YY>"] := CStr(time_struct.year);
+	format["<MON>"] := GetMonthName(time_struct.month);
+	format["<DAY>"] := CStr(time_struct.day);
+
+	if(time_struct.hour > 9)
+		format["<HH>"] := CStr(time_struct.hour);
 	else
-		format["<HH>"] := "0"+CStr(ts.hour);
+		format["<HH>"] := "0"+CStr(time_struct.hour);
 	endif
-	
-	if(ts.minute > 9)
-		format["<MM>"] := CStr(ts.minute);
+
+	if(time_struct.minute > 9)
+		format["<MM>"] := CStr(time_struct.minute);
 	else
-		format["<MM>"] := "0"+CStr(ts.minute);
+		format["<MM>"] := "0"+CStr(time_struct.minute);
 	endif
-	
-	if(ts.second > 9)
-		format["<SS>"] := CStr(ts.second);
+
+	if(time_struct.second > 9)
+		format["<SS>"] := CStr(time_struct.second);
 	else
-		format["<SS>"] := "0"+CStr(ts.second);
+		format["<SS>"] := "0"+CStr(time_struct.second);
 	endif
-	
+
 	return format;
 endfunction
 

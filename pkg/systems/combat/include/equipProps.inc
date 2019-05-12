@@ -1,4 +1,8 @@
-function CS_AddEquipmentPropsToChar(character, byref equipment)
+/*
+ *
+ * These functions are probably obsolete because the Core will transfer thes mods to the character :(
+
+ function CS_AddEquipmentPropsToChar(character, byref equipment)
 
     character.lower_reagent_cost_mod := character.lower_reagent_cost_mod + equipment.lower_reagent_cost;
     character.spell_damage_increase_mod := character.spell_damage_increase_mod + equipment.spell_damage_increase;
@@ -27,3 +31,7 @@ function CS_SubtractEquipmentPropsFromChar(character, byref equipment)
     character.luck_mod := character.luck_mod - equipment.luck;
 
 endfunction
+
+ *
+ *
+*/

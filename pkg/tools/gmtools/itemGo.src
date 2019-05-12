@@ -66,7 +66,7 @@ program go(who)
     endif
     var locs    := ReadConfigFile("::golocs");
     var MaxLocs := GetConfigMaxIntKey(locs)+1;
-    var dest    := locs[mod(result[0], MaxLocs)];
+    var dest    := locs[result[0] % MaxLocs];
     var traveler;
     if ( result[0] > MaxLocs )
        SendSysMessage( who, "Select a MOBILE." );
@@ -107,7 +107,7 @@ function FillInArrays( tname )
         // Store Name
         datindx := datalen+1;
         data[datindx] := currloc.Name;
-        if (mod(locationscount, 19) == 1)
+        if (locationscount % 19 == 1)
           // Pointer Down
           if (locationscount >= 19)
             layout[GetLayoutLength()+1] := "button 285 465 2648 2647 0 " + (pagecount);

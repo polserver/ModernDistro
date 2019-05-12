@@ -546,7 +546,7 @@ function invokegomenu(who)
   if(!(goresult[0] == 0))
     var locs    := ReadConfigFile("::golocs");
     var MaxLocs := GetConfigMaxIntKey(locs)+1;
-    var dest    := locs[mod(goresult[0], MaxLocs)];
+    var dest    := locs[goresult[0] % MaxLocs];
     var traveler;
     if(goresult[0] > MaxLocs) // teleporting someone else
       SendSysMessage(who, "Select a MOBILE.");
@@ -582,7 +582,7 @@ function FillIngoArrays(tname)
         // Store Name
         datindx := datalen+1;
         godata[datindx] := currloc.Name;
-        if(mod(locationscount, 19) == 1)
+        if(locationscount % 19 == 1)
           // Pointer Down
           if(locationscount >= 19)
             golayout[GetgoLayoutLength()+1] := "button 285 465 2648 2647 0 " +(pagecount);

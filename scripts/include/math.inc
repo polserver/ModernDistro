@@ -27,7 +27,7 @@
 //	- Added Min and Max functions.
 //	- Added Bounded function.
 //	- Added SplitLog function.
-// 
+//
 // v1.5:
 //	- Factorial(x) now returns 1 if x==0.
 //	- Log(x, y) now uses Log10 instead of successive
@@ -74,7 +74,7 @@ endfunction
 
 function SplitLog(x)
 // Returns array of {characteristic, mantissa} for x.
-// (If x==1.12345, the characteristic is "1", and the 
+// (If x==1.12345, the characteristic is "1", and the
 // mantissa is (0.12345)
 
 	return { (CInt(x)), (x - CInt(x)) };
@@ -101,32 +101,6 @@ function Bounded(x, i, y, inclusive := 1)
 endfunction
 
 
-//function Min(byref x)
-// returns the least value of array "x"
-//	x.sort();
-//	return x[1];
-//endfunction
-
-
-//function Max(byref x)
-// returns the greatest value of array "x"
-//	x.sort();
-//	return x[(len(x))];
-//endfunction
-
-
-function Mod(Numerator, Denominator)
-
-// Returns the modulus of the fraction:
-//
-//		 Numerator
-//		-----------
-//		Denominator
-
-
-	return (Numerator - (CInt(Numerator/Denominator) * Denominator));
-	
-endfunction
 
 
 
@@ -180,19 +154,10 @@ function Fac(factorial);
 endfunction
 
 
-function Exp(base, power)
-
-// Obsolete: math.em has Pow(b, p)
-
-	return Pow(base, power);
-
-endfunction
-
-
 function YRoot(x, y)
 
 // Returns the <y> root of a number <x>:
-	
+
 	var i := 0.000;
 	var n := 0.000;
 	var root := 2.000;
@@ -203,7 +168,7 @@ function YRoot(x, y)
 	endif
 
 	var success := 0;
-	while (!success)		
+	while (!success)
 		n := Pow(root, y);
 		i := x - n;
 		i := i / (a * root);
@@ -237,14 +202,6 @@ function Dec(a)
 	return a - 1;
 
 endfunction
-
-
-function Sqr(x)
-// Obsolete: math.em has Sqrt(x)
-	return Sqrt(x);
-
-endfunction
-
 
 function Mean(ArrayX)
 
@@ -284,7 +241,7 @@ endfunction
 
 function ZTest(ArrayX, mu, sigma)
 // Returns the test statistic for a ZTest.   This is used to show
-// the likelihood that a sample is drawn from the population.  The 
+// the likelihood that a sample is drawn from the population.  The
 // mean and standard deviation for the population must be known.
 // The z-statistic is computed as follows:
 //
@@ -313,7 +270,7 @@ endfunction
 function TTest(ArrayX, mu)
 
 // Returns the test statistic for a TTest.   This is used to show
-// the likelihood that a sample is drawn from the population, when 
+// the likelihood that a sample is drawn from the population, when
 // the mean and standard deviation for the entire population are
 // unknown.  The t-statistic is computed as follows:
 //
@@ -352,7 +309,7 @@ function BitIn(ArrayX)
 
 // Takes an array of 8 bits and converts them into an integer.
 // This is used for the flag support.  IMPORTANT: bit positon is
-// *NOT* the same thing as the array position!   The first bit in 
+// *NOT* the same thing as the array position!   The first bit in
 // the flag is the 8th bit in the array, and vice versa.  This is
 // because it processes the bit values in the following order:
 // 128, 64, 32, 16, 8, 4, 2, 1.
@@ -380,7 +337,7 @@ endfunction
 function BitOut(x)
 
 // This function takes an unsigned, short integer (0-255) and returns
-// an array containing the individual bit values.   IMPORTANT: the 
+// an array containing the individual bit values.   IMPORTANT: the
 // first element of the array is NOT the first bit, it is the 8th
 // bit, and so on down.   See the desc for BitIn for the details.
 
@@ -421,7 +378,7 @@ function BitAnd(x, y)
 	var n;
 
 	while (loop <= 8)
-	
+
 		n := loop - 1;
 		if ( (ArrayX[loop]==1) AND (ArrayY[loop]==1) )
 			z := z + Pow(2, n);
@@ -438,8 +395,8 @@ endfunction
 function BitOr(x, y)
 
 // Performs a bitwise logical disjunction for two unsigned, short
-// integers (0-255).  If either value (or both values) for a 
-// position are set, then that position in the result is set.   If 
+// integers (0-255).  If either value (or both values) for a
+// position are set, then that position in the result is set.   If
 // both are reset, then the position in the result is reset.
 
 	var ArrayX := BitOut(x);
@@ -467,7 +424,7 @@ function BitXor(x, y)
 
 // Performs a bitwise logical exclusion for two unsigned, short
 // integers (0-255).  If one and ONLY one value for a position is
-// set, then that position in the result is set.   If both are 
+// set, then that position in the result is set.   If both are
 // either set or reset, then the position in the result is reset.
 
 	var ArrayX := BitOut(x);
@@ -495,7 +452,7 @@ function BitEqv(x, y)
 
 // Performs a bitwise logical equivalence for two unsigned, short
 // integers (0-255).  If one and ONLY one value for a position is
-// set, then that position in the result is reset.   If both are 
+// set, then that position in the result is reset.   If both are
 // either set or reset, then the position in the result is set.
 
 	var ArrayX := BitOut(x);
@@ -552,7 +509,7 @@ function BitNot(x)
 
 // Performs a logical negation on a short, unsigned integer (0-255).
 // If a position in the integer is set, then that position in the
-// result is reset.  Conversely, if a position in the integer is 
+// result is reset.  Conversely, if a position in the integer is
 // reset, then that position in the result is set.
 
 	var ArrayX := BitOut(x);
@@ -585,7 +542,7 @@ function FlagSet(flag, bit);
 // Both <flag> and <bit> are integers.
 
 	bit := 9 - bit;
-	
+
 	var FlagArray := BitOut(flag);
 	FlagArray[bit] := 1;
 
@@ -602,7 +559,7 @@ function FlagReset(flag, bit);
 // Both <flag> and <bit> are integers.
 
 	bit := 9 - bit;
-	
+
 	var FlagArray := BitOut(flag);
 	FlagArray[bit] := 0;
 
@@ -650,27 +607,27 @@ function equal_probability_dice ( minimum, maximum )
 	var val := "";
 	minimum := CInt(minimum);
 	maximum := CInt(maximum);
-	
+
 	if ( minimum < 1 || maximum < 1 )
 		return 0;
 	endif
-	
+
 	if ( minimum > maximum )
 		var temp := minimum;
 		minimum := maximum;
 		maximum := temp;
 	endif
-	
+
 	var x := 1;
 	var z := minimum - 1;
 	var y := ( maximum - minimum + 1 );
-	
+
 	if ( z > 0 )
 		val := CStr ( x+"d"+y+"+"+z );
 	else
 		val := CStr ( x+"d"+y );
 	endif
-	
+
 	return val;
 endfunction
 
@@ -694,35 +651,35 @@ function normal_distribution_dice ( minimum, maximum )
 	var val := "";
 	minimum := CInt(minimum);
 	maximum := CInt(maximum);
-	
+
 	if ( minimum < 1 || maximum < 1 )
 		return 0;
 	endif
-	
+
 	if ( minimum > maximum )
 		var temp := minimum;
 		minimum := maximum;
 		maximum := temp;
 	endif
-	
+
 	var x := 0;
 	var y := 0;
 	var z := 0;
-	
+
 	for ( z; z < minimum; z += 1 )
 		x := minimum - z;
 		if ( ( maximum - z ) % x == 0 )
 			y := ( maximum - z ) / x;
 			break;
 		endif
-	endfor		
-	
+	endfor
+
 	if ( z > 0 )
 		val := CStr ( x+"d"+y+"+"+z );
 	else
 		val := CStr ( x+"d"+y );
 	endif
-	
+
 	return val;
 endfunction
 
@@ -738,7 +695,7 @@ endfunction
 //
 //////////////////////////////////////
 
-function Round ( num ) 
+function Round ( num )
  var checker := CDbl ( num - Floor ( num ) );
  if ( checker < 0.5 )
   return Floor ( num );
