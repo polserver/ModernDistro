@@ -24,7 +24,7 @@ use basicio;
 use basic;
 use cfgfile;
 
-include "util/key";
+include ":keys:key";
 include "include/objtype";
 const UOBJECT_BRASS_SIGN := 0x0bd2;
 const UOBJECT_WOOD_SIGN := 0x0bd0;
@@ -177,7 +177,7 @@ function boundaries(who, sign, levels)
 	homeinfo[1] := coords.x;
 	homeinfo[2] := coords.y;
 	// The following line is somewhat of a kluge.
-	// We need to make the coords for the NW corner to be equal to ground level Z plus 
+	// We need to make the coords for the NW corner to be equal to ground level Z plus
 	// The Z level of the top floor, levels * 20. Each floor is 20 Z high.
 	// This script used to have the GM target the NW corner of the highest floor of a structure.
 	// This was changed because it caused some confusion. So now we enter the number of stories

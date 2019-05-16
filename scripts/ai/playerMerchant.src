@@ -8,14 +8,14 @@ include "util/bank";
 include ":attributes:attributes";
 include "include/eventID";
 include "include/sysEvent";
-include "include/randName";
-include "include/vetement";
+include ":npcs:randName";
+include ":npcs:garment";
 include "include/utility";
 include "include/mrcSpawn";
 include "include/dist";
 include "include/client";
-include "include/NPCBackpacks";
-include "include/yesNo";
+include ":npcs:NPCBackpacks";
+include ":gumps:yesNoSizable";
 include "include/canAccess";
 
 const STARTHAIR := 0x2030;
@@ -98,7 +98,7 @@ program merchant()
                                   endif
                                 elseif(((text[firstname]) && (text["dismiss"])) and (ev.source.serial == master))
                                   TurnToward(who);
-                                  if(YesNo(who, "Fire him?"))
+                                  if(yesNoSizable(who, "Fire him?"))
                                     Fireme();
                                   endif
                                 elseif((text[firstname] and text["sell"]) or (text["vendor"] and text["sell"]))

@@ -1,7 +1,7 @@
 use uo;
 use vitals;
 
-include "include/spellRestrictions";
+include ":magery:spellRestrictions";
 
 program chrcast_thunderstorm( parms )
   var circle := 3;
@@ -25,13 +25,13 @@ if(caster.ip)
 bonus := int/5;
 endif
 
-  
+
 var dmg := Cint((dru/12) + (alore/12) + bonus);
 var duration := (dru + alore) / 10;
 var obszar := Cint(dru/15);
 var cwele := {};
-  
-  
+
+
 Detach();
 Playsoundeffect(caster, 0x5CF);
 

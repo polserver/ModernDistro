@@ -1,5 +1,5 @@
 include ":magery:summon";
-include "include/spellRestrictions";
+include ":magery:spellRestrictions";
 
 
 program chrcast_sfamiliar( parms )

@@ -5,7 +5,7 @@ use cfgfile;
 
 include "include/eventID";
 include "include/sysEvent";
-include "include/randName";
+include ":npcs:randName";
 include "include/NPCUtil";
 include "include/objtype";
 include "include/dist";
@@ -15,7 +15,7 @@ include "ai/combat/fight";
 include "ai/combat/defaultCombatEvent";
 include "ai/setup/animalSetup";
 include "ai/main/sleepMode";
-include "include/vetement";
+include ":npcs:garment";
 
 const HALT_THRESHOLD := 5; // how close before he attacks?
 var npccfgfile := ReadConfigFile( "npcdesc" );

@@ -1,7 +1,7 @@
 use uo;
 use vitals;
 
-include "include/spellRestrictions";
+include ":magery:spellRestrictions";
 
 program chrcast_wdeath( parms )
   var circle := 6;
@@ -38,7 +38,7 @@ PlaySoundEffect(caster, 0x20D);
 if(cast_on.npctemplate)
 
     if(chance > (RandomInt(100)) + 1) // 10% szansy
-        
+
         if(hapek < makshp) // sprawdza czy koles ma mniej niz 30% hape
         SendSysMessage(caster, cast_on.name + " przegral ze smiercia!",3,66);
         ApplyRawDamage(cast_on, WezMaxHp(cast_on)+100);
@@ -47,7 +47,7 @@ if(cast_on.npctemplate)
         endif
     else
         SendSysMessage(caster, cast_on.name + " wygral ze smiercia!",3,40);
-       
+
         PlayObjectCenteredEffect( cast_on, 0x37c3, 0x0a,0x1e);
         ApplyRawDamage(cast_on, Resisted(circle, caster, cast_on, dmg));
     endif
@@ -67,5 +67,5 @@ endfunction
 
 function WezHp(who)
   return Cint(GetVital(who, VITALID_LIFE)/ 100);
-endfunction 
+endfunction
 

@@ -5,14 +5,15 @@ use cfgfile;
 include "include/client";
 include "include/trainingskill";
 include ":attributes:attributes";
-// include "include/skillpoints"; used to find default points for skillcheck
 
 const UOBJECT_FLASK_EMPTY:= 0x1832;
 const UOBJECT_FLASK_FULL := 0x1834;
 const UOBJECT_FLASK_HEATED := 0x1833;
 
 program do_tasteid( character )
-    var thepoints := 10;
+//    var thepoints := 10;
+	var cfg := AP_GetAttributeCfgElem( ITEM_IDENTIFICATION );
+	var thepoints := cfg.AwardDefault;
     var the_item;
     var contents;
     var poison_level;
@@ -26,34 +27,34 @@ program do_tasteid( character )
     data[3] := 36;
     SetObjProperty(character, "LastUsedSkill", data );
     TrainingSkill(character, data[3]);
-    
+
     EraseObjProperty(character, "IsMeditating");
     EraseObjProperty(character, "HealTimer");
 
-   
+
     SendSysMessage( character, "Select an object to taste." );
     the_item := Target(character, "");
     if (!the_item)
         SendSysMessage(character, "Targetting cancelled.");
         return;
     endif
-   
+
     content_descr := "";
 
     if (SkillCheck(character, TASTE_IDENTIFICATION, -1, thepoints ))
-   
-		var itemdesc := alchemcfg[the_item.objtype].sname;   
+
+		var itemdesc := alchemcfg[the_item.objtype].sname;
 		if (itemdesc)
 			SendSysMessage(character, "It seems to be " + itemdesc);
 			SetName(the_item, itemdesc);
 		endif
-	
+
 		if (GetObjProperty(the_item, "potionname") )
 			itemdesc := GetObjProperty(the_item, "potionname");
 			SendSysMessage(character, "This seems to be a potion of " + itemdesc + ".");
 			SetName(the_item, ("a potion of " + itemdesc) );
 		endif
-	
+
 		case(the_item.objtype)
 			0x1DC04: poison_descr := "a lesser poison.";
 			0x1DC05: poison_descr := "a regular poison.";
@@ -64,11 +65,11 @@ program do_tasteid( character )
 	else
 		poison_descr := "nothing out of the ordinary.";
     endif
-   
+
     if (content_descr == "")
             SendSysMessage(character, "This contains " + poison_descr);
     endif
-     
+
 endprogram
 
 

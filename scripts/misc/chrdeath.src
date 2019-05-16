@@ -2,7 +2,6 @@ use uo;
 use os;
 use util;
 
-include "include/NPCBackpacks";
 include ":attributes:attributes";
 include "include/statMod";
 include ":virtue:noto";

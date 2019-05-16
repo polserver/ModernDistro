@@ -1,6 +1,6 @@
 include "include/client";
 include "include/objtype";
-include "include/NPCBackpacks";
+include ":npcs:NPCBackpacks";
 
 
 
@@ -10,11 +10,11 @@ include "include/NPCBackpacks";
 ///////////////////
 
 function IsExtended( plank )
-	return plank.graphic in {GID_PLANK_EXTENDED_FACING_EAST, 
+	return plank.graphic in {GID_PLANK_EXTENDED_FACING_EAST,
 						GID_PLANK_EXTENDED_FACING_WEST,
 						GID_PLANK_EXTENDED_FACING_NORTH,
 						GID_PLANK_EXTENDED_FACING_SOUTH };
-endfunction                           
+endfunction
 
 
 
@@ -85,7 +85,7 @@ function PlankPartner (planktype)
 		GID_PLANK_RETRACTED_FACING_NORTH: return GID_PLANK_EXTENDED_FACING_NORTH;
 		GID_PLANK_EXTENDED_FACING_SOUTH:  return GID_PLANK_RETRACTED_FACING_SOUTH;
 		GID_PLANK_RETRACTED_FACING_SOUTH: return GID_PLANK_EXTENDED_FACING_SOUTH;
-            
+
 		default:
 			syslog ("Unknown plank type " + Hex (planktype));
 			return error;
@@ -118,7 +118,7 @@ function FindKey (me, plank)
 				endforeach
       endif
 	endforeach
-					
+
 	return 0;
 endfunction
 

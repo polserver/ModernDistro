@@ -4,7 +4,6 @@ use uo;
 
 include "include/client";
 include ":attributes:attributes";
-include "include/fields";
 
 const SOUND_EFFECT_FIREFIELD:= 0x1de;
 const UOBJ_FIREFIELD_NS := 0x398c;

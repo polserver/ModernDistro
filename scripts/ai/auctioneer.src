@@ -5,7 +5,7 @@ use npc;
 use os;
 use uo;
 
-include "include/randName";
+include ":npcs:randName";
 include "include/eventID";
 include "include/client";
 include "include/utility";
@@ -15,61 +15,61 @@ include "include/utility";
 	    SetName (auctioneer, RandomName (auctioneer) );
 	    EquipFromTemplate( auctioneer, "Clothes" );
     endif
-    
+
     var storage:=findstoragearea("Merchant Storage");
     var inv_sell:=find_or_create_item(storage,"AUCTION",0xE7C);
-    
+
     if(!storage or !inv_sell)
 	exit;
     endif
-    
+
     EnableEvents (EVID_SPEECH, 2);
     EnableEvents (EVID_ITEM_GIVEN);
 
 
 program auctioneerai()
-    
+
     while (1)
 	var item, event := 0;
-    
+
 	event := os::wait_for_event (20);
-    
+
 	who:=event.source;
 	TurnToward(who);
-    
+
 	if(event.text["hello"])
-    
+
 	    Say("To learn about the auction type help or .auc help");
 	    Say("Any items not claimed in 7 days will be deleted.");
-    
+
 	elseif(event.text["help"])
-    
+
 	    Say("To sell an item: type sell and click on the item");
 	    Say("We charge 10% to handle the sale.");
 	    Say("Return to any auctioneer to claim your item.");
-    
+
 	elseif((event.text["holdbox"]) and (who.cmdlevel>3))
-    
+
 	    sendopenspecialcontainer(who,inv_sell);
-    
+
 	elseif(event.item)
 	    item:=event.item;
 	    if(item.objtype == 0x186E and item.graphic == 5360)
 		    Say ("That item has been destroyed.");
 		    destroyitem(item);
 	    endif
-    
+
 	elseif(getglobalproperty("#aucnpc") == 1)
-    
+
 	    Say("I am busy right now, please try later.");
-    
+
 	else
-    
+
 	    if(event.text["sell"])
-	
+
 		setglobalproperty("#aucnpc",1);
 		Say ("What would you like to sell?");
-	
+
 		item:=Target(who,TGTOPT_NOCHECK_LOS);
 		If (!item)
 		    SendSysMessage(who,"canceled.");
@@ -79,11 +79,11 @@ program auctioneerai()
 		endif
 		setglobalproperty("#aucnpc",0);
 	    endif
-    
+
 	endif
-    
+
 	cleareventque();
-    
+
     endwhile
 
 endprogram
@@ -140,7 +140,7 @@ function sell_item(who,item)
 
 	bartermsg:=RequestInput(who,who.backpack,"What is your message (esc for none)");
 
-	if((bartermsg == "") or (!bartermsg)) 
+	if((bartermsg == "") or (!bartermsg))
 		bartermsg:="<none>";
 	endif
 
@@ -165,7 +165,7 @@ endfunction
 function tellplayers(itemname, price, msg, name)
 
     foreach chr in EnumerateOnlineCharacters()
-    
+
        if (getobjproperty(chr, "auction") == "yes")
 	 PlaySoundEffect(chr,0xEF);
 	 SendSysMessage( chr, "New item: " + itemname, FONT_NORMAL, 300 );
@@ -173,7 +173,7 @@ function tellplayers(itemname, price, msg, name)
 	 if (msg<>"<none>") SendSysMessage( chr, "msg: " + msg); endif
 	 SendSysMessage( chr, "Starting bid: " + price, FONT_NORMAL, 300);
        endif
-    
+
     endforeach
 
 endfunction
@@ -188,9 +188,9 @@ function totalauctionitems()
    foreach auction_items in backpack
 
        timeleft := (GetObjProperty(auction_items, "time")-ReadGameClock());
-    
+
        if ((!timeleft) or (timeleft == ""))
-    
+
        else
 	    totalitems := totalitems + 1;
        endif
@@ -207,11 +207,11 @@ function ownitem(bpack,item)
    var backpack:=EnumerateItemsInContainer(bpack);
 
        foreach bpitem in backpack
-    
+
 	    if (bpitem.serial == item.serial)
 		return 1;
 	    endif
-    
+
        endforeach
 
    return 0;

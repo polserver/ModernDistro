@@ -6,7 +6,6 @@ use cliloc;
 include ":magery:spells";
 include ":magery:fields";
 include ":attributes:attributes";
-include "include/facings";
 include ":virtue:noto";
 
 program poisonfield( parms )

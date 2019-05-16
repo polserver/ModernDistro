@@ -7,7 +7,7 @@ include ":magery:spells";
 include "include/client";
 include "include/sounds";
 include "include/objtype";
-include "include/isValidLoc";
+include ":magery:isValidLoc";
 
 program spell_gate(parms)
   var caster := parms[1];
@@ -53,7 +53,7 @@ program spell_gate(parms)
   var toy := CInt(dest.y);
   var toz := CInt(dest.z);
   var torealm := dest.realm;
-  if (torealm != caster.realm) 
+  if (torealm != caster.realm)
 	SendSysMessageCL(caster, 1005570, color := 33); // You cannot gate to another facet.
 	return;
   endif
@@ -89,7 +89,7 @@ program spell_gate(parms)
     chk := 1;
   endif
   DestroyItem(multicheck);
-  
+
 // Check for static houses
     var signs := ListItemsNearLocationOfType( tox, toy, toz, 30, 0x160ff);
     foreach item in signs

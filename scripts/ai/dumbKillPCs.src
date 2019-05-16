@@ -5,8 +5,8 @@ use cfgfile;
 
 include "include/eventID";
 include "include/sysEvent";
-include "include/randName";
-include "include/vetement";
+include ":npcs:randName";
+include ":npcs:garment";
 include "include/NPCUtil";
 include "include/objtype";
 include "include/dist";

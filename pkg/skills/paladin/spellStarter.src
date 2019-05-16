@@ -9,7 +9,7 @@ use cfgfile;
 
 include ":attributes:attributes";
 include ":magery:spells";
-include "include/containers";
+include ":containers:containers";
 include ":itemUtils:itemdesc";
 include "include/client";
 include "include/sounds";
@@ -131,7 +131,7 @@ program SpellStarter(params)
 	var orig_hp := AP_GetVital(mobile, "Hits");
 	var delay := spell_elem.Delay;
 	var protection := GetObjProperty(mobile, "Protection");
-        // Added to work around a problem with mages being unable to cast while under the influence of 
+        // Added to work around a problem with mages being unable to cast while under the influence of
         // strength mods.
 //	if ( AP_GetStatMod(mobile, ATTRIBUTEID_STRENGTH) )
 //		protection := 1;
@@ -163,7 +163,7 @@ program SpellStarter(params)
 
 	endwhile
 ////////////////////////////////////////////////////
-	
+
 	var attribute := Lower(spell_elem.Attribute);
 
 	if ( !attribute )
@@ -175,7 +175,7 @@ program SpellStarter(params)
 	if ( !difficulty )
 		difficulty := -1;
 	endif
-		
+
 //	var skill_check := SkillCheck(mobile, attribute, difficulty, 50);
 	var skill_check := SkillCheck(mobile, attribute, difficulty, 30);
 
@@ -184,7 +184,7 @@ program SpellStarter(params)
 		skill_check := 1;
 	endif
 	mobile.frozen := 0;
-        
+
 	// skill_check > 0 on success
 	if ( skill_check)
 		var info := struct;
@@ -226,7 +226,7 @@ endprogram
 function EquipmentCheck(mobile)
 	var hand1 := GetEquipmentByLayer(mobile, LAYER_HAND1);
 	var hand2 := GetEquipmentByLayer(mobile, LAYER_HAND2);
-	
+
 	// On OSI there are spell weaving weapons that mages can hold while casting spells
 	// But they are not implemented yet. Maybe later.
 	if ( (hand2 && !hand1.IsA(POLCLASS_SPELLBOOK)) || (hand2 && !hand2.IsA(POLCLASS_SPELLBOOK)) )
@@ -261,7 +261,7 @@ function CheckReagents(mobile, byref spell_elem, scroll)
 			objtype := CInt(_amount_iter);
 		endif
 		var properties := dictionary{"objtype"->objtype};
-		
+
 		if ( AmountInContainer(mobile.backpack, properties) < amount )
 			if ( mobile.cmdlevel )
 				SendSysMessage(mobile, "You do not have enough "+GetObjTypeDesc(objtype, (amount>1))+".");

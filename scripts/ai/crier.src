@@ -7,7 +7,7 @@ const HALT_THRESHOLD := 8;
 
 include "include/eventID";
 include "include/sysEvent";
-include "include/randName";
+include ":npcs:randName";
 include "include/NPCUtil";
 include "include/objtype";
 include "include/dist";

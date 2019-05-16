@@ -10,7 +10,7 @@ use vitals;
 
 include "include/client";
 include "include/objtype";
-include "include/yesNo";
+include ":gumps:yesNoSizable";
 include ":attributes:attributes";
 
 const ITEM_SWARM		:= 0x091b;
@@ -31,7 +31,7 @@ program harvest_honey (character, beehive)
 	if (already_harvested_amount >= MAX_PER_HIVE)
 		SendSysMessage(character, "The hive is empty.");
 		SendSysMessage(character, "Do you want to destroy the beehive?");
-		var destroy := YesNo(character, "Destroy?");
+		var destroy := yesNoSizable(character, "Destroy?");
 		if (destroy)
 			CreateItemAtLocation(beehive.x, beehive.y, beehive.z, ITEM_SWARM, 1);
 			SendSysMessage(character, "You fail to destroy the hive, and now the bees are pretty angry...");

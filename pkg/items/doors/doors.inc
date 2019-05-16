@@ -5,7 +5,7 @@ use cfgfile;
 
 include "include/client";
 include "include/objtype";
-include "include/NPCBackpacks";
+include ":npcs:NPCBackpacks";
 
 var doordesc := ReadConfigFile (":doors:itemdesc");
 
@@ -40,7 +40,7 @@ function OpenDoor (door)
 		set_critical (1);
 		door.movable := 1;
 		door.graphic := opengraphic;
-		MoveObjectToLocation (door, newx, newy, newz, door.realm, MOVEOBJECT_FORCELOCATION);    
+		MoveObjectToLocation (door, newx, newy, newz, door.realm, MOVEOBJECT_FORCELOCATION);
 		door.movable := 0;
 		set_critical (0);
 		PlayDoorOpenSound (door);
@@ -94,7 +94,7 @@ function PlayDoorOpenSound (door)
 	case (doordesc[door.objtype].doortype)
 		"wood":
 			PlaySoundEffect (door, SFX_OPEN_WOODEN_DOOR);
-		"metal": 
+		"metal":
 			PlaySoundEffect (door, SFX_OPEN_METAL_DOOR);
 		default:
 			PlaySoundEffect (door, SFX_OPEN_METAL_DOOR);
@@ -112,7 +112,7 @@ function PlayDoorCloseSound (door)
 	case (doordesc[door.objtype].doortype)
 		"wood":
 			PlaySoundEffect (door, SFX_CLOSE_WOODEN_DOOR);
-		"metal": 
+		"metal":
 			PlaySoundEffect (door, SFX_CLOSE_METAL_DOOR);
 		default:
 			PlaySoundEffect (door, SFX_CLOSE_METAL_DOOR);
@@ -156,6 +156,6 @@ function IsLocked (who, door)
       endif */
 	endforeach
 
-	return 1;				
+	return 1;
 
 endfunction

@@ -13,14 +13,12 @@ use os;
 use storage;
 
 include ":attributes:attributes";
-include "include/BAInpcUtil";
 include ":gumps:gumps";
 include ":gumps:gumpPrompt";
 include ":gumps:requestGump";
 include ":gumps:yesNo";
-//include "include/storageAreas";
 include ":containers:storageAreas";
-include "include/weaponInfo";
+include ":commands:weaponInfo";
 include "include/arrays";
 
 CONST START_Y	:= 55;   // These are to track the display area height.
@@ -225,7 +223,7 @@ endfunction
 function DisplayAttributes(targ, byref gump, byref entry, byref y_pos)
 	var type := entry[2];
 	var attributes := AP_ListAttributesByType(type);
-	var attrib_cfg := ReadConfigFile(":*:attributes"); 
+	var attrib_cfg := ReadConfigFile(":*:attributes");
 	//
 	// Notes about the first page of showing attributes:
 	// 1. The Y position they start showing on is dynamic.

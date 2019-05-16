@@ -10,9 +10,8 @@ include "include/myUtil";
 include "include/packets";
 include ":attributes:attributes";
 include "include/clock";
-include "include/accounts";
 include ":timeutils:time";
-include "include/equipment";
+include ":equipment:equipment";
 
 program onlogon(who)
   TrackIP(who);

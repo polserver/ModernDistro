@@ -19,4 +19,4 @@ function Inncheck(character)
   endforeach
   return 0;
 
-endfunction 
+endfunction

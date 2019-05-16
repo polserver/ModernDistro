@@ -8,7 +8,7 @@ include ":magery:spells";
 include "include/client";
 include "include/sounds";
 include "include/objtype";
-include "include/isValidLoc";
+include ":magery:isValidLoc";
 include ":virtue:virtue";
 
 program recall(parms)

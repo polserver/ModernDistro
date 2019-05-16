@@ -5,7 +5,7 @@ use util;
 include ":attributes:attributes";
 include ":magery:spells";
 include "include/client";
-include "include/spellAttack";
+//include ":magery:spellAttack";
 include ":damage:damage";
 
 program earthquake( parms )

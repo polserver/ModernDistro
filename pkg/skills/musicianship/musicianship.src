@@ -5,7 +5,6 @@ use util;
 include "include/client";
 include ":attributes:attributes";
 include "include/objtype";
-include "include/skillPoints";
 include "include/canAccess";
 
 var config;

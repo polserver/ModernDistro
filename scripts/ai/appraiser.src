@@ -5,15 +5,14 @@ use uo;
 
 include "include/eventID";
 include "include/sysEvent";
-include "include/randName";
+include ":npcs:randName";
 include "include/utility";
 include "include/client";
-include "include/vetement";
-include "include/NPCBackpacks";
+include ":npcs:garment";
 include "util/bank";
 include "include/anchors";
 include "include/dist";
-include "include/skillLists";
+include ":npcs:skillLists";
 include "include/begging";
 
 const MAX_SKILLS      := 48;     // There are currently 48 Skills.

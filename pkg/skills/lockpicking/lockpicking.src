@@ -7,7 +7,6 @@ include "include/client";
 include "include/dist";
 include "include/objtype";
 include "include/startEqp";
-include "util/key";
 include "include/canAccess";
 include ":attributes:attributes";
 

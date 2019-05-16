@@ -1,5 +1,4 @@
 ////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
 //
 //
 // math.inc
@@ -49,7 +48,10 @@
 // Nando's formulae in the POL Dice Generator.
 // The new functions were written by ThisIsMe.
 //
-////////////////////////////////////////////////////////////
+// 2.2
+// Removed more functions duplicated in math.em.
+// Removed needless functions e.g. IncRevision() which
+// added 1 to the parameter passed to it
 ////////////////////////////////////////////////////////////
 
 use math;
@@ -59,10 +61,14 @@ const CONST_E := 2.718282;
 const CONST_PI := 3.141592;
 
 
-
-function Log(b, x)
-
+///////////////////////////////////////////////////////////
+//
+// Log(b, x)
+//
 // Finds the logarithm to base <b> of <x>.
+//
+///////////////////////////////////////////////////////////
+function Log(b, x)
 
 	if (x<=0)
 		return 0;
@@ -71,20 +77,31 @@ function Log(b, x)
 
 endfunction
 
-
-function SplitLog(x)
+///////////////////////////////////////////////////////////
+//
+// SplitLog(x)
+//
 // Returns array of {characteristic, mantissa} for x.
 // (If x==1.12345, the characteristic is "1", and the
 // mantissa is (0.12345)
+//
+///////////////////////////////////////////////////////////
+function SplitLog(x)
 
 	return { (CInt(x)), (x - CInt(x)) };
+
 endfunction
 
-
-function Bounded(x, i, y, inclusive := 1)
+///////////////////////////////////////////////////////////
+//
+// Bounded(x, i, y, inclusive := 1)
+//
 // Checks to see if a number "i" falls between the two
 // bounds "x" and "y".  If inclusive is set to nonzero,
 // the function will return true if (i==x) || (i==y).
+//
+///////////////////////////////////////////////////////////
+function Bounded(x, i, y, inclusive := 1)
 	if (inclusive)
 		if ( (i >= Min({x, y})) && (i <= Max({x, y})) )
 			return 1;
@@ -100,32 +117,14 @@ function Bounded(x, i, y, inclusive := 1)
 	endif
 endfunction
 
-
-
-
-
-
-function Remainder(numerator, denominator)
-
-// Use this to get the remainder for non-integers.
-// Returns the remainder of the fraction:
+///////////////////////////////////////////////////////////
 //
-//		 Numerator
-//		-----------
-//		Denominator
-
-	while (numerator >= denominator)
-		numerator := numerator - denominator;
-	endwhile
-
-	return numerator;
-
-endfunction
-
-
-function Trunc(number, places)
-
+// Trunc(number, places)
+//
 // Truncates a dbl to a fixed amount of decimal places.
+//
+///////////////////////////////////////////////////////////
+function Trunc(number, places)
 
 	var base := Pow(10, places);
 
@@ -136,27 +135,35 @@ function Trunc(number, places)
 
 endfunction
 
-
-function Fac(factorial);
-
+///////////////////////////////////////////////////////////
+//
+// Factorial(N);
+//
 // Returns the factorial of a number:
-// Fac(10) == 10 * 9 * 8 * 7 * 6 * 5 * 4 * 3 * 2 * 1
+// Factorial(10) == 10 * 9 * 8 * 7 * 6 * 5 * 4 * 3 * 2 * 1
+//
+///////////////////////////////////////////////////////////
+function Factorial(N)
 
-	factorial := CInt(factorial);
+	N := CInt(N);
 	var x := 1;
 
-	while (factorial > 0)
-		x := x * factorial;
-		factorial := factorial - 1;
+	while (N > 0)
+		x := x * N;
+		N := N - 1;
 	endwhile
 	return x;
 
 endfunction
 
-
-function YRoot(x, y)
-
+///////////////////////////////////////////////////////////
+//
+// YRoot(x, y)
+//
 // Returns the <y> root of a number <x>:
+//
+///////////////////////////////////////////////////////////
+function YRoot(x, y)
 
 	var i := 0.000;
 	var n := 0.000;
@@ -189,23 +196,14 @@ function YRoot(x, y)
 
 endfunction
 
-
-function Inc(a)
-// Increments an integer by one.
-	return (a + 1);
-
-endfunction
-
-
-function Dec(a)
-// Decrements an integer by one.
-	return a - 1;
-
-endfunction
-
-function Mean(ArrayX)
-
+///////////////////////////////////////////////////////////
+//
+// Mean(ArrayX)
+//
 // Returns the arithmatic mean (average) of an array of numbers.
+//
+///////////////////////////////////////////////////////////
+function Mean(ArrayX)
 
 	var n, i:=0.000;
 
@@ -217,9 +215,14 @@ function Mean(ArrayX)
 
 endfunction
 
-
-function StdDev(ArrayX)
+///////////////////////////////////////////////////////////
+//
+// StdDev(ArrayX)
+//
 // Returns the Standard Deviation of an array of numbers.
+//
+///////////////////////////////////////////////////////////
+function StdDev(ArrayX)
 
 	var m, n, i := 0.000;
 	var ArrayMean := Mean(ArrayX);
@@ -238,8 +241,10 @@ function StdDev(ArrayX)
 
 endfunction
 
-
-function ZTest(ArrayX, mu, sigma)
+///////////////////////////////////////////////////////////
+//
+// ZTest(ArrayX, mu, sigma)
+//
 // Returns the test statistic for a ZTest.   This is used to show
 // the likelihood that a sample is drawn from the population.  The
 // mean and standard deviation for the population must be known.
@@ -251,6 +256,9 @@ function ZTest(ArrayX, mu, sigma)
 // mu==the mean of the entire population
 // sigma==the standard deviation of the population
 // n==the number of samples in the data
+//
+///////////////////////////////////////////////////////////
+function ZTest(ArrayX, mu, sigma)
 
 	var i, n;
 	var z:= 0.000;
@@ -266,9 +274,10 @@ function ZTest(ArrayX, mu, sigma)
 
 endfunction
 
-
-function TTest(ArrayX, mu)
-
+///////////////////////////////////////////////////////////
+//
+// TTest(ArrayX, mu)
+//
 // Returns the test statistic for a TTest.   This is used to show
 // the likelihood that a sample is drawn from the population, when
 // the mean and standard deviation for the entire population are
@@ -280,7 +289,9 @@ function TTest(ArrayX, mu)
 // mu==the estimated mean of the entire population
 // s==the standard deviation of the samples
 // n==the number of samples in the data
-
+//
+///////////////////////////////////////////////////////////
+function TTest(ArrayX, mu)
 
 	var i, n, s;
 	var t:= 0.000;
@@ -299,20 +310,24 @@ endfunction
 
 
 
+/////////////////////////////////////////////////////////////////////
+// BITWISE FUNCTIONS: These are very old, and not very efficient.  //
+// Use the standard $$, ||, etc. for bitwise comparisons.          //
+// Left intact to support any legacy code.                         //
+/////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 //
-// BITWISE FUNCTIONS: These are very old, and not very efficient.
-// Use the standard $$, ||, etc. for bitwise comparisons.
-// Left intact to support any legacy code.
-
-
-function BitIn(ArrayX)
-
+// BitIn(ArrayX)
+//
 // Takes an array of 8 bits and converts them into an integer.
 // This is used for the flag support.  IMPORTANT: bit positon is
 // *NOT* the same thing as the array position!   The first bit in
 // the flag is the 8th bit in the array, and vice versa.  This is
 // because it processes the bit values in the following order:
 // 128, 64, 32, 16, 8, 4, 2, 1.
+//
+///////////////////////////////////////////////////////////
+function BitIn(ArrayX)
 
 	var i := 8;
 	var n;
@@ -333,13 +348,17 @@ function BitIn(ArrayX)
 
 endfunction
 
-
-function BitOut(x)
-
+///////////////////////////////////////////////////////////
+//
+// BitOut(x)
+//
 // This function takes an unsigned, short integer (0-255) and returns
 // an array containing the individual bit values.   IMPORTANT: the
 // first element of the array is NOT the first bit, it is the 8th
 // bit, and so on down.   See the desc for BitIn for the details.
+//
+///////////////////////////////////////////////////////////
+function BitOut(x)
 
 	x := Cint(x);
 	var loop := 1;
@@ -363,13 +382,16 @@ function BitOut(x)
 
 endfunction
 
-
-function BitAnd(x, y)
-
+///////////////////////////////////////////////////////////
+//
+// BitAnd(x, y)
 // Performs a bitwise logical conjunction for two unsigned, short
 // integers (0-255).  If both values for a position are set, then
 // that position in the result is set.   If either are reset, then
 // the position in the result is reset.
+//
+///////////////////////////////////////////////////////////
+function BitAnd(x, y)
 
 	var ArrayX := BitOut(x);
 	var ArrayY := BitOut(y);
@@ -391,13 +413,17 @@ function BitAnd(x, y)
 
 endfunction
 
-
-function BitOr(x, y)
-
+///////////////////////////////////////////////////////////
+//
+// BitOr(x, y)
+//
 // Performs a bitwise logical disjunction for two unsigned, short
 // integers (0-255).  If either value (or both values) for a
 // position are set, then that position in the result is set.   If
 // both are reset, then the position in the result is reset.
+//
+///////////////////////////////////////////////////////////
+function BitOr(x, y)
 
 	var ArrayX := BitOut(x);
 	var ArrayY := BitOut(y);
@@ -419,13 +445,17 @@ function BitOr(x, y)
 
 endfunction
 
-
-function BitXor(x, y)
-
+///////////////////////////////////////////////////////////
+//
+// BitXor(x, y)
+//
 // Performs a bitwise logical exclusion for two unsigned, short
 // integers (0-255).  If one and ONLY one value for a position is
 // set, then that position in the result is set.   If both are
 // either set or reset, then the position in the result is reset.
+//
+///////////////////////////////////////////////////////////
+function BitXor(x, y)
 
 	var ArrayX := BitOut(x);
 	var ArrayY := BitOut(y);
@@ -447,13 +477,17 @@ function BitXor(x, y)
 
 endfunction
 
-
-function BitEqv(x, y)
-
+///////////////////////////////////////////////////////////
+//
+// BitEqv(x, y)
+//
 // Performs a bitwise logical equivalence for two unsigned, short
 // integers (0-255).  If one and ONLY one value for a position is
 // set, then that position in the result is reset.   If both are
 // either set or reset, then the position in the result is set.
+//
+///////////////////////////////////////////////////////////
+function BitEqv(x, y)
 
 	var ArrayX := BitOut(x);
 	var ArrayY := BitOut(y);
@@ -475,14 +509,18 @@ function BitEqv(x, y)
 
 endfunction
 
-
-function BitImp(x, y)
-
+///////////////////////////////////////////////////////////
+//
+// BitImp(x, y)
+//
 // Performs a bitwise logical implication for two unsigned, short
 // integers (0-255).  If the a position in the first integer is set,
 // and the corresponding position for the second integer is reset,
 // then that position in the result is reset.  All other combinations
 // will result in the value being set.
+//
+///////////////////////////////////////////////////////////
+function BitImp(x, y)
 
 	var ArrayX := BitOut(x);
 	var ArrayY := BitOut(y);
@@ -504,13 +542,17 @@ function BitImp(x, y)
 
 endfunction
 
-
-function BitNot(x)
-
+///////////////////////////////////////////////////////////
+//
+// BitNot(x)
+//
 // Performs a logical negation on a short, unsigned integer (0-255).
 // If a position in the integer is set, then that position in the
 // result is reset.  Conversely, if a position in the integer is
 // reset, then that position in the result is set.
+//
+///////////////////////////////////////////////////////////
+function BitNot(x)
 
 	var ArrayX := BitOut(x);
 	var z := 0;
@@ -535,11 +577,15 @@ function BitNot(x)
 
 endfunction
 
-
-function FlagSet(flag, bit);
-
+///////////////////////////////////////////////////////////
+//
+// FlagSet(flag, bit)
+//
 // This function will set the <bit> position in the <flag> register.
 // Both <flag> and <bit> are integers.
+//
+///////////////////////////////////////////////////////////
+function FlagSet(flag, bit)
 
 	bit := 9 - bit;
 
@@ -552,11 +598,15 @@ function FlagSet(flag, bit);
 
 endfunction
 
-
-function FlagReset(flag, bit);
-
+///////////////////////////////////////////////////////////
+//
+// FlagReset(flag, bit)
+//
 // This function will reset the <bit> position in the <flag> register.
 // Both <flag> and <bit> are integers.
+//
+///////////////////////////////////////////////////////////
+function FlagReset(flag, bit)
 
 	bit := 9 - bit;
 
@@ -569,12 +619,16 @@ function FlagReset(flag, bit);
 
 endfunction
 
-
-function FlagCheck(flag, bit);
-
+///////////////////////////////////////////////////////////
+//
+// FlagCheck(flag, bit)
+//
 // This function will check the flag in the <bit> position of the
 // <flag> register.  It will return a 1 if the flag is set, and a 0
 // if the flag is reset.  Both <flag> and <bit> are integers.
+//
+///////////////////////////////////////////////////////////
+function FlagCheck(flag, bit)
 
 	var FlagArray := BitOut(flag);
 	bit := 9 - bit;
@@ -702,4 +756,18 @@ function Round ( num )
  else
   return Ceil ( num );
  endif
+endfunction
+
+/*
+ * IsBitOn ( value, shift_by )
+ *
+ * Purpose:
+ * Returns a 1 if the binary digit at the shift_by location is set, e.g. equal to 1.
+ * Otherwise it returns a 0.
+ *
+ * value:		The number on which to perform the test.
+ * shift_by:	The bit position to test.
+ */
+function IsBitOn ( value, shift_by )
+	return ( 1 & ( value >> shift_by ) );
 endfunction

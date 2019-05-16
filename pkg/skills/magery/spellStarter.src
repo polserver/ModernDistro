@@ -9,7 +9,7 @@ use cfgfile;
 
 include ":attributes:attributes";
 include ":magery:spells";
-include "include/containers";
+include ":containers:containers";
 include ":itemUtils:itemdesc";
 include "include/client";
 include "include/sounds";

@@ -7,12 +7,12 @@ use math;
 include "include/speech";
 include "include/client";
 include "include/eventID";
-include "include/randName";
+include ":npcs:randName";
 include "include/dist";
 include "include/anchors";
 include "ai/main/loot";
 include "ai/combat/defaultCombatEvent";
-include "include/vetement";
+include ":npcs:garment";
 
 
 var currentopponent := 0;
@@ -148,7 +148,7 @@ function lookiehere(who)
 	  elem := FindConfigElem(npccfg, npc.npctemplate);
 	  if(!elem.guardignore && !GetObjProperty(npc, "called"));
 		if((npc) && (npc.script != "tamed") && (npc.script != "light"))
-         
+
           if(guardzone == 1)
 		SetObjProperty(npc, "called", 1);
 		foreach mobile in ListMobilesNearLocation(me.x, me.y, me.z, 15, me.realm)
@@ -320,7 +320,7 @@ function Fight( opponent )
 	  return;
 	endif
   endif
- 
+
 	foreach mobile in ListMobilesNearLocation(me.x, me.y, me.z, 20, me.realm)
 		if(mobile.npctemplate == "townguard")
 			var ev := array;

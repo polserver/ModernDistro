@@ -5,8 +5,7 @@ use util;
 
 include "include/client";
 include ":attributes:attributes";
-include "include/spellAttack";
-include "include/spellRestrictions";
+
 program cast_fireball( caster, effect, sound )
 
 if (!effect)
@@ -31,7 +30,7 @@ var teffect := CInt(effect);
                       teffect,
                       5,
                        1 );
-   
+
 
 
    ApplyRawDamage( cast_on, GetMaxHp(cast_on) + 10  );

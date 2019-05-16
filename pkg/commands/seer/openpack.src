@@ -1,6 +1,6 @@
 use uo;
 
-include "include/NPCBackpacks";
+include ":npcs:NPCBackpacks";
 
 program textcmd_pack( who )
   var me := Target( who,TGTOPT_NOCHECK_LOS );

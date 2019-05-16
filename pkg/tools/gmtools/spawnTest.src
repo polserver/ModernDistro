@@ -2,7 +2,7 @@ use uo;
 use os;
 
 include "include/startEqp";
-include "util/key";
+include ":keys:key";
 
 var chestarray := {};
 

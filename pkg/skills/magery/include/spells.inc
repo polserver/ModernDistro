@@ -10,7 +10,7 @@ include ":magery:report";
 include "include/client";
 include "include/sounds";
 include "include/statMod";
-include "include/spellAttack";
+include ":magery:spellAttack";
 
 
 const EVID_DISCHARGE := 0x123457;

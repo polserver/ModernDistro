@@ -6,7 +6,6 @@ use cliloc;
 include ":magery:spells";
 include ":magery:fields";
 include ":attributes:attributes";
-include "include/facings";
 
 program parafield( parms )
   var caster := parms[1];
@@ -22,7 +21,7 @@ program parafield( parms )
   if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
         return 0;
   endif
-  
+
 	MS_PlaySpellSFX(info.spell_id, cast_on);
 	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
 

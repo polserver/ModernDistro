@@ -7,7 +7,7 @@ include ":attributes:attributes";
 include ":timedScripts:timedScripts";
 include ":magery:spells";
 include ":magery:fields";
-include "include/facings";
+//include "include/facings";
 
 program efield( parms )
   var caster := parms[1];
