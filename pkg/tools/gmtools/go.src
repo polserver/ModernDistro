@@ -65,7 +65,7 @@ program textcmd_go( who, text )
     // Open files and set veriables
     var locs    := ReadConfigFile("::golocs");
     var MaxLocs := GetConfigMaxIntKey(locs)+1;
-    var dest    := locs[mod(result[0], MaxLocs)];
+    var dest    := locs[result[0] % MaxLocs];
     var traveler;
     // Determine if we are teleporting ourselves or someone other and set the traveler variable
     if ( result[0] > MaxLocs ) // teleporting someone else
@@ -133,7 +133,7 @@ function FillInArrays( tname )
         datindx := datalen+1;
         data[datindx] := currloc.Name;
 
-        if (mod(locationscount, 19) == 1)
+        if (locationscount % 19 == 1)
 
           // Pointer Down
           if (locationscount >= 19)

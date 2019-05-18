@@ -26,6 +26,8 @@
  * GFPicTiled(byref gump, x, y, width, height, gump_id)
  * GFTooltip(byref gump, cliloc_id, customstring)
  * GFItemProperty ( byref gump, item_serial )
+ * GFClosable(byref gump, bool)
+ * GFAddAlphaRegion(byref gump, x, y, width, height)
  *
  * Private Function List
  * XGFError(text)

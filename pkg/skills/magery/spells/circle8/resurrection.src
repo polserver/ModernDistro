@@ -51,7 +51,7 @@ program spell_resurrect( parms )
 		if ( !ResurrectionGump(cast_on) )
 			return 0;
 		else
-			AdjustVirtue(caster, "Compassion", 1, 100);
+			VS_AdjustVirtue(caster, "Compassion", 1, 100);
 			var karma := CInt( GetObjProperty(caster, "Karma") );
 			if (!karma)
 				karma := 0;

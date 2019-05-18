@@ -22,7 +22,7 @@ use cfgfile;
 
 include "include/eventID";
 include "include/sysEvent";
-include "include/randName";
+include ":npcs:randName";
 include "include/NPCUtil";
 include "include/objtype";
 include "include/anchors";
@@ -42,7 +42,7 @@ var idlesnd1 := CInt(npccfgfile[me.npctemplate].idlesound1);
 var idlesnd2 := CInt(npccfgfile[me.npctemplate].idlesound2);
 
 program KillPlayers()
-    
+
     drop_anchor();
 
     EnableEvents( SYSEVENT_ENGAGED );

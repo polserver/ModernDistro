@@ -1,4 +1,4 @@
-include "include/skillLists";
+include ":npcs:skillLists";
 
 var cost;
 

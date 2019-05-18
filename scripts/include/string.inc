@@ -50,31 +50,30 @@ CONST STR_DEL_ALL		:= 0x2;
 CONST STR_DEL_LEADING		:= 0x4;
 CONST STR_DEL_TRAILING		:= 0x8;
 
-// Function TruncateArticle(x)
+// Function TruncateArticle(str)
 // This function will remove an indefinite article ("a" or "an")
-// from a string "x", returning the rest of the string.  If there
-// is no article, it returns the original string "x".
+// from a string "str", returning the rest of the string.  If there
+// is no article, it returns the original string "str".
+function TruncateArticle(str)
 
-function TruncateArticle(x)
-
-	x := CStr(x);
-	var i := len(x);
+	str := CStr(str);
+	var i := len(str);
 
 	var an_articlelist := { "an ", "An ", "AN ", "aN " };
 	var a_articlelist := { "a ", "A " };
 
-	if ( x[1,3] in an_articlelist )
-		x := (x[4,i-3]);
-	elseif ( x[1,2] in a_articlelist )
-		x := (x[3,i-2]);
+	if ( str[1,3] in an_articlelist )
+		str := (str[4,i-3]);
+	elseif ( str[1,2] in a_articlelist )
+		str := (str[3,i-2]);
 	endif
 
-	return x;
+	return str;
 
 endfunction
 
 
-// function AddArticle(x)
+// function AddArticle(str)
 // This function will prefix an indefinite article ("a" or "an") in
 // front of a string.  If the string begins with a consonant, it
 // uses "a", and if the string begins with a vowel it will use "an".
@@ -86,19 +85,19 @@ endfunction
 // or before an "h" in words where the accent falls on any syllable
 // other than the first (like "historic").
 
-function AddArticle(x)
+function AddArticle(str)
 
-	x := CStr(x);
+	str := CStr(str);
 	var vowellist := { "a", "A", "e", "E", "i", "I", "o", "O", "u", "U" };
-	var i := x[1];
+	var i := str[1];
 
 	if ( i in vowellist )
-		x := "an " + x;
+		str := "an " + str;
 	else
-		x := "a " + x;
+		str := "a " + str;
 	endif
 
-	return x;
+	return str;
 
 endfunction
 
@@ -205,7 +204,7 @@ function SortMultiArrayByIndex(MultiArray, SubIndex)
 				MultiArray[k] := f;
 			endif
 		endfor
-		//sleepms(2);
+		sleepms(2);
 	endfor
 
 	return MultiArray;
@@ -213,14 +212,14 @@ function SortMultiArrayByIndex(MultiArray, SubIndex)
 endfunction
 
 
-// function PadString(x, stringlength)
-// This function will pad a string "x" with enough spaces to reach
+// function PadString(str, stringlength)
+// This function will pad a string "str" with enough spaces to reach
 // a length indicated by "stringlength".  If the string is already
 // longer than stringlength, the function will return 0.
 
-function PadString(x, stringlength)
+function PadString(str, stringlength)
 
-	var padding := stringlength - len(x);
+	var padding := stringlength - len(str);
 	if (padding < 0)
 		return 0;
 	endif
@@ -228,44 +227,44 @@ function PadString(x, stringlength)
 	var padstr := "                    ";     // 20 spaces
 
 	while(padding > 20)
-		x := x + padstr;
+		str := str + padstr;
 		padding := padding - 20;
 	endwhile
 
 	if (padding > 0)
-		x := x + padstr[1, padding];
+		str := str + padstr[1, padding];
 	endif
 
-	return x;
+	return str;
 
 endfunction
 
 
 
-// function PadArray(x, arraylength)
-// This function will pad an array "x" with enough 0s to reach length
+// function PadArray(arry, arraylength)
+// This function will pad an array "arry" with enough 0s to reach length
 // specified in "arraylength".  If the length of the array is already
 // greater than arraylength, the function will return 0.
 
-function PadArray(x, arraylength)
+function PadArray(arry, arraylength)
 
-	var padding := arraylength - len(x);
+	var padding := arraylength - len(arry);
 
 	if (padding < 0)
 		return 0;
 	elseif (padding == 0)
-		return x;
+		return arry;
 	endif
 
-	var q := len(x);
+	var q := len(arry);
 	var i;
 
 	for (i := 1; i <= padding; i := i + 1)
 		q := q + 1;
-		x[q] := 0;
+		arry[q] := 0;
 	endfor
 
-	return x;
+	return arry;
 
 endfunction
 
@@ -288,23 +287,6 @@ function ReturnIndex(myarray, elementvalue)
 
 endfunction
 
-// Fix for some string bugs. Pass the string and
-// the value to set it to. If no value is passed,
-// it sets value to "". This prevents it from being
-// locked in instances such as the struct and dict bug where
-// once they get <uninitialized object> they can no longer be
-// written to.
-//
-// *Shouldnt be necessary anymore with pol 095.
-//
-function SetString(byref the_string, value:=0)
-	if ( !value )
-		the_string := "";
-	else
-		the_string := CStr(value);
-	endif
-endfunction
-
 // Makes the string lowercase, then capitalizes the first letter.
 function UCFirst(text)
 	text := CStr(text);
@@ -315,11 +297,11 @@ function UCFirst(text)
 	return text;
 endfunction
 
-function LCFirst( text )
+// Makes the first letter of the string lowercase.
+function LCFirst(text)
 	text := CStr(text);
 
 	if ( Len(text) > 1 )
-		text := Lower(text);
 		text[1] := Lower(text[1]);
 	endif
 
@@ -332,7 +314,7 @@ function RemoveSpaces(text, flags:=CLR_LEADING_SPACES)
 	var post := flags & CLR_TRAILING_SPACES;
 	var dbl := flags & CLR_DOUBLE_SPACES;
 	var all := flags & CLR_ALL_SPACES;
-	
+
 	if ( all )
 		while ( text[" "] )
 			text[" "] := "";
@@ -351,7 +333,7 @@ function RemoveSpaces(text, flags:=CLR_LEADING_SPACES)
 				sleepms(2);
 			endwhile
 		endif
-	
+
 		if ( dbl )
 			while ( text["  "] )
 				text["  "] := " ";
@@ -362,6 +344,21 @@ function RemoveSpaces(text, flags:=CLR_LEADING_SPACES)
 	return text;
 endfunction
 
+///////////////////////////////////////////////////////////
+//
+// RemoveFromString( text, remove, flags:=STR_DEL_ALL )
+//
+// Purpose:
+// Removes the value passed in "remove" from a string passed
+// in "text" based on flags passed.
+// Flags are: STR_DEL_ONCE
+//            STR_DEL_ALL
+//            STR_DEL_LEADING
+//            STR_DEL_TRAILING
+//
+// Returns the modified string.
+//
+///////////////////////////////////////////////////////////
 function RemoveFromString( text, remove, flags:=STR_DEL_ALL )
 	text := CStr(text);
 	remove := CStr(remove);
@@ -409,21 +406,31 @@ function RemoveFromString( text, remove, flags:=STR_DEL_ALL )
 	return text;
 endfunction
 
-function ArrayAppend(x, y)
+///////////////////////////////////////////////////////////
+//
+// AppendArray(arry1, arry2)
+//
+// Purpose:
+// Append Arry2 to the end of Arry1.
+//
+// Returns Arry1 with Array2 appended.
+//
+///////////////////////////////////////////////////////////
+function AppendArray(arry1, arry2)
 
-	var xlen := len(x);
+	var xlen := len(arry1);
 	var i := 0;
-	for (i := 1; i <= len(y); i := i + 1)
+	for (i := 1; i <= len(arry2); i := i + 1)
 		xlen := xlen + 1;
-		x[xlen] := y[i];
+		arry1[xlen] := arry2[i];
 	endfor
 
-	return x;
+	return arry1;
 
 endfunction
 
 
-function Check_ValidChar( text, allow_space:=0 )
+function Check_ValidChar(text, allow_space:=0)
 
          //Make sure you check a text without spaces or it will fail.
          var valid_char := array{ "a", "b", "c", "d", "e", "f", "g",
@@ -447,43 +454,12 @@ function Check_ValidChar( text, allow_space:=0 )
                   elseif( allow_space && ( text[i] == " " || CAsc( text[i] ) == 0 ))
                            continue;
                   endif
-                  
+
                   return 0;
          endfor
-         
+
          return 1;
 endfunction
-
-////////////////////////////////////////////////////
-//
-//  Function SearchStr
-//
-//  Parameters:
-//    strng - string to search
-//    substring - information to search for
-//
-//  Return value:
-//    position of <substring> within <strng>
-//          or
-//    0 - If not found
-//
-///////////////////////////////////////////////////////
-
-function SearchStr(strng, substring)
-var sublen := Len(substring);
-var fragment;
-	if(Len(strng) >= sublen)
-		for i := 1 to Len(strng)
-//		for i := 1 to Len(strng)-Len(substring)
-			fragment := SubStr(strng, i, sublen);
-			if(fragment == substring)
-				return i;
-			endif
-		endfor
-	endif
-	return 0;
-endfunction
-
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -497,7 +473,7 @@ endfunction
 //            or 0x0 to 0x7FFFFFFF hex.
 //
 //  Returns   A string representaton of a decimal integer with
-//            commas inserted appropriately. Example: 2,147,483,647
+//            commas inserted appropriately. Example: "2,147,483,647"
 //            or -1 if the integer exceeds 2147483647 decimal.
 //
 //////////////////////////////////////////////////////////////////////
@@ -519,7 +495,7 @@ function AddCommas(number)
   setsof3digits := CInt((Len(strng) - modstrlen) / 3);
   tempstring := strng[modstrlen + 1, Len(strng)];
   for i := 1 to setsof3digits
-    
+
     if(Len(tempstring) > 3)
       newstring := newstring + tempstring[1,3] + ",";
       tempstring := tempstring[4, Len(tempstring)];
@@ -528,20 +504,20 @@ function AddCommas(number)
     endif
 
   endfor
-  
-  
+
+
   return newstring;
 endfunction
 
 ///////////////////////////////////////////
-// SortArrayABC - Sortiert nen Array alphabetisch
-// arr := array(); dir := 1 Aufsteigend, 0 := Absteigend,
-// subindex := nach welchem Subarray-/Substructelement soll sortiert werden
+// SortArrayABC - Sorted as array alphabetically
+// arr := array(); dir := 1 ascending, 0 := descending,
+// subindex := Which Subarray/substructing element to sort by
 ///////////////////////////////////////////
 Function SortArrayABC(arr, dir := 1, subindex := 0)
   Var dict := dictionary, key;
 
-  // Dict aufbauen: Sortierkey -> {Nummen im Array}
+  // Build Dict: Sortierkey-> {Numbers in Array}
   ForEach element in arr
     If (!subindex)
       key := element;
@@ -555,7 +531,7 @@ Function SortArrayABC(arr, dir := 1, subindex := 0)
     SleepMS(2);
   EndForEach
 
-  // Keys entsprechend sortieren
+  // Keys Sorting accordingly
   var newarray := array{};
   var sorted := dict.keys();
   sorted.sort();

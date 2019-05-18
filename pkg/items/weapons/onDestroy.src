@@ -4,7 +4,7 @@
 
 use uo;
 
-include "include/equipment";
+include ":equipment:equipment";
 
 program OnDestroy(item)
 	var equipped := CInt(GetObjProperty(item, "#EquippedOn"));

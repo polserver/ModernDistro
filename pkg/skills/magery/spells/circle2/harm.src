@@ -28,7 +28,7 @@ program cast_harm( parms )
 
 	MS_PlaySpellSFX(info.spell_id, cast_on);
 	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
-	
+
 	// Base damage is a decimal number in between min and max damage
 	var min_damage := CInt(GetConfigInt(info.spell_config, "MinBaseDamage"));
 	var max_damage := CInt(GetConfigInt(info.spell_config, "MaxBaseDamage"));
@@ -43,7 +43,7 @@ program cast_harm( parms )
 		default: damage := CDbl(damage) / 4;
 	endcase
 
-	ApplyDamageEX(cast_on, damage, info.damage_type, caster);
-	
+	ApplySpellDamageEX(cast_on, damage, info.damage_type, caster);
+
 	return 1;
 endprogram

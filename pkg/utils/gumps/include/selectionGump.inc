@@ -37,7 +37,7 @@ CONST OKAY_BTN		:= 0xA00;
  * btn_type:	Type of button to display next to the text.
  *
  * Return Values
- * Returns an a single value from the options array if RADIO or NORMAL are used.
+ * Returns a single value from the options array if RADIO or NORMAL are used.
  * Returns an array of option values if CHECKBOX is used.
  * Returns an error on failure.
  *
@@ -54,7 +54,7 @@ function SelectionGump( mobile, title, options, btn_type:=BTN_TYPE_NORMAL )
 	GFResizePic( s_gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 280, 450 );
 
         GFAddAlphaRegion( s_gump, 0, 0, 310, 480 );
-        
+
 	GFTextMid( s_gump, 15, 20, 280, 1720, title );
 	GFAddButton( s_gump, 135, 440, 2128, 2129, GF_CLOSE_BTN, OKAY_BTN );
 
@@ -73,7 +73,7 @@ function SelectionGump( mobile, title, options, btn_type:=BTN_TYPE_NORMAL )
 				GFRadioButton( s_gump, 30, y_pos, 210, 211, 0, _entry_iter );
 				break;
 		endcase
-  
+
 		GFTextLine( s_gump, 60, y_pos, 2100, entry );
 		y_pos := y_pos+20;
 

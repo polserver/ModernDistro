@@ -39,7 +39,7 @@ program banker();
 	if(myanchor)
 		MoveObjectToLocation(me, myanchor[1], myanchor[2], myanchor[3], me.realm, MOVEOBJECT_FORCELOCATION);
 	endif
-	
+
 	drop_anchor();
 	myanchor := GetObjProperty(me, "Anchor");
 	EnableEvents(EVID_NODE);
@@ -131,9 +131,9 @@ endfunction
 function ShowBalance(who, goldamt, silveramt, copperamt)
 
 	var bankBalance := GFCreateGump();
-	
+
 	GFPage(bankBalance, 0);
-	
+
 	//Background 1
 	GFResizePic(bankBalance, 154, 101, 9200, 357, 343);
 	//HTML 1
@@ -168,7 +168,7 @@ function BuyBankersNote(who, me, currency := 0xEED)
 	var stuff := EnumerateItemsInContainer(box);
 	var payeeserial := 0;
 	var amt := 500000001;		// This is so the 'while' loop will get executed.
-	
+
 //	while(amt > 500000000)
 		amt := RequestGump(who,"For what amount shall I make the Banker's Order? The coins must be in your bank box.", "The maximum is 500 million coins");
 		amt := CInt(amt);
@@ -177,7 +177,7 @@ function BuyBankersNote(who, me, currency := 0xEED)
 			return 0;
 		endif
 //	endwhile
-	
+
 	var copperamt := 0;
 	var silveramt := 0;
 	var goldamt := 0;
@@ -189,34 +189,34 @@ function BuyBankersNote(who, me, currency := 0xEED)
 			default:
 		endcase
 	endforeach
-	
+
 	if(goldamt < (amt + 10))
 		PrintTextAbove(me, "I'm sorry. You don't have the funds available in your bank box.", 1, 39);
 		PrintTextAbove(me, "Please come back when you can deposit the amount needed.", 1, 39);
 		return 0;
 	endif
-		
 
-	
+
+
 	var payee := RequestGump(who,"Whom shall I list as the payee?", "Please make sure the name is spelled correctly.");
 	if(!payee)
 		PrintTextAbove(me, "Very well then. I see you've changed your mind.", 1, 39);
 		return 0;
 	endif
-	
-	payeeserial := FindValidPlayer(payee);
+
+	payeeserial := ACCT_FindValidPlayer(payee);
 	if(!payeeserial)
 		PrintTextAbove(me, "That person doesn't seem to have an account with any bank.", 1, 33);
 		return 0;
 	endif
-	
+
 	var agree := yesNoSizable(who, "There is a nominal fee of 10 coins additional charge for the Note. Do you accept?");
 	if(!agree)
 		PrintTextAbove(me, "Very well then. Perhaps later.", 1, 39);
 		return 0;
 	endif
-	
-	
+
+
 
 	var spentcoins := SpendCoin(who, amt + 10, box, CInt(currency));
 	if(!spentcoins)
@@ -232,7 +232,7 @@ function BuyBankersNote(who, me, currency := 0xEED)
 		PrintTextAbove(me, "Your backpack is full. Make room and come back later.", 1, 33);
 		return 0;
 	endif
-	
+
 	SetObjProperty(created, "Payee", payee);					// Payee's name
 	SetObjProperty(created, "PayeeSerial", payeeserial);		// Serial number of the player to whom the order is made
 	SetObjProperty(created, "Currency", currency);				// The ObjType of the coins being used
@@ -332,5 +332,5 @@ function ReleaseCoins(byref things)
 			default:
 		endcase
 	endforeach
-	
+
 endfunction

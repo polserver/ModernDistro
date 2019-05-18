@@ -22,8 +22,8 @@ use cfgfile;
 
 include "include/eventID";
 include "include/sysEvent";
-include "include/randName";
-include "include/vetement";
+include ":npcs:randName";
+include ":npcs:garment";
 include "include/NPCUtil";
 include "include/objtype";
 include "include/dist";
@@ -33,7 +33,7 @@ include "ai/combat/immobileFight";
 include "ai/main/sleepMode";
 include "ai/combat/spellCombatEvent";
 include "ai/setup/spellSetup";
-include "include/NPCCast";
+include ":npcs:NPCCast";
 
 const HALT_THRESHOLD := 10; // how close before he attacks?
 var LAST_BREATH := ReadGameClock();

@@ -6,19 +6,19 @@ use uo;
 include "include/eventID";
 include ":attributes:attributes";
 include "include/sysEvent";
-include "include/randName";
+include ":npcs:randName";
 include "include/utility";
 include "include/mrcSpawn";
 include "include/speech";
 include "include/client";
-include "include/vetement";
-include "include/NPCBackpacks";
+include ":npcs:garment";
+include ":npcs:NPCBackpacks";
 include "util/bank";
 include "include/anchors";
 include "include/dist";
 include "include/findCity";
 include "include/begging";
-include "include/trainSkill";
+include ":npcs:trainSkill";
 
 const RESPAWN_MINUTES := 30;     // In how many minutes will the NPC respawn if killed.
 const MAX_SKILLS      := 48;     // There are currently 48 Skills.

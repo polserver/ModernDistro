@@ -29,9 +29,9 @@ include ":attributes:titles";
 include ":datafile:datafile";
 
 /* AP_GetAttributesCfgFile()
- * 
+ *
  * Purpose
- * Loads attributes.cfg
+ * Loads attributes.cfg.
  *
  * Parameters
  *
@@ -78,7 +78,7 @@ function AP_GetAttributeCfgElem( attribute_name, byref cfg_file:=0 )
 endfunction
 
 /* AP_GetAttributesDataFile()
- * 
+ *
  * Purpose
  * Loads the attributes datafile.
  *

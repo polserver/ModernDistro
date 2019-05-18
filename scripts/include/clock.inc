@@ -72,10 +72,10 @@ endfunction
 ///////////////////
 
 function GetTimeDesc (seconds, showseconds := 1)
-	seconds := CINT (seconds);
-	var minutes := CINT (seconds/60);
-	var hours := CINT (minutes/60);
-	var days := CINT (hours/24);
+	seconds := CInt (seconds);
+	var minutes := CInt (seconds/60);
+	var hours := CInt (minutes/60);
+	var days := CInt (hours/24);
 
 	if (seconds < 60)
 		if (showseconds)
@@ -84,10 +84,10 @@ function GetTimeDesc (seconds, showseconds := 1)
 			return "< 1 minute";
 		endif
 	endif
-	
+
 	hours := hours - days*24;
 	minutes := minutes - (days*24 + hours)*60;
-	
+
 	var returnstring := "";
 	if (days)
 		if (days > 1)
@@ -96,7 +96,7 @@ function GetTimeDesc (seconds, showseconds := 1)
 			returnstring := returnstring + "1 day, ";
 		endif
 	endif
-	
+
 	if (hours or days)
 		if (hours > 1)
 			returnstring := returnstring + hours + " hours, ";
@@ -104,7 +104,7 @@ function GetTimeDesc (seconds, showseconds := 1)
 			returnstring := returnstring + "1 hour, ";
 		endif
 	endif
-	
+
 	if (minutes or hours or days)
 		if (minutes > 1)
 			returnstring := returnstring + minutes + " minutes";
@@ -112,9 +112,9 @@ function GetTimeDesc (seconds, showseconds := 1)
 			returnstring := returnstring +  "1 minute";
 		endif
 	endif
-	
+
 	if (showseconds)
-		seconds := CINT (seconds%60);
+		seconds := CInt (seconds%60);
 		if (seconds > 1)
 			returnstring := returnstring + ", " + seconds + " seconds, ";
 		elseif (seconds == 1)
@@ -123,7 +123,7 @@ function GetTimeDesc (seconds, showseconds := 1)
 			returnstring := returnstring + ", " + "0 seconds, ";
 		endif
 	endif
-	
+
 	return returnstring;
 endfunction
 
@@ -197,7 +197,7 @@ function GetYear ()
 		endif
 		current_year_counter := current_year_counter + 1;
 	endwhile;
-	return (2000 + current_year_counter);	
+	return (2000 + current_year_counter);
 endfunction
 
 ///////////////////
@@ -253,7 +253,7 @@ function GetMonth ()
 			done := 1;
 		endif
 	until (done);
-	return MonthNames [current_month_counter];	
+	return MonthNames [current_month_counter];
 endfunction
 
 
@@ -280,7 +280,7 @@ function Systime_GetYear ()
 			done:= 1;
 		endif
 	until (done);
-	return (2000 + current_year_counter);	
+	return (2000 + current_year_counter);
 endfunction
 
 
@@ -316,8 +316,8 @@ function Systime_GetMonth ()
 	//convert to GMT
 //	systime := systime + 43200;
 	//convert to days
-	var days := CINT (systime / SECONDS_PER_DAY);
-	
+	var days := CInt (systime / SECONDS_PER_DAY);
+
 	var current_year_counter := 0;
 	var current_month_counter := 1;
 	var done := 0;
@@ -350,7 +350,7 @@ endfunction
 
 
 ///////////////////
-//  Figures out what the current date is (real-world time) 
+//  Figures out what the current date is (real-world time)
 ///////////////////
 
 function Systime_GetDate ()
@@ -363,7 +363,7 @@ function Systime_GetDate ()
 	//convert to GMT
 //	systime := systime + 43200;
 	//convert to days
-	var days := CINT (systime / SECONDS_PER_DAY) + 1;
+	var days := CInt (systime / SECONDS_PER_DAY) + 1;
 
 	var current_year_counter := 0;
 	var current_month_counter := 1;
@@ -409,16 +409,16 @@ endfunction
 
 
 ///////////////////
-//  Figures out what the current hour is, military time (real-world time) 
+//  Figures out what the current hour is, military time (real-world time)
 ///////////////////
 
 function Systime_GetHour ()
 	var systime := polcore().systime;
 	//convert to GMT
 //	systime := systime + 43200;
-	systime := CINT (systime % SECONDS_PER_DAY);
+	systime := CInt (systime % SECONDS_PER_DAY);
 
-	var hour := CINT (systime / 3600);
+	var hour := CInt (systime / 3600);
 	return hour;
 endfunction
 
@@ -426,14 +426,14 @@ endfunction
 
 
 ///////////////////
-//  Figures out what the current minute is (real-world time) 
+//  Figures out what the current minute is (real-world time)
 ///////////////////
 
 function Systime_GetMinute ()
 	var systime := polcore().systime;
-	systime := CINT (systime % 3600);
+	systime := CInt (systime % 3600);
 
-	var minute := CINT (systime / 60);
+	var minute := CInt (systime / 60);
 	return minute;
 endfunction
 
@@ -469,8 +469,8 @@ function Systime_GetReadableTimeString ()
 	//convert to GMT
 //	systime := systime + 43200;
 	//convert to days
-	var days := CINT (systime / SECONDS_PER_DAY) + 1;
-	
+	var days := CInt (systime / SECONDS_PER_DAY) + 1;
+
 	var current_year_counter := 0;
 	var current_month_counter := 1;
 	var days_in_month, done := 0;
@@ -484,7 +484,7 @@ function Systime_GetReadableTimeString ()
 		else
 			days_in_month := MonthDays[current_month_counter];
 		endif
-		
+
 		if (days_in_month <= days)
 			days := days - days_in_month;
 			current_month_counter := current_month_counter + 1;
@@ -506,13 +506,13 @@ function Systime_GetReadableTimeString ()
 	systime := polcore().systime;
 	//convert to GMT
 //	systime := systime + 43200;
-	systime := CINT (systime % SECONDS_PER_DAY);
-	var hour := CINT (systime / 3600);
+	systime := CInt (systime % SECONDS_PER_DAY);
+	var hour := CInt (systime / 3600);
 
 	systime := polcore().systime;
-	systime := CINT (systime % 3600);
-	var minute := CINT (systime / 60);
-	
+	systime := CInt (systime % 3600);
+	var minute := CInt (systime / 60);
+
 	if (hour == 0)
 		hour := 24;
 	elseif (hour < 10)
@@ -521,7 +521,7 @@ function Systime_GetReadableTimeString ()
 	if (minute < 10)
 		minute := "0" + minute;
 	endif
-	
+
 	timestring := timestring + " " + hour + ":" + minute + "GMT";
 	return timestring;
 endfunction
@@ -536,7 +536,7 @@ endfunction
 function GetCurrentPlaytimeMonth ()
 	var year := Systime_GetYear ();
 	var month := lower (Systime_GetMonth ());
-	
+
 	return (year + "_" + month + "_play_time");
 endfunction
 
@@ -550,7 +550,7 @@ endfunction
 function GetPreviousPlaytimeMonth (previous_month_counter := 1)
 	var year := Systime_GetYear ();
 	var month := lower (Systime_GetMonth ());
-	
+
 	repeat
 		case (month)
 			"december":

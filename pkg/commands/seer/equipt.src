@@ -1,10 +1,10 @@
 //
-// Equip yourself from a NPCs Equip emplate
+// Equip yourself from a NPCs Equip template
 //
 
 use uo;
 
-include "include/vetement";
+include ":npcs:garment";
 
 
 program textcmd_action( who, template )

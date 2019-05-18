@@ -8,7 +8,7 @@ use os;
 include ":timedScripts:timedScripts";
 
 /*
- * TargetEX(mobile, duration, flags)
+ * TS_TargetEX(mobile, duration, flags)
  *
  * Purpose
  * Brings up a Target() cursor and closes it after so many seconds.
@@ -23,7 +23,7 @@ include ":timedScripts:timedScripts";
  * Returns the value from uo.em :: Target()
  *
  */
-function TargetEX(mobile, duration:=0, flags := TGTOPT_CHECK_LOS+TGTOPT_NEUTRAL)
+function TS_TargetEX(mobile, duration:=0, flags := TGTOPT_CHECK_LOS+TGTOPT_NEUTRAL)
 	if ( duration > 0 )
 		if ( CInt(TS_GetTimerDuration(mobile, "TargetControl")) > 0 )
 			// Existing timer... return an error to the script
@@ -48,7 +48,7 @@ function TargetEX(mobile, duration:=0, flags := TGTOPT_CHECK_LOS+TGTOPT_NEUTRAL)
 endfunction
 
 /*
- * TargetCoordinatesEX(mobile, duration, flags)
+ * TS_TargetCoordinatesEX(mobile, duration, flags)
  *
  * Purpose
  * Brings up a TargetCoordinates() cursor and closes it after so many seconds.
@@ -63,7 +63,7 @@ endfunction
  * Returns the value from uo.em :: TargetCoordinates()
  *
  */
-function TargetCoordinatesEX(mobile, duration:=0, flags := TGTOPT_NOCHECK_LOS)
+function TS_TargetCoordinatesEX(mobile, duration:=0, flags := TGTOPT_NOCHECK_LOS)
 	if ( duration > 0 )
 		if ( CInt(TS_GetTimerDuration(mobile, "TargetControl")) > 0 )
 			// Existing timer... return an error to the script

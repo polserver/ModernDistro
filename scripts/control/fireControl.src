@@ -3,15 +3,14 @@ use util;
 use os;
 use cfgfile;
 include ":attributes:attributes";
-// include "include/spellRestrictions";
 include "include/client";
-include "include/spellAttack";
+include ":magery:spellAttack";
 include ":damage:damage";
 
 program field_control( item )
   var npccfg1 := ReadConfigFile("::npcdesc");
   npccfg1 := npccfg1;
-  
+
   var creater := CInt(GetObjProperty(item, "creater"));
   var fieldstrength;
   var online := EnumerateOnlineCharacters();

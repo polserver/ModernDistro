@@ -1,4 +1,4 @@
-include "include/NPCBackpacks";
+include ":npcs:NPCBackpacks";
 
 const STARTHAIR := 0x2030;
 const ENDHAIR := 0x2060;
@@ -73,4 +73,4 @@ function RunToIt(me,item)
     endif
     look_around();
   endfor
-endfunction 
+endfunction

@@ -2,7 +2,7 @@ use uo;
 use vitals;
 use attributes;
 
-include "include/spellRestrictions";
+include ":magery:spellRestrictions";
 
 program chrcast_grenewal( parms )
   var circle := 2;

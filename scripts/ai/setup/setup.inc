@@ -1,4 +1,4 @@
-include "include/vetement";
+include ":npcs:garment";
 
 var speech;
 var ammotype;

@@ -4,18 +4,17 @@ use uo;
 
 include "include/eventID";
 include "include/sysEvent";
-include "include/randName";
+include ":npcs:randName";
 include "include/utility";
 include "include/mrcSpawn";
-include "include/vetement";
-include "include/NPCBackpacks";
+include ":npcs:garment";
 include "include/client";
 include "include/anchors";
 include "include/findCity";
 include "include/dist";
 include "include/begging";
 include ":attributes:attributes";
-include "include/trainSkill";
+include ":npcs:trainSkill";
 
 const MAX_SKILLS      := 48;
 

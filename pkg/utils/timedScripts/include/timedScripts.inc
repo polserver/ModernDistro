@@ -229,7 +229,7 @@ endfunction
  * TS_GetTimerDuration(mobile, timer_name)
  *
  * Purpose
- * Gets the number of seconds a timer has left to run.
+ * Returns the number of seconds a timer has left to run.
  *
  * Parameters
  * mobile:	Mobile to find the timer on.
@@ -296,7 +296,7 @@ endfunction
  * Parameters
  * mobile:	Mobile to lower the timed script on.
  * timer_name:	Name of the timer (elem name from timedScripts.cfg).
- * duration:	Number of seconds lower the run time of the timer.
+ * amount:	Number of seconds to lower the run time of the timer.
  *		-1 will stop it completely.
  *
  * Return value

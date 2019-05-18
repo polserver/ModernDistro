@@ -36,7 +36,7 @@ use basicio;
 use basic;
 use cfgfile;
 
-include "util/key";
+include ":keys:key";
 include "include/objtype";
 const UOBJECT_BRASS_SIGN := 0x0bd2;
 const UOBJECT_WOOD_SIGN := 0x0bd0;

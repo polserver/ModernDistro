@@ -3,12 +3,11 @@ use cliloc;
 include ":attributes:attributes";
 include ":magery:spells";
 include ":magery:fields";
-include "include/facings";
 
 program spell_firefield( parms )
   var caster := parms[1];
   var info := parms[2];
-  
+
   var cast_on := MS_TargetCoordinates(caster, info.targ, "Select a target.");
     if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
         cast_on := parms[4];
@@ -21,7 +20,7 @@ program spell_firefield( parms )
 		SendSysMessageCL(caster, 500979, color:= 33); // You cannot see that location.
 		return 0;
 	endif
-  
+
 	MS_PlaySpellSFX(info.spell_id, cast_on);
 	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
 

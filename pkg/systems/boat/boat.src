@@ -8,7 +8,7 @@ include ":gumps:yesNo";
 include "include/eventID";
 include "include/utility";
 include ":boat:plankUtil";
-include "include/newPerformAction";
+//include "include/newPerformAction";
 
 const STATE_STATIONARY		:= 0;
 const STATE_MOVING			:= 1;
@@ -572,7 +572,8 @@ endfunction
 function SmackEveryone()
 	foreach mob in (boat.mobiles)
 //		DoDamageByType (0, mob, Randomint(10), DAMAGETYPE_PHYSICAL);
-		NewPerformAction (mob, 4);
+//		NewPerformAction (mob, 4);
+		PerformAction (mob, ANIM_STAND);
 		PlaySoundEffect (mob, 0x110);
 	endforeach
 endfunction

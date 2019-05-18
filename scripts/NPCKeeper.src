@@ -3,8 +3,8 @@ use os;
 
 include "include/startEqp";
 include ":attributes:attributes";
-include "include/vetement";
-include "include/randName";
+include ":npcs:garment";
+include ":npcs:randName";
 include "include/client";
 
 var pncfg := ReadConfigFile("npcdesc");

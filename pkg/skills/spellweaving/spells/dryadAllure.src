@@ -1,7 +1,7 @@
 use uo;
 use vitals;
 
-include "include/spellRestrictions";
+include ":magery:spellRestrictions";
 
 program chrcast_dryad( parms )
   var circle := 5;
@@ -15,7 +15,7 @@ program chrcast_dryad( parms )
 
   var caster := result[1];
   var cast_on := result[2];
-  
+
 var dru := Cint(GetEffectiveSkill(caster, SPELLWEAVING));
 var alore := Cint(GetEffectiveSkill(caster, SKILLID_ANIMALLORE));
 var int := GetIntelligence(caster);
@@ -56,7 +56,7 @@ EraseObjProperty(cast_on, "serial");
 EraseObjProperty(cast_on, "script");
 EraseObjProperty(cast_on, "happiness");
 EraseObjProperty(cast_on, "mounted");
-EraseObjProperty(cast_on, "mounted_on"); 
+EraseObjProperty(cast_on, "mounted_on");
 PlaySoundEffect(cast_on, 0x5C6);
 RestartScript(cast_on);
 PrintTextAbove(cast_on, "*nie jest juz kontrolowany przez " + caster.name + "*");

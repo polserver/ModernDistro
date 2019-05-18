@@ -3,7 +3,7 @@ use cfgfile;
 use os;
 use util;
 
-include "include/coords";
+include ":coords:coords";
 include "include/canAccess";
 
 program use_message( who, message )

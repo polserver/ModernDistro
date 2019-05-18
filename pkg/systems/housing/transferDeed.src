@@ -18,7 +18,7 @@ use os;
 use cfgfile;
 
 include ":housing:housing_settings";
-//include "include/yesNo";
+//include ":gumps:yesNoSizable";
 include ":gumps:gumpPrompt";
 include "include/objtype";
 include ":containers:storageAreas";
@@ -55,7 +55,7 @@ program ChangeHouseOwner(who, deed)
 	return;
 	endif
 
-  
+
 	if (owner == who.serial)
 		SendSysMessage(who, "you already own this house!");
 		return;
@@ -65,7 +65,7 @@ program ChangeHouseOwner(who, deed)
 		return;
     endif
 	var bankbox		:= CP_GetStorageContainerForMobile( who, bank_region, CP_CREATE );
-    
+
     var packkey := CreateItemInBackpack( who, UOBJ_GOLD_KEY );
     if (!packkey)
 		GumpPrompt(who, "I couldn't create the key in your backpack. It might be full. The transfer has been aborted until you have room for the key.", hue := 33);
@@ -92,7 +92,7 @@ program ChangeHouseOwner(who, deed)
 			SetObjProperty(item,"signserial", signserial);
 			tileflag := 1;
 		endif
-			
+
 		if((item.objtype == UOBJECT_BRASS_SIGN) || (item.objtype == UOBJECT_WOOD_SIGN))
 			SetObjProperty(item, "LockId", lockid);
 		elseif(item.IsA(POLCLASS_DOOR))

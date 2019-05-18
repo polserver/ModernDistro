@@ -6,7 +6,7 @@ use cfgfile;
 
 include "include/client";
 include ":attributes:attributes";
-include "include/NPCBackpacks";
+include ":npcs:NPCBackpacks";
 include ":virtue:noto";
 //include "systems:spawnregion:spawnRegion";
 //include ":spawnregion:spawnRegion";

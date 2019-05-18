@@ -1,7 +1,7 @@
 use uo;
 use vitals;
 
-include "include/spellRestrictions";
+include ":magery:spellRestrictions";
 
 program curse_weapon( params )
 	var caster := params[1];

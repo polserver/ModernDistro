@@ -50,10 +50,10 @@ program cast_archcure(parms)
 			// NOTE: There is still a 1 in 100 chance that this wont work..
 			TS_CurePoison(vtarg, 10000, "P", poison_level);
 			PrintTextAbovePrivateCL(vtarg, vtarg, 1008072, color := 33); // You have been cured of all poisons.
-			AdjustVirtue(caster, "compassion", 1, 100);
+			VS_AdjustVirtue(caster, "compassion", 1, 100);
 		else
 			PrintTextAbovePrivateCL(vtarg, vtarg, 1008073, color := 33); // The attempt to cure you has failed.
-			AdjustVirtue(caster, "compassion", 1, 35);
+			VS_AdjustVirtue(caster, "compassion", 1, 35);
 		endif
 
 		MS_PlaySpellGFX(info.spell_id, vtarg, caster);

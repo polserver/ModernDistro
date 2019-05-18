@@ -1,5 +1,23 @@
-include ":attributes:attributes_ex";
+include ":attributes:attributes";
 
+
+//
+// CheckToolWear (who, tool, attributeID)
+//
+// Purpose
+// Checks to see if a tool has broken.
+//
+//
+// Parameters
+// who: The character using the tool.
+// tool: The tool being used.
+// attributeID: The attribute name that applies to the tool
+// being used, eg. a saw uses the attribute carpentry.
+//
+//
+// Return value
+// Returns a 0 if the tool "broke" or a 1 if the tool did not break.
+//
 function CheckToolWear (who, tool, attributeID)
 	var swings := GetObjProperty(tool,"swings");
 	if ( !swings )
@@ -18,8 +36,9 @@ function CheckToolWear (who, tool, attributeID)
 	if ( swings <= 0 )
 		DestroyItem(tool);
 		SendSysMessage(who,"Your tool broke.");
+		return 0;
 	else
-		var skill := GetAttribute(who, attributeID);
+		var skill := AP_GetSkill(who, attributeID);
 		if ( skill > 80 )
 			skill := 80;
 		elseif ( skill < 20 )
@@ -33,14 +52,34 @@ function CheckToolWear (who, tool, attributeID)
 				elseif ( (tool.hp > tool.maxhp) or (tool.hp == 1) )
 					SendSysMessage(who,"Your tool broke.");
 					DestroyItem(tool);
+					return 0;
 				endif
 			else
 				SetObjProperty(tool,"swings", (swings - 1));
-			endif	 
+				return 1;
+			endif
 		endif
 	endif
-endfunction 
+endfunction
 
+//
+// SetToolDurability(who, tool, skillid)
+//
+// Purpose
+// What does it do?
+//
+//
+// Parameters
+// List of parameters and their type to be passed to the function
+// and if necessary a small description of each parameter
+//
+//
+//
+//
+// Return value
+// Return value and its type with a small description if necessary.
+// If the function returns error values list them as well
+//
 function SetToolDurability(who, tool, skillid)
 
 	var toolfile := ReadConfigFile(":*:itemdesc");
@@ -68,4 +107,4 @@ function SetToolDurability(who, tool, skillid)
 		endif
 	endif
 
-endfunction 
+endfunction

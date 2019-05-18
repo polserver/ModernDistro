@@ -31,18 +31,18 @@ function IU_TransferItemProps(byref from_item, to_item)
 		to_item.damage_cold_mod := to_item.damage_cold_mod + CInt(from_item.ColdDamage);
 		to_item.damage_poison_mod := to_item.damage_poison_mod + CInt(from_item.damage_cold);
 		to_item.damage_energy_mod := to_item.damage_energy_mod + CInt(from_item.damage_energy);
-    to_item.lower_reagent_cost_mod := to_item.lower_reagent_cost_mod + from_item.lower_reagent_cost;
-    to_item.spell_damage_increase_mod := to_item.spell_damage_increase_mod + from_item.spell_damage_increase;
-    to_item.faster_casting_mod := to_item.faster_casting_mod + from_item.faster_casting;
-    to_item.faster_cast_recovery_mod := to_item.faster_cast_recovery_mod + from_item.faster_cast_recovery;
-    to_item.defence_increase_mod := to_item.defence_increase_mod + from_item.defence_increase;
-    to_item.lower_mana_cost_mod := to_item.lower_mana_cost_mod + from_item.lower_mana_cost;
-    to_item.hit_chance_mod := to_item.hit_chance_mod + from_item.hit_chance;
-    to_item.swing_speed_mod := to_item.swing_speed_mod + from_item.swing_speed;
-    to_item.damage_increase_mod := to_item.damage_increase_mod + from_item.damage_increase;
-    to_item.luck_mod := to_item.luck_mod + from_item.luck;
+		to_item.lower_reagent_cost_mod := to_item.lower_reagent_cost_mod + from_item.lower_reagent_cost;
+		to_item.spell_damage_increase_mod := to_item.spell_damage_increase_mod + from_item.spell_damage_increase;
+		to_item.faster_casting_mod := to_item.faster_casting_mod + from_item.faster_casting;
+		to_item.faster_cast_recovery_mod := to_item.faster_cast_recovery_mod + from_item.faster_cast_recovery;
+		to_item.defence_increase_mod := to_item.defence_increase_mod + from_item.defence_increase;
+		to_item.lower_mana_cost_mod := to_item.lower_mana_cost_mod + from_item.lower_mana_cost;
+		to_item.hit_chance_mod := to_item.hit_chance_mod + from_item.hit_chance;
+		to_item.swing_speed_mod := to_item.swing_speed_mod + from_item.swing_speed;
+		to_item.damage_increase_mod := to_item.damage_increase_mod + from_item.damage_increase;
+		to_item.luck_mod := to_item.luck_mod + from_item.luck;
 	endif
-	
+
 	// Resistances
 	if(to_item.IsA(POLCLASS_ARMOR))
 		to_item.resist_physical_mod := to_item.resist_physical_mod + CInt(from_item.resist_physical);
@@ -50,16 +50,16 @@ function IU_TransferItemProps(byref from_item, to_item)
 		to_item.resist_cold_mod := to_item.resist_cold_mod + CInt(from_item.resist_cold);
 		to_item.resist_poison_mod := to_item.resist_poison_mod + CInt(from_item.resist_poison);
 		to_item.resist_energy_mod := to_item.resist_energy_mod + CInt(from_item.resist_energy);
-    to_item.lower_reagent_cost_mod := to_item.lower_reagent_cost_mod + from_item.lower_reagent_cost;
-    to_item.spell_damage_increase_mod := to_item.spell_damage_increase_mod + from_item.spell_damage_increase;
-    to_item.faster_casting_mod := to_item.faster_casting_mod + from_item.faster_casting;
-    to_item.faster_cast_recovery_mod := to_item.faster_cast_recovery_mod + from_item.faster_cast_recovery;
-    to_item.defence_increase_mod := to_item.defence_increase_mod + from_item.defence_increase;
-    to_item.lower_mana_cost_mod := to_item.lower_mana_cost_mod + from_item.lower_mana_cost;
-    to_item.hit_chance_mod := to_item.hit_chance_mod + from_item.hit_chance;
-    to_item.swing_speed_mod := to_item.swing_speed_mod + from_item.swing_speed;
-    to_item.damage_increase_mod := to_item.damage_increase_mod + from_item.damage_increase;
-    to_item.luck_mod := to_item.luck_mod + from_item.luck;
+		to_item.lower_reagent_cost_mod := to_item.lower_reagent_cost_mod + from_item.lower_reagent_cost;
+		to_item.spell_damage_increase_mod := to_item.spell_damage_increase_mod + from_item.spell_damage_increase;
+		to_item.faster_casting_mod := to_item.faster_casting_mod + from_item.faster_casting;
+		to_item.faster_cast_recovery_mod := to_item.faster_cast_recovery_mod + from_item.faster_cast_recovery;
+		to_item.defence_increase_mod := to_item.defence_increase_mod + from_item.defence_increase;
+		to_item.lower_mana_cost_mod := to_item.lower_mana_cost_mod + from_item.lower_mana_cost;
+		to_item.hit_chance_mod := to_item.hit_chance_mod + from_item.hit_chance;
+		to_item.swing_speed_mod := to_item.swing_speed_mod + from_item.swing_speed;
+		to_item.damage_increase_mod := to_item.damage_increase_mod + from_item.damage_increase;
+		to_item.luck_mod := to_item.luck_mod + from_item.luck;
 	endif
 
 

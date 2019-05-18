@@ -43,10 +43,10 @@ program cast_cure( parms )
 		// NOTE: There is still a 1 in 100 chance that this wont work..
 		TS_CurePoison(cast_on, 10000, "P", poison_level);
 		if(cast_on != caster)
-			AdjustVirtue(caster, "compassion", 1, 100);
+			VS_AdjustVirtue(caster, "compassion", 1, 100);
 		endif
 		if(cast_on != caster)
-			AdjustVirtue(caster, "compassion", 1, 35);
+			VS_AdjustVirtue(caster, "compassion", 1, 35);
 		endif
 
 	endif

@@ -10,30 +10,31 @@ include "include/security";
 program textcmd_Equip( speaker )
 
         if( !AuthorizationCode( speaker ))
-                SendSysMessage( speaker, "Cancelled." );
+                SendSysMessage( speaker, "Cancelled.", color := 33 );
                 return 0;
         endif
 
-	SendSysMessage( speaker, "What shall be equipped?" );
+	SendSysMessage( speaker, "What shall be equipped?", color := 88 );
 	var what := TargetCoordinates( speaker );
 	if( !what )
 		return 0;
 	endif
 
-	SendSysMessage( speaker, "On whom shall "+what.desc+" be equipped?" );
+	SendSysMessage( speaker, "On whom shall "+what.Desc+" be equipped?", color := 88 );
 	var who := Target( speaker, TGTOPT_NOCHECK_LOS );
 	if( !who )
 		return 0;
         elseif( !who.IsA( POLCLASS_MOBILE ))
-                SendSysMessage( speaker, "You must select a player or npc." );
+                SendSysMessage( speaker, "You must select a player or npc.", color := 33 );
                 return 0;
 	endif
 
 	var res := EquipItem( who, what.item );
 	if( res )
-		SendSysMessage( speaker, "Done!" );
+		SendSysMessage( speaker, "Done!", color := 66 );
 	else
-		SendSysMessage( speaker, "Unable to equip item: "+res.errortext );
+		SendSysMessage( speaker, "Unable to equip item: "+res.errortext, color := 33 );
+		return 0;
 	endif
 
 	return 1;

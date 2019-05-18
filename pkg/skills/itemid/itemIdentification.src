@@ -4,7 +4,7 @@ use basic;
 use cfgfile;
 
 include "include/client";
-include "include/skillPoints";
+//include "include/skillPoints";
 include "include/trainingskill";
 include ":attributes:attributes";
 
@@ -19,7 +19,10 @@ program do_itemid( who )
 
   EraseObjProperty(who, "IsMeditating");
   EraseObjProperty(who, "HealTimer");
-  var thepoints := get_default_points(SKILLID_ITEM_IDENTIFICATION);
+	var cfg := AP_GetAttributeCfgElem( ITEM_IDENTIFICATION );
+	var thepoints := cfg.AwardDefault;
+
+  //var thepoints := get_default_points(SKILLID_ITEM_IDENTIFICATION);
   var the_item;
   var ncharges;
   SendSysMessage( who, "Select an object to identify." );

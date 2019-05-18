@@ -8,7 +8,7 @@ use cfgfile;
 use util;
 use basic;
 
-include "include/randNameUtil";
+include ":npcs:randNameUtil";
 
 function RandomName(character)
 	var newname := " ";

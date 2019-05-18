@@ -8,8 +8,7 @@ include ":attributes:attributes";
 include "include/client";
 include "include/objtype";
 include "include/statMod";
-include "include/firewall";
-include "include/spellAttack";
+include ":magery:spellAttack";
 include "include/dist";
 
 var caster;
@@ -243,20 +242,20 @@ function Resisted(circle, caster, cast_on, amt)
         var magery := CInt(AP_GetSkill(caster, MAGERY));
         var evalint := CInt(AP_GetSkill(caster, EVALUATING_INTELLIGENCE));
         var resist := CInt(AP_GetSkill(cast_on, RESISTING_SPELLS));
-        
+
         // chk1 relates to the resist ability.
         var chk1 := (resist / 5);
         // chk2 relates to the difficulty level
         var chk2 := resist - (((magery - 20) / 5) + (circle * 5));
-        
+
         if(chk1 < 1)
                 chk1 := 1;
         endif
         if(chk2 < 1)
                 chk2 := 1;
         endif
-        
-        // What an odd construct.  
+
+        // What an odd construct.
         // If you're hit with an easy spell then you have a difficulty of your resist
         var diff := 0;
         if(chk1 > chk2)
@@ -264,7 +263,7 @@ function Resisted(circle, caster, cast_on, amt)
         else
                 diff := chk2;
         endif
-        
+
         var points := getresistpoints(circle, cast_on, SKILLID_RESISTING_SPELLS);
         if(cast_on.dead)
                 return 0;

@@ -32,7 +32,7 @@ program cast_flamestrike( parms )
 	var base_damage := min_damage + (CDbl(RandomInt(CInt((max_damage - min_damage) * 10)) + 1) / 10);
 	var damage := MS_GetSpellDamage(caster, cast_on, base_damage);
 
-	ApplyDamageEX(cast_on, damage, info.damage_type, caster);
+	ApplySpellDamageEX(cast_on, damage, info.damage_type, caster);
 
 	return 1;
 endprogram

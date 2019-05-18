@@ -24,14 +24,14 @@ program cast_lightning( parms )
     endif
 	MS_PlaySpellSFX(info.spell_id, cast_on);
 	PlayLightningBoltEffect(cast_on);
-	
+
 	// Base damage is a decimal number in between min and max damage
 	var min_damage := CInt(GetConfigInt(info.spell_config, "MinBaseDamage"));
 	var max_damage := CInt(GetConfigInt(info.spell_config, "MaxBaseDamage"));
 	var base_damage := min_damage + (CDbl(RandomInt(CInt((max_damage - min_damage) * 10)) + 1) / 10);
 	var damage := MS_GetSpellDamage(caster, cast_on, base_damage);
 
-	ApplyDamageEX(cast_on, damage, info.damage_type, caster);
+	ApplySpellDamageEX(cast_on, damage, info.damage_type, caster, info.circle);
 
 	return 1;
 endprogram

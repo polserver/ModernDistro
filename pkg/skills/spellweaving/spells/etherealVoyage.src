@@ -2,7 +2,7 @@ use uo;
 use vitals;
 use attributes;
 
-include "include/spellRestrictions";
+include ":magery:spellRestrictions";
 
 Const TIME_RESTRICT := 300; // 300 sekund = 5 minut
 
@@ -42,7 +42,7 @@ program chrcast_voyage( parms )
 		SendSysMessage(caster, "Nie mozesz uzywac tego czaru gdy przeciwnicy cie widza.",3,40);
 		return 0;
 	endif
-	
+
 	var duration := (dru + alore) / 10;
 	PlaySoundEffect(caster, 0x5C9);
 	SetObjProperty(caster, "#journey", ReadGameClock() + TIME_RESTRICT);
@@ -75,9 +75,9 @@ endfunction
 function HostileScripts(przeciwnik)
 	case(przeciwnik.script)
 		"firebreather":
-		"spellKillPCs":  
+		"spellKillPCs":
 		"spellFire":
-		"killPCs":  
+		"killPCs":
 		"nuksKillPCs":
 		"vampireKillPCs":
 			return 0;

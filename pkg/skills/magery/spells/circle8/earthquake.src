@@ -5,7 +5,7 @@ use util;
 include ":attributes:attributes";
 include ":magery:spells";
 include "include/client";
-include "include/spellAttack";
+//include ":magery:spellAttack";
 include ":damage:damage";
 
 program earthquake( parms )
@@ -15,11 +15,11 @@ program earthquake( parms )
 
 /////////////////////// 0.97 Distro stuff starts here ////////////////////////
 	// TODO: Should not have LOS if targ is hidden, but not sure
-	
+
 	var base_damage;
 	var damage;
         PlaySoundEffect( caster, SFX_220 );
-	
+
 	// Get all targets in area excluding party and self. Damaged is divided by number of valid targets.
 	var area_size := CInt(GetConfigInt(info.spell_config, "AreaSize"));
 	var exclude := GetObjProperty(caster, "#Party");
@@ -29,7 +29,7 @@ program earthquake( parms )
 	foreach vtarg in targs
 		base_damage := (CDbl(AP_GetVital(vtarg, HITS)) / 3);
 		damage := MS_GetSpellDamage(caster, vtarg, base_damage);
-			
+
 		// Min and max damage for NPCs is 10 and 100
 		if ( vtarg.npctemplate )
 			if ( damage < 10 )
@@ -41,7 +41,7 @@ program earthquake( parms )
 
 		MS_PlaySpellGFX(info.spell_id, vtarg, caster);
 		MS_PlaySpellSFX(info.spell_id, vtarg, caster);
-		ApplyRawSpellDamageEX(vtarg, damage, info.damage_type, caster, info.circle);
+		ApplySpellDamageEX(vtarg, damage, info.damage_type, caster, info.circle);
 	endforeach
 
 	return 1;

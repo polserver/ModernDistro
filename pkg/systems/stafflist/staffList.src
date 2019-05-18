@@ -72,9 +72,9 @@ function logoff(ev)
   if(!lastlogon)
     lastlogon := "unknown";
   else
-    var s := Mod(lastlogon, 60);
+	var s := lastlogon % 60;
 	var m := CInt(lastlogon/60);
-	m := Mod(m, 60);
+	m := m % 60;
 	var h := CInt(m / 60);
 	if (s < 10)
 	  s := "0" + CStr(s);

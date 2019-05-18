@@ -36,7 +36,7 @@ program cast_paralyze( parms )
 
 	// Commented out the virtue drop until I can find some practical way in scripts to
 	// provide a way to raise valor.
-	//AdjustVirtue(caster, "valor", -1, 100);
+	//VS_AdjustVirtue(caster, "valor", -1, 100);
 	TS_StartTimer(cast_on, "Paralysis", duration);
 
 	return 1;

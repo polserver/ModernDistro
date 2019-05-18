@@ -2,7 +2,7 @@ use uo;
 use os;
 use guilds;
 
-include "include/yesNo";
+include ":gumps:yesNoSizable";
 include "include/canAccess";
 include "guildData";
 include "include/webPage";
@@ -356,7 +356,7 @@ function recruit(who)
   endif
   var guildname := guild.getprop("guildname");
   SendSysMessage(targ, "Would you like to join the guild: " + guildname, 3, 70);
-  var answer := YesNo(targ, "Join Guild?");
+  var answer := yesNoSizable(targ, "Join Guild?");
   if(!answer)
     SendSysMessage(targ, "You have refused to join " + guildname + ".", 3, 40);
     SendSysMessage(who, targ.name + " has decided not to join.", 3, 40);
@@ -532,7 +532,7 @@ endfunction
 
 function resign(who)
   SendSysMessage(who, "Are you sure you want to resign?", 3, 40);
-  var answer := YesNo(who, "Quit Guild?");
+  var answer := yesNoSizable(who, "Quit Guild?");
   if(!answer)
     SendSysMessage(who, "Canceled.", 3, 40);
     return;

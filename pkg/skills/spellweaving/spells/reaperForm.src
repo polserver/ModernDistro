@@ -2,7 +2,7 @@ use uo;
 use vitals;
 use attributes;
 
-include "include/spellRestrictions";
+include ":magery:spellRestrictions";
 
 program chrcast_iweapon( parms )
   var circle := 4;
@@ -37,7 +37,7 @@ var wierzchowiec := GetEquipmentByLayer(caster, 25);
   SendSysMessage(caster, "Nie mozesz uzywac tego czaru na wierchowcu.", FONT_NORMAL, 40);
   return;
   endif
-  
+
 var duration := (dru + alore + bonus);
 
 PlayObjectCenteredEffect( caster, 0x3779, 10,45 );

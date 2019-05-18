@@ -7,14 +7,13 @@ use cfgfile;
 include "include/eventID";
 include ":attributes:attributes";
 include "include/sysEvent";
-include "include/randName";
+include ":npcs:randName";
 include "include/NPCUtil";
 include "include/objtype";
 include "include/anchors";
 include "include/dist";
 include "ai/main/setup";
 include "ai/main/sleepMode";
-include "include/animal";
 include ":damage:damage";
 
 

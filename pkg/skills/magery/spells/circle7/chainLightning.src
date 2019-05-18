@@ -8,7 +8,7 @@ include ":attributes:attributes";
 include ":magery:spells";
 include "include/client";
 include "include/sounds";
-include "include/spellAttack";
+//include ":magery:spellAttack";
 include ":damage:damage";
 
 
@@ -38,7 +38,7 @@ program cast_chainlightning( parms )
 	if(targs.size() > 1)
 		base_damage := base_damage * 2;
 	endif
-	
+
 	foreach vtarg in targs
 				// uoguide.com does not mention LOS needed for damage to target. That is why this if is commented out.
                 //if((CheckLineOfSight(vtarg, caster)) and (vtarg.cmdlevel < 2))
@@ -52,7 +52,7 @@ program cast_chainlightning( parms )
                     SetObjProperty(vtarg, "LastHit", {caster.name, caster.serial, "chain lightning"});
                     PlayLightningBoltEffect( vtarg );
                     PlaySoundEffect(vtarg, SFX_SPELL_LIGHTNING);
-                    ApplyRawSpellDamageEX(vtarg, damage, info.damage_type, caster);
+                    ApplySpellDamageEX(vtarg, damage, info.damage_type, caster);
                     sleepms(600);
                 //endif
 	endforeach

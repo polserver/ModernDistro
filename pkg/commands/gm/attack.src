@@ -3,7 +3,6 @@ use util;
 
 include "include/client";
 include "include/objtype";
-include "include/bard";
 include "include/eventID";
 
 program bard_provoke(character)

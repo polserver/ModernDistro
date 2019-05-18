@@ -2,13 +2,13 @@
  *
  *
  */
- 
+
 use uo;
 use os;
 
 /*
  * GetGameTime(day_length)
- *
+ * ***Not finished***
  * Purpose
  * Takes the value from ReadGameClock() and converts it into a time.
  *

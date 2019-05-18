@@ -126,93 +126,17 @@ function BreakArray(byref the_array, size:=1)
 	endif
 endfunction
 
-/*
- * FindInArray(byref the_array, find_what)
- *
- * Purpose
- * Finds the first instance of something in an array.
- *
- * Parameters
- * the_array:	Array to search.
- * find_what:	What to look for.
- *
- * Return value
- * Returns > 1 (the index) if it is found.
- * Returns 0 if 'find_what' was not found.
- *
- */
-function FindInArray(byref the_array, find_what)
-	if ( Lower(TypeOf(the_array)) != "array" )
-		return error{"errortext":="Object passed was not an array."};
-	endif
-
-  return (find_what in the_array);
-
-endfunction
-
-
 ////////////////////////////////////////////////////////////////
-// Function	GetIndex(byref the_array, byref to_find)
+// Function	InsertElementInSortedArray(byref the_array, byref element)
+//
+// Purpose	Insert an element at the good index, must be the only one
+//			instance of that element in the array, no dupe allowed.
+//
 // Parameters	the_array containing the element
-//		what to find
-// Return	the element's index if found, error otherwise.
-// Errortext	<Element not found>
-////////////////////////////////////////////////////////////////
-function GetIndex( byref the_array, byref to_find )
-
-	var max := the_array.Size();
-	if( !max )
-		var ret := error;
-		ret.+errortext := "Element not found";
-		return ret;
-	endif
-	
-	var ctr;
-	var min := 1;
-	if( the_array[1].IsA(POLCLASS_UOBJECT) )
-		while( min <= max )
-			ctr := Cint((min+max)/2);
-			if( the_array[ctr].serial = to_find.serial )
-				return ctr;
-			elseif( the_array[ctr].serial < to_find.serial )
-				min := ctr + 1;
-			else
-				max := ctr - 1;
-			endif
-		endwhile
-		
-		var ret := error;
-		ret.+errortext := "Element not found";
-		return ret;
-	else
-		while( min <= max )
-			ctr := Cint((min+max)/2);
-			if( the_array[ctr] = to_find )
-				return ctr;
-			elseif( the_array[ctr] < to_find )
-				min := ctr + 1;
-			else
-				max := ctr - 1;
-			endif
-		endwhile
-		
-		var ret := error;
-		ret.+errortext := "Element not found";
-		return ret;	
-	endif
-	
-endfunction
-
-
-////////////////////////////////////////////////////////////////
-// Function	InsertElementInSortedArray(byref the_array, byref to_find)
-// Parameters	the_array containing the element
-//		what to insert
-// Return	non-zero if the element could be insert, error otherwise.
-// Errortext	<Element <element> already exist in the array>
-//		<Couldn't insert element <element>>
-// Goal		Insert an element at the good index, must be the only one
-//		instance of that element in the array, no dupe allowed.
+//				what to insert
+// Return		non-zero if the element could be inserted, error otherwise.
+// Errortext	<Element <element> already exists in the array>
+//				<Couldn't insert element <element>>
 ////////////////////////////////////////////////////////////////
 function InsertInSortedArray( byref the_array, byref element )
 
@@ -220,7 +144,7 @@ function InsertInSortedArray( byref the_array, byref element )
 	if( !max )
 		return the_array.Append(element);
 	endif
-	
+
 	var ctr;
 	var min := 1;
 	if( the_array[1].IsA(POLCLASS_UOBJECT) )
@@ -228,7 +152,7 @@ function InsertInSortedArray( byref the_array, byref element )
 			ctr := Cint((min+max)/2);
 			if( the_array[ctr].serial = element.serial )
 				var ret := error;
-				ret.+errortext := "Element " + element + " already exist in array";
+				ret.+errortext := "Element " + element + " already exists in array";
 				return ret;
 			elseif( the_array[ctr].serial < element.serial )
 				min := ctr + 1;
@@ -241,7 +165,7 @@ function InsertInSortedArray( byref the_array, byref element )
 			ctr := Cint((min+max)/2);
 			if( the_array[ctr] = element )
 				var ret := error;
-				ret.+errortext := "Element " + element + " already exist in array";
+				ret.+errortext := "Element " + element + " already exists in array";
 				return ret;
 			elseif( the_array[ctr] < element )
 				min := ctr + 1;
@@ -252,71 +176,53 @@ function InsertInSortedArray( byref the_array, byref element )
 	endif
 
 	return the_array.Insert( min, element );
-	
+
 endfunction
 
 
 ////////////////////////////////////////////////////////////////
 // Function	RemoveElement(byref the_array, byref element)
-// Parameters	the_array containing the element
-//		the element to remove
-// Return	1 is the elment was successfully removed
-//		An error otherwise
+// Parameters	the_array: the array containing the element
+//				element: element to remove
+// Return 1 if the elment was successfully removed or error.
+//
 ////////////////////////////////////////////////////////////////
 function RemoveElement( byref the_array, byref element )
 
-	var index := GetIndex( the_array, element );
+	var index := element in the_array;
 	if( index )
-		return the_array.Erase(index);
+		return the_array.erase(index);
 	else
 		return index;
 	endif
 
 endfunction
 
-
-////////////////////////////////////////////////////////////////
-// Function	SortArray(byref the_array)
-// Parameters	the_array to sort
-// Return	1 if the sorting was success, 0 otherwise.
-// Goal		Sort the array, even array of uobject.
-////////////////////////////////////////////////////////////////
-function SortArray( byref the_array )
-
-	var length := the_array.Size();
-	if( length )
-		if( the_array[1].IsA(POLCLASS_UOBJECT) )
-			var i;
-			var j;
-			var temp;
-			var old_prio := set_priority(50);
-			for( i := 1; i < length; i := i + 1 )
-				for( j := 2; j <= (length-i+1); j := j + 1 )
-					if( the_array[j].serial < the_array[j-1].serial )
-						temp := the_array[j];
-						the_array[j]	:= the_array[j-1];
-						the_array[j-1]	:= temp;
-					endif
-				endfor
-			endfor
-			set_priority(old_prio);
-		else
-			return the_array.Sort();
-		endif
-	endif
-	
-	return 1;
-	
-endfunction
-
-//Fill_array
-// you don't want to send this non-integers. Error checking isn't at the moment.
+// FillArray(starts, ends, incr := 1)
+//
 // This function is handed start and end numbers, and increments. If you send it
 // (1,5,1), for instance, it will return an array {1,2,3,4,5}. (5,1,-2) will return
 // {5,3,1}. (1,5,3) will return {1,4}.
 // Added by Madman Across the Water
 
-function fill_array(starts, ends, incr := 1)
+function FillArray(starts, ends, incr := 1)
+
+	var retval :="";
+	if(TypeOf(starts) != "Integer")
+		retval := error;
+		retval.errortext := "starts is not an integer";
+		return retval;
+	endif
+	if(TypeOf(ends) != "Integer")
+		retval := error;
+		retval.errortext := "ends is not an integer";
+		return retval;
+	endif
+	if(TypeOf(incr) != "Integer")
+		retval := error;
+		retval.errortext := "incr is not an integer";
+		return retval;
+	endif
 
 	var newarray := array;
 	if (incr == 0)
@@ -342,7 +248,7 @@ function fill_array(starts, ends, incr := 1)
 	         i := i + 1;
 	     endwhile
 	endif
-	
+
 	return 0;
 endfunction
 

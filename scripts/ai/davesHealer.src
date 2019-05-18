@@ -2,11 +2,11 @@ use npc;
 use os;
 use uo;
 
-include "include/NPCCast";
+include ":npcs:NPCCast";
 include ":attributes:attributes";
-include "include/NPCBackpacks";
-include "include/randName";
-include "include/vetement";
+include ":npcs:NPCBackpacks";
+include ":npcs:randName";
+include ":npcs:garment";
 include "include/eventID";
 include "include/sysEvent";
 include "include/dist";

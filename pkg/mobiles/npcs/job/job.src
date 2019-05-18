@@ -3,7 +3,7 @@ use uo;
 use util;
 
 include "include/client";
-include "include/yesNo";
+include ":gumps:yesNoSizable";
 // include "include/skills";
 include ":attributes:attributes";
 
@@ -28,7 +28,7 @@ program job (parms)
 	endif
 	SetObjProperty (player, "#workingonajob", GetPid ());
 	set_critical (0);
-	
+
 	//Check to see if the merchant has any jobs available
 	var merchantjobs := GetObjProperty (merchant, "#jobsgiven");
 	if (!merchantjobs)
@@ -44,7 +44,7 @@ program job (parms)
 		PrintTextAbovePrivate(merchant, "I don't have any work available right now, I'm afraid", player, color := 33);
 		return;
 	endif
-	
+
 	//Now check to see if the player can do any more jobs today
 	var playerjobs := GetGlobalProperty ("#jobs_for_account_"+player.acctname);
 	if (!playerjobs)
@@ -59,7 +59,7 @@ program job (parms)
 		endif
 	endforeach
 	SetGlobalProperty ("#jobs_for_account_"+player.acctname, playerjobs);
-	
+
 	if (playerjobvalue >= PLAYER_MAX_JOBVALUE_PER_DAY)
   		PrintTextAbovePrivate(merchant, "I don't have any work for you.  Come back tomorrow.", player, color := 33);
 		return;
@@ -84,12 +84,12 @@ program job (parms)
 	var endtime := ReadGameClock() + 300;
 
 	PrintTextAbovePrivate (merchant, "If you will make " + amount + " " + itemname + ", I will pay you for them.", player, color := 88);
-	if (!YesNo (player,"Accept?") )
+	if (!yesNoSizable (player,"Accept?") )
 		PrintTextAbovePrivate (merchant, "Very well.", player, color := 33);
 		EraseObjProperty (player, "#workingonajob");
 		return;
 	endif
-	
+
 	merchantjobs.insert (ReadGameClock(), 1);
 	SetObjProperty (merchant, "#jobsgiven", merchantjobs);
 

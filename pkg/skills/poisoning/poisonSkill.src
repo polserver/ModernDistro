@@ -90,14 +90,14 @@ program do_poisoning( who )
 					SetObjProperty(the_item, "phit", 1);
 					// Adjust the following virtues negatively for poisoning a weapon.
 					case(stren)
-						1:	AdjustVirtue(who, "honor", -1, prob := 35);
-							AdjustVirtue(who, "compassion", -1, 35);
-						2:	AdjustVirtue(who, "honor", -1, 50);
-							AdjustVirtue(who, "compassion", -1, 50);
-						3:	AdjustVirtue(who, "honor", -1, 65);
-							AdjustVirtue(who, "compassion", -1, 65);
-						4:	AdjustVirtue(who, "honor", -1, 80);
-							AdjustVirtue(who, "compassion", -1, 80);
+						1:	VS_AdjustVirtue(who, "honor", -1, prob := 35);
+							VS_AdjustVirtue(who, "compassion", -1, 35);
+						2:	VS_AdjustVirtue(who, "honor", -1, 50);
+							VS_AdjustVirtue(who, "compassion", -1, 50);
+						3:	VS_AdjustVirtue(who, "honor", -1, 65);
+							VS_AdjustVirtue(who, "compassion", -1, 65);
+						4:	VS_AdjustVirtue(who, "honor", -1, 80);
+							VS_AdjustVirtue(who, "compassion", -1, 80);
 					endcase
 				else
 					if (RandomInt(100) > GetAttribute(who, POISONING))
@@ -139,14 +139,14 @@ program do_poisoning( who )
 					// Adjust the following virtues negatively for poisoning a weapon.
 					// A harsher virtue adjustment because ten arrows were done at once.
 					case(stren)
-						1:	AdjustVirtue(who, "honor", -3, prob := 35);
-							AdjustVirtue(who, "compassion", -3, 35);
-						2:	AdjustVirtue(who, "honor", -3, 50);
-							AdjustVirtue(who, "compassion", -3, 50);
-						3:	AdjustVirtue(who, "honor", -3, 65);
-							AdjustVirtue(who, "compassion", -3, 65);
-						4:	AdjustVirtue(who, "honor", -3, 80);
-							AdjustVirtue(who, "compassion", -3, 80);
+						1:	VS_AdjustVirtue(who, "honor", -3, prob := 35);
+							VS_AdjustVirtue(who, "compassion", -3, 35);
+						2:	VS_AdjustVirtue(who, "honor", -3, 50);
+							VS_AdjustVirtue(who, "compassion", -3, 50);
+						3:	VS_AdjustVirtue(who, "honor", -3, 65);
+							VS_AdjustVirtue(who, "compassion", -3, 65);
+						4:	VS_AdjustVirtue(who, "honor", -3, 80);
+							VS_AdjustVirtue(who, "compassion", -3, 80);
 					endcase
 
 				else
