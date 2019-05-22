@@ -11,7 +11,7 @@ function summon_creature( caster, circle := 8, npctemplate, cast_loc, controldif
     var duration := 20 + (magery * 2);
     var attributelist := { "None" };
     var parms := {}, totem, totemtype;
-  
+
 	SendSysMessage(caster, "Select a Totem to summon from, press <ESC> to summon unbound.", color := 88);
 	totem := Target(caster);
 	totemtype := GetObjProperty(totem, "Totem");
@@ -63,18 +63,18 @@ function summon_creature( caster, circle := 8, npctemplate, cast_loc, controldif
 	endif
 
 	if ("Intelligence" in attributelist)
-		SetIntelligenceMod(thecritter, CInt(AP_GetSkill(caster, MEDITATION) / 3));
-		SetMana(thecritter, thecritter.intelligence);
+		AP_SetStatMod(thecritter, INTELLIGENCE, CInt(AP_GetSkill(caster, MEDITATION) / 3));
+		AP_SetVital(thecritter, VITALID_MANA, thecritter.intelligence);
 	endif
 
 	if ("Speed" in attributelist)
-		SetDexterityMod(thecritter, CInt(AP_GetSkill(caster, MEDITATION) / 3));
-		SetStamina(thecritter, thecritter.dexterity);
+		AP_SetStatMod(thecritter, DEXTERITY, CInt(AP_GetSkill(caster, MEDITATION) / 3));
+		AP_SetVital(thecritter, VITALID_STAMINA, thecritter.dexterity);
 	endif
 
 	if ("Strength" in attributelist)
-		SetStrengthMod(thecritter, CInt(AP_GetSkill(caster, MEDITATION) / 3));
-		SetHp(thecritter, thecritter.strength);
+		AP_SetStatMod(thecritter, STRENGTH, CInt(AP_GetSkill(caster, MEDITATION) / 3));
+		AP_SetVital(thecritter, VITALID_LIFE, thecritter.strength);
 	endif
 	Detach();
 	sleep(duration);
@@ -83,6 +83,6 @@ function summon_creature( caster, circle := 8, npctemplate, cast_loc, controldif
     PlayStationaryEffect( thecritter.x, thecritter.y, thecritter.z, FX_SMOKE, 0xa, 0xa, 0, thecritter.realm );
     MoveObjectToLocation(thecritter, 6143, 0, 0, "britannia_alt", MOVEOBJECT_FORCELOCATION);
     SetScriptController(thecritter);
-    ApplyDamage(thecritter, GetHp(thecritter) + 100);
+    ApplyDamage(thecritter, AP_GetVital(thecritter, VITALID_LIFE) + 100);
   endif
 endfunction

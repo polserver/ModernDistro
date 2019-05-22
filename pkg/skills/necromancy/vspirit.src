@@ -14,7 +14,7 @@ program vengeful_spirit( params )
 
 	var necroskill := Cint(AP_GetSkill(caster, NECROMANCY));
 	var sspeak := Cint(AP_GetSkill(caster, SPIRIT_SPEAK));
-	var int := GetIntelligence(caster);
+	var int := AP_GetStat(caster, INTELLIGENCE);
 
 	var bonus := 0;
 
@@ -37,7 +37,7 @@ program vengeful_spirit( params )
 
 	sleep((necroskill+sspeak+bonus) / 10);
 	MoveObjectToLocation(spirit,0,0,0, spirit.realm,MOVEOBJECT_FORCELOCATION);
-	ApplyRawDamage(spirit, GetHp(spirit) + 3);
+	ApplyRawDamage(spirit, AP_GetVital(spirit, VITALID_LIFE) + 3);
 
 
 endprogram

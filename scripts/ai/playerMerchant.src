@@ -510,7 +510,7 @@ function Fireme()
   endforeach
   RevokePrivilege( me, "invul" );
   say("I regret nothing!");
-  ApplyRawDamage( me, GetHp(me) +3);
+  ApplyRawDamage( me, AP_GetVital(me, VITALID_LIFE) +3);
 endfunction
 
 function addthingstobuy(who)
@@ -529,7 +529,7 @@ function addthingstobuy(who)
     endif
     PrintTextAbovePrivate(me, "What do you want me to buy?", who);
     var what := Target( master );
-        if ((!what) || (what == error) || (GetStrength(what)) )
+        if ((!what) || (what == error) || (AP_GetStat(what, STRENGTH)) )
         PrintTextAbovePrivate(me, "Nevermind", who);
         return;
         endif

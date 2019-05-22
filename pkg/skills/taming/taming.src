@@ -82,7 +82,7 @@ program tame( who )
     points := points * 10;
   endif
   var thename := get_name(thecreature.name);
-  var critterhp := GetHp(thecreature);
+  var critterhp := AP_GetVital(thecreature, VITALID_LIFE);
   var count;
   var counter := 0;
   sleep(1);
@@ -90,7 +90,7 @@ program tame( who )
     if(who.dead)
       break;
     else
-      critterhp := GetHp(thecreature);
+      critterhp := AP_GetVital(thecreature, VITALID_LIFE);
       case(counter)
         0: PrintTextAbove(who, "What a nice " + thename + ".");
         1: PrintTextAbove(who, "I've always wanted a " + thename + " like you.");
@@ -99,7 +99,7 @@ program tame( who )
       endcase
       counter := counter + 1;
       sleep(4);
-      if(GetHp(thecreature) < critterhp)
+      if(AP_GetVital(thecreature, VITALID_LIFE) < critterhp)
         SendSysMessage(who,"That creature is too angry to continue taming");
         return;
       endif

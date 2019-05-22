@@ -34,9 +34,9 @@ endfunction
 function DoTempMod(who, stat, amt, duration)
   var mod;
   case(stat)
-    "str":  mod := "#ss";  SetStrengthMod(who, GetStrengthMod(who) + amt);
-    "dex":  mod := "#dd";  SetDexterityMod(who, GetDexterityMod(who) + amt);
-    "int":  mod := "#ii";  SetIntelligenceMod(who, GetIntelligenceMod(who) + amt);
+    "str":  mod := "#ss";  AP_SetStatMod(who, STRENGTH, AP_GetStatMod(who, STRENGTH) + amt);
+    "dex":  mod := "#dd";  AP_SetStatMod(who, DEXTERITY, AP_GetStatMod(who, DEXTERITY) + amt);
+    "int":  mod := "#ii";  AP_SetStatMod(who, INTELLIGENCE, AP_GetStatMod(who, INTELLIGENCE) + amt);
     "ar" :  mod := "#ar";  who.ar_mod           := who.ar_mod + amt;
 	"p"  :  mod := "#pp";  who.setParalyzed(1);
   endcase
@@ -101,11 +101,11 @@ function SpellCheck(who, modType, effect, duration, value, description)
 							SendSysMessage(who, "Nothing happens: the " + description + " is weaker than the " + CStr(effectDescriptions[i]) + " that is already affecting you.");
 						elseif (effectValues[i] < 0)
 							SendSysMessage(who, "The " + description + " has countered the effects of the " + CStr(effectDescriptions[i]) + " that was affecting you.");
-							SetDexterityMod(who, GetDexterityMod(who) - effectValues[i]);
+							AP_SetStatMod(who, DEXTERITY, AP_GetStatMod(who, DEXTERITY) - effectValues[i]);
 							effectValues[i] := 0;
 							effectExpirations[i] := (ReadGameClock() + duration);
 						else
-							SetDexterityMod(who, GetDexterityMod(who) + (value - effectValues[i]) );
+							AP_SetStatMod(who, DEXTERITY, AP_GetStatMod(who, DEXTERITY) + (value - effectValues[i]) );
 							SendSysMessage(who, "You sense that you are quicker and more agile.");
 							effectValues[i] := value;
 							effectExpirations[i] := (ReadGameClock() + duration);
@@ -115,7 +115,7 @@ function SpellCheck(who, modType, effect, duration, value, description)
 					endif
 				endfor
 			else
-				SetDexterityMod(who, GetDexterityMod(who) + value);
+				AP_SetStatMod(who, DEXTERITY, AP_GetStatMod(who, DEXTERITY) + value);
 				SendSysMessage(who, "You sense that you are quicker and more agile.");
 				i := len(effectTypes)+1;
 				effectTypes[i] := effect;
@@ -132,11 +132,11 @@ function SpellCheck(who, modType, effect, duration, value, description)
 							SendSysMessage(who, "Nothing happens: the " + description + " is weaker than the " + CStr(effectDescriptions[i]) + " that is already affecting you.");
 						elseif (effectValues[i] > 0)
 							SendSysMessage(who, "The " + description + " has countered the effects of the " + CStr(effectDescriptions[i]) + " that was affecting you.");
-							SetDexterityMod(who, GetDexterityMod(who) - effectValues[i]);
+							AP_SetStatMod(who, DEXTERITY, AP_GetStatMod(who, DEXTERITY) - effectValues[i]);
 							effectValues[i] := 0;
 							effectExpirations[i] := (ReadGameClock() + duration);
 						else
-							SetDexterityMod(who, GetDexterityMod(who) + (value - effectValues[i]) );
+							AP_SetStatMod(who, DEXTERITY, AP_GetStatMod(who, DEXTERITY) + (value - effectValues[i]) );
 							SendSysMessage(who, "You sense that you are slower and less agile.");
 							effectValues[i] := value;
 							effectExpirations[i] := (ReadGameClock() + duration);
@@ -146,7 +146,7 @@ function SpellCheck(who, modType, effect, duration, value, description)
 					endif
 				endfor
 			else
-				SetDexterityMod(who, GetDexterityMod(who) + value);
+				AP_SetStatMod(who, DEXTERITY, AP_GetStatMod(who, DEXTERITY) + value);
 				SendSysMessage(who, "You sense that you are slower and less agile.");
 				i := len(effectTypes)+1;
 				effectTypes[i] := effect;
@@ -160,7 +160,7 @@ function SpellCheck(who, modType, effect, duration, value, description)
 			for(i:=1; i<=len(effectTypes); i:=i+1)
 				if (effectTypes[i] == effect)
 					if (effectExpirations[i] <= ReadGameClock() )
-						SetDexterityMod(who, GetDexterityMod(who) - effectValues[i]);
+						AP_SetStatMod(who, DEXTERITY, AP_GetStatMod(who, DEXTERITY) - effectValues[i]);
 						if (effectValues[i] > 0)
 							SendSysMessage(who, "You feel a bit slower as the " + CStr(effectDescriptions[i]) + " wear off.");
 						elseif (effectValues[i] < 0)

@@ -35,7 +35,7 @@
 //   ********
 // updated by zulu (zulu@cadvision.com)
 // updated by Shilohen (shilohen@sympatico.ca)
-// n.b. Some properties for items weren't tested as the 
+// n.b. Some properties for items weren't tested as the
 // walkonscript but those will be there in case of future
 // core changes.
 /////////////////////////////////////////////////////////////
@@ -69,9 +69,9 @@ program textcmd_setprop( who, text )
 	if( !obj )
 		return 0;
 	endif
-	
+
 	SetScriptController(who);
-	
+
 	if( obj.IsA(POLCLASS_MOBILE) )
 		ProcessMobileSetProp( who, obj, propname, amount, amount_str );
 	else
@@ -88,9 +88,9 @@ function ProcessMobileSetProp( who, mobile, propname, amount, amount_str )
 		SendSysMessage( who, "This property don't exist for mobiles." );
 		return 0;
 	endif
-	
+
 	SendSysmessage( who, propname + " was: " + old_value );
-		
+
 	if( SetMobileProp( mobile, propname, amount, amount_str ) )
 		var new_value := GetMobileProp( mobile, propname );
 		if( new_value == old_value )
@@ -105,9 +105,9 @@ function ProcessMobileSetProp( who, mobile, propname, amount, amount_str )
 	else
 		SendSysmessage( who, "Could not write to " + propname + "." );
 	endif
-	
+
 	return 1;
-	
+
 endfunction
 
 
@@ -118,9 +118,9 @@ function ProcessItemSetProp( who, item, propname, amount, amount_str )
 		SendSysMessage( who, "This property don't exist for items." );
 		return 0;
 	endif
-	
+
 	SendSysmessage( who, propname + " was: " + old_value );
-		
+
 	if( SetItemProp( item, propname, amount, amount_str ) )
 		var new_value := GetItemProp( item, propname );
 		if( new_value == old_value )
@@ -135,9 +135,9 @@ function ProcessItemSetProp( who, item, propname, amount, amount_str )
 	else
 		SendSysmessage( who, "Could not write to " + propname + "." );
 	endif
-	
+
 	return 1;
-	
+
 endfunction
 
 
@@ -155,15 +155,15 @@ function GetMobileProp( mobile, propname )
 		"name":		retstr := mobile.name;				break;
 		"warmode":	retstr := mobile.warmode;			break;
 		"gender":	retstr := mobile.gender;			break;
-		"hp":		retstr := GetHp(mobile);			break;
-		"mana":		retstr := GetMana(mobile);			break;
-		"stamina":	retstr := GetStamina(mobile);			break;
-		"strength":	retstr := GetStrength(mobile);			break;
-		"dexterity":	retstr := GetDexterity(mobile);			break;
-		"intelligence":	retstr := GetIntelligence(mobile);		break;
-		"strmod":	retstr := GetStrengthMod(mobile);		break;
-		"intmod":	retstr := GetIntelligenceMod(mobile);		break;
-		"dexmod":	retstr := GetDexterityMod(mobile);		break;
+		"hp":		retstr := AP_GetVital(mobile, VITALID_LIFE);			break;
+		"mana":		retstr := AP_GetVital(mobile, VITALID_MANA);			break;
+		"stamina":	retstr := AP_GetVital(mobile, VITALID_STAMINA);			break;
+		"strength":	retstr := AP_GetStat(mobile, STRENGTH);			break;
+		"dexterity":	retstr := AP_GetStat(mobile, DEXTERITY);			break;
+		"intelligence":	retstr := AP_GetStat(mobile, INTELLIGENCE);		break;
+		"strmod":	retstr := AP_GetStatMod(mobile, STRENGTH);		break;
+		"intmod":	retstr := AP_GetStatMod(mobile, INTELLIGENCE);		break;
+		"dexmod":	retstr := AP_GetStatMod(mobile, DEXTERITY);		break;
 		"armod":	retstr := mobile.ar_mod;			break;
 		"graphic":	retstr := mobile.graphic;			break;
 		"poisoned":	retstr := mobile.poisoned;			break;
@@ -188,7 +188,7 @@ function GetMobileProp( mobile, propname )
 	else
 		return retstr;
 	endif
-	
+
 endfunction
 
 
@@ -206,15 +206,15 @@ function SetMobileProp( mobile, propname, amount, amount_str )
 		"name":		mobile.name		:= amount_str;		break;
 		"warmode":	mobile.warmode		:= amount;		break;
 		"gender":	mobile.gender		:= amount;		break;
-		"hp":		ret := SetHp(mobile,amount);			break;
-		"mana":		ret := SetMana(mobile,amount);			break;
-		"stamina":	ret := SetStamina(mobile,amount);		break;
-		"strength":	ret := SetBaseStrength(mobile,amount);		break;
-		"dexterity":	ret := SetBaseDexterity(mobile,amount);		break;
-		"intelligence":	ret := SetBaseIntelligence(mobile,amount);	break;
-		"strmod":	ret := SetStrengthMod(mobile,amount);		break;
-		"intmod":	ret := SetIntelligenceMod(mobile,amount);	break;
-		"dexmod":	ret := SetDexterityMod(mobile,amount);		break;
+		"hp":		ret := AP_SetVital(mobile, VITALID_LIFE, amount);			break;
+		"mana":		ret := AP_SetVital(mobile, VITALID_MANA, amount);			break;
+		"stamina":	ret := AP_SetVital(mobile, VITALID_STAMINA, amount);		break;
+		"strength":	ret := AP_SetTrueStat(mobile, STRENGTH, amount);		break;
+		"dexterity":	ret := AP_SetTrueStat(mobile, DEXTERITY, amount);		break;
+		"intelligence":	ret := AP_SetTrueStat(mobile, INTELLIGENCE, amount);	break;
+		"strmod":	ret := AP_SetStatMod(mobile, STRENGTH, amount);		break;
+		"intmod":	ret := AP_SetStatMod(mobile, INTELLIGENCE, amount);	break;
+		"dexmod":	ret := AP_SetStatMod(mobile, DEXTERITY, amount);		break;
 		"armod":	mobile.ar_mod		:= amount;		break;
 		"graphic":	mobile.graphic		:= amount;		break;
 		"hidden":	mobile.hidden		:= amount;		break;

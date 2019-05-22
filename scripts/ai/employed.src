@@ -106,33 +106,33 @@ endfunction
 function ExpandStats(me, st, dx, it)
   if(st)
     if(st <= 210)
-      SetBaseStrength(me,st);
-      SetStrengthMod(me, 0);
+      AP_SetTrueStat(me, STRENGTH, st);
+      AP_SetStatMod(me, STRENGTH, 0);
     else
-      SetBaseStrength(me,210);
-      SetStrengthMod(me, st - 210);
+      AP_SetTrueStat(me, STRENGTH, 210);
+      AP_SetStatMod(me, STRENGTH, st - 210);
     endif
-    SetHp(me, st);
+    AP_SetVital(me, VITALID_LIFE, st);
   endif
   if(dx)
     if(dx <= 210)
-      SetBaseDexterity(me,dx);
-      SetDexterityMod(me, 0);
+      AP_SetTrueStat(me, DEXTERITY, dx);
+      AP_SetStatMod(me, DEXTERITY, 0);
     else
-      SetBaseDexterity(me,210);
-      SetDexterityMod(me, dx - 210);
+      AP_SetTrueStat(me, DEXTERITY, 210);
+      AP_SetStatMod(me, DEXTERITY, dx - 210);
     endif
-    SetStamina(me, dx);
+    AP_SetVital(me, VITALID_STAMINA, dx);
   endif
   if(it)
     if(it<=210)
-      SetBaseIntelligence(me,it);
-      SetIntelligenceMod(me, 0);
+      AP_SetTrueStat(me, INTELLIGENCE, it);
+      AP_SetStatMod(me, INTELLIGENCE, 0);
     else
-      SetBaseIntelligence(me,210);
-      SetIntelligenceMod(me, it - 210);
+      AP_SetTrueStat(me, INTELLIGENCE, 210);
+      AP_SetStatMod(me, INTELLIGENCE, it - 210);
     endif
-    SetMana(me, it);
+    AP_SetVital(me, VITALID_MANA, it);
   endif
 endfunction
 
@@ -146,14 +146,14 @@ function MainAILoop()
     if(ReadGameClock() > CInt(GetObjProperty(me, "Timer")))
 	  Release();
     endif
-    mhp := GetHp(me);
+    mhp := AP_GetVital(me, VITALID_LIFE);
     ev := os::wait_for_event(waittime);
     case (ev.type)
 	  SYSEVENT_SPEECH:     ProcessSpeech(ev);
 	  SYSEVENT_ENGAGED:    if(ev.source)
 	  	                     Fight(ev.source);
 	  	                   endif
-	  SYSEVENT_DAMAGED:        if(GetHp(me) < mhp)
+	  SYSEVENT_DAMAGED:        if(AP_GetVital(me, VITALID_LIFE) < mhp)
                              PlaySoundEffect(me,dmgsound);
                            endif
                            if(ev.source)
@@ -249,7 +249,7 @@ function ProcessSpeech(ev)
   elseif (evtext["all guard"])
     say("Who should I guard?");
 	var what := Target(master, TGTOPT_HELPFUL + TGTOPT_CHECK_LOS);
-	if(GetHp(what))
+	if(AP_GetVital(what, VITALID_LIFE))
       AllCommand(SYSEVENT_ALL_GUARD_CMD, what);
 	endif
   elseif(evtext[mename + " fetch"]  || (evtext[mename + " get"]))
@@ -267,14 +267,14 @@ endfunction
 
 function Fight(opponent)
   if(caster)
-    if(GetMana(me) < (GetIntelligence(me) / 2))
+    if(AP_GetVital(me, VITALID_MANA) < (AP_GetStat(me, INTELLIGENCE) / 2))
       say("I must meditate first.");
       meditationloop();
       return;
     endif
   endif
   var oldfollowing := following;
-  SetDexterityMod(me, 0);
+  AP_SetStatMod(me, DEXTERITY, 0);
   following := 0;
   if (opponent.serial == me.serial)
     return;
@@ -336,7 +336,7 @@ function Fight(opponent)
   SetWarMode(0);
   opponent := 0;
   if(caster)
-    if(GetMana(me) < (GetIntelligence(me) / 2))
+    if(AP_GetVital(me, VITALID_MANA) < (AP_GetStat(me, INTELLIGENCE) / 2))
       say("I must meditate.");
       meditationloop();
       return;
@@ -353,8 +353,8 @@ function meditationloop()
   healparms[1] := "#MOB";
   healparms[2] := me;
   healparms[3] := me;
-  while(GetMana(me) < GetIntelligence(me))
-    SetMana(me, GetMana(me) + 2);
+  while(AP_GetVital(me, VITALID_MANA) < AP_GetStat(me, INTELLIGENCE))
+    AP_SetVital(me, VITALID_MANA, AP_GetVital(me, VITALID_MANA) + 2);
 	ev := wait_for_event(2);
 	case (ev.type)
       EVID_DAMAGED: if(TS_GetTimerNames(me, "P").size() > 1)
@@ -464,7 +464,7 @@ function Guard()
       return;
     endforeach
   endif
-  if( (!GetStrength(guarding)) || (guarding.dead) || (dist(me,guarding) > 15) )
+  if( (!AP_GetStat(guarding, STRENGTH)) || (guarding.dead) || (dist(me,guarding) > 15) )
     guarding := 0;
   endif
 endfunction
@@ -479,20 +479,20 @@ function Follow()
     if(d <= 2)
        waittime := 1;
     elseif(d > 6)
-      var ma := 200 - CInt(GetDexterity(me));
-      SetDexterityMod(me, CInt(GetDexterityMod(me)) + ma);
+      var ma := 200 - CInt(AP_GetStat(me, DEXTERITY));
+      AP_SetStatMod(me, DEXTERITY, CInt(AP_GetStatMod(me, DEXTERITY)) + ma);
       RunToward(escortee);
-      SetDexterityMod(me, CInt(GetDexterityMod(me)) - ma);
+      AP_SetStatMod(me, DEXTERITY, CInt(AP_GetStatMod(me, DEXTERITY)) - ma);
       waittime := 0;
     else
-      var ma := 200 - CInt(GetDexterity(me));
-      SetDexterityMod(me, CInt(GetDexterityMod(me)) + ma);
+      var ma := 200 - CInt(AP_GetStat(me, DEXTERITY));
+      AP_SetStatMod(me, DEXTERITY, CInt(AP_GetStatMod(me, DEXTERITY)) + ma);
       walktoward(escortee);
-      SetDexterityMod(me, CInt(GetDexterityMod(me)) - ma);
+      AP_SetStatMod(me, DEXTERITY, CInt(AP_GetStatMod(me, DEXTERITY)) - ma);
       waittime := 0;
     endif
   endif
-  if( (!GetStrength(escortee)) || (escortee.dead) || (dist(me,escortee) > 15) )
+  if( (!AP_GetStat(escortee, STRENGTH)) || (escortee.dead) || (dist(me,escortee) > 15) )
     guarding := 0;
   endif
   if(guarding)

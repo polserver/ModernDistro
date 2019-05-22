@@ -27,7 +27,7 @@ const KEYRING := 0x1011;
 program use_static_sign( who, sign )
 
 
-    // This is for a house that has never been purchased.    
+    // This is for a house that has never been purchased.
     if(GetObjProperty(sign, "NewHouse"))
 		var price		:= CInt(GetObjProperty(sign, "Price"));
 		var bank_region := CP_DEFAULT_AREA;
@@ -46,34 +46,34 @@ program use_static_sign( who, sign )
 		var sez			:= infoarr[7];
 		nwz := nwz;
 		sez := sez;
-		
+
 		if (!yesno_ex(who, "Do you want to buy this house?"))
 			SendSysMessage (who, "Canceled.");
 			return 0;
 		endif
-		
+
 		set_critical( 1 );
 		var created := CreateBuiltDeed(who, sign, bankbox);
 		set_critical( 0 );
-		
+
 		if (!created)
 			SendSysMessage( who, "ERROR: Unable to create built deed!", color := 33 );
 			SendSysMessage(who, "Your bankbox might be too full. Try removing some items from it.", color := 33);
 			SendSysMessage(who, "Then come back and try buying this house again.", color := 33);
 		  return 0;
-		endif 
-		
+		endif
+
 		var packkey := CreateItemInBackpack( who, UOBJ_GOLD_KEY );
-		
+
 		if (!packkey)
 			SendSysMessage( who, "Your backpack is too full! Cannot create the key.", color := 33);
 			SendSysMessage(who, "Aborting. You must make room before buying this house.", color := 33);
 			DestroyItem(created);
 			return 0;
 		endif
-		
+
 		var bankkey := CreateItemInContainer( bankbox, UOBJ_GOLD_KEY );
-		
+
 		if (!bankkey)
 			SendSysMessage( who, "Your bankbox is too full! Cannot create the extra key!");
 			SendSysMessage(who, "Aborting. You must make room before buying this house.", color := 33);
@@ -81,7 +81,7 @@ program use_static_sign( who, sign )
 			DestroyItem( packkey );
 			return 0;
 		endif
-	
+
 		if (!who.spendgold (price))
 			SendSysMessage (who, "You don't have enough money in your backpack to buy it.", color := 33);
 			SendSysMessage (who, "Checking your bank box...", color := 56);
@@ -94,7 +94,7 @@ program use_static_sign( who, sign )
 				return 0;
 			endif
 		endif
-	
+
 		var lockid := AllocLockId();
 		packkey.SetLockId( lockid );
 		bankkey.SetLockId( lockid );
@@ -138,15 +138,15 @@ program use_static_sign( who, sign )
 		newsigninfo[8]  := infoarr[8];
 		newsigninfo[9]  := infoarr[9];
 		SetObjProperty(sign, "homeinfo", newsigninfo);
-		
+
 		if (!GetObjProperty(sign,"numlockdowns"))
 			SetObjProperty(sign,"numlockdowns", infoarr[8]);
 		endif
-		
+
 		if (!GetObjProperty(sign,"numsecure"))
 			SetObjProperty(sign,"numsecure",    infoarr[9]);
 		endif
-		
+
 		SetObjProperty(sign, "builtdeed", created.serial);
 		SetObjProperty(created, "homeinfo", infoarr);
 		EraseObjProperty(sign, "friends");
@@ -157,13 +157,13 @@ program use_static_sign( who, sign )
 		GumpPrompt(who, "A key has been placed in your backpack. The deed is in your bank box along with a spare key.");
 		Sign.name := "A house sign";
 		SetObjProperty( sign, "lastownername", who.name );
-		
+
 		// The following sets the decay time for 60 Real Life days.
 		// Would like to move this to a settings.cfg file at some point.
 		SetObjProperty(sign,"decay", (ReadGameClock() + CInt(get_abandon_time())));
 		return 1;
     endif
-    
+
 
   SetObjProperty(sign,"decay", (ReadGameClock()+ CInt(get_abandon_time())));
   var homeinfo := GetObjProperty(sign,"homeinfo");
@@ -175,14 +175,14 @@ program use_static_sign( who, sign )
   var result;
   SetPlaqueName( sign );
   Detach();
-  
+
   if( who.serial == oserial )
     data[25] := who.name;
     SetObjProperty( sign, "lastownername", who.name );
   else
     data[25] := GetObjProperty( sign, "lastownername" );
   endif
-  
+
   data[26] := GetObjProperty( sign, "numlockdowns" );
   data[27] := GetObjProperty( sign, "numsecure" );
   var coownerinfo := GetObjProperty(sign,"coowners");
@@ -455,7 +455,7 @@ function AddFriend( sign, who )
   if (ind > 0)
     SendSysMessage(who, "that person is already a friend");
     return;
-  elseif (GetMana(targetchr) == error)
+  elseif (AP_GetVital(targetchr, VITALID_MANA) == error)
     SendSysMessage(who, "you cant friend that!");
     return;
   elseif (targetchr.npctemplate)
@@ -491,7 +491,7 @@ function addenemy( sign, who )
   elseif( targetchr.serial == who.serial)
     SendSysMessage(who, "that person is a friend.");
     return;
-  elseif (GetMana(targetchr) == error)
+  elseif (AP_GetVital(targetchr, VITALID_MANA) == error)
     SendSysMessage(who, "you cant make that an enemy!");
     return;
   elseif (targetchr.npctemplate)
@@ -525,7 +525,7 @@ function addcoowner( sign, who )
 //  if ((ind > 0) or ( targetchr.serial = who.serial))
     SendSysMessage(who, "that person is already a co-owner");
     return;
-  elseif (GetMana(targetchr) == error)
+  elseif (AP_GetVital(targetchr, VITALID_MANA) == error)
     SendSysMessage(who, "you cant make that a co-owner!");
     return;
   elseif (targetchr.npctemplate)

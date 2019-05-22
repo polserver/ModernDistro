@@ -39,7 +39,7 @@ program field_control( item )
   sleepms(1500);
   while(item)
     foreach character in ListMobilesNearLocation(item.x,item.y, item.z, 0, item.realm)
-      if((GetHp(character) > 1) && (character.cmdlevel < 2))
+      if((AP_GetVital(character, VITALID_LIFE) > 1) && (character.cmdlevel < 2))
         fieldstrength := RandomInt(dmg);
         PlaySoundEffect(character, 0x209);
         ApplyRawSpellDamageEX(character, fieldstrength, DMG_FIRE, boss, 2);

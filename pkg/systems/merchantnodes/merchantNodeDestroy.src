@@ -12,7 +12,7 @@ program destroy(item)
     if(npc)
       RevokePrivilege(npc, "invul");
       SetObjProperty(npc, "guardkill", 1);
-      ApplyRawDamage(npc, GetHP(npc) + 1000);
+      ApplyRawDamage(npc, AP_GetVital(npc, VITALID_LIFE) + 1000);
     endif
   endforeach
   var type := GetObjProperty(item, "Type");

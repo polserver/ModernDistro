@@ -12,7 +12,7 @@ function HandleMods(who, item)
   endif
   if(penalty)
     SetObjProperty(item, "#equipped", who.serial);
-    SetDexterityMod(who, GetDexterityMod(who) - penalty);
+    AP_SetStatMod(who, DEXTERITY, AP_GetStatMod(who, DEXTERITY) - penalty);
   endif
   var type := GetObjProperty(item, "type");
   if(!type)
@@ -82,9 +82,9 @@ function strengthBoost(who,item)
 endfunction
 
 function wizzohat(who,item)
-  SetIntelligenceMod(who, GetIntelligenceMod(who) + 10);
-  SetStrengthMod(who, GetStrengthMod(who) - 5);
-  SetDexterityMod(who, GetDexterityMod(who) - 5);
+  AP_SetStatMod(who, INTELLIGENCE, AP_GetStatMod(who, INTELLIGENCE) + 10);
+  AP_SetStatMod(who, STRENGTH, AP_GetStatMod(who, STRENGTH) - 5);
+  AP_SetStatMod(who, DEXTERITY, AP_GetStatMod(who, DEXTERITY) - 5);
   SetObjProperty(item, "#equipped", who.serial);
   return 1;
 endfunction

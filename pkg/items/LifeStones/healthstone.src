@@ -2,14 +2,14 @@
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                                 //
-// Heakth Stone script                                                                             //  
+// Heakth Stone script                                                                             //
 // Double clicking a Health Stone will use it.                                                     //
 // If it is not "linked" to someone, ie. never used before, it will be linked to the user and the  //
 // user will get a target.                                                                         //
 // If it has been "linked" then there is a check to verify if the user is the one linked to the    //
 // stone. If so then the user will get a target. If not then the user will get an error message.   //
 // If the user targets the stone her hp will charge the stone. Her hp will be drained until        //
-// either she reaches 1 or the stone is fully charged. If she targets herself then hp will         // 
+// either she reaches 1 or the stone is fully charged. If she targets herself then hp will         //
 // be transferred from the stone to her until either her hp is full or the stone is empty.         //
 //                                                                                                 //
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -51,7 +51,7 @@ program use_healthstone (who, stone)
 	endif
         capacity := GetObjProperty (stone, "MaxCapacity"); // Get the stones Maximum cap for HP
         amt := GetObjProperty(stone, "Amount"); //  How much health is in the stone now
-        myhp := GetHp( who ); // How much health does she have
+        myhp := AP_GetVital(who, VITALID_LIFE); // How much health does she have
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Section where we decide what to do based on what was targetted by the Health Stone user         //
@@ -60,7 +60,7 @@ program use_healthstone (who, stone)
 // If she targets herself then transfer any stored health to her until either she is full or
 // the stone is empty
         if (what == who)
-            maxhpts := GetMaxHp(who);
+            maxhpts := AP_GetVitalMaximumValue(who, VITALID_LIFE);
             if (!amt) //If the stone is bone dry of HP
                 SendSysMessage(who, "That stone has no stored health.", color := 666);
                 return;
@@ -113,13 +113,13 @@ program use_healthstone (who, stone)
         endif
         Status (stone);
 endprogram
-        
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // This function is called the first time a Health Stone is used to initialize the stones CProps //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
         function Init(who, stone)
-        
+
             SetObjProperty(stone, "MaxCharges", 10);
             SetObjProperty(stone, "Charges", 10);
             SetObjProperty(stone, "MaxCapacity", RandomInt(400) + 91);
@@ -180,10 +180,10 @@ function Status (stone)
     var capacity := GetObjProperty(stone, "MaxCapacity");
     var amt := GetObjProperty(stone, "Amount");
     var condition, quantity;
-    
+
     var wear := CInt(charges /2); // Var used to calculate wear
     var storage := CInt(amt * 100 / capacity); // Var used to gauge the amt of life-energy stored in the stone (%).
-    
+
     case(wear)
         5: condition := "unused";
         4: condition := "hardly used";
@@ -192,7 +192,7 @@ function Status (stone)
         1: condition := "badly worn";
         default: condition := "unknown";
     endcase
-    // "stone seems to hold " ... " Health" 
+    // "stone seems to hold " ... " Health"
     if (storage >= 85)
         quantity := "a very large amount of";
     elseif (storage >=70)
@@ -209,8 +209,8 @@ function Status (stone)
     SetObjProperty(stone, "Quantity", quantity);
     SetObjProperty(stone, "Condition", condition);
 endfunction
-    
-        
+
+
 function InInventory(byref inventory, byref it)
 
 	foreach item in EnumerateItemsInContainer(inventory)

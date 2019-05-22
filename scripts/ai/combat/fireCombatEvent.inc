@@ -5,7 +5,7 @@ include ":damage:damage";
 //include ":magery:spells";
 
 function process_combat_event(opponent)
-  if((GetHp(me) * 100/GetMaxHp(me)) < flee_point)
+  if((AP_GetVital(me, VITALID_LIFE) * 100/AP_GetVitalMaximumValue(me, VITALID_LIFE)) < flee_point)
     EraseObjProperty(me,"#flees");
     flee(opponent);
   endif
@@ -23,8 +23,8 @@ function spellattack(opponent);
     PerformAction(me,0x0c);
     sleep(1);
     PlaySoundEffect(me, 0x16b);
-    sleep(1);    
-    var base := Cint(((FLAME_STRENGTH * GetHp(me)) / GetMaxHp(me)) / 2);
+    sleep(1);
+    var base := Cint(((FLAME_STRENGTH * AP_GetVital(me, VITALID_LIFE)) / AP_GetVitalMaximumValue(me, VITALID_LIFE)) / 2);
     var dmg :=  RandomInt(base) + base;
     PlayMovingEffect(me, opponent, 0x36d4, 10, 1, 1);
     ApplyRawSpellDamageEX(opponent, dmg, DMG_FIRE, 0, 4);

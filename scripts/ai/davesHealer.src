@@ -85,7 +85,7 @@ function Fight( opponent )
        SYSEVENT_DISENGAGED:
        SYSEVENT_ENGAGED:
        SYSEVENT_DAMAGED:        PlaySoundEffect(me,dmgsound);
-                                if(GetHp(me) < (GetMaxHp(me)/2))
+                                if(AP_GetVital(me, VITALID_LIFE) < (AP_GetVitalMaximumValue(me, VITALID_LIFE)/2))
                                   CastSpell(me, me, "greaterHeal");
                                 endif
        SYSEVENT_OPPONENT_MOVED: break;

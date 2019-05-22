@@ -6,7 +6,7 @@ program happycounter(parms)
   var me := parms[1];
   var timer := parms[2];
   var happiness;
-  while((GetHp(me) > 0) && (me.script == "tamed"))
+  while((AP_GetVital(me, VITALID_LIFE) > 0) && (me.script == "tamed"))
     if(GetObjProperty(me,"countercheck") != timer)
       break;
     endif

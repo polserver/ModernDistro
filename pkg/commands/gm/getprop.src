@@ -11,7 +11,7 @@ program textcmd_getprop( who, propname )
 	if( !obj )
 		return 0;
 	endif
-	
+
 	if( obj.IsA(POLCLASS_MOBILE) )
 		ProcessMobileGetProp( who, obj, propname );
 	else
@@ -62,20 +62,20 @@ function GetMobileProp( mobile, propname )
 		"warmode":	retstr := mobile.warmode;		break;
 		"gender":	retstr := mobile.gender;		break;
 		"truecolor":	retstr := mobile.truecolor;		break;
-		"hp":		retstr := GetHp(mobile);		break;
-		"maxhp":	retstr := GetMaxHp(mobile);		break;
-		"mana":		retstr := GetMana(mobile);		break;
-		"maxmana":	retstr := GetMaxMana(mobile);		break;
-		"stamina":	retstr := GetStamina(mobile);		break;
-		"maxstamina":	retstr := GetMaxStamina(mobile);	break;
-		"strength":	retstr := GetStrength(mobile);		break;
-		"dexterity":	retstr := GetDexterity(mobile);		break;
-		"intelligence":	retstr := GetIntelligence(mobile);	break;
+		"hp":		retstr := AP_GetVital(mobile, VITALID_LIFE);		break;
+		"maxhp":	retstr := AP_GetVitalMaximumValue(mobile, VITALID_LIFE);		break;
+		"mana":		retstr := AP_GetVital(mobile, VITALID_MANA);		break;
+		"maxmana":	retstr := AP_GetVitalMaximumValue(mobile, VITALID_MANA);		break;
+		"stamina":	retstr := AP_GetVital(mobile, VITALID_STAMINA);		break;
+		"maxstamina":	retstr := AP_GetVitalMaximumValue(mobile, VITALID_STAMINA);	break;
+		"strength":	retstr := AP_GetStat(mobile, STRENGTH);		break;
+		"dexterity":	retstr := AP_GetStat(mobile, DEXTERITY);		break;
+		"intelligence":	retstr := AP_GetStat(mobile, INTELLIGENCE);	break;
 		"dead":		retstr := mobile.dead;			break;
 		"ar":		retstr := mobile.ar;			break;
-		"strmod":	retstr := GetStrengthMod(mobile);	break;
-		"intmod":	retstr := GetIntelligenceMod(mobile);	break;
-		"dexmod":	retstr := GetDexterityMod(mobile);	break;
+		"strmod":	retstr := AP_GetStatMod(mobile, STRENGTH);	break;
+		"intmod":	retstr := AP_GetStatMod(mobile, INTELLIGENCE);	break;
+		"dexmod":	retstr := AP_GetStatMod(mobile, DEXTERITY);	break;
 		"armod":	retstr := mobile.ar_mod;		break;
 		"graphic":	retstr := mobile.graphic;		break;
 		"trueobjtype":	retstr := mobile.trueobjtype;		break;

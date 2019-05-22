@@ -15,7 +15,7 @@ program EvaluatingIntelligence(who)
         data[3] := 16;
         SetObjProperty(who, "LastUsedSkill", data );
         TrainingSkill(who, data[3]);
-  
+
   EraseObjProperty(who, "IsMeditating");
   EraseObjProperty(who, "HealTimer");
   SendSysMessageUC(who, CAscZ("What do you wish to evaluate?"), "ENG");
@@ -34,8 +34,8 @@ program EvaluatingIntelligence(who)
     return;
   endif
   // variables for sys messages
-  var intell := getIntell(GetIntelligence(subject), subject.graphic, subject.gender);
-  var mentalStreng := getMentalStreng(CInt(CInt(GetMana(subject))/CDbl(GetMaxMana(subject))*100));
+  var intell := getIntell(AP_GetStat(subject, INTELLIGENCE), subject.graphic, subject.gender);
+  var mentalStreng := getMentalStreng(CInt(CInt(AP_GetVital(subject, VITALID_MANA))/CDbl(AP_GetVitalMaximumValue(subject, VITALID_MANA))*100));
   var skill := GetAttribute(who, EVALUATING_INTELLIGENCE);
   // adjust succeed and fail msgs here
   var strMsg, strFail;
@@ -44,14 +44,14 @@ program EvaluatingIntelligence(who)
     strFail := "that creature's mental abilities.";
   else
     strMsg := subject.name;
-    if(upper(subject.name[len(subject.name)]) != "S" || lower(subject.name[len(subject.name)]) != "s" ) 
-      strFail := subject.name + "'s mental abilities.";  
-    else 
-      strFail := subject.name + "' mental abilities."; 
+    if(upper(subject.name[len(subject.name)]) != "S" || lower(subject.name[len(subject.name)]) != "s" )
+      strFail := subject.name + "'s mental abilities.";
+    else
+      strFail := subject.name + "' mental abilities.";
     endif
   endif
 /*  var pts := CInt(GetAttribute(who, EVALUATING_INTELLIGENCE) + 1) *3;
-  if (pts < 30) 
+  if (pts < 30)
     pts := 30;
   endif */
   var pts := CInt(GetAttribute(who, EVALUATING_INTELLIGENCE) / 10) + 15;
@@ -59,7 +59,7 @@ program EvaluatingIntelligence(who)
     pts := 35;
   endif
   if(SkillCheck(who,EVALUATING_INTELLIGENCE, -1, pts/3))
-    PrintTextAbovePrivateUC(subject, CAscZ(strMsg + " looks " + intell + "." ), "ENG", who);	
+    PrintTextAbovePrivateUC(subject, CAscZ(strMsg + " looks " + intell + "." ), "ENG", who);
     // player's EVALUATING_INTELLIGENCE skill equal/greater than 76 can get mental strength info
     if(skill >= 76)
       PrintTextAbovePrivateUC(subject, CAscZ(strMsg + " is at " + mentalStreng + " mental strength."), "ENG", who);

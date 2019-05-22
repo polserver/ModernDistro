@@ -19,9 +19,9 @@ function undo_mod(who, mod, amt, serial)
     who := SystemFindObjectBySerial(serial, SYSFIND_SEARCH_OFFLINE_MOBILES);
   endif
   case(mod)
-    "str": 	SetStrengthMod(who, GetStrengthMod(who) - amt);
-    "dex": 	SetDexterityMod(who, GetDexterityMod(who) - amt);
-    "int": 	SetIntelligenceMod(who, GetIntelligenceMod(who) - amt);
+    "str": 	AP_SetStatMod(who, STRENGTH, AP_GetStatMod(who, STRENGTH) - amt);
+    "dex": 	AP_SetStatMod(who, DEXTERITY, AP_GetStatMod(who, DEXTERITY) - amt);
+    "int": 	AP_SetStatMod(who, INTELLIGENCE, AP_GetStatMod(who, INTELLIGENCE) - amt);
     "ar" : 	who.ar_mod           := who.ar_mod - amt;
     "p"  : 	who.frozen           := 0;
             who.paralyzed        := 0;

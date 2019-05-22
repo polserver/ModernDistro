@@ -108,7 +108,7 @@ function remove(house, sign, event)
     if (!idiot)
       SendSysMessage(who, "cancelled");
       return;
-    elseif (GetMana(idiot) == error)
+    elseif (AP_GetVital(idiot, VITALID_MANA) == error)
       SendSysMessage(who,"you cannot eject items");
       return;
     endif
@@ -181,7 +181,7 @@ function HouseFunction(house, event, num)
     SendSysMessage(event.source, "Cancelled.");
     return;
   endif
-  
+
   	// Set-up in case this item is a deeded item.
 	var DeedObjType := GetObjProperty( itemt, "DeedObjType" );
 	var DeedColor := GetObjProperty( itemt, "DeedColor" );
@@ -189,7 +189,7 @@ function HouseFunction(house, event, num)
 	var OtherItems := array;
 	OtherItems := GetObjProperty( itemt, "OtherItems" );
 	//////////////////////////////////////////////
-  
+
   var lists := GetObjProperty(house, "footage");
   var itemlist := {};
   var holder;
@@ -395,7 +395,7 @@ function housebanning(house, event, sign)
     SendSysMessage(who, "Canceled.");
     return;
   endif
-  if(!GetStrength(idiot))
+  if(!AP_GetStat(idiot, STRENGTH))
     SendSysMessage(who, "That cannot be added to the list.");
     return;
   endif
@@ -512,7 +512,7 @@ function reveal(house, event)
   var holder := 0;
   foreach thing in lists
     foreach thing in ListObjectsInBox(thing[1], thing[2], thing[3], thing[4], thing[5],thing[6], house.realm)
-      if((GetStrength(thing)) && (thing.hidden))
+      if((AP_GetStat(thing, STRENGTH)) && (thing.hidden))
         thing.hidden := 0;
         holder := holder + 1;
       endif

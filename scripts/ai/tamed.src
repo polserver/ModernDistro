@@ -59,7 +59,7 @@ program TamedAI()
   start_script(":taming:happyCounter", parms);
   master := SystemFindObjectBySerial(masterserial, SYSFIND_SEARCH_OFFLINE_MOBILES);
   if(!master)
-    ApplyRawDamage(me, GetHP(me)+ 1);
+    ApplyRawDamage(me, AP_GetVital(me, VITALID_LIFE)+ 1);
     return;
   endif
   me.setmaster(master);
@@ -114,7 +114,7 @@ function MainAILoop()
   nextwatch := ReadGameClock();
   var mhp;
   EnableMainEvents();
-  while(GetHp(me)> 0)
+  while(AP_GetVital(me, VITALID_LIFE)> 0)
     if ( GetObjProperty(me, "totem") )
 	SetObjProperty(me, "happiness", 100);
     endif
@@ -122,7 +122,7 @@ function MainAILoop()
 	SetObjProperty(me, "happiness", 1000);
     endif
     happiness := GetObjProperty(me,"happiness");
-    mhp := GetHp(me);
+    mhp := AP_GetVital(me, VITALID_LIFE);
     if(GetObjProperty(me, "onhold"))
       HoldLoop("onhold");
     elseif(GetObjProperty(me, "stabled"))
@@ -139,7 +139,7 @@ function MainAILoop()
       case(ev.type)
         SYSEVENT_SPEECH:        ProcessSpeech(ev);
         SYSEVENT_ENGAGED:       Fight(ev.source);
-        SYSEVENT_DAMAGED:       if(GetHp(me)< mhp)
+        SYSEVENT_DAMAGED:       if(AP_GetVital(me, VITALID_LIFE)< mhp)
                                   if(ev.source)
                                     Fight(ev.source);
                                   endif
@@ -199,7 +199,7 @@ endfunction
 function Fight(opponent)
   var oldfollowing := following;
   var flees := 0;
-  SetDexterityMod(me, 0);
+  AP_SetStatMod(me, DEXTERITY, 0);
   following := 0;
   if(opponent == me)
     return;
@@ -421,7 +421,7 @@ function release()
 	    SetObjProperty(it, "critter", me.npctemplate);
 	    SetObjProperty(it, "critcolor", me.color);
 	    SetObjProperty(it, "critgraphic", me.graphic);
-	    SetObjProperty(it, "totemhp", GetHp(me));
+	    SetObjProperty(it, "totemhp", AP_GetVital(me, VITALID_LIFE));
 	    it.usescript := ":magicitems:use_totem";
 	    it.decay := 0;
 	    it.movable := 1;
@@ -433,7 +433,7 @@ function release()
 	    PlayStationaryEffect( me.x, me.y, me.z, FX_SMOKE, 0xa, 0xa );
 	    MoveObjectToLocation(me, 0, 0, 0, "britannia_alt", MOVEOBJECT_FORCELOCATION);
 	    SetObjProperty(me, "guardkill", 1);
-	    ApplyRawDamage( me, GetMaxHp(me) + 3 );
+	    ApplyRawDamage( me, AP_GetVitalMaximumValue(me, VITALID_LIFE) + 3 );
 	else
 	    say("*Argh*");
 	    return;
@@ -452,7 +452,7 @@ function release()
     endif
     PlayStationaryEffect(me.x, me.y, me.z, FX_SMOKE, 0xa, 0xa, 0, me.realm);
     MoveObjectToLocation(me,5288, 1176, 0,"britannia_alt",MOVEOBJECT_FORCELOCATION); // problem for new map
-    ApplyRawDamage(me, GetHp(me)+ 3);
+    ApplyRawDamage(me, AP_GetVital(me, VITALID_LIFE)+ 3);
   else
     if(GetObjProperty(me,"mounted"))
       char := GetObjProperty(me,"mounted_on");
@@ -724,7 +724,7 @@ function Guard()
       return;
     endforeach
   endif
-  if((!GetStrength(guarding))||(guarding.dead)||(dist(me,guarding)> 15))
+  if((!AP_GetStat(guarding, STRENGTH))||(guarding.dead)||(dist(me,guarding)> 15))
     guarding := 0;
   endif
 endfunction
@@ -740,20 +740,20 @@ function Follow()
     if(GetObjProperty(me, "Pause"))
       waittime := 2;
     else
-      var ma := 200 - CInt(GetDexterity(me));
-      SetDexterityMod(me, CInt(GetDexterityMod(me))+ ma);
+      var ma := 200 - CInt(AP_GetStat(me, DEXTERITY));
+      AP_SetStatMod(me, DEXTERITY, CInt(AP_GetStatMod(me, DEXTERITY))+ ma);
       RunToward(following);
-      SetDexterityMod(me, CInt(GetDexterityMod(me))- ma);
+      AP_SetStatMod(me, DEXTERITY, CInt(AP_GetStatMod(me, DEXTERITY))- ma);
       waittime := 0;
     endif
   else
     if(GetObjProperty(me, "Pause"))
       waittime := 2;
     else
-      var ma := 200 - CInt(GetDexterity(me));
-      SetDexterityMod(me, CInt(GetDexterityMod(me))+ ma);
+      var ma := 200 - CInt(AP_GetStat(me, DEXTERITY));
+      AP_SetStatMod(me, DEXTERITY, CInt(AP_GetStatMod(me, DEXTERITY))+ ma);
       walktoward(following);
-      SetDexterityMod(me, CInt(GetDexterityMod(me))- ma);
+      AP_SetStatMod(me, DEXTERITY, CInt(AP_GetStatMod(me, DEXTERITY))- ma);
       waittime := 0;
     endif
   endif
@@ -851,7 +851,7 @@ function ProcessSpeech(ev)
   elseif(evtext["all guard"])
     say("Who should I guard?");
 	var what := Target(master, TGTOPT_HELPFUL + TGTOPT_CHECK_LOS);
-	if(GetHp(what))
+	if(AP_GetVital(what, VITALID_LIFE))
       AllCommand(SYSEVENT_ALL_GUARD_CMD, what);
 	endif
   elseif(evtext[mename + " fetch"])
@@ -892,7 +892,7 @@ function AllCommand(evtype,what)
 endfunction
 
 function cast_meteor(opponent)
-  var base := Cint(((FLAME_STRENGTH * GetHp(me)) / GetMaxHp(me)) / 2);
+  var base := Cint(((FLAME_STRENGTH * AP_GetVital(me, VITALID_LIFE)) / AP_GetVitalMaximumValue(me, VITALID_LIFE)) / 2);
   var dmg :=  RandomInt(base) + base;
   PerformAction(me,0x0c);
   PlaysoundEffect(me, 0x16b);
@@ -913,7 +913,7 @@ function flee(opponent)
 	else
 		MoveObjectToLocation(me,5288,1176,0,"britannia_alt",MOVEOBJECT_FORCELOCATION);
 		SetObjProperty(me,"guardkill",1);
-		ApplyRawDamage(me, GetMaxHp(me)+ 3);
+		ApplyRawDamage(me, AP_GetVitalMaximumValue(me, VITALID_LIFE)+ 3);
 	endif
     else
       numflees := numflees + 1;

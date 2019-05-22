@@ -16,7 +16,7 @@ var fey :=systemfindobjectbyserial(getobjproperty(caster, "fey"));
 
   if(fey)
     MoveObjectToLocation(fey,0,0,0, fey.realm,MOVEOBJECT_FORCELOCATION);
-    ApplyRawDamage(fey, GetHp(fey) + 10);
+    ApplyRawDamage(fey, AP_GetVital(fey, VITALID_LIFE) + 10);
     eraseobjproperty(caster, "fey");
   endif
 

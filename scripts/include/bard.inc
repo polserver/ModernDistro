@@ -45,7 +45,7 @@ function can_sing( me, circle)
 //	var item;
 
 	foreach item in ListEquippedItems(me)
-		if ((cfg1[item.objtype].blockcircle) && (cfg1[item.objtype].blockcircle <= circle)) 
+		if ((cfg1[item.objtype].blockcircle) && (cfg1[item.objtype].blockcircle <= circle))
                 	SendSysMessage(me, "Your equipment prevents you from playing the song!", color := 33);
                 	return 0;
 		endif
@@ -81,7 +81,7 @@ endfunction
 ///////////////////
 
 function MakeSound (character, soundeffect)
-	foreach mobile in ListMobilesNearLocationEx (character.x, character.y, character.z, 15, 
+	foreach mobile in ListMobilesNearLocationEx (character.x, character.y, character.z, 15,
 			LISTEX_FLAG_NORMAL+LISTEX_FLAG_HIDDEN+LISTEX_FLAG_GHOST, character.realm)
 		if (mobile.acct)
 			var acct := mobile.acct;
@@ -119,7 +119,7 @@ function GetHarmonizedBards(who, range:=5)
 			numbards := numbards + 1;
 		endif
 	endforeach
-	
+
 	return numbards;
 endfunction
 
@@ -130,15 +130,15 @@ function BardTarget(byref who, byref npctarget, prompt := "Select a target", ops
 	if (npctarget)
 		return npctarget;
 	endif
-	
+
 	if (who.npctemplate)
 		return;
 	endif
-	
+
 	SendSysMessage(who, prompt);
-	
+
 	var targ := target(who, ops);
-	
+
 	if ( ( who.x == x ) && ( who.y == y ) )
 		return targ;
 	else
@@ -150,17 +150,17 @@ endfunction
 function BardTargetCoordinates(byref who, byref params := "", prompt := "Select a target")
 	var x := who.x;
 	var y := who.y;
-	
+
 	who.hidden := 0;
 	if (params[3])
 		return params[3];
 	elseif ( who.npctemplate )
 		return;
 	endif
-	
+
 	SendSysMessage(who, prompt);
 	var targ := TargetCoordinates(who);
-	
+
 	if ( ( who.x == x ) && ( who.y == y ) )
 		return targ;
 	else
@@ -173,7 +173,7 @@ function IsInGroup(bard, mobile, chklos := 0)
 	if (bard == mobile)
 		return 1;
 	endif
-	
+
 	if ( (chklos) && ! (CheckLineOfSight(bard, mobile)) )
 		return 0;
 	elseif ( !( mobile.serial in GetObjProperty(bard, "BardGroup") ) )
@@ -184,8 +184,8 @@ function IsInGroup(bard, mobile, chklos := 0)
 endfunction
 
 function CheckStam(who, amount)
-	if ( GetStamina(who) >= amount )
-		SetStamina(who, GetStamina(who) - amount);
+	if ( AP_GetVital(who, VITALID_STAMINA) >= amount )
+		AP_SetVital(who, VITALID_STAMINA, AP_GetVital(who, VITALID_STAMINA) - amount);
 		return 1;
 	else
 		return 0;
@@ -201,20 +201,20 @@ function BardResisted(caster, cast_on, amt, circle := 0)
         var musicianship := CInt(GetAttribute(caster, MUSICIANSHIP));
         var evalint := CInt(GetAttribute(caster, EVALUATING_INTELLIGENCE));
         var resist := CInt(GetAttribute(cast_on, RESISTING_SPELLS));
-        
+
         // chk1 relates to the resist ability.
         var chk1 := (resist / 5);
         // chk2 relates to the difficulty level
         var chk2 := resist - (((musicianship - 20) / 5) + (circle * 5));
-        
+
         if(chk1 < 1)
                 chk1 := 1;
         endif
         if(chk2 < 1)
                 chk2 := 1;
         endif
-        
-        // What an odd construct.  
+
+        // What an odd construct.
         // If you're hit with an easy spell then you have a difficulty of your resist
         var diff := 0;
         if(chk1 > chk2)
@@ -222,7 +222,7 @@ function BardResisted(caster, cast_on, amt, circle := 0)
         else
                 diff := chk2;
         endif
-        
+
         var points := getbardresistpoints(circle, cast_on, RESISTING_SPELLS);
         if(cast_on.dead)
                 return 0;
@@ -279,7 +279,7 @@ endfunction
 // function GetAudience(who, range, flags)
 // This function returns a list of valid "listeners" to the song,
 // based on restrictions set forth in an array "flags".  "Flags"
-// must have either "ALL", "HOSTILES", or "NEUTRALS" as one of 
+// must have either "ALL", "HOSTILES", or "NEUTRALS" as one of
 // the elements, and may not have more than one.  In addition,
 // the following elements will restrict certain types of mobiles:
 //
@@ -292,7 +292,7 @@ endfunction
 //
 // NOTE: If "RACE" is chosen, then the LAST ELEMENT in flags MUST
 // be an ARRAY containing the list of graphics that are to be
-// included in the audience.  
+// included in the audience.
 
 function GetAudience(who, range, flags)
 
@@ -385,7 +385,7 @@ endfunction
 
 // function PlayMidi(who, listeners, song)
 //
-// This function will play midi #<song> to all players listed in an 
+// This function will play midi #<song> to all players listed in an
 // array <listeners>.
 
 function PlayMidi(listeners, song)

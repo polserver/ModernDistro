@@ -110,7 +110,7 @@ endprogram
 function ValidateSpawns()
   var chk := array;
   foreach thing in npclist
-    if(GetHP(thing))
+    if(AP_GetVital(thing, VITALID_LIFE))
       chk.append(thing);
     endif
   endforeach
@@ -125,7 +125,7 @@ endfunction
 function DespawnAll()
   var chk := array;
   foreach thing in npclist
-    var hp := GetHP(thing);
+    var hp := AP_GetVital(thing, VITALID_LIFE);
     if(hp)
       MoveObjectToLocation(thing, 5279, 1184, 0, "britannia", MOVEOBJECT_FORCELOCATION); // newmap problem
       ApplyRawDamage(thing, Cint(hp + 100));

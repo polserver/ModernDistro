@@ -2,21 +2,21 @@ include ":attributes:attributes";
 include ":timedScripts:poisonUtil";
 
 function process_combat_event(opponent)
-  if((GetHp(me) < (GetMaxHP(me) / 2)) && (RandomInt(8) >= 5))
+  if((AP_GetVital(me, VITALID_LIFE) < (AP_GetVitalMaximumValue(me, VITALID_LIFE) / 2)) && (RandomInt(8) >= 5))
     CastSpell(me, me, "greaterHeal");
   elseif((TS_GetTimerNames(me, "P").size() > 0) && (RandomInt(8) >= 5))
     CastSpell(me, me, "cure");
   else
     spellattack(opponent);
   endif
-  if(((GetHp(me) * 100) / GetMaxHp(me)) < flee_point)
+  if(((AP_GetVital(me, VITALID_LIFE) * 100) / AP_GetVitalMaximumValue(me, VITALID_LIFE)) < flee_point)
     EraseObjProperty(me,"#flees");
     flee(opponent);
   endif
 endfunction
 
 function process_flee_event(opponent)
-  if((GetHp(me) < (GetMaxHP(me) / 2)) && (RandomInt(8) >= 3))
+  if((AP_GetVital(me, VITALID_LIFE) < (AP_GetVitalMaximumValue(me, VITALID_LIFE) / 2)) && (RandomInt(8) >= 3))
     CastSpell(me, me, "greaterHeal");
     return 0;
   elseif((TS_GetTimerNames(me, "P").size() > 0) && (RandomInt(8) >= 3))
@@ -25,7 +25,7 @@ function process_flee_event(opponent)
   else
     spellattack(opponent);
   endif
-  if(((GetHp(me) * 100) / GetMaxHp(me)) >= flee_point)
+  if(((AP_GetVital(me, VITALID_LIFE) * 100) / AP_GetVitalMaximumValue(me, VITALID_LIFE)) >= flee_point)
     return 1;
   endif
 endfunction
@@ -49,7 +49,7 @@ function prepare_for_fight(opponent)
 endfunction
 
 function post_combat()
-  if((GetHp(me) < (GetMaxHP(me) / 2)) && (RandomInt(4) >= 2))
+  if((AP_GetVital(me, VITALID_LIFE) < (AP_GetVitalMaximumValue(me, VITALID_LIFE) / 2)) && (RandomInt(4) >= 2))
     CastSpell(me, me, "greaterHeal");
   endif
   if(TS_GetTimerNames(me, "P").size() > 0)

@@ -125,7 +125,7 @@ program stablemaster()
                                         var summoned := GetObjProperty(pet, "summoned");
                                         if((pet.script == "tamed") && (!summoned))
                                           if (tempdata == player.serial)
-                                            var price := 30 + (GetStrength(pet)/5);
+                                            var price := 30 + (AP_GetStat(pet, STRENGTH)/5);
                                             say("I charge " + price + " per real world week to take care of " + pet.name + ".");
                                             if (GetPayment(player, price))
                                               say("Keep this ticket and give it to me when you want " + pet.name + " back.");
@@ -219,7 +219,7 @@ function sellanimal(who)
 	  endfor
 	endif
     SetObjProperty(theitem, "ClearRestock", (ReadGameClock() + 1800));
-	var buyamount := CInt(GetStrength(pet) / 2);
+	var buyamount := CInt(AP_GetStat(pet, STRENGTH) / 2);
     var mygold := GetObjProperty(inv_rs, "MyGold");
     if(buyamount > mygold)
       say("Im sorry, but I cannot afford to buy any pets right now.");
@@ -230,7 +230,7 @@ function sellanimal(who)
 	  say(pet.name + " is worth $" + buyamount);
 	  SetObjProperty(pet, "guardkill", 1);
 	  MoveObjectToLocation(pet, 5555, 1111, 0, "britannia_alt", MOVEOBJECT_FORCELOCATION); // new map problem
-	  ApplyRawDamage(pet, GetHp(pet) + 10);
+	  ApplyRawDamage(pet, AP_GetVital(pet, VITALID_LIFE) + 10);
 	  CreateItemInBackpack(who, 0x0eed, buyamount);
 	  return;
     endif

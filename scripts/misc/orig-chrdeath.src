@@ -40,9 +40,9 @@ endprogram
 function CheckForAutoRes(who, corpse)
   if(CInt(GetObjProperty(corpse, "AutoRes")) == 1)
 	Resurrect(who);
-	SetHp(who, GetMaxHP(who));
-	SetMana(who, GetMaxMana(who));
-	SetStamina(who, GetMaxStamina(who));
+	AP_SetVital(who, VITALID_LIFE, AP_GetVitalMaximumValue(who, VITALID_LIFE));
+	AP_SetVital(who, VITALID_MANA, AP_GetVitalMaximumValue(who, VITALID_MANA));
+	AP_SetVital(who, VITALID_STAMINA, AP_GetVitalMaximumValue(who, VITALID_STAMINA));
 	var mypack := who.backpack;
     if(!mypack)
       return;
@@ -74,9 +74,9 @@ function CheckForDivineRes(who, corpse)
         endif
       endif
     endforeach
-    SetHp(who, who.maxhp);
-    SetMana(who, who.maxmana);
-    SetStamina(who, who.maxstamina);
+    AP_SetVital(who, VITALID_LIFE, who.maxhp);
+    AP_SetVital(who, VITALID_MANA, who.maxmana);
+    AP_SetVital(who, VITALID_STAMINA, who.maxstamina);
   endif
 endfunction
 
