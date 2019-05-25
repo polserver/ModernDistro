@@ -27,7 +27,7 @@ endprogram
 function RainDamage(targ)
   var victims := ListMobilesNearLocationEx(targ.x, targ.y, targ.z, 3, 0x3, targ.realm);
   foreach targ in victims
-    if((GetHp(targ)) && (!targ.cmdlevel))
+    if((AP_GetVital(targ, VITALID_LIFE)) && (!targ.cmdlevel))
       PlayObjectCenteredEffect(targ, 0x36cb, 7, 0x10);
       PlaySoundEffect(targ, 0x228);
       SetObjProperty(targ, "guardkill", 1);

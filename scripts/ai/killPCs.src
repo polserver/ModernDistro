@@ -34,7 +34,7 @@ endprogram
 
 function CloseDistance( opponent )
 
-var sleepdelay := 400 - (CInt(GetDexterity(me)) * 1.5);
+var sleepdelay := 400 - (CInt(AP_GetStat(me, DEXTERITY)) * 1.5);
 
 	if (sleepdelay < 0)
 		sleepdelay := 0;

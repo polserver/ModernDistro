@@ -73,7 +73,7 @@ function KillChildren(spawnpoint)
         i := SystemFindObjectBySerial(x);
         SetObjProperty(i, "summoned", 1);
         RevokePrivilege(i, "invul" );
-        ApplyRawDamage(i, GetHp(i)+3);
+        ApplyRawDamage(i, AP_GetVital(i, VITALID_LIFE)+3);
       endif
     endforeach
   endif

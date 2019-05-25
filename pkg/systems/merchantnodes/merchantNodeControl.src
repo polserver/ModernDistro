@@ -25,7 +25,7 @@ program merchantnode(itm)
 	sleep(RandomInt(1));
 
 // if all nodes are globally disabled, we sleep until they are enabled again.
-	if(GetGlobalProperty("nomerchants"))											
+	if(GetGlobalProperty("nomerchants"))
 		SetNodeName("globally disabled");
 		SetObjProperty(item, "#wait", 2);
 		while(GetGlobalProperty("nomerchants"))
@@ -33,7 +33,7 @@ program merchantnode(itm)
 		endwhile
 	endif
 
-// 
+//
 	SetNodeName("enabled");
 	EraseObjProperty(item, "#wait");
 	rng := CInt(GetObjProperty(item, "Range"));
@@ -144,13 +144,13 @@ program merchantnode(itm)
 			endif
 			DespawnAll();
 			ValidateSpawns();
-			
+
 			// hang out here until it gets turned back on again.
 			while((GetObjProperty(item, "Status") == "off") or (GetGlobalProperty("nomerchants")))
 				var ev := os::wait_for_event(120);
 				ev := ev;
 			endwhile
-			
+
 			// Things have turned back on, so this stuff gets moving
 			SpawnAll(item.realm);
 			ValidateSpawns();
@@ -181,7 +181,7 @@ function ValidateSpawns()
 		foreach thing in npclist
 			if(entry[2] == GetObjProperty(thing, "Anchor"))
 				var npc := thing;
-				if((entry[3] == 1) and (GetHP(npc)))
+				if((entry[3] == 1) and (AP_GetVital(npc, VITALID_LIFE)))
 					if(npc in chk)
 						// do nothing -- invalid entry --
 					else
@@ -190,7 +190,7 @@ function ValidateSpawns()
 				else
 					MoveObjectToLocation(npc, 6066, 1, 0, "britannia", MOVEOBJECT_FORCELOCATION);
 					RevokePrivilege(npc, "invul");
-					ApplyRawDamage(npc, GetHP(npc) + 100);
+					ApplyRawDamage(npc, AP_GetVital(npc, VITALID_LIFE) + 100);
 				endif
 			endif
 			sleepms(2);
@@ -203,7 +203,7 @@ function ValidateSpawns()
 		else
 			MoveObjectToLocation(npc, 6066, 1, 0, "britannia", MOVEOBJECT_FORCELOCATION);
 			RevokePrivilege(npc, "invul");
-			ApplyRawDamage(npc, GetHP(npc) + 100);
+			ApplyRawDamage(npc, AP_GetVital(npc, VITALID_LIFE) + 100);
 		endif
 		sleepms(2);
 	endforeach
@@ -218,7 +218,7 @@ endfunction
 function DespawnAll()
 	var chk := array;
 	foreach thing in npclist
-		var hp := GetHP(thing);
+		var hp := AP_GetVital(thing, VITALID_LIFE);
 		if(hp)
 			MoveObjectToLocation(thing, 6066, 1, 0, "britannia", MOVEOBJECT_FORCELOCATION);
 			RevokePrivilege(thing, "invul");
@@ -298,10 +298,10 @@ function ProcessMerchantText(ev)
 	if (text["appraise"] || text["stable"] || text["showinventory"] || text["showrestock"])
 		pass := 1;
 	endif
-	
+
 	// If the character wants to do something with a vendor:
 	if (text["buy"] || text["sell"] || text["job"] || text["train"] || text["teach"] || (pass))
-		
+
 		// Just pick the nearest vendor if the player isn't specific.
 		if( text["merchant"] || text["vendor"] || (pass) )
 			var dis := 7;

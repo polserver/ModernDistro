@@ -38,7 +38,7 @@ function MakeLoot(corpse, lootgroup)
       magicadjustment := 0;
     endif
   endif
-  if(GetHp(corpse))
+  if(AP_GetVital(corpse, VITALID_LIFE))
     has_backpack := GetEquipmentByLayer(corpse, 0x15);
     if (!has_backpack)
         var newbackpack := CreateItemAtLocation(corpse.x, corpse.y, corpse.z, 0xe75,1, corpse.realm);
@@ -74,7 +74,7 @@ function MakeLoot(corpse, lootgroup)
       CreateFromGroup(corpse, CInt(str));
     endforeach
   endif
-  
+
     if (corpse.npctemplate.ammotype)
         ammotype := corpse.npctemplate.ammotype;
         if (ammotype)

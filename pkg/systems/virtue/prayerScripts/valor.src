@@ -138,9 +138,9 @@ program valorshrine(params)
 		if (res)
 			PlayObjectCenteredEffect(who, 0x373a, 0x10, 0x10);
 			PlaySoundEffect(who, 0x1ec);
-			SetHp(who, who.strength);
-			SetMana(who, who.intelligence);
-			SetStamina(who, who.dexterity);
+			AP_SetVital(who, VITALID_LIFE, who.strength);
+			AP_SetVital(who, VITALID_MANA, who.intelligence);
+			AP_SetVital(who, VITALID_STAMINA, who.dexterity);
 			TS_CurePoison(who, 10000, "P", 5);
 		endif
 	endif

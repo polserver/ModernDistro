@@ -205,7 +205,7 @@ function Adjustment(who, type)
     SetBaseSkillBaseValue(who, SKILLID_FENCING,         1000);
     SetBaseSkillBaseValue(who, SKILLID_WRESTLING,       900);
     SetBaseSkillBaseValue(who, SKILLID_ANATOMY,         1000);
-    SetBaseStrength(who, 80);
+    AP_SetTrueStat(who, STRENGTH, 80);
   elseif((type == "Fighter1") || (type == "Fighter2") || (type == "Fighter3") || (type == "Fighter4"))
     SetBaseSkillBaseValue(who, SKILLID_RESISTING_SPELLS, 600);
     SetBaseSkillBaseValue(who, SKILLID_TACTICS,         900);

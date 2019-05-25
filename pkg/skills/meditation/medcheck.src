@@ -34,11 +34,11 @@ program medcheck(who)
       endif
 	  sleepms(waittime);
     endif
-    if(GetMana(who) < GetIntelligence(who))
-      SetMana(who, GetMana(who) + 1);
+    if(AP_GetVital(who, VITALID_MANA) < AP_GetStat(who, INTELLIGENCE))
+      AP_SetVital(who, VITALID_MANA, AP_GetVital(who, VITALID_MANA) + 1);
     endif
-    if(GetMana(who) > GetIntelligence(who))
-      SetMana(who, who.intelligence);
+    if(AP_GetVital(who, VITALID_MANA) > AP_GetStat(who, INTELLIGENCE))
+      AP_SetVital(who, VITALID_MANA, who.intelligence);
     endif
   endwhile
 endprogram

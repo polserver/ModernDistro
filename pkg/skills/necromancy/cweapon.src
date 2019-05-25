@@ -11,7 +11,7 @@ program curse_weapon( params )
 
 	var necroskill := Cint(GetAttribute(caster, NECROMANCY));
 	var sspeak := Cint(GetAttribute(caster, SPIRIT_SPEAK));
-	var int := GetIntelligence(caster);
+	var int := AP_GetStat(caster, INTELLIGENCE);
 	var duration := ((sspeak * 10) / 34) + 1;
 
 	detach();

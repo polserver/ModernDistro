@@ -496,15 +496,15 @@ function FillInStats(who)
       4: levelname := "Admin";
       5: levelname := "Development";
   endcase
-  infodata[8] := GetStrength(who);
-  infodata[10] := GetIntelligence(who);
-  infodata[12] := GetDexterity(who);
+  infodata[8] := AP_GetStat(who, STRENGTH);
+  infodata[10] := AP_GetStat(who, INTELLIGENCE);
+  infodata[12] := AP_GetStat(who, DEXTERITY);
   infodata[14] := who.x;
   infodata[16] := who.y;
   infodata[18] := who.z;
-  infodata[20] := GetHp(who) + "/" + GetMaxHp(who);
-  infodata[22] := GetMana(who) + "/" + GetMaxMana(who);
-  infodata[24] := GetStamina(who) + "/" + GetMaxStamina(who);
+  infodata[20] := AP_GetVital(who, VITALID_LIFE) + "/" + AP_GetVitalMaximumValue(who, VITALID_LIFE);
+  infodata[22] := AP_GetVital(who, VITALID_MANA) + "/" + AP_GetVitalMaximumValue(who, VITALID_MANA);
+  infodata[24] := AP_GetVital(who, VITALID_STAMINA) + "/" + AP_GetVitalMaximumValue(who, VITALID_STAMINA);
   infodata[26] := who.ar;
   infodata[28] := who.graphic;
   infodata[30] := who.color;
@@ -574,15 +574,15 @@ function EditStat(who, character, result, trg)
       SendSysMessage(who, "Cancelled.");
     else
       case(result)
-         1: SetBaseStrength(character,val);
-         2: SetBaseIntelligence(character,val);
-         3: SetBaseDexterity(character,val);
+         1: AP_SetTrueStat(character, STRENGTH, val);
+         2: AP_SetTrueStat(character, INTELLIGENCE, val);
+         3: AP_SetTrueStat(character, DEXTERITY, val);
          4: MoveObjectToLocation(character, val, character.y, character.z, character.realm);
          5: MoveObjectToLocation(character, character.x, val, character.z, character.realm);
          6: MoveObjectToLocation(character, character.x, character.y, val, character.realm);
-         7: SetHp(character, val);
-         9: SetMana(character, val);
-        11: SetStamina(character, val);
+         7: AP_SetVital(character, VITALID_LIFE, val);
+         9: AP_SetVital(character, VITALID_MANA, val);
+        11: AP_SetVital(character, VITALID_STAMINA, val);
         13: character.ar_mod := 0;
             character.ar_mod := val - character.ar;
         14: character.graphic := val;

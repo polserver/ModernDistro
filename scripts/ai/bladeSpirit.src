@@ -131,7 +131,7 @@ endfunction
 function in_combat_event_loop(opponent, loops)
   loops := loops;
   if(Distance(me,opponent) < 2)
-    var dmg := RandomInt(CInt(GetStrength(opponent) / 25));
+    var dmg := RandomInt(CInt(AP_GetStat(opponent, STRENGTH) / 25));
     dmg := dmg * 2;
     if(dmg > 24)
       dmg := 12;

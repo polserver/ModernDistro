@@ -14,7 +14,7 @@ program unequip(who, item)
   var penalty := CInt(itemdesc[item.objtype].DexPenalty);
   if(penalty)
     EraseObjProperty(item, "#equipped");
-    SetDexterityMod(who, GetDexterityMod(who) + penalty);
+    AP_SetStatMod(who, DEXTERITY, AP_GetStatMod(who, DEXTERITY) + penalty);
   endif
   var type := GetObjProperty(item,"type");
   var val := 0;
@@ -72,9 +72,9 @@ function strengthRemove(who,item)
 endfunction
 
 function wizzohat(who,item)
-  SetIntelligenceMod(who, GetIntelligenceMod(who) - 10);
-  SetStrengthMod(who, GetStrengthMod(who) + 5);
-  SetDexterityMod(who, GetDexterityMod(who) + 5);
+  AP_SetStatMod(who, INTELLIGENCE, AP_GetStatMod(who, INTELLIGENCE) - 10);
+  AP_SetStatMod(who, STRENGTH, AP_GetStatMod(who, STRENGTH) + 5);
+  AP_SetStatMod(who, DEXTERITY, AP_GetStatMod(who, DEXTERITY) + 5);
   EraseObjProperty(item, "#equipped");
   return 1;
 endfunction

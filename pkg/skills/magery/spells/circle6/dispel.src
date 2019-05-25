@@ -35,7 +35,7 @@ program dispel ( parms )
       var resist := GetAttribute(master, RESISTING_SPELLS);
       if((RandomInt(99) + 1) < resist)
         MoveObjectToLocation(cast_on,0,0,0, "britannia", MOVEOBJECT_FORCELOCATION); // newmap problem
-        ApplyRawDamage(cast_on, GetMaxHp(cast_on) + 3);
+        ApplyRawDamage(cast_on, AP_GetVitalMaximumValue(cast_on, VITALID_LIFE) + 3);
       endif
       send_attack(caster, cast_on, 41);
     endif

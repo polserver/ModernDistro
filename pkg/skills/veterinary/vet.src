@@ -26,7 +26,7 @@ program use_bandages (parms)
   elseif(!CheckLineOfSight(who,patient))
 	SendSysMessage(who,"You cant see your patient.", color := 33);
 	return;
-  elseif((GetHp(patient) >= GetStrength(patient)) && (TS_GetTimerNames(patient, "P").size() == 0))
+  elseif((AP_GetVital(patient, VITALID_LIFE) >= AP_GetStat(patient, STRENGTH)) && (TS_GetTimerNames(patient, "P").size() == 0))
 	SendSysMessage(who,"Your patient is at full heath", color := 66);
 	return;
   endif
@@ -92,7 +92,7 @@ function heal(who, patient, bandy)
       SendSysMessage(who, "You stop healing your patient to work on another.", color := 88);
       break;
     endif
-    chp:=GetHp(who);
+    chp:=AP_GetVital(who, VITALID_LIFE);
     sleep(1);
     if(dist(who, patient) > 2)
       SendSysMessage(who,"Your patient isn't close enough.", color := 33);
@@ -102,7 +102,7 @@ function heal(who, patient, bandy)
       SendSysMessage(who,"You stop healing your patient.", color := 33);
       break;
     endif
-    if(GetHp(who) < chp)
+    if(AP_GetVital(who, VITALID_LIFE) < chp)
       if((RandomInt(100)+1) > who.dex)
         SendSysMessage( who, "Your fingers slip.", color := 33 );
         healamt := (healamt / 2);
@@ -117,15 +117,15 @@ function heal(who, patient, bandy)
         if(healamt <= 10)
           SendSysMessage(who,"You finish applying the bandages, but they barely help.", color := 88);
         endif
-        if((patient.str - GetHp(patient)) > healamt)
+        if((patient.str - AP_GetVital(patient, VITALID_LIFE)) > healamt)
           HealDamage(patient, healamt);
           AwardRawSkillPoints(who, SKILLID_VETERINARY, (healamt * 2));
         else
-          healamt := GetStrength(patient) - GetHp(patient);
+          healamt := AP_GetStat(patient, STRENGTH) - AP_GetVital(patient, VITALID_LIFE);
           HealDamage(patient, healamt);
           AwardRawSkillPoints(who, SKILLID_VETERINARY, (healamt * 2));
         endif
-        if(GetHp(patient) == GetMaxHp(patient))
+        if(AP_GetVital(patient, VITALID_LIFE) == AP_GetVitalMaximumValue(patient, VITALID_LIFE))
 		  SendSysMessage(who, "You have healed your patient completely.", color := 66);
         else
 		  SendSysMessage(who, "You successfully heal " + patient.name+".", color := 66);
@@ -172,7 +172,7 @@ function cure(who, patient, bandy)
       SendSysMessage(who, "You stop healing your patient to work on another.", color := 88);
       break;
     endif
-    chp:=GetHp(who);
+    chp:=AP_GetVital(who, VITALID_LIFE);
     sleep(1);
     if(dist(who, patient) > 1)
       SendSysMessage(who,"Your patient isn't close enough.", color := 33);
@@ -182,7 +182,7 @@ function cure(who, patient, bandy)
       SendSysMessage(who,"You stop healing your patient.", color := 33);
       break;
     endif
-	if(GetHp(who) < chp)
+	if(AP_GetVital(who, VITALID_LIFE) < chp)
       if((RandomInt(100)+1) > who.dex)
 	    SendSysMessage( who, "Your fingers slip.", color := 33 );
         healamt := ((healamt * 3) / 4);

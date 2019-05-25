@@ -109,7 +109,7 @@ program CastleGuard()
     elseif((ReadGameClock() > killtime) && (killtime != 0))
       MoveObjectToLocation(me, 5555, 1111, 0, "britannia", MOVEOBJECT_FORCELOCATION); // newmap problem
       SetObjProperty(me, "guardkill", 1);
-      ApplyRawDamage(me, GetHp(me) + 100);
+      ApplyRawDamage(me, AP_GetVital(me, VITALID_LIFE) + 100);
       break;
     endif
     if(escortee)
@@ -172,7 +172,7 @@ function idleloop()
       next_wander := ReadGameClock() + 10;
     elseif((ReadGameClock() > killtime) && (killtime != 0))
       MoveObjectToLocation(me, 5555, 1111, 0, "britannia", MOVEOBJECT_FORCELOCATION); // newmap problem
-      ApplyRawDamage(me, GetHp(me) + 100);
+      ApplyRawDamage(me, AP_GetVital(me, VITALID_LIFE) + 100);
       break;
     endif
   endwhile
@@ -191,14 +191,14 @@ function Follow()
     if(GetObjProperty(me, "Pause"))
       waittime := 2;
     else
-      var ma := 200 - CInt(GetDexterity(me));
-      SetDexterityMod(me, CInt(GetDexterityMod(me)) + ma);
+      var ma := 200 - CInt(AP_GetStat(me, DEXTERITY));
+      AP_SetStatMod(me, DEXTERITY, CInt(AP_GetStatMod(me, DEXTERITY)) + ma);
 	  walkToward(escortee);
-      SetDexterityMod(me, CInt(GetDexterityMod(me)) - ma);
+      AP_SetStatMod(me, DEXTERITY, CInt(AP_GetStatMod(me, DEXTERITY)) - ma);
       waittime := 0;
     endif
   endif
-  if((!GetStrength(escortee)) || (escortee.dead) || (dist(me,escortee) > 15) )
+  if((!AP_GetStat(escortee, STRENGTH)) || (escortee.dead) || (dist(me,escortee) > 15) )
     following := 0;
   endif
 endfunction

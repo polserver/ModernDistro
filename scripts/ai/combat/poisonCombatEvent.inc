@@ -1,7 +1,7 @@
 include ":attributes:attributes";
 function process_combat_event(opponent)
   DoPoison(opponent);
-  if((GetHp(me) * 100/GetMaxHp(me)) < flee_point)
+  if((AP_GetVital(me, VITALID_LIFE) * 100/AP_GetVitalMaximumValue(me, VITALID_LIFE)) < flee_point)
 	EraseObjProperty(me,"#flees");
 	flee(opponent);
   endif
@@ -36,7 +36,7 @@ endfunction
 function DoPoison(you)
   SetObjProperty(me, "#lastbreath", ReadGameClock() + 10);
   if((Distance(me,you) < 2) && (RandomInt(4)==1))
-	var p_level := CInt(GetMaxHp(me)/20);
+	var p_level := CInt(AP_GetVitalMaximumValue(me, VITALID_LIFE)/20);
 	var poison_level := CInt(GetObjProperty(you, "poison_level"));
     if(p_level < 1)
       p_level := 1;

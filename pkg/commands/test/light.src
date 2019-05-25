@@ -1,0 +1,72 @@
+use uo;
+use os;
+
+program mylight (who, text)
+
+        SendSysMessage(who,"Select target");
+        var targ := target( who, TGTOPT_NOCHECK_LOS );
+
+	if (text && text == "off")
+		targ.setlightlevel (0, 0);
+		return;
+	endif
+
+	if (text && text == "dark")
+		targ.setlightlevel (20, 3800);
+		return;
+	endif
+
+	if (text && text["level"])
+		var parms := SplitWords(text);
+		if (len(parms) != 3)
+			SendSysMessage(who, "Invalid setting.  Correct usage is:");
+			SendSysMessage(who, "light level [day or night] [0 to 30]");
+			SendSysMessage(who, "0 is normal daylight.  20 is normal night.");
+			return;
+		endif
+
+		if (parms [2] != "day" && parms[2] != "night")
+			SendSysMessage(who, "Invalid setting.  Correct usage is:");
+			SendSysMessage(who, "light level [day or night] [0 to 30]");
+			SendSysMessage(who, "0 is normal daylight.  20 is normal night.");
+			return;
+		endif
+
+		var lightlevel := CInt(parms[3]);
+		if (!lightlevel && lightlevel != 0)
+			SendSysMessage(who, "Invalid setting.  Correct usage is:");
+			SendSysMessage(who, "light level [day or night] [0 to 30]");
+			SendSysMessage(who, "0 is normal daylight.  20 is normal night.");
+			return;
+		endif
+
+		if (lightlevel < 0 || lightlevel > 30)
+			SendSysMessage(who, "Invalid setting.  Correct usage is:");
+			SendSysMessage(who, "light level [day or night] [0 to 30]");
+			SendSysMessage(who, "0 is normal daylight.  20 is normal night.");
+			return;
+		endif
+
+		if (parms[2] == "day")
+			set_critical(1);
+			SetGlobalProperty("daylight_level", lightlevel);
+			set_critical(0);
+		else
+			set_critical(1);
+			SetGlobalProperty("nighttime_level", lightlevel);
+			set_critical(0);
+		endif
+
+		SendSysMessage(who, "Done!");
+		return;
+	endif
+ 
+        if(Cint(text) > 30)
+                text := 30;
+        endif
+ 
+        targ.setlightlevel (Cint(text), 3600);
+        SendSysMessage(who, targ.name + "'s light level is now: " + Cint(text));
+ 
+ 
+endprogram;

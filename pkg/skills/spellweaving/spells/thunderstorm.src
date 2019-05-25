@@ -17,7 +17,7 @@ program chrcast_thunderstorm( parms )
 
 var dru := Cint(GetEffectiveSkill(caster, SPELLWEAVING));
 var alore := Cint(GetEffectiveSkill(caster, SKILLID_ANIMALLORE));
-var int := GetIntelligence(caster);
+var int := AP_GetStat(caster, INTELLIGENCE);
 
 var bonus := 0;
 

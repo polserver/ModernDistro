@@ -56,7 +56,7 @@ function MerchantTrain(me, who, text)
         if(npclevel > maxskilltotrain)
           npclevel := maxskilltotrain;
         endif
-        var pclevel := GetBaseSkill(who, holder);
+        var pclevel := AP_GetTrueSkill(who, holder);
         if((pclevel >= npclevel) || (pclevel > maxskilltotrain))
           PrintTextAbovePrivate(me, "I cannot teach you anymore.", who);
           return;
@@ -116,7 +116,7 @@ function TrainSkill(me, who, item)
       return;
     endif
     npc_level    := GetAttribute(me, attributeid);
-    pc_level     := GetBaseSkill(who, attributeid);
+    pc_level     := AP_GetTrueSkill(who, attributeid);
     pc_level     := GetAttributeBaseValue(who, attributeid) / 10;
     goldreceived := item.amount;
     variance     := npc_level - pc_level;

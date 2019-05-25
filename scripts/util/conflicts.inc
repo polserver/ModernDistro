@@ -150,19 +150,19 @@ endfunction
 //
 ////////////////////////////////////////////////////////
 function co_fight()
- 
+
    var d  := Distance( me, badguy );
 
    if ((badguy.dead) || (!badguy)  || (d > 10) )
       co_untarget();
       return;
-   elseif( GetHp(me) <= CInt( GetMaxHp(me) / 5 ) && d < 16)
+   elseif( AP_GetVital(me, VITALID_LIFE) <= CInt( AP_GetVitalMaximumValue(me, VITALID_LIFE) / 5 ) && d < 16)
       RunAwayFrom( badguy );
       TurnToward( badguy );
-   elseif (d > 2)       
+   elseif (d > 2)
       RunToward(   badguy );
    elseif (d > 1)
       WalkToward(  badguy );
-   endif       
+   endif
 
 endfunction

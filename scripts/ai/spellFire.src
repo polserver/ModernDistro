@@ -37,7 +37,7 @@ program KillPlayers()
 endprogram
 
 function CloseDistance( opponent )
-  var sleepdelay := 400 - (CInt(GetDexterity(me)) * 1.5);
+  var sleepdelay := 400 - (CInt(AP_GetStat(me, DEXTERITY)) * 1.5);
   case (Distance(me, opponent))
     1:
     0:       return 1;

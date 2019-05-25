@@ -18,18 +18,18 @@ function MurdererStatLoss(who)
 	  multiplier := maximumloss;
 	endif
 	multiplier := 1.0 - multiplier;
-	var str := GetStrength(who);
-	var dex := GetDexterity(who);
-	var inte := GetIntelligence(who);
+	var str := AP_GetStat(who, STRENGTH);
+	var dex := AP_GetStat(who, DEXTERITY);
+	var inte := AP_GetStat(who, INTELLIGENCE);
 	str := CInt(str * multiplier);
 	dex := CInt(dex * multiplier);
 	inte := CInt(inte * multiplier);
-	SetBaseStrength(who,str);
-	SetBaseDexterity(who,dex);
-	SetBaseIntelligence(who,inte);
-	SetHp(who, who.maxhp);
-	SetStamina(who, who.maxstamina);
-	SetMana(who, who.maxmana);
+	AP_SetTrueStat(who, STRENGTH, str);
+	AP_SetTrueStat(who, DEXTERITY, dex);
+	AP_SetTrueStat(who, INTELLIGENCE, inte);
+	AP_SetVital(who, VITALID_LIFE, who.maxhp);
+	AP_SetVital(who, VITALID_STAMINA, who.maxstamina);
+	AP_SetVital(who, VITALID_MANA, who.maxmana);
     var skillarray := GetObjProperty(who, "SkillArray");
     var newval, final;
     foreach entry in skillarray

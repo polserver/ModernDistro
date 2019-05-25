@@ -94,7 +94,7 @@ function flee(opponent)
     if ( numflees > 10 )
       MoveObjectToLocation(me,5288,1176,0,"britannia_alt",MOVEOBJECT_FORCELOCATION);
       SetObjProperty(me,"guardkill",1);
-      ApplyRawDamage( me, GetMaxHp(me) + 3 );
+      ApplyRawDamage( me, AP_GetVitalMaximumValue(me, VITALID_LIFE) + 3 );
     else
       numflees := numflees + 1;
     endif

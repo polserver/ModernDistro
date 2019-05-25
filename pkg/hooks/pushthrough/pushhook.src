@@ -49,15 +49,15 @@ exported function pushthrough( who , obstacles )
 	var str_walker, str_obstacle;
 	var mount1 := GetEquipmentByLayer( who , 25 );
 	if( mount1 )
-		str_walker := GetStrength( mount1 );
+		str_walker := AP_GetStat(mount1, STRENGTH);
 	else
-		str_walker := GetStrength( who );
+		str_walker := AP_GetStat(who, STRENGTH);
 	endif
 	var mount2 := GetEquipmentByLayer( mobile , 25 );
 	if( mount2 )
-		str_obstacle := GetStrength( mount2 );
+		str_obstacle := AP_GetStat(mount2, STRENGTH);
 	else
-		str_obstacle := GetStrength( mobile );
+		str_obstacle := AP_GetStat(mobile, STRENGTH);
 	endif
 	if( str_walker < str_obstacle )
 		return 0;

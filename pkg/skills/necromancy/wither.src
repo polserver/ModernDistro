@@ -16,7 +16,7 @@ program wither( params )
 
     var necroskill := Cint(AP_GetSkill(caster, NECROMANCY));
     var sspeak := Cint(AP_GetSkill(caster, SPIRIT_SPEAK));
-    var int := GetIntelligence(caster);
+    var int := AP_GetStat(caster, INTELLIGENCE);
     var bonus := 0;
 
     if(caster.ip)

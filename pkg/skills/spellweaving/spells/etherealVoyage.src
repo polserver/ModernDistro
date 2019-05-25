@@ -17,7 +17,7 @@ program chrcast_voyage( parms )
 	var caster := result[1];
 	var dru := Cint(GetEffectiveSkill(caster, SPELLWEAVING));
 	var alore := Cint(GetEffectiveSkill(caster, SKILLID_ANIMALLORE));
-	var int := GetIntelligence(caster);
+	var int := AP_GetStat(caster, INTELLIGENCE);
 	var bonus := 0;
 	if(caster.ip)
 		bonus := int/5;

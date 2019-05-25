@@ -59,7 +59,7 @@ program meditation(who)
 		EraseObjProperty(who, "#ISMEDITATING");
 	endif
 
-	var diff := CInt(GetAttribute(who, MEDITATION) - GetMana(who)) + (loss / 1000);
+	var diff := CInt(GetAttribute(who, MEDITATION) - AP_GetVital(who, VITALID_MANA)) + (loss / 1000);
 	if (diff < 0)
 		diff := 0;
 	elseif (diff > 110)
@@ -74,9 +74,9 @@ program meditation(who)
 	if(SkillCheck(who, MEDITATION, diff, pts))
 		var oldx := who.x;
 		var oldy := who.y;
-		var oldstamina := GetStamina(who);
-		var chp := GetHp(who);
-		var cmana := GetMana(who);
+		var oldstamina := AP_GetVital(who, VITALID_STAMINA);
+		var chp := AP_GetVital(who, VITALID_LIFE);
+		var cmana := AP_GetVital(who, VITALID_MANA);
 		lastmed := CInt(ReadGameClock()) + 60;
 		SetObjProperty(who, "LastMeditation", lastmed);
 		SendSysMessage(who, "You start to meditate.");
@@ -84,7 +84,7 @@ program meditation(who)
 		PrintTextAbove(who, "* Meditating *");
 		SetObjProperty(who, "#ISMEDITATING", 1);
 
-		while( (oldstamina <= GetStamina(who)) && (oldx==who.x) && (oldy==who.y) && (poisoned < 1) && (!who.warmode) && (!IsThingOnHand(who)) && (!who.hidden) )
+		while( (oldstamina <= AP_GetVital(who, VITALID_STAMINA)) && (oldx==who.x) && (oldy==who.y) && (poisoned < 1) && (!who.warmode) && (!IsThingOnHand(who)) && (!who.hidden) )
 
 			loss := manaloss(who);
 			if(loss == "nomed")
@@ -92,21 +92,21 @@ program meditation(who)
 				EraseObjProperty(who, "#ISMEDITATING");
 				return 0;
 			endif
-			if(GetMana(who) >= GetIntelligence(who))
+			if(AP_GetVital(who, VITALID_MANA) >= AP_GetStat(who, INTELLIGENCE))
 				SendSysMessage(who, "Your mana has recharged.", color := 66);
 				EraseObjProperty(who, "#ISMEDITATING");
 				return 1;
 			endif
-			if((GetHp(who) < chp) || (GetMana(who) < cmana))
+			if((AP_GetVital(who, VITALID_LIFE) < chp) || (AP_GetVital(who, VITALID_MANA) < cmana))
 				SendSysMessage(who, "You lose your concentration.", color := 33);
 				EraseObjProperty(who, "#ISMEDITATING");
 				return 0;
 			endif
 			sleepms( CInt(50000 / GetAttribute(who, MEDITATION) ) );
-			SetMana(who, GetMana(who) + 1);
-			chp := GetHp(who);
-			cmana := GetMana(who);
-			oldstamina := GetStamina(who);
+			AP_SetVital(who, VITALID_MANA, AP_GetVital(who, VITALID_MANA) + 1);
+			chp := AP_GetVital(who, VITALID_LIFE);
+			cmana := AP_GetVital(who, VITALID_MANA);
+			oldstamina := AP_GetVital(who, VITALID_STAMINA);
 //			poisoned := CInt( GetObjProperty(who,"poison_level") );
 			poisoned := who.poisoned;
 		endwhile

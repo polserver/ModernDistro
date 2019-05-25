@@ -170,7 +170,7 @@ function dismountme(who, corpse)
   var y := newcorpse.y;
   var z := newcorpse.z;
   newcorpse.facing := who.facing;
-  ApplyRawDamage(newcorpse, GetHp(newcorpse)+3);
+  ApplyRawDamage(newcorpse, AP_GetVital(newcorpse, VITALID_LIFE)+3);
   var contain;
   foreach cpse in ListItemsAtLocation(x, y, z, who.realm );
     if(CInt(GetObjProperty(cpse,"myserial")) == serial)

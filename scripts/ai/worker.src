@@ -254,7 +254,7 @@ function TrainSkill(me, who, item)
         skillarray := {};
         skillarray.append(trainskillid);
         foreach thing in GetSkillIds()
-          if(GetBaseSkill(who, thing) > 0)
+          if(AP_GetTrueSkill(who, thing) > 0)
             skillarray.append(thing);
           endif
         endforeach
@@ -263,7 +263,7 @@ function TrainSkill(me, who, item)
         var holder := {};
         holder.append(trainskillid);
         foreach thing in skillarray
-          if((thing != trainskillid) and (GetBaseSkill(who, thing) > 0))
+          if((thing != trainskillid) and (AP_GetTrueSkill(who, thing) > 0))
             holder.append(thing);
           endif
         endforeach

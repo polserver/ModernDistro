@@ -1,9 +1,9 @@
 include ":attributes:attributes";
 function process_combat_event(opponent)
-    if ((GetHp(me) * 100/GetMaxHp(me)) < flee_point)
+    if ((AP_GetVital(me, VITALID_LIFE) * 100/AP_GetVitalMaximumValue(me, VITALID_LIFE)) < flee_point)
       EraseObjProperty(me,"#flees");
       flee(opponent);
-    elseif (GetHp(me) < GetMaxHp(me)/2)
+    elseif (AP_GetVital(me, VITALID_LIFE) < AP_GetVitalMaximumValue(me, VITALID_LIFE)/2)
       ApplyHealing();
     endif
 endfunction
@@ -51,7 +51,7 @@ function ApplyHealing()
   if((GetObjProperty(me,"#nextheal") < ReadGameClock()) || !GetObjProperty(me,"#nextheal"))
     bandages := Cint(GetObjProperty(me, "bandages"));
     if(bandages)
-      SetHp(me, GetHp(me) + (RandomInt(GetMaxHp(me) - GetHp(me))+1));
+      AP_SetVital(me, VITALID_LIFE, AP_GetVital(me, VITALID_LIFE) + (RandomInt(AP_GetVitalMaximumValue(me, VITALID_LIFE) - AP_GetVital(me, VITALID_LIFE))+1));
       SetObjProperty(me,"#nextheal", ReadGameClock()+20);
       bandages := bandages - 1;
       if(bandages <= 0)

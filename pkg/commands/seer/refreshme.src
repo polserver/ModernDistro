@@ -8,7 +8,7 @@
 
 include ":attributes:attributes";
 program textcmd_refreshme( who )
-    SetHp(who, GetMaxHp(who));
-    SetMana(who, GetMaxMana(who));
-    SetStamina(who, GetMaxStamina(who));
+    AP_SetVital(who, VITALID_LIFE, AP_GetVitalMaximumValue(who, VITALID_LIFE));
+    AP_SetVital(who, VITALID_MANA, AP_GetVitalMaximumValue(who, VITALID_MANA));
+    AP_SetVital(who, VITALID_STAMINA, AP_GetVitalMaximumValue(who, VITALID_STAMINA));
 endprogram

@@ -10,7 +10,7 @@ function summon_creature( caster, circle := 8, npctemplate, cast_loc, controldif
     var duration := 20 + (magery * 2);
     var attributelist := { "None" };
     var parms := struct, totem, totemtype;
-  
+
 	if (SkillCheck(caster, MEDITATION, controldiff, (circle * 50) ) )
 		parms .+ script := "tamed";
 		thecritter := CreateNpcFromTemplate(npctemplate, cast_loc.x, cast_loc.y,cast_loc.z, parms, caster.realm);
@@ -40,6 +40,6 @@ function summon_creature( caster, circle := 8, npctemplate, cast_loc, controldif
     PlayStationaryEffect( thecritter.x, thecritter.y, thecritter.z, FX_SMOKE, 0xa, 0xa, 0, thecritter.realm );
     MoveObjectToLocation(thecritter, 6143, 0, 0, "britannia_alt", MOVEOBJECT_FORCELOCATION);
     SetScriptController(thecritter);
-    ApplyDamage(thecritter, GetHp(thecritter) + 100);
+    ApplyDamage(thecritter, AP_GetVital(thecritter, VITALID_LIFE) + 100);
   endif
 endfunction

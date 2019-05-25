@@ -36,7 +36,7 @@ program animate_dead( params )
 	Detach();
 	sleep(200);
 	MoveObjectToLocation(deadnpc,0,0,0, deadnpc.realm, MOVEOBJECT_FORCELOCATION);
-	ApplyRawDamage(deadnpc, GetHp(deadnpc) + 20);
+	ApplyRawDamage(deadnpc, AP_GetVital(deadnpc, VITALID_LIFE) + 20);
 
 
 endprogram

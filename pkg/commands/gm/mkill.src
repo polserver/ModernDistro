@@ -16,7 +16,7 @@ program textcmd_kill( who )
 
         if((mob.cmdlevel) && mob.cmdlevel > who.cmdlevel)
 		RevokePrivilege( who, "invul" );
-		ApplyDamage( who, GetHp(who) );
+		ApplyDamage( who, AP_GetVital(who, VITALID_LIFE) );
                 return;
         endif
 
@@ -43,7 +43,7 @@ program textcmd_kill( who )
 	endif
 
 	RevokePrivilege( mob, "invul" );
-	ApplyRawDamage( mob, GetHp(mob) );
+	ApplyRawDamage( mob, AP_GetVital(mob, VITALID_LIFE) );
 
 	else
 		if (!mob.isA(POLCLASS_NPC))
@@ -53,7 +53,7 @@ program textcmd_kill( who )
 			MoveObjectToLocation(mob, 5288, 1176, 0, who.realm, 0x40000000);
 			SetObjProperty(mob, "guardkill", 1);
 			RevokePrivilege( mob, "invul" );
-			ApplyRawDamage( mob, GetHp(mob) );
+			ApplyRawDamage( mob, AP_GetVital(mob, VITALID_LIFE) );
 		endif
 	endif
 

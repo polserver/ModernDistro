@@ -71,7 +71,7 @@ program textcmd_go( who, text )
     if ( result[0] > MaxLocs ) // teleporting someone else
        SendSysMessage( who, "Select a MOBILE." );
        traveler :=  Target( who, TGTOPT_NOCHECK_LOS );
-       if(!traveler || !GetStrength(traveler))
+       if(!traveler || !AP_GetStat(traveler, STRENGTH))
          SendSysMessage( who, "Invalid selection." );
          return;
        endif

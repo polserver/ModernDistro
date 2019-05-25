@@ -7,8 +7,8 @@ program textcmd_showstats( who )
 
     var mobile := Target( who );
     if (mobile)
-        PrintTextAbovePrivate( mobile, "Str: " + GetStrength(mobile), who );
-        PrintTextAbovePrivate( mobile, "Dex: " + GetDexterity(mobile), who );
-        PrintTextAbovePrivate( mobile, "Int: " + GetIntelligence(mobile), who );
+        PrintTextAbovePrivate( mobile, "Str: " + AP_GetStat(mobile, STRENGTH), who );
+        PrintTextAbovePrivate( mobile, "Dex: " + AP_GetStat(mobile, DEXTERITY), who );
+        PrintTextAbovePrivate( mobile, "Int: " + AP_GetStat(mobile, INTELLIGENCE), who );
     endif
 endprogram

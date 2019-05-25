@@ -36,9 +36,9 @@ program Anatomy(who)
 		    return 0;
   endif
   // variables for sys messages
-  var streng := getStreng(GetStrength(subject), subject.graphic, subject.gender);
-  var dext := getDext(GetDexterity(subject), subject.graphic, subject.gender);
-  var endur := getEnd(CInt(CInt(GetStamina(subject))/CDbl(GetMaxStamina(subject))*100));
+  var streng := getStreng(AP_GetStat(subject, STRENGTH), subject.graphic, subject.gender);
+  var dext := getDext(AP_GetStat(subject, DEXTERITY), subject.graphic, subject.gender);
+  var endur := getEnd(CInt(CInt(AP_GetVital(subject, VITALID_STAMINA))/CDbl(AP_GetVitalMaximumValue(subject, VITALID_STAMINA))*100));
   var skill := GetAttribute(who, ANATOMY);
   // adjust succeed and fail msgs here
   var strMsg, strFail;
@@ -47,10 +47,10 @@ program Anatomy(who)
     strFail := "that creature's physical characteristics.";
   else
     strMsg := subject.name;
-    if(upper(subject.name[len(subject.name)]) != "S" || lower(subject.name[len(subject.name)]) != "s" ) 
-      strFail := subject.name + "'s physical characteristics.";  
-    else 
-      strFail := subject.name + "' physical characteristics."; 
+    if(upper(subject.name[len(subject.name)]) != "S" || lower(subject.name[len(subject.name)]) != "s" )
+      strFail := subject.name + "'s physical characteristics.";
+    else
+      strFail := subject.name + "' physical characteristics.";
     endif
   endif
   var pts := CInt(GetAttribute(who, ANATOMY)+ 15);

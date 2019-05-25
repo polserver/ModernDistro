@@ -314,7 +314,7 @@ function spellcast(me, circle, scroll, id)
   var val := SplitWords(spellcfg[id].val);
   var times := CInt(val[1]);
   var slp   := CInt(val[2]);
-  var mhp := GetHp(me);
+  var mhp := AP_GetVital(me, VITALID_LIFE);
   var umana, diff;
   var n := 1;
   if(scroll == 0)
@@ -346,11 +346,11 @@ function spellcast(me, circle, scroll, id)
   else
     return 0;
   endif
-  if((mhp > GetHp(me)) && ((RandomInt(99)+1) > (AP_GetSkill(me, WRESTLING)/2)))
+  if((mhp > AP_GetVital(me, VITALID_LIFE)) && ((RandomInt(99)+1) > (AP_GetSkill(me, WRESTLING)/2)))
     SendSysMessage(me,"You lost your concentration.", 3, 40);
     return 0;
   endif
-  if (umana > GetMana(me))
+  if (umana > AP_GetVital(me, VITALID_MANA))
     me.frozen :=1;
     PerformAction(me,ANIM_CAST_DIR);
     sleepms(1200);
@@ -363,7 +363,7 @@ function spellcast(me, circle, scroll, id)
   if(can_cast(me))
     me.frozen :=1;
     for (n:=1; n<=times; n:=n+1)
-      if((mhp > GetHp(me)) && ((RandomInt(99)+1) > (AP_GetSkill(me, WRESTLING)/2)))
+      if((mhp > AP_GetVital(me, VITALID_LIFE)) && ((RandomInt(99)+1) > (AP_GetSkill(me, WRESTLING)/2)))
         SendSysMessage(me,"You lost your concentration.", 3, 40);
         PlaySoundEffect(me,0x005d);
         PlayObjectCenteredEffect(me, 0x3735,0x0a, 0x1e);
@@ -378,7 +378,7 @@ function spellcast(me, circle, scroll, id)
     endif
     me.frozen :=0;
     if (SkillCheck(me,MAGERY, diff, 0))
-      if((mhp > GetHp(me)) && ((RandomInt(99)+1) > (AP_GetSkill(me, WRESTLING)/2)))
+      if((mhp > AP_GetVital(me, VITALID_LIFE)) && ((RandomInt(99)+1) > (AP_GetSkill(me, WRESTLING)/2)))
         SendSysMessage(me,"You lost your concentration.", 3, 40);
         return 0;
       endif
@@ -428,9 +428,9 @@ function newusemana(who, circle, cast_on, delivery)
     7: umana := 40;
     8: umana := 50;
   endcase
-  var mana := GetMana(who);
+  var mana := AP_GetVital(who, VITALID_MANA);
   if(mana >= umana)
-    SetMana(who, Cint(mana - umana));
+    AP_SetVital(who, VITALID_MANA, Cint(mana - umana));
     return 1;
   else
     SendSysMessage(who,"You do not have enough mana to cast that.", 3, 40);
@@ -451,7 +451,7 @@ function mobspellcast(me, circle, scroll)
     7:   diff := 85;     points := 190;    umana :=  40;
     8:   diff := 95;     points := 210;    umana :=  50;
   endcase
-  if(umana > GetMana(me))
+  if(umana > AP_GetVital(me, VITALID_MANA))
     return 0;
   endif
   if(can_cast(me))
@@ -581,9 +581,9 @@ function usemana(who, circle, cast_on)
     9: umana :=  75;
    10: umana := 100;
   endcase
-  var mana := GetMana(who);
+  var mana := AP_GetVital(who, VITALID_MANA);
   if(mana >= umana)
-    var ms := SetMana(who, Cint(mana - umana));
+    var ms := AP_SetVital(who, VITALID_MANA, Cint(mana - umana));
     return 1;
   else
     SendSysMessage(who,"You do not have enough mana to cast that.", 3, 40);

@@ -58,7 +58,7 @@ function StartEffect(who, spellid, item)
     SendSysMessage(who, "You cant see that");
     return;
   endif
-  if(!GetHp(trg))
+  if(!AP_GetVital(trg, VITALID_LIFE))
     SendSysMessage(who, "You can only use that on living things.");
     return;
   endif
@@ -149,7 +149,7 @@ function cast_harm(caster, cast_on)
   endif
   PlaySoundEffect(cast_on, SFX_SPELL_HARM);
   PlayObjectCenteredEffect(cast_on, FX_GLOW_SPIKE, 0x0a,0x1e);
-  if(GetHp(cast_on) >= 1)
+  if(AP_GetVital(cast_on, VITALID_LIFE) >= 1)
     if(cast_on.npctemplate)
       dmg := dmg * 2;
     endif
@@ -165,7 +165,7 @@ function cast_fireball(caster, cast_on)
   endif
   PlayMovingEffect( caster, cast_on, FX_FIREBALL, 5, 1 );
   PlaySoundEffect( caster, 0x15f);
-  if(GetHp(cast_on) >= 1)
+  if(AP_GetVital(cast_on, VITALID_LIFE) >= 1)
     if(cast_on.npctemplate)
       dmg := dmg * 2;
     endif
@@ -213,15 +213,15 @@ function cast_manadrain(caster, cast_on)
   //var target_resist := GetAttribute(cast_on, RESISTING_SPELLS); // uncomment if needed
   var diff := MWresisted(40, cast_on, (RandomInt(30)));
   if(diff > 0)
-    if(diff > GetMaxMana(cast_on))
-      diff := GetMaxMana(cast_on);
+    if(diff > AP_GetVitalMaximumValue(cast_on, VITALID_MANA))
+      diff := AP_GetVitalMaximumValue(cast_on, VITALID_MANA);
     endif
     PlaySoundEffect(caster, SFX_SPELL_MANA_DRAIN);
     PlayObjectCenteredEffect(cast_on, FX_HEAL_EFFECT, 7, 0x10);
-    if((GetMana(cast_on) - diff) < 0)
-      diff := GetMana(cast_on);
+    if((AP_GetVital(cast_on, VITALID_MANA) - diff) < 0)
+      diff := AP_GetVital(cast_on, VITALID_MANA);
     endif
-    SetMana(cast_on, (GetMana(cast_on) - diff));
+    AP_SetVital(cast_on, VITALID_MANA, (AP_GetVital(cast_on, VITALID_MANA) - diff));
   endif
 endfunction
 

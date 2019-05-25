@@ -3,9 +3,9 @@ include ":attributes:attributes";
 
 program textcmd_setint(chr)
     var who := Target(chr);
-    SetDexterityMod(who, 0);
-    SetIntelligenceMod(who, 0);
-    SetStrengthMod(who, 0);
+    AP_SetStatMod(who, DEXTERITY, 0);
+    AP_SetStatMod(who, INTELLIGENCE, 0);
+    AP_SetStatMod(who, STRENGTH, 0);
     who.ar_mod := 0;
     foreach thing in List_of_Skills
       SetAttributeTemporaryMod(chr, thing, 0);

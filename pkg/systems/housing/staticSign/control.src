@@ -17,7 +17,7 @@ program SignListener(sign)
     ev := wait_for_event(120);
     if(ev)
       who := ev.source;
-      if((who.x >= homeinfo[2]) && (who.x <= homeinfo[4]) && (who.y >= homeinfo[3]) && (who.y <= homeinfo[5]) && 
+      if((who.x >= homeinfo[2]) && (who.x <= homeinfo[4]) && (who.y >= homeinfo[3]) && (who.y <= homeinfo[5]) &&
 		(who.z >= homeinfo[7]) && (who.z <= homeinfo[6]))
         if(owneracct == who.acctname)
           handle_speech(ev, sign, 3);
@@ -158,7 +158,7 @@ function banish(sign, event)
     if (!idiot)
       SendSysMessage(who,"cancelled");
       return;
-    elseif (GetMana(idiot) == error)
+    elseif (AP_GetVital(idiot, VITALID_MANA) == error)
       SendSysMessage(who,"you cannot ban items");
       return;
     endif
@@ -211,7 +211,7 @@ function remove(sign, event)
     if (!idiot)
       SendSysMessage(who,"cancelled");
       return;
-    elseif (GetMana(idiot) == error)
+    elseif (AP_GetVital(idiot, VITALID_MANA) == error)
       SendSysMessage(who,"you cannot eject items");
       return;
     endif

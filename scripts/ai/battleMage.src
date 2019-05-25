@@ -166,7 +166,7 @@ function Fight(opponent)
   sleepms(100);
   PlayLightningBoltEffect(opponent);
   sleepms(100);
-  ApplyRawDamage(opponent, GetHp(opponent) + 10);
+  ApplyRawDamage(opponent, AP_GetVital(opponent, VITALID_LIFE) + 10);
   sleep(1);
   PerformAction(me, 17);
   sleepms(200);
@@ -203,10 +203,10 @@ function post_combat()
 		PlaySoundEffect(me, 0x31);
 		sleep(1);
 	endif
-  if(GetHp(me) < GetStrength(me))
+  if(AP_GetVital(me, VITALID_LIFE) < AP_GetStat(me, STRENGTH))
     sleep(1);
     PerformAction(me, 0x22);
-    SetHp(me, me.strength);
+    AP_SetVital(me, VITALID_LIFE, me.strength);
     PlaySoundEffect(me, 0x32);
     sleep(1);
   endif
@@ -274,10 +274,10 @@ function in_combat_event_loop(opponent, loops)
     PlaySoundEffect(me, 0x31);
     sleep(1);
   endif
-  if(GetHp(me) < (GetStrength(me) / 2))
+  if(AP_GetVital(me, VITALID_LIFE) < (AP_GetStat(me, STRENGTH) / 2))
     sleep(1);
     PerformAction(me, 0x22);
-    SetHp(me, me.strength);
+    AP_SetVital(me, VITALID_LIFE, me.strength);
     PlaySoundEffect(me, 0x32);
     sleep(1);
   endif
