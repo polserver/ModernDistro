@@ -1,0 +1,398 @@
+//////////////////////////////////////////////////////////
+// This program file is here to use for creating little //
+// pieces of code for testing purposes.					//
+//////////////////////////////////////////////////////////
+
+
+use uo;
+use cfgfile;
+use os;
+use polsys;
+use basic;
+use cliloc;
+
+include "include/findCity";
+//include "include/myUtil";
+//include "util/bank";
+include ":currency:currency";
+include "include/string";
+//include ":gumps:gumpMessage";
+//include ":staticHousing:staticHousing";
+include "include/packets";
+include ":clilocs:clilocs";
+//include "include/attributes";
+include "include/server";
+include ":virtue:virtue";
+include ":timedScripts:timedScripts";
+include ":timedScripts:poisonUtil";
+
+program test_cmd(who, text)
+
+	SetRegionLightLevel( "BritanniaBackground", 30 );
+	return;
+
+	SendSysMessage(who,"10 - 14 = " + CStr(10 - 14), color := 88);
+	SendSysMessage(who,"14 - 10 = " + CStr(14 - 10), color := 88);
+	return;
+
+	var HPRegenRate := AP_GetVitalRegenRateMod(who, "hits");
+	SetObjProperty(who, "OrigHPRegen'", HPRegenRate);
+	SendSysMessage(who, Cstr(HPRegenRate), color := 88);
+	AP_SetVitalRegenRateMod( who, "Hits", CInt(HPRegenRate + 1200) );
+	AP_SaveVitalRegenRateProp(who, "hits");
+	RecalcVitals(who);
+	SendSysMessage(who, Cstr(AP_GetVitalRegenRateMod(who, "hits")), color := 88);
+	AP_SetVital(who, "Hits", AP_GetVital(who, "Hits") - 12);
+	var gameclock := ReadGameClock();
+	while(AP_GetVital(who, "hits") < AP_GetStat( who, "Strength" ))
+		Sleep(1);
+	endwhile
+	SendSysMessage(who, "Healed in " + CStr(ReadGameClock() - gameclock) + " seconds.", color := 88);
+
+	AP_SetVitalRegenRateMod( who, "Hits", CInt(HPRegenRate + 2400) );
+	AP_SaveVitalRegenRateProp(who, "hits");
+	RecalcVitals(who);
+	AP_SetVital(who, "Hits", AP_GetVital(who, "Hits") - 12);
+	gameclock := ReadGameClock();
+	while(AP_GetVital(who, "hits") < AP_GetStat( who, "Strength" ))
+		Sleep(1);
+	endwhile
+	SendSysMessage(who, "Healed in " + CStr(ReadGameClock() - gameclock) + " seconds.", color := 88);
+	AP_SetVitalRegenRateMod( who, "Hits", CInt(GetObjProperty(who, "OrigHPRegen") ) );
+	AP_SaveVitalRegenRateProp(who, "hits");
+	RecalcVitals(who);
+	return;
+/*	var npctarg := Target(who);
+//	SendSysMessage(who, "lower_reagent_cost = " + CStr(npctarg.lower_reagent_cost), color := 89);
+//	SendSysMessage(who, "spell_damage_increase = " + CStr(npctarg.spell_damage_increase), color := 88);
+//	SendSysMessage(who, "faster_casting = " + CStr(npctarg.faster_casting), color := 89);
+//	SendSysMessage(who, "faster_cast_recovery = " + CStr(npctarg.faster_cast_recovery), color := 88);
+//	SendSysMessage(who, "defence_increase = " + CStr(npctarg.defence_increase), color := 89);
+	who.defence_increase_cap := 10;
+	who.defence_increase_cap := 10;
+	who.defence_increase_cap := 10;
+	who.defence_increase_cap := 10;
+	who.defence_increase_cap := 10;
+	who.defence_increase_cap := 10;
+	SendSysMessage(who, "defence_increase_cap = " + CStr(npctarg.defence_increase_cap), color := 88);
+	SendSysMessage(who, "lower_mana_cost = " + CStr(npctarg.lower_mana_cost), color := 89);
+	SendSysMessage(who, "resist_fire_cap = " + CStr(npctarg.resist_fire_cap), color := 88);
+	SendSysMessage(who, "resist_cold_cap = " + CStr(npctarg.resist_cold_cap), color := 89);
+	SendSysMessage(who, "resist_energy_cap = " + CStr(npctarg.resist_energy_cap), color := 88);
+	SendSysMessage(who, "resist_physical_cap = " + CStr(npctarg.resist_physical_cap), color := 89);
+	SendSysMessage(who, "resist_poison_cap = " + CStr(npctarg.resist_poison_cap), color := 88);
+	SendSysMessage(who, "luck = " + CStr(npctarg.luck), color := 89);
+	SendSysMessage(who, "========================");
+	SendSysMessage(who, "defence_increase_mod = " + CStr(npctarg.lower_reagent_cost), color := 89);
+	SendSysMessage(who, "DefenceIncreaseCapMod = " + CStr(npctarg.spell_damage_increase), color := 88);
+	SendSysMessage(who, "LowerManaCostMod = " + CStr(npctarg.faster_casting), color := 89);
+	SendSysMessage(who, "faster_cast_recovery = " + CStr(npctarg.faster_cast_recovery), color := 88);
+	SendSysMessage(who, "defence_increase = " + CStr(npctarg.defence_increase), color := 89);
+	SendSysMessage(who, "defence_increase_cap = " + CStr(npctarg.defence_increase_cap), color := 88);
+	SendSysMessage(who, "lower_mana_cost = " + CStr(npctarg.lower_mana_cost), color := 89);
+	SendSysMessage(who, "resist_fire_cap = " + CStr(npctarg.resist_fire_cap), color := 88);
+	SendSysMessage(who, "resist_cold_cap = " + CStr(npctarg.resist_cold_cap), color := 89);
+	SendSysMessage(who, "resist_energy_cap = " + CStr(npctarg.resist_energy_cap), color := 88);
+	SendSysMessage(who, "resist_physical_cap = " + CStr(npctarg.resist_physical_cap), color := 89);
+	SendSysMessage(who, "resist_poison_cap = " + CStr(npctarg.resist_poison_cap), color := 88);
+	SendSysMessage(who, "luck = " + CStr(npctarg.luck), color := 89);
+	who.luck_mod := 30;
+	SendSysMessage(who, "Luck = " + CStr(who.luck));
+	return;
+*/
+/*	var timer_names := TS_GetTimerNames(who, "P");
+	foreach timer_name in timer_names
+		Print(timer_name);
+	endforeach
+	return 1;
+*/
+	//                  VS_GetSettingsCfgString(VS_Capitalize(virtue_shrine + "ShrineMsg"), "Neg3");
+	SendSysMessage(who, VS_GetSettingsCfgString("ShrineLocsFelucca", VS_Capitalize(text)), color := 88);
+	return;
+
+	SendSysMessage(who, VS_Capitalize("compassion"), 2, 88);
+	var crap := VS_GetSettingsCfgString(VS_Capitalize("compassion") + "ShrineMsg", "Zero");
+	SendSysMessage(who, crap, 2, 88);
+	SendSysMessage(who, CStr(VS_GetSettingsCfgElem("Settings").MaxRange));
+	return;
+
+	var stuff333 := {};
+	var cont := Target(who);
+	stuff333 := EnumerateItemsInContainer(cont);
+	SendSysMessage(who, "There are " + CStr(stuff333.size()) + " items in the container.");
+	return;
+
+
+	var reg := Target(who);
+	Print("Is a reagent " + CStr(reg.IsReagent()) + " Is a plant " + CStr(reg.IsPlant()));
+	return;
+
+/*
+	// Read artidx.mul to get the offset into art.mul.
+	var ArtTileIdx := OpenBinaryFile( "artidx.mul", OPENMODE_IN, LITTLE_ENDIAN );
+	ArtTileIdx.seek((CInt(text) * 12));
+	var Offset := ArtTileIdx.GetInt32();					// Look-up - index into art.mul. Is either undefined ($FFFFFFFF -1) or the file offset in ART.MUL
+	var TileSize := ArtTileIdx.GetInt32();					// Size of the art tile.
+	var Unknown := ArtTileIdx.GetInt32();					// Umknown data.
+
+	// Read art.mul to extract the tile bitmap.
+	// Fun stuff. :)
+	var ArtTileMul := OpenBinaryFile( "art.mul", OPENMODE_IN, LITTLE_ENDIAN );
+	ArtTileMul.seek(CInt(Offset));
+	var Flag := ArtTileMul.GetInt32();
+	// Here is where it gets tricky because I do not know what a "raw" or "run" tile is.
+	// I assume a "raw" tile is a terrain tile and
+	// a "run" is the kind we all know as 'art' tiles .
+
+
+	if (Flag > $FFFF or Flag == 0)
+		//... tile is Raw ...
+	else
+		//... tile is Run ...
+	endif
+
+*/
+////////////////////////////////////////////////////////////////////////////
+	// ReadPolCFG();
+	// ReadSSOptCFG ();
+	// var TileDataInfo := struct;
+	// TileDataInfo := GetTileDataInfo(CInt(text));
+	// SendSysMessage(who, TileDataInfo.name, 3, 88);
+	// SendSysMessage(who, CStr(TileDataInfo.weight), 3, 88);
+	// return;
+
+	SendSysMessageCL(who, 1010515, color := CInt(text)); // You cannot use that while it is locked down.
+	return;
+	var objdesc := GetMultiDimensions(0xa2);
+	var multi_dims := struct;
+	multi_dims.+x1 := objdesc.xmin;
+	multi_dims.+y1 := objdesc.ymin;
+	multi_dims.+x2 := objdesc.xmax;
+	multi_dims.+y2 := objdesc.ymax;
+
+	SendSysMessage(who, CStr(multi_dims.x1), 3, color := 88);
+	SendSysMessage(who, CStr(multi_dims.y1), 3, color := 88);
+	SendSysMessage(who, CStr(multi_dims.x2), 3, color := 88);
+	SendSysMessage(who, CStr(multi_dims.y2), 3, color := 88);
+	SendSysMessage(who, "The multi dimensions are " + CStr(Abs(multi_dims.x1) + multi_dims.x2) + " by "
+						+ CStr(Abs(multi_dims.y1) + multi_dims.y2), color := 88);
+	return 1;
+
+	var place1 := struct;
+	var where := struct;
+	place1.+x1 := 5838;
+	place1.+y1 := 1182;
+	place1.+x2 := 5843;
+	place1.+y2 := 1187;
+	where := TargetCoordinates(who);
+	if(IsInsideBox(place1, where))
+		SendSysMessage(who, "Yeppers! It's inside the box", color := 66);
+	endif
+	return;
+
+
+
+	var list := who.party.members;
+	var list2 := ListMobilesNearLocation( who.x, who.y, who.z, 5, who.realm );
+	foreach person in list2
+		if(person in list)
+			SendSysMessage(who, CStr(person.name), 3, 88);
+			SendSysMessage(who, person.errortext, 3, 88);
+		endif
+	endforeach
+	return;
+
+	var place := TargetCoordinates(who);
+	var mult := CreateMultiAtLocation( place.x, place.y, place.z, CInt(text), 7, place.realm );
+	if(mult.errortext)
+		SendSysMessage(who, mult.errortext, 3, 88);
+	endif
+	return;
+
+
+	var Thing := Target(who);
+	SendSysMessage(who, "Energy resistance is " + CStr(thing.resist_energy), 1, 88);
+	SendSysMessage(who, "Fire damage is " + CStr(thing.damage_fire), 1, 88);
+	return;
+
+
+	// Add buff icon for 10 seconds
+	who.addBuff(0x460, 30, 0x106a85, 0x106a86, CAscZ("1234 "));
+	sleep(30);
+	var debuffed := who.delbuff(0x460);
+	SendSysMessage(who, debuffed.errortext, 2, 66);
+	//who.clearbuffs();
+
+	return;
+/*var cmdlvl := CInt(text);;
+SendSysMessage(who, "Logical test: " + CStr(who.cmdlevel == cmdlvl), 1, 88);
+return 1;
+*/
+/*	var fred := {};
+	SendSysMessage(who, "FRED", 6, 33);
+	return;
+
+	var targ := TargetCoordinates(who);
+	var statics := ListStaticsAtLocation( targ.x, targ.y, targ.z, 0, targ.realm );
+	//var statics := ListStaticsAtLocation( 1224, 1567, 0, 0, "britannia_alt" );
+	if(!Len(statics))
+		SendSysMessage(who, "There are no statics there.", 2, 88);
+		return;
+	endif
+	foreach static in statics
+		SendSysMessage(who, "Len of statics is " + CStr(Len(statics)) + "    Static is " + CInt(static.objtype), 2, 88);
+	endforeach
+	return;
+
+*/
+
+/*
+var targ := TargetCoordinates(who);
+
+var arrayofstatics := {0xc9e, 0xca5, 0xca9};
+var statics := ListStaticsNearLocation( targ.x, targ.y, targ.z, 4, LIST_IGNORE_Z, targ.realm );
+foreach static in statics
+	if(static.objtype in arrayofstatics)
+	SendSysMessage(who, "an ohii tree is here.", 1, 88);
+	endif
+endforeach
+
+return;
+if(FindHouseForLocation(targ.x, targ.y, targ.z, who.realm))
+	SendSysMessage(who, "Yep. Inside the house.", 1, 88);
+else
+	SendSysMessage(who, "Nope. Not inside the house.", 1, 33);
+endif
+return 1;
+
+
+
+gumpmessage(who, text);
+return;
+
+
+
+var num := CInt(text);
+var result := AddCommas(num);
+SendSysMessage(who,CStr(num), 1, 88);
+SendSysMessage(who, result);
+return;
+
+
+
+
+// Test create multi stacks of coins
+var words := SplitWords(text);
+var done := createcoins( who, who.backpack, words[1], CInt(words[2]) );
+
+if(done)
+	SendSysMessage(who, "Success!", 1, 66);
+else
+	SendSysMessage(who, "Failed!", 1, 33);
+endif
+
+*/
+
+/*
+var difference := 0;
+var price := 120000;
+var vault := FindBankBox( who );
+var stacksofcashinbank := GetStacksOfTypeInContainer (vault, 0xEED);
+var stacksofcashinpack := GetStacksOfTypeInContainer (who.backpack, 0xEED);
+var cashinbank := stacksofcashinbank[1];
+var cashinpack := stacksofcashinpack[1];
+var totalcash := cashinbank + cashinpack;
+SendSysMessage(who, totalcash);
+if(cashinbank >= price)
+	SpendCoin(who, price, vault, 0xEED);
+	SendSysMessage(who, "You had enough gold in your bank to buy", 3, 66);
+	SendSysMessage(who, "the house. The gold was subtracted from your bank.", 3, 66);
+elseif(cashinpack >= price)
+	SpendCoin(who, price, who.backpack, 0xEED);
+	SendSysMessage(who, "You had enough gold in your pack to buy", 3, 66);
+	SendSysMessage(who, "the house. The gold was subtracted from your pack.", 3, 66);
+elseif(totalcash >= price)
+	if(cashinbank > cashinpack)
+		difference := price - cashinbank;
+		SpendCoin(who, (price-difference), vault, 0xEED);
+		SpendCoin(who, difference, who.backpack, 0xEED);
+		SendSysMessage(who, "The total of your gold in your bank and your", 3, 66);
+		SendSysMessage(who, "pack was enough to buy the house.", 3, 66);
+	else
+		difference := price - cashinpack;
+		SpendCoin(who, (price-difference), who.backpack, 0xEED);
+		SpendCoin(who, difference, vault, 0xEED);
+		SendSysMessage(who, "The total of your gold in your pack and your", 3, 66);
+		SendSysMessage(who, "bank was enough to buy the house.", 3, 66);
+	endif
+else
+	SendSysMessage(who, "The total of your gold in your bank and your", 3, 40);
+	SendSysMessage(who, "backpack is not enough to buy this house.", 3, 40);
+endif
+*/
+
+
+
+//	var targ := TargetCoordinates(who);
+//	SendSysMessage(who, "Name is " + targ.name, color := 88);
+//	var multi := CreateMultiAtLocation(targ.x, targ.y, targ.z, CInt(text), 0x100, who.realm );
+//	if(!multi)
+//		SendSysMessage(who, multi.errortext);
+//	endif
+
+//	SendSysMessage(who, WhatCityAmIIn(who), color := 88);
+//	SendSysMessage(who, IsInsideCity(who), color := 88);
+//	SendSysMessage(who, CStr(Hex(GetTownCurrency("Caemberlyn"))), color := 88);
+endprogram
+
+function IsInsideBox(box, location)
+
+	if( (location.x >= box.x1) && (location.x <= box.x2) && (location.y >= box.y1) && (location.y <= box.y2) )
+		return 1;
+	endif
+
+endfunction
+
+/////////////////////////////////////////////////////////////////////
+// GetTileDataInfo - Returns TILEDATA. Mul Entry as struct
+// TileID<0x4000 landtiles TileID>0x3FFF items
+/////////////////////////////////////////////////////////////////////
+
+// Function GetTileDataInfo(TileID)
+  // Var polcfg:=GetGlobalProperty(GLOBAL_POL_CFG_STRUCT);
+  // Var tiledata:=OpenBinaryFile( polcfg.UoDataFileRoot+"tiledata.mul", OPENMODE_IN, LITTLE_ENDIAN );
+  // If (!tiledata)
+    // Return(error);
+  // EndIf
+  // Var pos;
+  // If (TileID<0x4000) // landtiles
+    // pos:=(((TileID >> 5) + 1) * 4) + (TileID * 26);
+  // Else
+    // Var tmpid:=TileID-0x4000;
+    // tiledata.seek(0x68800,SEEKDIR_BEG);
+    // pos:=(((tmpid >> 5) + 1) * 4) + (tmpid * 37);
+  // EndIf
+  // tiledata.seek(pos,SEEKDIR_CUR);
+  // Var tile:=struct;
+  // tile.+ID        :=TileID;
+  // tile.+flags     :=tiledata.getint32(); //uo::TILEDATA_FLAG_*
+  // If (TileID<0x4000)
+    // tile.+texid   :=tiledata.getint16();
+  // Else
+    // tile.+weight  :=tiledata.getint8();
+    // tile.+quality :=tiledata.getint8(); // wearable items: Layer
+    // tile.+unk1    :=tiledata.getint16();
+    // tile.+unk2    :=tiledata.getint8();
+    // tile.+quantity:=tiledata.getint8();
+    // tile.+anim    :=tiledata.getint16();
+    // tile.+unk3    :=tiledata.getint8();
+    // tile.+hue     :=tiledata.getint8();
+    // tile.+stackoff:=tiledata.getint8();
+    // tile.+value   :=tiledata.getint8();
+    // tile.+height  :=tiledata.getint8(); // if Flag Bridge height/2
+  // EndIf
+  // tile.+name      :=tiledata.getstring(20);
+  // tiledata.close();
+  // Return(tile);
+// EndFunction
+
