@@ -1,30 +1,33 @@
 use uo;
 use os;
 
+include ":sysbook:spawnShelf";
+include ":gumps:yesNoSizable";
+
 program textcmd_shelfclear(who)
 
-  SendSysMessage(who, "This command disabled until Distro team updates it to", 1, 88);
-  SendSysMessage(who, "conform to the updated book spawn system.", 1, 88);
-  return 0;
-  var count := 0;
-  var shelf;
-  var shelves := {};
-  var ct1 := 0, ct2 := 0;
-  var globalshelves := GetGlobalProperty("shelves");
-  foreach thing in globalshelves
-    shelf := SystemFindObjectBySerial(thing);
-    if(shelf)
-      foreach book in EnumerateItemsInContainer(shelf)
-        count := count + 1;
-        DestroyItem(book);
-      endforeach
-      shelves.append(thing.serial);
-      ct1 := ct1 + 1;
-    endif
-    ct2 := ct2 + 1;
-    sleepms(1);
-  endforeach
-  SetGlobalProperty("shelves", shelves);
-  sendsysmessage(who, "Total Books Destroyed: " + count);
-  SendSysMessage(who, "Wiping " + (ct2 - ct1) + " shelves out of " + ct2);
+	// The extra spaces in the second string are to make the question the last line of text in the gump.
+	var prompt :=	"This command deletes all books from all book spawn shelves. " +
+					"It does not remove the shelves from the spawn database.   Do you wish to continue?";
+	var do_it := YesNoSizable(who, prompt);
+	if(!do_it)
+		return 0;
+	endif
+	var count := 0;
+	var bookshelf_keys := {};
+	var shelfdata := RetrieveOrInitBookshelfDB();
+	var shelf, bookshelf_object;
+	bookshelf_keys := shelfdata.Keys();
+	foreach key in bookshelf_keys
+		shelf := shelfdata.FindElement(key);
+		bookshelf_object := SystemFindObjectBySerial(key);
+		if(bookshelf_object)
+			foreach book in EnumerateItemsInContainer(bookshelf_object)
+				count := count + 1;
+				DestroyItem(book);
+			endforeach
+		endif
+		sleepms(5);
+	endforeach
+	sendsysmessage(who, "Total Books Destroyed: " + count);
 endprogram

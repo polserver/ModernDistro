@@ -1,6 +1,10 @@
 use uo;
 use os;
 
+program BookInterface()
+  return 1;
+endprogram
+
 exported function IsWritable(book)
   if(GetObjProperty(book, "NoWrite") || (book.movable == 0) || ((book.container).objtype == 0x0a9f))
     return 0;
@@ -26,7 +30,7 @@ exported function GetTitle(book)
 endfunction
 
 exported function SetTitle(book, title)
-  title := nettoie(title);
+  title := Cleans(title);
 
   book.setprop("title", title);
   book.name := title;
@@ -42,7 +46,7 @@ exported function GetAuthor(book)
 endfunction
 
 exported function SetAuthor(book, author)
-  author := nettoie(author);
+  author := Cleans(author);
 
   book.setprop("author", author);
 endfunction
@@ -77,17 +81,22 @@ exported function SetLine(book, line, text)
   if(contents == error)
     contents := array;
   endif
-  contents[ line ] := nettoie(text);
+  contents[ line ] := Cleans(text);
   book.setprop("contents", contents);
   return 1;
 endfunction
 
-function nettoie(chaine)
- var tabchaine := CascZ(chaine);
+exported function IsBook(book)
+	book := book;
+	return 1;
+endfunction
+
+function Cleans(chain)
+ var tabchaine := CascZ(chain);
  var result := "";
  var i := 1;
  var bon := 1;
- 
+
  while (bon == 1)
   var car := tabchaine[i];
   if (car > 0)
@@ -97,10 +106,7 @@ function nettoie(chaine)
    bon := 0;
   endif
  endwhile
- 
+
  return result;
 endfunction
 
-program BookInterface()
-  return 1;
-endprogram

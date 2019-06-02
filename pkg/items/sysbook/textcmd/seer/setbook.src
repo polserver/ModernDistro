@@ -1,5 +1,8 @@
 ////////////////////////////////////////////////////
 //
+// This programme allows you to change a book's
+// graphic and its read/write status.
+//
 // Bookcase Spawning system  version .3
 // created December 6, 2000
 // updated June 19, 2017
@@ -42,9 +45,14 @@ var data := {
 };
 
 program test(who)
-  var book := Target(who, TGTOPT_NOCHECK_LOS);
-  if(!book) return; endif
-  if (GetObjProperty(book,"maxpages")==16) return; endif
+
+	var book := Target(who, TGTOPT_NOCHECK_LOS);
+	if(!book)
+		return;
+	endif
+	if (GetObjProperty(book,"maxpages")==16)
+		return;
+	endif
 
   var res := SendDialogGump(who, layout, data);
   if(res[0] == 9)
