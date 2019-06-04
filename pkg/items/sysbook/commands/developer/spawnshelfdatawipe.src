@@ -1,0 +1,34 @@
+use uo;
+use os;
+use util;
+use cfgfile;
+use datafile;
+
+include ":sysbook:spawnShelf";
+include ":sysbook:sysBook";
+include ":gumps:yesNoSizable";
+
+program shelfstock(who);
+
+	// The extra spaces in the second string are to make the question the last line of text in the gump.
+	var prompt :=	"This will clear the spawnshelf datafile. If you continue, NO bookshelves " +
+					"will spawn sysbooks until you use .newspawnshelf to add bookshelves to the data file. " +
+					"Please think before you continue!             Do you wish to continue?";
+	var do_it := YesNoSizable(who, prompt);
+	if(!do_it)
+		return 0;
+	endif
+	var shelf_data := CreateDataFile("spawnedbookshelves", DF_KEYTYPE_INTEGER);
+	if(!shelf_data)
+		LogToFile("::log/sysbook.log", "[spawnshelfdatawipe.ecl]: Datastore file error: " + shelf_data.errortext, LOG_DATETIME);
+		print("Sysbook error - check sysbook.log");
+		return 0;
+	endif
+	var shelf_keys := shelf_data.Keys();
+	foreach key in shelf_keys
+		shelf_data.DeleteElement(key);
+		Sleepms(5);
+	endforeach
+
+endprogram
+

@@ -1,0 +1,77 @@
+/////////////////////////////////////////////////////////////////////
+//
+// This programme displays a list of all books stored in the
+// staticbooks data file There is a check boxes beside each title
+// to allow the staff member to create the books selected.
+//
+// Author: Yukiko
+// Date: 2019-06-03
+//
+/////////////////////////////////////////////////////////////////////
+use uo;
+use os;
+use datafile;
+use cfgfile;
+
+include ":sysbook:sysBook";
+include ":sysbook:spawnShelf";
+include ":gumps:yesNoSizable";
+include ":gumps:selectionGump";
+
+program create_selected_sysbooks(who)
+
+	var books_file := OpenDataFile("staticbooks");
+	var bookContents := struct;
+	var book_keys := {};
+	var book_titles := {};
+	var books := 0;
+	var the_book := 0;
+	book_keys := books_file.Keys();
+
+	foreach key in book_keys
+		bookContents := GetBookContents(key);
+		book_titles.Append(bookContents.title);
+		Sleepms(5);
+	endforeach
+	books := SelectionGump(who, "List of " + CStr(book_keys.size()) + " books in the 'Library':", book_titles, BTN_TYPE_CHECKBOX);
+		SendSysMessage(who, Cstr(books.size()), color := 88);
+	if(books.errortext == "No option was selected.")
+		SendSysMessage(who, "No books selected.", color := 33);
+		return 0;
+	endif
+	SendSysMessage(who, "Target a container, or yourself to create the books in your backpack, or press <EXC> to cancel.", color := 88);
+	var the_place := Target(who);
+	if(!the_place)
+		SendSysMessage(who, "Cancelled.", color := 33);
+		return 0;
+	elseif(the_place == who)
+		the_place := who.backpack;
+	else
+		the_place := the_place; // In otherwords, a container was targetted.
+	endif
+	foreach book_title in books
+		bookContents := FindBookByTitle(book_title, book_keys);
+		the_book := CreateItemInContainer(the_place, 0xFF0, 1);
+		the_book.setprop("contents", bookContents.conents);
+		the_book.setprop("title",    bookContents.title);
+		the_book.setprop("author",   bookContents.author);
+		the_book.name := bookContents.title;
+		SetObjProperty(the_book, "NoWrite", 1);
+		the_book.setprop("SysBook", 1);
+	endforeach
+	SendSysMessage(who, "The selected book or books have been created in " + the_place.name + ".", color := 66);
+	return 0;
+
+endprogram
+
+function FindBookByTitle(title, book_keys)
+
+	foreach key in book_keys
+		var bookContents := GetBookContents(key);
+		if(Lower(title) == Lower(bookContents.title))
+			return bookContents;
+		endif
+		Sleepms(5);
+	endforeach
+
+endfunction

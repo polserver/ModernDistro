@@ -87,7 +87,7 @@ endfunction
 //
 /////////////////////////////////////////////////////////////////////
 function AddABook(byref shelf)
-	var book := CreateItemInContainer(shelf, 0xfef, 1);
+	var book := CreateItemInContainer(shelf, 0xFF0, 1);
 	case(RandomInt(4)+1)
 		1: book.graphic := 0xFEF;
 		2: book.graphic := 0xFF0;
@@ -98,8 +98,9 @@ function AddABook(byref shelf)
 	book.setprop("contents", bookContents.conents);
 	book.setprop("title",    bookContents.title);
 	book.setprop("author",   bookContents.author);
-	book.setprop("SysBook", 1);
 	book.name := bookContents.title;
+	SetObjProperty(book, "NoWrite", 1);
+	book.setprop("SysBook", 1);
 endfunction
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////

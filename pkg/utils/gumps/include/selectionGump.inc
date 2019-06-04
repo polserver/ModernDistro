@@ -92,7 +92,7 @@ function SelectionGump( mobile, title, options, btn_type:=BTN_TYPE_NORMAL )
 	if( !input[0] )
 		return error{"errortext":="No option was selected."};
 	endif
-
+	var selections_made := 0;
 	case( btn_type )
 		BTN_TYPE_NORMAL:
 			var val := input[0];
@@ -102,10 +102,17 @@ function SelectionGump( mobile, title, options, btn_type:=BTN_TYPE_NORMAL )
 			foreach key in ( input.keys )
 				if( key >= 1 && key <= num_options )
 					values.Append( options[key] );
+					selections_made := 1;
 				endif
 				SleepMS(2);
+
 			endforeach
-			return values;
+			// The following returns an error if no checkboxes were checked and the Okay button is clicked.
+			if(selections_made)
+				return values;
+			else
+				return error{"errortext":="No option was selected."};
+			endif
 		BTN_TYPE_RADIO:
 			foreach key in ( input.keys )
 				if ( key >= 1 && key <= num_options )
