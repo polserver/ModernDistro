@@ -1,11 +1,14 @@
 use uo;
 use os;
 
-//////////////////////////////////
-// Makes a book read only.
-//////////////////////////////////
+/////////////////////////////////////////////////////
+// bookro
+//
+// This command makes a book read only.
+//
+/////////////////////////////////////////////////////
 
-program textcmd_booklock(who)
+program bookro(who)
 
 	while(1)
 		SendSysMessage(who, "Target the book you wish to make read-only:", color := 88);

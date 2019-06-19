@@ -1,0 +1,108 @@
+/////////////////////////////////////////////////////////////////////
+//
+// addtoshardlibrary
+//
+// Purpose:
+// This command will add a book from the Master Library
+// (:sysbook:master_library.cfg) to the Shard Library (shard_library data file).
+// This will make that book available for creation in-game and,
+// if the book is set to spawn when it is selected, it will spawn in
+// bookshelves that are set to spawn books.
+//
+/////////////////////////////////////////////////////////////////////
+
+use uo;
+use file;
+use cfgfile;
+use datafile;
+
+include ":sysbook:sysBook";
+include ":gumps:gumps";
+
+program addtoshardlibrary(who)
+
+	var book_titles := array;		// Array of titles to send to the gump.
+	var selected_books := array;	// Array of books selected to be entered into the data file.
+	var the_book := 0;				// Config file book objref.
+	var book_title := "";			// String to hold the book title from the books.cfg file.
+	var shard_library := CreateDataFile("shard_library", DF_KEYTYPE_INTEGER);
+	if(!shard_library)
+		LogToFile("::log/sysbook.log", "[addtolibrary.ecl]: Datastore file error: " + shard_library.errortext, LOG_DATETIME);
+		Print("Sysbook error - [addtolibrary.ecl]: Datastore file error: " + shard_library.errortext);
+		return 0;
+	endif
+	UnloadConfigFile(":sysbook:config/master_library");
+	var books := ReadConfigFile(":sysbook:config/master_library");
+	if(!books)
+		LogToFile("::log/sysbook.log", "[reinitsysbookdata.ecl]: Error loading config file: " + books.errortext, LOG_DATETIME);
+		Print("Sysbook error - check sysbook.log");
+		return 0;
+	endif
+	var book_keys := GetConfigStringKeys(books);
+
+	// Build the list of titles for the selection gump.
+	foreach key in book_keys
+		the_book := FindConfigElem(books, key);
+		book_title := GetConfigString(the_book, "title");
+		book_titles.Append(book_title);
+	endforeach
+	book_titles.Sort();
+	selected_books := InitializeBookGump( who, book_titles, "Add Books to Shard Library" );
+
+	if(selected_books.errortext == "No option was selected.")
+		SendSysMessage(who, "No books were selected.", color := 33);
+		return 0;
+	endif
+	// This is where the magic happens.
+	var counter, pages, cur_page, cur_line, entry;
+	var author := "";
+	var title := "";
+	var contents_array := array;
+	var selected_spawn := 0,
+	selected_title := "";;
+
+	// One by one we go through the books selected for the library.
+	foreach selected_book in selected_books
+		selected_title := selected_book.Title;
+		selected_spawn := selected_book.Spawn;
+		// Cycle through the config file, books.cfg, the master file of books.
+		foreach key in book_keys
+			key := CInt(key);
+			the_book := FindConfigElem(books, key);
+			// Get the title of the current book in the master file.
+			book_title := GetConfigString(the_book, "title");
+			// If the title of the current book in the master file matches the current
+			// selected book title...
+			if(book_title == selected_title)
+				// ...and the book is not already in the library then...
+				if(!BookExists(shard_library, key))
+					// ...add the book to the library data file.
+					counter := 1;
+					pages := CInt(books[key].pages);
+					title := (books[key].title);
+					author := (books[key].author);
+					for(cur_page := 1; cur_page <= pages; cur_page := cur_page + 1)
+						for(cur_line := 1; cur_line <= 8; cur_line := cur_line + 1)
+							entry := GetConfigString(books[key], "p" + cur_page + "l" + cur_line);
+							if(!entry.errortext)
+								contents_array[counter] := entry;
+							else
+								contents_array[counter] := "";
+							endif
+							counter := counter + 1;
+						endfor
+					endfor
+					CreateBook(shard_library,key,title,author,contents_array, selected_spawn);
+					contents_array := {};
+				else
+					// Otherwise complain that the book exists in the library and do not add it.
+					SendSysMessage(who, selected_title + " is already in the library.", color := 33);
+				endif
+			endif
+			Sleepms(5);
+		endforeach	// ...key in book_keys
+		Sleepms(5);
+	endforeach		// ...selected_title in selected_books
+	SendSysMessage(who, "Finnished adding the selected books to the Shard Library.", color := 66);
+
+endprogram

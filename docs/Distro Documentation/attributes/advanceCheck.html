@@ -1,0 +1,321 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    <meta http-equiv="Content-Language" content="en-us">
+    <title>Attributes
+      Documentation</title>
+    <link rel="stylesheet" type="text/css" href="docs.css">
+  </head>
+  <body>
+    <div id="container">
+      <div id="header">
+        <h1 style="text-align: center;">Attributes
+          DOCUMENTATION</h1>
+        <p style="text-align: center;">Attributes functions for POL097
+          distro, by <a href="mailto:AustinHeilman@Gmail.com">Austin
+            Heilman</a>.</p>
+        <hr style="margin-left: auto; margin-right: auto;">
+        <h2>advanceCheck.inc</h2>
+      </div>
+      <div id="content">
+        <table style="border-collapse: collapse;" id="AutoNumber1" width="100%"
+          cellspacing="0" cellpadding="2" bordercolor="#111111" border="0">
+          <tbody>
+            <tr>
+              <td bordercolorlight="#000000" bordercolordark="#000000" style="border-style: solid; border-width: 1px;"
+                colspan="2" width="1%" bgcolor="#c0c0c0" align="center"> <br>
+                <b><font face="Tahoma" size="2">advanceCheck.inc
+                    Functions</font></b><br>
+                &nbsp;</td>
+            </tr>
+            <tr>
+              <td bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style: none; border-left-width: medium; border-right-style: none; border-right-width: medium;"
+                colspan="2" width="1%" align="center">
+                &nbsp;</td>
+            </tr>
+            <tr>
+              <td style="border-style: solid; border-width: 1px;" colspan="2" width="100%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Includes</font></b></td>
+            </tr>
+            <tr>
+              <td style="border-style: solid; border-width: 1px;" colspan="2" width="100%"
+                bgcolor="#c0c0c0"> <font face="Tahoma" size="2">The following
+                  inc files are included in&nbsp;advanceCheck.inc</font></td>
+            </tr>
+            <tr>
+              <td style="border-style: solid; border-width: 1px;" colspan="2" width="100%"
+                bgcolor="#c0c0c0"> <font face="Tahoma" size="2">":attributes:attributes_ex"<b><br>
+                  </b>":skilllocks:common"
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style: none; border-left-width: medium; border-right-style: none; border-right-width: medium;"
+                colspan="2" width="1%" align="center">
+                &nbsp;</td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1px;" colspan="2" width="1%"
+                bgcolor="#c0c0c0" align="center">
+                <p align="center"><b><font face="Tahoma">CheckStatsForSkill</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style: solid; border-left-width: 1px; border-right-style: solid; border-right-width: 1px; border-bottom-style: solid; border-bottom-width: 1px;"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1px;" colspan="2" width="1%"
+                bgcolor="#c0c0c0"> <font face="Tahoma" size="2">(mobile,
+                  skill_name)</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid none solid solid; border-width: 1px medium 1px 1px;"
+                width="25%" bgcolor="#c0c0c0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid solid solid none; border-width: 1px 1px 1px medium;"
+                height="17" width="100%" bgcolor="#c0c0c0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style: solid; border-left-width: 1px; border-right-style: none; border-right-width: medium; border-bottom-style: none; border-bottom-width: medium;"
+                width="25%" bgcolor="#c0c0c0"> <font face="Tahoma" size="2">mobile</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style: none; border-left-width: medium; border-right-style: solid; border-right-width: 1px; border-bottom-style: none; border-bottom-width: medium;"
+                height="18" width="100%" bgcolor="#c0c0c0"> <font face="Tahoma"
+                  size="2">Mobile to do the stat checks on.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style: solid; border-left-width: 1px; border-right-style: none; border-right-width: medium; border-bottom-style: none; border-bottom-width: medium;"
+                width="25%" bgcolor="#c0c0c0"> <font face="Tahoma" size="2">skill_name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style: none; border-left-width: medium; border-right-style: solid; border-right-width: 1px; border-bottom-style: none; border-bottom-width: medium;"
+                height="18" width="100%" bgcolor="#c0c0c0"> <font face="Tahoma"
+                  size="2">Skill to get the stat advance list from.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1px;" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1px;" colspan="2" width="1%"
+                bgcolor="#c0c0c0"> <font face="Tahoma" size="2">Performs a stat
+                  check on all stats that are listed within a skill's
+                  attributes.cfg elem.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1px;" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1px;" colspan="2" width="1%"
+                bgcolor="#c0c0c0"> <font face="Tahoma" size="2">1 on success, 0
+                  on failure</font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1px;" colspan="2" width="1%"
+                bgcolor="#c0c0c0" align="center">
+                <p align="center"><b><font face="Tahoma">CheckStatAdvancement</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style: solid; border-left-width: 1px; border-right-style: solid; border-right-width: 1px; border-bottom-style: solid; border-bottom-width: 1px;"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1px;" colspan="2" width="1%"
+                bgcolor="#c0c0c0"> <font face="Tahoma" size="2">(mobile,
+                  stat_name, stat_mult)</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid none solid solid; border-width: 1px medium 1px 1px;"
+                width="25%" bgcolor="#c0c0c0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid solid solid none; border-width: 1px 1px 1px medium;"
+                height="17" width="100%" bgcolor="#c0c0c0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style: solid; border-left-width: 1px; border-right-style: none; border-right-width: medium; border-bottom-style: none; border-bottom-width: medium;"
+                width="25%" bgcolor="#c0c0c0"> <font face="Tahoma" size="2">mobile</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style: none; border-left-width: medium; border-right-style: solid; border-right-width: 1px; border-bottom-style: none; border-bottom-width: medium;"
+                height="18" width="100%" bgcolor="#c0c0c0"> <font face="Tahoma"
+                  size="2">Mobile to do the stat advancement check on.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style: solid; border-left-width: 1px; border-right-style: none; border-right-width: medium; border-bottom-style: none; border-bottom-width: medium;"
+                width="25%" bgcolor="#c0c0c0"> <font face="Tahoma" size="2">stat_name</font><font
+                  face="Tahoma" size="2"></font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style: none; border-left-width: medium; border-right-style: solid; border-right-width: 1px; border-bottom-style: none; border-bottom-width: medium;"
+                height="18" width="100%" bgcolor="#c0c0c0"> <font face="Tahoma"
+                  size="2">Name of the stat to do the advancement check on.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style: solid; border-left-width: 1px; border-right-style: none; border-right-width: medium; border-bottom-style: none; border-bottom-width: medium;"
+                width="25%" bgcolor="#c0c0c0"> <font face="Tahoma" size="2">stat_mult</font><font
+                  face="Tahoma" size="2"></font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style: none; border-left-width: medium; border-right-style: solid; border-right-width: 1px; border-bottom-style: none; border-bottom-width: medium;"
+                height="18" width="100%" bgcolor="#c0c0c0"> <font face="Tahoma"
+                  size="2">Multiplier to effect the chance of a gain. (rolled
+                  dice from an attributes.cfg StatCheck entry)</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1px;" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1px;" colspan="2" width="1%"
+                bgcolor="#c0c0c0"> <font face="Tahoma" size="2">Does an
+                  advancement check on a stat.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1px;" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1px;" colspan="2" width="1%"
+                bgcolor="#c0c0c0"> <font face="Tahoma" size="2">1 on success, 0
+                  on failure</font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1px;" colspan="2" width="1%"
+                bgcolor="#c0c0c0" align="center">
+                <p align="center"><b><font face="Tahoma">CheckSkillAdvance</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style: solid; border-left-width: 1px; border-right-style: solid; border-right-width: 1px; border-bottom-style: solid; border-bottom-width: 1px;"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1px;" colspan="2" width="1%"
+                bgcolor="#c0c0c0"> <font face="Tahoma" size="2">(mobile,
+                  skill_name, award_diff, pass_chance, pretend:=0)</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid none solid solid; border-width: 1px medium 1px 1px;"
+                width="25%" bgcolor="#c0c0c0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid solid solid none; border-width: 1px 1px 1px medium;"
+                height="17" width="100%" bgcolor="#c0c0c0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style: solid; border-left-width: 1px; border-right-style: none; border-right-width: medium; border-bottom-style: none; border-bottom-width: medium;"
+                width="25%" bgcolor="#c0c0c0"> <font face="Tahoma" size="2">mobile</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style: none; border-left-width: medium; border-right-style: solid; border-right-width: 1px; border-bottom-style: none; border-bottom-width: medium;"
+                height="18" width="100%" bgcolor="#c0c0c0"> <font face="Tahoma"
+                  size="2">Mobile to do the skill advancement check on.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: none none none solid; border-width: medium medium medium 1px;"
+                width="25%" bgcolor="#c0c0c0"> <font face="Tahoma" size="2">skill_name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: none solid none none; border-width: medium 1px medium medium;"
+                height="18" width="100%" bgcolor="#c0c0c0"> <font face="Tahoma"
+                  size="2">Name of the skill to check.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: none none none solid; border-width: medium medium medium 1px;"
+                width="25%" bgcolor="#c0c0c0"> <font face="Tahoma" size="2">award_diff</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: none solid none none; border-width: medium 1px medium medium;"
+                height="18" width="100%" bgcolor="#c0c0c0"> <font face="Tahoma"
+                  size="2">Difficulty to use for advancement award.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: none none none solid; border-width: medium medium medium 1px;"
+                width="25%" bgcolor="#c0c0c0"> <font face="Tahoma" size="2">pass_chance</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: none solid none none; border-width: medium 1px medium medium;"
+                height="18" width="100%" bgcolor="#c0c0c0"> <font face="Tahoma"
+                  size="2">Chance of getting a gain check.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: none none none solid; border-width: medium medium medium 1px;"
+                width="25%" bgcolor="#c0c0c0"> <font face="Tahoma" size="2">pretend:=0</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: none solid none none; border-width: medium 1px medium medium;"
+                height="18" width="100%" bgcolor="#c0c0c0"> <font face="Tahoma"
+                  size="2">Do not actually make any skill changes (for testing).</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1px;" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1px;" colspan="2" width="1%"
+                bgcolor="#c0c0c0"> <font face="Tahoma" size="2">Does an
+                  advancement check on a skill and considers skill locks.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1px;" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1px;" colspan="2" width="1%"
+                bgcolor="#c0c0c0"> <font face="Tahoma" size="2">Returns amount
+                  advanced on success, 0 on failure</font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="footer">
+        <p>Last Update: $Id: advanceCheck.html&nbsp;2007-10-06 20:18 oldngrey $</p>
+      </div>
+    </div>
+  </body>
+</html>

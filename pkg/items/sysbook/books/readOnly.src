@@ -1,9 +1,17 @@
 use datafile;
 
+include ":sysbook:sysBook";
 function GetBookElem(book)
   var bookid := book.getprop("bookid");
-  var df := OpenDataFile("staticbooks");
-  return df.FindElement(bookid);
+	var shard_library := RetrieveOrInitShardLibrary();
+
+	if(shard_library.errortext)
+		LogToFile("::log/sysbook.log", "[readOnly.ecl]: Datastore file error: " + shard_library.errortext, LOG_DATETIME);
+		Print("Sysbook error - check sysbook.log");
+		return 0;
+	endif
+
+  return shard_library.FindElement(bookid);
 endfunction
 
 exported function IsWritable(book)

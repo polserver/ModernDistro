@@ -1,0 +1,67 @@
+/////////////////////////////////////////////////////////////////////
+//
+// createshardlibrary
+//
+// Purpose:
+// This command creates all of the Shard Library's books in a
+// container of your choice. Please ensure the container can hold a
+// lot of items.
+//
+/////////////////////////////////////////////////////////////////////
+use uo;
+use os;
+use datafile;
+use cfgfile;
+
+include ":sysbook:sysBook";
+include ":gumps:yesNoSizable";
+
+program createshardlibrary(who)
+
+	var shard_library := RetrieveOrInitShardLibrary();
+
+	if(shard_library.errortext)
+		LogToFile("::log/sysbook.log", "[createlibrary.ecl]: Datastore file error: " + shard_library.errortext, LOG_DATETIME);
+		Print("Sysbook error - check sysbook.log");
+		return 0;
+	endif
+	var bookContents := struct;
+	var book_keys := {};
+	var book := 0;
+
+	// The extra spaces in the second string are to make the question the last line of text in the gump.
+	var prompt :=	"This command creates all of the in-game books in a container of your choice. " +
+					"Please ensure the container can hold a lot of items.                   Do you wish to continue?";
+	var do_it := YesNoSizable(who, prompt);
+	if(!do_it)
+		return 0;
+	endif
+
+	SendSysMessage(who, "Please target a container in which to place the books:", color := 88);
+	var holder := Target(who);
+	if(!holder)
+		SendSysMessage(who, "Cancelled.", color := 33);
+		return 0;
+	endif
+	if(!holder.IsContainer())
+		SendSysMessage(who, "You must target a valid container.", color := 33);
+		return 0;
+	endif
+	book_keys := shard_library.Keys();
+	foreach key in book_keys
+		book := CreateItemInContainer(holder, 0xFF0, 1); // Tan book (book2)
+		if(!book)
+			SendSysMessage(who, "I could not create a book. Maybe the container is too small to hold all of the in-game books.", color := 33);
+			return 0;
+		endif
+		bookContents := GetBookContents(key);
+		book.setprop("contents", bookContents.conents);
+		book.setprop("title",    bookContents.title);
+		book.setprop("author",   bookContents.author);
+		book.setprop("SysBook", 1);
+		book.name := bookContents.title;
+		Sleepms(5);
+	endforeach
+	SendSysMessage(who, "The library has been created successfuly.", color := 66);
+
+endprogram

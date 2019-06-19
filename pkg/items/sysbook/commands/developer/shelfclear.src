@@ -1,0 +1,44 @@
+/////////////////////////////////////////////////////////////////////
+//
+// shelfclear
+//
+// Purpose:
+// This command deletes all books from all bookshelves that are set
+// to spawn books. It does not remove the shelves from the bookshelf
+// spawn database.
+//
+/////////////////////////////////////////////////////////////////////
+
+use uo;
+use os;
+
+include ":sysbook:spawnShelf";
+include ":gumps:yesNoSizable";
+
+program shelfclear(who)
+
+	// The extra spaces in the second string are to make the question the last line of text in the gump.
+	var message :=	"This command deletes all books from all book spawn shelves. " +
+					"It does not remove the shelves from the spawn database.   Do you wish to continue?";
+	var do_it := YesNoSizable(who, message);
+	if(!do_it)
+		return 0;
+	endif
+	var count := 0;
+	var bookshelf_keys := {};
+	var shelfdata := RetrieveOrInitBookshelfDB();
+	var shelf, bookshelf_object;
+	bookshelf_keys := shelfdata.Keys();
+	foreach key in bookshelf_keys
+		shelf := shelfdata.FindElement(key);
+		bookshelf_object := SystemFindObjectBySerial(key);
+		if(bookshelf_object)
+			foreach book in EnumerateItemsInContainer(bookshelf_object)
+				count := count + 1;
+				DestroyItem(book);
+			endforeach
+		endif
+		sleepms(5);
+	endforeach
+	sendsysmessage(who, "Total Books Destroyed: " + count);
+endprogram

@@ -1,0 +1,45 @@
+use uo;
+use os;
+
+include ":bulletinboard:settings";
+
+program BB_Message_Methods()
+
+	return 1;
+endprogram
+
+exported function IsMessageBoardNote( item )
+	item := item;
+
+	return 1;
+endfunction
+
+exported function SetLastActivity( item )
+
+	var bb_settings := BB_GetSettingsCfgElem( "SystemBulletinBoardSettings" ),
+		time_til_deletion := ( CInt( bb_settings.DeleteThreadsOlderThan ) * 86400 );
+
+	return SetObjProperty( item, "LastPostTime", ( ReadGameClock() + time_til_deletion ) );
+endfunction
+
+exported function GetReplies( item )
+	var replies := GetObjProperty( item, "Replies" );
+	if( !replies || replies.errortext )
+		replies := Array;
+	endif
+
+	return replies;
+endfunction
+
+exported function SaveReplies( item, replies )
+
+	return SetObjProperty( item, "Replies", replies );
+endfunction
+
+exported function AddReply( item, reply_item )
+	var replies := GetReplies( item );
+
+	replies.Append( reply_item.serial );
+
+	return SaveReplies( item, replies );
+endfunction

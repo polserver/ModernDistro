@@ -43,7 +43,6 @@ program shelfstock();
 		// Cycle through the data file element by element.
 		foreach key in bookshelf_keys
 			shelf := shelfdata.FindElement(key);
-			max_books := CInt(shelf.GetProp("MaxBooks"));
 			bookshelf_object := SystemFindObjectBySerial(key);
 			// If the object does not exist then remove it from the database.
 			// This condition should never be met because onDestroy should remove the shelf
@@ -58,6 +57,7 @@ program shelfstock();
 				shelfdata.DeleteElement(bookshelf_object.serial);
 				return 0;
 			endif
+			max_books := CInt(shelf.GetProp("MaxBooks"));
 			// Retrieve the current number of sysbooks in the bookshelf.
 			num_books := GetSysBookCount(bookshelf_object);
 			// If less than max_books then restock the bookshelf.

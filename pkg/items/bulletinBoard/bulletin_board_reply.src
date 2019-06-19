@@ -1,0 +1,77 @@
+use uo;
+use os;
+
+program Bulletin_Board_Packethooks()
+  Print( "Installing Bulletin Board Packethook" );
+  return 1;
+endprogram
+
+exported function RequestMessage( mobile, byref packet )
+/*
+	Subcommand 3 - Request Message (Client)
+	BYTE[4] BoardID
+	BYTE[4] MessageID
+*/
+	var bulletin_board := SystemFindObjectBySerial( packet.GetInt32( 4 ) ),
+		message := SystemFindObjectBySerial( packet.GetInt32( 8 ) );
+
+	if( !message || !bulletin_board )
+		return 1;
+	endif
+
+	return run_Script_to_completion( ":bulletinboard:scripts/items/bulletinBoard/use", { 3, mobile, bulletin_board, message } );
+endfunction
+
+exported function RequestMessageSummary( mobile, byref packet )
+/*
+	Subcommand 4 - Request Message Summary (Client)
+	BYTE[4] BoardID
+	BYTE[4] MessageID
+*/
+
+	var bulletin_board := SystemFindObjectBySerial( packet.GetInt32( 4 ) ),
+		message := SystemFindObjectBySerial( packet.GetInt32( 8 ) );
+
+	if( !message || !bulletin_board )
+		return 1;
+	endif
+
+	return run_Script_to_completion( ":bulletinboard:scripts/items/bulletinBoard/use", { 4, mobile, bulletin_board, message } );
+endfunction
+
+exported function PostMessage(mobile, byref packet)
+	var last_post := 0;
+	if( packet.GetInt32( 8 ) )
+		last_post := GetObjProperty( mobile, "#NextBBReply" );
+		if( last_post > ReadGameClock() )
+			SendSysMessage( mobile, "You must wait "+( last_post - ReadGameClock() )+" seconds before replying to another thread.", 0x3, 0x22 );
+			return 1;
+		endif
+	else
+		last_post := GetObjProperty( mobile, "#NextBBPost" );
+		if( last_post > ReadGameClock() )
+			SendSysMessage( mobile, "You must wait "+( last_post - ReadGameClock() )+" seconds before creating a new thread.", 0x3, 0x22 );
+			return 1;
+		endif
+	endif
+
+	return run_Script_to_completion( ":bulletinboard:scripts/items/bulletinBoard/use", { 5, mobile, packet } );
+endfunction
+
+exported function RemoveMessage( mobile, byref packet )
+/*
+	Subcommand 6 - Remove Posted Message (Client)
+	BYTE[4] BoardID
+	BYTE[4] MessageID
+*/
+
+	var bulletin_board := SystemFindObjectBySerial( packet.GetInt32( 4 ) ),
+		message := SystemFindObjectBySerial( packet.GetInt32( 8 ) );
+
+	if( !message || message.container != bulletin_board )
+		return 1;
+	endif
+
+	SendSysMessage( mobile, "Deleting: "+message.desc+" from "+bulletin_board.desc+".", 0x3, 0x42 );
+	DestroyItem( message );
+endfunction

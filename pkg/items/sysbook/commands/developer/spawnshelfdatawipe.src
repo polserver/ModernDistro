@@ -1,3 +1,14 @@
+/////////////////////////////////////////////////////////////////////
+//
+// spawnshelfdatawipe
+//
+// Purpose
+// This will clear the spawnshelf datafile. After using this command,
+// NO bookshelves will spawn books from the Shard Library until you
+// use the newspawnshelf command to add bookshelves to the data file.
+//
+/////////////////////////////////////////////////////////////////////
+
 use uo;
 use os;
 use util;
@@ -8,7 +19,7 @@ include ":sysbook:spawnShelf";
 include ":sysbook:sysBook";
 include ":gumps:yesNoSizable";
 
-program shelfstock(who);
+program spawnshelfdatawipe(who);
 
 	// The extra spaces in the second string are to make the question the last line of text in the gump.
 	var prompt :=	"This will clear the spawnshelf datafile. If you continue, NO bookshelves " +

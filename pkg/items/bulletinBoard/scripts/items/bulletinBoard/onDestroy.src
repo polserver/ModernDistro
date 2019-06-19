@@ -1,0 +1,15 @@
+use uo;
+use os;
+
+program BB_OnDestroy( bulletin_board )
+
+	foreach item in ( EnumerateItemsInContainer( bulletin_board ) )
+		var destroy_item := DestroyItem( item );
+		if( !destroy_item || destroy_item.errortext )
+			PrintTextAbove( bulletin_board, "Error destroying bulletin board: "+destroy_item.errortext, 0x3, 0x22 );
+			return 0;
+		endif
+	endforeach
+
+	return 1;
+endprogram

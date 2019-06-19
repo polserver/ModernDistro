@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    <meta http-equiv="Content-Language" content="en-us">
+    <title>Sysbook Documentation - Sysbook config file settings</title>
+    <link rel="stylesheet" type="text/css" href="docs.css">
+  </head>
+  <body>
+    <div id="container">
+      <div id="header">
+        <h1 style="text-align: center;">Sysbook Documentation</h1>
+        <div style="text-align: center;"> </div>
+        <p style="text-align: center;">For the sysbook package in the Distro, by
+          <a href="mailto:distro@polserver.com">Yukiko</a>.</p>
+        <hr>
+        <h2 style="text-align: center;"><span style="font-weight: bold;">Sysbook
+            config file settings</span><span style="font-weight: bold;"></span></h2>
+      </div>
+      <div id="content"><big><big></big></big>
+        <table style="text-align: left; width: 100%;" cellspacing="2" cellpadding="10"
+          border="3">
+          <caption id="fred">These settings can be found in the settings.cfg
+            file in the config directory in the sysbook package.</caption>
+          <tbody>
+            <tr>
+              <td style="vertical-align: top;"><span style="font-weight: bold;">RestockDelay</span></td>
+              <td style="vertical-align: top;">The time in seconds that the
+                system will wait until the next restock cycle.<br>
+                Default setting is 1800 (30 minutes)</td>
+            </tr>
+            <tr>
+              <td style="vertical-align: top; font-weight: bold;">SpawnOneBook</td>
+              <td style="vertical-align: top;">If set to 1 the bookShelfMonitor
+                programme will only create one book during each cycle. If set to
+                any other value, the bookShelfMonitor programme will fill the
+                shelf to its MaxBooks value.<br>
+                Default setting is 0.</td>
+            </tr>
+            <tr>
+              <td style="vertical-align: top;"><span style="font-weight: bold;">DefaultMaxBooks</span></td>
+              <td style="vertical-align: top;">The default maxmimum number of
+                books a shelf should contain. This can be overridden when using
+                the addbookshelf command.<br>
+                Default setting is 10</td>
+            </tr>
+          </tbody>
+        </table>
+        <big><big><span style="font-weight: bold;"> </span></big></big></div>
+    </div>
+  </body>
+</html>

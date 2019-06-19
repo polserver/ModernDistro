@@ -13,13 +13,15 @@
 use uo;
 use basic;
 
-include ":gumps:old-gumps";
+//include ":gumps:old-gumps";
+include ":gumps:gumps";
 
 
 // Gump constants
 //
 const WINX_MAX := 640;
 const WINY_MAX := 480;
+const BKGND_GOLDTRIM            := 2620;  // Gold-press, black backing
 
 program textcmd_gfchart( who )
 
@@ -45,32 +47,33 @@ program textcmd_gfchart( who )
 
 	var exit_but;
 
-			GFInitGump();
-			GFNoClose();
-			GFNoMove();
+	//GFInitGump();
+	var gump := GFCreateGump( 50,50 );
+//	GFNoClose();
+//	GFNoMove();
 
-			GFResizePic(0, 0, BKGND_GOLDTRIM, WINX_MAX+3, WINY_MAX+4);
-			GFTextMid(0, 6, WINX_MAX, 67, "Gump Color Chart" );
-exit_but :=	GFButtonID(WINX_MAX - 63, 11, 0x849, 0x848, 1); // Cancel  (0x81C, 0x81B = OKAY)
+	GFResizePic(gump, 0, 0, BKGND_GOLDTRIM, WINX_MAX+3, WINY_MAX+4);
+	GFTextMid(gump, 0, 6, WINX_MAX, 67, "Text and Gump Colour Chart" );
+	exit_but :=	GFAddButton(gump, WINX_MAX - 63, 11, 0x849, 0x848, 1); // Cancel  (0x81C, 0x81B = OKAY)
 
-			var i;
-			for( i := 1; i <= 40 ; i := i + 1 )
-				GFTextLine(16, i*11+15, i, "aeiouAEIOU12345 - " + CStr(i) );
-				GFTextLine(206, i*11+15, i+40, "aeiouAEIOU12345 - " + CStr(i+40) );
-				if ( i < 21 )
-					GFTextLine(396, i*11+15, i+80, "aeiouAEIOU12345 - " + CStr(i+80) );
-				endif
-			endfor
+	var i;
+	for( i := 1; i <= 40 ; i := i + 1 )
+		GFTextLine(gump, 16, i*11+15, i, "aeiouAEIOU12345 - " + CStr(i) );
+		GFTextLine(gump, 206, i*11+15, i+40, "aeiouAEIOU12345 - " + CStr(i+40) );
+		if ( i < 21 )
+			GFTextLine(gump, 396, i*11+15, i+80, "aeiouAEIOU12345 - " + CStr(i+80) );
+		endif
+	endfor
 
-			GFTextMid(396, 26*11, 234, 90, "Black is colour '0' only!" );
-			GFTextMid(396, 28*11, 234, 90, "Pure white is '910'." );
-			GFTextMid(396, 31*11, 234, 90, "Colours 1-100 repeat from 101." );
-			GFTextMid(396, 32*11+4, 234, 90, "(Black never repeats!)" );
+	GFTextMid(gump, 396, 26*11, 234, 90, "Black is colour '0' only!" );
+	GFTextMid(gump, 396, 28*11, 234, 90, "Pure white is '910'." );
+	GFTextMid(gump, 396, 31*11, 234, 90, "Colours 1-100 repeat from 101." );
+	GFTextMid(gump, 396, 32*11+4, 234, 90, "(Black never repeats!)" );
 
-			GFTextRight(WINX_MAX - 7, WINY_MAX - 36, 32, "v1.1 - Myrathi" );
-			GFTextRight(WINX_MAX - 7, WINY_MAX - 21, 32, "myrathi@templar.dhs.org" );
+	GFTextRight(gump, WINX_MAX - 7, WINY_MAX - 36, 32, "v1.1 - Myrathi" );
+	GFTextRight(gump, WINX_MAX - 7, WINY_MAX - 21, 32, "myrathi@templar.dhs.org" );
 
-	var retv := GFSendGump( who );
+	var retv := GFSendGump( who, gump );
 	if ( !retv and (retv <> 0) )
 		SendSysMessage( who, "Please close any other user-gumps and try again." );
 		return;

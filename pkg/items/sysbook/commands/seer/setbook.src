@@ -1,6 +1,8 @@
 ////////////////////////////////////////////////////
 //
-// This programme allows you to change a book's
+// setbook
+//
+// This command allows you to change a book's
 // graphic and its read/write status.
 //
 // Bookcase Spawning system  version .3
@@ -40,21 +42,23 @@ var layout := {
 var data := {
   "Book Graphic",
   "Random",
-  "R/W",
-  "Read-Only"
+  " R/W",
+  " Read-Only"
 };
 
-program test(who)
+program setbook(who)
 
+	SendSysMessage(who, "Target the book you wish to modify.", color := 88);
+	SendSysMessage(who, "Press <EsC> to cancel.", color := 88);
 	var book := Target(who, TGTOPT_NOCHECK_LOS);
+
 	if(!book)
-		return;
-	endif
-	if (GetObjProperty(book,"maxpages")==16)
+		SendSysMessage(who, "Cancelled.", color := 33);
 		return;
 	endif
 
   var res := SendDialogGump(who, layout, data);
+
   if(res[0] == 9)
     foreach thing in (res.keys)
       case(thing)

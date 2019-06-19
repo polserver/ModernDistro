@@ -1,0 +1,59 @@
+/////////////////////////////////////////////////////////////////////
+//
+// removespawnshelf
+//
+// Purpose
+// Allows the user to remove a bookshelf from the spawnedbookshelves
+// data file.
+//
+// Parameters
+// who - the user.
+//
+// The user does not enter any parameters.
+//
+/////////////////////////////////////////////////////////////////////
+use uo;
+use datafile;
+
+include ":gumps:requestGump";
+include ":sysbook:settings";
+include ":sysbook:sysBook";
+
+program removespawnshelf(who)
+
+	var bookshelves := OpenDataFile(":sysbook:spawnedbookshelves");
+	if(bookshelves.errortext)
+		bookshelves := CreateDataFile(":sysbook:spawnedbookshelves", DF_KEYTYPE_INTEGER);
+	endif
+
+	var bookshelf := 0;
+	var shelf_to_remove := 0;
+	var doomed_shlf := 0;
+	while(1)
+		repeat
+			SendSysMessage(who, "Please target a bookshelf to remove from the spawn shelf data file:", color := 88);
+			SendSysMessage(who, "(Press <Esc> to cancel)", color := 88);
+			shelf_to_remove := Target(who);
+			if(!shelf_to_remove)
+				SendSysMessage(who, "Cancelled.", color := 33);
+				exit;
+			endif
+			if(!shelf_to_remove.IsBookshelf())
+				SendSysMessage(who, "That is not a bookshelf!", color := 33);
+			endif
+		until(shelf_to_remove.IsBookshelf());
+		doomed_shlf := bookshelves.FindElement(shelf_to_remove.serial);
+		if(!doomed_shlf.errortext)
+			bookshelf := bookshelves.DeleteElement(shelf_to_remove.serial);
+			SendSysMessage(who, "The bookshelf has been removed from the datafile.", color := 66);
+		elseif(doomed_shlf.errortext == "Element not found")
+			SendSysMessage(who, "That bookshelf is not in the spawn shelf data file.", color := 33);
+		else
+			SendSysMessage(who, "There was a problem - " + doomed_shlf.errortext, color := 33);
+		endif
+	endwhile
+
+
+endprogram
+
+

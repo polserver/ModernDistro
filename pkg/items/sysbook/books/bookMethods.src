@@ -1,17 +1,13 @@
 use uo;
 use os;
 
-program BookInterface()
-  return 1;
-endprogram
-
 exported function IsWritable(book)
-  if(GetObjProperty(book, "NoWrite") || (book.movable == 0) || ((book.container).objtype == 0x0a9f))
+  if(GetObjProperty(book, "NoWrite") || ((book.container).objtype == 0x0a9f))
     return 0;
   else
-    if(book.movable == 0)
-      return 0;
-    endif
+//    if(book.movable == 0)
+//      return 0;
+//    endif
     return 1;
   endif
 endfunction
@@ -109,4 +105,8 @@ function Cleans(chain)
 
  return result;
 endfunction
+
+program BookInterface()
+  return 1;
+endprogram
 

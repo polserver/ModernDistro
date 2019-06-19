@@ -1,0 +1,244 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+  
+  <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+
+  
+  <meta http-equiv="Content-Language" content="en-us">
+  <title>Sysbook Documentation</title>
+
+  
+  
+  <link rel="stylesheet" type="text/css" href="docs.css">
+
+</head><body>
+<div id="container">
+<div id="header">
+<h1 style="text-align: center;">Sysbook package Documentation<br>
+</h1>
+<div style="text-align: center;"> </div>
+<p style="text-align: center;">For the sysbook package in the Distro,
+by <a href="mailto:distro@polserver.com">Yukiko</a>.</p>
+<hr>
+<h2>Config Files</h2>
+</div>
+<div id="content">
+<table style="border-collapse: collapse; width: 100%;" id="AutoNumber1" border="0" bordercolor="#111111" cellpadding="2" cellspacing="0">
+  <tbody>
+    <tr>
+      <td bordercolorlight="#000000" bordercolordark="#000000" style="border-style: solid; border-width: 1px;" colspan="2" align="center" bgcolor="#c0c0c0" width="1%"> <br>
+      <b><font face="Tahoma" size="2">files in attributes/config
+directory</font></b><br>
+&nbsp;</td>
+    </tr>
+    <tr>
+      <td bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style: none; border-left-width: medium; border-right-style: none; border-right-width: medium;" colspan="2" align="center" width="1%">&nbsp;</td>
+    </tr>
+    <tr>
+      <td style="border-style: solid; border-width: 1px;" colspan="2" bgcolor="#808080" width="100%"> <b><font face="Tahoma" size="2">attributes.cfg</font></b></td>
+    </tr>
+    <tr>
+      <td style="border-style: solid; border-width: 1px;" colspan="2" bgcolor="#c0c0c0" width="100%"> <font face="Tahoma" size="2">The
+following is a list of keys in the distro attributes.cfg</font></td>
+    </tr>
+    <tr>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-style: solid none solid solid; border-width: 1px medium 1px 1px;" bgcolor="#c0c0c0" width="25%"> <font face="Tahoma" size="2">AttributeType</font></td>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-style: solid solid solid none; border-width: 1px 1px 1px medium;" bgcolor="#c0c0c0" height="17" width="100%"> <font face="Tahoma" size="2">"Stat" or "Skill". Used to retrieve lists of either skill or
+stats.</font></td>
+    </tr>
+    <tr>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-style: solid none solid solid; border-width: 1px medium 1px 1px;" bgcolor="#c0c0c0" width="25%"> <font face="Tahoma" size="2">SkillId</font></td>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-style: solid solid solid none; border-width: 1px 1px 1px medium;" bgcolor="#c0c0c0" height="17" width="100%"> <font face="Tahoma" size="2">Only used by the AP_ functions to convert between attribute
+and skillid</font></td>
+    </tr>
+    <tr>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-style: solid none solid solid; border-width: 1px medium 1px 1px;" bgcolor="#c0c0c0" width="25%"> <font face="Tahoma" size="2">Title</font></td>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-style: solid solid solid none; border-width: 1px 1px 1px medium;" bgcolor="#c0c0c0" height="17" width="100%"> <font face="Tahoma" size="2">Used in titles. See titles.inc</font></td>
+    </tr>
+    <tr>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-style: solid none solid solid; border-width: 1px medium 1px 1px;" bgcolor="#c0c0c0" width="25%"> <font face="Tahoma" size="2">StatCheck</font></td>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-style: solid solid solid none; border-width: 1px 1px 1px medium;" bgcolor="#c0c0c0" height="17" width="100%"> <font face="Tahoma" size="2">Used
+to apply bonus stat advances when using a skill. The statcheck lists
+the attribute, the % chance of applying a stat bonus and the amount of
+the bonus as a die roll.</font></td>
+    </tr>
+    <tr>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-style: solid none solid solid; border-width: 1px medium 1px 1px;" bgcolor="#c0c0c0" width="25%"> <font face="Tahoma" size="2">Script</font></td>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-style: solid solid solid none; border-width: 1px 1px 1px medium;" bgcolor="#c0c0c0" height="17" width="100%"> <font face="Tahoma" size="2">Used by keyboard macros and the skills buttons to figure out
+which script to run for each skill.</font></td>
+    </tr>
+    <tr>
+      <td colspan="2" rowspan="1">&nbsp;</td>
+    </tr>
+    <tr>
+      <td style="border-style: solid; border-width: 1px;" colspan="2" bgcolor="#808080" width="100%"> <b><font face="Tahoma" size="2">settings.cfg</font></b></td>
+    </tr>
+    <tr>
+      <td style="border-style: solid; border-width: 1px;" colspan="2" bgcolor="#c0c0c0" width="100%"> <font face="Tahoma" size="2">These
+are documented in&nbsp;config settings. Settings are pre-set values
+store in cfg files for any package. Their purpose is to allow package
+parameters to change without re-compiling.&nbsp;</font></td>
+    </tr>
+    <tr>
+      <td colspan="2" rowspan="1">&nbsp;</td>
+    </tr>
+    <tr>
+      <td style="border-style: solid; border-width: 1px;" colspan="2" bgcolor="#808080" width="100%"> <b><font face="Tahoma" size="2">titles.cfg</font></b></td>
+    </tr>
+    <tr>
+      <td style="border-style: solid; border-width: 1px;" colspan="2" bgcolor="#c0c0c0" width="100%"> <font face="Tahoma" size="2">This is
+a list of skill level titles. &nbsp;By default they are:</font></td>
+    </tr>
+    <tr>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style: solid; border-left-width: 1px; border-right-style: none; border-right-width: medium; border-bottom-style: none; border-bottom-width: medium;" bgcolor="#c0c0c0" width="25%"> <font face="Tahoma" size="2">Untrained</font></td>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style: none; border-left-width: medium; border-right-style: solid; border-right-width: 1px; border-bottom-style: none; border-bottom-width: medium;" bgcolor="#c0c0c0" height="18" width="100%"> <font face="Tahoma" size="2">10.0</font></td>
+    </tr>
+    <tr>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style: solid; border-left-width: 1px; border-right-style: none; border-right-width: medium; border-bottom-style: none; border-bottom-width: medium;" bgcolor="#c0c0c0" width="25%"> <font face="Tahoma" size="2">Neophyte</font></td>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style: none; border-left-width: medium; border-right-style: solid; border-right-width: 1px; border-bottom-style: none; border-bottom-width: medium;" bgcolor="#c0c0c0" height="18" width="100%"> <font face="Tahoma" size="2">40.0</font></td>
+    </tr>
+    <tr>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style: solid; border-left-width: 1px; border-right-style: none; border-right-width: medium; border-bottom-style: none; border-bottom-width: medium;" bgcolor="#c0c0c0" width="25%"> <font face="Tahoma" size="2">Novice</font></td>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style: none; border-left-width: medium; border-right-style: solid; border-right-width: 1px; border-bottom-style: none; border-bottom-width: medium;" bgcolor="#c0c0c0" height="18" width="100%"> <font face="Tahoma" size="2">50.0</font></td>
+    </tr>
+    <tr>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style: solid; border-left-width: 1px; border-right-style: none; border-right-width: medium; border-bottom-style: none; border-bottom-width: medium;" bgcolor="#c0c0c0" width="25%"> <font face="Tahoma" size="2">Apprentice</font></td>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style: none; border-left-width: medium; border-right-style: solid; border-right-width: 1px; border-bottom-style: none; border-bottom-width: medium;" bgcolor="#c0c0c0" height="18" width="100%"> <font face="Tahoma" size="2">60.0</font></td>
+    </tr>
+    <tr>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style: solid; border-left-width: 1px; border-right-style: none; border-right-width: medium; border-bottom-style: none; border-bottom-width: medium;" bgcolor="#c0c0c0" width="25%"> <font face="Tahoma" size="2">Journeyman</font></td>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style: none; border-left-width: medium; border-right-style: solid; border-right-width: 1px; border-bottom-style: none; border-bottom-width: medium;" bgcolor="#c0c0c0" height="18" width="100%"> <font face="Tahoma" size="2">70.0</font></td>
+    </tr>
+    <tr>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style: solid; border-left-width: 1px; border-right-style: none; border-right-width: medium; border-bottom-style: none; border-bottom-width: medium;" bgcolor="#c0c0c0" width="25%"> <font face="Tahoma" size="2">Expert</font></td>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style: none; border-left-width: medium; border-right-style: solid; border-right-width: 1px; border-bottom-style: none; border-bottom-width: medium;" bgcolor="#c0c0c0" height="18" width="100%"> <font face="Tahoma" size="2">80.0</font></td>
+    </tr>
+    <tr>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style: solid; border-left-width: 1px; border-right-style: none; border-right-width: medium; border-bottom-style: none; border-bottom-width: medium;" bgcolor="#c0c0c0" width="25%"> <font face="Tahoma" size="2">Adept</font></td>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style: none; border-left-width: medium; border-right-style: solid; border-right-width: 1px; border-bottom-style: none; border-bottom-width: medium;" bgcolor="#c0c0c0" height="18" width="100%"> <font face="Tahoma" size="2">00.0</font></td>
+    </tr>
+    <tr>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style: solid; border-left-width: 1px; border-right-style: none; border-right-width: medium; border-bottom-style: none; border-bottom-width: medium;" bgcolor="#c0c0c0" width="25%"> <font face="Tahoma" size="2">Master</font></td>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style: none; border-left-width: medium; border-right-style: solid; border-right-width: 1px; border-bottom-style: none; border-bottom-width: medium;" bgcolor="#c0c0c0" height="18" width="100%"> <font face="Tahoma" size="2">100.0</font></td>
+    </tr>
+    <tr>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="width: 25%; border-left-style: solid; border-left-width: 1px; border-right-style: none; border-right-width: medium; border-bottom-style: solid; border-bottom-width: 1px; background-color: rgb(192, 192, 192);">
+      <font face="Tahoma" size="2">GrandMaster</font></td>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="width: 100%; height: 18px; border-left-style: none; border-left-width: medium; border-right-style: solid; border-right-width: 1px; border-bottom-style: solid; border-bottom-width: 1px; background-color: rgb(192, 192, 192);">
+      <font face="Tahoma" size="2">130.0</font></td>
+    </tr>
+    <tr>
+      <td colspan="2" width="1%">&nbsp; &nbsp;</td>
+    </tr>
+    <tr>
+      <td style="border-style: solid; border-width: 1px;" colspan="2" bgcolor="#808080" width="100%"> <b><font face="Tahoma" size="2">uoclient.cfg</font></b></td>
+    </tr>
+    <tr>
+      <td style="border-style: solid; border-width: 1px;" colspan="2" bgcolor="#c0c0c0" width="100%"> <font face="Tahoma" size="2">The
+distro uses a standard pol uoclient.cfg file with the following
+definitions in the "General" section</font></td>
+    </tr>
+    <tr>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="width: 25%; border-left-style: solid; border-left-width: 1px; border-right-style: none; border-right-width: medium; border-bottom-style: solid; border-bottom-width: 1px; background-color: rgb(192, 192, 192);">
+      <font face="Tahoma" size="2">Strength<br>
+Intelligence<br>
+Dexterity<br>
+      <br>
+Hits<br>
+Mana<br>
+Stamina<br>
+      <br>
+MaxSkillID</font></td>
+      <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" style="width: 100%; height: 18px; border-left-style: none; border-left-width: medium; border-right-style: solid; border-right-width: 1px; border-bottom-style: solid; border-bottom-width: 1px; background-color: rgb(192, 192, 192);">
+      <font face="Tahoma" size="2">Strength<br>
+Intelligence<br>
+Dexterity<br>
+      <br>
+Hits<br>
+Mana<br>
+Stamina<br>
+      <br>
+51<br>
+      </font></td>
+    </tr>
+    <tr>
+      <td colspan="2" rowspan="1">&nbsp;</td>
+    </tr>
+    <tr>
+      <td style="border-style: solid; border-width: 1px;" colspan="2" bgcolor="#808080" width="100%"> <b><font face="Tahoma" size="2">uoskills.cfg</font></b></td>
+    </tr>
+    <tr>
+      <td style="border-style: solid; border-width: 1px;" colspan="2" bgcolor="#c0c0c0" width="100%"> <font face="Tahoma" size="2">The
+distro uses a standard pol uoskills.cfg file with each skill mapped to
+the attribute entry found in attributes.cfg. Note there is no
+skills.cfg required or used by the distro.<br>
+Eg: <br>
+Skill 0<br>
+{<br>
+Attribute Alchemy<br>
+}</font></td>
+    </tr>
+    <tr>
+      <td colspan="2" rowspan="1">&nbsp;</td>
+    </tr>
+    <tr>
+      <td style="border-style: solid; border-width: 1px;" colspan="2" bgcolor="#808080" width="100%"> <b><font face="Tahoma" size="2">vitals.cfg</font></b></td>
+    </tr>
+    <tr>
+      <td style="border-style: solid; border-width: 1px;" colspan="2" bgcolor="#c0c0c0" width="100%"> <font face="Tahoma" size="2">The
+distro uses the vitals.cfg file in the normal way - ie it points to the
+functions that regenerate and get maximum values for the vitals. The
+file is:</font></td>
+    </tr>
+    <tr>
+      <td style="border-style: solid; border-width: 1px;" colspan="2" bgcolor="#c0c0c0" width="100%"> <font face="Tahoma" size="2">Vital
+Hits<br>
+{<br>
+Alias&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Life<br>
+RegenRateFunction&nbsp;&nbsp;
+&nbsp;:attributes:hooks/vitalInit:GetHitsRegenRate<br>
+MaximumFunction&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;:attributes:hooks/vitalInit:GetHitsMaximumValue<br>
+}<br>
+      <br>
+Vital Mana<br>
+{<br>
+RegenRateFunction&nbsp;&nbsp;
+&nbsp;:attributes:hooks/vitalInit:GetManaRegenRate<br>
+MaximumFunction&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;:attributes:hooks/vitalInit:GetManaMaximumValue<br>
+}<br>
+      <br>
+Vital Stamina<br>
+{<br>
+RegenRateFunction&nbsp;&nbsp;
+&nbsp;:attributes:hooks/vitalInit:GetStaminaRegenRate<br>
+MaximumFunction&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;:attributes:hooks/vitalInit:GetStaminaMaximumValue<br>
+}<br>
+      <br>
+Vital Hunger<br>
+{<br>
+// Note: This vital is not linked to any attributes.<br>
+RegenRateFunction&nbsp;&nbsp;
+&nbsp;:attributes:hooks/vitalInit:GetHungerRegenRate<br>
+MaximumFunction&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;:attributes:hooks/vitalInit:GetHungerMaximumValue<br>
+      <br>
+RegenWhileDead&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;1<br>
+}<br>
+      </font></td>
+    </tr>
+    <tr>
+      <td colspan="2" rowspan="1">&nbsp;</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div id="footer">
+<p>Last Update: $Id: configfiles.html&nbsp;2007-10-06 20:18 oldngrey $</p>
+</div>
+</div>
+
+</body></html>
