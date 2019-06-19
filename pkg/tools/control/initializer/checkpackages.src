@@ -1,30 +1,29 @@
-/* $Id$
- *
- */
+/*
+        Maintened by *Edwards
+
+        2009-10-25
+*/
 use uo;
 use os;
 use polsys;
 use cfgfile;
 
-include ":control:report";
+include ":security:report";
 include ":datafile:datafile";
 include "include/string";
 
 // Run 255 lines before going to the next script.
 // Its as close as it gets to critical without the console whining about it.
 Set_Priority(255);
-Set_Script_Option(SCRIPTOPT_NO_RUNAWAY, 1);
+Set_Script_Option( SCRIPTOPT_NO_RUNAWAY, 1 );
 
 program CheckPackages()
-	ICP_ReportText("---=[ ICP SETUP HAS STARTED UP ]=---", ICP_REPORT_SYSLOG);
 
-	var pkg_info := DFOpenDataFile(":control:packages", DF_CREATE);
-	var pkg_gumps := DFOpenDataFile(":control:gumps", DF_CREATE);
+	var pkg_info := DFOpenDataFile( ":control:packages", DF_CREATE );
+	var pkg_gumps := DFOpenDataFile( ":control:gumps", DF_CREATE );
 
-	// This foreach loop is here until DeleteDataFile() in datafile.em works.
-	// Its purpose is to wipe the datafile so its updated for the new package settings.
-	DFPurgeFile(pkg_info);
-	pkg_gumps.DeleteElement("index");
+	DFPurgeFile( pkg_info );
+	pkg_gumps.DeleteElement( "index" );
 
 	DF_DEBUG_MODE := 0;
 
@@ -39,23 +38,23 @@ program CheckPackages()
 		var temp_info := struct;
 
 		var pkg_name := package;
-		if ( !pkg_name )
+		if( !pkg_name )
 			pkg_name := "::config (main configs)";
 		endif
 
-		var data_elem := DFFindElement(pkg_info, pkg_name, DF_CREATE);
-		data_elem.SetProp("TextCommands", cmd_list[package]);
+		var data_elem := DFFindElement( pkg_info, pkg_name, DF_CREATE );
+		data_elem.SetProp( "TextCommands", cmd_list[package] );
 
 		var icp_cfg := ReadConfigFile(":"+package+":icp");
 		icp_cfg := icp_cfg["Register"];
 
 		if ( icp_cfg )
-			temp_info.+Name := GetCfgValue(icp_cfg, "Name");
-			temp_info.+Version := CDbl(GetCfgValue(icp_cfg, "Version"));
-			temp_info.+Creator := GetCfgValue(icp_cfg, "Creator");
-			temp_info.+C_Email := GetCfgValue(icp_cfg, "C_Email");
-			temp_info.+Maintainer := GetCfgValue(icp_cfg, "Maintainer");
-			temp_info.+M_Email := GetCfgValue(icp_cfg, "M_Email");
+			temp_info.+Name := GetCfgValue( icp_cfg, "Name");
+			temp_info.+Version := CDbl( GetCfgValue(icp_cfg, "Version"));
+			temp_info.+Creator := GetCfgValue( icp_cfg, "Creator");
+			temp_info.+C_Email := GetCfgValue( icp_cfg, "C_Email");
+			temp_info.+Maintainer := GetCfgValue( icp_cfg, "Maintainer");
+			temp_info.+M_Email := GetCfgValue( icp_cfg, "M_Email");
 
 			var description := "";
 			foreach line in  GetConfigStringArray(icp_cfg, "Description")
@@ -70,7 +69,7 @@ program CheckPackages()
 			data_elem.SetProp("Main", temp_info);
 			data_elem.SetProp("Scripts", script_list);
 		else
-			ICP_ReportText("Warning: Package ["+pkg_name+"] has no ICP support!", ICP_REPORT_SYSLOG);
+			ReportText("Warning: Package ["+pkg_name+"] has no ICP support!", REPORT_SYSLOG);
 			temp_info.+Name := pkg_name;
 			temp_info.+NoSupport := 1;
 			if ( package == "" )
@@ -81,8 +80,6 @@ program CheckPackages()
 
 		UnloadConfigFile(":"+package+":icp");
 	endforeach
-
-	ICP_ReportText("ICP setup has completed.", ICP_REPORT_SYSLOG);
 
 	return 1;
 endprogram

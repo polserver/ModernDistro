@@ -1,0 +1,78 @@
+/*
+		bookShelfMonitor.src for sysbooks package.
+
+		This programme will cycle through the
+		spawnedbookshelves data file and restock
+		each shelf as needed based upon the MaxBooks
+		property stored in the data file for that shelf.
+		It sleeps RestockDelay seconds between each restock
+		cycle.
+
+        Maintained by The POL Distro Team
+
+        2018-07-25
+*/
+use uo;
+use os;
+use util;
+use file;
+use datafile;
+use cfgfile;
+
+include ":sysbook:sysBook";
+include ":sysbook:spawnShelf";
+include ":sysbook:settings";
+
+var sysbook_settings := SB_GetSettingsCfgElem( "Settings" );
+var RestockDelay := sysbook_settings.RestockDelay;
+var DefaultMaxBooks := sysbook_settings.DefaultMaxBooks;
+var SpawnOneBook := sysbook_settings.SpawnOneBook;
+
+program shelfstock();
+
+	var bookshelf_keys := {};
+	var shelfdata := RetrieveOrInitBookshelfDB();
+	var shelf, bookshelf_object;
+	var max_books := 0;
+	var num_books := 0;
+	var num_to_add := 0;
+
+	Sleep(60);
+	while(1)
+		bookshelf_keys := shelfdata.Keys();
+		// Cycle through the data file element by element.
+		foreach key in bookshelf_keys
+			shelf := shelfdata.FindElement(key);
+			bookshelf_object := SystemFindObjectBySerial(key);
+			// If the object does not exist then remove it from the database.
+			// This condition should never be met because onDestroy should remove the shelf
+			// but just in case there is some malfunction, I put this in here anyway.
+			if(!bookshelf_object)
+				shelfdata.DeleteElement(bookshelf_object.serial);
+				return 0;
+			// Though not likely to happen, if somehow there is an object in the database
+			// that is not a bookshelf, this condition will be triggered and remove it from
+			// the database.
+			elseif(!bookshelf_object.IsBookshelf())
+				shelfdata.DeleteElement(bookshelf_object.serial);
+				return 0;
+			endif
+			max_books := CInt(shelf.GetProp("MaxBooks"));
+			// Retrieve the current number of sysbooks in the bookshelf.
+			num_books := GetSysBookCount(bookshelf_object);
+			// If less than max_books then restock the bookshelf.
+			if(num_books < max_books)
+				if(SpawnOneBook == 1)
+					num_to_add := 1;
+				else
+					num_to_add := max_books - num_books;
+				endif
+				RestockTheShelf(bookshelf_object, num_to_add);
+			endif
+			Sleepms(50);
+		endforeach
+		Sleep(RestockDelay);
+	endwhile
+
+endprogram
+

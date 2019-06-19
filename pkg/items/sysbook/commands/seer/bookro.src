@@ -1,0 +1,23 @@
+use uo;
+use os;
+
+/////////////////////////////////////////////////////
+// bookro
+//
+// This command makes a book read only.
+//
+/////////////////////////////////////////////////////
+
+program bookro(who)
+
+	while(1)
+		SendSysMessage(who, "Target the book you wish to make read-only:", color := 88);
+		SendSysMessage(who, "Press <ESC> to cancel.", color := 88);
+		var trg := Target(who, TGTOPT_NOCHECK_LOS);
+		if(!trg)
+			SendSysMessage(who, "Canceled");
+			return;
+		endif
+		SetObjProperty(trg, "NoWrite", 1);
+	endwhile
+endprogram

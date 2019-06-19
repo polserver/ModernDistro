@@ -1,0 +1,64 @@
+/*
+        Maintened by *Edwards
+        
+        2009-10-25
+*/
+use uo;
+use os;
+
+include ":control:internal/icp-commands";
+include ":control:internal/icp-generalinfo";
+include ":control:internal/icp-gumps";
+include ":control:internal/icp-index";
+include ":control:internal/icp-itemdesc";
+include ":control:internal/icp-npcdesc";
+include ":control:internal/icp-pkgpanel";
+include ":control:internal/icp-scripts";
+include ":control:internal/icp-util";
+include ":datafile:datafile";
+include ":gumps:gumpprompt";
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+include ":gumps:yesno";
+include "include/security";
+
+// Arbitrary button return (id) values.
+CONST START_ID		:= 0xA00000; // Anything above this value is a button.
+CONST BACK_BTN		:= 0xA00002;
+CONST UNCACHE_BTN	:= 0xA00003;
+CONST GENERAL_BTN	:= 0xA00004;
+CONST SCRIPTS_BTN	:= 0xA00005;
+CONST COMMANDS_BTN	:= 0xA00006;
+CONST ITEMDESC_BTN	:= 0xA00007;
+CONST NPCDESC_BTN	:= 0xA00008;
+
+// Easier to use the datafile as a global.
+var pkg_info := DFOpenDataFile(":control:packages", DF_CREATE);
+var pkg_gumps := DFOpenDataFile(":control:gumps", DF_CREATE);
+
+program textcmd_ICPSystem( who, pkg_name )
+
+        if( !AuthorizationCode( who ))
+                SendSysMessage( who, "Cancelled." );
+                return 0;
+        endif
+        
+	while( who.connected )
+		if( pkg_name )
+			var input := ICP_PackagePanels( who, pkg_name );
+			if( !input )
+				break;
+			endif
+		endif
+
+		//Show a list of all packages
+		pkg_name := ICP_PackageIndex( who );
+		if( !pkg_name )
+			break;
+		endif
+	endwhile
+ 
+	SendSysMessage( who, "Done." );
+
+	return 1;
+endprogram

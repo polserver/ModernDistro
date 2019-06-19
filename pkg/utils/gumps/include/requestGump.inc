@@ -66,9 +66,9 @@ function RequestGump(mobile, question, option := "", pre_val := "", cancel_btn:=
 	GFResizePic(r_gump, 20, 100, GFGetCfgConst("BackGrounds", "GOLDTRIM"), 360, 30);
 	var r_txt;
 	if ( !txt_lmt )
-    r_txt := GFTextEntry(r_gump, 30, 105, 335, 25, 1153, pre_val);
+		r_txt := GFTextEntry(r_gump, 30, 105, 335, 25, 1153, pre_val);
 	else
-    r_txt := GFTextEntry(r_gump, 30, 105, 335, 25, 1153, pre_val, 0, txt_lmt);
+		r_txt := GFTextEntry(r_gump, 30, 105, 335, 25, 1153, pre_val, 0, txt_lmt);
   endif
 
 	if ( cancel_btn )

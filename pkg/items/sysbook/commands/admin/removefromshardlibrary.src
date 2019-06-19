@@ -1,0 +1,73 @@
+/////////////////////////////////////////////////////////////////////
+//
+// removefromshardlibrary
+//
+// Purpose
+// This command will remove a book from the Shard Library
+// but the book will still be in the Master Library and can be
+// added back to the Shard Library using the addtolibrary command.
+//
+/////////////////////////////////////////////////////////////////////
+
+use uo;
+use file;
+use cfgfile;
+use datafile;
+
+include ":sysbook:sysBook";
+include ":gumps:gumps";
+
+program removefromshardlibrary(who)
+
+	var book_titles := array;		// Array of titles to send to the gump.
+	var selected_books := array;	// Array of books selected to be entered into the data file.
+	var the_book := 0;				// Config file book objref.
+	var book_title := "";			// String to hold the book title from the books.cfg file.
+	var shard_library := RetrieveOrInitShardLibrary();
+
+	if(shard_library.errortext)
+		LogToFile("::log/sysbook.log", "[removefromlibrary.ecl]: Datastore file error: " + shard_library.errortext, LOG_DATETIME);
+		Print("Sysbook error - check sysbook.log");
+		return 0;
+	endif
+	var book_keys := shard_library.keys();
+	if(!book_keys.Size())
+		SendSysMessage(who, "There  are no books in the Shard Library to remove.", color := 53);
+		return 0;
+	endif
+
+	// Build the list of titles for the selection gump.
+	foreach key in book_keys
+		the_book := shard_library.FindElement(key);
+		book_title := the_book.GetProp("title");
+		book_titles.Append(book_title);
+	endforeach
+
+	book_titles.Sort();
+	selected_books := SelectionGump(who, "List of " + CStr(book_keys.size()) + " books in the library:", book_titles, BTN_TYPE_CHECKBOX);
+
+	if(selected_books.errortext == "No option was selected.")
+		SendSysMessage(who, "No books were selected.", color := 33);
+		return 0;
+	endif
+
+	// One by one we go through the books selected for the library.
+	foreach selected_title in selected_books
+		// Cycle through the config file, books.cfg, the master file of books.
+		foreach key in book_keys
+			key := CInt(key);
+			the_book := shard_library.FindElement(key);
+			// Get the title of the current book in the master file.
+			book_title := the_book.GetProp("title");
+			// If the title of the current book in the master file matches the current
+			// selected book title...
+			if(book_title == selected_title)
+				shard_library.DeleteElement(key);
+			endif
+			Sleepms(5);
+		endforeach	// ...key in book_keys
+		Sleepms(5);
+	endforeach		// ...selected_title in selected_books
+	SendSysMessage(who, "Finished deleting the selected books from the Shard Library.", color := 66);
+
+endprogram

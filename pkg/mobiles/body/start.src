@@ -1,0 +1,26 @@
+use os;
+
+program init_body_types()
+	InitializeBodyTable_DF();
+	InitializeShrink_DF();
+
+	return 1;
+endprogram
+
+function InitializeBodyTable_DF()
+	var script := Start_Script( ":body:scripts/initialize/initializeBodyTable" );
+	if ( script.errortext )
+		SysLog(script.errortext);
+	else
+		Print( "Starting body type setup...OK." );
+	endif
+endfunction
+
+function InitializeShrink_DF()
+	var script := Start_Script( ":body:scripts/initialize/initializeShrink" );
+	if ( script.errortext )
+		SysLog(script.errortext);
+	else
+		Print( "Starting shrink datafile setup...OK." );
+	endif
+endfunction

@@ -1,0 +1,33 @@
+use uo;
+use os;
+
+program Animate_Large_Forge_Items( mobile, forge )
+	var items := GetObjProperty( forge, "OtherItems" ),
+		i := 1,
+		j := 1,
+		delay := 800,
+		forge_part := 0;
+
+	if( !items || items.errortext )
+		SendSysMessage( mobile, "This forge appears to be broken, please page a gm.", 0x3, 0x22 );
+		return 0;
+	endif
+
+	for( i:=1; i<=8; i:=i+1 )
+		if( CInt( i % 2 ) == 1 )
+			delay := 800;
+		else
+			delay := 500;
+		endif
+
+		SleepMS( delay );
+		for( j:=1; j<=items.Size(); j:=j+1 )
+			SleepMS( 5 );
+			forge_part := SystemFindObjectBySerial( items[j] );
+			forge_part.Animate();
+		endfor
+	endfor
+
+	SendSysMessage( mobile, "The forge appears to be extremely hot.", 0x3, 0x42 );
+	return 1;
+endprogram

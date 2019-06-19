@@ -1,0 +1,32 @@
+use uo;
+use os;
+
+include ":body:body";
+include ":body:shrink";
+
+program bodytype_textcmd( mobile )
+	var shrink := 0,
+		mob_type := "",
+		targ := Target( mobile );
+	
+	if( !targ )
+		SendSysMessage( mobile, "Canceled.", 0x3, 0x22 );
+		return 0;
+	endif
+
+	shrink := SHRINK_GetObjtype( targ.graphic );
+	if( IsMonster( targ.graphic ) )
+		mob_type := "Monster";
+	elseif( IsAnimal( targ.graphic ) )
+		mob_type := "Animal";
+	elseif( IsSea( targ.graphic ) )
+		mob_type := "Sea";
+	elseif( IsEquipment( targ.graphic ) )
+		mob_type := "Equipment";
+	elseif( IsHuman( targ.graphic ) )
+		mob_type := "Human";
+	endif
+
+	SendSysMessage( mobile, "This appears to be a "+mob_type+" creature with graphic of "+targ.graphic+" and shrink graphic: "+shrink+".", 0x3, 0x42 );
+	return 1;
+endprogram

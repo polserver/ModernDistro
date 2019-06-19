@@ -1,0 +1,186 @@
+/*
+        Maintened by *Edwards
+        
+        2008-12-14
+        
+        Last Modifications 2008-12-14
+             * Added an if statement for close option
+*/
+use uo;
+use os;
+use polsys;
+
+include ":control:internal/cmdbar";
+include ":control:internal/icp-util";
+include ":datafile:datafile";
+include ":gumps:gumpprompt";
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+
+program textcmd_CommandBar( mobile )
+
+	if( GetProcess( CInt( GetObjProperty( mobile, "#CmdBarPid" ))))
+		return 0;
+	else
+		SetObjProperty( mobile, "#CmdBarPid", GetPid() );
+	endif
+
+	var data_file := DFOpenDataFile( ":control:cmdbar", DF_CREATE ),
+	    main_elem := DFFindElement( data_file, "CmdBarMain", DF_CREATE ),
+	    commands := main_elem.GetProp( "Commands" );
+
+	var cur_menu := EXPAND_BTN,
+	    cur_pkg, cur_lvl, gump,
+	    cur_pkg_elem;
+ 
+	while( mobile.connected && GetObjProperty( mobile, "#CmdBarPid" ))
+                if( cur_menu == CLOSE_BTN )
+                        EraseObjProperty( mobile, "#CmdBarPid" );
+                        return 1;
+		elseif( cur_menu == EXPAND_BTN )
+			gump := RetrieveGump( main_elem, "Expanded", mobile );
+		elseif( cur_menu == COLLAPSE_BTN )
+			gump := RetrieveGump( main_elem, "Collapsed", mobile );
+		elseif( cur_menu == CMDLIST_BTN )
+			gump := RetrieveGump( main_elem, "CmdLvl-"+mobile.cmdlevel+"PkgList", mobile );
+		elseif( cur_menu == CMDLVLS_BTN )
+			gump := gump := RetrieveGump( main_elem, "Levels", mobile );
+		elseif( cur_menu == SETTINGS_BTN )
+			gump := SettingsMenu( mobile );
+		elseif( cur_menu == PKG_START )
+			gump := RetrieveGump( cur_pkg_elem, "Levels", mobile );
+		elseif( cur_menu == LVL_START )
+			gump := RetrieveGump( cur_pkg_elem, cur_lvl+"-Commands", mobile );
+		endif
+
+		if( !ICP_LoadUserSetting( mobile, "Movable" ))
+			GFMovable( gump, 0 );
+		endif
+
+		var input := GFSendGump( mobile, gump );
+		if( !input[0] )
+			// Right click was made
+			break;
+		elseif( input[COLLAPSE_BTN] )
+			cur_menu := COLLAPSE_BTN;
+		elseif( input[EXPAND_BTN] )
+			cur_menu := EXPAND_BTN;
+		elseif( input[CMDLIST_BTN] )
+			if( cur_menu == CMDLIST_BTN || cur_pkg )
+				cur_menu := EXPAND_BTN;
+				cur_pkg := 0; cur_lvl := 0;
+			else
+				cur_menu := CMDLIST_BTN;
+			endif
+		elseif( input[REFRESH_BTN] )
+			var script := Start_Script( ":control:initializer/cmdbarmenus" );
+			while( script.pid )
+				SleepMS(100);
+			endwhile
+		elseif( input[CMDLVLS_BTN] )
+			if( cur_menu == CMDLVLS_BTN )
+				cur_menu := EXPAND_BTN;
+			else
+				cur_menu := CMDLVLS_BTN;
+			endif
+		elseif( input[SETTINGS_BTN] )
+			if ( cur_menu == SETTINGS_BTN )
+				cur_menu := EXPAND_BTN;
+			else
+				cur_menu := SETTINGS_BTN;
+			endif
+		elseif( input[APPLY_BTN] )
+			ICP_SaveUserSetting( mobile, "Movable", input[MOVABLE_CHK] );
+			ICP_SaveUserSetting( mobile, "Transparent", input[TRANSPARENT_CHK] );
+			ICP_SaveUserSetting( mobile, "NoCmdBarLogin", (input[LOGIN_CHK] == error ));
+			GumpPrompt( mobile, "Settings updated." );
+		elseif( input[0] >= CMD_START )
+			var command := commands[cur_pkg][cur_lvl][input[0]-CMD_START];
+			var result := StartCommand( mobile, cur_pkg, cur_lvl, command );
+			// Collapse the menus if the command worked
+			if( result )
+				cur_menu := EXPAND_BTN;
+				cur_pkg := 0;
+				cur_lvl := 0;
+			endif
+		elseif( input[0] >= LVL_START )
+			var temp := commands[cur_pkg].Keys();
+			cur_lvl := temp[input[0]-LVL_START];
+			cur_menu := LVL_START;
+		elseif( input[0] >= PKG_START )
+			var temp := commands.Keys();
+			cur_pkg := temp[input[0]-PKG_START];
+			cur_pkg_elem := DFFindElement( data_file, "CmdLvl-"+mobile.cmdlevel+cur_pkg );
+			cur_menu := PKG_START;
+		else
+			// This gets hit when the user right clicks the gump
+			// and check boxes were present (and checked)
+			break;
+		endif
+
+		SleepMS(2);
+	endwhile
+
+	return 1;
+endprogram
+
+function SettingsMenu( mobile )
+
+	var transparency := ICP_LoadUserSetting( mobile, "Transparent" );
+	var gump := ICP_ExpandedMenuBar( transparency );
+ 
+	GFResizePic( gump, 470, 30, GFGetCfgConst( "BackGrounds", "STONESLAB" ), 170, 150 );
+	if( transparency )
+		GFAddAlphaRegion( gump, 470, 30, 170, 150 );
+	endif
+
+	GFCheckBox( gump, 485, 42, 210, 211, ICP_LoadUserSetting( mobile, "Movable" ), MOVABLE_CHK );
+	GFTextLine( gump, 510, 42, 2100, "Movable");
+
+	GFCheckBox( gump, 485, 62, 210, 211, ICP_LoadUserSetting( mobile, "Transparent" ), TRANSPARENT_CHK );
+	GFTextLine( gump, 510, 62, 2100, "Transparent");
+
+	GFCheckBox( gump, 485, 82, 210, 211, ( !ICP_LoadUserSetting( mobile, "NoCmdBarLogin" )), LOGIN_CHK );
+	GFTextLine( gump, 510, 82, 2100, "Open on login");
+
+	if( mobile.cmdlevel >= 3 )
+		GFAddButton( gump, 485, 118, 2117, 2118, GF_CLOSE_BTN, REFRESH_BTN );
+		GFTextLine( gump, 510, 115, 2100, "Uncache Gumps" );
+	endif
+
+	GFAddButton( gump, 530, 145, 0x84C, 0x84B, GF_CLOSE_BTN, APPLY_BTN );
+
+	return gump;
+endfunction
+
+function StartCommand( mobile, cur_pkg, cur_lvl, command )
+
+	if( cur_lvl > mobile.cmdlevel )
+		GumpPrompt( mobile, "Your command level is not high enough." );
+		return 0;
+	endif
+
+	var path := ICP_FormatScriptPath( command, cur_pkg );
+	var script := Start_Script( path, mobile );
+
+	if( script.errortext )
+		GumpPrompt( mobile, "Failed to start "+path+" [P] "+script.errortext );
+		return 0;
+	else
+		return 1;
+	endif
+endfunction
+
+function RetrieveGump( data_elem, gump_name, mobile:=0 )
+
+	var transparent := 0;
+	if( mobile )
+		transparent := ICP_LoadUserSetting( mobile, "Transparent" );
+
+		if( transparent )
+			gump_name := gump_name+"Trans";
+		endif
+	endif
+
+	return data_elem.GetProp( gump_name );
+endfunction

@@ -1,0 +1,39 @@
+use uo;
+use os;
+use cfgfile;
+use datafile;
+
+include ":body:body";
+
+program generate_body_types_df()
+
+	Set_Script_Option( SCRIPTOPT_NO_RUNAWAY, 1 );
+	Set_Priority( 255 );
+
+	var data_elem := BODY_GetDatafileElem( "Categories" );
+
+	// Clear out old cache
+	foreach prop_name in ( data_elem.PropNames() )
+		data_elem.EraseProp( prop_name );
+	endforeach
+
+	var cfg_file := BODY_GetCfgFile();
+	foreach elem_name in ( GetConfigIntKeys( cfg_file ))
+		var cfg_elem := cfg_file[elem_name];
+		var type_name := Lower( cfg_elem.Type );
+		if( !type_name )
+			type_name := "unknown";
+		endif
+
+		var type_list := data_elem.GetProp( type_name );
+		if( !type_list )
+			type_list := array;
+		endif
+
+		type_list.Append( elem_name );
+
+		data_elem.SetProp( type_name, type_list );
+	endforeach
+
+	return 1;
+endprogram

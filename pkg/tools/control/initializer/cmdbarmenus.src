@@ -1,7 +1,3 @@
-/* $Id$
- *
- */
-
 use uo;
 use os;
 use polsys;
@@ -9,7 +5,7 @@ use polsys;
 include ":control:internal/cmdbar";
 include ":control:internal/icp-util";
 include ":datafile:datafile";
-include ":gumps:gumpPrompt";
+include ":gumps:gumpprompt";
 include ":gumps:gumps";
 include ":gumps:gumps_ex";
 include "include/arrays";
@@ -22,6 +18,7 @@ include "include/arrays";
 unload_scripts("");
 
 program CmdBarMenus()
+
 	// Run 255 lines before going to the next script.
 	// Its as close as it gets to critical without the console whining about it.
 	Set_Priority(255);
@@ -121,6 +118,7 @@ endfunction
 
 function CollapsedMenuBar(transparency:=0)
 	var gump := GFCreateGump();
+        GFClosable(gump, 0);
 	GFResizePic(gump, 0, 0, GFGetCfgConst("BackGrounds", "STONESLAB"), 30, 30);
 	if ( transparency )
 		GFAddAlphaRegion(gump, 0, 0, 30, 30);
@@ -161,7 +159,7 @@ function PkgListMenu(transparency:=0, byref commands, byref max_level)
 			if ( package.name == "" )
 				package.name := "Non-Packaged";
 			endif
-			GFTextLine(gump, 50, y_pos, 2100, package.name);
+			GFTextLine(gump, 53, y_pos, 2100, package.name);
 			GFAddButton(gump, 165, y_pos+3, 5224, 5224, GF_CLOSE_BTN, PKG_START+package.id);
 			y_pos += 20;
 		endforeach
@@ -263,7 +261,7 @@ function CommandLevelInfoMenu(transparency:=0)
 	var i;
 	var y_pos := 35;
 	for ( i:=0; i<num_levels; i+=1 )
-		GFTextLine(gump, 155, y_pos, 2100, i+" - "+GetCmdLevelName(i));
+		GFTextLine(gump, 170, y_pos, 2100, i+" - "+GetCmdLevelName(i));
 		y_pos += 20;
 	endfor
 

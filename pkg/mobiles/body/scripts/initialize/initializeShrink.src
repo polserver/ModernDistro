@@ -1,0 +1,37 @@
+use uo;
+use os;
+use cfgfile;
+use datafile;
+
+include ":body:shrink";
+
+program generate_body_types_df()
+	var shrink_list := Dictionary,
+		data_elem := SHRINK_GetDatafileElem( "Categories" );
+
+	// Clear out old cache
+	foreach prop_name in ( data_elem.PropNames() )
+		data_elem.EraseProp( prop_name );
+	endforeach
+
+	var cfg_file := SHRINK_GetCfgFile();
+	foreach elem_name in ( GetConfigIntKeys( cfg_file ) )
+		SleepMS( 5 );
+		var cfg_elem := FindConfigElem( cfg_file, elem_name );
+		if( cfg_elem.errortext )
+			Print( "cfg_elem error -> "+cfg_elem.errortext );
+		endif
+
+		var objtype := GetConfigInt( cfg_elem, "Objtype" );
+		if( objtype.errortext )
+			Print( "objtype error -> "+objtype.errortext );
+		endif		
+
+		shrink_list.Insert( CStr( elem_name ), objtype );
+	endforeach
+
+	data_elem.SetProp( "ShrinkList", shrink_list );
+	Print( "Done generating Shrink List...." );
+	return 1;
+endprogram
+

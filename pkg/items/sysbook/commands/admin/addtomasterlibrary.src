@@ -1,0 +1,143 @@
+////////////////////////////////////////////////////////////////////
+//
+// addtomasterlibrary
+//
+// Used to add a new book to the Master Library
+// (sysbook:master_library.cfg).
+// After entering the command the user is promted to target a book.
+// The book is checked to be sure it has content and if so, the
+// contents are reformatted to match the books config file
+// format. Then the book info is appended to the end of the
+// Master Library (:sysbook:master_library.cfg).
+// When the user is done, press <ESC> to exit.
+//
+////////////////////////////////////////////////////////////////////
+use cfgfile;
+use os;
+use uo;
+
+include ":sysbook:sysBook";
+include ":sysbook:spawnShelf";
+
+program addtomasterlibrary(who)
+
+    var original_contents := {};
+    var contents := {};
+    var bookstuff := {};
+    var filename, sysbooks, book, title, author, nextspot;
+    var curpage, curline, index;
+    filename := ":sysbook:config/master_library";
+	while(1)
+		contents := {};
+		original_contents := {};
+		bookstuff := {};
+		index := {};
+		book := PromptUser(who);
+		title := GetObjProperty(book, "title");
+		author := GetObjProperty(book, "author");
+		original_contents := GetObjProperty(book, "contents");
+		contents := truncate(original_contents);
+
+		// Get the last book number and add one to it.
+		sysbooks:= ReadConfigFile(filename);
+		nextspot := GetConfigMaxIntKey(sysbooks);
+		if(nextspot.errortext)
+			nextspot := 1;
+		else
+			nextspot := nextspot + 1;
+		endif
+
+		curpage := 1;
+		curline := 1;
+		for (index := 1; index <= contents.size(); index := index + 1)
+			// Allows us to insert a blank page if we want to.
+			if(contents[index] == "@")
+				curpage := curpage + 1;
+				curline := 1;
+			else
+				bookstuff[index + 3] := {"p" + curpage + "l" + curline, contents[index]};
+				curline := curline + 1;
+			endif
+			if(curline == 9)
+				curpage := curpage + 1;
+				curline := 1;
+			endif
+		endfor
+		bookstuff[1] := {"pages", curpage};
+		bookstuff[2] := {"title", title};
+		bookstuff[3] := {"author", author};
+
+
+		AppendConfigFileElem( filename, "book", nextspot, bookstuff );
+	endwhile
+    UnloadConfigFile(filename);
+
+    SendSysMessage(who, "The book was added successfully to the Master Library.", color :=66);
+
+endprogram
+
+/////////////////////////////////////////////////////////////////////
+//
+// PromptUser(user)
+//
+// Purpose
+// Prompts the user to select an object that meets two basic
+// criteria: The object is a book and the book has a CProp,
+// "contents".
+//
+// Parameters
+// user - An object reference to the user.
+//
+//
+//
+//
+// Return value
+// book_choice - An item reference to a book object.
+//
+/////////////////////////////////////////////////////////////////////
+function PromptUser(user)
+var is_valid_book := 0;
+var book_choice := 0;
+	repeat
+		SendSysMessage(user, "Choose the book to add to the Master Library.", color := 88);
+		SendSysMessage(user, " or press <ESC> when you are finished adding books.", color := 88);
+		book_choice := Target(user);
+		if(!book_choice)
+			SendSysMessage(user, "Finished.", color := 88);
+			exit;
+		elseif(!book_choice.IsBook())
+			SendSysMessage(user, "That object is not a book.", color := 33);
+			SendSysMessage(user, "Try again or press <ESC> to cancel.", color := 88);
+		elseif(!GetObjProperty(book_choice, "contents"))
+			SendSysMessage(user, "This book is blank! We don't want an empty book in the Master Library, silly!", color := 33);
+		else
+			is_valid_book := 1;
+		endif
+	until(is_valid_book);
+	return book_choice;
+endfunction
+
+
+//////////////////////////////////////////////////////////////////
+// This function removes the trailing empty lines from a book's //
+// contents.                                                    //
+// oc contains the original contents array                      //
+//////////////////////////////////////////////////////////////////
+function truncate(oc)
+
+    var cont := {};
+    var index;
+    var junk := 1;
+    for (index:=oc.size();index >= 1;index:=index-1)
+	if( Len(oc[index]) )
+	    junk := index;
+	    break;
+	endif
+    endfor
+
+    for (index := 1; index <= junk; index := index +1)
+	cont[index] := oc[index];
+    endfor
+
+    return cont;
+endfunction

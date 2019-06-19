@@ -1,0 +1,36 @@
+use uo;
+use os;
+
+/////////////////////////////////////////////////////////////////////
+// setpages
+//
+// This command allows the user to modify the maximum number of
+// pages in a book. Please note: Due to the unique way books work
+// in UO the maximum number of pages will always be an odd number
+// or else the last page, on the right hand side will be blank.
+// If the user enters 48 as the maximum pages this command will add
+// 1 to that number to make it 49.
+//
+/////////////////////////////////////////////////////////////////////
+
+program setpages(who, text)
+
+	var page_count := CInt(text);
+	if(!page_count)
+		SendSysMessage(who, "No page count entered. Defaulting to 33 pages.", color := 88);
+		page_count := 33;
+	endif
+	if(page_count%2 == 0)
+		page_count := page_count += 1;
+	endif
+	while(1)
+		SendSysMessage(who, "Set the pages to " + CStr(page_count) + " pages for which book?", color := 88);
+		SendSysMessage(who, "Press <ESC> to cancel.", color := 88);
+		var trg := Target(who, TGTOPT_NOCHECK_LOS);
+		if(!trg)
+			SendSysMessage(who, "Canceled");
+			return;
+		endif
+		SetObjProperty(trg, "maxpages", page_count);
+	endwhile
+endprogram

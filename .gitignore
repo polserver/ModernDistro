@@ -58,6 +58,10 @@ realm/*
 # POL MULs
 MUL/*
 
+# Sublime Text files
+*.sublime-project
+*.sublime-workspace
+
 # Misc Directories used locally
 decoration/
 devpkg/

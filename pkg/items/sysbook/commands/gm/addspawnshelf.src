@@ -1,0 +1,68 @@
+/////////////////////////////////////////////////////////////////////
+//
+// addspawnshelf
+//
+// Purpose:
+// Allows a user to add a bookshelf to the spawn shelf data file.
+//
+// If the user appends a <space> followed by an integer, the integer
+// will be used to set the maximum books that will be spawned in
+// the bookshelves targetted. If no integer is appended to
+// the command a gump will be presented with the default value
+// from the sysbook settings file. The user can change it if so
+// desired.
+//
+/////////////////////////////////////////////////////////////////////
+
+use uo;
+use datafile;
+
+include ":gumps:requestGump";
+include ":sysbook:settings";
+include ":sysbook:spawnShelf";
+include ":sysbook:sysBook";
+
+var sysbook_settings := SB_GetSettingsCfgElem( "Settings" );
+var DefaultMaxBooks := sysbook_settings.DefaultMaxBooks;
+
+program addspawnshelf(who, text)
+
+	var bookshelves := OpenDataFile(":sysbook:spawnedbookshelves");
+	if(bookshelves.errortext)
+		bookshelves := CreateDataFile(":sysbook:spawnedbookshelves", DF_KEYTYPE_INTEGER);
+	endif
+
+	var max_books := 0;
+	var bookshelf := 0;
+	var shelf_to_add := 0;
+
+	while(1)
+		repeat
+			SendSysMessage(who, "Please target a bookshelf:", color := 88);
+			SendSysMessage(who, "(Press <Esc> to cancel)", color := 88);
+			shelf_to_add := Target(who);
+			if(!shelf_to_add)
+				SendSysMessage(who, "Cancelled.", color := 33);
+				exit;
+			endif
+			if(!shelf_to_add.IsBookshelf())
+				SendSysMessage(who, "That is not a bookshelf!", color := 33);
+			endif
+		until(shelf_to_add.IsBookshelf());
+
+		if(text == "")
+			text := RequestGump(who, "Max books to spawn:", "", CStr(DefaultMaxBooks), CANCEL_BTN_OFF, 3);
+		endif
+		max_books := CInt(text);
+
+		bookshelf := bookshelves.CreateElement(shelf_to_add.serial);
+		bookshelf.SetProp("MaxBooks", max_books);
+		SendSysMessage(who, "The bookshelf has been added to the datafile.", color := 66);
+		RestockTheShelf(shelf_to_add, max_books);
+		SendSysMessage(who, "It has been populated with " + CStr(max_books) + "text books.", color := 66);
+	endwhile
+
+
+endprogram
+
+

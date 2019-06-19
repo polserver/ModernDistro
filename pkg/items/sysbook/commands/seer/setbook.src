@@ -1,0 +1,86 @@
+////////////////////////////////////////////////////
+//
+// setbook
+//
+// This command allows you to change a book's
+// graphic and its read/write status.
+//
+// Bookcase Spawning system  version .3
+// created December 6, 2000
+// updated June 19, 2017
+// designed by Syzygy, Zulu and Bishop Ebonhand
+// updated by Yukiko POL Distro team
+//
+///////////////////////////////////////////////////
+use uo;
+use os;
+use util;
+
+var layout := {
+  "page 0                         ",
+  "gumppic   0   0 2321           ",
+  "text    150  14    0    0      ",
+  "group 1                        ",
+  "radio    40  60 1209 1210 0 1  ",
+  "radio   100  60 1209 1210 0 2  ",
+  "radio   167  60 1209 1210 0 3  ",
+  "radio   220  60 1209 1210 0 4  ",
+  "radio    40  15 1209 1210 1 5  ",
+  "tilepic  48  60 4079           ",
+  "tilepic 108  60 4080           ",
+  "tilepic 175  60 4081           ",
+  "tilepic 230  60 4082           ",
+  "text     53  14    0    1      ",
+  "button  206 100 2128 2129 1 0 9",
+  "text     52 102    0    2      ",
+  "text    115 102    0    3      ",
+  "group 2                        ",
+  "radio    40 105 1209 1210 1 6  ",
+  "radio   100 105 1209 1210 0 7  "
+};
+
+var data := {
+  "Book Graphic",
+  "Random",
+  " R/W",
+  " Read-Only"
+};
+
+program setbook(who)
+
+	SendSysMessage(who, "Target the book you wish to modify.", color := 88);
+	SendSysMessage(who, "Press <EsC> to cancel.", color := 88);
+	var book := Target(who, TGTOPT_NOCHECK_LOS);
+
+	if(!book)
+		SendSysMessage(who, "Cancelled.", color := 33);
+		return;
+	endif
+
+  var res := SendDialogGump(who, layout, data);
+
+  if(res[0] == 9)
+    foreach thing in (res.keys)
+      case(thing)
+        1: book.graphic := 0xFEF;
+        2: book.graphic := 0xFF0;
+        3: book.graphic := 0xFF1;
+        4: book.graphic := 0xFF2;
+        5: RandomGraphic(book);
+        6: EraseObjProperty(book, "NoWrite");
+        7: SetObjProperty(book, "NoWrite", 1);
+      endcase
+    endforeach
+  else
+    SendSysMessage(who, "Canceled");
+  endif
+endprogram
+
+function RandomGraphic(book)
+  case(RandomInt(4) + 1)
+    1: book.graphic := 0xFEF;
+    2: book.graphic := 0xFF0;
+    3: book.graphic := 0xFF1;
+    4: book.graphic := 0xFF2;
+  endcase
+endfunction

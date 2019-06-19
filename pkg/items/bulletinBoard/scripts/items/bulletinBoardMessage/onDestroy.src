@@ -1,0 +1,25 @@
+use uo;
+use os;
+
+program BBM_OnDestroy( note )
+	var replies := note.GetReplies(),
+		reply := 0,
+		destroy_item := 0;
+
+	if( !replies.Size() )
+		return 1;
+	endif
+
+	foreach serial in ( replies )
+		reply := SystemFindObjectBySerial( CInt( serial ) );
+		if( reply )
+			destroy_item := DestroyItem( reply );
+			if( !destroy_item || destroy_item.errortext )
+				PrintTextAbove( reply.container, "Could not destroy reply: "+destroy_item.errortext, 0x3, 0x42 );
+				return 0;
+			endif
+		endif
+	endforeach
+
+	return 1;
+endprogram

@@ -1,0 +1,14 @@
+use uo;
+use os;
+
+program BB_canRemove( mobile, bulletin_board, item, movetype )
+	bulletin_board := bulletin_board;
+	item := item;
+
+	if( movetype == MOVETYPE_PLAYER )
+		SendSysMessage( mobile, "You can not remove that from the bulletin board.", 0x3, 0x22 );
+		return 0;
+	endif
+
+	return 1;
+endprogram

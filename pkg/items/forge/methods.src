@@ -1,0 +1,33 @@
+use uo;
+
+program Install()
+
+	return 1;
+endprogram
+
+exported function IsForge( item )
+
+	item := item; // Avoid compiler warnings.
+
+	return 1;
+endfunction
+
+exported function Animate( item )
+	if( item.graphic == CInt( item.objtype+3 ) )
+		if( item.objtype == 0x198A || item.objtype == 0x197E )
+			item.facing := 1;
+		endif
+		PlaySoundEffect( item, 0x02C );
+
+		return item.graphic := item.objtype;
+	elseif( item.graphic == item.objtype )
+		if( item.objtype == 0x198A || item.objtype == 0x197E )
+			item.facing := 29;
+		endif
+
+		return item.graphic := CInt( item.objtype+3 );
+	endif
+
+// Just a simple fail safe.
+	return item.graphic := item.objtype;
+endfunction
