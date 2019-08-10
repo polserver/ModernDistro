@@ -105,14 +105,14 @@ function FindKey (me, plank)
 	foreach item in EnumerateItemsInContainer (me.backpack)
 		if(item.IsKey())
         keylockid := GetObjProperty (item, "lockid");
-				if (item.KeyMatchesLock(item, plank))
+				if (item.KeyMatchesLock(plank))
 					return item;
 				endif
     endif
 		if(item.IsKeyRing())
 				foreach key in EnumerateItemsInContainer (FindMyPack (item.serial))
 					keylockid := GetObjProperty (key, "lockid");
-          if (item.KeyMatchesLock(item, plank))
+          if (item.KeyMatchesLock(plank))
 						return key;
 					endif
 				endforeach
