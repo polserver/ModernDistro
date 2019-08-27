@@ -142,7 +142,7 @@ function NPCDamageMod(byref attacker, byref defender, damage)
 	Print("debug message - mainHitScript: unmodified damage = " + CStr(damage));
 	var NPCMod := CS_GetSettingsCfgElem("NPCMod");
 	var PlayerAdvantage := CInt(NPCMod.PlayerAdvantage);
-	if(defender.isA(POLCLASS_NPC)
+	if(defender.isA(POLCLASS_NPC))
 		damage := damage * PlayerAdvantage;
 	endif
 	Print("debug message - mainHitScript: modified damage = " + CStr(damage));
@@ -222,6 +222,7 @@ function WeaponHitScripts(attacker, defender, weapon, armor, basedamage, rawdama
 endfunction
 
 function ArmorHitScripts(attacker, defender, weapon, armor, basedamage, rawdamage)
+
 	foreach hitscript in ( GetArmorHitScripts(defender, armor) )
 		var script := Start_Script(hitscript, array{attacker, defender, weapon, armor, basedamage, rawdamage});
 		if ( script.errortext )
@@ -232,17 +233,21 @@ function ArmorHitScripts(attacker, defender, weapon, armor, basedamage, rawdamag
 	endforeach
 
 	return 1;
+
 endfunction
 
-/*
+
 function PoisonChecks(attacker, defender, weapon, armor, basedamage, rawdamage)
-	if ( rawdamage < 1 )
-		return 0;
+
+	var PoisonStrength := GetObjProperty(weapon, "PoisonStrength");
+	var duration := CInt(3 + AP_GetSkill(caster, POISONING) * 0.4);
+
+	if ( PoisonStrength )
+		TS_StartTimer(defender, "DefaultPoison", duration, PoisonStrength, attacker);
 	endif
 
-	// Unsure how poisoned weapon CProps will look yet.
 endfunction
-*/
+
 
 //
 // Returns 1 on successful parry.

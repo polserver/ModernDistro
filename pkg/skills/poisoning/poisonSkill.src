@@ -9,8 +9,16 @@ include "include/objtype";
 include ":virtue:noto";
 include ":timedScripts:timedScripts";
 
-var config_file;
-
+var poison_config_file := ReadConfigFile( "poisoning");
+    if(!poison_config_file)
+    	SysLog("Error: :poisoning:poisonSkill.src ---> poisoning.cfg file not found.");
+    	return 0;
+    endif;
+var alchemy_itemdesc_file := ReadConfigFile(":alchemy:itemdesc");
+    if(!alchemy_itemdesc_file)
+    	SysLog("Error: :poisoning:poisonSkill.src ---> :alchemy:itemdesc.cfg file not found.");
+    	return 0;
+    endif;
 program do_poisoning( who )
     var the_item;
     var the_poison;
@@ -18,7 +26,6 @@ program do_poisoning( who )
 //    var elem;
     var stren;
     var point;
-    config_file := ReadConfigFile( "poisoning");
     SendSysMessage( who, "Select a poison potion." );
     the_poison := Target(who, "");
     if (!the_poison)
@@ -43,12 +50,12 @@ program do_poisoning( who )
 		SendSysMessage(who, "You can't reach that!");
 		return 0;
     endif
-    var alchcfg := ReadConfigFile(":adval:alchemy2");
-    var itemcfg := ReadConfigFile(":adval:itemdesc");
-    itemcfg := itemcfg;
-    var potion_cfg := ReadConfigFile( "potion" );
-    var potion_strength :=FindConfigElem(potion_cfg, the_poison.objtype);
+    var potion_strength :=FindConfigElem(alchemy_itemdesc_file, the_poison.objtype);
 	stren :=CInt(GetConfigInt(potion_strength, "strength"));
+	if(stren.errortext)
+		SysLog("No 'strength' entry for poison potion in alchemy itemdesc file.");
+		return;
+	endif
     var acfgfile;
     var theitem := FindConfigElem( acfgfile, CInt(the_item.objtype) );
     if (!theitem)
@@ -76,18 +83,27 @@ program do_poisoning( who )
 					var hitscripts := GetObjProperty(the_item, "OnHit");
 					var previouspoison := GetObjProperty(the_item, "phit");
 					PlaySoundEffect(who, 0x248);
-						if (!hitscripts)
-							hitscripts := {};
-							hitscripts[1] := ":combat:poisonHit";
-						else
-						  hitscripts.append(":combat:poisonHit");
-						endif
+					SetObjProperty(the_item, "PoisonStrength", stren);
 
-						if (previouspoison != 1)
-							SetObjProperty(the_item, "OnHit", hitscripts);
-						endif
 					SendSysMessage(who, "You have successfully applied the poison.");
-					SetObjProperty(the_item, "phit", 1);
+
+					// Changing from a separate poison hit script to
+					// inclusion of poison hit in mainHitScript.
+					// The commented out lines are left in here for
+					// future reference in the event we, or someone else,
+					// wants to use a separate poison hit script.
+					/* if (!hitscripts)
+						hitscripts := {};
+						hitscripts[1] := ":combat:poisonHit";
+					else
+					  hitscripts.append(":combat:poisonHit");
+					endif
+
+					if (previouspoison != 1)
+						SetObjProperty(the_item, "OnHit", hitscripts);
+					endif 
+					SetObjProperty(the_item, "phit", 1); */
+
 					// Adjust the following virtues negatively for poisoning a weapon.
 					case(stren)
 						1:	VS_AdjustVirtue(who, "honor", -1, prob := 35);
@@ -111,7 +127,7 @@ program do_poisoning( who )
 				SubtractAmount(the_poison,1);
 				CreateItemInBackpack(who, UOBJ_EMPTY_BOTTLE, 1);
 				return 1;
-			elseif((the_item.objtype == 0xf3f) || (the_item.objtype == 0x1bfb))
+			elseif((the_item.objtype == 0xf3f) || (the_item.objtype == 0x1bfb)) // arrow and crossbow bolt
 				SubtractAmount(the_poison,1);
 				if(!ReserveItem(the_item))
 					SendSysMessage(who,"cancelled");
@@ -129,9 +145,10 @@ program do_poisoning( who )
 						return 0;
 					endif
 					var objtype;
+					// Convert arrows and crossbow bolts to the poisoned versions.
 					case(obj)
-						0xf3f:   objtype := 0x1999a;
-						0x1bfb:  objtype := 0x1999b;
+						0xf3f:   objtype := 0x1999a; // arrow
+						0x1bfb:  objtype := 0x1999b; // crossbow bolt
 					endcase
 					CreateItemInBackpack( who, objtype, 10 );
 					PlaySoundEffect(who, 0x248);
