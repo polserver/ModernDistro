@@ -1,0 +1,26 @@
+/////////////////////////////////////////////////////////
+// This command will unload a specified script or if no
+// script is specified, it will unload all non running
+// scripts.
+/////////////////////////////////////////////////////////
+
+use uo;
+use os;
+
+program Unload_Scrpts(who, text)
+
+	// IIf the user entered a script then notify him that we are
+	// attempting to unload that script.
+	// Otherwise notify him that we are unloading all scripts.
+	if(text != "")
+		SendSysMessage(who, "Attempting to unload the script " + text + ".src.", color := 88);
+		// Print to console.
+		Print("Unloading " + text + ".src");
+	else
+		SendSysMessage(who, "Unloading all non running scripts.", color := 88);
+		// Print to console.
+		Print("Unloading all non running scripts");
+	endif
+	Unload_Scripts(text);
+
+endprogram
