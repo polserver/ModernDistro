@@ -1,0 +1,66 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+  
+  <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+
+  
+  <meta http-equiv="Content-Language" content="en-us">
+  <title>Merchant Nodes</title>
+
+  
+  
+  <link rel="stylesheet" type="text/css" href="docs.css">
+
+</head><body>
+<div id="container">
+<div id="header">
+<h1 style="text-align: center;">Merchant and Guard Node - Admin
+Commands<br>
+</h1>
+<div style="text-align: center;"> </div>
+<p style="text-align: center;">For the merchantnodes package in the Distro,
+by <a href="mailto:distro@polserver.com">Yukiko</a>.</p>
+<hr>
+<h2 style="text-align: center;"><span style="font-weight: bold;">Administrator
+Commands</span></h2>
+</div>
+<div id="content"><big><big><span style="font-weight: bold;">This is a
+list of the
+administrator (Admin) level commands and their description:<br>
+</span></big></big>
+<table style="text-align: left; width: 100%;" border="3" cellpadding="10" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;"><span style="font-weight: bold;">grabnodes</span><br>
+      </td>
+      <td style="vertical-align: top;">This command is very useful in
+the event you need to perform an item wipe because it is used to save
+all nodes, both merchant and guard nodes, and merchant and guard data on those nodes located in the realm the
+user is in. To save the nodes in each realm the user must teleport to
+the realms and issue this command whilst in that realm. The node data
+is saved to a config file in /pkg/systems/spawnSystem/config/<br>
+Usage is .grabnodes [file name] where file name is optional. If the
+user does not enter a file name the command will default to
+"packedNodes-" with the realm name appended. If a file name is
+specified then -&lt;realm name&gt; is appended to the name entered by
+the user.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;"><span style="font-weight: bold;">seednodes</span><br>
+      </td>
+      <td style="vertical-align: top;">This is the opposite of grabnodes used to restore grabbed nodes
+from a config file created by the .grabnodes command. The nodes will be
+restored to the realm the user is in. To restore the nodes in each
+realm the user must teleport to the realms and issue this command
+whilst in that realm. </td>
+    </tr>
+  </tbody>
+</table>
+<big><big><span style="font-weight: bold;"><br>
+</span></big></big><br>
+<br>
+</div>
+</div>
+
+</body></html>

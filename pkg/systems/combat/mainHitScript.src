@@ -233,14 +233,13 @@ function ArmorHitScripts(attacker, defender, weapon, armor, basedamage, rawdamag
 	endforeach
 
 	return 1;
-
 endfunction
 
 
 function PoisonChecks(attacker, defender, weapon, armor, basedamage, rawdamage)
 
 	var PoisonStrength := GetObjProperty(weapon, "PoisonStrength");
-	var duration := CInt(3 + AP_GetSkill(caster, POISONING) * 0.4);
+	var duration := CInt(GetObjProperty(weapon, "duration"));
 
 	if ( PoisonStrength )
 		TS_StartTimer(defender, "DefaultPoison", duration, PoisonStrength, attacker);

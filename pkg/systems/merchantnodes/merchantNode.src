@@ -45,7 +45,7 @@ program MerchantNodeManager(who, itm)
   GFTextLine(150, 40, COLOR_BLUE, "X");
   GFTextLine(210, 40, COLOR_BLUE, "Y");
   GFTextLine(270, 40, COLOR_BLUE, "Z");
-  GFTextLine(310, 40, COLOR_BLUE, "Enable");
+  GFTextLine(308, 40, COLOR_BLUE, "Enabled");
   GFTextLine(360, 40, COLOR_BLUE, "Delete");
   GFTextLine(420, 40, COLOR_BLUE, "Rebuild Stock");
   FillInPageData();
@@ -75,7 +75,7 @@ program MerchantNodeManager(who, itm)
   cancel  := GFButtonID(100, 370, G_RED_OVAL_CANCEL_0, G_RED_OVAL_CANCEL_1, 1, 0);
   GetStatus(item);
   var retkey  := GFSendGump(who);
-  if((retkey[cancel.keyid]) or (retkey[0] == 1))
+  if((retkey[cancel.keyid]) || (retkey[0] == 1))
     SendSysMessage(who, "Cancelled", 3, 40);
   elseif(retkey[apply.keyid])
     ResetMerchantNode(who, retkey);
@@ -105,7 +105,11 @@ program MerchantNodeManager(who, itm)
       if(!trg)
         SendSysMessage(who, "Cancelled.", 3, 40);
         return;
-      else
+      elseif(trg.realm != itm.realm)
+		SendSysMessage(who, "The merchant must be placed in the same facet (realm) as the node.", color := 33);
+		SendSysMessage(who, "Canceled.", color := 33);
+		return 0;
+	  else
         tmparray.append(array(trg.x, trg.y, trg.z));
       endif
       if(template == 1)
@@ -142,9 +146,16 @@ function FillInPageData()
     GFTextLine(150, sy, color, x);
     GFTextLine(210, sy, color, y);
     GFTextLine(270, sy, color, z);
-    GFCheckBox(320, sy, 208, 209, 0, 5000+i);
-    GFCheckBox(370, sy, 208, 209, 0, 6000+i);
-    GFCheckBox(460, sy, 208, 209, 0, 7000+i);
+//    GFCheckBox(320, sy, 208, 209, 0, 5000+i);
+//    GFCheckBox(370, sy, 208, 209, 0, 6000+i);
+//    GFCheckBox(460, sy, 208, 209, 0, 7000+i);
+  if(status)
+    GFCheckBox(320, sy, 211, 210, 0, 5000+i);
+  else
+    GFCheckBox(320, sy, 210, 211, 0, 5000+i);
+  endif
+    GFCheckBox(370, sy, 210, 211, 0, 6000+i);
+    GFCheckBox(460, sy, 210, 211, 0, 7000+i);
     sy := sy + 25;
     i := i + 1;
   endforeach
@@ -156,17 +167,17 @@ function GetStatus(item)
     case(status)
       "on":      color := COLOR_GREEN; txt := "Merchant Node Enabled";
                  GFSetRadioGroup(1);
-                 GFRadioButton(20, 320, 208, 209, 1, 200);
-                 GFRadioButton(20, 340, 208, 209, 0, 201);
+                 GFRadioButton(20, 308, 208, 209, 1, 200);
+                 GFRadioButton(20, 330, 208, 209, 0, 201);
       "off":     color := COLOR_RED; txt := "Merchant Node Disabled";
                  GFSetRadioGroup(1);
-                 GFRadioButton(20, 320, 208, 209, 0, 200);
-                 GFRadioButton(20, 340, 208, 209, 1, 201);
+                 GFRadioButton(20, 308, 208, 209, 0, 200);
+                 GFRadioButton(20, 330, 208, 209, 1, 201);
       default:   color := COLOR_GREEN; txt := "Merchant Node Enabled";
                  SetObjProperty(item, "Status", "on");
                  GFSetRadioGroup(1);
-                 GFRadioButton(20, 320, 208, 209, 1, 200);
-                 GFRadioButton(20, 340, 208, 209, 0, 201);
+                 GFRadioButton(20, 308, 208, 209, 1, 200);
+                 GFRadioButton(20, 330, 208, 209, 0, 201);
     endcase
   var cs := GetObjProperty(item, "#wait");
   if(cs == 1)
@@ -176,21 +187,22 @@ function GetStatus(item)
     color := COLOR_YELLOW;
     txt := "Merchant Nodes Are Disabled Globally";
   elseif(status != "off")
-    restock := GFCheckBox(340, 320, 208, 209, 0, 400);
-    respawn := GFCheckBox(340, 340, 208, 209, 0, 300);
-    GFTextLine(370, 320, COLOR_GREEN, "Restock Merchants");
-    GFTextLine(370, 340, COLOR_GREEN, "Respawn Merchants");
+    restock := GFCheckBox(340, 308, 210, 211, 0, 400);
+    respawn := GFCheckBox(340, 330, 210, 211, 0, 300);
+    GFTextLine(370, 308, COLOR_GREEN, "Restock Merchants");
+    GFTextLine(370, 330, COLOR_GREEN, "Respawn Merchants");
   endif
   GFTextMid(150, 370, 300, color, txt);
-  GFTextLine(50, 320, COLOR_GREEN, "Enable Node");
-  GFTextLine(50, 340, COLOR_GREEN, "Disable Node");
+  GFTextLine(50, 308, COLOR_GREEN, "Enable Node");
+  GFTextLine(50, 330, COLOR_GREEN, "Disable Node");
 endfunction
 
 function ResetMerchantNode(who, ret)
   var rsp := 0;
   var newarray := type;
   foreach thing in (ret.keys)
-    if((thing >= 5000) and (thing <= 5010))
+    if((thing >= 5000) && (thing <= 5010))
+      Broadcast(CStr(thing));
       var num := thing - 5000;
       var tmpdata := type[num];
       if(tmpdata[3] == 1)
@@ -205,7 +217,7 @@ function ResetMerchantNode(who, ret)
         endif
       endforeach
       rsp := 1;
-    elseif((thing >= 6000) and (thing <= 6010))
+    elseif((thing >= 6000) && (thing <= 6010))
       var num := thing - 6000;
       var holder := array;
       var tnum := type[num];
@@ -227,14 +239,14 @@ function ResetMerchantNode(who, ret)
     ev.+type := "Restock";
     proc.SendEvent(ev);
   endif
-  if((ret[200]) and (GetObjProperty(item, "Status") == "off"))
+  if((ret[200]) && (GetObjProperty(item, "Status") == "off"))
     rsp := 1;
     SetObjProperty(item, "Status", "on");
   elseif(ret[201])
     SetObjProperty(item, "Status", "off");
     rsp := 1;
   endif
-  if((ret[respawn.keyid]) or (rsp == 1))
+  if((ret[respawn.keyid]) || (rsp == 1))
     if(ret[200])
       SendRespawnEvent();
     else

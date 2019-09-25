@@ -1,0 +1,148 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+  
+  <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+
+  
+  <meta http-equiv="Content-Language" content="en-us">
+  <title>Merchant Node Setup and Use</title>
+
+  
+  
+  <link rel="stylesheet" type="text/css" href="docs.css">
+
+</head><body>
+<div id="container">
+<div style="text-align: center;"> </div>
+<div id="header">
+<div style="text-align: center;"> </div>
+<h1 style="text-align: center;">Merchant Node Documentation<br>
+</h1>
+<div style="text-align: center;"> </div>
+<p style="text-align: center;">For the merchant node package in the
+Distro,
+by <a href="mailto:distro@polserver.com">Yukiko</a>.</p>
+<hr>
+<h2 style="text-align: center;">Merchant Node Setup</h2>
+</div>
+<div id="content"><big id="fred"><big style="font-weight: bold;">Placing
+a node:</big><br>
+To install a merchant node, you must know the following information
+before you begin:<br>
+Largest radius of the room to monitor. this can be determined by
+standing in the exact center of the room and counting the tiles to the
+furthest wall. Keep in mind that the nodes check line of sight. So for
+buildings that are not rectangular, you must base your centering on the
+assumption that the building is rectangular. once you have your radius,
+you must create your NPCs.<br>
+<br>
+Note that merchant NPCs are designed to be permanent and should <span style="font-weight: bold;">not</span> be
+created by the .createnpc command or a spawn point. Use the .createnode
+command to begin setting up the node.<br>
+<br>
+</big>
+<hr style="width: 100%; height: 2px;"><big><big style="font-weight: bold;">The create node gump:<br>
+</big></big><img src="file:///C:/Users/Me/AppData/Local/Temp/moz-screenshot.jpg" alt=""><br>
+<b><br>
+</b><big>The createnode gump is pretty straight forward. simply fill in
+the
+radius in the spot labeled “Define Listener Range” and choose whether
+the node controls merchants or bankers. Choose Merchant for this
+tutorial. Setting a node to "banker" will cause the node not to run
+restock. So do not use this setting on normal merchants.<br>
+<br>
+The "Next Respawn" field is the amount of time between restocks in
+minutes. Each npc will restock his inventory on that interval. The
+default of 30 minutes is recommended for all merchants except reagent
+vendors which seem to work best at 12 minute restock intervals. Once
+all the relevant information is entered, click the "okay" button.<br>
+<br>
+You will get a target cursor. This is for placing the node. Place the
+node at the center of the room, even if it is within a wall or outside
+the actual building.<br>
+<br>
+<br>
+<big><span style="font-weight: bold;">Using the node:</span></big><br>
+Once the node is created, double-click on it and a gump will appear.
+</big><big>If you do not see the node, use the .info command and target
+yourself. Click the blue button next to Pivileges. In the list of
+privileges click the blue button next to seeinvis to enable seeing
+invisible items. </big><big>Before we look at the gump in detail,
+let's spawn your first merchant.
+There is a checkbox in the upper left hand side of the gump. Click on
+that to create a merchant. The gump will disappear and you will be
+asked to enter the type of merchant you wish to spawn. Enter alchemist
+and press &lt;enter&gt;. You will receive a target cursor. Choose
+where you wish the merchant to appear. The node will spawn the merchant
+at that location. Please note that it my take up to 60 seconds for the
+merchant to appear in game.<br>
+<br>
+There are occasions when you might want more than one merchant in a
+shop or location. So to place another merchant use the node again
+(double-click) and click on the checkbox in the gump and follow the
+procedure above for placing another merchant.<br>
+<br>
+</big>
+<hr style="width: 100%; height: 2px;"><span style="font-weight: bold;"><big><big>The
+merchant node gump:</big></big></span><big><big><br>
+</big></big><img src="file:///C:/Users/Me/AppData/Local/Temp/moz-screenshot-5.jpg" alt=""><br>
+<br>
+<big>This is an example of a merchant node gump. At the top left you
+see the number of enabled merchants on the left side of the slash and
+the total number of merchants created by this node on the right. In
+this cae three enabled of three created. The node has been used to
+spawn three merchants, a tailor, a mage, and an alchemist. You can see
+it shows the merchant type and its location. Note that the location
+information does not show the realm. This is because a node can only be
+used to spawn merchants in the same realm as the node.<br>
+<br>
+There are also three check boxes next to each merchant listed, Enabled,
+Delete, and Rebuild Stock. If the merchant is enabled its information
+will be shown in green and the Enabled check box will have a check
+mark. To disable a merchant click on the check box and click the Apply
+button in the lower left. Disabling a merchant will remove it from the
+game world but not from the node.This can be useful when you wish to
+setup nodes with certain merchants that are only available at certain
+times such as during quests. When a merchant is disabled its
+information will be shown in red. The Delete button is used to delete a
+merchant from the node. To delete a merchant check the Delete check box
+and click the Apply button. Once you click the Apply button the
+merchant will be deleted. <span style="font-weight: bold;">This
+operation cannot be reversed.</span> The Rebuild Stock option is not
+enabled and thus the check box does nothing.<br>
+<br>
+At the bottom left just above the Apply and Cancel buttons are two
+radio buttons, Enable Node and Disable Node. You can only activate one button. When a node is enabled it
+will appear as a bright glowing green crystal. When a node is disabled
+it appears as a dark green crystal. When you disable a node the
+merchants will be removed from the world but not from the node. If you
+re-enable a node, the merchants will be respawned in the world.<br>
+<br>
+On the lower right of the gump are two check boxes, Restock Merchants
+and Respawn Merchants. Restock Merchants will instantly restock the
+inventory for all merchants on this node. This is useful if you are
+running a quest and players are buying out a particular merchant's
+inventory faster than the restock time the node may have been set to at
+creation. Use the Respawn Merchants check box for times when a merchant
+might have been killed. Please note that the merchants in the Distro
+are set to be invulnerable. So they cannot be killed. You are free to
+change their invulnerable privilege by editing their templates in the
+npcdesc.cfg file located in the main /config directory.<br>
+<br>
+&nbsp;Remember no choices will take effect until you click the Apply button.<br>
+</big><big><big><br>
+</big></big><span style="font-weight: bold;"></span><br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<big><br>
+</big></div>
+<div id="footer">
+<p>Last Update: 2019-06-15 by Yukiko<br>
+</p>
+</div>
+</div>
+
+</body></html>

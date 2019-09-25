@@ -20,7 +20,6 @@ program use_blackpotion(who, potion)
 		return 0;
 	endif
 
-
 	// No need for timed script useage, due to the command for
 	// setting lightlevel handling it the way we want.
   	empty_bottle(who, potion);

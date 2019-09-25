@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+
+
+  
+  <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+
+  
+  <meta http-equiv="Content-Language" content="en-us"><title>Merchant Nodes</title>
+  
+
+  
+  
+  <link rel="stylesheet" type="text/css" href="docs.css"></head><body>
+<div id="container">
+<div style="text-align: center;"> </div>
+<div id="header">
+<div style="text-align: center;"> </div>
+<h1 style="text-align: center;">MERCHANT AND GUARD NODES<br>
+</h1>
+<div style="text-align: center;"> </div>
+<p style="text-align: center;">For the merchant node package in the
+Distro, by <a href="mailto:distro@polserver.com">Yukiko</a>.</p>
+<hr>
+<h2 style="text-align: center;">About the merchant and guard nodes package:</h2>
+</div>
+<div id="content"><big id="fred"><big><span style="font-weight: bold;">Merchant Nodes:</span></big><br>
+A quick note: The terms “vendor” and
+“merchant” are used interchangeably in this document.<br>
+<br>
+<span style="font-weight: bold;">Merchant nodes</span> handle all
+speech events for npcs that interact regularly with players. bankers,
+stable masters, and all normal merchants are controlled under this
+system. These NPCs WILL NOT interact with players if they are not
+controlled by a merchant node.<br>
+<br>
+<big><big>Features:</big></big><br>
+<span style="font-weight: bold;">Merchant nodes</span> control all
+vendor restocking, and will queue restock cycles so they do not happen
+all at once. Thus distributing system load over a longer period of time.<br>
+<br>
+<span style="font-weight: bold;">Merchant nodes</span> do all listening
+for their linked merchants.. the merchants themselves no longer handle
+speech events.. This results in lower overall CPU utilization and much
+more user-friendly interaction for the players in game.<br>
+<br>
+&nbsp;&nbsp; Only the closest NPC within line of sight (LOS) and no
+greater than 4 tiles away from the player will receive the speech
+event. So the player can always choose which NPC he wishes to interact
+with by positioning himself closest to the NPC.<br>
+<br>
+&nbsp;&nbsp; Vendors will keep items sold to them from players and will
+alter the buy/sell price of those items to reflect quality and
+condition. If a vendor does not sell the item after 2 restock cycles,
+he will liquidate the items back into gold currency to use for
+replenishing his stock and buying new goods..<br>
+<br>
+&nbsp;&nbsp; Vendors have a limited amount of gold to work with. As a
+vendor buys and sells goods, his pool of available gold will increase
+or decrease. Players that sell a lot of items to NPCs will find that
+the NPC cannot afford to purchase anymore items and may not be able to
+afford to restock his normal stock of items.<br>
+<br>
+&nbsp;&nbsp; Vendors spend their profit to restock their own regular
+inventory. Once a vendor runs out of money, he must sell some of his
+current stock before he can restock to normal levels..<br>
+<br>
+&nbsp;&nbsp; When a vendor sells out of a particular item in a given
+stock cycle, he will attempt to purchase an increased amount during his
+next restock. This amount may increase up to 20 X his base value.. if a
+vendor does not sell the elevated items, he will stop stocking them
+until he reaches his base inventory<br>
+and then continue from that base..</big><big><br>
+</big><br>
+</div>
+<div id="footer">
+<p>Last Update: 2019-06-15 by Yukiko<br>
+</p>
+</div>
+</div>
+
+</body></html>
