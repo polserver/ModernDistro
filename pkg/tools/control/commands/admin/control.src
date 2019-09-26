@@ -1,6 +1,6 @@
 /*
         Maintened by *Edwards
-        
+
         2009-10-25
 */
 use uo;
@@ -16,7 +16,7 @@ include ":control:internal/icp-pkgpanel";
 include ":control:internal/icp-scripts";
 include ":control:internal/icp-util";
 include ":datafile:datafile";
-include ":gumps:gumpprompt";
+include ":gumps:gumpPrompt";
 include ":gumps:gumps";
 include ":gumps:gumps_ex";
 include ":gumps:yesno";
@@ -42,7 +42,7 @@ program textcmd_ICPSystem( who, pkg_name )
                 SendSysMessage( who, "Cancelled." );
                 return 0;
         endif
-        
+
 	while( who.connected )
 		if( pkg_name )
 			var input := ICP_PackagePanels( who, pkg_name );
@@ -57,7 +57,7 @@ program textcmd_ICPSystem( who, pkg_name )
 			break;
 		endif
 	endwhile
- 
+
 	SendSysMessage( who, "Done." );
 
 	return 1;
