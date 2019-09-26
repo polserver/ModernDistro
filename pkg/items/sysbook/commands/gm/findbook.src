@@ -50,7 +50,7 @@ program createshardbook(who)
 		return 0;
 	endif
 
-	SendSysMessage(who, "Target a container, or yourself to create the books in your backpack, or press <EXC> to cancel.", color := 88);
+	SendSysMessage(who, "Target a container, or yourself to create the books in your backpack, or press <ESC> to cancel.", color := 88);
 	var the_place := Target(who);
 
 	if(!the_place)

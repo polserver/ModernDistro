@@ -1,19 +1,21 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html><head>
-
   
   <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 
   
-  <meta http-equiv="Content-Language" content="en-us"><title>Sysbook Documentation</title>
-  
+  <meta http-equiv="Content-Language" content="en-us">
+  <title>Sysbook Documentation - Admin Commands</title>
 
   
   
-  <link rel="stylesheet" type="text/css" href="docs.css"></head><body>
+  <link rel="stylesheet" type="text/css" href="docs.css">
+
+</head><body>
 <div id="container">
 <div id="header">
-<h1 style="text-align: center;">Sysbook package Documentation - Admin Commands<br>
+<h1 style="text-align: center;">Sysbook package Documentation - Admin
+Commands<br>
 </h1>
 <div style="text-align: center;"> </div>
 <p style="text-align: center;">For the sysbook package in the Distro,
@@ -31,23 +33,31 @@ administrator (Admin) level commands and their description:<br>
     <tr>
       <td style="vertical-align: top;"><span style="font-weight: bold;">addtomasterlibrary</span><br>
       </td>
-      <td style="vertical-align: top;">Used to add a new book to the
+      <td style="vertical-align: top;">Used to add one or more new books to the
 Master Library (sysbook:master_library.cfg). After entering the command
 the user is promted to target a book. The book is checked to be sure it
 has content and if so, the contents are reformatted to match the books
 config file format. Then the book info is appended to the end of the
 Master Library (:sysbook:master_library.cfg). When the user is done,
 press &lt;ESC&gt; to exit.<br>
+Usage is .addtomasterlibrary
       </td>
     </tr>
     <tr>
       <td style="vertical-align: top;"><span style="font-weight: bold;">addtoshardlibrary</span><br>
       </td>
-      <td style="vertical-align: top;">This command will add a book
-from the Master Library (:sysbook:master_library.cfg) to the Shard
-Library (shard_library data file).&nbsp; This will make that book
+      <td style="vertical-align: top;">This
+command will present a list of books contained in the Master Library.
+Select the books you wish to add to the Shard
+Library.&nbsp; This will make that book
 available for creation in-game and, if the book is set to spawn when it
-is selected, it will spawn in bookshelves that are set to spawn books.<br>
+is selected, it will spawn in bookshelves that are set to spawn books.
+Note that all of the books presented are set to spawn by default. When
+adding books you may have special books that you do not want generally
+available in spawn shelves. These might be books for special quests or
+events. Unckeck&nbsp; the spawn check box next to the book to prevent
+it from spawning in the spawn bookshelves.<br>
+Usage is .addtoshardlibrary<br>
       </td>
     </tr>
     <tr>
@@ -56,6 +66,7 @@ is selected, it will spawn in bookshelves that are set to spawn books.<br>
       <td style="vertical-align: top;">This command creates all of the
 Shard Library's books in a container of your choice. Please ensure the
 container can hold a lot of items.<br>
+Usage is .createshardlibrary<br>
       </td>
     </tr>
     <tr>
@@ -65,22 +76,24 @@ container can hold a lot of items.<br>
 selected books from the Shard Library. The book will still be available
 in the Master Library and can be added back into the Shard Library by
 using the addtoshardlibrary command.<br>
+Usage is .removefromshardlibrary<br>
       </td>
     </tr>
     <tr>
       <td style="vertical-align: top;"><span style="font-weight: bold;">setbooktospawn</span><br>
       </td>
-      <td style="vertical-align: top;">This allows the user to set
-certain books in the Shard Library to spawn in the bookshelves that are
-set to spawn books.<br>
+      <td style="vertical-align: top;">This
+allows the user to set books in the Shard Library to spawn that have
+previously been set not set to spawn in the bookshelves.<br>
+Usage is .setbooktospawn<br>
       </td>
     </tr>
     <tr>
       <td style="vertical-align: top;"><span style="font-weight: bold;">setbooktonotspawn</span><br>
       </td>
       <td style="vertical-align: top;">This command allows the user to
-stop certain books in the Shard Library from spawned in the bookshelves
-that are set to spawn books<br>
+stop certain books in the Shard Library from being spawned in the spawn bookshelves.<br>
+Usage is .setnottospawn<br>
       </td>
     </tr>
   </tbody>
