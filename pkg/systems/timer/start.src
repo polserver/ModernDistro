@@ -1,4 +1,6 @@
 use os;
 
+include ":settingsController:scriptStarter";
+
 print("Starting murder timers");
-start_script("timers");
+startControlScript("timers");

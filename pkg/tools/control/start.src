@@ -5,6 +5,8 @@
 */
 use os;
 
+include ":settingsController:scriptStarter";
+
 var script := Start_Script( "initializer/checkpackages" );
 if( script.errortext )
 	SysLog( "Error starting ICP setup ->"+script.errortext );
@@ -12,7 +14,7 @@ else
 	Print( "Starting ICPPackage setup... OK." );
 endif
 
-script := Start_Script( "initializer/cmdbarmenus" );
+script := startControlScript( "initializer/cmdbarmenus" );
 if( script.errortext )
 	SysLog( "Error starting ICP command bar setup ->"+script.errortext );
 else
