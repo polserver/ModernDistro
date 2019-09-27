@@ -1,0 +1,44 @@
+use uo;
+use polsys;
+use basic;
+
+program textcmd_bcast( who, text )
+	// Convert the text entered by the user to lower case.
+	text := Lower(text);
+	// By calling the Realms() function with no parameters we get a list of the realms.
+	// This list is in a dictionary.
+	var relms := Realms();
+	// Get the keys from the dictionary. The keys are the names of the realms.
+	// The keys are returned as an array. So realm_names is an array of realm names.
+	var realm_names := relms.keys();
+	// This checks to make sure the user has entered a valid realm.
+	// If not the programme exits with an error message.
+	if(!(text in realm_names))
+		SendSysMessage(who, "That is not a valid realm.", color := 33);
+		return 0;
+	endif
+	// Here we are getting the info for a specific realm using the Realms() function
+	// but we are passing the text from the user.
+	// This time, because we are getting info for a specific realm, Realms() returns a struct.
+	var realm_info := Realms(text);
+	// Here we are getting the width and height, not the Z.
+	// Then we get the integer valuse of each divided by 2 to come up with the
+	// middle location of the realm. tox is the middle X coordinate of the realm
+	// and toy is the middle Y of the realm.
+	var tox := CInt(realm_info.width / 2);
+	var toy := CInt(realm_info.height / 2);
+	// We need to know the upper Z level of the map. This is returned in a struct.
+	var dest := GetMapInfo( tox, toy, text );
+	// If, for some reason, we receive an error the we print it to the user and exit.
+	if(dest.errortext)
+		SendSysMessage(who, dest.errortext, color := 33);
+		return 0;
+	endif
+	SendSysMessage(who, CStr(tox) + " " + CStr(toy) + " " + CStr(dest.z));
+	// This next line performs the actual moving of the user.
+    var result := MoveObjectToLocation (who, tox, toy, dest.z, text, MOVEOBJECT_FORCELOCATION);
+	// Again we check to see if we received an error. If so, print it to the user.
+	if(result.errortext)
+		SendSysMessage(who, result.errortext, color := 33);
+	endif
+endprogram

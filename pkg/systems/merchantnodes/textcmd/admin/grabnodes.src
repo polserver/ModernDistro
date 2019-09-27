@@ -2,9 +2,14 @@ use uo;
 use os;
 use cfgfile;
 
-program textcmd_grabnodes(who)
+program textcmd_grabnodes(who, text)
   var x := 0;
   var y := 0;
+  if(!text)
+	text := ":spawnSystem:packedNodes-" + who.realm;
+  else
+	text := ":spawnSystem:" + text + "-" + who.realm;
+  endif
   foreach thing in ListObjectsInBox(0, 0, -100, 6143, 4095, 100, who.realm)
     if(thing.objtype == 0x1887a)
       var data := array;
@@ -26,11 +31,11 @@ program textcmd_grabnodes(who)
           t.append(GetObjProperty(thing, entry));
           tmp.append(t);
         endif
-      endforeach    
+      endforeach
       holder.pname  := "data";
       holder.pvalue := pack(tmp);
       data.append(holder);
-      AppendConfigFileElem("packedNodes", "MERCHANT", "merchant" + x, data);
+      AppendConfigFileElem(text, "MERCHANT", "merchant" + x, data);
       x := x + 1;
       DestroyItem(thing);
     elseif(thing.objtype == 0x1887b)
@@ -53,11 +58,11 @@ program textcmd_grabnodes(who)
           t.append(GetObjProperty(thing, entry));
           tmp.append(t);
         endif
-      endforeach   
+      endforeach
       holder.pname  := "data";
       holder.pvalue := pack(tmp);
       data.append(holder);
-      AppendConfigFileElem( "packedNodes", "GUARD", "guard" + y, data);
+      AppendConfigFileElem( text, "GUARD", "guard" + y, data);
       y := y + 1;
       DestroyItem(thing);
     endif

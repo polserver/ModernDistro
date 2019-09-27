@@ -1,17 +1,17 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html><head>
-
-
   
   <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 
   
-  <meta http-equiv="Content-Language" content="en-us"><title>Sysbook Documentation</title>
-  
+  <meta http-equiv="Content-Language" content="en-us">
+  <title>Sysbook Documentation - GM Commands</title>
 
   
   
-  <link rel="stylesheet" type="text/css" href="docs.css"></head><body>
+  <link rel="stylesheet" type="text/css" href="docs.css">
+
+</head><body>
 <div id="container">
 <div id="header">
 <h1 style="text-align: center;">Sysbook package Documentation<br>
@@ -29,34 +29,40 @@ by <a href="mailto:distro@polserver.com">Yukiko</a>.</p>
     <tr>
       <td style="vertical-align: top;"><span style="font-weight: bold;">addspawnshelf</span><br>
       </td>
-      <td style="vertical-align: top;">Allows a user to add a bookshelf
+      <td style="vertical-align: top;">Allows
+a user to add one or more bookshelves
 to the spawn shelf data file. If the user appends a &lt;space&gt;
 followed by an integer, the integer will be used to set the maximum
 books that will be spawned in the bookshelves targetted. If no integer
-is appended to the command a gump will be presented with the default
-value from the sysbook settings file. The user can change it if so desired.<br>
+is appended to the command, a gump will be presented with the default
+value stored in the sysbook settings file. If you do not specify an
+integer this gump will appear for each shelf as you target it. This
+gives you the opportunity to edit the maximum books on a per shelf
+basis but having the gump opened for each shelf can be a bit wearysome.<br>
+Usage is .addspawnshelf<br>
       </td>
     </tr>
     <tr>
-      <td style="vertical-align: top;"><span style="font-weight: bold;">createshardbook</span><br>
+      <td style="vertical-align: top;"><span style="font-weight: bold;">findbook</span><br>
       </td>
-      <td style="vertical-align: top;">This programme displays a list
-of all books stored in the Shard Library (shard_library data file).
-There are check boxes beside each title to allow the staff member to
-create the books selected.<br>
+      <td style="vertical-align: top;">This
+command presents the user with a gump listing all of the books in the
+Shard Library. Select the books you wish to create and then they will
+be created in the container of your choice.<br>
+Usage is .findbook<br>
       </td>
     </tr>
     <tr>
       <td style="vertical-align: top;"><span style="font-weight: bold;">removespawnshelf</span><br>
       </td>
-      <td style="vertical-align: top;">This command allows the user to remove a bookshelf from the spawnedbookshelves data file.<br>
+      <td style="vertical-align: top;">This command allows the user to
+remove one or more bookshevesf from the spawnedbookshelves data file.<br>
+Usage is .removespawnshelf<br>
       </td>
     </tr>
   </tbody>
 </table>
-
 </div>
-
 </div>
 
 </body></html>

@@ -28,15 +28,24 @@ endprogram
 
 function do_poison(who, potion)
 	var item_config := ReadConfigFile(":alchemy:itemdesc");
+	if(item_config.errortext)
+		Print(item_config.errortext);
+	endif
 	var config_elem := FindConfigElem(item_config, potion.objtype);
-	var strength := GetConfigInt(config_elem, "strength");
+	if(config_elem.errortext)
+		Print(config_elem.errortext);
+	endif
+	var strength := CInt(GetConfigInt(config_elem, "strength"));
+	if(strength.errortext)
+		Print(strength.errortext);
+	endif
 
 	empty_bottle(who, potion);
 	PrintTextAbovePrivateCL(who, 1010512, {}, 3, 33, who); // You have been poisoned!
-/*
+	/*
 	if ( who.cmdlevel > 1 )
 		return 0;
 	endif
 	*/
-	TS_StartTimer(who, "defaultPoison", 120, strength, who);
+	TS_StartTimer(who, "DefaultPoison", 120, strength, who);
 endfunction
