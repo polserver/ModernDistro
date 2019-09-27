@@ -28,6 +28,11 @@ include ":timedScripts:poisonUtil";
 
 program test_cmd(who, text)
 
+	var fred_cfg := ReadConfigFile(":alchemy:fred");
+	if(!fred_cfg)
+		Print("File fred_cfg not found in " + GetProcess(GetPid()).name + ".");
+		return;
+	endif
 	SetRegionLightLevel( "BritanniaBackground", 30 );
 	return;
 
