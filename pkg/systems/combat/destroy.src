@@ -91,7 +91,7 @@ function protection(who,item)
 endfunction
 
 function RemoveMods(who, item)
-  var proc := GetProcess(Cint(GetObjProperty(item, "Pid")));
+  var proc := GetProcess(GetObjProperty(item, "Pid"));
   if(proc)
     var ev := {};
     ev.+type := EVID_UNEQUIP;

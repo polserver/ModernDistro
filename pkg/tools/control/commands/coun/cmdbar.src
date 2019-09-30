@@ -1,8 +1,8 @@
 /*
         Maintened by *Edwards
-        
+
         2008-12-14
-        
+
         Last Modifications 2008-12-14
              * Added an if statement for close option
 */
@@ -19,7 +19,7 @@ include ":gumps:gumps_ex";
 
 program textcmd_CommandBar( mobile )
 
-	if( GetProcess( CInt( GetObjProperty( mobile, "#CmdBarPid" ))))
+	if( GetProcess(  GetObjProperty( mobile, "#CmdBarPid" )))
 		return 0;
 	else
 		SetObjProperty( mobile, "#CmdBarPid", GetPid() );
@@ -32,7 +32,7 @@ program textcmd_CommandBar( mobile )
 	var cur_menu := EXPAND_BTN,
 	    cur_pkg, cur_lvl, gump,
 	    cur_pkg_elem;
- 
+
 	while( mobile.connected && GetObjProperty( mobile, "#CmdBarPid" ))
                 if( cur_menu == CLOSE_BTN )
                         EraseObjProperty( mobile, "#CmdBarPid" );
@@ -128,7 +128,7 @@ function SettingsMenu( mobile )
 
 	var transparency := ICP_LoadUserSetting( mobile, "Transparent" );
 	var gump := ICP_ExpandedMenuBar( transparency );
- 
+
 	GFResizePic( gump, 470, 30, GFGetCfgConst( "BackGrounds", "STONESLAB" ), 170, 150 );
 	if( transparency )
 		GFAddAlphaRegion( gump, 470, 30, 170, 150 );

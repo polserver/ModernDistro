@@ -81,7 +81,7 @@ endfunction
 
 function RemoveMods(who)
   foreach item in ListEquippedItems(who)
-    var proc := GetProcess(Cint(GetObjProperty(item, "Pid")));
+    var proc := GetProcess(GetObjProperty(item, "Pid"));
     if(proc)
       var ev := {};
       ev.+type := EVID_UNEQUIP;
