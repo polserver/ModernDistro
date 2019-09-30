@@ -9,11 +9,12 @@ include ":npcs:randName";
 include "include/utility";
 include "include/client";
 include ":npcs:garment";
-include "util/bank";
+//include "util/bank";
 include "include/anchors";
 include "include/dist";
 include ":npcs:skillLists";
 include "include/begging";
+include ":containers:storageAreas";
 
 const MAX_SKILLS      := 48;     // There are currently 48 Skills.
 const UOBJ_GOLDCOIN   := 0x0eed; // A gold coin
@@ -25,6 +26,7 @@ set_priority( 50 );
 var me := Self();
 var inv_rs, inv_fs, inv_pb, inv_1c;
 var player, counter;
+var bank_region := CP_DEFAULT_AREA;
 
 program appraiser()
   start_script("NPCKeeper", me);
@@ -90,7 +92,7 @@ function appraise(who)
     PrintTextAbovePrivate(me, "Im not interested in that!", who);
     return;
   endif
-  var bankbox := FindBankBox(who);
+  var bankbox := CP_GetStorageContainerForMobile( who, bank_region, CP_CREATE );
   if(!bankbox)
     PrintTextAbove(me, "I cannot seem to find your bankbox!", who);
     return;
@@ -111,7 +113,7 @@ function processdeedsale(who, trg)
     MoveItemToContainer(trg, who.backpack);
     return;
   endif
-  var bankbox := FindBankBox(who);
+  var bankbox := CP_GetStorageContainerForMobile( who, bank_region, CP_CREATE );
   if(!bankbox)
     PrintTextAbovePrivate(me, "I cannot seem to find your bankbox!", who);
     MoveItemToContainer(trg, who.backpack);
@@ -159,6 +161,6 @@ function processdeedsale(who, trg)
     endif
   endwhile
   if(chk == 0)
-    PrintTextAbovePrivate(me, "The funds have been deposited in your bank box.", who);
+    PrintTextAbovePrivate(me, "The funds will be deposited in your bank box forthwith.", who);
   endif
 endfunction
