@@ -13,12 +13,12 @@ include ":gumps:yesNo";
 
 program textcmd_dropSkill( mobile )
 
-	if( GetProcess( CInt( GetObjProperty( mobile, "#CmdDropSkillPid" ))))
+	if( GetProcess(  GetObjProperty( mobile, "#CmdDropSkillPid" )))
 		return 0;
 	else
 		SetObjProperty( mobile, "#CmdDropSkillPid", GetPid() );
 	endif
- 
+
 	//Initialize the gump
         var gump := GFCreateGump();
 
@@ -65,15 +65,15 @@ program textcmd_dropSkill( mobile )
 
         input := input[0];
         var option := skills_list[input];
-        
+
         if( !YesNo( mobile, "Are you sure you want to drop your "+option+"?", "Yes, drop my "+option+" to 0.", "It's a mistake, do not drop my "+option+"!" ))
                 SendSysMessage( mobile, "Cancelled." );
                 return 0;
         endif
-        
+
         AP_SetTrueSkill( mobile, option, 0 );
         SendSysMessage( mobile, "You dropped your "+option+"." );
-        
-        
+
+
         return 1;
 endprogram
