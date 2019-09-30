@@ -27,9 +27,9 @@ program cast_invis( parms )
 	// Tell spell starter to not wait for this script to finish
 	//var spell_starter := GetProcess(info.pid);
 	//spell_starter.SendEvent("continue");
-	
+
 	// Duration: (Magery * 1.2) seconds
-	var duration := CInt((AP_GetSkill(caster, MAGERY) * 1.2) * 1000);
+	var duration := CInt((AP_GetSkill(caster, MAGERY) * 1.2) );
 	TS_StartTimer(cast_on, "Invisibility", duration, 0, caster);
 
 	return 1;
