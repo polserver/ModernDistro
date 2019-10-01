@@ -18,7 +18,7 @@ program TimedScript_Invisiblity(params)
 		return 0;
 	endif
 	
-	SetObjProperty(defender, "Invisible", 1);
+	SetObjProperty(defender, "Invisibility", 1);
 	defender.hidden := 1;
 	
 	while ( defender.hidden == 1 )

@@ -10,16 +10,27 @@ use polsys;
 function UpdateBuffIcon( mobile, byref cfg_elem, byref event )
 
         var buff_icon := CInt( cfg_elem.BuffIcon );
+        // This section is my attempt to read cliloc info from the cfg file.
+        // var cliloc_name := CInt( cfg_elem.cliloc_name );
+        // if(cliloc_name.errortext)
+        //   Print(cliloc_name.errortext);
+        // else
+        //   Print(CStr(cliloc_name));
+        // endif
+        // var cliloc_desc := CInt( cfg_elem.cliloc_desc );
+        //////////////////////////////////////////////////////////////////////
         if( buff_icon )
                 var level := event.level,
                     amount := event.amount;
                 
+                // SendBuffIcon( mobile, buff_icon, level, amount, cliloc_name, cliloc_desc ); // cfg cliloc stuff.
                 SendBuffIcon( mobile, buff_icon, level, amount );
         endif
         
         return 1;
 endfunction
 
+// function SendBuffIcon( mobile, icon, modifier, duration, cliloc_name, cliloc_desc ) // cfg cliloc stuff.
 function SendBuffIcon( mobile, icon, modifier, duration )
 
         if( mobile.IsA( POLCLASS_NPC ))
@@ -38,9 +49,9 @@ function SendBuffIcon( mobile, icon, modifier, duration )
 
         if( show )
                 var clilocs := GetClilocsInfo( icon ),
-	            cliloc_name := clilocs[1],
-	            cliloc_desc := clilocs[2];
-     
+                cliloc_name := clilocs[1],
+                cliloc_desc := clilocs[2];
+
                 packet.SetInt16( 15, icon );
                 packet.SetInt16( 17, show );
                 packet.SetInt16( 23, duration );
@@ -133,146 +144,146 @@ endfunction
 /*
 
    "dismount":
-         tile := 1001;
-         cliloc1 := 1075635;
-         cliloc2 := 1075636;
+         BuffIcon := 1001;
+         cliloc_name := 1075635;
+         cliloc_desc := 1075636;
    "disarm":
-          tile := 1002;
-         cliloc1 := 1075637;
-         cliloc2 := 1075638;
+          BuffIcon := 1002;
+         cliloc_name := 1075637;
+         cliloc_desc := 1075638;
    "nightsight":
-          tile := 1005;
-         cliloc1 := 1075643;
-         cliloc2 := 1075644;
+          BuffIcon := 1005;
+         cliloc_name := 1075643;
+         cliloc_desc := 1075644;
    "deathstrike":
-         tile := 1006;
+         BuffIcon := 1006;
    "evilomen":
-         tile := 1007;
+         BuffIcon := 1007;
    "dontknow1":
-         tile := 1008;
+         BuffIcon := 1008;
    "regeneration":
-         tile := 1009;
-         cliloc1 := 1044106;
-         cliloc2 := 1075106;
+         BuffIcon := 1009;
+         cliloc_name := 1044106;
+         cliloc_desc := 1075106;
    "divinefury":
-         tile := 1010;
+         BuffIcon := 1010;
    "enemyofone":
-         tile := 1011;
+         BuffIcon := 1011;
    "stealth":
-         tile := 1012;
-         cliloc1 := 1044107;
-         cliloc2 := 1075655;
+         BuffIcon := 1012;
+         cliloc_name := 1044107;
+         cliloc_desc := 1075655;
    "meditation":
-         tile := 1013;
-         cliloc1 := 1044106;
-         cliloc2 := 1075106;
+         BuffIcon := 1013;
+         cliloc_name := 1044106;
+         cliloc_desc := 1075106;
    "bloodoathcaster":
-         tile := 1014;
+         BuffIcon := 1014;
    "bloodoathcurse":
-         tile := 1015;
+         BuffIcon := 1015;
    "corpseskin":
-         tile := 1016;
+         BuffIcon := 1016;
    "mindrot":
-         tile := 1017;
+         BuffIcon := 1017;
    "painstrike":
-         tile := 1018;
+         BuffIcon := 1018;
    "strangle":
-         tile := 1019;
+         BuffIcon := 1019;
    "giftofrenewal":
-         tile := 1020;
+         BuffIcon := 1020;
    "attunewapon":
-         tile := 1021;
+         BuffIcon := 1021;
    "thunderstorm":
-         tile := 1022;
+         BuffIcon := 1022;
    "essenceofwind":
-         tile := 1023;
+         BuffIcon := 1023;
    "etheralvoyage":
-         tile := 1024;
+         BuffIcon := 1024;
    "giftoflife":
-         tile := 1025;
+         BuffIcon := 1025;
    "arcaneempowerment":
-         tile := 1026;
+         BuffIcon := 1026;
    "mortalstrike":
-         tile := 1027;
+         BuffIcon := 1027;
    "reactivearmor":
-         tile := 1028;
-         cliloc1 := 1075812;
-         cliloc2 := 1075813;
+         BuffIcon := 1028;
+         cliloc_name := 1075812;
+         cliloc_desc := 1075813;
    "protection":
-         tile := 1029;
-         cliloc1 := 1075814;
-         cliloc2 := 1075815;
+         BuffIcon := 1029;
+         cliloc_name := 1075814;
+         cliloc_desc := 1075815;
    "archprotection":
-         tile := 1030;
-         cliloc1 := 1075816;
-         cliloc2 := 1075816;
+         BuffIcon := 1030;
+         cliloc_name := 1075816;
+         cliloc_desc := 1075816;
    "magicreflection":
-         tile := 1031;
-         cliloc1 := 1075817;
-         cliloc2 := 1075818;
+         BuffIcon := 1031;
+         cliloc_name := 1075817;
+         cliloc_desc := 1075818;
    "incognito":
-         tile := 1032;
-         cliloc1 := 1075819;
-         cliloc2 := 1075820;
+         BuffIcon := 1032;
+         cliloc_name := 1075819;
+         cliloc_desc := 1075820;
    "disguised":
-         tile := 1033;
+         BuffIcon := 1033;
    "animalform":
-         tile := 1034;
+         BuffIcon := 1034;
    "polymorph":
-         tile := 1035;
-         cliloc1 := 1075824;
-         cliloc2 := 1075820;
+         BuffIcon := 1035;
+         cliloc_name := 1075824;
+         cliloc_desc := 1075820;
    "invisibility":
-         tile := 1036;
-         cliloc1 := 1075825;
-         cliloc2 := 1075826;
+         BuffIcon := 1036;
+         cliloc_name := 1075825;
+         cliloc_desc := 1075826;
    "paralyse":
-         tile := 1037;
-         cliloc1 := 1075827;
-         cliloc2 := 1075828;
+         BuffIcon := 1037;
+         cliloc_name := 1075827;
+         cliloc_desc := 1075828;
    "poison":
-         tile := 1038;
-         cliloc1 := 0x0F8627;
-         cliloc2 := 0x1069B1;
+         BuffIcon := 1038;
+         cliloc_name := 0x0F8627;
+         cliloc_desc := 0x1069B1;
    "bleed":
-         tile := 1039;
-         cliloc1 := 0x106a75;
-         cliloc2 := 0x106a76;
+         BuffIcon := 1039;
+         cliloc_name := 0x106a75;
+         cliloc_desc := 0x106a76;
    "clumsy":
-         tile := 1040;
-         cliloc1 := 0x106a77;
-         cliloc2 := 0x106a78;
+         BuffIcon := 1040;
+         cliloc_name := 0x106a77;
+         cliloc_desc := 0x106a78;
    "feeblemind":
-         tile := 1041;
-         cliloc1 := 0x106a79;
-         cliloc2 := 0x106a7a;
+         BuffIcon := 1041;
+         cliloc_name := 0x106a79;
+         cliloc_desc := 0x106a7a;
    "weaken":
-         tile := 1042;
-         cliloc1 := 1075837;
-         cliloc2 := 1075838;
+         BuffIcon := 1042;
+         cliloc_name := 1075837;
+         cliloc_desc := 1075838;
    "curse":
-         tile := 1043;
-         cliloc1 := 1075835;
-         cliloc2 := 1075836;
+         BuffIcon := 1043;
+         cliloc_name := 1075835;
+         cliloc_desc := 1075836;
    "masscurse":
-         tile := 1044;
-         cliloc1 := 0x106a7f;
-         cliloc2 := 0x106a80;
+         BuffIcon := 1044;
+         cliloc_name := 0x106a7f;
+         cliloc_desc := 0x106a80;
    "agility":
-         tile := 1045;
-         cliloc1 := 0x106a81;
-         cliloc2 := 0x106a82;
+         BuffIcon := 1045;
+         cliloc_name := 0x106a81;
+         cliloc_desc := 0x106a82;
    "cunning":
-         tile := 1046;
-         cliloc1 := 0x106a83;
-         cliloc2 := 0x106a84;
+         BuffIcon := 1046;
+         cliloc_name := 0x106a83;
+         cliloc_desc := 0x106a84;
    "strength":
-         tile := 1047;
-         cliloc1 := 0x106a85;
-         cliloc2 := 0x106a86;
+         BuffIcon := 1047;
+         cliloc_name := 0x106a85;
+         cliloc_desc := 0x106a86;
    "bless":
-         tile := 1048;
-         cliloc1 := 0x106a87;
-         cliloc2 := 0x106a88;
+         BuffIcon := 1048;
+         cliloc_name := 0x106a87;
+         cliloc_desc := 0x106a88;
   endcase
 */
