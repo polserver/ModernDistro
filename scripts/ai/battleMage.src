@@ -29,7 +29,6 @@ var nextchk     := ReadGameClock() + 120;
 
 program CastleGuard()
   SetObjProperty(me, "MerchantType", "BattleMage");
-  // me.concealed := 1;
   start_script("NPCKeeper", me);
   var myanchor := GetObjProperty(me, "Anchor");
   if(myanchor)
