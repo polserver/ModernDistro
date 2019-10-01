@@ -15,6 +15,7 @@ include "include/anchors";
 include ":npcs:skillLists";
 include ":timedScripts:poisonUtil";
 include ":damage:damage";
+include "include/speech";
 
 var flee_point := 0;
 var npccfg := ReadConfigFile("::npcdesc");
@@ -28,7 +29,7 @@ var nextchk     := ReadGameClock() + 120;
 
 program CastleGuard()
   SetObjProperty(me, "MerchantType", "BattleMage");
-  me.concealed := 1;
+  // me.concealed := 1;
   start_script("NPCKeeper", me);
   var myanchor := GetObjProperty(me, "Anchor");
   if(myanchor)
@@ -36,8 +37,14 @@ program CastleGuard()
   endif
   drop_anchor();
   myanchor := GetObjProperty(me, "Anchor");
-  EnableEvents(SYSEVENT_ENGAGED);
-  EnableEvents(EVID_NODE);
+  // Added in attempt to get out of the node system.
+  EnableEvents(SYSEVENT_SPEECH, 3);
+  EnableEvents( SYSEVENT_ENGAGED + SYSEVENT_DISENGAGED + SYSEVENT_DAMAGED );
+  EnableEvents( SYSEVENT_ENTEREDAREA + SYSEVENT_LEFTAREA, HALT_THRESHOLD );
+  EnableEvents(SYSEVENT_OPPONENT_MOVED);
+
+//  EnableEvents(SYSEVENT_ENGAGED);
+//  EnableEvents(EVID_NODE);
   SetWarMode(0);
   set_priority(100);
   var ev;
@@ -55,9 +62,18 @@ program CastleGuard()
     ev := os::wait_for_event(120);
 	if (ev)
       case(ev.type)
-        EVID_NODE:           foreach thing in (ev.crims)
-                               Fight(thing);
-                             endforeach
+      SYSEVENT_SPEECH:      var tspeech := process_text(ev.text, "default","default");
+                        txt := lower(ev.text);
+                        if(tspeech)
+                          say(tspeech);
+                        elseif(txt[myname] && (txt["train"] || txt["teach"]))
+                          TurnToward(ev.source);
+                          MerchantTrain(me, ev.source, ev.text);
+                        endif
+		SYSEVENT_ITEM_GIVEN:  TrainSkill(me, ev.source, ev.item);
+		SYSEVENT_ENTEREDAREA:	if(ev.murderer)
+														Fight(ev);
+													endif
         SYSEVENT_ENGAGED:    if((ev.source) && (!ev.source.dead))
 		                       say("Thou wilt regret thine actions, swine!");
                                Fight(ev.source);
@@ -66,6 +82,8 @@ program CastleGuard()
 		                       say("Thou wilt regret thine actions, swine!");
                                Fight(ev.source);
                              endif
+		SYSEVENT_LEFTAREA:
+
       endcase
 	endif
 	if(ReadGameClock() >= next_wander)
@@ -284,6 +302,114 @@ function in_combat_event_loop(opponent, loops)
   if(loops > 50)
 	RestartScript(me);
 	return;
+  endif
+endfunction
+
+function MerchantTrain(me, who, text)
+  var totaltrain := 0;
+  var words := SplitWords(text);
+  var skill := words[3];
+  if(!skill)
+    var trainable := "";
+    var holder := "";
+    foreach thing in getskilllist(me)
+      if(holder == "")
+        holder := thing;
+      else
+        holder := holder + ", " + thing;
+      endif
+      totaltrain := totaltrain + 1;
+    endforeach
+    trainable  := trainable + holder;
+    if(totaltrain > 0)
+      say("I can train thee in the following skills:");
+      say(trainable);
+    else
+      say("I can not train thee.");
+    endif
+  else
+    skill := lower(skill);
+    skill := FindSkillId(skill);
+    var npclevel := 33;
+    var pclevel;
+    foreach thing in getskilllist(me)
+      if(lower(thing) == skill)
+        pclevel := AP_GetSkill(who, AP_SkillIDToAttributeName(thing));
+        if(pclevel > npclevel)
+          say("I cannot teach you anymore.");
+          return;
+        else
+          var trainmaxcost := GoldForSkillGain(npclevel, pclevel, thing);
+          say("I will train thee " + thing + " for " + trainmaxcost + " gold.");
+          SetObjProperty(who, "TrainMaxCost", trainmaxcost);
+          SetObjProperty(who, "TrainSkillID", thing);
+          return;
+        endif
+      endif
+    endforeach
+    say("I know not of that skill.");
+  endif
+endfunction
+
+function TrainSkill(me, who, item)
+  var variance := 0;
+  var npc_level := 0;
+  var pc_level := 0;
+  var goldreceived := 0;
+  var new_level := 0;
+  var currentnpccost := 0;
+  if((item.objtype == 0xeed) && (item.amount != 0))
+    var trainmaxcost := GetObjProperty(who, "TrainMaxCost");
+    var trainskillid := GetObjProperty(who, "TrainSkillID");
+    if((!trainmaxcost || !trainskillid) && trainskillid != 0)
+      say("I don't know what this is for, but thanks!");
+      DestroyItem(item);
+      return;
+    endif
+    if(AP_GetSkill(me, AP_SkillIDToAttributeName(trainskillid)))
+      npc_level    := 33;
+      pc_level     := AP_GetSkill(who, AP_SkillIDToAttributeName(trainskillid));
+      goldreceived := item.amount;
+      variance     := npc_level - pc_level;
+      currentnpccost := GoldForSkillGain(npc_level, pc_level, trainskillid);
+      if(pc_level < npc_level)
+        if(currentnpccost != trainmaxcost)
+          if(currentnpccost > trainmaxcost)
+            npc_level := SkillGainForGold(npc_level, pc_level, trainskillid, trainmaxcost);
+            variance  := npc_level - pc_level;
+          else
+            if(goldreceived > currentnpccost)
+              say("I can not train thee to that level.");
+              MoveItemToContainer(item, who.backpack);
+              return;
+            else
+              trainmaxcost := currentnpccost;
+            endif
+          endif
+        endif
+        if(trainmaxcost <= goldreceived)
+          new_level := (npc_level * 10);
+          EraseObjProperty( who, "TrainMaxCost" );
+          EraseObjProperty( who, "TrainSkillID" );
+        else
+          new_level := ((pc_level + CInt((CDbl(variance) * (CDbl(goldreceived) / CDbl(trainmaxcost))))) * 10);
+          SetObjProperty( who, "TrainMaxCost", trainmaxcost-goldreceived );
+        endif
+        say("Let me show you how it's done.");
+        SetBaseSkillBaseValue(who, trainskillid, new_level);
+        DestroyItem(item);
+        SendSysMessage(who, "Your skill increases.");
+      else
+        say("I'm not as good as thee.  Please find another to train thee.");
+        MoveItemToContainer(item, who.backpack);
+      endif
+    else
+      say("I don't know that skill. Why don't you ask me what i can train you in?");
+      MoveItemToContainer(item, who.backpack);
+    endif
+  else
+    say("Bah, I have no use for this. Be off with ye.");
+    MoveItemToContainer(item, who.backpack);
   endif
 endfunction
 
