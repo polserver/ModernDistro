@@ -70,12 +70,18 @@ program CastleGuard()
                           MerchantTrain(me, ev.source, ev.text);
                         endif
 		SYSEVENT_ITEM_GIVEN:  TrainSkill(me, ev.source, ev.item);
+<<<<<<< HEAD
 //		SYSEVENT_ENTEREDAREA:	foreach thing in (ev.murderer)
 		SYSEVENT_ENTEREDAREA:	if(ev.murderer)
 														SendSysMessage(ev, "You are a murderer!", color := 33);
 														Fight(ev);
 													endif
 //													endforeach
+=======
+		SYSEVENT_ENTEREDAREA:	if(ev.murderer)
+														Fight(ev);
+													endif
+>>>>>>> development
         SYSEVENT_ENGAGED:    if((ev.source) && (!ev.source.dead))
 		                       say("Thou wilt regret thine actions, swine!");
                                Fight(ev.source);
