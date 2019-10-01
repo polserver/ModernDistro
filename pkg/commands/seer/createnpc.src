@@ -11,7 +11,7 @@ program	text_command_createnpc(who, template)
 
 
 
-	var	mercscripts := {"appraiser", "barber", "banker", "battleMage", "bucsBanker", "bucsTownHealer", "davesHealer", 
+	var	mercscripts := {"appraiser", "barber", "banker", "bucsBanker", "bucsTownHealer", "davesHealer",
 						"healer", "merchant", "stablemaster", "townguard", "townHealer"};
 	var	guardscripts := {"townGuard", "instakillGuard"};
 	var	npc_config := ReadConfigFile("::npcdesc");
@@ -38,7 +38,7 @@ program	text_command_createnpc(who, template)
 	else
 		node := "none";
 	endif
-	
+
 /*	if(node != "none")
 		GumpPrompt(who, "The NPC you want to create requires a listening node. Therefore I will create one instead of the NPC.
 						Target the location for the node. Use (double-click) the node to create the NPC.", 1, hue:=1153);
@@ -46,16 +46,16 @@ program	text_command_createnpc(who, template)
 
 
 	case (node)
-	
+
 		"none":	createthenpc(who, template);
 		"merc":	createmerc(who);
 		"gard":	createguard(who);
-	
+
 	endcase
 */
 createthenpc(who, template);
 	return;
-	
+
 endprogram
 
 
@@ -79,7 +79,7 @@ endprogram
 	endfunction
 
 	function createmerc(who)
-	
+
 		Start_Script( ":merchantnodes:textcmd/gm/createnode", who );
 /*		var thingy := CreateItemAtLocation(loc.x, loc.y, loc.z, "merchantnode", 1, loc.realm);
 		if(!thingy)
@@ -87,7 +87,7 @@ endprogram
 		endif
 	*/
 	endfunction
-	
+
 	function createguard(who)
 
 		var loc := TargetCoordinates(who);
@@ -109,7 +109,7 @@ endprogram
 		var Groups_cfg := ReadConfigFile("NPC_Groups");
 		var NPC_Groups := GetConfigStringKeys( Groups_cfg );
 //		SendSysMessage(who, "Length of NPC_Groups is " + CStr(Len(NPC_Groups)));
-		
+
 		foreach group in NPC_Groups
 				var elem := FindConfigElem (Groups_cfg, group);
 				if (elem)
@@ -154,7 +154,7 @@ endprogram
 			SendSysmessage (who, "Canceled.", color := 33);
 			return;
 		endif
-		
+
 		return thenpcs [selection2.index];
 	endfunction
 
