@@ -60,6 +60,10 @@ use math;
 const CONST_E := 2.718282;
 const CONST_PI := 3.141592;
 
+// Used in the RoundToTens() function
+const ROUND_NORMAL := 0;
+const ROUND_DOWN := 1;
+const ROUND_UP := 2;
 
 ///////////////////////////////////////////////////////////
 //
@@ -770,4 +774,46 @@ endfunction
  */
 function IsBitOn ( value, shift_by )
 	return ( 1 & ( value >> shift_by ) );
+endfunction
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+//
+// function RoundToTens( n, behaviour := NORMAL )
+// Purpose: Round the passed number to an even multiple of 10.
+// Examples:	RoundToTen( 145 ) will return 140.
+//						RoundToTen( 146 ) will return 150.
+// Parameters:	n - Is converted to an integer.
+//						behaviour - constant as defined below.
+//						ROUND_NORMAL will round up or down using normal rounding
+//						rules, ie. if n is in the range of 140 - 145 it will return140.
+//						if n is in the range of 146 to 150 it will return 150.
+//						ROUND_DOWN will always round down to the nearest tens
+//						place, ie. if n is between 140 - 149 it will return 140.
+//						ROUND_UP will always round up to the nearest tens
+//						place, ie. if n is between 140 - 149 it will return 150.
+//
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+function RoundToTens( n, behaviour := ROUND_NORMAL )
+	n := CInt(n);
+
+    // Smaller multiple
+    var a := (n / 10) * 10;
+
+    // Larger multiple
+    var b := a + 10;
+
+    // Return to even tens place
+	if(behaviour  == ROUND_NORMAL)
+		if(n-a > b -n)
+			return b;
+		else
+			return a;
+		endif
+	elseif(behaviour == ROUND_DOWN)
+			return a;
+	elseif(behaviour == ROUND_UP)
+			return b;
+	endif
+
 endfunction

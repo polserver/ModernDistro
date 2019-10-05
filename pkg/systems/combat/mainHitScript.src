@@ -27,7 +27,7 @@ include ":damage:damage";
 var item_cfg := ReadConfigFile(":*:itemdesc");
 
 program MainHitScript(attacker, defender, weapon, armor, basedamage, rawdamage)
-
+	Print("In mainHitScript");
 	//
 	// Cheat checker
 	//
@@ -79,7 +79,7 @@ program MainHitScript(attacker, defender, weapon, armor, basedamage, rawdamage)
 	DamageInfo(attacker, defender, basedamage, rawdamage);
 	WeaponHitScripts(attacker, defender, weapon, armor, basedamage, rawdamage);
 	ArmorHitScripts(attacker, defender, weapon, armor, basedamage, rawdamage);
-	//PoisonChecks(attacker, defender, weapon, armor, basedamage, rawdamage);
+	PoisonChecks(attacker, defender, weapon, armor, basedamage, rawdamage);
 
 	var hostiles := ListHostiles(defender, 1);
 	rawdamage := rawdamage+CInt(hostiles.Size()/2);
@@ -238,8 +238,9 @@ endfunction
 
 function PoisonChecks(attacker, defender, weapon, armor, basedamage, rawdamage)
 
-	var PoisonStrength := GetObjProperty(weapon, "PoisonStrength");
+	var PoisonStrength := CInt(GetObjProperty(weapon, "PoisonStrength"));
 	var duration := CInt(GetObjProperty(weapon, "duration"));
+	Print(CStr(PoisonStrength) + "    " + CStr(duration));
 
 	if ( PoisonStrength )
 		TS_StartTimer(defender, "DefaultPoison", duration, PoisonStrength, attacker);

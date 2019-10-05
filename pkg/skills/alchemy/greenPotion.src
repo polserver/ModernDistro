@@ -47,5 +47,5 @@ function do_poison(who, potion)
 		return 0;
 	endif
 	*/
-	TS_StartTimer(who, "DefaultPoison", 120, strength, who);
+	TS_StartTimer(who, "DefaultPoison", 120, strength);
 endfunction
