@@ -8,27 +8,34 @@ include ":timedScripts:timedScripts";
 include ":itemutils:itemdesc";
 include "include/client";
 include "include/sounds";
-
-program use_Drink(character, drink)
+include "include/math";
+program use_Drink(who, drink)
 	if( drink.movable == 0 )
-		SendSysMessage(character, "You cannot drink that.");
+		SendSysMessage(who, "You cannot drink that.");
 		return 0;
 	endif
 
 	var cfg_elem := GetItemDescInfo(drink.objtype);
 	var proof := GetConfigInt(cfg_elem, "Proof");
-	var poison := CInt(GetObjProperty(drink, "PoisonLevel"));
+	var strength := CInt(GetObjProperty(drink, "PoisonStrength"));
+	var duration := CInt(GetObjProperty(drink, "duration"));
 
 	SubtractAmount(drink, 1);
-	PerformAction(character, ANIM_EAT);
-	PlaySoundEffect(character, SFX_DRINK_1);
+	PerformAction(who, ANIM_EAT);
+	PlaySoundEffect(who, SFX_DRINK_1);
 	Sleep(2);
 
-	if ( poison > 0 )
-		TS_StartTimer(character, "DefaultPoison", 120, poison, character);
-	endif
 	if ( proof )
-		TS_StartTimer(character, "Alcohol", proof*10);
+		TS_StartTimer(who, "Alcohol", proof*10);
+	endif
+	if ( strength > 0 )
+		// If the beverage is alcoholic the strength of the alcohol
+		// will increase the duration of the poison timer.
+		var modifier := (proof * 0.01) * 4;
+		duration := CInt(duration + (duration * modifier));
+		// Round up to the nearest tens place.
+		duration := RoundToTens(duration, ROUND_UP);
+		TS_StartTimer(who, "DefaultPoison", duration, strength);
 	endif
 
 	return 1;

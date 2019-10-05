@@ -23,7 +23,9 @@ program eat(who, food)
 
 	var cfg_elem := GetItemDescInfo(food.objtype);
 	var themsg;
-	var poison := CInt(GetObjProperty(food, "PoisonLevel"));
+	var strength := CInt(GetObjProperty(food, "PoisonStrength"));
+	var duration := CInt(GetObjProperty(food, "duration"));
+
 	var foodvalue := CInt(cfg_elem.foodvalue);
 
 	var hunger := AP_GetVital(who, "Hunger");
@@ -105,8 +107,8 @@ program eat(who, food)
 		endcase
 	endif
 
-	if ( poison > 0 )
-		TS_StartTimer(who, "defaultPoison", 120, poison, who);
+	if ( strength > 0 )
+		TS_StartTimer(who, "DefaultPoison", duration, strength);
 	endif
 
 	return 1;

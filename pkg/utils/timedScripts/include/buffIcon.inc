@@ -33,6 +33,8 @@ endfunction
 // function SendBuffIcon( mobile, icon, modifier, duration, cliloc_name, cliloc_desc ) // cfg cliloc stuff.
 function SendBuffIcon( mobile, icon, modifier, duration )
 
+        Print("Buff icon is " + CStr(icon));
+
         if( mobile.IsA( POLCLASS_NPC ))
                 return 0;
         endif
@@ -136,6 +138,11 @@ function GetClilocsInfo( icon )
                            cliloc_name := 1075825;
                            cliloc_desc := 1075826;
                            break;
+                1038:      // Poison
+                           cliloc_name := 0x0F8627;
+                           cliloc_desc := 0x1069B1;
+                           break;
+
         endcase
         
         return array{cliloc_name, cliloc_desc};
