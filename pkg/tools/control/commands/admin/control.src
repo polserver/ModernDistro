@@ -19,7 +19,7 @@ include ":datafile:datafile";
 include ":gumps:gumpPrompt";
 include ":gumps:gumps";
 include ":gumps:gumps_ex";
-include ":gumps:yesno";
+include ":gumps:yesNo";
 include "include/security";
 
 // Arbitrary button return (id) values.
