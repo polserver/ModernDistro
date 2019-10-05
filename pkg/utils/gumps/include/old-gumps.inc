@@ -906,15 +906,15 @@ var aGFTlength := struct;
          "`',.;:::::::::"+ //  3
          "!!!!!!!!!!!!!!"+ //  4
          "il1[]]]]]]]]]\""+ //  5
-         "bcejotî(){}==="+ //  6
-         "adfpqrszIÑ~~~~"+ //  7
-         "ghnuvyÅ <>----"+ //  8
+         "bcejot‚Äù(){}==="+ //  6
+         "adfpqrszI‚Äû~~~~"+ //  7
+         "ghnuvy <>-----"+ //  8
          "xJ578$?+++++++"+ //  9
          "kCE2369^/*****"+ // 10
-         "mwABDFOPéô40%%"+ // 11
+         "mwABDFOP≈Ω‚Ñ¢40%%"+ // 11
          "GLNQSZ@#######"+ // 12
          "HRT&__________"+ // 13
-         "KöUYYYYYYYYYYY"+ // 14
+         "K≈°UYYYYYYYYYYY"+ // 14
          "XXXXXXXXXXXXXX"+ // 15
          "VVVVVVVVVVVVVV"+ // 16
          "MMMMMMMMMMMMMM"+ // 18
@@ -1340,15 +1340,15 @@ function GFTextWidth(gump_text)
 	"`',.;:::::::::"+	//  3
 	"!!!!!!!!!!!!!!"+	//  4
 	"il1[]]]]]]]]]\""+	//  5
-	"bcejotî(){}==="+	//  6
-	"adfpqrszIÑ~~~~"+	//  7
-	"ghnuvyÅ<>-----"+	//  8
+	"bcejot‚Äù(){}==="+	//  6
+	"adfpqrszI‚Äû~~~~"+	//  7
+	"ghnuvy <>-----"+	//  8
 	"xJ578$?++++++ "+	//  9
 	"kCE2369^/*****"+	// 10
-	"mwABDFOPéô40%%"+	// 11
+	"mwABDFOP≈Ω‚Ñ¢40%%"+	// 11
 	"GLNQSZ@#######"+	// 12
 	"HRT&__________"+	// 13
-	"KöUYYYYYYYYYYY"+	// 14
+	"K≈°UYYYYYYYYYYY"+	// 14
 	"XXXXXXXXXXXXXX"+	// 15
 	"VVVVVVVVVVVVVV"+	// 16
 	"MMMMMMMMMMMMMM"+	// 18
