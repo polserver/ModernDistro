@@ -1,0 +1,9 @@
+use uo;
+
+include ":settingsController:scriptStarter";
+
+exported function start_control_script( scriptString, params := 0 );
+
+	startControlScript( scriptString, params := 0 );
+
+endfunction
