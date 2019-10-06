@@ -5,7 +5,7 @@ use polsys;
 include ":control:internal/cmdbar";
 include ":control:internal/icp-util";
 include ":datafile:datafile";
-include ":gumps:gumpprompt";
+include ":gumps:gumpPrompt";
 include ":gumps:gumps";
 include ":gumps:gumps_ex";
 include "include/arrays";
