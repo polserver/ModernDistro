@@ -118,7 +118,7 @@ endfunction
  */
 function AP_SetSkillMod( mobile, skill_name, points )
 
-	var result := SetAttributeTemporaryMod( mobile, skill_name, CInt( CDbl( points ) * 10 ));
+	var result := SetAttributeTemporaryMod( mobile, skill_name, CInt( CDbl( points ) * 10.0 ));
 	RecalcVitals( mobile );
 	return result;
 endfunction

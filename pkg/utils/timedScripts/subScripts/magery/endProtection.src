@@ -1,0 +1,26 @@
+/*
+ * $Id: endAgility.src 921 2006-12-20 23:27:45Z tekproxy $
+ *
+ */
+
+use uo;
+use os;
+
+include ":attributes:attributes";
+include ":damage:damage";
+
+program TimedScript_EndProtection(params)
+	var mobile := params[1];
+
+	var mods := struct;
+	mods := GetObjProperty(mobile, "Protection");
+
+	ModifyResistance(mobile, DMG_PHYSICAL, + mods.phys_resist_mod);
+	AP_ModifySkillMod(mobile, RESISTING_SPELLS, + mods.resist_spells_mod);
+
+
+	EraseObjProperty(mobile, "Protection");
+
+	return 1;
+endprogram
+

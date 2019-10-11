@@ -361,8 +361,9 @@ endfunction
 function MS_PlaySpellSFX(spellid, targ, success:=1)
 	var cfg_elem := MS_GetSpellsCfgElem(spellid);
 	var sfx := CInt(GetConfigInt(cfg_elem, "SFX"));
-
-	Print("Playing SFX:"+sfx+" for spellid:"+spellid);
+	if(GetGlobalProperty("Debug"))
+		Print("Playing SFX:"+sfx+" for spellid:"+spellid);
+	endif
 	PlaySoundEffect(targ, sfx);
 
 	return 1;
@@ -372,8 +373,9 @@ endfunction
 function MS_PlaySpellGFX(spellid, targ, caster, speed:=7, loop:=14, explode := 0)
 	var cfg_elem := MS_GetSpellsCfgElem(spellid);
 	var gfx := CInt(GetConfigInt(cfg_elem, "GFX"));
-
-	Print("Playing GFX:"+gfx+" for spellid:"+spellid+" of gfx type:"+CInt(cfg_elem.GFXType));
+	if(GetGlobalProperty("Debug"))
+		Print("Playing GFX:"+gfx+" for spellid:"+spellid+" of gfx type:"+CInt(cfg_elem.GFXType));
+	endif
 	case ( CInt(cfg_elem.GFXType) )
 		0: return 1;
 		1: PlayObjectCenteredEffect(targ, gfx, speed, loop);

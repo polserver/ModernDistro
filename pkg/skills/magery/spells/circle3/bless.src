@@ -25,20 +25,16 @@ program cast_bless( parms )
 	MS_PlaySpellSFX(info.spell_id, cast_on);
 	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
 
-		// Str increase % = (Eval / 10 + 1)
+	// Str increase % = (Eval / 10 + 1)
 	var percent := CDbl(AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 10) + 1;
-	var dex_points := CInt(AP_GetStat(cast_on, DEXTERITY) * (percent / 100));
-	var int_points := CInt(AP_GetStat(cast_on, INTELLIGENCE) * (percent / 100));
-	var str_points := CInt(AP_GetStat(cast_on, STRENGTH) * (percent / 100));
+	var points := CInt(AP_GetStat(cast_on, DEXTERITY) * (percent / 100));
 
 	// Duration: ((Eval / 5) + 1) * 6
 	var duration := ((AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 5) + 1) * 6;
 
 	// Same as casting agility, cunning and strength all at once.
 	// Bless should probably not be able to stack with Agility, etc. So we do it this way.
-	TS_StartTimer(cast_on, "Agility", duration, dex_points, caster);
-	TS_StartTimer(cast_on, "Cunning", duration, int_points, caster);
-	TS_StartTimer(cast_on, "Strength", duration, str_points, caster);
+	TS_StartTimer(cast_on, "Bless", duration, points, caster);
 
 	return 1;
 

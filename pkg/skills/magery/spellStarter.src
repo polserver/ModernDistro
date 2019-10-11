@@ -30,7 +30,7 @@ program SpellStarter(params)
 	var spell_elem := MS_GetSpellsCfgElem(spell_id);
 	var manacost := CInt(spell_elem.ManaCost);
 	// If spell is set to 'TestOnly 1', then it requires cmdlevel or #SpellTester CProp before it can be used.
-	if ( spell_elem.TestOnly and !mobile.cmdlevel )
+	if ( spell_elem.TestOnly && !mobile.cmdlevel )
 		// TestOnly spell, check for #SpellTester
 		if ( !GetObjProperty(mobile, "#SpellTester") )
 			SendSysMessage(mobile, "This spell has been temporarily disabled.", color := 33);

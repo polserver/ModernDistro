@@ -63,6 +63,7 @@ MaximumClientsBypassCmdLevel=1
 #                     (until character is selected)
 #
 LoginServerTimeout 10
+
 #############################################################################
 ## System Profiling and Performance
 #############################################################################
@@ -242,7 +243,7 @@ ReportURL=/pol/report_program_abort.php
 #            If someone knows a little about TCP/IP, they could cause you
 #            trouble if it's enabled.
 #
-WebServer=1
+WebServer=0
 
 #
 # WebServerPort: What TCP/IP port to listen for web requests
