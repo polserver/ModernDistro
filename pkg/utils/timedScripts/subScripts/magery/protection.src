@@ -1,0 +1,38 @@
+/*
+ * $Id: agility.src 1013 2007-03-05 22:46:11Z tekproxy $
+ *
+ */
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":damage:damage";
+
+program TimedScript_Protection(params)
+	var defender := params[1];
+	var attacker := params[2];
+	var points := params[3];
+	params := 0;
+	var mods := struct;
+
+	if(!GetObjProperty(defender, "Protection"))
+		var phys_resist_mod := 10 + (RandomInt(5) + 1);
+		var resist_spells_mod := 30 + (RandomInt(5) + 1);
+
+		ModifyResistance(defender, DMG_PHYSICAL, - phys_resist_mod);
+		AP_ModifySkillMod(defender, RESISTING_SPELLS, - resist_spells_mod);
+
+		mods.+ phys_resist_mod := phys_resist_mod;
+		mods.+ resist_spells_mod := resist_spells_mod;
+		SetObjProperty(defender, "Protection", mods);
+	else
+		mods := GetObjProperty(defender, "Protection");
+		ModifyResistance(defender, DMG_PHYSICAL, + mods.phys_resist_mod);
+		AP_ModifySkillMod(defender, RESISTING_SPELLS, + mods.resist_spells_mod);
+		EraseObjProperty(defender, "Protection");
+	endif
+
+	return 1;
+endprogram
+

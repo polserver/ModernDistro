@@ -272,7 +272,6 @@ function TS_StartTimer(mobile, timer_name, duration, level := 0, attacker := 0)
 	if ( duration < 1 )
 		return error{"errortext":="Error::TS_StartTimer() - Duration must be greater than 0."};
 	endif
-	Print("TS_StartTimer: " + mobile.name + " " + timer_name + " " + CStr(duration) + " " +  CStr(level) + " " +  attacker.name);
 	var event := struct;
 	event.+type := EVENT_ADD_TIMER;
 	event.+name := CStr(timer_name);
