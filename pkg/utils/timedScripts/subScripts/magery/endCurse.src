@@ -1,0 +1,26 @@
+/*
+ * $Id: endAgility.src 921 2006-12-20 23:27:45Z tekproxy $
+ *
+ */
+ 
+use uo;
+use os;
+
+include ":attributes:attributes";
+
+program TimedScript_EndAgility(params)
+	var mobile := params[1];
+	
+	var points := CInt(GetObjProperty(mobile, "CurseMod"));	
+	AP_ModifyStatMod(mobile, DEXTERITY, points);
+	AP_ModifyStatMod(mobile, INTELLIGENCE, points);
+	AP_ModifyStatMod(mobile, STRENGTH, points);
+	 mobile.resist_fire_cap_mod :=  mobile.resist_fire_cap_mod + points;
+	 mobile.resist_cold_cap_mod :=  mobile.resist_cold_cap_mod + points;
+	 mobile.resist_poison_cap_mod :=  mobile.resist_poison_cap_mod + points;
+	 mobile.resist_energy_cap_mod := mobile.resist_energy_cap_mod +  points;
+	EraseObjProperty(mobile, "CurseMod");
+	
+	return 1;
+endprogram
+

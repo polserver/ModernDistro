@@ -1,0 +1,15 @@
+//////////////////////////////////////////////////////////
+// This program file is here to use for creating little //
+// pieces of code for testing purposes.					//
+//////////////////////////////////////////////////////////
+
+
+use uo;
+use attributes;
+
+program test_cmd(who, text)
+
+	who.resist_physical_cap_mod := 100;
+	who.resist_physical_mod := 20;
+	SendSysMessage(who, CStr(who.resist_physical));
+endprogram

@@ -4,6 +4,7 @@ use util;
 
 include ":attributes:attributes";
 include ":timedScripts:timedScripts";
+include ":timedScripts:buffIcon";
 include ":magery:spells";
 include "include/client";
 include "include/sounds";
@@ -26,14 +27,15 @@ program cast_curse( parms )
 
 	// Note: Skill gain is a little too easy
 	var resist_skill := AP_GetSkill(caster, RESISTING_SPELLS);
-	Print("diff b:"+(15 * (resist_skill / 100.0)));
+	Print(":spells/circle4/curse.src - diff b:"+(15 * (resist_skill / 100.0)));
 	var diff := info.difficulty + (15 * (resist_skill / 100.0));
 	var adv_diff_bonus := info.difficulty + CInt(((RandomInt(150) + 1.0) - (15 * (resist_skill / 100.0) * 10)) / 10.0);
 	if ( adv_diff_bonus < 0 )
 			adv_diff_bonus := 0;
 	endif
 	var adv_diff := resist_skill + adv_diff_bonus;
-	Print("diff:"+diff+" adv_diff:"+adv_diff);
+	Print(":spells/circle4/curse.src - diff:"+diff+" adv_diff:"+adv_diff);
+
 // Not sure what tekproxy was thinking with the following but he commented it out so I am leaving it in.
 /*
 	for i := 1 to 1000
@@ -47,25 +49,17 @@ program cast_curse( parms )
 		SleepMS(2);
 	endfor
 */
+
 	MS_PlaySpellSFX(info.spell_id, cast_on);
 	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
 
-	// Duration: 144% Magery, up to 144 seconds
-	var duration := CInt(AP_GetSkill(caster, MAGERY) * 1.44);
-	if ( duration > 144 )
-			duration := 144;
-	endif
+	// Str increase % = (Eval / 10 + 1)
+	var percent := CDbl(AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 10) + 1;
+	var points := CInt(AP_GetStat(cast_on, DEXTERITY) * (percent / 100) *= -1);
 
-	// Decrease % = (Caster Magery / 10) + 1) - (Target Resist / 15)
-	// Note: OSI says resist scales down potency but doesn't explain HOW
-	var percent := CDbl((AP_GetSkill(caster, MAGERY) / 10) + 1) - (AP_GetSkill(cast_on, RESISTING_SPELLS) / 15);
-	var dex_points := CInt(AP_GetStat(cast_on, DEXTERITY) * (percent / 100));
-	var int_points := CInt(AP_GetStat(cast_on, INTELLIGENCE) * (percent / 100));
-	var str_points := CInt(AP_GetStat(cast_on, STRENGTH) * (percent / 100));
-
-	TS_StartTimer(cast_on, "Clumsy", duration, dex_points, caster);
-	TS_StartTimer(cast_on, "FeebleMind", duration, int_points, caster);
-	TS_StartTimer(cast_on, "Weaken", duration, str_points, caster);
+	// Duration: ((Eval / 5) + 1) * 6
+	var duration := ((AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 5) + 1) * 6;
+	TS_StartTimer(cast_on, "Curse", duration, points, caster);
 
 	return 1;
 endprogram
