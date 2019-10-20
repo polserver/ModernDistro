@@ -7,20 +7,31 @@ use uo;
 use os;
 
 include ":attributes:attributes";
+include ":timedScripts:timedScripts";
 
 program TimedScript_Weaken(params)
 	var defender := params[1];
 	var attacker := params[2];
-	var points := params[3];
-	params := 0;
+	var percent := params[3];
+	var duration := params[4];
+
+	var cfg_elem := TS_GetCfgElem("Weaken");
+    var buff_icon := CInt( cfg_elem.BuffIcon );
+    var cliloc_name :=  CInt(cfg_elem.cliloc_name);
+    var cliloc_desc :=  CInt(cfg_elem.cliloc_desc);
+	params := {};
 	
 	// Prevents mod from being applied twice.
 	if ( GetObjProperty(defender, "WeakenMod") )
 		return 0;
 	endif
 	
+	var true_percent := CDbl(percent) / 100;
+	var points := struct;
+	points.+str := CInt(AP_GetTrueStat(defender, STRENGTH) * true_percent);
+	AP_ModifyStatMod(defender, STRENGTH, -points.str);
+	defender.addBuff(buff_icon, duration, cliloc_name, cliloc_desc, CStr(percent));
 	SetObjProperty(defender, "WeakenMod", points);
-	AP_ModifyStatMod(defender, STRENGTH, -(points));
 	
 	return 1;
 endprogram

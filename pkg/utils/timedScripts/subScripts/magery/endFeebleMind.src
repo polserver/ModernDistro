@@ -7,12 +7,17 @@ use uo;
 use os;
 
 include ":attributes:attributes";
+include ":timedScripts:timedScripts";
 
 program TimedScript_EndFeebleMind(params)
 	var mobile := params[1];
 	
-	var points := CInt(GetObjProperty(mobile, "FeebleMindMod"));	
-	AP_ModifyStatMod(mobile, INTELLIGENCE, points);
+	var cfg_elem := TS_GetCfgElem("Strength");
+    var buff_icon := CInt( cfg_elem.BuffIcon );
+	var points := struct;	
+	points := GetObjProperty(mobile, "FeebleMindMod");	
+	AP_ModifyStatMod(mobile, INTELLIGENCE, points.int);
+	mobile.delbuff(buff_icon);
 	EraseObjProperty(mobile, "FeebleMindMod");
 	
 	return 1;

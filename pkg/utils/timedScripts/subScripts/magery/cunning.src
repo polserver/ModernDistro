@@ -7,21 +7,32 @@ use uo;
 use os;
 
 include ":attributes:attributes";
+include ":timedScripts:timedScripts";
 
 program TimedScript_Cunning(params)
 	var defender := params[1];
 	var attacker := params[2];
-	var points := params[3];	
-	params := 0;
+	var percent := params[3];
+	var duration := params[4];
+
+	var cfg_elem := TS_GetCfgElem("Cunning");
+    var buff_icon := CInt( cfg_elem.BuffIcon );
+    var cliloc_name :=  CInt(cfg_elem.cliloc_name);
+    var cliloc_desc :=  CInt(cfg_elem.cliloc_desc);
+	params := {};
 	
 	// Prevents mod from being applied twice.
 	if ( GetObjProperty(defender, "CunningMod") )
 		return 0;
 	endif
 	
+	var true_percent := CDbl(percent) / 100;
+	var points := struct;
+	points.+int := CInt(AP_GetTrueStat(defender, INTELLIGENCE) * true_percent);
+	AP_ModifyStatMod(defender, INTELLIGENCE, points.int);
+	defender.addBuff(buff_icon, duration, cliloc_name, cliloc_desc, CStr(percent));
 	SetObjProperty(defender, "CunningMod", points);
-	AP_ModifyStatMod(defender, INTELLIGENCE, points);
-	
+
 	return 1;
 endprogram
 
