@@ -7,12 +7,17 @@ use uo;
 use os;
 
 include ":attributes:attributes";
+include ":timedScripts:timedScripts";
 
 program TimedScript_EndCunning(params)
 	var mobile := params[1];
 	
-	var points := CInt(GetObjProperty(mobile, "CunningMod"));	
-	AP_ModifyStatMod(mobile, INTELLIGENCE, -(points));
+	var cfg_elem := TS_GetCfgElem("Cunning");
+    var buff_icon := CInt( cfg_elem.BuffIcon );
+	var points := struct;	
+	
+	AP_ModifyStatMod(mobile, INTELLIGENCE, -(points.int));
+	mobile.delbuff(buff_icon);
 	EraseObjProperty(mobile, "CunningMod");
 	
 	return 1;

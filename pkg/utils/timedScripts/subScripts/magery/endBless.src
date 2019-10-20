@@ -7,14 +7,19 @@ use uo;
 use os;
 
 include ":attributes:attributes";
+include ":timedScripts:timedScripts";
 
 program TimedScript_EndAgility(params)
 	var mobile := params[1];
 	
-	var points := CInt(GetObjProperty(mobile, "BlessMod"));	
-	AP_ModifyStatMod(mobile, DEXTERITY, -1 * points);
-	AP_ModifyStatMod(mobile, INTELLIGENCE, -1 * points);
-	AP_ModifyStatMod(mobile, STRENGTH, -1 * points);
+	var cfg_elem := TS_GetCfgElem("Bless");
+    var buff_icon := CInt( cfg_elem.BuffIcon );
+	var points := struct;	
+	points := GetObjProperty(mobile, "BlessMod");	
+	AP_ModifyStatMod(mobile, DEXTERITY, -points.dex);
+	AP_ModifyStatMod(mobile, INTELLIGENCE, -points.int);
+	AP_ModifyStatMod(mobile, STRENGTH, -points.str);
+	mobile.delbuff(buff_icon);
 	EraseObjProperty(mobile, "BlessMod");
 	
 	return 1;

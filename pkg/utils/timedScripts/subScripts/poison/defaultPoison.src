@@ -9,6 +9,7 @@ program TimedScript_DefaultPoison(params)
 	var who := params[1];
 	var attacker := params[2];
 	var level := CInt(params[3]);
+	var duration := CInt(params[4]);
 	params := 0; // No longer needed.
 
 	if ( !level )
@@ -73,7 +74,8 @@ program TimedScript_DefaultPoison(params)
 		   time := 5;
 		   break;
 	endcase
-
+	var cliloc_string := CStr(dmg) + "\t" + CStr(time);
+	who.addbuff(1038, duration, 1017383, 1075633, cliloc_string);
 	while ( 1 )
 		PrintTextAbovePrivate(who, poisonedmsg, who);
 		foreach mobile in ( ListMobilesInLineOfSight(who, 8) )
@@ -96,6 +98,6 @@ program TimedScript_DefaultPoison(params)
 
 		Sleep(time);
 	endwhile
-
+	who.delbuff(1038);
 	return 1;
 endprogram

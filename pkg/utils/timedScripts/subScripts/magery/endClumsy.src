@@ -7,12 +7,17 @@ use uo;
 use os;
 
 include ":attributes:attributes";
+include ":timedScripts:timedScripts";
 
 program TimedScript_EndClumsy(params)
 	var mobile := params[1];
-
-	var points := CInt(GetObjProperty(mobile, "ClumsyMod"));	
-	AP_ModifyStatMod(mobile, DEXTERITY, points);
+	
+	var cfg_elem := TS_GetCfgElem("Clumsy");
+    var buff_icon := CInt( cfg_elem.BuffIcon );
+	var points := struct;	
+	points := GetObjProperty(mobile, "ClumsyMod");	
+	AP_ModifyStatMod(mobile, DEXTERITY, points.dex);
+	mobile.delbuff(buff_icon);
 	EraseObjProperty(mobile, "ClumsyMod");
 
 	return 1;

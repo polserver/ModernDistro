@@ -1,12 +1,22 @@
 /*
-        Created by *Edwards
+        Written by Yukiko
 
-        2010-09-26
+        2019-10-13
 */
 use uo;
 use polsys;
 
-
+////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                    //
+// UpdateBuffIcon( mobile, byref cfg_elem, byref event, byref params := struct )      //
+//                                                                                    //
+// Purpose: Displays or removes a buff icon on a player's client.                     //
+//                                                                                    //
+// parameters:  mobile - the character referece to apply the buff icon.               //
+//              cfg-elem - The element reference to an elements in timedScripts.cfg.  //
+//              event - A struct containing information for the buff.                 //
+//                                                                                    //
+////////////////////////////////////////////////////////////////////////////////////////
 function UpdateBuffIcon( mobile, byref cfg_elem, byref event )
 
         var buff_icon := CInt( cfg_elem.BuffIcon );
@@ -14,13 +24,17 @@ function UpdateBuffIcon( mobile, byref cfg_elem, byref event )
         var cliloc_desc :=  CInt(cfg_elem.cliloc_desc);
         if( buff_icon )
             var level := event.level,
-                amount := event.amount;
-            
+            amount := event.amount;
+            // The following 'if' and 'elseif' are temporary kluges until I can
+            // think of a proper way to rewrite this function to allow for buffs
+            // that require multiple cliloc parameters.
             if(amount)
-                // The following 'if' statement is a kluge to handle the "Bless" buff.
-                if(buff_icon == 1048)
-                    var bless_level := CStr(level)+"\t"+CStr(level)+"\t"+CStr(level);
-                    mobile.addBuff(buff_icon, amount, cliloc_name, cliloc_desc, bless_level);
+                if(buff_icon == 1048)       // Bless
+                    var level3 := CStr(level)+"\t"+CStr(level)+"\t"+CStr(level);
+                    mobile.addBuff(buff_icon, amount, cliloc_name, cliloc_desc, level3);
+                elseif(buff_icon == 1043)   // Curse
+                    var level3 := CStr(level)+"\t"+CStr(level)+"\t"+CStr(level)+"\t"+CStr(level)+"\t"+CStr(level)+"\t"+CStr(level)+"\t"+CStr(level);
+                    mobile.addBuff(buff_icon, amount, cliloc_name, cliloc_desc, level3);
                 else
                     mobile.addBuff(buff_icon, amount, cliloc_name, cliloc_desc, CStr( level ));
                 endif
@@ -68,7 +82,7 @@ endfunction
    "meditation":
          BuffIcon := 1013;
          cliloc_name := 1044106;
-         cliloc_desc := 1075106;
+         cliloc_desc := 1075106; I think this is the wrong cliloc. "Fools!  You cannot defeat me."
    "bloodoathcaster":
          BuffIcon := 1014;
    "bloodoathcurse":
