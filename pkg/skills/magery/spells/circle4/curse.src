@@ -27,14 +27,12 @@ program cast_curse( parms )
 
 	// Note: Skill gain is a little too easy
 	var resist_skill := AP_GetSkill(caster, RESISTING_SPELLS);
-	Print(":spells/circle4/curse.src - diff b:"+(15 * (resist_skill / 100.0)));
 	var diff := info.difficulty + (15 * (resist_skill / 100.0));
 	var adv_diff_bonus := info.difficulty + CInt(((RandomInt(150) + 1.0) - (15 * (resist_skill / 100.0) * 10)) / 10.0);
 	if ( adv_diff_bonus < 0 )
 			adv_diff_bonus := 0;
 	endif
 	var adv_diff := resist_skill + adv_diff_bonus;
-	Print(":spells/circle4/curse.src - diff:"+diff+" adv_diff:"+adv_diff);
 
 // Not sure what tekproxy was thinking with the following but he commented it out so I am leaving it in.
 /*
@@ -54,12 +52,12 @@ program cast_curse( parms )
 	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
 
 	// Str increase % = (Eval / 10 + 1)
-	var percent := CDbl(AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 10) + 1;
-	var points := CInt(AP_GetStat(cast_on, DEXTERITY) * (percent / 100) *= -1);
+	var percent := CDbl((AP_GetSkill(caster, MAGERY) / 10) + 1);
+	var points := CInt(AP_GetSkill(caster, MAGERY) * (percent / 100));
 
 	// Duration: ((Eval / 5) + 1) * 6
 	var duration := ((AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 5) + 1) * 6;
-	TS_StartTimer(cast_on, "Curse", duration, points, caster);
+	TS_StartTimer(cast_on, "Curse", duration, percent, caster);
 
 	return 1;
 endprogram

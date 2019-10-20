@@ -26,10 +26,10 @@ program cast_poison(parms)
 	// Duration: (3 + (Magery * 0.4)) seconds
 	var duration := CInt(3 + AP_GetSkill(caster, MAGERY) * 0.4);
 	var poison_level := MS_GetPoisonLevel(caster, caster);
-	TS_StartTimer(caster, "DefaultPoison", duration, poison_level, caster);
+    TS_StartTimer(cast_on, "DefaultPoison", duration, poison_level, caster);
 
-	MS_PlaySpellSFX(info.spell_id, caster);
-	MS_PlaySpellGFX(info.spell_id, caster, caster);
+	MS_PlaySpellSFX(info.spell_id, cast_on);
+	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
 	VS_AdjustVirtue(caster, "honor", -1, 100);
 	VS_AdjustVirtue(caster, "compassion", -1, 100);
 

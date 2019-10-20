@@ -82,7 +82,7 @@ endfunction
    "meditation":
          BuffIcon := 1013;
          cliloc_name := 1044106;
-         cliloc_desc := 1075106;
+         cliloc_desc := 1075106; I think this is the wrong cliloc. "Fools!  You cannot defeat me."
    "bloodoathcaster":
          BuffIcon := 1014;
    "bloodoathcurse":

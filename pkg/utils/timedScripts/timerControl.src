@@ -153,7 +153,7 @@ function AddNewTimer(mobile, byref event, byref timer_list, byref num_poisons)
 
 	var script;
 	if ( elem_info.Script )
-		script := Start_Script(elem_info.Script, {mobile, event.attacker, event.level});
+		script := Start_Script(elem_info.Script, {mobile, event.attacker, event.level, event.amount});
 		if( script.errortext )
 			TS_ReportText("Error::AddNewTimer() - Unable to start script ["+elem_info.Script+"] ->"+script.errortext, TS_REPORT_SYSLOG);
 			return 0;
@@ -180,7 +180,7 @@ function AddNewTimer(mobile, byref event, byref timer_list, byref num_poisons)
 		num_poisons += 1;
 	endif
 
-	UpdateBuffIcon( mobile, elem_info, event );
+//	UpdateBuffIcon( mobile, elem_info, event );
 
 	return 1;
 endfunction

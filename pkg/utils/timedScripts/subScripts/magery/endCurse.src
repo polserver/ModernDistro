@@ -7,20 +7,25 @@ use uo;
 use os;
 
 include ":attributes:attributes";
+include ":timedScripts:timedScripts";
 
 program TimedScript_EndAgility(params)
 	var mobile := params[1];
 	
-	var points := CInt(GetObjProperty(mobile, "CurseMod"));	
-	AP_ModifyStatMod(mobile, DEXTERITY, points);
-	AP_ModifyStatMod(mobile, INTELLIGENCE, points);
-	AP_ModifyStatMod(mobile, STRENGTH, points);
-	 mobile.resist_fire_cap_mod :=  mobile.resist_fire_cap_mod + points;
-	 mobile.resist_cold_cap_mod :=  mobile.resist_cold_cap_mod + points;
-	 mobile.resist_poison_cap_mod :=  mobile.resist_poison_cap_mod + points;
-	 mobile.resist_energy_cap_mod := mobile.resist_energy_cap_mod +  points;
+	var curse_elem := TS_GetCfgElem("Curse");
+    var buff_icon := CInt( curse_elem.BuffIcon );
+	var points := struct;	
+	points := GetObjProperty(mobile, "CurseMod");	
+	AP_ModifyStatMod(mobile, DEXTERITY, points.dex);
+	AP_ModifyStatMod(mobile, INTELLIGENCE, points.int);
+	AP_ModifyStatMod(mobile, STRENGTH, points.str);
+	mobile.resist_fire_cap_mod := mobile.resist_fire_cap_mod + 10;
+	mobile.resist_cold_cap_mod := mobile.resist_cold_cap_mod + 10;
+	mobile.resist_poison_cap_mod := mobile.resist_poison_cap_mod + 10;
+	mobile.resist_energy_cap_mod := mobile.resist_energy_cap_mod + 10;
+	mobile.delbuff(buff_icon);
 	EraseObjProperty(mobile, "CurseMod");
-	
+
 	return 1;
 endprogram
 

@@ -6,13 +6,19 @@ use uo;
 use os;
 
 include ":attributes:attributes";
+include ":timedScripts:timedScripts";
 
-program TimedScript_Bless(params)
+program TimedScript_Curse(params)
 	var defender := params[1];
 	var attacker := params[2];
-	var points := params[3];
-	params := 0;
-	
+	var percent := params[3];
+	var duration := params[4];
+
+	var curse_elem := TS_GetCfgElem("Curse");
+    var buff_icon := CInt( curse_elem.BuffIcon );
+    var cliloc_name :=  CInt(curse_elem.cliloc_name);
+    var cliloc_desc :=  CInt(curse_elem.cliloc_desc);
+	params := {};
 	// Prevents mod from being applied twice.
 	if ( GetObjProperty(defender, "CurseMod") )
 		return 0;
@@ -30,15 +36,21 @@ program TimedScript_Bless(params)
 		return 0;
 	endif
 	
+	var true_percent := CDbl(percent) / 100;
+	var points := struct;
+	points.+dex := CInt(AP_GetTrueStat(defender, DEXTERITY) * true_percent);
+	points.+int := CInt(AP_GetTrueStat(defender, INTELLIGENCE) * true_percent);
+	points.+str := CInt(AP_GetTrueStat(defender, STRENGTH) * true_percent);
+	AP_ModifyStatMod(defender, DEXTERITY, -points.dex);
+	AP_ModifyStatMod(defender, INTELLIGENCE, -points.int);
+	AP_ModifyStatMod(defender, STRENGTH, -points.str);
+	defender.resist_fire_cap_mod := defender.resist_fire_cap_mod + -10;
+	defender.resist_cold_cap_mod := defender.resist_cold_cap_mod + -10;
+	defender.resist_poison_cap_mod := defender.resist_poison_cap_mod + -10;
+	defender.resist_energy_cap_mod := defender.resist_energy_cap_mod + -10;
+    var level3 := CStr(percent)+"\t"+CStr(percent)+"\t"+CStr(percent)+"\t"+CStr(10)+"\t"+CStr(10)+"\t"+CStr(10)+"\t"+CStr(10);
+    defender.addBuff(buff_icon, duration, cliloc_name, cliloc_desc, level3);
 	SetObjProperty(defender, "CurseMod", points);
-	AP_ModifyStatMod(defender, DEXTERITY, (points *= -1));
-	AP_ModifyStatMod(defender, INTELLIGENCE, (points *= -1));
-	AP_ModifyStatMod(defender, STRENGTH, (points *= -1));
-	defender.resist_fire_cap_mod := defender.resist_fire_cap_mod + (points *= -1);
-	defender.resist_cold_cap_mod := defender.resist_cold_cap_mod + (points *= -1);
-	defender.resist_poison_cap_mod := defender.resist_poison_cap_mod + (points *= -1);
-	defender.resist_energy_cap_mod :=defender.resist_energy_cap_mod +  (points *= -1);
-
 
 	return 1;
 endprogram

@@ -27,7 +27,7 @@ program cast_bless( parms )
 
 	// Str increase % = (Eval / 10 + 1)
 	var percent := CDbl(AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 10) + 1;
-	var points := CInt(AP_GetStat(cast_on, DEXTERITY) * (percent / 100));
+	var points := CInt(AP_GetSkill(caster, MAGERY) * (percent / 100));
 
 	// Duration: ((Eval / 5) + 1) * 6
 	var duration := ((AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 5) + 1) * 6;

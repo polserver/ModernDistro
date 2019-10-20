@@ -7,12 +7,17 @@ use uo;
 use os;
 
 include ":attributes:attributes";
+include ":timedScripts:timedScripts";
 
 program TimedScript_EndWeaken(params)
 	var mobile := params[1];
-
-	var points := CInt(GetObjProperty(mobile, "WeakenMod"));	
-	AP_ModifyStatMod(mobile, STRENGTH, points);
+	
+	var cfg_elem := GetTSInfo("Weaken");
+    var buff_icon := CInt( cfg_elem.BuffIcon );
+	var points := struct;	
+	points := GetObjProperty(mobile, "WeakenMod");	
+	AP_ModifyStatMod(mobile, STRENGTH, points.str);
+	mobile.delbuff(buff_icon);
 	EraseObjProperty(mobile, "WeakenMod");
 	
 	return 1;
