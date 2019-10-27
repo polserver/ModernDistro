@@ -3,6 +3,6 @@ use os;
 use util;
 
 program bonecontrol(corpse)
-  sleep(600);
+  Sleep(600);
   DestroyItem(corpse);
 endprogram

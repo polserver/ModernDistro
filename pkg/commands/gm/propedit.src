@@ -12,7 +12,7 @@
 //
 // Notes:
 //
-//  - type ".propedit" then target the item or 
+//  - type ".propedit" then target the item or
 //    mobile who's cprops you wish to view or edit.
 //
 //  - edit Cprop strings, doubles and integers
@@ -21,10 +21,10 @@
 //  - deals with the first 60 cprops on an object
 //
 //  - press the red flag in the top right corner
-//    to toggle the gump size (to help with larger 
+//    to toggle the gump size (to help with larger
 //    Cprops)
 //
-//  - to edit cprops on a multi, first stand on the 
+//  - to edit cprops on a multi, first stand on the
 //    multi then type ".propedit multi"
 //
 //  - you can call propedit from another script
@@ -115,7 +115,7 @@ var main_layout:={
 
 //////////
 
-var add_layout:={ 
+var add_layout:={
   "resizepic 160 25 2520 340 250",
   "button 380 243 2071 2072 0 1",
   "button 230 243 239 240 1 0 998",
@@ -132,7 +132,7 @@ var add_layout:={
   "text 260 204 0 9",
   "gumppic 190 90 1143"
  };
-  
+
 //////////
 
 var del_layout:={
@@ -150,7 +150,7 @@ program CpropEditor(parms1,parms2)
   var who,thing;
 
   if (TypeOf(parms1)=="Array")
-    if ( (parms1[1].isa(POLCLASS_MOBILE) and !parms1[1].isa(POLCLASS_NPC)) and parms1[2].isa(POLCLASS_UOBJECT) )
+    if ( (parms1[1].isa(POLCLASS_MOBILE) && !parms1[1].isa(POLCLASS_NPC)) && parms1[2].isa(POLCLASS_UOBJECT) )
       who:=parms1[1];
       thing:=parms1[2];
     else
@@ -209,10 +209,10 @@ function SendCpropGump(who,thing)
   var del_page:=num_pages+2;
   var this_layout:=main_layout;
   var this_data:=main_data;
-  
+
 //  Compose Cprop Pages
   ComposeMainGump(add_page,del_page,this_layout,this_data,thing);
-  
+
 // Add Prop Page
   this_layout.append("page "+add_page);
   foreach bit in add_layout
@@ -220,16 +220,16 @@ function SendCpropGump(who,thing)
   endforeach
   this_layout.append("textentry 200 92 200 20 0 500 "+len(this_data));
   this_data.append("");
-  
-// Del Prop Page  
+
+// Del Prop Page
   this_layout.append("page "+del_page);
   foreach bit in del_layout
     this_layout.append(bit);
   endforeach
-  
+
   var retval:=SendDialogGump(who,this_layout,this_data);
 
-// Check for buttons.....  
+// Check for buttons.....
   var i;
   if (retval[1000])           // Toggle Hex
     show_in_hex:=!show_in_hex;
@@ -256,7 +256,7 @@ function SendCpropGump(who,thing)
       add_prop_val:=0.0; // double
     else
       add_prop_val:="";  // string
-    endif    
+    endif
     SetObjProperty(thing,add_prop_name,add_prop_val);
     return 1;
   elseif (retval[997])      // Delete Cprop
@@ -276,7 +276,7 @@ function SendCpropGump(who,thing)
     endfor
     return 1;
   endif
-  
+
   return 0;
 endfunction
 
@@ -287,19 +287,19 @@ function ComposeMainGump(byref add_page,byref del_page,byref this_layout,byref t
   var propnames:=GetObjPropertyNames(thing);
   var width:=GetGumpWidth();
   this_layout[3]:="resizepic 0 0 2520 "+width+" 300";
-  this_layout[6]:="button "+(width-40)+" 10 31 31 1 0 1001"; 
+  this_layout[6]:="button "+(width-40)+" 10 31 31 1 0 1001";
   this_layout[9]:="croppedtext 140 10 "+(width-200)+" 25 0 4";
   if (show_in_hex)
     this_data[1]:="Show Int";
   else
     this_data[1]:="Show Hex";
-  endif                    
+  endif
   if (thing.name)
     this_data[5]:=thing.name+" ["+ToggleHex(thing.serial)+"]";
   else
     this_data[5]:=thing.desc+" ["+ToggleHex(thing.serial)+"]";
   endif
-  
+
   var i,j,y,this_prop,this_type;
 
   for (i:=1;i<add_page;i:=i+1)
@@ -307,10 +307,10 @@ function ComposeMainGump(byref add_page,byref del_page,byref this_layout,byref t
     this_layout.append("button 380 267 2071 2072 1 0 995");// Cancel button
     this_layout.append("button 200 267 239 240 1 0 999");  // Main apply button
     if (i>1)
-      this_layout.append("button "+(width-60)+" 40 250 251 0 "+(i-1)); 
+      this_layout.append("button "+(width-60)+" 40 250 251 0 "+(i-1));
     endif
     if (i<(add_page-1))
-      this_layout.append("button "+(width-60)+" 265 252 253 0 "+(i+1)); 
+      this_layout.append("button "+(width-60)+" 265 252 253 0 "+(i+1));
     endif
     if (add_page>2)
       this_layout.append("gumppic "+(width-108)+" 263 2644");
@@ -326,7 +326,7 @@ function ComposeMainGump(byref add_page,byref del_page,byref this_layout,byref t
     if (end_j>len(propnames))
       end_j:=len(propnames);
     endif
-    
+
     for (j:=start_j; j<=end_j; j:=j+1)
       if (propnames[j])
         this_prop:=GetObjProperty(thing,propnames[j]);
@@ -347,7 +347,7 @@ function ComposeMainGump(byref add_page,byref del_page,byref this_layout,byref t
         if (this_prop.errortext)
           this_layout.append("croppedtext 280 "+y+" "+(width-310)+" 20 34 "+len(this_data));
           this_data.append(this_prop.errortext);
-        elseif ( (can_edit) and  ( this_type=="Integer") or (this_type=="Double") or (this_type=="String") )
+        elseif ( (can_edit) &&  ( this_type=="Integer") or (this_type=="Double") or (this_type=="String") )
           this_layout.append("gumppic 260 "+(y+3)+" 58");
           this_layout.append("textentry 280 "+y+" "+(width-310)+" 20 0 "+(500+j)+" "+len(this_data));
           this_data.append(ToggleHex(this_prop,this_type));
@@ -355,7 +355,7 @@ function ComposeMainGump(byref add_page,byref del_page,byref this_layout,byref t
           this_layout.append("croppedtext 280 "+y+" "+(width-310)+" 20 0 "+len(this_data));
           this_data.append(this_prop);
         endif
-        this_layout.append("checkbox 30 "+y+" 210 211 0 "+(j+700)); 
+        this_layout.append("checkbox 30 "+y+" 210 211 0 "+(j+700));
       endif
     endfor
   endfor
@@ -394,7 +394,7 @@ function ToggleHex(value,value_type:=0)
   if (!value_type)
     value_type:=TypeOf(value);
   endif
-  if ((value_type=="Integer") and (show_in_hex))
+  if ((value_type=="Integer") && (show_in_hex))
     return Hex(value);
   else
     return Cstr(value);

@@ -13,7 +13,7 @@ program use_commcrystal(who, crystal)
     SendSysMessage(who, "All charges have been used");
     return;
   endif
-  
+
   var LinkString := GetObjProperty(crystal, "Links");
   var Links := Splitwords(LinkString);
   var LinkCount := Len(Links);
@@ -21,7 +21,7 @@ program use_commcrystal(who, crystal)
   var i, blank, placeholder, receiver;
   SendSysMessage(who, "Select object.");
   var TargetItem := target(who);
-  if ( (TargetItem.objtype != CRYSTALOBJ) and (TargetItem.objtype != RECEIVEROBJ) )
+  if ( (TargetItem.objtype != CRYSTALOBJ) && (TargetItem.objtype != RECEIVEROBJ) )
     SendSysMessage(who, "That is not a communication crystal.");
     return;
   endif

@@ -22,7 +22,7 @@ program use_guild_deed(who, deed)
   var house := who.multi;
   var owner := GetObjProperty(house, "owneracct");
   var coowners := GetObjProperty(house, "coownlist");
-  if((owner != who.acctname) and (!(who.serial in coowners)))
+  if((owner != who.acctname) && (!(who.serial in coowners)))
     SendSysMessage(who, "You must be the owner or a co-owner of the house to place a guildstone.");
     return;
   endif

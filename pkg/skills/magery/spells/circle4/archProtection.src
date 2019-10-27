@@ -7,56 +7,52 @@ include ":timedScripts:timedScripts";
 include ":magery:spells";
 include ":damage:damage";
 
-program cast_archprot( parms )
-    var caster := parms[1];
-    var info := parms[2];
+var mods := struct;
+var ts_cfg_elem := TS_GetCfgElem("Protection");
+var buff_icon := CInt( ts_cfg_elem.BuffIcon );
+var cliloc_name :=  CInt(ts_cfg_elem.cliloc_name);
+var cliloc_desc :=  CInt(ts_cfg_elem.cliloc_desc);
+
+program cast_archprot( params )
+    var caster := params[1];
+    var info := params[2];
+
 	// Get all targets in area that are in party.
 	var area_size := GetConfigInt(info.spell_config, "AreaSize");
 	var party_members := caster.party.members;
 	var includes := {};
-	if ( party_members == error )
-			includes := array{caster.serial};
-	else
-		foreach member in party_members
-			includes.Append(member.serial);
+
+	if( !caster.party.errortext )
+		foreach member in (caster.party.members)
+			includes.Append(member);
 		endforeach
 	endif
 
 	var friendlies := MS_GetFriendlies(caster, area_size);
-	if ( friendlies != error )
-			includes += friendlies;
+	foreach friendly in friendlies
+		print( friendly.name );
+	endforeach
+
+	if ( friendlies.Size() )
+		foreach friend in friendlies
+			includes.Append( friend );
+		endforeach
 	endif
-	
-	var targs := MS_GetValidTargets(caster, area_size, 1, "", includes);
-	foreach vtarg in targs
+
+	// var targs := MS_GetValidTargets(caster, area_size, 1, {}, includes);
+	foreach vtarg in includes
 		if ( !GetObjProperty(vtarg, "Protection") )
-			ApplyArchProtection(vtarg);
+			print("Arch " + vtarg.name + "Area size = " + CStr(area_size));
+			params[1] := vtarg;
+			params[2] := info;
+			Start_Script("spells/circle2/protection", params);
 		else
-			RemoveArchProtection(vtarg);
+			params[1] := vtarg;
+			params[2] := info;
+			Start_Script("spells/circle2/protection", params);
 		endif
 
-		MS_PlaySpellGFX(info.spell_id, vtarg, caster);
 	endforeach
-	
+
 	return 1;
 endprogram
-
-function ApplyArchProtection(mobile)
-	ModifyResistance(mobile, DMG_PHYSICAL, -35);
-	AP_ModifySkillMod(mobile, RESISTING_SPELLS, -35);
-	
-	// At present there is no determined way to modify casting speed and other stats:
-	// ModifyMagicProperties(caster, "FasterCastSpeed", -2);
-	
-	SetObjProperty(mobile, "Protection", 1);
-endfunction
-
-function RemoveArchProtection(mobile)
-	ModifyResistance(mobile, DMG_PHYSICAL, 35);
-	AP_ModifySkillMod(mobile, RESISTING_SPELLS, 35);
-	
-	// At present there is no determined way to modify casting speed and other stats:
-	// ModifyMagicProperties(caster, "FasterCastSpeed", 2);
-	
-	EraseObjProperty(mobile, "Protection");
-endfunction

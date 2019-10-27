@@ -206,7 +206,7 @@ exported function RemoveDeclaration(stone, guild, enemy)
     dc := {};
   endif
   foreach gstatus in dc
-    if(((enemy.guildid != gstatus[2]) && (guild.guildid != gstatus[1])) and ((enemy.guildid != gstatus[1]) && (guild.guildid != gstatus[2])))
+    if(((enemy.guildid != gstatus[2]) && (guild.guildid != gstatus[1])) && ((enemy.guildid != gstatus[1]) && (guild.guildid != gstatus[2])))
       holder.append(gstatus);
       break;
     endif
@@ -218,7 +218,7 @@ exported function RemoveDeclaration(stone, guild, enemy)
     dc := {};
   endif
   foreach gstatus in dc
-    if(((enemy.guildid != gstatus[2]) && (guild.guildid != gstatus[1])) and ((enemy.guildid != gstatus[1]) && (guild.guildid != gstatus[2])))
+    if(((enemy.guildid != gstatus[2]) && (guild.guildid != gstatus[1])) && ((enemy.guildid != gstatus[1]) && (guild.guildid != gstatus[2])))
       holder.append(gstatus);
       break;
     endif
@@ -334,7 +334,7 @@ exported function Pending(stone, guild, enemy, type)
   stone := stone; // stops ecompile "not used" warning
   var chk := 1;
   foreach thing in (guild.getprop("GuildDeclareStatus"))
-    if((Cint(thing[1]) == enemy.guildid) and (Cint(thing[2]) == guild.guildid) and (thing[3] == type))
+    if((Cint(thing[1]) == enemy.guildid) && (Cint(thing[2]) == guild.guildid) && (thing[3] == type))
       chk := 0;
       break;
     endif

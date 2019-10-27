@@ -626,22 +626,22 @@ var data := {
 
     var thefurncolor;
 
-	if (((furncolor > 1600) and (furncolor < 1654)) or
-		((furncolor > 1500) and (furncolor < 1533)) or
-		((furncolor > 1600) and (furncolor < 1654)) or
-		((furncolor > 1300) and (furncolor < 1333)) or
-		((furncolor > 1400) and (furncolor < 1433)) or
-		((furncolor > 1200) and (furncolor < 1225)) or
-		((furncolor > 2400) and (furncolor < 2430)) or
-		((furncolor > 2212) and (furncolor < 2219)) or
-		((furncolor > 1101) and (furncolor < 1149)))
+	if (((furncolor > 1600) && (furncolor < 1654)) ||
+		((furncolor > 1500) && (furncolor < 1533)) ||
+		((furncolor > 1600) && (furncolor < 1654)) ||
+		((furncolor > 1300) && (furncolor < 1333)) ||
+		((furncolor > 1400) && (furncolor < 1433)) ||
+		((furncolor > 1200) && (furncolor < 1225)) ||
+		((furncolor > 2400) && (furncolor < 2430)) ||
+		((furncolor > 2212) && (furncolor < 2219)) ||
+		((furncolor > 1101) && (furncolor < 1149)))
 		thefurncolor := furncolor;
     else
 		SendSysMessage(who, "Cancelled.", 3, 33);
 		return;
 	endif
 
-	if ((thefurncolor == 0) or (thefurncolor == 1))
+	if ((thefurncolor == 0) || (thefurncolor == 1))
 		SendSysMessage(who, "Cancelled.", 3, 33);
 		return;
 	endif

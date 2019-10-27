@@ -586,7 +586,7 @@ var data := {
 
 program spcolour (who)
 
-	
+
 	var res := SendDialogGump( who, layout, data );
 	var colour := 0;
 	var theitem := Target(who, TGTOPT_NOCHECK_LOS);
@@ -599,26 +599,26 @@ program spcolour (who)
 
     var thecolour;
 
-    if (((colour > 1600) and (colour < 1654)) or
-		((colour > 1500) and (colour < 1533)) or
-		((colour > 1600) and (colour < 1654)) or
-		((colour > 1300) and (colour < 1333)) or
-		((colour > 1400) and (colour < 1433)) or
-		((colour > 1200) and (colour < 1225)) or
-		((colour > 2400) and (colour < 2430)) or
-		((colour > 2212) and (colour < 2219)) or
-		((colour > 1101) and (colour < 1149)))
+    if (((colour > 1600) && (colour < 1654)) ||
+		((colour > 1500) && (colour < 1533)) ||
+		((colour > 1600) && (colour < 1654)) ||
+		((colour > 1300) && (colour < 1333)) ||
+		((colour > 1400) && (colour < 1433)) ||
+		((colour > 1200) && (colour < 1225)) ||
+		((colour > 2400) && (colour < 2430)) ||
+		((colour > 2212) && (colour < 2219)) ||
+		((colour > 1101) && (colour < 1149)))
 		thecolour := colour;
 	else
 		SendSysMessage(who, "Cancelled.");
 		return;
     endif
 
-	if ((thecolour == 0) or (thecolour == 1))
+	if ((thecolour == 0) || (thecolour == 1))
 		SendSysMessage(who, "Cancelled.");
 		return;
 	endif
 
 	theitem.color := thecolour;
 
-endprogram 
+endprogram

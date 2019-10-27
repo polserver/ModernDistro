@@ -3,6 +3,12 @@ use util;
 
 include ":attributes:attributes";
 include ":magery:spells";
+include ":timedScripts:timedScripts";
+
+var ts_cfg_elem := TS_GetCfgElem("ReactiveArmor");
+var buff_icon := CInt( ts_cfg_elem.BuffIcon );
+var cliloc_name :=  CInt(ts_cfg_elem.cliloc_name);
+var cliloc_desc :=  CInt(ts_cfg_elem.cliloc_desc);
 
 program cast_nightsight(parms)
     var caster := parms[1];
@@ -19,16 +25,16 @@ program cast_nightsight(parms)
     if ( !MS_MobileCheck(caster, cast_on) )
         return 0;
     endif
-    
+
 
 	MS_PlaySpellSFX(info.spell_id, cast_on);
 	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
-		
+
 	// If target magery < 10, no effect
 	// Note: On OSI, spell duration is until next dawn or dusk
 	if ( AP_GetSkill(cast_on, MAGERY) > 10.0 )
-		cast_on.SetLightLevel(0, CInt(AP_GetSkill(caster, MAGERY)) * 60);
+        TS_StartTimer(cast_on, "NightSight", CInt(AP_GetSkill(caster, MAGERY)) * 60, 0, caster);
 	endif
-	
+
 	return 1;
 endprogram

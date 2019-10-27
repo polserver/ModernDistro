@@ -1,19 +1,19 @@
 
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                                 //
-// Stamina Stone script                                                                            //
-// Double clicking a Stamina Stone will use it.                                                    //
-// If it is not "linked" to someone, ie. never used before, it will be linked to the user and the  //
-// user will get a target.                                                                         //
-// If it has been "linked" then there is a check to verify if the user is the one linked to the    //
-// stone. If so then the user will get a target. If not then the user will get an error message.   //
-// If the user targets the stone her stamina will charge the stone. Her stamina will be drained    //
-// until either she reaches 1 or the stone is fully charged. If she targets herself then stamina   //
-// will be transferred from the stone to her until either her stamina is full or the stone is      //
-// empty.                                                                                          //
-//                                                                                                 //
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Stamina Stone script
+// Double clicking a Stamina Stone will use it.
+// If it is not "linked" to someone, ie. never used before, it will be linked to the user and the
+// user will get a target.
+// If it has been "linked" then there is a check to verify if the user is the one linked to the
+// stone. If so then the user will get a target. If not then the user will get an error message.
+// If the user targets the stone her stamina will charge the stone. Her stamina will be drained
+// until either she reaches 1 or the stone is fully charged. If she targets herself then stamina
+// will be transferred from the stone to her until either her stamina is full or the stone is
+// empty.
+//
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 use uo;
 use os;

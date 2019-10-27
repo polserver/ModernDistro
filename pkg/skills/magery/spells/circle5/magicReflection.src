@@ -3,6 +3,12 @@ use os;
 
 include ":magery:spells";
 include ":damage:damage";
+include ":timedScripts:timedScripts";
+
+var ts_cfg_elem := TS_GetCfgElem("MagicReflection");
+var buff_icon := CInt( ts_cfg_elem.BuffIcon );
+var cliloc_name :=  CInt(ts_cfg_elem.cliloc_name);
+var cliloc_desc :=  CInt(ts_cfg_elem.cliloc_desc);
 
 program cast_reflect( parms )
 	var caster := parms[1];
@@ -11,34 +17,39 @@ program cast_reflect( parms )
 	if ( GetObjProperty(caster, "MagicReflection") )
 		RemoveMagicReflection(caster);
 	else
-		var points := 25 - (AP_GetSkill(caster, INSCRIPTION) / 20);
+		var points := 20 - (AP_GetSkill(caster, INSCRIPTION) / 20);
 		ApplyMagicReflection(caster, points);
 	endif
 
 	MS_PlaySpellSFX(info.spell_id, caster);
 	MS_PlaySpellGFX(info.spell_id, caster, caster);
-	
+
 	return 1;
 endprogram
 
 function ApplyMagicReflection(caster, points)
 	ModifyResistance(caster, DMG_PHYSICAL, -(points));
+	caster.resist_physical_cap_mod := caster.resist_physical_cap_mod - 5;
 	ModifyResistance(caster, DMG_FIRE, 10);
 	ModifyResistance(caster, DMG_COLD, 10);
 	ModifyResistance(caster, DMG_POISON, 10);
 	ModifyResistance(caster, DMG_ENERGY, 10);
 
+	var cl_string := CStr(caster.resist_physical) + "\t" + CStr(caster.resist_fire) + "\t" + CStr(caster.resist_cold) + "\t" +
+				 CStr(caster.resist_poison) + "\t" + CStr(caster.resist_energy);
+	caster.addbuff(buff_icon, 0, cliloc_name, cliloc_desc, cl_string);
 	SetObjProperty(caster, "MagicReflection", points);
 endfunction
 
-function RemoveMagicReflection(mobile)
-	var points := GetObjProperty(mobile, "MagicReflection");
-	
-	ModifyResistance(mobile, DMG_PHYSICAL, points);
-	ModifyResistance(mobile, DMG_FIRE, -10);
-	ModifyResistance(mobile, DMG_COLD, -10);
-	ModifyResistance(mobile, DMG_POISON, -10);
-	ModifyResistance(mobile, DMG_ENERGY, -10);
+function RemoveMagicReflection(caster)
+	var points := GetObjProperty(caster, "MagicReflection");
 
-	EraseObjProperty(mobile, "MagicReflection");
+	ModifyResistance(caster, DMG_PHYSICAL, points);
+	caster.resist_physical_cap_mod := caster.resist_physical_cap_mod + 5;
+	ModifyResistance(caster, DMG_FIRE, -10);
+	ModifyResistance(caster, DMG_COLD, -10);
+	ModifyResistance(caster, DMG_POISON, -10);
+	ModifyResistance(caster, DMG_ENERGY, -10);
+	caster.delbuff(buff_icon);
+	EraseObjProperty(caster, "MagicReflection");
 endfunction

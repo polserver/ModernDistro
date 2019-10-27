@@ -7,15 +7,19 @@ use uo;
 use os;
 
 include ":attributes:attributes";
+include ":timedScripts:timedScripts";
 
 program TimedScript_EndInvisibility(params)
 	var defender := params[1];
 	var attacker := params[2];
 	params := 0;
-	
+	var ts_cfg_elem := TS_GetCfgElem("Paralysis");
+	var buff_icon := CInt( ts_cfg_elem.BuffIcon );
+
 	EraseObjProperty(defender, "Invisibility");
 	defender.hidden := 0;
-	
+	defender.delbuff(buff_icon);
+
 	return 1;
 endprogram
 

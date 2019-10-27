@@ -21,7 +21,7 @@ program cast_curse( parms )
   if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
         return 0;
   endif
-  
+
 	MS_PlaySpellSFX(info.spell_id, cast_on);
 
 	// Get all targets in area excluding party and self.
@@ -41,8 +41,8 @@ program cast_curse( parms )
 	var targs := MS_GetValidTargets(cast_on, area_size, 1, excludes);
 	foreach vtarg in targs
 		MS_PlaySpellGFX(info.spell_id, vtarg, caster);
-		TS_StartTimer(vtarg, "Curse", duration, 0, caster);
+		TS_StartTimer(vtarg, "MassCurse", duration, 0, caster);
 	endforeach
-	
+
 	return 1;
 endprogram

@@ -2,12 +2,18 @@
  * $Id: endParalysis.src 373 2006-06-17 18:27:33Z austinheilman $
  *
  */
- 
+
 use uo;
 use os;
 
-program TimedScript_EndParalysis(mobile)
-	mobile.paralyzed := 0;
-	
+include ":timedScripts:timedScripts";
+
+program TimedScript_EndParalysis(defender)
+	var ts_cfg_elem := TS_GetCfgElem("Paralysis");
+	var buff_icon := CInt( ts_cfg_elem.BuffIcon );
+
+	defender.paralyzed := 0;
+	defender.delbuff(buff_icon);
+
 	return 1;
 endprogram

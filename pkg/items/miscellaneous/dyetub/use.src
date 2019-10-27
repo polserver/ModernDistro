@@ -45,7 +45,7 @@ program dyeable(who, dyetub)
   var element  := FindConfigElem(cfg,  item.objtype);
   var dyeable  := GetConfigInt(element, "dyeable");
   if(dyeable == 1)
-    if((item.objtype == 0xfab) and (dyetub.color == 1))
+    if((item.objtype == 0xfab) && (dyetub.color == 1))
       SendSysMessage(who, "You cannot duplicate black dye tubs");
       return;
     else

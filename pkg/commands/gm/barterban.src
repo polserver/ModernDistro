@@ -7,8 +7,8 @@ program change_cmdlevel( who )
     SendSysMessage( who, "Barter Ban, select player." );
 
     var player := Target( who, TGTOPT_NOCHECK_LOS );
- 
-    if( !player.npctemplate and !player.amount )
+
+    if( !player.npctemplate && !player.amount )
 	if (getObjProperty (player, "barterban") == 1)
 	    EraseObjProperty (player, "barterban");
 	    SendSysMessage( who, "Player is no longer banned." );

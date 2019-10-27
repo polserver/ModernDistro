@@ -1,0 +1,26 @@
+use uo;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include ":timedScripts:timedScripts";
+
+var ts_cfg_elem := TS_GetCfgElem("ReactiveArmor");
+var buff_icon := CInt( ts_cfg_elem.BuffIcon );
+var cliloc_name :=  CInt(ts_cfg_elem.cliloc_name);
+var cliloc_desc :=  CInt(ts_cfg_elem.cliloc_desc);
+
+program TimedScript_NightSight(params)
+	var defender := params[1];
+	var attacker := params[2];
+	var duration := params[4];
+
+	defender.setlightlevel(0, duration);
+	SetObjProperty(defender, "NightSight", 1);
+	// I am using a custom text for the cliloc description because the canned one is not in character with the game.
+	defender.addbuff(buff_icon, duration, cliloc_name, 1042971, "The dark places are now illuminated.");
+endprogram
+
+// 1042971
+// 1070722
+// 1114057
