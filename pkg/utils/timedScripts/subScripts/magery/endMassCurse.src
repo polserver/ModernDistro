@@ -1,0 +1,27 @@
+/*
+ * $Id: endAgility.src 921 2006-12-20 23:27:45Z tekproxy $
+ *
+ */
+
+use uo;
+use os;
+
+include ":attributes:attributes";
+include ":timedScripts:timedScripts";
+
+program TimedScript_EndAgility(params)
+	var mobile := params[1];
+
+	var curse_elem := TS_GetCfgElem("MassCurse");
+    var buff_icon := CInt( curse_elem.BuffIcon );
+	var points := struct;
+	points := GetObjProperty(mobile, "MassCurseMod");
+	AP_ModifyStatMod(mobile, DEXTERITY, points.dex);
+	AP_ModifyStatMod(mobile, INTELLIGENCE, points.int);
+	AP_ModifyStatMod(mobile, STRENGTH, points.str);
+	mobile.delbuff(buff_icon);
+	EraseObjProperty(mobile, "CurseMod");
+
+	return 1;
+endprogram
+

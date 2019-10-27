@@ -239,7 +239,7 @@ function MWReflected(cast_on)
     var eqp := GetObjProperty(cast_on, "EquipTimers");
     foreach thing in ListEquippedItems(cast_on)
       foreach entry in eqp
-        if((thing.serial == entry[1]) and (entry[2] == "ref"))
+        if((thing.serial == entry[1]) && (entry[2] == "ref"))
           holder := GetObjProperty(thing, "pid");
           break;
         endif
@@ -334,7 +334,7 @@ function identifyit(who, item)
     name := name + " " + GetObjProperty(the_item, "damagemod");
   endif
   name.erase(1);
-  if((!GetObjProperty(the_item, "IDed")) and (name != ""))
+  if((!GetObjProperty(the_item, "IDed")) && (name != ""))
     SetName(the_item, name);
   endif
   var msg := "It appears to be";

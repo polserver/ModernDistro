@@ -74,7 +74,7 @@ program textcmd_gfchart( who )
 	GFTextRight(gump, WINX_MAX - 7, WINY_MAX - 21, 32, "myrathi@templar.dhs.org" );
 
 	var retv := GFSendGump( who, gump );
-	if ( !retv and (retv <> 0) )
+	if ( !retv && (retv <> 0) )
 		SendSysMessage( who, "Please close any other user-gumps and try again." );
 		return;
 	endif

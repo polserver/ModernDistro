@@ -55,7 +55,7 @@ endprogram
 
 function process_wool(who, blade, sheep, craftingbag)
   blade := blade;
-  if((!CheckLineOfSight(who, sheep)) or (dist(who, sheep) > 2))
+  if((!CheckLineOfSight(who, sheep)) || (dist(who, sheep) > 2))
     SendSysMessage(who, "That sheep is too far away!", color := 33);
     return 0;
   endif
@@ -106,7 +106,7 @@ endfunction
 
 function CarveFish(who, blade, use_on, craftingbag)
   blade := blade;
-  if((!Accessible(who, use_on)) or (!CheckLineOfSight(who, use_on)) or (dist(who, use_on) > 2))
+  if((!Accessible(who, use_on)) || (!CheckLineOfSight(who, use_on)) || (dist(who, use_on) > 2))
     SendSysMessage(who, "You cannot use that");
     return 0;
   endif
@@ -136,7 +136,7 @@ function Carve_Corpse(who, cadaver, blade, craftingbag)
   var createdthing;
   craftingbag := craftingbag;
   Detach();
-  if((!Accessible(who, cadaver)) or (!CheckLineOfSight(who, cadaver)))
+  if((!Accessible(who, cadaver)) || (!CheckLineOfSight(who, cadaver)))
     SendSysMessage(who, "You cannot use that");
     return;
   endif
@@ -155,7 +155,7 @@ function Carve_Corpse(who, cadaver, blade, craftingbag)
     var beardlist := {0x203e, 0x203f, 0x2040, 0x2041, 0x204b, 0x204c, 0x204d };
     var hairlist  := {0x2044, 0x2045, 0x2046, 0x2047, 0x2048, 0x2049, 0x204a, 0x203b, 0x203c, 0x203d };
     foreach thing in EnumerateItemsInContainer(cadaver)
-      if((thing.objtype in hairlist) or (thing.objtype in beardlist))
+      if((thing.objtype in hairlist) || (thing.objtype in beardlist))
         DestroyItem(thing);
       else
         MoveObjectToLocation(thing, cadaver.x, cadaver.y, cadaver.z, cadaver.realm, MOVEOBJECT_FORCELOCATION);
@@ -271,7 +271,7 @@ endfunction
 
 
 function make_jack_o_latern(who, blade, pumpkin)
-    if((!CheckLineOfSight(who, pumpkin)) or (distance(who, pumpkin) > 2))
+    if((!CheckLineOfSight(who, pumpkin)) || (distance(who, pumpkin) > 2))
      SendSysMessage(who, "The pumpkin is either not close enough or is not within line of sight.");
      return;
    endif

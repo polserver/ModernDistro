@@ -48,13 +48,13 @@ program auctioneerai()
 	    Say("We charge 10% to handle the sale.");
 	    Say("Return to any auctioneer to claim your item.");
 
-	elseif((event.text["holdbox"]) and (who.cmdlevel>3))
+	elseif((event.text["holdbox"]) && (who.cmdlevel>3))
 
 	    sendopenspecialcontainer(who,inv_sell);
 
 	elseif(event.item)
 	    item:=event.item;
-	    if(item.objtype == 0x186E and item.graphic == 5360)
+	    if(item.objtype == 0x186E && item.graphic == 5360)
 		    Say ("That item has been destroyed.");
 		    destroyitem(item);
 	    endif
@@ -109,7 +109,7 @@ function sell_item(who,item)
 		return;
 	endif
 
-        if((item.objtype == 0x186E and item.graphic == 5360) or (item.objtype>=0xff0 and item.objtype<=0xff4))
+        if((item.objtype == 0x186E && item.graphic == 5360) or (item.objtype>=0xff0 && item.objtype<=0xff4))
                 Say ("You cannot sell that.");
 		return;
         endif

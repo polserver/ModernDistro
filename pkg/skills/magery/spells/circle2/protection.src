@@ -15,10 +15,10 @@ var cliloc_name :=  CInt(ts_cfg_elem.cliloc_name);
 var cliloc_desc :=  CInt(ts_cfg_elem.cliloc_desc);
 
 
-program cast_protection(parms)
-    var caster := parms[1];
-    var info := parms[2];
-
+program cast_protection(params)
+    var caster := params[1];
+    var info := params[2];
+    Broadcast(caster.name);
 	if ( GetObjProperty(caster, "Protection") )
 		RemoveProtection(caster);
 	else

@@ -146,7 +146,7 @@ function buildgump(who)
     return;
   else
     foreach thing in (box.keys)
-      if((thing != 1025) and (thing != 0))
+      if((thing != 1025) && (thing != 0))
         case(thing)
           2049: recruit(who);
           2050: viewmembers(who);
@@ -514,7 +514,7 @@ function SetFealty(who)
   var box := GFSendGump(who);
   if(box[ok.keyid])
     foreach k in(box.keys)
-      if((k != ok.keyid) and (k != 0))
+      if((k != ok.keyid) && (k != 0))
         choose := k;
         break;
       endif
@@ -643,7 +643,7 @@ function Dismiss(who)
   var choose := 0;
   if(box[ok.keyid])
     foreach k in(box.keys)
-      if((k > 1) and (k != ok.keyid))
+      if((k > 1) && (k != ok.keyid))
         choose := k;
         break;
       endif
@@ -697,7 +697,7 @@ function setallies(who)
   //var orderguilds := GetGlobalProperty("OrderGuilds"); // uncomment if needed
   //var chaosguilds := GetGlobalProperty("ChaosGuilds"); // uncomment if needed
   foreach gstatus in ListGuilds()
-    if((VirtueChecking(guild, gstatus)) and (!guild.isallyguild(gstatus)) and (guild.guildid != gstatus.guildid) and (!guild.isenemyguild(gstatus)) and (guildstone.Pending(guild, gstatus, "RE")))
+    if((VirtueChecking(guild, gstatus)) && (!guild.isallyguild(gstatus)) && (guild.guildid != gstatus.guildid) && (!guild.isenemyguild(gstatus)) && (guildstone.Pending(guild, gstatus, "RE")))
       count := count + 1;
       if(count > 13)
         count := 1;
@@ -770,7 +770,7 @@ function remallies(who)
   //var orderguilds := GetGlobalProperty("OrderGuilds"); // uncomment if needed
   //var chaosguilds := GetGlobalProperty("ChaosGuilds"); // uncomment if needed
   foreach gstatus in ListGuilds()
-    if((VirtueChecking(guild, gstatus)) and (guild.isallyguild(gstatus)) and (guild.guildid != gstatus.guildid))
+    if((VirtueChecking(guild, gstatus)) && (guild.isallyguild(gstatus)) && (guild.guildid != gstatus.guildid))
       count := count + 1;
       if(count > 13)
         count := 1;
@@ -843,7 +843,7 @@ function setenemies(who)
   //var orderguilds := GetGlobalProperty("OrderGuilds"); // uncomment if needed
   //var chaosguilds := GetGlobalProperty("ChaosGuilds"); // uncomment if needed
   foreach gstatus in ListGuilds()
-    if((VirtueChecking(guild, gstatus)) and (!guild.isallyguild(gstatus)) and (guild.guildid != gstatus.guildid) and (!guild.isenemyguild(gstatus)) and (guildstone.Pending(guild, gstatus, "RA")))
+    if((VirtueChecking(guild, gstatus)) && (!guild.isallyguild(gstatus)) && (guild.guildid != gstatus.guildid) && (!guild.isenemyguild(gstatus)) && (guildstone.Pending(guild, gstatus, "RA")))
       count := count + 1;
       if(count > 13)
         count := 1;
@@ -917,7 +917,7 @@ function remenemies(who)
   //var orderguilds := GetGlobalProperty("OrderGuilds"); // uncomment if needed
   //var chaosguilds := GetGlobalProperty("ChaosGuilds"); // uncomment if needed
   foreach gstatus in ListGuilds()
-    if((VirtueChecking(guild, gstatus)) and (guild.isenemyguild(gstatus)) and (guild.guildid != gstatus.guildid))
+    if((VirtueChecking(guild, gstatus)) && (guild.isenemyguild(gstatus)) && (guild.guildid != gstatus.guildid))
       count := count + 1;
       if(count > 13)
         count := 1;
@@ -987,7 +987,7 @@ function yourallies(who)
   //var chaosguilds := GetGlobalProperty("ChaosGuilds"); // uncomment if needed
   foreach gstatus in (guild.getprop("guildallies"))
     var enemy := FindGuild(gstatus);
-    if((enemy) and (VirtueChecking(guild, enemy)))
+    if((enemy) && (VirtueChecking(guild, enemy)))
       count := count + 1;
       if(count > 13)
         count := 1;
@@ -1035,7 +1035,7 @@ function yourenemies(who)
   //var chaosguilds := GetGlobalProperty("ChaosGuilds"); // uncomment if needed
   foreach gstatus in (guild.getprop("guildenemies"))
     var enemy := FindGuild(gstatus);
-    if((enemy) and (VirtueChecking(guild, enemy)))
+    if((enemy) && (VirtueChecking(guild, enemy)))
       count := count + 1;
       if(count > 13)
         count := 1;
@@ -1223,7 +1223,7 @@ function setcharter(who)
       if(subnote != "")
         guild.setprop("webpage", subnote);
       endif
-    elseif((thing != 0) and (thing != 2))
+    elseif((thing != 0) && (thing != 2))
       subnote := box[thing];
       subnote[1, find(subnote, ": ", 1)+1] := "";
       if(subnote != "")
@@ -1387,7 +1387,7 @@ function AcceptCandidate(who)
     endif
     var choose := 0;
     foreach k in (res.keys)
-      if((k >= 1) and (k != ok.keyid))
+      if((k >= 1) && (k != ok.keyid))
         choose := SystemFindObjectBySerial(k, SYSFIND_SEARCH_OFFLINE_MOBILES);
       endif
     endforeach
@@ -1471,7 +1471,7 @@ function RefuseCandidate(who)
     endif
     var choose := 0;
     foreach k in (res.keys)
-      if((k >= 1) and (k != ok.keyid))
+      if((k >= 1) && (k != ok.keyid))
         choose := SystemFindObjectBySerial(k, SYSFIND_SEARCH_OFFLINE_MOBILES);
       endif
     endforeach
@@ -1567,7 +1567,7 @@ function GrantTitle(who)
   endif
   if(box[ok.keyid])
     foreach k in(box.keys)
-      if((k != ok.keyid) and (k != 0))
+      if((k != ok.keyid) && (k != 0))
         choose := k;
         break;
       endif

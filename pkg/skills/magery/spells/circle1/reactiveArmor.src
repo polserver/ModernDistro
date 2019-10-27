@@ -1,3 +1,5 @@
+
+
 /*
  * Increases caster's Physical Resistance by ((Inscription / 20) + 15) points,
  * and decreases caster's Fire, Cold, Energy and Poison Resistance by 5 points each.
@@ -10,44 +12,63 @@ use os;
 include ":attributes:attributes";
 include ":magery:spells";
 include ":damage:damage";
+include ":timedScripts:timedScripts";
+
+var mods := struct;
+var ts_cfg_elem := TS_GetCfgElem("ReactiveArmor");
+var buff_icon := CInt( ts_cfg_elem.BuffIcon );
+var cliloc_name :=  CInt(ts_cfg_elem.cliloc_name);
+var cliloc_desc :=  CInt(ts_cfg_elem.cliloc_desc);
 
 program cast_reactivearmor( parms )
   var caster := parms[1];
   var info := parms[2];
-  
+
   var cast_on := caster;
-	
+
 	if ( GetObjProperty(cast_on, "ReactiveArmor") )
 		RemoveReactiveArmor(cast_on);
 	else
+		var elemental_penalty := -5;
 		var points := (AP_GetSkill(cast_on, INSCRIPTION) / 20) + 15;
-		ApplyReactiveArmor(cast_on, points);
+		ApplyReactiveArmor(cast_on, elemental_penalty, points);
 	endif
 
 	MS_PlaySpellSFX(info.spell_id, cast_on);
 	MS_PlaySpellGFX(info.spell_id, cast_on, cast_on);
-	
+
 	return 1;
 endprogram
 
-function ApplyReactiveArmor(mobile, points)
-	ModifyResistance(mobile, DMG_PHYSICAL, points);
-	ModifyResistance(mobile, DMG_FIRE, -5);
-	ModifyResistance(mobile, DMG_COLD, -5);
-	ModifyResistance(mobile, DMG_POISON, -5);
-	ModifyResistance(mobile, DMG_ENERGY, -5);
+function ApplyReactiveArmor(mobile, elemental_penalty, points)
 
-	SetObjProperty(mobile, "ReactiveArmor", points);
+	ModifyResistance(mobile, DMG_PHYSICAL, points);
+	ModifyResistance(mobile, DMG_FIRE, elemental_penalty);
+	ModifyResistance(mobile, DMG_COLD, elemental_penalty);
+	ModifyResistance(mobile, DMG_POISON, elemental_penalty);
+	ModifyResistance(mobile, DMG_ENERGY, elemental_penalty);
+
+	mods.+Physical := points;
+	mods.+Fire := elemental_penalty;
+	mods.+Cold := elemental_penalty;
+	mods.+Poison := elemental_penalty;
+	mods.+Energy := elemental_penalty;
+
+	var cl_params := CStr(mods.Physical) + "\t" + CStr(mods.Fire) + "\t"  + CStr(mods.Cold) + "\t" + CStr(mods.Poison) + "\t" + CStr(mods.Energy);
+	mobile.addBuff(buff_icon, 0, cliloc_name, cliloc_desc, cl_params);
+	SetObjProperty(mobile, "ReactiveArmor", mods);
+
 endfunction
 
 function RemoveReactiveArmor(mobile)
-	var points := GetObjProperty(mobile, "ReactiveArmor");
 
-	ModifyResistance(mobile, DMG_PHYSICAL, -(points));
-	ModifyResistance(mobile, DMG_FIRE, 5);
-	ModifyResistance(mobile, DMG_COLD, 5);
-	ModifyResistance(mobile, DMG_POISON, 5);
-	ModifyResistance(mobile, DMG_ENERGY, 5);
+	ModifyResistance(mobile, DMG_PHYSICAL, (mods.Physical));
+	ModifyResistance(mobile, DMG_FIRE, -(mods.Fire));
+	ModifyResistance(mobile, DMG_COLD, -(mods.Cold));
+	ModifyResistance(mobile, DMG_POISON, -(mods.Poison));
+	ModifyResistance(mobile, DMG_ENERGY, -(mods.Energy));
 
+	mobile.delbuff(buff_icon);
 	EraseObjProperty(mobile, "ReactiveArmor");
+
 endfunction

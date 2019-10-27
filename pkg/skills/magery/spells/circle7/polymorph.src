@@ -1,3 +1,19 @@
+///////////////////////////////////////////////////////////////////
+// Polymorph spell.
+// Written by Yukiko "Kiko" for the POL Modern Distro.
+// 2019-10-25
+//
+// I want to note that I have laced this programme heavily with
+// comments for a specific reason. I try to write my programmes
+// knowing that someone, who is new to programming may look at the
+// code. I want them to be able to learn from my work.
+// I have also predeclared all variables. I believe this helps
+// with clarity in understanding the code. I realize this is not
+// always practical or expedient. eScript does not require this.
+///////////////////////////////////////////////////////////////////
+
+
+
 use util;
 
 include ":attributes:attributes";
@@ -5,81 +21,152 @@ include ":magery:spells";
 include ":virtue:virtue";
 include ":timedScripts:timedScripts";
 
+// Note: Declaring variables and constants above the 'program' declaration
+// makes them globally available to functions which may be called.
+var poly_cfg := ReadConfigFile(":magery:polymorph");
+if(poly_cfg.errortext)
+	SysLog("polymorph.src -- Can't read :magery:polymorph.cfg.");
+	return;
+endif
+
 program cast_polymorph( parms )
 
 	var caster := parms[1];
+	// Get caster's magery skill level.
 	var magery     := CInt(GetAttribute(caster, MAGERY));
+	// Get the buff icon element info for Polymorph from timedScripts.cfg.
+	var ts_cfg_elem := TS_GetCfgElem("Polymorph");
+	var buff_icon := CInt( ts_cfg_elem.BuffIcon );
+	var cliloc_name :=  CInt(ts_cfg_elem.cliloc_name);
+	var cliloc_desc :=  CInt(ts_cfg_elem.cliloc_desc);
+	// Used to store the caster's original graphic and colour.
+	var my_form := struct;
+	// Used to store the group of possible forms the caster might assume.
 	var critgroup;
-	var the_creature;
+	// Used to store the element reference for the form the caster will assume.
+	var critter;
+	// Name property from the cfg file will be stored here.
+	var crit_name := "";
+	// Graphic property from the cfg file will be stored here.
+	var crit_graphic := 0;
+	// This will hold the colour property from the cfg file.
+	var crit_colour := {};
+	// Theis array will hold the element references from the cfg file based
+	// on the critgroup value.
+	var critter_group := {};
+	// This array will hold all possible colours for a creature.
+	var colours :={};
+	// Used to hold a string article for the buff system.
+	var article := "";
 
+	// Determine the groups possible based on the magery skill.
+	// The value of variable 'critgroup' corresponds to Level
+	// in the cfg file.
 	if (magery < 70)
-		critgroup := RandomInt(1);
+		critgroup := 1;
 	elseif (magery < 80)
-		critgroup := RandomInt(1)+1;
+		critgroup := RandomInt(2) + 1;
 	elseif (magery < 90)
-		critgroup := RandomInt(1)+2;
+		critgroup := RandomInt(3) + 1;
 	else
-		critgroup := 3;
+		critgroup := RandomInt(4) + 1;
 	endif
 
-	var critter := RandomInt(8);
 
-	case (critgroup)
-	0:
-		case (critter)
-			0: the_creature := 0x6;		//bird
-			1: the_creature := 0x33;	//slime
-			2: the_creature := 0x05;	//eagle
-			3: the_creature := 0x27;	//mongbat
-			4: the_creature := 0x1F;	//headless
-			5: the_creature := 0x1D;	//gorilla
-			6: the_creature := 0x2A;	//ratman
-			7: the_creature := 0x1C;	//giant spider
-		endcase
-	1:
-		case (critter)
-			0: the_creature := 0x30;	//scorpion
-			1: the_creature := 0x07;	//orc
-			2: the_creature := 0x03;	//zombie
-			3: the_creature := 0x11;	//orc
-			4: the_creature := 0x21;	//lizardman
-			5: the_creature := 0x1A;	//shade
-			6: the_creature := 0x15;	//giant serp
-			7: the_creature := 0x1E;	//harpy
-		endcase
-	2:
-		case (critter)
-			0: the_creature := 0x12;	//ettin
-			1: the_creature := 0x08;	//corpser
-			2: the_creature := 0x16;	//beholder
-			3: the_creature := 0x0E;	//earth elem
-			4: the_creature := 0x10;	//water elem
-			5: the_creature := 0x0F;	//fire elem
-			6: the_creature := 0x0D;	//air elem
-			7: the_creature := 0x2F;	//ent
-		endcase
-	3:
-		case (critter)
-			0: the_creature := 0x01;	//ogre
-			1: the_creature := 0x04;	//gargoyle
-			2: the_creature := 0x18;	//lich
-			3: the_creature := 0x96;	//seaserp
-			4: the_creature := 0x09;	//daemon
-			5: the_creature := 0x0C;	//dragon
-			6: the_creature := 0x0A;	//daemon with sword
-			7: the_creature := 0x3A;	//wisp
-		endcase
-	endcase
 
 	if(!GetObjProperty(caster, "Polymorphed"))
-		SetObjProperty(caster, "MyGraphic", caster.graphic);
+		// Preserve caster's graphic and colour in a CProp on the character.
+		my_form.+graphic := caster.graphic;
+		my_form.colour := caster.color;
+		SetObjProperty(caster, "MyOrigForm", my_form);
 		SetObjProperty(caster, "Polymorphed", 1);
-		caster.graphic := the_creature;
+		// Get the appropriate group of creatures based on magery skill.
+		critter_group := GetGroup(critgroup);
+		// Pick a random creature from the group.
+		critter := critter_group[RandomInt(8) + 1];
+		// Here we get the properties of the critter.
+		crit_name := GetConfigString(critter, "Name");
+		crit_graphic := GetConfigInt(critter, "Graphic");
+		// Some creatures have more than one colour possible.
+		// So we load all listed colours into an array and
+		// pick a random one.
+		colours := GetConfigIntArray(critter, "Color");
+		crit_colour := colours.RandomEntry();
+		// Assign those properties to the caster.
+		caster.graphic := crit_graphic;
+		caster.color := crit_colour;
+
+		// The buff icon description needs an article ('a' or 'an') for
+		// the creature's description.
+		article := ReturnArticle(crit_name);
+		// Display the buff icon.
+		caster.addbuff(buff_icon, 0, cliloc_name, cliloc_desc, article + "\t" + crit_name); // You are transformed into ~1_ARTICLE~ ~2_FORM~.
+		// Honesty takes a hit for polymorphing.
 		VS_AdjustVirtue(caster, "Honesty", -1, 50);
 	else
-		caster.graphic := GetObjProperty(caster, "MyGraphic");
-		EraseObjProperty(caster, "MyGraphic");
+		// Restore caster's graphic and colour.
+		my_form := GetObjProperty(caster, "MyOrigForm");
+		caster.graphic := my_form.graphic;
+		caster.color := my_form.colour;
+		// Clear the CProps and delete the buff icon.
+		EraseObjProperty(caster, "MyOrigForm");
 		EraseObjProperty(caster, "Polymorphed");
+		caster.delbuff(buff_icon);
 	endif
 
 endprogram
+
+///////////////////////////////////////////////////////////
+//
+// GetGroup(group)
+// Parameter: group - an integer.
+// This function builds an array of element references
+// whose 'Level' property matches the value of 'group'.
+//
+// Returns: An array of element references from poly_cfg
+///////////////////////////////////////////////////////////
+function GetGroup(group);
+
+	// This array will hold element references to creatures from the cfg file.
+	var critters := {};
+	// Get all the keys from poly_cfg
+	var crit_keys := GetConfigStringKeys(poly_cfg);
+	// This will hold a reference to a single element from the config file.
+	var elem;
+	foreach key in crit_keys
+		elem := FindConfigElem(poly_cfg, key);
+		if(GetConfigInt(elem, "Level") == CInt(group))
+			critters.append(elem);
+		endif
+	endforeach
+	return critters;
+
+endfunction
+
+
+// function ReturnArticle(str)
+// This function will return an indefinite article ("a" or "an")
+// for the passed string. If the string begins with a consonant, it
+// uses "a", and if the string begins with a vowel it will use "an".
+// Note, this will occasionally produce grammatically incorrect
+// phrases involving strings beginning with "h" or glided "u" sounds,
+// such as "a hour", "an unit", or "a eunuch".  For the curious, the
+// "a" is used before consonants, including the "y" sound in some
+// phoenemes of "u".  The "an" article is used before a vowel sound,
+// or before an "h" in words where the accent falls on any syllable
+// other than the first (like "historic").
+// Most of the code was borrowed from the AddArticle function in
+// /scripts/include/string.inc.
+
+function ReturnArticle(str)
+
+	var i := str[1];
+	var vowellist := { "a", "A", "e", "E", "i", "I", "o", "O", "u", "U" };
+
+	if ( i in vowellist )
+		return "an";
+	else
+		return "a";
+	endif
+
+endfunction

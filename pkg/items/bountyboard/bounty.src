@@ -19,7 +19,7 @@ program Assign_Bounty(parms)
 	if(mygold)
 	  var mob := SystemFindObjectBySerial(id, SYSFIND_SEARCH_OFFLINE_MOBILES);
 	  var bounty := GetBountyAmount(who, mygold, mob.name);
-	  if((bounty) and (bounty <= mygold))
+	  if((bounty) && (bounty <= mygold))
         AddBounty(mob, bounty);
         foreach thing in goldpiles
 	      if(thing.amount < bounty)
