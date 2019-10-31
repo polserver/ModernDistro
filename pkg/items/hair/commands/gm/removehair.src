@@ -1,0 +1,40 @@
+/* $Id$
+ *
+ */
+
+use uo;
+use os;
+
+include "include/client";
+
+program command_RemoveHair(who, text)
+	text := Lower(text);
+	var layers := array{};
+	if ( text["head"] )
+		layers.Append(LAYER_HAIR);
+	endif
+	if ( text["beard"] )
+		layers.Append(LAYER_BEARD);
+	endif
+	
+	if ( layers.Size() < 1 )
+		SendSysMessage(who, "Syntax: .removehair (head) (beard)");
+		return 0;
+	endif
+	
+	var targ := Target(who);
+	if ( !targ.IsA(POLCLASS_MOBILE) )
+		SendSysMessage(who, "Cancelled.");
+		return 0;
+	endif
+	
+	foreach layer in ( layers )
+		DestroyItem(GetEquipmentByLayer(targ, layer));
+		SleepMS(2);
+	endforeach
+	
+	return 1;
+endprogram
+
+	
+	

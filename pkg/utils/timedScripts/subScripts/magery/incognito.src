@@ -6,40 +6,82 @@ use uo;
 use os;
 
 include ":attributes:attributes";
+include ":timedScripts:timedScripts";
 include "include/client";
+include ":body:bodyHues";
 
-var hair_types := array{ "cutHair", "ShortHair", "LongHair", "PonyTailHair", "MohawkHair",
+var orig_info := struct;
+var ts_cfg_elem := TS_GetCfgElem("Incognito");
+var buff_icon := CInt( ts_cfg_elem.BuffIcon );
+var cliloc_name :=  CInt(ts_cfg_elem.cliloc_name);
+var cliloc_desc :=  CInt(ts_cfg_elem.cliloc_desc);
+
+
+var Human_hair_types := array{ "cutHair", "ShortHair", "LongHair", "PonyTailHair", "MohawkHair",
                     "PageBoyHair", "BunsHair", "AfroHair", "RecedingHair", "PigTailHair",
-                    "KrisnaHair" }; 
-var beard_types := array{ "LongBeardHair", "ShortBeardHair", "GoateeHair", "MustacheHair",
+                    "KrisnaHair" };
+var human_beard_types := array{ "LongBeardHair", "ShortBeardHair", "GoateeHair", "MustacheHair",
                      "MedShortBeardHair", "medlongbeard", "VandykeHair" };
+
+var elven_hair_types := {"elfmidlong", "elflongfeather", "elfshort", "elfmullet", "elfflower",
+					"elflonghair", "elftopknot", "elflongbraid", "elfbuns", "elfspikedhair"};
+
+// Gargoyle male head.
+var male_gargy_horns := {"MaleHornStyle1", "MaleHornStyle2", "MaleHornStyle3", "MaleHornStyle4",
+						"MaleHornStyle5", "MaleHornStyle6", "MaleHornStyle7", "MaleHornStyle8"};
+
+var gargy_facial_horns := {"FacialHornStyle1", "FacialHornStyle2", "FacialHornStyle3", "FacialHornStyle4"};
+
+
+var female_gargy_horns := {"FemaleHornStyle1", "FemaleHornStyle2", "FemaleHornStyle3", "FemaleHornStyle4",
+							"FemaleHornStyle5", "FemaleHornStyle6", "FemaleHornStyle7", "FemaleHornStyle8"};
 
 program TimedScript_Incognito(params)
 	var mobile := params[1];
 	params := 0;
-	
+	var hair_types := array;
+	var beard_types := array;
+
 	// Store original info if this is the first time incognito has been cast
 	if ( !GetObjProperty(mobile, "Incognito") )
-		var original := struct;
-		original.+name := mobile.name;
-		original.+gender := mobile.gender;
-		original.+truecolor := mobile.truecolor;
-		original.+title_prefix := mobile.title_prefix;
-		original.+title_suffix := mobile.title_suffix;
-		original.+title_guild := mobile.title_guild;
-		original.+title_race := mobile.title_race;
-		
+
+		case (mobile.graphic)
+			0x190:	hair_types := Human_hair_types;		// Human male
+					beard_types := human_beard_types;
+					break;
+			0x191:	hair_types := Human_hair_types;		// Human female
+			0x25D:	hair_types := elven_hair_types;		// Elven male (he elf)
+			0x25E:	hair_types := elven_hair_types;		// Elven female (she elf)
+			0x29A:	hair_types := male_gargy_horns;		// Gargoyle male (garguy :D)
+					beard_types := gargy_facial_horns;
+					break;
+			0x29B: hair_types := female_gargy_horns;	// Gargoyle female (gargirl :D)
+		endcase
+
+
+		orig_info.+name := mobile.name;
+		orig_info.+gender := mobile.gender;
+		orig_info.+graphic := mobile.graphic;
+		orig_info.+truecolor := mobile.truecolor;
+		orig_info.+title_prefix := mobile.title_prefix;
+		orig_info.+title_suffix := mobile.title_suffix;
+		orig_info.+title_guild := mobile.title_guild;
+		orig_info.+title_race := mobile.title_race;
+
 		var hair := GetEquipmentByLayer(mobile, LAYER_HAIR);
 		var beard := GetEquipmentByLayer(mobile, LAYER_BEARD);
-		original.+hair := hair.name;
-		original.+hair_color := hair.color;
-		original.+beard := beard.name;
-		original.+beard_color := hair.color;
+		orig_info.+hair := hair.name;
+		orig_info.+hair_color := hair.color;
+		orig_info.+beard := beard.name;
+		orig_info.+beard_color := hair.color;
 
-		SetObjProperty(mobile, "Incognito", original);		
-		Print("Incognito original:"+original);
+		SetObjProperty(mobile, "Incognito", orig_info);
+		Print("Incognito original:"+orig_info);
+	else
+		// Prevent Incognito spell if the caster is under the influence.
+		return 0;
 	endif
-	
+
 	// Remove title prefix and suffix, ignore guild and race for now.
 	mobile.title_prefix := "";
 	mobile.title_suffix := "";
@@ -47,40 +89,82 @@ program TimedScript_Incognito(params)
 	//mobile.title_race := "";
 
 	// Set gender and color
-	mobile.gender := RandomInt(1);
+	mobile.gender := RandomInt(2);
 	mobile.truecolor	:= 1056 - RandomInt(55); // 1002-1056
 
-	// Get random hair type with random hair color and equip it.
-	var color_cfg := ReadConfigFile(":hair:hairColors");
-	var categories := GetConfigStringArray(color_cfg["Index"], "Category");
-	var new_hair_color := GetConfigStringArray(color_cfg[categories[RandomInt(categories.Size()) + 1]], "Color");
-	new_hair_color := new_hair_color[RandomInt(new_hair_color.Size()) + 1];
 
-	DestroyItem(GetEquipmentByLayer(mobile, LAYER_HAIR));
-	var new_hair := CreateItemInBackpack(mobile, hair_types[RandomInt(hair_types.Size()) + 1]);
-	new_hair.color := new_hair_color;
-	EquipItem(mobile, new_hair);
-		
 	// Get name template and if it's a male, get random beard and color and equip it.
 	var name_template;
-	if ( mobile.gender == 0 )
-		name_template := "5"; // Human Male names
-		DestroyItem(GetEquipmentByLayer(mobile, LAYER_BEARD));
-		var new_beard := CreateItemInBackpack(mobile, beard_types[RandomInt(beard_types.Size()) + 1]);
-		var new_beard_color := GetConfigStringArray(color_cfg[categories[RandomInt(categories.Size()) + 1]], "Color");
-		new_beard_color := new_beard_color[RandomInt(new_beard_color.Size()) + 1];
-		new_beard.color := new_beard_color;
-		
-		EquipItem(mobile, new_beard);
+	if(mobile.graphic == 0x190 || mobile.graphic == 0x191)
+		// Get random hair type with random hair color and equip it.
+		var color_cfg := ReadConfigFile(":hair:hairColors");
+		var categories := GetConfigStringArray(color_cfg["Index"], "Category");
+		var new_hair_color := GetConfigStringArray(color_cfg[categories[RandomInt(categories.Size()) + 1]], "Color");
+		new_hair_color := new_hair_color[RandomInt(new_hair_color.Size()) + 1];
+
+		if ( mobile.gender == 0 )
+			name_template := "5"; // Human Male names
+			DestroyItem(GetEquipmentByLayer(mobile, LAYER_HAIR));
+			var new_hair := CreateItemInBackpack(mobile, hair_types[RandomInt(hair_types.Size()) + 1]);
+			new_hair.color := new_hair_color;
+			EquipItem(mobile, new_hair);
+			DestroyItem(GetEquipmentByLayer(mobile, LAYER_BEARD));
+			var new_beard := CreateItemInBackpack(mobile, beard_types[RandomInt(beard_types.Size()) + 1]);
+			var new_beard_color := GetConfigStringArray(color_cfg[categories[RandomInt(categories.Size()) + 1]], "Color");
+			new_beard_color := new_beard_color[RandomInt(new_beard_color.Size()) + 1];
+			new_beard.color := new_beard_color;
+
+			EquipItem(mobile, new_beard);
+		else
+			name_template := "6"; // Human Female names
+			DestroyItem(GetEquipmentByLayer(mobile, LAYER_HAIR));
+			var new_hair := CreateItemInBackpack(mobile, hair_types[RandomInt(hair_types.Size()) + 1]);
+			new_hair.color := new_hair_color;
+			EquipItem(mobile, new_hair);
+		endif
+	elseif(mobile.graphic == 0x25D || mobile.graphic == 0x25E) // Elf graphic
+		// Elven stuff
+		if(mobile.gender == 0)
+			name_template := 13;
+			DestroyItem(GetEquipmentByLayer(mobile, LAYER_HAIR));
+			var new_hair := CreateItemInBackpack(mobile, hair_types[RandomInt(hair_types.Size()) + 1]);
+			new_hair.color := RandomElvenHairHue();
+			EquipItem(mobile, new_hair);
 	else
-		name_template := "6"; // Human Female names
+			name_template := 14;
+			DestroyItem(GetEquipmentByLayer(mobile, LAYER_HAIR));
+			var new_hair := CreateItemInBackpack(mobile, hair_types[RandomInt(hair_types.Size()) + 1]);
+			new_hair.color := RandomElvenHairHue();
+			EquipItem(mobile, new_hair);
+		endif
+	elseif(mobile.graphic == 0x29A || mobile.graphic == 0x29B) // Gargoyle graphic
+		// Gargoyle stuff
+		if(mobile.gender == 0)
+			name_template := 16;
+			DestroyItem(GetEquipmentByLayer(mobile, LAYER_HAIR));
+			var new_hair := CreateItemInBackpack(mobile, hair_types[RandomInt(hair_types.Size()) + 1]);
+			new_hair.color := RandomGargoyleHornHue();
+			EquipItem(mobile, new_hair);
+			DestroyItem(GetEquipmentByLayer(mobile, LAYER_BEARD));
+			var new_beard := CreateItemInBackpack(mobile, beard_types[RandomInt(beard_types.Size()) + 1]);
+			new_beard.color := RandomGargoyleHornHue();
+
+			EquipItem(mobile, new_beard);
+		else
+			name_template := 17;
+			DestroyItem(GetEquipmentByLayer(mobile, LAYER_HAIR));
+			var new_horn := CreateItemInBackpack(mobile, hair_types[RandomInt(hair_types.Size()) + 1]);
+			new_horn.color := RandomGargoyleHornHue();
+			EquipItem(mobile, new_horn);
+		endif
+	else
+		SendSysMessage(mobile, "You must be in your natural form forthis spell.", color := 33);
+		return;
 	endif
-	
 	// Give mobile a random name
 	var names := ReadConfigFile("::names");
 	var name_list := GetConfigStringArray(names[name_template], "Name");
-	SetName(mobile, name_list[RandomInt(name_list.Size()) + 1]);	
+	SetName(mobile, name_list[RandomInt(name_list.Size()) + 1]);
 
 	return 1;
 endprogram
-

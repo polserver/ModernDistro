@@ -1,0 +1,14 @@
+/* 
+ * $Id$
+ *
+ */
+
+use uo;
+use os;
+
+program ControlScript(cuthair)
+	//Sleep(90);
+	//DestroyItem(cuthair);
+	
+	return 1;
+endprogram
