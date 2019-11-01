@@ -1,0 +1,132 @@
+/*
+ * $Id$
+ *
+ */
+
+use uo;
+use os;
+use cfgfile;
+
+include "include/client";
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+
+CONST CANCEL_BTN	:= 0xA00001;
+// CONST OKAY_BTN		:= 0xA00002;
+
+program UseDyes(who, dyes)
+	if ( !ReserveItem(dyes) )
+		SendSysMessage(who, "Someone else is already using that.");
+		return 0;
+	elseif ( !(dyes in EnumerateItemsInContainer(who.backpack)) )
+		SendSysMessage(who, "That must be in your backpack to be used.");
+		return 0;
+	endif
+
+	var hair := GetEquipmentByLayer(who, LAYER_HAIR);
+	var beard := GetEquipmentByLayer(who, LAYER_BEARD);
+	var color := CInt(hair.color);
+	if ( !color )
+		color := CInt(beard.color);
+	endif
+
+	var gump := BuildHairDyeGump(color);
+	var input := GFSendGump(who, gump);
+
+	if ( input[0] == 0 || input[CANCEL_BTN] )
+		SendSysMessage(who, "Cancelled.");
+		return 0;
+	endif
+
+	foreach key in ( input.keys )
+		if ( key > 2 )
+			color := key;
+			break;
+		endif
+		SleepMS(2);
+	endforeach
+
+	if ( !IsValidHairColor(color) )
+		// Occurs when custom values are inserted into the gump with client cheats.
+		// Remember Raph Koster's rule - "The client is in the hands of the enemy. Never trust it."
+		SendSysMessage(who, "Error - Color found ["+color+"] is invalid.");
+		return 0;
+	endif
+
+	hair.color := color;
+	beard.color := color;
+	SubtractAmount(dyes, 1);
+
+	return 1;
+endprogram
+
+function BuildHairDyeGump(cur_color := 0)
+	var gump := GFCreateGump();
+
+	GFPage(gump, 0);
+	//GFClosable(gump, 0);
+	GFResizePic(gump, 0, 0, GFGetCfgConst("Defaults", "BackGround"), 400, 450);
+	GFResizePic(gump, 15, 15, GFGetCfgConst("Defaults", "ForeGround"), 120, 420);
+	GFResizePic(gump, 140, 15, GFGetCfgConst("Defaults", "ForeGround"), 245, 380);
+
+	GFAddButton(gump, 190, 405, 2128, 2129, GF_CLOSE_BTN, 1);
+	GFAddButton(gump, 265, 405, 2119, 2120, GF_CLOSE_BTN, 2);
+
+	var color_cfg := ReadConfigFile(":hair:hairColors");
+	var index_elem := color_cfg["Index"]; // Controls order colors appear.
+	var categories := GetConfigStringArray(index_elem, "Category");
+
+	// Build category buttons on the left first
+	var index_y := 25;
+	foreach category in ( categories )
+		GFAddButton(gump, 20, index_y+3, 5224, 5224, GF_PAGE_BTN, _category_iter);
+		var color_elem := color_cfg[category];
+		GFTextLine(gump, 50, index_y, color_elem.TitleColor, category);
+
+		index_y += 20;
+		SleepMS(2);
+	endforeach
+
+	// Build colors inside each category
+	foreach category in ( categories )
+		GFPage(gump, _category_iter);
+		var color_elem := color_cfg[category];
+
+		var color_x := 150;
+		var color_y := 20;
+		var side := 1;
+		foreach color in ( GetConfigStringArray(color_elem, "Color") )
+			color := CInt(color);
+			GFRadioButton(gump, color_x, color_y, 210, 211, (color == cur_color), color);
+			GFTextLine(gump, color_x+20, color_y, color-1, category);
+			if ( side == 1 )
+				color_x := 290;
+				side := 0;
+			else
+				color_x := 150;
+				color_y += 20;
+				side := 1;
+			endif
+
+			SleepMS(2);
+		endforeach
+		SleepMS(2);
+	endforeach
+
+	return gump;
+endfunction
+
+function IsValidHairColor(color_num)
+	var color_cfg := ReadConfigFile(":hair:hairColors");
+	color_num := CStr(color_num);
+
+	foreach elem_name in ( GetConfigStringKeys(color_cfg) )
+		var cfg_elem := color_cfg[elem_name];
+		if ( color_num in GetConfigStringArray(cfg_elem, "Color") )
+			return 1;
+		endif
+		SleepMS(2);
+	endforeach
+
+	return 0;
+endfunction
