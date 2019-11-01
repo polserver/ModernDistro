@@ -127,13 +127,26 @@ program TimedScript_Incognito(params)
 		if(mobile.gender == 0)
 			name_template := 13;
 			DestroyItem(GetEquipmentByLayer(mobile, LAYER_HAIR));
-			var new_hair := CreateItemInBackpack(mobile, hair_types[RandomInt(hair_types.Size()) + 1]);
+
+			var new_hair := hair_types[RandomInt(hair_types.Size()) + 1];
+			if(new_hair == "elfflower")
+				new_hair := "elfmidlong";
+			elseif(new_hair == "elfbuns")
+				new_hair := "elflonghair";
+			endif
+			CreateItemInBackpack(mobile, new_hair);
 			new_hair.color := RandomElvenHairHue();
 			EquipItem(mobile, new_hair);
 	else
 			name_template := 14;
 			DestroyItem(GetEquipmentByLayer(mobile, LAYER_HAIR));
-			var new_hair := CreateItemInBackpack(mobile, hair_types[RandomInt(hair_types.Size()) + 1]);
+			var new_hair := hair_types[RandomInt(hair_types.Size()) + 1];
+			if(new_hair == "elfmidlong")
+				new_hair := "elfflower";
+			elseif(new_hair == "elflonghair")
+				new_hair := "elfbuns";
+			endif
+			CreateItemInBackpack(mobile, new_hair);
 			new_hair.color := RandomElvenHairHue();
 			EquipItem(mobile, new_hair);
 		endif
