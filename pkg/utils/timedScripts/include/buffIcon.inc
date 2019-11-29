@@ -25,20 +25,7 @@ function UpdateBuffIcon( mobile, byref cfg_elem, byref event )
         if( buff_icon )
             var level := event.level,
             amount := event.amount;
-            // The following 'if' and 'elseif' are temporary kluges until I can
-            // think of a proper way to rewrite this function to allow for buffs
-            // that require multiple cliloc parameters.
             if(amount)
-                if(buff_icon == 1048)       // Bless
-                    var level3 := CStr(level)+"\t"+CStr(level)+"\t"+CStr(level);
-                    mobile.addBuff(buff_icon, amount, cliloc_name, cliloc_desc, level3);
-                elseif(buff_icon == 1043)   // Curse
-                    var level3 := CStr(level)+"\t"+CStr(level)+"\t"+CStr(level)+"\t"+CStr(level)+"\t"+CStr(level)+"\t"+CStr(level)+"\t"+CStr(level);
-                    mobile.addBuff(buff_icon, amount, cliloc_name, cliloc_desc, level3);
-                else
-                    mobile.addBuff(buff_icon, amount, cliloc_name, cliloc_desc, CStr( level ));
-                endif
-            else
                 mobile.delbuff(buff_icon);
             endif
 

@@ -1,0 +1,8 @@
+///////////////////////////////////////////////
+// Program to play sound effect for testing.
+///////////////////////////////////////////////
+use uo;
+
+program textcmd_play_sfx( who, effect )
+	PlaySoundEffect( who, CInt(effect) );
+endprogram
