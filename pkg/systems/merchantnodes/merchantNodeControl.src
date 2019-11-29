@@ -67,7 +67,7 @@ program merchantnode(itm)
 			tmparray.append(anchor);
 			tmparray.append(1);
 			holder.append(tmparray);
-			if((!template) or (template == 1) or (template == "merchant"))
+			if((!template) || (template == 1) || (template == "merchant"))
 				SetObjProperty(item, "Template", 1);
 				var merctype := FindMerchantType(tmparray[1]);
 				create_node_merc(merctype, merctype + " " + anchor[1] + " " + anchor[2] + " " + anchor[3]);
@@ -106,7 +106,7 @@ program merchantnode(itm)
 
 // This is the main loop for listening to events and sending them to the merchants
 	while(item)
-		if((GetObjProperty(item, "Status") == "on") and (!GetGlobalProperty("nomerchants")))
+		if((GetObjProperty(item, "Status") == "on") && (!GetGlobalProperty("nomerchants")))
 			// only process if the node is still enabled
 			spawn := GetObjProperty(item, "Type");
 			if(ReadGameClock() >= gc)
@@ -146,7 +146,7 @@ program merchantnode(itm)
 			ValidateSpawns();
 
 			// hang out here until it gets turned back on again.
-			while((GetObjProperty(item, "Status") == "off") or (GetGlobalProperty("nomerchants")))
+			while((GetObjProperty(item, "Status") == "off") || (GetGlobalProperty("nomerchants")))
 				var ev := os::wait_for_event(120);
 				ev := ev;
 			endwhile
@@ -163,7 +163,7 @@ endprogram
 
 function SetNodeName(txt)
 	var tmplate := GetObjProperty(item, "Template");
-	if((!tmplate) or (tmplate == "merchant"))								 // setting to merchant mode
+	if((!tmplate) || (tmplate == "merchant"))								 // setting to merchant mode
 		SetObjProperty(item, "Template", 1);
 	elseif(tmplate == "banker")																// setting to banker mode
 		SetObjProperty(item, "Template", 2);
@@ -181,7 +181,7 @@ function ValidateSpawns()
 		foreach thing in npclist
 			if(entry[2] == GetObjProperty(thing, "Anchor"))
 				var npc := thing;
-				if((entry[3] == 1) and (AP_GetVital(npc, VITALID_LIFE)))
+				if((entry[3] == 1) && (AP_GetVital(npc, VITALID_LIFE)))
 					if(npc in chk)
 						// do nothing -- invalid entry --
 					else
@@ -242,9 +242,9 @@ function SpawnAll(map)
 				chk := 1;
 			endif
 		endforeach
-		if((chk == 0) and (status == 1))
+		if((chk == 0) && (status == 1))
 			var new := 0;
-			while((!new) and item)
+			while((!new) && item)
 				new := CreateNpcFromTemplate(type, root1[1], root1[2], root1[3], 0, map);
 				if(new)
 					SetObjProperty(new, "Anchor", array(root1[1], root1[2], root1[3]));
@@ -341,14 +341,14 @@ function ProcessMerchantText(ev)
 endfunction
 
 function RestockAllMerchants()
-	if((!GetGlobalProperty("norestock")) and (!GetGlobalProperty("nomerchants")))
+	if((!GetGlobalProperty("norestock")) && (!GetGlobalProperty("nomerchants")))
 		var cratelist := GetObjProperty(item, "Type");
 		foreach entry in cratelist
 			var anchor		:= entry[2];
 			var stockname := FindMerchantType(entry[1]) + " " + anchor[1] + " " + anchor[2] + " " + anchor[3];
 			var inv_fs := FindRootItemInStorageArea(storage, stockname + " FS");
 			var inv_rs := FindRootItemInStorageArea(storage, stockname + " RS");
-			if(inv_rs and inv_fs)
+			if(inv_rs && inv_fs)
 				checkstock(inv_rs, inv_fs);
 				RestockMyInventory(inv_rs, inv_fs);
 			endif
