@@ -1,0 +1,60 @@
+use uo;
+use cfgfile;
+
+var cWeapon := ReadConfigFile(":weapons:itemdesc");
+var weaponElement;
+var arrowElement;
+
+program selectammo(who, weapon)
+
+	SendSysMessage(who, "Select the stack of ammunition you would like to use.");
+	var ammo := Target(who);
+	var HScript := GetObjProperty(ammo, "HitScripts");
+	arrowElement := FindConfigElem(cWeapon, ammo.objtype);
+	weaponElement := FindConfigElem(cWeapon, weapon.objtype);
+
+	if (!arrowElement)
+		SendSysMessage(who, "Invalid selection.");
+		return 0;
+	endif
+	if (ammo.container != who.backpack)
+		SendSysMessage(who, "The ammunition must be in the top layer of your backpack.");
+		return 0;
+	endif
+	if ( CInt(arrowElement.ProjectileAnim) == CInt(weaponElement.ProjectileAnim) )
+		SetObjProperty(weapon, "AmmoType", CInt(ammo.objtype) );
+		if(HScript)
+			if(":combat:hitScripts/poisonHit" in HScript)
+				SetObjProperty(weapon, "PoisonStrength", GetObjProperty(ammo, "PoisonStrength"));
+				SetObjProperty(weapon, "Duration", GetObjProperty(ammo, "Duration"));
+				SetObjProperty(weapon, "HitScripts", HScript);
+				SetObjProperty(weapon, "OnHit", GetObjProperty(ammo, "OnHit"));
+			endif
+		endif
+		SendSysMessage(who, "Now switching to " + CStr(ammo.desc) + ".");
+		// Not certain we need this next line.
+		// For now I'll comment it out.
+		// DuplicateProps(ammo, weapon);
+		return 1;
+	else
+		SendSysMessage(who, "You cannot fire that type of missile from this weapon.");
+		return 0;
+	endif
+
+endprogram
+
+
+// function DuplicateProps(oAmmo, oWeapon)
+
+	// var propNames := GetObjPropertyNames(oAmmo);
+	// var cProp;
+	// EraseObjProperty(oWeapon, "MissileHit");
+	// foreach cProp in propNames
+		// if (cProp == "OnHit")
+			// SetObjProperty(oWeapon, "MissileHit", GetObjProperty(oAmmo, cProp) );
+		// else
+			// SetObjProperty(oWeapon, cProp, GetObjProperty(oAmmo, cProp) );
+		// endif
+	// endforeach
+
+// endfunction

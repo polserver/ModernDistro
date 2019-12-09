@@ -1,0 +1,10 @@
+use os;
+
+program start_NPC_datralie()
+var script := Start_Script(":npcs:startup/NPCCache");
+if ( script.errortext )
+	SysLog(script.errortext);
+else
+	Print("Starting NPC datafile setup...");
+endif
+Endprogram

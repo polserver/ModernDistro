@@ -79,7 +79,7 @@ program MainHitScript(attacker, defender, weapon, armor, basedamage, rawdamage)
 	DamageInfo(attacker, defender, basedamage, rawdamage);
 	WeaponHitScripts(attacker, defender, weapon, armor, basedamage, rawdamage);
 	ArmorHitScripts(attacker, defender, weapon, armor, basedamage, rawdamage);
-	PoisonChecks(attacker, defender, weapon, armor, basedamage, rawdamage);
+//	PoisonChecks(attacker, defender, weapon, armor, basedamage, rawdamage);
 
 	var hostiles := ListHostiles(defender, 1);
 	rawdamage := rawdamage+CInt(hostiles.Size()/2);
@@ -103,7 +103,7 @@ function FacingChecks(attacker, defender)
 	endif
 
 	TurnObjectToward(attacker, defender.x, defender.y);
-	//TurnObjectToward(defender, attacker.x, attacker.y);
+	TurnObjectToward(defender, attacker.x, attacker.y);
 
 	return 1;
 endfunction

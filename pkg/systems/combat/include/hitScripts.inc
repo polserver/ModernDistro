@@ -23,7 +23,7 @@ use os;
 function GetWeaponHitScripts(object)
 	var hit_scripts := GetObjProperty(object, "HitScripts");
 	if ( TypeOf(hit_scripts) != "Array" )
-		hit_scripts := array;
+		hit_scripts := {};
 	endif
 
 	if ( object.IsA(POLCLASS_NPC) )

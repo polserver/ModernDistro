@@ -61,9 +61,6 @@ function ApplyDamageEX(mobile, amount, type:=DMG_FORCED, source:=0)
 	endif
 
 	var settings := DMG_GetSettingsCfgElem("Settings");
-	if ( settings.DisplayDamage )
-		DisplayDamage(mobile, amount, source);
-	endif
 
 	if ( amount < 0 )
 		HealDamage(mobile, Abs(amount));
@@ -108,9 +105,6 @@ function ApplyRawDamageEX(mobile, amount, type:=DMG_FORCED, source:=0)
 	endif
 
 	var settings := DMG_GetSettingsCfgElem("Settings");
-	if ( settings.DisplayDamage )
-		DisplayDamage(mobile, amount, source);
-	endif
 
 	if ( amount < 0 )
 		HealDamage(mobile, Abs(amount));
@@ -171,9 +165,6 @@ function ApplySpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circle 
 	endif
 
 	settings := DMG_GetSettingsCfgElem("Settings");
-	if ( settings.DisplayDamage )
-	    DisplayDamage(mobile, amount, source);
-	endif
 
 	if ( amount < 0 )
 	    HealDamage(mobile, Abs(amount));
@@ -229,9 +220,6 @@ function ApplyRawSpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circ
 	endif
 
 	settings := DMG_GetSettingsCfgElem("Settings");
-	if ( settings.DisplayDamage )
-		DisplayDamage(mobile, amount, source);
-	endif
 
 	if ( amount < 0 )
 		HealDamage(mobile, Abs(amount));
@@ -251,44 +239,6 @@ function ApplyRawSpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circ
   endif
 
 	return amount;
-endfunction
-
-/*
- * DisplayDamage(damaged, amount, source)
- *
- * Purpose
- * Displays the damage done above the damaged mobile.
- *
- * Parameters
- * damaged:	Mobile that was damaged.
- * amount:	Amount of damage that was done.
- * source:	Source of the damage.
- *
- * Return Value
- * Returns 1
- *
- */
-function DisplayDamage(damaged, amount, source:=0)
-
-	var dmg_packet := CreatePacket(0x0B, 0x07);
-
-	if( amount <= 255 )
-		dmg_packet.SetInt8(0x06, amount);
-	else
-		dmg_packet.SetInt16(0x05, amount);
-	endif
-
-	dmg_packet.SetInt32(0x01, damaged.serial);
-
-	if ( source.acctname )
-		dmg_packet.SendPacket(source);
-	endif
-
-	if( damaged.acctname )
-		dmg_packet.SendPacket(damaged);
-	endif
-
-	return 1;
 endfunction
 
 /*

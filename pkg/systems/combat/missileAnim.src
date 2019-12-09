@@ -1,0 +1,12 @@
+use uo;
+use os;
+
+program missile_anim(params)
+
+	var att_info := params[1];
+	var def_info := params[2];
+	Sleepms(900);
+	PlaySoundEffect(att_info.mobile, CInt((att_info.cfginfo).ProjectileSound));
+	PlayMovingEffect(att_info.mobile, def_info.mobile, (att_info.cfginfo).ProjectileAnim, 10, 0);
+
+endprogram

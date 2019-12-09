@@ -27,12 +27,17 @@ include "include/facings";
 var g_item_cfg := ReadConfigFile(":*:itemdesc");
 var g_settings_cfg := CS_GetSettingsCfgFile();
 
+// ammo_consumed is a flag used to determine whether to
+// play the projectile animation.
+var ammo_consumed := 0;
+
 program Install()
 	print("INSTALLING: Combat hook... ");
 	return 1;
 endprogram
 
 exported function Attack(attacker, defender)
+
 	if ( !g_settings_cfg["Settings"].EnableHook )
 		return 0;
 	elseif ( !CanAttack(attacker, defender) )
@@ -51,6 +56,12 @@ exported function Attack(attacker, defender)
 	endif
 
 	PlayAttackAnimation(a_info);
+
+	// If ammo_consumed then start the missileAnim animation script.
+	if ( ammo_consumed )
+		Start_Script(":combat:missileAnim",{a_info, d_info});
+	endif
+
 
 	var hit_chance := CalcHitDifficulty(a_info, d_info);
 	if ( RandomFloat(1.0) < hit_chance )
@@ -121,9 +132,9 @@ function FacingChecks(attacker, defender)
 			endif
 		endif
 		// Should only turn the attacker
-		//if ( !IsFacing(defender, attacker.x, attacker.y) )
-		//	TurnObjectToward(defender, attacker.x, attacker.y);
-		//endif
+		if ( !IsFacing(defender, attacker.x, attacker.y) )
+			TurnObjectToward(defender, attacker.x, attacker.y);
+		endif
 	endif
 
 	return 1;
@@ -148,14 +159,25 @@ function DistanceChecks(byref a_info, byref d_info)
 endfunction
 
 function AmmoChecks(byref a_info, byref d_info)
-	var ammo_type := CInt((a_info.cfginfo).ProjectileType);
+	// Get ammo type from the weapon, if there.
+	var ammo_type := CInt(GetObjProperty((a_info.mobile).weapon, "AmmoType"));
+	// If the weapon has an ammo type CProp but that ammo type is not
+	// in the character's backpack then switch to the default ammo type.
+	if(ammo_type && !FindSubstance( (a_info.mobile).backpack, ammo_type, 1, 0, 0 ))
+		ammo_type := 0;
+	endif
+	if(!ammo_type)
+		ammo_type := CInt((a_info.cfginfo).ProjectileType);
+	endif
+	// If we are out of all ammo then return.
 	if ( !ammo_type )
 		return 1;
 	endif
-
+	// ammo_consumed is a flag used to determine whether to
+	// play the projectile animation.
+	ammo_consumed := 0;
 	if ( ConsumeSubstance((a_info.mobile).backpack, ammo_type, 1) )
-		PlaySoundEffect(a_info.mobile, CInt((a_info.cfginfo).ProjectileSound));
-		PlayMovingEffect(a_info.mobile, d_info.mobile, (a_info.cfginfo).ProjectileAnim, 10, 0);
+		ammo_consumed := 1;
 		return 1;
 	else
 		CombatMsg(a_info.mobile, "You do not have any "+GetObjTypeDesc(ammo_type, 1)+"!", "Ammo");

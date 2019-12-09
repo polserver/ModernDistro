@@ -28,6 +28,7 @@ program do_poisoning( who )
 //    var elem;
     var stren;
     var point;
+	var hitscripts := {};
     SendSysMessage( who, "Select a poison potion." );
     the_poison := Target(who, "");
     if (!the_poison)
@@ -68,10 +69,10 @@ program do_poisoning( who )
 		SendSysMessageCL(who, 501975, color := 33); // That is too far away.
 		return 0;
     endif
-    if(!the_item.IsFood() && !the_item.IsDrink() && the_item.Attribute != "Swordsmanship" && the_item.Attribute != "Fencing")
+/*    if(!the_item.IsFood() && !the_item.IsDrink() && the_item.Attribute != "Swordsmanship" && the_item.Attribute != "Fencing")
     	SendSysMessageCL(who, 502145, color := 33); // You cannot poison that! You can only poison bladed or piercing weapons, food or drink.)
     	return 0;
-    endif
+    endif */
     var potion_strength :=FindConfigElem(alchemy_itemdesc_file, the_poison.objtype);
 	stren :=CInt(GetConfigInt(potion_strength, "strength"));
 	if(stren.errortext)
@@ -79,7 +80,7 @@ program do_poisoning( who )
 		return;
 	endif
 	var duration := 90;
- 	//    if (SkillCheck( who, POISONING, -1, 10))
+ 	    if (SkillCheck( who, POISONING, -1, 10))
 			if ((the_item.Attribute == "Swordsmanship") || (the_item.Attribute == "Fencing"))
 				Print("Swordsmanship");
 				if (stren == 0)
@@ -96,34 +97,23 @@ program do_poisoning( who )
 					point := 290;
 				endcase
 				// Didn't mess with the skill gains here until we see how it pans out 08-05-2011
-				if (SkillCheck( who, POISONING, skill, point/10) + 20)
+				if (SkillCheck( who, POISONING, skill, point/10 + 20))
 
 					SubtractAmount(the_poison,1);
 					CreateItemInBackpack(who, UOBJ_EMPTY_BOTTLE, 1);
 					PlaySoundEffect(who, 0x248);
 					SetObjProperty(the_item, "PoisonStrength", stren);
-					SetObjProperty(the_item, "duration", duration);
+					SetObjProperty(the_item, "Duration", duration);
 
-					SendSysMessageCL(who, 1010517, color := 66 ); // You apply the poison
-
-					//////////////////////////////////////////////////////////////////////
-					// We are changing from a separate poison hit script to
-					// inclusion of poison hit in mainHitScript.
-					// The commented out lines are left in here for
-					// future reference in the event we, or someone else,
-					// wants to use a separate poison hit script.
-					/* if (!hitscripts)
+					SendSysMessageCL(who, 1010517, color := 66 ); // You apply the poison.
+					hitscripts := GetObjProperty(the_item, "HitScripts");
+					if (!hitscripts)
 						hitscripts := {};
-						hitscripts[1] := ":combat:poisonHit";
+						hitscripts[1] := ":combat:hitScripts/poisonHit";
 					else
-					  hitscripts.append(":combat:poisonHit");
+					  hitscripts.append(":combat:hitScripts/poisonHit");
 					endif
-
-					if (previouspoison != 1)
-						SetObjProperty(the_item, "OnHit", hitscripts);
-					endif
-					SetObjProperty(the_item, "phit", 1); */
-					/////////////////////////////////////////////////////////////////////////
+					SetObjProperty(the_item, "HitScripts", hitscripts);
 
 					// Drop virtues.
 					VirtueDrop(who, stren);
@@ -146,17 +136,24 @@ program do_poisoning( who )
 				CreateItemInBackpack(who, UOBJ_EMPTY_BOTTLE, 1);
 				if (SkillCheck( who, POISONING, -1, 10))
 					var obj := the_item.objtype;
-//					if(!SubtractAmount(the_item, 10))
-//						SendSysMessage(who,"Those must be poisoned in groups of 10.");
-//						return 0;
-//					endif
+					if(!SubtractAmount(the_item, 10))
+						SendSysMessage(who,"Those must be poisoned in groups of 10.");
+						return 0;
+					endif
 					var objtype;
 					// Convert arrows and crossbow bolts to the poisoned versions.
-					case(obj)
-						0xf3f:   objtype := 0x1999a; // arrow
-						0x1bfb:  objtype := 0x1999b; // crossbow bolt
-					endcase
-					CreateItemInBackpack( who, objtype, 10 );
+					obj := CreateItemInBackpack( who, "parrow", 10 );
+					SetObjProperty(obj, "PoisonStrength", stren);
+					SetObjProperty(obj, "Duration", duration);
+					hitscripts := GetObjProperty(the_item, "HitScripts");
+					if (!hitscripts)
+						hitscripts := {};
+						hitscripts[1] := ":combat:hitScripts/poisonHit";
+					else
+					  hitscripts.append(":combat:hitScripts/poisonHit");
+					endif
+					SetObjProperty(the_item, "HitScripts", hitscripts);
+
 					PlaySoundEffect(who, 0x248);
 					SendSysMessage(who, "You poison some arrows and put them in your backpack");
 					// Drop virtues.
@@ -170,7 +167,7 @@ program do_poisoning( who )
 			elseif (the_item.IsFood() || the_item.IsDrink())
 				SubtractAmount(the_poison,1);
 				CreateItemInBackpack(who, UOBJ_EMPTY_BOTTLE, 1);
-				if (SkillCheck( who, POISONING, skill, point/10) + 20)
+				if (SkillCheck( who, POISONING, skill, point/10 + 20))
 					PlaySoundEffect(who, 0x248);
 					SetObjProperty(the_item, "PoisonStrength", stren);
 					SetObjProperty(the_item, "duration", duration);
@@ -186,7 +183,7 @@ program do_poisoning( who )
 				SendSysMessage(who, "That cannot be poisoned.");
 				return 0;
 		    endif
-		 // endif
+		endif
 endprogram
 
 
@@ -196,7 +193,7 @@ function poisonArrows (arrow)
     var arrowName := arrow.desc;
     arrow.color := 0x8042;
     arrow.desc := "poisoned " + arrowName;
-    SetObjProperty(arrow, "OnHit", {":combat:poisonHit"});
+    SetObjProperty(arrow, "HitScripts", {":combat:poisonHit"});
 
 endfunction
 
@@ -212,7 +209,7 @@ function VirtueDrop(player, strength)
 		4:	VS_AdjustVirtue(player, "honor", -3, 80);
 			VS_AdjustVirtue(player, "compassion", -3, 80);
 	endcase
-endfunction	
+endfunction
 
 function SelfPoisonCheck(who, strength)
 	if (RandomInt(100) > GetAttribute(who, POISONING))

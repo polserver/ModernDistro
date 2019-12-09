@@ -8,16 +8,19 @@ include "include/sounds";
 program HitScript(params)
 	var attacker	:= params[1];
 	var defender	:= params[2];
-	//var weapon	:= params[3];
+	var weapon	:= params[3];
 	//var armor	:= params[4];
 	//var basedamage	:= params[5];
 	//var rawdamage	:= params[6];
 	params := 0; // Not needed anymore.
-	
+
 	PlayObjectCenteredEffect(defender, FX_EXPLODE_1, 7, 16);
 	PlaySoundEffect(defender, SFX_EXPLOSION_11);
-	
-	ApplyDamageEX(defender, (RandomInt(3)+1), DMG_FIRE, attacker);
-	
+	var FireDamage := GetObjProperty(weapon, FireDamage);
+	if(!FireDamage)
+		FireDamage := RandomInt(3)+1;
+	endif
+	ApplyDamageEX(defender, FireDamage, DMG_FIRE, attacker);
+
 	return 1;
 endprogram

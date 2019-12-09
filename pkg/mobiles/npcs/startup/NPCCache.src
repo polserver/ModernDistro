@@ -1,0 +1,78 @@
+/*
+ * Purpose
+ * Builds the datafile,:npcs:NPCsByTaxonomy, which
+ * is a datafile containing NPCs sorted by their taxonomical
+ * classification.
+*/
+
+use uo;
+use os;
+use cfgfile;
+use datafile;
+
+Program NPC_By_Taxonomy_Cache()
+
+	var taxonomies := {};		// An array that holds the various NPC classifications
+	var Tax_NPC_list := {};		// A temp array that holds all NPCs in a certain classification.
+	var NPC_keys := {};			// Holds all of the keys from npcdesc.cfg
+	var NPC_Ref := 0;			// Used to hold a ObjRef to an NPC.
+	var class := 0;				// Used to hold a reference to a datafile element.
+	var temp := "";				// A temp variable to hold a string.
+
+	UnloadConfigFile(":npcs:settings");
+	// Open the NPC taxonomy datafile or if it does not exist, create it.
+	var NPC_Taxonomy_df := OpenDataFile( ":npcs:NPCsByTaxonomy" );
+	if(NPC_Taxonomy_df.errortext == "Datafile does not exist")
+		NPC_Taxonomy_df := CreateDataFile( ":npcs:NPCsByTaxonomy", DF_KEYTYPE_STRING );
+	endif
+
+	// Read the npcdesc.cfg File(s)
+	var npcdesc_cfg := ReadConfigFile(":*:npcdesc");
+	if(npcdesc_cfg.errortext)
+		Print(npcdesc_cfg.errortext);
+	endif
+
+	// Get the various Classifications from the npcdesc.cfg file.
+	// Loop through the NPCs defined in the npcdesc.cfg file and
+	// add each unique classification to the taxonomies array.
+	NPC_keys := GetConfigStringKeys(npcdesc_cfg);
+	foreach key in NPC_keys
+		temp := GetConfigString( FindConfigElem( npcdesc_cfg, key ), "Taxonomy" );
+		// Any NPCs without a 'Taxonomy' custom member will be given the
+		// designation 'none'. Also if 'Taxonomy' is misspelled they are
+		// also assigned 'none' as their designation..
+		if(temp.errortext)
+			temp := "none";
+		endif
+		if(temp in taxonomies)
+			continue;
+		endif
+		taxonomies.append(temp);
+	endforeach
+	class := NPC_Taxonomy_df.CreateElement("Taxonomies");
+	// This is the fun part, building the datafile.
+	foreach thing in taxonomies
+		// Create the classification element in <thing>.
+		// Clear the Tax_NPC_List
+		Tax_NPC_list := {};
+		foreach NPC in NPC_keys
+			// Get the element for the NPC.
+			NPC_Ref := FindConfigElem( npcdesc_cfg, NPC );
+			temp := GetConfigString( NPC_Ref, "Taxonomy" );
+			// Any NPCs without a 'Taxonomy' custom member will be given the
+			// designation 'none'. Also if 'Taxonomy' is misspelled they are
+			// also assigned 'none' as their designation..
+			if(temp.errortext)
+				temp := "none";
+			endif
+			// If the NPCs 'Taxonomy' member == the current classification
+			// and the NPC is not in the list then add it.
+			if((temp == thing) && !(NPC in Tax_NPC_list))
+				Tax_NPC_list.append(NPC);
+			endif
+		endforeach
+		// Store the NPC_List in the datafile.
+		class.SetProp(thing, Tax_NPC_list);
+	endforeach
+	Print("NPC datafile setup done.");
+endprogram
