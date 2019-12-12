@@ -76,7 +76,6 @@ program TimedScript_DefaultPoison(params)
 	var cliloc_string := CStr(dmg) + "\t" + CStr(time);
 	defender.addbuff(1038, duration, 1017383, 1075633, cliloc_string);
 	defender.poisoned := 1;
-	HealthBarColor( defender, 1, 1 );
 	while ( 1 )
 		PrintTextAbovePrivate(defender, poisonedmsg, defender);
 		foreach mobile in ( ListMobilesInLineOfSight(defender, 8) )
@@ -100,54 +99,7 @@ program TimedScript_DefaultPoison(params)
 		Sleep(time);
 	endwhile
 	defender.poisoned := 0;
-	if(defender.invul == 1)
-		HealthBarColor( defender, 2, 1 );
-	else
-		HealthBarColor( defender, 2, 1 );
-	endif
 	defender.delbuff(1038);
 	return 1;
 endprogram
-
-function HealthBarColor( byref victim, byref hue, byref flag := 0 )
-/*
-Packet Name: Health bar status update (KR)
-Last Modified: 2009-07-28 14:21:26
-Modified By: MuadDib
-
-
-Packet: 0x17
-Sent By: Server
-Size: 12 bytes
-
-Packet Build
-BYTE[1] 0x17
-BYTE[2] Length
-BYTE[4] Mobile Serial
-BYTE[2] 0x0001
-BYTE[2] HealthBar Color (1=green, 2=yellow, >2=red?)
-BYTE[1] Flag (0=Remove health bar color, 1=Enable health bar color)
-
-Subcommand Build
-N/A
-
-Notes
-This packet is send to both 2D and KR client.
-When mobile is poisoned (green health bar), flag is determined as:
-0: remove poison, 1: poison level
-
-Green (Poison) overrides yellow. If both are set yellow appears only if green is disabled.
-*/
-
-	var packet := CreatePacket( 0x17, 12 );
-		packet.SetInt16( 1, 12 );
-		packet.SetInt32( 3, victim.serial );
-		packet.SetInt16( 7, 0x1 );
-		packet.SetInt16( 9, hue );
-		packet.SetInt8( 11, flag );
-
-	packet.SendAreaPacket( victim.x, victim.y, 18, victim.realm );
-
-endfunction
-
 

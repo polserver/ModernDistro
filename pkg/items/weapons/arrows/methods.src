@@ -1,0 +1,18 @@
+/*
+        Maintained by The POL Distro Team
+
+        2018-07-25
+*/
+use uo;
+
+program Install()
+
+	return 1;
+endprogram
+
+exported function IsArrow( unused arrow )
+
+	return 1;
+
+endfunction
+

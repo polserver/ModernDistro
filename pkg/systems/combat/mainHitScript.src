@@ -79,7 +79,6 @@ program MainHitScript(attacker, defender, weapon, armor, basedamage, rawdamage)
 	DamageInfo(attacker, defender, basedamage, rawdamage);
 	WeaponHitScripts(attacker, defender, weapon, armor, basedamage, rawdamage);
 	ArmorHitScripts(attacker, defender, weapon, armor, basedamage, rawdamage);
-//	PoisonChecks(attacker, defender, weapon, armor, basedamage, rawdamage);
 
 	var hostiles := ListHostiles(defender, 1);
 	rawdamage := rawdamage+CInt(hostiles.Size()/2);

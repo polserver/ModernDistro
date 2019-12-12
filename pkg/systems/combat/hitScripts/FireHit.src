@@ -14,9 +14,12 @@ program HitScript(params)
 	//var rawdamage	:= params[6];
 	params := 0; // Not needed anymore.
 
-	PlayObjectCenteredEffect(defender, FX_EXPLODE_1, 7, 16);
-	PlaySoundEffect(defender, SFX_EXPLOSION_11);
-	var FireDamage := GetObjProperty(weapon, FireDamage);
+	if(!weapon.IsBow() && !weapon.IsCrossbow())
+		PlayObjectCenteredEffect(defender, FX_EXPLODE_4, 7, 16);
+		PlaySoundEffect(defender, SFX_EXPLOSION_11);
+	endif
+
+	var FireDamage := GetObjProperty(weapon, "FireDamage");
 	if(!FireDamage)
 		FireDamage := RandomInt(3)+1;
 	endif
