@@ -14,6 +14,6 @@ OpenWorldBank();
 print("Initializing merchant storage");
 find_or_create_storage("Merchant Storage");
 print("Wiping merchant storage");
-startControlScript("storageWipe");
+start_script("storageWipe");
 print("Initializing teleporters");
 //CreateTeleporters();

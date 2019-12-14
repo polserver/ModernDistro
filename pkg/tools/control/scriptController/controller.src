@@ -1,0 +1,33 @@
+use os;
+
+include ":control:scriptController";
+include ":timeutils:time";
+
+program scriptController()
+
+	//check if global prop exists.
+	if( GetGlobalProperty(CS_GlobalID) )
+		CS_ErrorLog( "Controller script trying to start but its already running on PID:"+GetGlobalProperty(CS_GlobalID) );
+		return error{ "errortext" := "Controller script trying to start but its already running." };
+	endif
+
+	//create global prop and store own pid
+	var PID := GetPID();
+	SetGlobalProperty(CS_GlobalID, PID);
+
+	//start event loop
+	while (1)
+		var event;
+		event := Wait_For_Event(SECONDS_IN_WEEK);
+		case( event.type )
+			CS_EVENT_START:
+				//receive event to start control script
+
+				break;
+			CS_EVENT_KILL:
+				//receive event to kill control scriptd
+				break;
+		endcase
+	endwhile
+
+endprogram
