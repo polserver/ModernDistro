@@ -80,6 +80,7 @@ tiles.cfg
 ecompile.log
 leftovers.txt
 orphans.txt
+pol.cfg
 
 # POL binaries and cfg
 pol.exe
