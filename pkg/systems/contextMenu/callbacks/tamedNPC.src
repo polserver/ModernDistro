@@ -1,0 +1,18 @@
+use uo;
+use npc;
+
+include "include/sysEvent";
+
+program processTamedNPCCallback( params )
+	print("tamed callback started");
+
+	var npc := SystemFindObjectBySerial(params.serial);
+
+	var ev := struct{
+	"type" := SYSEVENT_SPEECH,
+	"source" := params.mobile,
+	"text" := params.text
+	};
+	SendEvent(npc, ev);
+
+endprogram

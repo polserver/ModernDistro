@@ -1,16 +1,40 @@
 use uo;
 use os;
 
+include ":contextMenu:playerMenus";
+include ":contextMenu:npcMenus";
+include ":contextMenu:itemMenus";
+/**
+ * Core documentation can be found here:
+ * https://docs.polserver.com/pol100/scripttypes.php#PopUpMenuScript
+ *
+ * For this script to function it requires UOFeatureEnable 0x08 to be set.
+ */
+program popupmenu(mobile, object)
+	var menu;
+	if( object.isa( POLCLASS_MOBILE ))
+		if( object.isa( POLCLASS_NPC ) )
+			//check if its a merchant
+			menu := CMP_NPC_GenerateMenu( mobile, object );
+		else
+			if( object == mobile )
+				// do self context menu.
+			else
+				// do other player context menu.
+			endif
+		endif
+	elseif( object.isa( POLCLASS_ITEM ) )
+		//do item context menu.
+	else
+		SysLog("Context menu for "+object.desc+" but isn't handled by the script.");
+	endif
 
-program popupmenu(who)
-
-// A placeholder for popup menu program.
-// This should stop the console exception error reporting the missing popupmenu.ecl missing.
-
-// In the future I will try to determine if this program is necessary and if so will actually add functional
-// code to it.
-
-
+	var ret := SendPopUpMenu( mobile, object, menu.menuOptions );
+	var callback := menu.callbacks[ret];
+	print( "return from context: "+ callback);
+	if( callback.type == "speech" )
+		SendSpeechToNPC(callback.mobile, callback.npc, callback.text);
+	endif
 
 endprogram
 
