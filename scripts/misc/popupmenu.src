@@ -31,7 +31,6 @@ program popupmenu(mobile, object)
 
 	var ret := SendPopUpMenu( mobile, object, menu.menuOptions );
 	var callback := menu.callbacks[ret];
-	print( "return from context: "+ callback);
 	if( callback.type == "speech" )
 		SendSpeechToNPC(callback.mobile, callback.npc, callback.text);
 	endif
