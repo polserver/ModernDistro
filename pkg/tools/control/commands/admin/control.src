@@ -38,11 +38,10 @@ var pkg_gumps := DFOpenDataFile(":control:gumps", DF_CREATE);
 
 program textcmd_ICPSystem( who, pkg_name )
 
-        if( !AuthorizationCode( who ))
-                SendSysMessage( who, "Cancelled." );
-                return 0;
-        endif
-
+        // if( !AuthorizationCode( who ))
+                // SendSysMessage( who, "Cancelled." );
+                // return 0;
+        // endif
 	while( who.connected )
 		if( pkg_name )
 			var input := ICP_PackagePanels( who, pkg_name );
