@@ -131,11 +131,11 @@ endfunction
  * Creates a rectangle shaped gump with buttons and text.
  * SelectionGump2 uses an HTML area to display text for clarity.
  * Parameters
- * mobile:	Mobile to send the gump to.
- * title:   string that will be used for gump's title.
- * options:	Array containing strings to display next to the buttons.
+ * mobile:		Mobile to send the gump to.
+ * title:   	String that will be used for gump's title.
+ * options:		Array containing strings to display next to the buttons.
  * btn_type:	Type of button to display next to the text.
- *
+ * transparent:	Set to 1 for a transparent gump.
  * Return Values
  * Returns a single value from the options array if RADIO or NORMAL are used.
  * Returns an array of option values if CHECKBOX is used.
