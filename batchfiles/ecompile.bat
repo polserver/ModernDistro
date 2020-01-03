@@ -27,7 +27,7 @@ ECHO Command        Purpose
 ECHO  [ a ] - Compile a specific script.
 ECHO  [ b ] - Compile a directory.
 ECHO  [ c ] - Compile all .src scripts.
-ECHO  [ d ] - Compile all scripts and output to POL\log\ecompile.log
+ECHO  [ d ] - Compile all scripts, output to POL\log\ecompile.log and \log\ecompile_error.log
 ECHO  [ e ] - Compile all scripts but halt on errors.
 ECHO  [ f ] - Compile updated scripts only.
 ECHO.
