@@ -42,7 +42,7 @@ COMPILE_ALL_SCRIPTS()
 #-- COMPILE_ALL_SCRIPTS_OPTXT() FUNCTION
 COMPILE_ALL_SCRIPTS_OPTXT()
 	{
-	$ECOMPILE_PATH -A -b -f 2>&1 > ecompile.log
+	%ECOMPILE_PATH% -b -A -f > log\ecompile.log 2> log\ecompile_error.log
 	echo ""
 	echo " Compilation complete."
 	RETURN_TO_MENU
