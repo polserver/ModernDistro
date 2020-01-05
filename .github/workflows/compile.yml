@@ -1,0 +1,70 @@
+name: Compile test
+
+on: [push, pull_request]
+
+jobs:
+  compile_test:
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install latest ecompile
+        run: |
+          wget -q https://github.com/polserver/polserver/releases/download/NightlyRelease/Nightly-Linux-clang.zip
+          unzip Nightly-Linux-clang.zip
+          rm -f *_dbg.zip
+          rm -f Nightly-Linux-clang.zip
+          unzip -j -o *.zip
+          cp ecompile scripts/
+          cp *.em scripts/
+          echo "ModuleDirectory=scripts" >>scripts/ecompile.cfg
+          echo "IncludeDirectory=scripts" >>scripts/ecompile.cfg
+          echo "PolScriptRoot=scripts" >>scripts/ecompile.cfg
+          echo "PackageRoot=pkg" >>scripts/ecompile.cfg
+          echo "DisplaySummary=1" >>scripts/ecompile.cfg
+          echo "DisplayWarnings=1" >>scripts/ecompile.cfg
+          echo "CompileAspPages=1" >>scripts/ecompile.cfg
+
+      - name: Compile
+        run: |
+          scripts/ecompile -A -T
+
+  notify_on_failure:
+    needs: build
+    runs-on: "ubuntu-latest"
+    if: failure()
+    steps:
+      - name: Discord notification failure
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: turleypol/actions-status-discord@master
+        with:
+          status: failure
+          job: Compile test
+          nofail: false
+  notify_on_success:
+    needs: build
+    runs-on: "ubuntu-latest"
+    if: success()
+    steps:
+      - name: Discord notification success
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: turleypol/actions-status-discord@master
+        with:
+          status: success
+          job: Compile test
+          nofail: false
+  notify_on_cancel:
+    needs: build
+    runs-on: "ubuntu-latest"
+    if: cancelled()
+    steps:
+      - name: Discord notification cancelled
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: turleypol/actions-status-discord@master
+        with:
+          status: cancelled
+          job: Compile test
+          nofail: false
