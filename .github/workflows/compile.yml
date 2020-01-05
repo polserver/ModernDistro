@@ -30,7 +30,7 @@ jobs:
           scripts/ecompile -A -T
 
   notify_on_failure:
-    needs: build
+    needs: compile_test
     runs-on: "ubuntu-latest"
     if: failure()
     steps:
@@ -43,7 +43,7 @@ jobs:
           job: Compile test
           nofail: false
   notify_on_success:
-    needs: build
+    needs: compile_test
     runs-on: "ubuntu-latest"
     if: success()
     steps:
@@ -56,7 +56,7 @@ jobs:
           job: Compile test
           nofail: false
   notify_on_cancel:
-    needs: build
+    needs: compile_test
     runs-on: "ubuntu-latest"
     if: cancelled()
     steps:
