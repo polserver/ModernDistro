@@ -125,24 +125,34 @@ endfunction
 
 
 /*
- * SelectionGump2(mobile, title, options, btn_type)
- *
- * Purpose
- * Creates a rectangle shaped gump with buttons and text.
- * SelectionGump2 uses an HTML area to display text for clarity.
- * Parameters
- * mobile:		Mobile to send the gump to.
- * title:   	String that will be used for gump's title.
- * options:		Array containing strings to display next to the buttons.
- * btn_type:	Type of button to display next to the text.
- * transparent:	Set to 1 for a transparent gump.
- * Return Values
- * Returns a single value from the options array if RADIO or NORMAL are used.
- * Returns an array of option values if CHECKBOX is used.
- * Returns an error on failure.
- *
- */
-function SelectionGump2( mobile, title, options, btn_type:=BTN_TYPE_NORMAL, transparent := 0)
+* SelectionGump2( mobile, title, options, btn_type:=BTN_TYPE_NORMAL, transparent := 0, tooltips :={} )
+*
+* Purpose: Displays a vertical rectangle that lists items that can be selected.
+* The button type (btn_type) determines whether multiple items or only one item
+* can be selected.
+*
+* Parameters:	mobile		-	reference to a player.
+*				title		-	The title displayed at the top of the gump.
+*				options		-	An array containing the list of choices to be displayed in the gump.
+*				btn_type	-	The type of button to be displayed next to each choice.
+*								BTN_TYPE_NORMAL - Single selection and returns immediately without
+*								the need to click OKAY.
+*								BTN_TYPE_CHECKBOX - Multiple selections can be made. Requires the user
+*								to click OKAY.
+*								BTN_TYPE_RADIO - Single selection but requires the user to click OKAY.
+*				transparent	-	If set to 1 makes the gump transparent. This parameter is optional and
+*								defaults to no transparency but if you pass a tooltips parameter you must
+*								specify this parameter.
+*				tooltips	-	Array of tooltips for each item in the options array. These can be
+*								custom string tooltips or integer cliloc numbers. This parameter is
+*								optional and defaults to an empty array (no tooltips) if no tooltip
+*								array is passed to the function.
+*
+* Return Values: The user's selection which will be a single string if BTN_TYPE_NORMAL or BTN_TYPE_RADIO
+*				 buttons are used. An array of strings selected if BTN_TYPE_CHECKBOX is used.
+*				 Error if no selection is made and the gump is closed by right-clicking it.
+*/
+function SelectionGump2( mobile, title, options, btn_type:=BTN_TYPE_NORMAL, transparent := 0, tooltips :={} )
 
 	if( Lower( TypeOf( options )) != "array" )
 		return error{"errortext":="Options list must be an array."};
@@ -166,7 +176,7 @@ function SelectionGump2( mobile, title, options, btn_type:=BTN_TYPE_NORMAL, tran
 	foreach entry in ( options )
 		case( btn_type )
 			BTN_TYPE_NORMAL:
-				GFAddButton( s_gump, 30, y_pos+3, 2117, 2118, GF_CLOSE_BTN, _entry_iter );
+				GFAddButton( s_gump, 30, y_pos+3, 9792, 9793, GF_CLOSE_BTN, _entry_iter );
 				break;
 			BTN_TYPE_CHECKBOX:
 				GFCheckBox( s_gump, 30, y_pos, 9792, 9793, 0, _entry_iter );
@@ -177,6 +187,11 @@ function SelectionGump2( mobile, title, options, btn_type:=BTN_TYPE_NORMAL, tran
 		endcase
 
 		GFHTMLArea( s_gump, 60, y_pos+3, 210, 26, entry, 1, 0 );
+		if(TypeOf(tooltips[_entry_iter]) == "String")
+			GFTooltip(s_gump, 1042971, tooltips[_entry_iter]);
+		elseif(TypeOf(tooltips[_entry_iter]) == "Integer")
+			GFTooltip(s_gump, tooltips[_entry_iter]);
+		endif
 		y_pos := y_pos+31;
 
 		if( _entry_iter % 12 == 0 && _entry_iter < num_options )
@@ -207,7 +222,6 @@ function SelectionGump2( mobile, title, options, btn_type:=BTN_TYPE_NORMAL, tran
 					selections_made := 1;
 				endif
 				SleepMS(2);
-
 			endforeach
 			// The following returns an error if no checkboxes were checked and the Okay button is clicked.
 			if(selections_made)
