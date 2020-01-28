@@ -1,3 +1,18 @@
+/////////////////////////////////////////////////////////////////////
+//
+// Program Name: createnpc
+//
+// Author: Yukiko
+//
+// Date Created: 2020-01-24
+//
+// Description: Text command used for creating NPCs.
+//
+// Parameters: NPC template name (optional)
+//
+// Return Value: none.
+//
+/////////////////////////////////////////////////////////////////////
 use uo;
 use cliloc;
 use cfgfile;
@@ -7,23 +22,18 @@ include ":gumps:selectionGump";
 include ":gumps:gumpPrompt";
 include ":gumps:yesNo";
 
-
-
-
 program	text_command_createnpc(who, template)
-
-
 
 	var	mercscripts := {"appraiser", "barber", "banker", "bucsBanker", "bucsTownHealer", "davesHealer",
 						"healer", "merchant", "stablemaster", "townguard", "townHealer"};
 	var	guardscripts := {"townGuard", "instakillGuard"};
 	var	npc_config := ReadConfigFile("::npcdesc");
-	var node :="";
+	var node :="none";
 	var	NPC_entry;
 	var	ai_script;
 
 	if (!template)
-		template := DisplayNPCSelectionMenu2(who);
+		template := DisplayNPCSelectionMenu(who);
 		if (!template)
 			return;
 		endif
@@ -42,7 +52,7 @@ program	text_command_createnpc(who, template)
 		node := "none";
 	endif
 
-/*	if(node != "none")
+	if(node != "none")
 		GumpPrompt(who, "The NPC you want to create requires a listening node. Therefore I will create one instead of the NPC.
 						Target the location for the node. Use (double-click) the node to create the NPC.", 1, hue:=1153);
 	endif
@@ -55,8 +65,8 @@ program	text_command_createnpc(who, template)
 		"gard":	createguard(who);
 
 	endcase
-*/
-createthenpc(who, template);
+
+//	createthenpc(who, template);
 	return;
 
 endprogram
@@ -84,11 +94,7 @@ endfunction
 function createmerc(who)
 
 	Start_Script( ":merchantnodes:textcmd/gm/createnode", who );
-/*		var thingy := CreateItemAtLocation(loc.x, loc.y, loc.z, "merchantnode", 1, loc.realm);
-	if(!thingy)
-		SendSysMessage(who, "Oh dear. For some reason I couldn't create the node.", color := 33);
-	endif
-*/
+
 endfunction
 
 function createguard(who)
@@ -105,63 +111,7 @@ function createguard(who)
 endfunction
 
 
-function DisplayNPCSelectionMenu (who)
-	var npcmenu := CreateMenu ("Select an NPC type:");
-	var thegroups := {};
-	var index := 1;
-	var Groups_cfg := ReadConfigFile("NPC_Groups");
-	var NPC_Groups := GetConfigStringKeys( Groups_cfg );
-//		SendSysMessage(who, "Length of NPC_Groups is " + CStr(Len(NPC_Groups)));
-
-	foreach group in NPC_Groups
-			var elem := FindConfigElem (Groups_cfg, group);
-			if (elem)
-				AddMenuItem (npcmenu, elem.GroupGraphic, NPC_Groups[index]); // NPC_Groups is an array of group names
-				thegroups.append (group);
-				index := index + 1;
-			endif
-	endforeach
-
-	var selection := SelectMenuItem2 (who, npcmenu);
-	if (!selection)
-		SendSysmessage (who, "Canceled.", color := 33);
-		return;
-	endif
-
-	var thegroup := NPC_Groups [selection.index];
-	SendSysMessage (who, "You chose " + thegroup);
-
-	var elem := FindConfigElem (Groups_cfg, thegroup);
-	if (!elem)
-		SendSysMessage (who, "Whoops!  Big error!", color := 33);
-		return;
-	endif
-
-	var thenpctypes := GetConfigStringArray (elem, "npc");
-	if (!thenpctypes or !len (thenpctypes))
-		SendSysMessage (who, "No NPCs in that group.", color := 33);
-		return;
-	endif
-
-	var npcmenu2 := CreateMenu ("Select an NPC type:");
-	var thenpcs := {};
-	foreach entry in thenpctypes
-		var template := SplitWords (entry)[1];
-		var graphic := CInt (SplitWords (entry)[2]);
-		AddMenuItem (npcmenu2, graphic, template);
-		thenpcs.append (template);
-	endforeach
-
-	var selection2 := SelectMenuItem2 (who, npcmenu2);
-	if (!selection2)
-		SendSysmessage (who, "Canceled.", color := 33);
-		return;
-	endif
-
-	return thenpcs [selection2.index];
-endfunction
-
-function DisplayNPCSelectionMenu2(who)
+function DisplayNPCSelectionMenu(who)
 
 	var Taxonomy_props := {};
 	var NPC_List := {};
@@ -170,19 +120,25 @@ function DisplayNPCSelectionMenu2(who)
 	var NPC_Taxonomy_df := OpenDataFile( ":npcs:NPCsByTaxonomy" );
 	var Tkey := NPC_Taxonomy_df.FindElement("Taxonomies");
 	Taxonomy_props := Tkey.PropNames();
-	Taxonomy_Selection := SelectionGump2( who, "Taxonomies - Select one:", Taxonomy_props, BTN_TYPE_RADIO);
+
+	var Settings_cfg := ReadConfigFile(":npcs:settings");
+	var tax_elem := FindConfigElem( settings_cfg, "Taxonomy" );
+	var Tax_desc := {};
+	foreach Tax_prop in Taxonomy_props
+		Tax_desc[_Tax_prop_iter] := Tax_prop + " - " + GetConfigString( tax_elem, Tax_prop );
+	endforeach
+	Taxonomy_Selection := SelectionGump2( who, "Taxonomy - Select one:", Taxonomy_props, BTN_TYPE_NORMAL, 0, tax_desc);
 	if(Taxonomy_Selection.errortext)
 		SendSysMessageCl(who, 1042023, color := 33); // Cancelled.
 		exit;
 	endif
 	NPC_List := TKey.GetProp(Taxonomy_Selection);
-	NPC_Selection := SelectionGump2( who, "NPCs - Select one:", NPC_List, BTN_TYPE_RADIO);
+	NPC_Selection := SelectionGump2( who, "NPCs - Select one:", NPC_List, BTN_TYPE_NORMAL);
 	if(NPC_Selection.errortext)
 		SendSysMessageCl(who, 1042023, color := 33); // Cancelled.
 		exit;
 	endif
 	return NPC_Selection;
 
-
-
 endfunction
+
