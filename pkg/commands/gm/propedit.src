@@ -1,404 +1,1291 @@
-////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+// propedit v0.7
+// - gump based CProp editor
 //
-// Propedit v0.6 - gump based cprop editor
-//
-////////////////////////////////////////////////////////
-//
-// Author  : Dougall
-// Updated : 15 August 2002
-// Contact : dougalloogle@yahoo.com
-//
-////////////////////////////////////////////////////////
+// Authors  : Dougall/Turley/Shinigami
+// Updated : 27 Jan 2020 ()
+// Requires: pol core 095
 //
 // Notes:
 //
-//  - type ".propedit" then target the item or
-//    mobile who's cprops you wish to view or edit.
+//  - type ".propedit" then target the item or mobile whose CProps you wish
+//    to view or edit.
 //
-//  - edit Cprop strings, doubles and integers
-//    directly into the gump.
+//  - edit CProp strings, doubles and integers directly into the gump.
 //
-//  - deals with the first 60 cprops on an object
+//  - press the + button next to arrays / dictionaries to edit them
 //
-//  - press the red flag in the top right corner
-//    to toggle the gump size (to help with larger
-//    Cprops)
+//  - deals with the first 100 CProps on an object
 //
-//  - to edit cprops on a multi, first stand on the
-//    multi then type ".propedit multi"
+//  - press the red flag in the top right corner to toggle the gump size
+//    (to help with larger CProps)
 //
-//  - you can call propedit from another script
-//    like this:
-//        start_script("::textcmd/gm/propedit", { who, thing });
-//    where
-//        who   - person who gets sent the gump
-//        thing - thing to view/edit props on
+//  - to edit CProps on a multi, first stand on the multi then type:
+//      ".propedit multi"
+//
+//  - to edit CProps on an account, type:
+//      ".propedit account"
+//    and then select a character belonging to the account
+//    only for cmdlevel developer and higher // F.
+//
+//  - to edit CProps on an item by serial, type:
+//      ".propedit serial=<serial number>"
+//
+//  - you can call propedit from another script like this:
+//      start_script("::textcmd/x_xxxxgm/propedit", { who, thing });
+//    where:
+//      who   - person who gets sent the gump
+//      thing - thing to view/edit props on
 //
 //  - please send me an email if you find any bugs...
-//
-////////////////////////////////////////////////////////
-//
-// Histoy:
-//
-//  0.6 - rewrote propedit to use SendDialogGump() rather
-//        than gumps.inc (should make the script quicker
-//        and more efficient)
-//      - added support for multis/housing
-//      - added support for calling propedit from another
-//        script.
-//
-//  0.5 - fixed gump crash when very large arrays or
-//        strings were stored as cprops on items
-//      - tightened up the code a bit
-//
-//  0.4 - removed faulty array editing
-//
-//  0.1 to 0.3 - initial construction and testing
-//
-////////////////////////////////////////////////////////
 //
 // Warning & Disclaimer:
 //
 //  - !BE WARNED! It's really easy to make a mess of
-//    some pretty essential Cprops with this tool.
+//    some pretty essential CProps with this tool.
 //
 //  - Disclaimer: ...I didn't do it.....I wasn't there
 //    ....It wasn't me.... ....honest...
 //
-////////////////////////////////////////////////////////
 
 use os;
 use uo;
-use basic;
+include "include/varutils";
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 // Consts
+const GUMP_WIDTH_ONE   := 600;
+const GUMP_WIDTH_TWO   := 750;
+const GUMP_WIDTH_THREE := 900;
 
-const TEXT_LINES        := 10;
-const MAX_PAGES         := 6;
-const MAX_CHARS         := 200;
+// !! Great care must be taken when changing these consts to ensure that data
+// indexes (into the array Returned from SendDialogGump) do not clash !!
+const TEXT_LINES  := 10; // Lines per page
+const MAX_PAGES   := 10; // Maximum pages
+const MAX_ITEMS   := 100;// Maximum editable items in total
+const MAX_CHARS   := 200;// Maximum editable text line length
 
-////////////////////////////////////////////////////////
+// gump data Return index ranges
+const TEXTENTRY_OFFSET   := 550;
+const DEL_OFFSET         := 660;
+const ARRAY_EDIT_OFFSET  := 770;
+const DICT_EDIT_OFFSET   := 880;
+const STRUCT_EDIT_OFFSET := 2000;
+
+// gump data Return individual indexes
+const APPLY_BUTTON          := 1000;
+const PREVIOUS_BUTTON       := 1001;
+const ADD_BUTTON            := 1002;
+const ADD_TEXTENTRY         := 1003;
+const CONFIRM_DELETE_BUTTON := 1004;
+const TOGGLE_HEX_BUTTON     := 1005;
+const TOGGLE_WIDTH_BUTTON   := 1006;
+const RESIZE_TEXTENTRY_FROM := 1007;
+const RESIZE_TEXTENTRY_TO   := 1008;
+const CONFIRM_RESIZE_BUTTON := 1009;
+const ADD_INTEGER_RADIO     := 1010;
+const ADD_DOUBLE_RADIO      := 1011;
+const ADD_TEXT_RADIO        := 1012;
+const ADD_ARRAY_RADIO       := 1013;
+const ADD_DICT_RADIO        := 1014;
+const ADD_STRUCT_RADIO      := 1015;
+
+
+
+////////////////////////////////////////////////////////////////////////////////
 // Global Variables
-var gump_width     :=1;
-var show_in_hex    :=1;
+var finished       := 0;
+var gump_width     := 2; // 2 = medium size
+var show_in_hex    := 0;
 
 //////////
 
-var main_data:={
-"",                     // show hex/int
-"CProp Editor",
-"Add Cprop",
-"Del Marked Cprops",
-"",                     // item name
-"Enter new propname....",
-"Enter proptype....",
-"Integer",
-"Double",
-"String",
-"Confirm Delete",
-"Delete Checked Cprops ?" };
-
-//////////
-
-var main_layout:={
-"page0",
-"nodispose",
-"resizepic",                        // resizepic (varies - altered later in script)
-"text 70 270 34 0",
-"button 50 273 2224 2224 1 0 1000", // hextoggle
-"button",                           // widthtoggle (varies - altered later in script)
-"text 40 9 1 1",
-"text 43 11 66 1",
-"text"                             // item name (varies - altered later in script)
+var main_data := array{
+  "",                       // show hex/int
+  "CProp Editor",
+  "Add CProp",
+  "Del Checked CProps",
+  "",                       // item name
+  "Enter new propname....",
+  "Enter proptype....",
+  "Integer",
+  "Double",
+  "String",
+  "Array",
+  "Dictionary",
+  "Struct",
+  "Confirm Delete",
+  "Delete Checked CProps?"
 };
 
 //////////
 
-var add_layout:={
-  "resizepic 160 25 2520 340 250",
-  "button 380 243 2071 2072 0 1",
-  "button 230 243 239 240 1 0 998",
-  "group 0",
-  "radio 220 140 2152 2154 1 1005",
-  "radio 220 170 2152 2154 0 1006",
-  "radio 220 200 2152 2154 0 1007",
-  "text 280 34 1 2",
-  "text 283 35 34 2",
-  "text 200 70 0 5",
-  "text 200 120 0 6",
-  "text 260 144 0 7",
-  "text 260 174 0 8",
-  "text 260 204 0 9",
-  "gumppic 190 90 1143"
- };
+var main_layout := array{
+  "page0",
+  "nodispose",
+  "resizepic",                        // resizepic (varies - altered later in script)
+  "text 70 295 34 0",
+  "button 50 298 2224 2224 1 0 " + TOGGLE_HEX_BUTTON,
+  "button",                           // widthtoggle (varies - altered later in script)
+  "text 40 33 1 1",
+  "text 43 35 66 1",
+  "text"                              // item name (varies - altered later in script)
+};
 
 //////////
 
-var del_layout:={
-  "resizepic 160 25 2520 340 250",
-  "text 260 34 1 10",
-  "text 263 36 34 10",
-  "text 240 110 0 11",
-  "button 380 242 2071 2072 0 1",
-  "button 230 243 239 240 1 0 997"
- };
+var add_layout := array{
+  "resizepic 160 50 2520 340 250",
+  "button 380 268 2071 2072 0 1",
+  "button 230 268 239 240 1 0 " + ADD_BUTTON,
+  "group 0",
+  "radio 210 165 2152 2154 1 " + ADD_INTEGER_RADIO,
+  "radio 210 195 2152 2154 0 " + ADD_DOUBLE_RADIO,
+  "radio 210 225 2152 2154 0 " + ADD_TEXT_RADIO,
+  "radio 340 165 2152 2154 0 " + ADD_ARRAY_RADIO,
+  "radio 340 195 2152 2154 0 " + ADD_DICT_RADIO,
+  "radio 340 225 2152 2154 0 " + ADD_STRUCT_RADIO,
+  "text 280 59 1 2",
+  "text 283 61 34 2",
+  "text 200 95 0 5",
+  "text 200 145 0 6",
+  "text 240 169 0 7",
+  "text 240 199 0 8",
+  "text 240 229 0 9",
+  "text 370 169 0 10",
+  "text 370 199 0 11",
+  "text 370 229 0 12",
+  "gumppic 190 115 1143"
+};
 
-////////////////////////////////////////////////////////
+//////////
 
-program CpropEditor(parms1,parms2)
-  var who,thing;
+var del_layout := array{
+  "resizepic 160 50 2520 340 250",
+  "text 260 59 1 13",
+  "text 263 61 34 13",
+  "text 240 135 0 14",
+  "button 380 267 2071 2072 0 1",
+  "button 230 269 239 240 1 0 " + CONFIRM_DELETE_BUTTON
+};
 
-  if (TypeOf(parms1)=="Array")
-    if ( (parms1[1].isa(POLCLASS_MOBILE) && !parms1[1].isa(POLCLASS_NPC)) && parms1[2].isa(POLCLASS_UOBJECT) )
-      who:=parms1[1];
-      thing:=parms1[2];
-    else
-      syslog("Invalid params in call_script : "+who);
+//////////
+
+var array_data := array{
+  "",                       // show hex/int
+  "CProp Editor",
+  "Append Array Item",
+  "Resize Array",
+  "",                       // array name
+  "",
+  "Select the type to append",
+  "Integer",
+  "Double",
+  "String",
+  "Enter resize low idx",
+  "Enter resize high idx"
+};
+
+//////////
+
+var array_append_layout := array{
+  "resizepic 160 50 2520 340 250",
+  "button 380 268 2071 2072 0 1",
+  "button 230 268 239 240 1 0 " + ADD_BUTTON,
+  "group 0",
+  "radio 240 145 2152 2154 1 " + ADD_INTEGER_RADIO,
+  "radio 240 175 2152 2154 0 " + ADD_DOUBLE_RADIO,
+  "radio 240 205 2152 2154 0 " + ADD_TEXT_RADIO,
+  "text 280 59 1 2",
+  "text 283 61 34 2",
+  "text 200 115 0 6",
+  "text 300 149 0 7",
+  "text 300 179 0 8",
+  "text 300 209 0 9"
+};
+
+//////////
+
+var array_resize_layout := array{
+  "resizepic 160 50 2520 340 250",
+  "text 260 59 1 3",
+  "text 263 61 34 3",
+  "text 200 100 0 5",
+  "text 240 135 0 10",
+  "text 240 195 0 11",
+  "button 380 267 2071 2072 0 1",
+  "button 230 269 239 240 1 0 " + CONFIRM_RESIZE_BUTTON,
+  "gumppic 280 155 2444",
+  "gumppic 280 215 2444"
+};
+
+//////////
+
+var dict_layout := array{
+  "resizepic 160 50 2520 340 250",
+  "button 380 268 2071 2072 0 1",
+  "button 230 268 239 240 1 0 " + ADD_BUTTON,
+  "group 0",
+  "radio 300 165 2152 2154 1 " + ADD_INTEGER_RADIO,
+  "radio 300 195 2152 2154 0 " + ADD_DOUBLE_RADIO,
+  "radio 300 225 2152 2154 0 " + ADD_TEXT_RADIO,
+  "text 280 59 1 2",
+  "text 283 61 34 2",
+  "text 200 95 0 5",
+  "text 200 145 0 6",
+  "text 330 169 0 7",
+  "text 330 199 0 8",
+  "text 330 229 0 9",
+  "gumppic 190 115 1143"
+};
+
+var dict_data := array{
+  "",                       // show hex/int
+  "CProp Editor",
+  "Add Key",
+  "Del Checked Keys",
+  "",                       // array name
+  "Enter new entry keyname",
+  "Select the new entry type",
+  "Integer",
+  "Double",
+  "String",
+  "Confirm Delete",
+  "Delete Checked Entries?"
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// CPropEditor
+//
+program CPropEditor(parms1, parms2)
+  var who, thing;
+
+  If (TypeOfInt(parms1) == OT_ARRAY)
+    // called by another script
+    If (
+      // muss ein Player sein
+      (parms1[1].isa(POLCLASS_MOBILE) && !parms1[1].isa(POLCLASS_NPC)) &&
+      // muss ein Objekt sein
+      parms1[2].isa(POLCLASS_UOBJECT)
+    )
+      who   := parms1[1];
+      thing := parms1[2];
+    Else
+      syslog("WARNING: invalid parameters in the calling script: "+parms1);
       return;
-    endif
-  else
-    who:=parms1;
-    parms2:=lower(parms2);
-    if (parms2["multi"])
-      if (!who.multi)
-        sendsysmessage(who,"You must stand on the multi to edit it's cprops.");
+    EndIf
+
+  Else
+    // called as a textcmd
+    who := parms1;
+
+    var options := GetOptions(Lower(parms2));
+    If (options["multi"])
+      If (!who.multi)
+        SendSysMessage(who,"You must stand on the multi to edit its CProps.");
+        Return;
+      Else
+        thing := who.multi;
+      EndIf
+
+    ElseIf (options["account"])
+
+      SendSysMessage(who, "Edit whose account CProps?");
+      thing := Target(who);
+      If (thing.acct)
+        thing := thing.acct;
+      ElseIf (thing)
+        SendSysMessage(who, "That doesn't have an account!");
+        Return;
+      EndIf
+
+    ElseIf (options["serial"])
+      thing := SystemFindObjectBySerial(
+        CInt(options["serial"]), SYSFIND_SEARCH_OFFLINE_MOBILES);
+      If (!thing)
+        SendSysMessage(who, "Serial not found");
         return;
-      else
-        thing:=who.multi;
-      endif
-    else
-      sendsysmessage(who,"Edit Cprops on what?");
-      thing:=Target(who,TGTOPT_NOCHECK_LOS);
-    endif
-  endif
+      EndIf
 
-  if (!thing)
-    sendsysmessage(who,"Cancelled.");
-    return;
-  elseif (thing.isa(POLCLASS_ITEM))
+    Else
+      SendSysMessage(who, "Edit CProps on what?");
+      thing := TargetCoordinates(who);
+    EndIf
+  EndIf
+
+  If (!thing)
+    SendSysMessage(who, "Abort");
+    Return;
+  ElseIf (thing.item);
+    thing := thing.item;
     ReserveItem(thing);
-  endif
+  ElseIf (thing.mobile)
+    thing := thing.mobile;
+  ElseIf (TypeOfInt(thing) == OT_STRUCT)
+    Return;
+  EndIf
 
-  while (SendCpropGump(who,thing))
-    sleepms(20);
-  endwhile
+  While (DoCPropGump(who, thing) && !finished)
+    SleepMS(25);
+  EndWhile
 
-  if (!thing)
-    sendsysmessage(who,"Item destroyed!");
-  elseif (thing.isa(POLCLASS_ITEM))
+  If (thing.isa(POLCLASS_ITEM))
     ReleaseItem(thing);
-  endif
+  EndIf
+EndProgram
 
-endprogram
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// DoCPropGump
+// - responsible For calculating , building, sending and
+// handling the results from the main CProp gump
+//
+Function DoCPropGump(who, thing)
+  var propnames    := GetCPropNames(thing);
+  var propname_len := len(propnames);
 
-function SendCpropGump(who,thing)
-  var propnames:=GetObjPropertyNames(thing);
+  If (propname_len > MAX_ITEMS)
+    SendSysMessage(who, "propedit displaying "+MAX_ITEMS+"/"+propname_len+" CProps!");
+    propname_len := MAX_ITEMS;
+  EndIf
+
+  // calculate page details
   var num_pages;
-  if (!len(propnames))
-    num_pages:=1;
-  else
-    num_pages:=1+Cint((len(propnames)-1)/TEXT_LINES);
-  endif
-  if (num_pages>MAX_PAGES)
-    num_pages:=MAX_PAGES;
-  endif
-  var add_page:=num_pages+1;
-  var del_page:=num_pages+2;
-  var this_layout:=main_layout;
-  var this_data:=main_data;
+  If (!propname_len)
+    num_pages := 1;
+  Else
+    num_pages := 1 + CInt((propname_len - 1) / TEXT_LINES);
+  EndIf
+  If (num_pages > MAX_PAGES)
+    num_pages := MAX_PAGES;
+  EndIf
+  var add_page := num_pages + 1;
+  var del_page := num_pages + 2;
 
-//  Compose Cprop Pages
-  ComposeMainGump(add_page,del_page,this_layout,this_data,thing);
+  // obtain the current gump width
+  var width := GetGumpWidth();
 
-// Add Prop Page
-  this_layout.append("page "+add_page);
-  foreach bit in add_layout
-    this_layout.append(bit);
-  endforeach
-  this_layout.append("textentry 200 92 200 20 0 500 "+len(this_data));
-  this_data.append("");
+  // setup the main page
+  var this_layout := main_layout;
+  var this_data   := main_data;
 
-// Del Prop Page
-  this_layout.append("page "+del_page);
-  foreach bit in del_layout
-    this_layout.append(bit);
-  endforeach
+  If (show_in_hex)
+    this_data[1] := "Show Int";
+  Else
+    this_data[1] := "Show Hex";
+  EndIf
 
-  var retval:=SendDialogGump(who,this_layout,this_data);
+  If (!thing.isa(POLCLASS_UOBJECT))
+    this_data[5] := "Account: "+thing.name;
+  ElseIf (thing.name)
+    this_data[5] := thing.name+" ["+ToggleHex(thing.serial)+"]";
+  Else
+    this_data[5] := thing.desc+" ["+ToggleHex(thing.serial)+"]";
+  EndIf
 
-// Check for buttons.....
-  var i;
-  if (retval[1000])           // Toggle Hex
-    show_in_hex:=!show_in_hex;
-    return 1;
-  elseif (retval[1001])       // Toggle Width
-    gump_width:=gump_width+1;
-    if (!GetGumpWidth())
-      gump_width:=1;
-    endif
-    return 1;
-  elseif (retval[998])        // Add Cprop
-    var add_prop_name:=GetGumpText(retval[500]);
-    if (!len(add_prop_name))
-      sendsysmessage(who,"No Cprop name specified!");
-      return 1;
-    elseif (add_prop_name in propnames)
-      sendsysmessage(who,"There is alread a Cprop with that name!");
-      return 1;
-    endif
-    var add_prop_val;
-    if (retval[1005])
-      add_prop_val:=0;   // integer
-    elseif (retval[1006])
-      add_prop_val:=0.0; // double
-    else
-      add_prop_val:="";  // string
-    endif
-    SetObjProperty(thing,add_prop_name,add_prop_val);
-    return 1;
-  elseif (retval[997])      // Delete Cprop
-    for (i:=1;i<=len(propnames);i:=i+1)
-      if (retval[700+i])
-        EraseObjProperty(thing,propnames[i]);
-      endif
-    endfor
-    return 1;
-  elseif (retval[999])      // Apply changes to cprops
-    for (i:=1;i<=len(propnames);i:=i+1)
-      var this_prop:=GetObjProperty(thing,propnames[i]);
-      var this_text:=retval[i+500];
-      if (!this_text.errortext)
-        SetObjProperty(thing,propnames[i],SetPropType(GetGumpText(this_text),TypeOf(this_prop)));
-      endif
-    endfor
-    return 1;
-  endif
-
-  return 0;
-endfunction
-
-////////////////////////////////////////////////////////
+  this_layout[3] := "resizepic 0 25 2520 " + width + " 300";
+  this_layout[6] := "button " + (width - 40) + " 35 31 31 1 0 " + TOGGLE_WIDTH_BUTTON;
+  this_layout[9] := "croppedtext 140 35 " + (width - 200) + " 25 0 4";
 
 
-function ComposeMainGump(byref add_page,byref del_page,byref this_layout,byref this_data,thing)
-  var propnames:=GetObjPropertyNames(thing);
-  var width:=GetGumpWidth();
-  this_layout[3]:="resizepic 0 0 2520 "+width+" 300";
-  this_layout[6]:="button "+(width-40)+" 10 31 31 1 0 1001";
-  this_layout[9]:="croppedtext 140 10 "+(width-200)+" 25 0 4";
-  if (show_in_hex)
-    this_data[1]:="Show Int";
-  else
-    this_data[1]:="Show Hex";
-  endif
-  if (thing.name)
-    this_data[5]:=thing.name+" ["+ToggleHex(thing.serial)+"]";
-  else
-    this_data[5]:=thing.desc+" ["+ToggleHex(thing.serial)+"]";
-  endif
+  var i, j, y, this_prop, this_type;
 
-  var i,j,y,this_prop,this_type;
+  // build the rest of the main pages
+  For (i := 1; i < add_page; i += 1)
 
-  for (i:=1;i<add_page;i:=i+1)
-    this_layout.append("page "+i);
-    this_layout.append("button 380 267 2071 2072 1 0 995");// Cancel button
-    this_layout.append("button 200 267 239 240 1 0 999");  // Main apply button
-    if (i>1)
-      this_layout.append("button "+(width-60)+" 40 250 251 0 "+(i-1));
-    endif
-    if (i<(add_page-1))
-      this_layout.append("button "+(width-60)+" 265 252 253 0 "+(i+1));
-    endif
-    if (add_page>2)
-      this_layout.append("gumppic "+(width-108)+" 263 2644");
-      this_layout.append("gumppic "+(width-105)+" 266 "+(2224+i));
-    endif
-    this_layout.append("button 340 38 2224 2224 0 "+add_page);
-    this_layout.append("text 360 35 34 2");
-    this_layout.append("button 40 38 2224 2224 0 "+del_page);
-    this_layout.append("text 60 35 34 3");
+    // build page i
+    this_layout.append("page " + i);
+    this_layout.append("button 200 292 239 240 1 0 " + APPLY_BUTTON);
 
-    var start_j:=((i-1)*TEXT_LINES)+1;
-    var end_j:=i*TEXT_LINES;
-    if (end_j>len(propnames))
-      end_j:=len(propnames);
-    endif
+    If (i > 1)
+      this_layout.append("button "+(width-60)+" 65 250 251 0 "+(i-1));
+    EndIf
 
-    for (j:=start_j; j<=end_j; j:=j+1)
-      if (propnames[j])
-        this_prop:=GetObjProperty(thing,propnames[j]);
-        this_type:=TypeOf(this_prop);
-        this_prop:=Cstr(this_prop);
-        var can_edit:=1;
-        if (len(this_prop)>MAX_CHARS)
-          this_prop:=this_prop[1,MAX_CHARS];
-          can_edit:=0;
-        endif
-        y:=(j-start_j)*20+60;
+    If (i < (add_page - 1))
+      this_layout.append("button "+(width-60)+" 290 252 253 0 "+(i+1));
+    EndIf
+
+    If (add_page > 2)
+      this_layout.append("text "+(width-105)+" 291 0 "+len(this_data));
+      this_data.append(i);
+    EndIf
+    this_layout.append("button 340 63 2224 2224 0 " + add_page);
+    this_layout.append("text 360 60 34 2");
+    this_layout.append("button 40 63 2224 2224 0 " + del_page);
+    this_layout.append("text 60 60 34 3");
+
+    var start_j := ((i - 1) * TEXT_LINES) + 1;
+    var end_j := i * TEXT_LINES;
+    If (end_j > propname_len)
+      end_j := propname_len;
+    EndIf
+
+    // add details For propnames in the range start_j to end_j
+    For (j := start_j; j<=  end_j; j += 1)
+      SleepMS(2);
+      If (propnames[j])
+        this_prop := GetCProp(thing, propnames[j]);
+        this_type := TypeOf(this_prop);
+        this_prop := Cstr(this_prop);
+
+        var can_edit := 1;
+        If (len(this_prop) > MAX_CHARS)
+          this_prop := this_prop[1, MAX_CHARS];
+          can_edit  := 0;
+        EndIf
+        y := (j - start_j) * 20 + 85;
         this_layout.append("croppedtext 50 "+y+" 130 20 0 "+len(this_data));
         this_data.append(propnames[j]);
 
         this_layout.append("croppedtext 200 "+y+" 60 20 0 "+len(this_data));
         this_data.append(this_type);
 
-        if (this_prop.errortext)
+        If (this_prop.errortext)
           this_layout.append("croppedtext 280 "+y+" "+(width-310)+" 20 34 "+len(this_data));
           this_data.append(this_prop.errortext);
-        elseif ( (can_edit) &&  ( this_type=="Integer") or (this_type=="Double") or (this_type=="String") )
+        ElseIf ((can_edit) &&  (this_type == "Integer") || (this_type == "Double") || (this_type == "String"))
           this_layout.append("gumppic 260 "+(y+3)+" 58");
-          this_layout.append("textentry 280 "+y+" "+(width-310)+" 20 0 "+(500+j)+" "+len(this_data));
-          this_data.append(ToggleHex(this_prop,this_type));
-        else
+          this_layout.append("textentry 280 "+y+" "+(width-310)+" 20 0 "+(TEXTENTRY_OFFSET+j)+" "+len(this_data));
+          this_data.append(ToggleHex(this_prop, this_type));
+        ElseIf (this_type == "Array")
+          this_layout.append("button 260 "+(y+3)+" 55 55 1 0 "+(ARRAY_EDIT_OFFSET+j));
           this_layout.append("croppedtext 280 "+y+" "+(width-310)+" 20 0 "+len(this_data));
           this_data.append(this_prop);
-        endif
-        this_layout.append("checkbox 30 "+y+" 210 211 0 "+(j+700));
-      endif
-    endfor
-  endfor
-endfunction
+        ElseIf (this_type == "Dictionary")
+          this_layout.append("button 260 "+(y+3)+" 55 55 1 0 "+(DICT_EDIT_OFFSET+j));
+          this_layout.append("croppedtext 280 "+y+" "+(width-310)+" 20 0 "+len(this_data));
+          this_data.append(this_prop);
+        ElseIf (this_type == "Struct")
+          this_layout.append("button 260 "+(y+3)+" 55 55 1 0 "+(STRUCT_EDIT_OFFSET+j));
+          this_layout.append("croppedtext 280 "+y+" "+(width-310)+" 20 0 "+len(this_data));
+          this_data.append(this_prop);
+        Else
+          this_layout.append("croppedtext 280 "+y+" "+(width-310)+" 20 0 "+len(this_data));
+          this_data.append(this_prop);
+        EndIf
+        this_layout.append("checkbox 30 "+y+" 210 211 0 "+(j+DEL_OFFSET));
+      EndIf
+    EndFor
+  EndFor
 
-////////////////////////////////////////////////////////
 
-function GetGumpText(text)
-  return text[Find(text,": ",1)+2,len(text)];
-endfunction
+  // add property page
+  this_layout.append("page " + add_page);
+  this_layout := this_layout + add_layout;
+  this_layout.append("textentry 200 117 200 20 0 "+(ADD_TEXTENTRY)+" "+len(this_data));
+  this_data.append("");
 
-////////////////////////////////////////////////////////
+  // delete property page
+  this_layout.append("page " + del_page);
+  this_layout := this_layout + del_layout;
 
-function GetGumpWidth()
-  case (gump_width)
-    1:  return 600;
-    2:  return 750;
-    3:  return 900;
-  endcase
-  return 0;
-endfunction
+  // send the Gump and wait For a reply...
+  var retval := SendDialogGump(who, this_layout, this_data);
 
-////////////////////////////////////////////////////////
+  // check For button presses
+  If (retval[TOGGLE_HEX_BUTTON])
+    show_in_hex := !show_in_hex;
+    Return 1;
 
-function SetPropType(text,type)
-  case (type)
-    "Integer" : return Cint(text);
-    "Double"  : return Cdbl(text);
-  endcase
-  return text;
-endfunction
+  ElseIf (retval[TOGGLE_WIDTH_BUTTON])
+    gump_width += 1;
+    If (!GetGumpWidth())
+      gump_width := 1;
+    EndIf
+    Return 1;
 
-////////////////////////////////////////////////////////
+  ElseIf (retval[ADD_BUTTON])
+    var add_prop_name := GetGumpText(retval[ADD_TEXTENTRY]);
+    If (!len(add_prop_name))
+      SendSysMessage(who, "No CProp name specified!");
+      Return 1;
+    ElseIf (add_prop_name in propnames)
+      SendSysMessage(who, "There is already a CProp with that name!");
+      Return 1;
+    EndIf
 
-function ToggleHex(value,value_type:=0)
-  if (!value_type)
-    value_type:=TypeOf(value);
-  endif
-  if ((value_type=="Integer") && (show_in_hex))
-    return Hex(value);
-  else
-    return Cstr(value);
-  endif
-endfunction
+    var add_prop_val;
+    If (retval[ADD_INTEGER_RADIO])
+      add_prop_val := 0;
+    ElseIf (retval[ADD_DOUBLE_RADIO])
+      add_prop_val := 0.0;
+    ElseIf (retval[ADD_TEXT_RADIO])
+      add_prop_val := "";
+    ElseIf (retval[ADD_ARRAY_RADIO])
+      add_prop_val := array;
+    ElseIf (retval[ADD_DICT_RADIO])
+      add_prop_val := dictionary;
+    ElseIf (retval[ADD_STRUCT_RADIO])
+      add_prop_val := struct;
+    EndIf
+    SetCProp(thing, add_prop_name, add_prop_val);
+    Return 1;
 
-////////////////////////////////////////////////////////
+  ElseIf (retval[CONFIRM_DELETE_BUTTON])
+    For (i := 1; i <= propname_len; i += 1)
+      If (retval[DEL_OFFSET + i])
+        EraseCProp(thing, propnames[i]);
+      EndIf
+      SleepMS(2);
+    EndFor
+    Return 1;
+
+  ElseIf (retval[APPLY_BUTTON])
+    For (i := 1; i <= propname_len; i += 1)
+      var this_prop := GetCProp(thing, propnames[i]);
+      var this_text := retval[i+TEXTENTRY_OFFSET];
+      If (this_text.errortext != "Key not found in inthash")
+        SetCProp(thing, propnames[i], SetPropType(GetGumpText(this_text), TypeOf(this_prop)));
+      EndIf
+      SleepMS(2);
+    EndFor
+    Return 1;
+
+  Else
+    // Check For array editing
+    For (i := 1; i <= propname_len; i += 1)
+      If (retval[ARRAY_EDIT_OFFSET + i])
+        var this_propname := propnames[i];
+        While (DoArrayGump(who, thing, this_propname) && !finished)
+          SleepMS(25);
+        EndWhile
+        Return 1;
+      EndIf
+    EndFor
+
+    // Check For dictionary editing
+    For (i := 1; i <= propname_len; i += 1)
+      If (retval[DICT_EDIT_OFFSET+i])
+        var this_propname := propnames[i];
+        While (DoDictGump(who, thing, this_propname) && !finished)
+          SleepMS(25);
+        EndWhile
+        Return 1;
+      EndIf
+    EndFor
+
+    // Check For dictionary editing
+    For (i := 1; i <= propname_len; i += 1)
+      If (retval[STRUCT_EDIT_OFFSET+i])
+        var this_propname := propnames[i];
+        While (DoStructGump(who, thing, this_propname) && !finished)
+          SleepMS(25);
+        EndWhile
+        Return 1;
+      EndIf
+    EndFor
+  EndIf
+
+  Return 0;
+EndFunction
+
+////////////////////////////////////////////////////////////////////////////////
+// DoArrayGump
+// - responsible For calculating , building, sending and
+// Returning the results from the main array editing
+//
+Function DoArrayGump(who, thing, array_propname)
+
+  var array_val := GetCProp(thing, array_propname);
+  var array_len := len(array_val);
+  If (array_len > MAX_ITEMS)
+    SendSysMessage(who, "propedit can only display "+MAX_ITEMS+"/"+array_len+" array entries!");
+    array_len := MAX_ITEMS;
+  EndIf
+
+  // initial calculations and setup
+  var num_pages;
+  If (!array_len)
+    num_pages := 1;
+  Else
+    num_pages := 1 + CInt((array_len - 1) / TEXT_LINES);
+  EndIf
+  If (num_pages > MAX_PAGES)
+    num_pages := MAX_PAGES;
+  EndIf
+  var append_page := num_pages + 1;
+  var resize_page := num_pages + 2;
+
+  // obtain the current gump width
+  var width := GetGumpWidth();
+
+  // setup the main page
+  var this_layout := main_layout;
+  var this_data  := array_data;
+
+  this_layout[3] := "resizepic 0 25 2520 " + width + " 300";
+  this_layout[6] := "button " + (width - 40) + " 35 31 31 1 0 " + TOGGLE_WIDTH_BUTTON;
+  this_layout[9] := "croppedtext 140 35 " + (width - 200) + " 25 0 4";
+
+  this_data[6] := "Warning: truncated values will be lost!";
+  If (show_in_hex)
+    this_data[1] := "Show Int";
+  Else
+    this_data[1] := "Show Hex";
+  EndIf
+  this_data[5] := "Array : " + array_propname;
+
+  var i, j, y, this_prop, this_type;
+
+  // build the rest of the main pages
+  For (i := 1; i < append_page; i += 1)
+
+    // build page i
+    this_layout.append("page " + i);
+    this_layout.append("button 380 292 2322 2323 1 0 "+PREVIOUS_BUTTON);
+    this_layout.append("button 200 292 239 240 1 0 "+APPLY_BUTTON);
+    If (i > 1)
+      this_layout.append("button "+(width-60)+" 65 250 251 0 "+(i-1));
+    EndIf
+
+    If (i < (append_page - 1))
+      this_layout.append("button "+(width-60)+" 290 252 253 0 "+(i+1));
+    EndIf
+
+    If (append_page > 2)
+      this_layout.append("text "+(width-105)+" 291 0 "+len(this_data));
+      this_data.append(i);
+    EndIf
+    this_layout.append("button 340 63 2224 2224 0 "+append_page);
+    this_layout.append("text 360 60 34 2");
+    this_layout.append("button 40 63 2224 2224 0 "+resize_page);
+    this_layout.append("text 60 60 34 3");
+
+    var start_j := ((i - 1) * TEXT_LINES) + 1;
+    var end_j   := i * TEXT_LINES;
+    If (end_j > array_len)
+      end_j := array_len ;
+    EndIf
+
+    // add details For propnames in the range start_j to end_j
+    For (j := start_j; j <= end_j; j += 1)
+      SleepMS(2);
+      this_prop := array_val[j];
+      this_type := TypeOf(this_prop);
+      this_prop := Cstr(this_prop);
+
+      var can_edit := 1;
+      If (len(this_prop) > MAX_CHARS)
+        this_prop := this_prop[1, MAX_CHARS];
+        can_edit  := 0;
+      EndIf
+      y := (j - start_j) * 20 + 85;
+      this_layout.append("croppedtext 50 "+y+" 130 20 0 "+len(this_data));
+      this_data.append(j);
+
+      this_layout.append("croppedtext 100 "+y+" 60 20 0 "+len(this_data));
+      this_data.append(this_type);
+
+      If (this_prop.errortext)
+        this_layout.append("croppedtext 180 "+y+" "+(width-310)+" 20 34 "+len(this_data));
+        this_data.append(this_prop.errortext);
+      ElseIf ((can_edit) &&  (this_type == "Integer") || (this_type == "Double") || (this_type == "String"))
+        this_layout.append("gumppic 160 "+(y+3)+" 58");
+        this_layout.append("textentry 180 "+y+" "+(width-310)+" 20 0 "+(TEXTENTRY_OFFSET+j)+" "+len(this_data));
+        this_data.append(ToggleHex(this_prop, this_type));
+      ElseIf (this_type == "Array")
+        this_layout.append("croppedtext 180 "+y+" "+(width-310)+" 20 0 "+len(this_data));
+        this_data.append(this_prop);
+      ElseIf (this_type == "Dictionary")
+        this_layout.append("croppedtext 180 "+y+" "+(width-310)+" 20 0 "+len(this_data));
+        this_data.append(this_prop);
+      ElseIf (this_type == "Struct")
+        this_layout.append("croppedtext 180 "+y+" "+(width-310)+" 20 0 "+len(this_data));
+        this_data.append(this_prop);
+      Else
+        this_layout.append("croppedtext 180 "+y+" "+(width-310)+" 20 0 "+len(this_data));
+        this_data.append(this_prop);
+      EndIf
+    EndFor
+  EndFor
+
+  // append page
+  this_layout.append("page " + append_page);
+  this_layout := this_layout + array_append_layout;
+
+  // resize page
+  this_layout.append("page " + resize_page);
+  this_layout := this_layout + array_resize_layout;
+  this_layout.append("textentry 300 158 100 20 0 "+(RESIZE_TEXTENTRY_FROM)+" "+len(this_data));
+  this_data.append("1");
+  this_layout.append("textentry 300 218 100 20 0 "+(RESIZE_TEXTENTRY_TO)+" "+len(this_data));
+  this_data.append(array_len);
+
+  var retval := SendDialogGump(who, this_layout, this_data);
+
+  // check For button presses....
+  If (retval[TOGGLE_HEX_BUTTON])
+    show_in_hex := !show_in_hex;
+    Return 1;
+
+  ElseIf (retval[TOGGLE_WIDTH_BUTTON])
+    gump_width += 1;
+    If (!GetGumpWidth())
+      gump_width := 1;
+    EndIf
+    Return 1;
+
+  ElseIf (retval[ADD_BUTTON])
+    var add_prop_val;
+    If (retval[ADD_INTEGER_RADIO])
+      add_prop_val := 0;
+    ElseIf (retval[ADD_DOUBLE_RADIO])
+      add_prop_val := 0.0;
+    Else // (retval[ADD_TEXT_RADIO])
+      add_prop_val := "";
+    EndIf
+    array_val.append(add_prop_val);
+    SetCProp(thing, array_propname, array_val);
+    Return 1;
+
+  ElseIf (retval[CONFIRM_RESIZE_BUTTON])
+    var from_idx  := CInt(GetGumpText(retval[RESIZE_TEXTENTRY_FROM]));
+    var to_idx    := CInt(GetGumpText(retval[RESIZE_TEXTENTRY_TO]));
+    var size      := (to_idx - from_idx) + 1;
+    var new_array := array{};
+    var last_item_type := TypeOf(array_val[from_idx]);
+
+    If ((from_idx > 0) && (size > 0))
+      For (i := 0; i < size; i += 1)
+        var new_val := array_val[from_idx + i];
+        If (!new_val.errortext)
+          new_array.append(array_val[from_idx + i]);
+        ElseIf (last_item_type == "String")
+          new_array.append(SetPropType("", last_item_type));
+        Else
+          new_array.append(SetPropType("0", last_item_type));
+        EndIf
+        SleepMS(2);
+      EndFor
+      SetCProp(thing, array_propname, new_array);
+    EndIf
+    Return 1;
+
+  ElseIf (retval[APPLY_BUTTON])
+    For (i := 1; i <= array_len; i += 1)
+      var this_val := array_val[i];
+      var this_idx := retval[i + TEXTENTRY_OFFSET];
+      If (this_idx.errortext!="Key not found in inthash")
+        array_val[i] := SetPropType(GetGumpText(this_idx), TypeOf(this_val));
+      EndIf
+      SleepMS(2);
+    EndFor
+    SetCProp(thing, array_propname, array_val);
+    Return 1;
+
+  ElseIf (retval[PREVIOUS_BUTTON])
+    Return 0;
+  EndIf
+
+  finished := 1;
+  Return 0;
+EndFunction
+
+////////////////////////////////////////////////////////////////////////////////
+// DoDictGump
+// - responsible For calculating , building, sending and
+// Returning the results from the main array editing
+//
+Function DoDictGump(who, thing, dict_propname)
+
+  var dict_val  := GetCProp(thing, dict_propname);
+  var dict_keys := dict_val.keys();
+  var dict_size := len(dict_keys);
+  If (dict_size>MAX_ITEMS)
+    SendSysMessage(who, "propedit can only display "+MAX_ITEMS+"/"+dict_size+" dictionary entries!");
+    dict_size := MAX_ITEMS;
+  EndIf
+
+  // initial calculations and setup
+  var num_pages;
+  If (!dict_size)
+    num_pages := 1;
+  Else
+    num_pages := 1 + CInt((dict_size - 1) / TEXT_LINES);
+  EndIf
+  If (num_pages > MAX_PAGES)
+    num_pages := MAX_PAGES;
+  EndIf
+  var add_page := num_pages + 1;
+  var del_page := num_pages + 2;
+
+  // obtain the current gump width
+  var width := GetGumpWidth();
+
+  // setup the main page
+  var this_layout := main_layout;
+  var this_data   := dict_data;
+  If (show_in_hex)
+    this_data[1] := "Show Int";
+  Else
+    this_data[1] := "Show Hex";
+  EndIf
+  this_data[5] := "Dictionary: " + dict_propname;
+
+  this_layout[3] := "resizepic 0 25 2520 "+width+" 300";
+  this_layout[6] := "button "+(width-40)+" 35 31 31 1 0 "+TOGGLE_WIDTH_BUTTON;
+  this_layout[9] := "croppedtext 140 35 "+(width-200)+" 25 0 4";
+
+  var i, j, y, this_prop, this_type;
+
+  // build the rest of the main pages
+  For (i := 1; i < add_page; i += 1)
+
+    // build page i
+    this_layout.append("page " + i);
+    this_layout.append("button 380 292 2322 2323 1 0 " + PREVIOUS_BUTTON);
+    this_layout.append("button 200 292 239 240 1 0 " + APPLY_BUTTON);
+
+    If (i > 1)
+      this_layout.append("button "+(width-60)+" 65 250 251 0 "+(i-1));
+    EndIf
+
+    If (i < (add_page - 1))
+      this_layout.append("button "+(width-60)+" 290 252 253 0 "+(i+1));
+    EndIf
+
+    If (add_page > 2)
+      this_layout.append("text "+(width-105)+" 291 0 "+len(this_data));
+      this_data.append(i);
+    EndIf
+    this_layout.append("button 340 63 2224 2224 0 "+add_page);
+    this_layout.append("text 360 60 34 2");
+    this_layout.append("button 40 63 2224 2224 0 "+del_page);
+    this_layout.append("text 60 60 34 3");
+
+    var start_j := ((i - 1) * TEXT_LINES) + 1;
+    var end_j   := i * TEXT_LINES;
+    If (end_j > dict_size)
+      end_j := dict_size ;
+    EndIf
+
+    // add details For propnames in the range start_j to end_j
+    For (j := start_j; j <= end_j; j += 1)
+      SleepMS(2);
+      this_prop := dict_val[dict_keys[j]];
+      this_type := TypeOf(this_prop);
+      this_prop := Cstr(this_prop);
+      var can_edit := 1;
+      If (len(this_prop) > MAX_CHARS)
+        this_prop := this_prop[1, MAX_CHARS];
+        can_edit := 0;
+      EndIf
+      y := (j - start_j) * 20 + 85;
+      this_layout.append("croppedtext 50 "+y+" 130 20 0 "+len(this_data));
+      this_data.append(dict_keys[j]);
+
+      this_layout.append("croppedtext 200 "+y+" 60 20 0 "+len(this_data));
+      this_data.append(this_type);
+
+      If (this_prop.errortext)
+        this_layout.append("croppedtext 280 "+y+" "+(width-310)+" 20 34 "+len(this_data));
+        this_data.append(this_prop.errortext);
+      ElseIf ((can_edit) &&  (this_type == "Integer") || (this_type == "Double") || (this_type == "String"))
+        this_layout.append("gumppic 260 "+(y+3)+" 58");
+        this_layout.append("textentry 280 "+y+" "+(width-310)+" 20 0 "+(TEXTENTRY_OFFSET+j)+" "+len(this_data));
+        this_data.append(ToggleHex(this_prop, this_type));
+      ElseIf (this_type == "Array")
+        this_layout.append("croppedtext 280 "+y+" "+(width-310)+" 20 0 "+len(this_data));
+        this_data.append(this_prop);
+      ElseIf (this_type == "Dictionary")
+        this_layout.append("croppedtext 280 "+y+" "+(width-310)+" 20 0 "+len(this_data));
+        this_data.append(this_prop);
+      ElseIf (this_type == "Struct")
+        this_layout.append("croppedtext 280 "+y+" "+(width-310)+" 20 0 "+len(this_data));
+        this_data.append(this_prop);
+      Else
+        this_layout.append("croppedtext 280 "+y+" "+(width-310)+" 20 0 "+len(this_data));
+        this_data.append(this_prop);
+      EndIf
+      this_layout.append("checkbox 30 "+y+" 210 211 0 "+(j+DEL_OFFSET));
+    EndFor
+  EndFor
+
+  // new key page
+  this_layout.append("page " + add_page);
+  this_layout := this_layout + dict_layout;
+  this_layout.append("textentry 200 117 200 20 0 "+(ADD_TEXTENTRY)+" "+len(this_data));
+  this_data.append("");
+
+  // delete page
+  this_layout.append("page " + del_page);
+  this_layout := this_layout + del_layout;
+
+  var retval := SendDialogGump(who, this_layout, this_data);
+
+  // check For button presses....
+  If (retval[TOGGLE_HEX_BUTTON])
+    show_in_hex := !show_in_hex;
+    Return 1;
+
+  ElseIf (retval[TOGGLE_WIDTH_BUTTON])
+    gump_width += 1;
+    If (!GetGumpWidth())
+      gump_width := 1;
+    EndIf
+    Return 1;
+
+  ElseIf (retval[ADD_BUTTON])
+    var add_key_name := GetGumpText(retval[ADD_TEXTENTRY]);
+    If (!len(add_key_name))
+      SendSysMessage(who, "No key specified!");
+      Return 1;
+    ElseIf (add_key_name in dict_keys)
+      SendSysMessage(who, "There is already a dictionary key with that name!");
+      Return 1;
+    EndIf
+
+    var add_key_val;
+    If (retval[ADD_INTEGER_RADIO])
+      add_key_val := 0;
+    ElseIf (retval[ADD_DOUBLE_RADIO])
+      add_key_val := 0.0;
+    Else // (retval[ADD_TEXT_RADIO])
+      add_key_val := "";
+    EndIf
+    dict_val.insert(add_key_name, add_key_val);
+    SetCProp(thing, dict_propname, dict_val);
+    Return 1;
+
+  ElseIf (retval[CONFIRM_DELETE_BUTTON])
+    For (i := 1; i <= dict_size; i += 1)
+      If (retval[DEL_OFFSET + i])
+        dict_val.erase(dict_keys[i]);
+        SetCProp(thing, dict_propname, dict_val);
+      EndIf
+      SleepMS(2);
+    EndFor
+    Return 1;
+
+  ElseIf (retval[APPLY_BUTTON])
+    For (i := 1; i <= dict_size; i += 1)
+      var this_key := dict_keys[i];
+      var this_val := dict_val[this_key];
+      var this_idx := retval[i + TEXTENTRY_OFFSET];
+      If (this_idx.errortext != "Key not found in inthash")
+        dict_val[this_key] := SetPropType(GetGumpText(this_idx), TypeOf(this_val));
+      EndIf
+      SleepMS(2);
+    EndFor
+    SetCProp(thing, dict_propname, dict_val);
+    Return 1;
+
+  ElseIf (retval[PREVIOUS_BUTTON])
+    Return 0;
+  EndIf
+
+  finished := 1;
+  Return 0;
+EndFunction
+
+////////////////////////////////////////////////////////////////////////////////
+// DoStructGump
+// - responsible For calculating , building, sending and
+// Returning the results from the main array editing
+//
+Function DoStructGump(who, thing, struct_propname)
+
+  var struct_val  := GetCProp(thing, struct_propname);
+  var struct_keys := struct_val.keys();
+  var struct_size := len(struct_keys);
+  If (struct_size>MAX_ITEMS)
+    SendSysMessage(who, "propedit can only display "+MAX_ITEMS+"/"+struct_size+" struct entries!");
+    struct_size := MAX_ITEMS;
+  EndIf
+
+  // initial calculations and setup
+  var num_pages;
+  If (!struct_size)
+    num_pages := 1;
+  Else
+    num_pages := 1 + CInt((struct_size - 1) / TEXT_LINES);
+  EndIf
+  If (num_pages > MAX_PAGES)
+    num_pages := MAX_PAGES;
+  EndIf
+  var add_page := num_pages + 1;
+  var del_page := num_pages + 2;
+
+  // obtain the current gump width
+  var width := GetGumpWidth();
+
+  // setup the main page
+  var this_layout := main_layout;
+  var this_data   := dict_data;
+  If (show_in_hex)
+    this_data[1] := "Show Int";
+  Else
+    this_data[1] := "Show Hex";
+  EndIf
+  this_data[5] := "Struct: " + struct_propname;
+
+  this_layout[3] := "resizepic 0 25 2520 "+width+" 300";
+  this_layout[6] := "button "+(width-40)+" 35 31 31 1 0 "+TOGGLE_WIDTH_BUTTON;
+  this_layout[9] := "croppedtext 140 35 "+(width-200)+" 25 0 4";
+
+  var i, j, y, this_prop, this_type;
+
+  // build the rest of the main pages
+  For (i := 1; i < add_page; i += 1)
+
+    // build page i
+    this_layout.append("page " + i);
+    this_layout.append("button 380 292 2322 2323 1 0 " + PREVIOUS_BUTTON);
+    this_layout.append("button 200 292 239 240 1 0 " + APPLY_BUTTON);
+
+    If (i > 1)
+      this_layout.append("button "+(width-60)+" 65 250 251 0 "+(i-1));
+    EndIf
+
+    If (i < (add_page - 1))
+      this_layout.append("button "+(width-60)+" 290 252 253 0 "+(i+1));
+    EndIf
+
+    If (add_page > 2)
+      this_layout.append("text "+(width-105)+" 291 0 "+len(this_data));
+      this_data.append(i);
+    EndIf
+    this_layout.append("button 340 63 2224 2224 0 "+add_page);
+    this_layout.append("text 360 60 34 2");
+    //this_layout.append("button 40 63 2224 2224 0 "+del_page);
+    //this_layout.append("text 60 60 34 3");
+
+    var start_j := ((i - 1) * TEXT_LINES) + 1;
+    var end_j   := i * TEXT_LINES;
+    If (end_j > struct_size)
+      end_j := struct_size ;
+    EndIf
+
+    // add details For propnames in the range start_j to end_j
+    For (j := start_j; j <= end_j; j += 1)
+      SleepMS(2);
+      this_prop := struct_val[struct_keys[j]];
+      this_type := TypeOf(this_prop);
+      this_prop := Cstr(this_prop);
+      var can_edit := 1;
+      If (len(this_prop) > MAX_CHARS)
+        this_prop := this_prop[1, MAX_CHARS];
+        can_edit := 0;
+      EndIf
+      y := (j - start_j) * 20 + 85;
+      this_layout.append("croppedtext 50 "+y+" 130 20 0 "+len(this_data));
+      this_data.append(struct_keys[j]);
+
+      this_layout.append("croppedtext 200 "+y+" 60 20 0 "+len(this_data));
+      this_data.append(this_type);
+
+      If (this_prop.errortext)
+        this_layout.append("croppedtext 280 "+y+" "+(width-310)+" 20 34 "+len(this_data));
+        this_data.append(this_prop.errortext);
+      ElseIf ((can_edit) &&  (this_type == "Integer") || (this_type == "Double") || (this_type == "String"))
+        this_layout.append("gumppic 260 "+(y+3)+" 58");
+        this_layout.append("textentry 280 "+y+" "+(width-310)+" 20 0 "+(TEXTENTRY_OFFSET+j)+" "+len(this_data));
+        this_data.append(ToggleHex(this_prop, this_type));
+      ElseIf (this_type == "Array")
+        this_layout.append("croppedtext 280 "+y+" "+(width-310)+" 20 0 "+len(this_data));
+        this_data.append(this_prop);
+      ElseIf (this_type == "Dictionary")
+        this_layout.append("croppedtext 280 "+y+" "+(width-310)+" 20 0 "+len(this_data));
+        this_data.append(this_prop);
+      ElseIf (this_type == "Struct")
+        this_layout.append("croppedtext 280 "+y+" "+(width-310)+" 20 0 "+len(this_data));
+        this_data.append(this_prop);
+      Else
+        this_layout.append("croppedtext 280 "+y+" "+(width-310)+" 20 0 "+len(this_data));
+        this_data.append(this_prop);
+      EndIf
+      this_layout.append("checkbox 30 "+y+" 210 211 0 "+(j+DEL_OFFSET));
+    EndFor
+  EndFor
+
+  // new key page
+  this_layout.append("page " + add_page);
+  this_layout := this_layout + dict_layout;
+  this_layout.append("textentry 200 117 200 20 0 "+(ADD_TEXTENTRY)+" "+len(this_data));
+  this_data.append("");
+
+  // delete page
+  this_layout.append("page " + del_page);
+  this_layout := this_layout + del_layout;
+
+  var retval := SendDialogGump(who, this_layout, this_data);
+
+  // check For button presses....
+  If (retval[TOGGLE_HEX_BUTTON])
+    show_in_hex := !show_in_hex;
+    Return 1;
+
+  ElseIf (retval[TOGGLE_WIDTH_BUTTON])
+    gump_width += 1;
+    If (!GetGumpWidth())
+      gump_width := 1;
+    EndIf
+    Return 1;
+
+  ElseIf (retval[ADD_BUTTON])
+    var add_key_name := GetGumpText(retval[ADD_TEXTENTRY]);
+    If (!len(add_key_name))
+      SendSysMessage(who, "No key specified!");
+      Return 1;
+    ElseIf (add_key_name in struct_keys)
+      SendSysMessage(who, "There is already a struct key with that name!");
+      Return 1;
+    EndIf
+
+    var add_key_val;
+    If (retval[ADD_INTEGER_RADIO])
+      add_key_val := 0;
+    ElseIf (retval[ADD_DOUBLE_RADIO])
+      add_key_val := 0.0;
+    Else // (retval[ADD_TEXT_RADIO])
+      add_key_val := "";
+    EndIf
+    struct_val[add_key_name]:=add_key_val;
+    SetCProp(thing, struct_propname, struct_val);
+    Return 1;
+
+  ElseIf (retval[CONFIRM_DELETE_BUTTON])
+    SendSysMessage(who, "Not supported");
+//    For (i := 1; i <= dict_size; i += 1)
+//      If (retval[DEL_OFFSET + i])
+//        dict_val.erase(dict_keys[i]);
+//        SetCProp(thing, dict_propname, dict_val);
+//      EndIf
+//      SleepMS(2);
+//    EndFor
+    Return 1;
+
+  ElseIf (retval[APPLY_BUTTON])
+    For (i := 1; i <= struct_size; i += 1)
+      var this_key := struct_keys[i];
+      var this_val := struct_val[this_key];
+      var this_idx := retval[i + TEXTENTRY_OFFSET];
+      If (this_idx.errortext != "Key not found in inthash")
+        struct_val[this_key] := SetPropType(GetGumpText(this_idx), TypeOf(this_val));
+      EndIf
+      SleepMS(2);
+    EndFor
+    SetCProp(thing, struct_propname, struct_val);
+    Return 1;
+
+  ElseIf (retval[PREVIOUS_BUTTON])
+    Return 0;
+  EndIf
+
+  finished := 1;
+  Return 0;
+EndFunction
+
+////////////////////////////////////////////////////////////////////////////////
+
+Function GetGumpText(text)
+  Return text[Find(text, ": ", 1) + 2, len(text)];
+EndFunction
+
+////////////////////////////////////////////////////////////////////////////////
+
+Function GetGumpWidth()
+  Case (gump_width)
+    1:  Return GUMP_WIDTH_ONE;
+    2:  Return GUMP_WIDTH_TWO;
+    3:  Return GUMP_WIDTH_THREE;
+  EndCase
+  Return 0;
+EndFunction
+
+////////////////////////////////////////////////////////////////////////////////
+
+Function GetCPropNames(thing)
+  If (thing.isa(POLCLASS_UOBJECT))
+//    Return GetObjPropertyNames(thing);
+
+    Var properties := { };
+    Var append;
+
+    ForEach propname in GetObjPropertyNames(thing)
+      SleepMS(2);
+      append := 1;
+      // If (propname[1, 3] == SKILLWERTKENNUNG)
+      //   Var propnamepart := propname;
+      //   propnamepart[1, 3] := "";
+      //   If (IsSkillNameDefinied(propnamepart))
+      //     append := 0;
+      //   EndIf
+      // ElseIf (propname[1, 5] == SKILLTYPKENNUNG)
+      //   If (IGNORE_TYPES[" " + GetObjProperty(thing, propname) + " "])
+      //     Var propnamepart := propname;
+      //     propnamepart[1, 5] := "";
+      //     If (IsSkillNameDefinied(propnamepart))
+      //       append := 0;
+      //     EndIf
+      //   EndIf
+      // ElseIf (IGNORE_PROPS[" " + propname + " "])
+      //   append := 0;
+      // EndIf
+
+      If (append)
+        properties.append(propname);
+      EndIf
+
+    EndForEach
+
+    Return properties;
+  Else
+    Return thing.propnames();
+  EndIf
+EndFunction
+
+////////////////////////////////////////////////////////////////////////////////
+
+Function GetCProp(thing, propname)
+  If (thing.isa(POLCLASS_UOBJECT))
+    Return GetObjProperty(thing, propname);
+  Else
+    Return thing.getprop(propname);
+  EndIf
+EndFunction
+
+////////////////////////////////////////////////////////////////////////////////
+
+Function SetCProp(thing, propname, set_value)
+  If (thing.isa(POLCLASS_UOBJECT))
+    Return SetObjProperty(thing, propname, set_value);
+  Else
+    Return thing.setprop(propname, set_value);
+  EndIf
+EndFunction
+
+////////////////////////////////////////////////////////////////////////////////
+
+Function EraseCProp(thing, propname)
+  If (thing.isa(POLCLASS_UOBJECT))
+    Return EraseObjProperty(thing, propname);
+  Else
+    Return thing.eraseprop(propname);
+  EndIf
+EndFunction
+
+////////////////////////////////////////////////////////////////////////////////
+
+Function SetPropType(text, type)
+  Case (type)
+    "Integer" : Return CInt(text);
+    "Double"  : Return CDbl(text);
+  EndCase
+  Return text;
+EndFunction
+
+////////////////////////////////////////////////////////////////////////////////
+
+Function ToggleHex(value, value_type := 0)
+  If (!value_type)
+    value_type := TypeOf(value);
+  EndIf
+  If ((value_type == "Integer") && (show_in_hex))
+    Return Lower(Hex(value));
+  Else
+    Return Cstr(value);
+  EndIf
+EndFunction
+
+////////////////////////////////////////////////////////////////////////////////
