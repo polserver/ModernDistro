@@ -1,0 +1,26 @@
+/////////////////////////////////////////////////////////////////////
+//
+// Program Name: start
+//
+// Author: Yukiko
+//
+// Date Created: 2020-02-12
+//
+// Description: Start script to initialize bautool.
+//
+// Parameters: none.
+//
+// Return Value: none.
+//
+/////////////////////////////////////////////////////////////////////
+
+use os;
+
+program startBautool()
+
+	var success := Start_Script(":bautool:commands/seer/bautool", {"Init"});
+	if(success.errortext)
+		SysLog(success.errortext);
+	endif
+
+endprogram

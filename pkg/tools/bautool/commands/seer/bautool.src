@@ -137,7 +137,7 @@ Var datafileelement:=dataelementElement.getprop("dictionary");
 
 
 Program bautool(who, param)
-  If (param=="Init") // Generate datafile via script
+  If (who[1]=="Init") // Generate datafile via script
     Init();
     Return;
   EndIf
