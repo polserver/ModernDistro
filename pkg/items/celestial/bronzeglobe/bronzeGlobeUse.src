@@ -1,0 +1,26 @@
+use uo;
+
+program orrery_use(who, globe)
+
+	who := who; // Currently the mobile reference is not used. It might be later.
+	var animated := GetObjProperty(globe, "Animated");
+
+	if(animated)
+		if(globe.objtype == 0x9CEF)
+			globe.graphic := 0x9CF7;
+			EraseObjProperty(globe, "Animated");
+		elseif(globe.objtype == 0x9CF8)
+			globe.graphic := 0x9D00;
+			EraseObjProperty(globe, "Animated");
+		endif
+	else
+		if(globe.objtype == 0x9CEF)
+			globe.graphic := 0x9CEF;
+			SetObjProperty(globe, "Animated", 1);
+		elseif(globe.objtype == 0x9CF8)
+			globe.graphic := 0x9CF8;
+			SetObjProperty(globe, "Animated", 1);
+		endif
+	endif
+
+endprogram

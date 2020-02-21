@@ -1,0 +1,23 @@
+// Created 2/16/2020 4:00:00 AM, with Gump Studio.
+// Exported with POLGumpExporter ver 1.1 for gump pkg
+
+use uo;
+use os;
+
+include ":gumps:gumps";
+
+program gump_gump(who)
+
+	var gump := GFCreateGump();
+
+	GFPage(gump, 0);
+
+	//Image 1
+	GFGumpPic(gump, 55, -6, 1664, 0);
+
+	//Image 2
+	GFGumpPic(gump, 225, 140, 1725, 0);
+
+	GFSendGump(who, gump);
+
+endprogram

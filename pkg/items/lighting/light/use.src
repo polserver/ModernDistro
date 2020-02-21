@@ -1,14 +1,13 @@
 use uo;
-
+use os;
 include ":itemutils:itemUtil";
 
 program useLight( who, light )
-	SendSysMessage(who, "In 'use' script.", 3, 88);
+
 	if( !useItem_check( who, light, DEFAULT_ITEM ))
 		return 0;
 	endif
- 
 	light.Toggle();
-
 	return 1;
+
 endprogram
