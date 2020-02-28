@@ -1,0 +1,69 @@
+/*
+        Created by *Edwards
+        
+        2010-02-03
+*/
+use uo;
+use guilds;
+
+include "include/security";
+include ":guilds:guild";
+include ":security:report";
+
+program charGuild_onDelete( mobile )
+
+        RemoveRecruitStatut( mobile );
+
+        var guild := FindGuild( mobile.guildid );
+        if( !guild )
+                //Mobile has no guild, ...
+                return 0;
+        endif
+        
+        if( mobile.serial == guild.GetProp( "Master" ))
+                DestroyGuildStone( guild );
+                guild.RemoveMember( mobile );
+                
+                var total_guild := ListGuilds();
+                foreach info_guild in ( total_guild )
+                        if( guild.IsAllyGuild( info_guild ))
+                                guild.RemoveAllyGuild( info_guild );
+                        elseif( guild.IsEnemyGuild( info_guild ))
+                                guild.RemoveEnemyGuild( info_guild );
+                        endif
+
+                        SleepMS(5);
+                endforeach
+
+                var destroy_guild := DestroyGuild( guild );
+                if( destroy_guild.errortext )
+                        NotifyStaffOnline( mobile, "Error destroying guild -->"+destroy_guild.errortext );
+                endif
+                
+                ReportText( guild.GetProp( "Name" )+" destroyed by "+mobile.name+" Serial: "+mobile.serial, REPORT_SYSLOG );
+        else
+                guild.RemoveMember( mobile );
+                ReportText( mobile.name+" removed from "+guild.GetProp( "Name" )+" by "+mobile.name+" Serial: "+mobile.serial, REPORT_SYSLOG );
+        endif
+
+	return 1;
+endprogram
+
+function RemoveRecruitStatut( mobile )
+
+        foreach guild in ( ListGuilds() )
+                var guild_recruits := guild.GetProp( "Recruit" );
+                foreach recruit in guild_recruits
+                        if( recruit.serial == mobile.serial )
+                                guild_recruits.Erase( recruit );
+                                guild.SetProp( "Recruit", guild_recruits );
+                                break;
+                        endif
+                        SleepMS(5);
+                endforeach
+                
+                SleepMS(5);
+        endforeach
+        
+        return 1;
+endfunction

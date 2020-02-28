@@ -1,0 +1,25 @@
+/*
+        Created by *Edwards
+
+        2010-02-01
+        
+        Last Modifications 2010-02-03
+             * Changed: Now verify with FindGuild.
+*/
+use uo;
+use os;
+use guilds;
+
+program Logon_Guild( mobile )
+
+        //Just make sure the mobile has a guildID or delete all props.
+        
+        var guild := FindGuild( mobile.guildid );
+        if( !guild )
+                EraseObjProperty( mobile, "Guild_Abbr" );
+                EraseObjProperty( mobile, "Guild_Title" );
+                mobile.title_guild := "";
+        endif
+
+	return 1;
+endprogram

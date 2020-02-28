@@ -1,0 +1,37 @@
+/*
+        Maintened by *Edwards
+
+        2009-05-30
+*/
+use uo;
+use os;
+
+include "include/security";
+
+program textcmd_openGuild( mobile )
+
+        if( !AuthorizationCode( mobile ))
+                SendSysMessage( mobile, "Cancelled." );
+                return 0;
+        endif
+        
+        SendSysMessage( mobile, "Select a player to view guild." );
+        var targ := Target( mobile, TGTOPT_NOCHECK_LOS );
+        if( !targ )
+                SendSysMessage( mobile, "Cancelled." );
+                return 0;
+        elseif( !targ.IsA( POLCLASS_MOBILE ) || targ.IsA( POLCLASS_NPC ))
+                SendSysMessage( mobile, "You must select a player." );
+                return 0;
+        elseif( !targ.guildid )
+                SendSysMessage( mobile, "This player is not a member of any guild." );
+                return 0;
+        endif
+
+        var start := Start_Script( ":guilds:guildMenu", {targ, mobile} );
+        if( start.errortext )
+                SendSysMessage( mobile, "Error starting <:guilds:guildMenu> from command viewGuild -->"+start.errortext );
+        endif
+ 
+        return 1;
+endprogram

@@ -1,0 +1,212 @@
+/*
+        Maintened by *Edwards
+        
+        2009-06-02
+
+        Last Modifications 2009-07-25
+             * Fixed SendText()
+*/
+use uo;
+use os;
+use guilds;
+
+include "include/security";
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+include ":security:speechReport";
+
+program textcmd_guildchat( mobile, text )
+
+	if( GetProcess( CInt( GetObjProperty( mobile, "#CmdGChatPid" ))))
+		return 0;
+	else
+		SetObjProperty( mobile, "#CmdGChatPid", GetPid() );
+	endif
+
+        if( !mobile.guildid )
+                SendSysMessage( mobile, "You are not a member of any guild.", 3, 68 );
+                return 0;
+        endif
+
+        if( !text )
+                SendOptions( mobile );
+        else
+                SendText( mobile, text );
+                NotifyStaffOnline( mobile, "[Guild SpyMode] "+text );
+                Speech_ReportText( mobile, text, ITEM_REPORT_SYSLOG );
+        endif
+
+        return 1;
+endprogram
+
+function SendOptions( mobile );
+
+        var gump := GFCreateGump();
+
+	GFResizePic( gump, 0, 0, GFGetCfgConst( "Defaults", "BackGround" ), 300, 320 );
+        GFResizePic( gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 270, 25 );
+	GFResizePic( gump, 15, 45, GFGetCfgConst( "Defaults", "ForeGround" ), 270, 265 );
+	GFTextMid( gump, 15, 17, 280, 1720, "Guild Chat Options" );
+
+	GFAddButton( gump, 130, 270, 2128, 2129, GF_CLOSE_BTN, 0xA1 ); // Okay
+
+        var mobile_options := GetObjProperty( mobile, "GuildChat" );
+        if( !mobile_options )
+                mobile_options := array{};
+                mobile_options[1] := 2;
+                mobile_options[2] := 2;
+        endif
+
+        // Hear Option
+        GFSetRadioGroup( gump, 1 );
+        GFTextLine( gump, 60, 80, 2100, "Hear own guild only." );
+        if( mobile_options[1] == 1 )
+                GFRadioButton( gump, 30, 80, 210, 211, 1, 0xb01 );
+        else
+                GFRadioButton( gump, 30, 80, 210, 211, 0, 0xb01 );
+        endif
+
+        GFTextLine( gump, 60, 100, 2100, "Hear own/ally guild." );
+        if( mobile_options[1] == 2 )
+                GFRadioButton( gump, 30, 100, 210, 211, 1, 0xb02 );
+        else
+                GFRadioButton( gump, 30, 100, 210, 211, 0, 0xb02 );
+        endif
+
+        GFTextLine( gump, 60, 120, 2100, "Hear all guild." );
+        if( mobile_options[1] == 3 )
+                GFRadioButton( gump, 30, 120, 210, 211, 1, 0xb03 );
+        else
+                GFRadioButton( gump, 30, 120, 210, 211, 0, 0xb03 );
+        endif
+
+        // Talk Option
+        GFSetRadioGroup( gump, 2 );
+        GFTextLine( gump, 60, 160, 2100, "Talk to own guild only." );
+        if( mobile_options[2] == 1 )
+                GFRadioButton( gump, 30, 160, 210, 211, 1, 0xc01 );
+        else
+                GFRadioButton( gump, 30, 160, 210, 211, 0, 0xc01 );
+        endif
+
+        GFTextLine( gump, 60, 180, 2100, "Talk to own/ally guild." );
+        if( mobile_options[2] == 2 )
+                GFRadioButton( gump, 30, 180, 210, 211, 1, 0xc02 );
+        else
+                GFRadioButton( gump, 30, 180, 210, 211, 0, 0xc02 );
+        endif
+
+        GFTextLine( gump, 60, 200, 2100, "Talk to all guild." );
+        if( mobile_options[2] == 3 )
+                GFRadioButton( gump, 30, 200, 210, 211, 1, 0xc03 );
+        else
+                GFRadioButton( gump, 30, 200, 210, 211, 0, 0xc03 );
+        endif
+
+        var input := GFSendGump( mobile, gump );
+        if( !input )
+                SendSysMessage( mobile, "Cancelled.", 3, 68 );
+                return 0;
+        endif
+
+        if( input[0xb01] )
+                mobile_options[1] := 1;
+        elseif( input[0xb02] )
+                mobile_options[1] := 2;
+        elseif( input[0xb03] )
+                mobile_options[1] := 3;
+        endif
+
+        if( input[0xc01] )
+                mobile_options[2] := 1;
+        elseif( input[0xc02] )
+                mobile_options[2] := 2;
+        elseif( input[0xc03] )
+                mobile_options[2] := 3;
+        endif
+
+        SetObjProperty( mobile, "GuildChat", mobile_options );
+        SendSysMessage( mobile, "Options saved.", 3, 68 );
+
+        return 1;
+endfunction
+
+function SendText( mobile, text )
+
+        var mobile_options := GetObjProperty( mobile, "GuildChat" );
+        if( !mobile_options )
+                mobile_options := array{};
+                mobile_options[2] := 2;
+        endif
+
+        var ref_guild := mobile.guild;
+        
+        MessageGuild( mobile, text, ref_guild );
+
+        case( CInt( mobile_options[2] ))
+                2:
+                        var guild_ally := ref_guild.AllyGuilds;
+                        foreach guild in ( guild_ally )
+                                if( guild == mobile.guild )
+                                        continue;
+                                endif
+                                
+                                MessageGuild( mobile, text, guild );
+                                SleepMS(5);
+                        endforeach
+                        break;
+                3:
+                        var all_guild := ListGuilds();
+                        foreach guild in ( all_guild )
+                                if( guild != mobile.guild )
+                                        MessageGuild( mobile, text, guild );
+                                endif
+                                SleepMS(5);
+                        endforeach
+                        break;
+        endcase
+
+        return 1;
+endfunction
+
+function MessageGuild( mobile, text, guild )
+
+        foreach member in ( guild.members )
+                if( member.connected )
+                        ReceiveText( member, mobile, text );
+                endif
+                SleepMS(5);
+        endforeach
+
+        return 1;
+endfunction
+
+function ReceiveText( member, mobile, text )
+
+        var member_options := GetObjProperty( member, "GuildChat" );
+        if( !member_options )
+                member_options := array{};
+                member_options[1] := 2;
+        endif
+        
+        if( mobile.guildid == member.guildid )
+                SendSysMessage( member, mobile.name+" ["+( mobile.guild ).GetProp( "Abbr" )+"]: "+text, 3, 68 );
+        endif
+        
+        if( member.serial != mobile.serial )
+                case( CInt( member_options[1] ))
+                        2:
+                               if(( member.guild ).IsAllyGuild( mobile.guild ))
+                                      SendSysMessage( member, mobile.name+" ["+( mobile.guild ).GetProp( "Name" )+"]: "+text, 3, 65 );
+                               endif
+                               break;
+                        3:
+                               if( mobile.guildid != member.guildid )
+                                      SendSysMessage( member, mobile.name+" ["+( mobile.guild ).GetProp( "Abbr" )+"]: "+text, 3, 68 );
+                               endif
+                               break;
+                endcase
+        endif
+        
+        return 1;
+endfunction

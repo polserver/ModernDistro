@@ -1,0 +1,144 @@
+/*
+        Maintened by *Edwards
+
+        2009-05-30
+*/
+use uo;
+use guilds;
+use cliloc;
+
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+include ":gumps:yesno";
+include ":guilds:settings";
+include ":guilds:validate";
+include ":security:report";
+
+var settings := Guild_GetSettingsCfgElem( "Settings" );
+
+program Guild_Create( mobile )
+
+	if( GetProcess( CInt( GetObjProperty( mobile, "#GuildButton" ))))
+		return 0;
+	else
+		SetObjProperty( mobile, "#GuildButton", GetPid() );
+	endif
+
+	var gump := GFCreateGump( 125, 200 );
+
+	GFResizePic( gump, 0, 0, GFGetCfgConst( "Defaults", "BackGround" ), 500, 300 );
+	GFResizePic( gump, 25, 20, GFGetCfgConst( "Defaults", "ForeGround" ), 450, 25 );
+	GFTextLine( gump, 200, 20, 1720, "Guild Creation" );
+
+        var text := "As you are not a member of any guild you can create your own by providing
+	            a unique guild name and paying the standard guild registration fee.";
+
+        GFDrawWrappedText( gump, 70, 60, GFWordWrap( text, 420 ));
+
+	GFTextLine( gump, 25, 140, 2100, "Registration Fee:" );
+	GFTextLine( gump, 160, 140, 1720, CInt( settings.RegistrationFee ));
+
+	GFTextLine( gump, 25, 165, 2100, "Guild Name:" );
+	GFResizePic( gump, 150, 165, GFGetCfgConst( "Defaults", "ForeGround" ), 200, 25 );
+	var guild_name_temp := GFTextEntry( gump, 160, 165, 200, 20, 1720, "", 3 );
+
+	GFTextLine( gump, 25, 190, 2100, "Guild Abbreviation:" );
+	GFResizePic( gump, 150, 190, GFGetCfgConst( "Defaults", "ForeGround" ), 200, 25 );
+	var abbreviation_temp := GFTextEntry( gump, 160, 190, 200, 20, 1720, "", 4 );
+
+	GFAddButton( gump, 25, 250, 2128, 2129, GF_CLOSE_BTN, 0xA1 ); // Okay
+	GFAddButton( gump, 100, 250, 2119, 2120, GF_CLOSE_BTN, 0xA2 ); // Cancel
+
+        var input := GFSendGump( mobile, gump );
+        if( !input || input[0xA2] )
+		SendSysMessageCL( mobile, 1042023, color := 33 ); // Cancelled.
+		return 0;
+        elseif( input[0xA1] )
+                var guild_name := GFExtractData( input, guild_name_temp ),
+                    guild_abbr := GFExtractData( input, abbreviation_temp );
+
+		if( !guild_name )
+			SendSysMessage( mobile, "You must provide a guild name.", 3, 68 );
+			return 0;
+		elseif( !guild_abbr )
+			SendSysMessage( mobile, "You must provide a guild abbreviation.", 3, 68 );
+			return 0;
+		endif
+
+		AddGuild( mobile, guild_name, guild_abbr );
+        endif
+
+        return 1;
+endprogram
+
+function AddGuild( guild_GM, guild_name, guild_abbr )
+
+	var regist_fee := CInt( settings.RegistrationFee );
+	if( !regist_fee )
+		regist_fee := 250000;
+	endif
+
+	if( guild_GM.gold < regist_fee && guild_GM.cmdlevel < 3 )
+		SendSysMessageCL( guild_GM, 1019022, color := 33 ); // You do not have enough gold.
+		return 0;
+        endif
+
+        if( !guild_name )
+                SendSysMessageCL( guild_GM, 1042023, color := 33 ); // Cancelled.
+                return 0;
+	elseif( Len( guild_name ) > CInt( settings.MaxNameLen ))
+		SendSysMessageCL( guild_GM, 501143, color := 33 ); // That name is too long.
+		return 0;
+	elseif( !ValidStr( guild_name ))
+		SendSysMessage( guild_GM, "Guild name contains illegal characters.", 3, 33 );
+		return 0;
+	elseif( !ValidName( guild_name ))
+		SendSysMessage( guild_GM, "Guild name already exists.", 3, 33 );
+		return 0;
+	endif
+
+	if( !guild_abbr )
+                SendSysMessageCL( guild_GM, 1042023, color := 33 ); // Cancelled.
+                return 0;
+	elseif( Len( guild_abbr ) > CInt( settings.MaxAbbrLen ))
+		SendSysMessage( guild_GM, "Guild abbreviation is too long.", 3, 33 );
+		return 0;
+	elseif( !ValidStr( guild_abbr ))
+		SendSysMessage( guild_GM, "Guild abbreviation contains illegal characters.", 3, 33 );
+		return 0;
+	elseif( !ValidName( guild_abbr ))
+		SendSysMessage( guild_GM, "Guild abbreviation already exists.", 3, 33 );
+		return 0;
+	endif
+
+	if( !YesNo( guild_gm, "Are you sure you want to create a new guild?", "Yes", "No" ))
+		SendSysMessageCL( guild_gm, 1042023, color := 33 ); // Cancelled.
+		return 0;
+	else
+		if( !guild_GM.SpendGold( regist_fee ) && guild_GM.cmdlevel < 3 )
+			SendSysMessageCL( guild_GM, 1019022, color := 33 ); // You do not have enough gold.
+			return 0;
+		endif
+	endif
+
+	var guild := CreateGuild();
+	if( guild )
+		guild.SetProp( "Name", guild_name );
+		guild.SetProp( "Abbr",  guild_abbr );
+		guild.SetProp( "Master", guild_GM.serial );
+
+                SetObjProperty( guild_GM, "Guild_Title", "GuildMaster" );
+                SetObjProperty( guild_GM, "Guild_Abbr", 1 );
+
+		guild.AddMember( guild_GM );
+                guild_GM.title_guild := "GuildMaster ["+guild_abbr+"]";
+
+		SendSysMessage( guild_GM, "Guild was successfully created.", 3, 68 );
+                ReportText( guild.GetProp( "Name" )+" successfully created by "+guild_GM.name+" Serial: "+guild_GM.serial, REPORT_SYSLOG );
+        else
+		SendSysMessage( guild_GM, "Guild creation failed.", 3, 33 );
+		SysLog( "Error creating guild -> ["+guild.errortext+"] + CharSerial -> ["+guild_gm.serial+"]" );
+	endif
+
+        return 1;
+endfunction

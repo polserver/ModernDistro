@@ -4,7 +4,7 @@
  *
  * Function List
  * GFAddButton(byref gump, x, y, off_id, on_id, btn_type:=GF_PAGE_BTN, btn_value:=0)
- * GFAddImageTileButton ( byref gump, x, y, off_id, on_id, btn_type:=GF_PAGE_BTN, btn_value:=0, tilepic_id, hue:=0, tile_x, tile_y )
+ * GFAddImageTileButton(byref gump, x, y, off_id, on_id, btn_type:=GF_PAGE_BTN, btn_value:=0, tilepic_id, hue:=0, tile_x, tile_y )
  * GFAddHTMLLocalized(byref gump, x, y, width, height, cliloc, background, scrollbar, hue := 0, customstring:="")
  * GFCheckBox(byref gump, x, y, unc_id, che_id, status:=0, btn_value:=0)
  * GFCreateGump(x:=0, y:=0, width:=0, height:=0)
