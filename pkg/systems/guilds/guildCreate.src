@@ -9,7 +9,7 @@ use cliloc;
 
 include ":gumps:gumps";
 include ":gumps:gumps_ex";
-include ":gumps:yesno";
+include ":gumps:yesNo";
 include ":guilds:settings";
 include ":guilds:validate";
 include ":security:report";
