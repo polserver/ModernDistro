@@ -1,5 +1,5 @@
 /*
-        Maintened by *Edwards
+        Maintened by The POL Distro Team
 
         2009-05-30
 

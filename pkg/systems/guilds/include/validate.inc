@@ -1,6 +1,6 @@
 /*
-        Maintened by *Edwards
-        
+        Maintened by POL Distro Team
+
         2009-05-30
 */
 use uo;
@@ -59,7 +59,7 @@ function ValidName( thestring )
                            flag := 0;
                            break;
                   endif
-                  
+
                   SleepMS(5);
          endforeach
 

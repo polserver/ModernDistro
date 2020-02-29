@@ -1,5 +1,5 @@
 /*
-        Maintened by *Edwards
+        Maintened by The POL Distro Team
 
         2009-05-30
 */
@@ -23,7 +23,7 @@ program Guild_Create( parms )
         var mobile,
             viewer,
             guild_id := 0;
-            
+
 	if( Lower( TypeOf( parms )) == "array" )
                 mobile := parms[1];
                 viewer := parms[2];
@@ -52,11 +52,11 @@ function showGuildInfo( mobile, viewer, guild_id := 0 )
         var temp_guild;
         if( !guild_id )
                 temp_guild := mobile.guildid;
-                
+
         else
                 temp_guild := guild_id;
         endif
-        
+
         var guild := FindGuild( temp_guild );
         if( guild.errortext )
                 SendSysMessage( mobile, "Error cant find guild -->"+guild.errortext );
@@ -69,27 +69,27 @@ function showGuildInfo( mobile, viewer, guild_id := 0 )
         GFResizePic( gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 370, 25 );
 	GFResizePic( gump, 15, 45, GFGetCfgConst( "Defaults", "ForeGround" ), 370, 465 );
 	GFTextMid( gump, 15, 17, 400, 1720, "Guild Menu for "+guild.GetProp( "Name" ) );
- 
+
 	GFAddButton( gump, 100, 470, 2119, 2120, GF_CLOSE_BTN, 0xA2 ); // Cancel
 	GFAddButton( gump, 25, 470, 2128, 2129, GF_CLOSE_BTN, 0xA1 ); // Okay
 
         var temp_charter := guild.GetProp( "Charter" );
         var text_charter;
-        
+
         foreach line in temp_charter
                 if( _line_iter == 1 )
                 	text_charter := CStr( line );
                 else
                 	text_charter += " "+CStr( line );
                 endif
-                
+
 		SleepMS(5);
         endforeach
-        
+
         if( !text_charter )
 		text_charter := "No charter.";
         endif
-        
+
         var guild_icon := guild.GetProp( "GuildIcon" );
         if( !guild_icon )
                  guild_icon := 0x15a9;
@@ -195,7 +195,7 @@ function showGuildMasterInfo( mobile, byref gump, guild, viewer )
 
         GFTextLine( gump, 60, 260, 2100, "Change the guild's icon." );
         GFRadioButton( gump, 40, 260, 210, 211, 0, 0xc04 );
-        
+
         GFTextLine( gump, 60, 300, 2100, "Grant title to another member." );
         GFRadioButton( gump, 40, 300, 210, 211, 0, 0xc03 );
 
