@@ -9,7 +9,7 @@ use guilds;
 include ":gumps:gumps";
 include ":gumps:gumps_ex";
 include ":guilds:guild";
-include ":gumps:yesno";
+include ":gumps:yesNo";
 include ":guilds:settings";
 include ":guilds:validate";
 include "include/security";
