@@ -1,0 +1,29 @@
+/*
+        Created by *Edwards
+        
+        2009-09-06
+*/
+use uo;
+
+include ":datafile:datafile";
+
+program Install()
+	return 1;
+endprogram
+
+exported function IsguildStone( item )
+
+	item := item; // Avoid compiler warnings.
+	
+	return 1;
+endfunction
+
+exported function SetGuild( item, guildid )
+
+	return SetObjProperty( item, "GuildID", guildid );
+endfunction
+
+exported function GetGuild( item )
+
+	return CInt( GetObjProperty( item, "GuildID" ));
+endfunction

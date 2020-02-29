@@ -1,0 +1,16 @@
+use uo;
+use os;
+
+program core_guildButton( mobile )
+
+	var guild := mobile.guildid;
+	if( !guild )
+		Start_Script( ":guilds:guildCreate", mobile );
+		return 1;
+	elseif( guild )
+		Start_Script( ":guilds:guildMenu", mobile );
+		return 1;
+	endif
+
+	return 1;
+endprogram

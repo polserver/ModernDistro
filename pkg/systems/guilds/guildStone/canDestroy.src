@@ -1,0 +1,25 @@
+/*
+        Created by *Edwards
+
+        2010-01-26
+*/
+use uo;
+use guilds;
+
+program canDestroy( guildstone )
+
+        RemoveGuildStone_Guild( guildstone );
+        
+        ( guildstone.multi ).EraseGuildStone();
+        
+	return 1;
+endprogram
+
+function RemoveGuildStone_Guild( guildstone )
+
+        var guild := FindGuild( guildstone.GetGuild() );
+        
+	guild.EraseProp( "GuildStone" );
+ 
+	return 1;
+endfunction

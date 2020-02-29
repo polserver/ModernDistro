@@ -1,0 +1,32 @@
+/*
+        Created by *Edwards
+
+        2009-09-06
+
+        Last Modifications 2010-01-26
+             * Fixed: Guildstone will update the guildname on use
+*/
+use uo;
+use os;
+use guilds;
+
+program UseGuildStone( mobile, item )
+
+        var guild_id := item.GetGuild(),
+            guild := FindGuild( guild_id );
+
+        if( !guild && !mobile.cmdlevel > 3 )
+                SendSysMessage( mobile, "That guild stone has no members! Page a staff!" );
+                return 0;
+        endif
+
+        SetName( item, guild.GetProp( "Name" ));
+
+        var script := Start_Script( ":guilds:guildMenu", {mobile, guild_id} );
+        if( script.errortext )
+                SendSysMessage( mobile, "Error starting script <:guilds:guildMenu> -->"+script.errortext );
+                return 0;
+        endif
+
+        return 1;
+endprogram

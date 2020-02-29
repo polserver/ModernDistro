@@ -1,0 +1,12 @@
+////////////////////////////////////////////////
+// onCreate programme for the First Aid Belt  //
+////////////////////////////////////////////////
+
+use uo;
+
+program OnCreateFirstAidBelt(FirstAidBelt)
+
+	var bonus_healing_points := 10;
+	SetObjProperty(FirstAidBelt, "HealingBonus", bonus_healing_points);
+
+endprogram

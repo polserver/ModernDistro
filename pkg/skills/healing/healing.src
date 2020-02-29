@@ -24,6 +24,11 @@ program use_bandages(who, item)
 	if(item.IsEnhancedBandage())
 		healing := healing + CInt(GetObjProperty(item, "HealingBonus"));
 	endif
+	// Check for First Aid Belt equipped.
+	var FAB_Bonus := GetObjProperty(GetEquipmentByLayer( who, 12 ), "HealingBonus");
+	if(FAB_Bonus)
+		healing := healing + (healing * FAB_Bonus);
+	endif
 	EraseObjProperty(who, "IsMeditating");
 	if(!can_access(who, item))
 		return;
