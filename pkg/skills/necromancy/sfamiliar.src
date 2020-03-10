@@ -14,7 +14,7 @@ program chrcast_sfamiliar( params )
 
 	if(familiar)
 		MoveObjectToLocation(familiar,10,10,10, familiar.realm,MOVEOBJECT_FORCELOCATION);
-		ApplyRawDamage(familiar, AP_GetVital(familiar, VITALID_LIFE) + 10);
+		familiar.kill();
 		eraseobjproperty(caster, "familiar");
 	endif
 

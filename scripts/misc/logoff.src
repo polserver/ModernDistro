@@ -31,7 +31,7 @@ program onlogoff(who)
       var ser := Cint(GetObjProperty(mount, "serial"));
       var critter := SystemFindObjectBySerial(ser);
       if(critter)
-        ApplyRawDamage(critter, 2000);
+        critter.kill();
       endif
       DestroyItem(mount);
     else

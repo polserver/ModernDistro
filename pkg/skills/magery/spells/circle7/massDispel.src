@@ -45,8 +45,8 @@ program mass_dispel ( parms )
       if(master)
         var resist := GetAttribute(master, RESISTING_SPELLS);
         if((RandomInt(99) + 1) < resist)
-          MoveObjectToLocation(mobile,0,0,0,"britannia_alt",MOVEOBJECT_FORCELOCATION); // problem for new map
-          ApplyRawDamage(mobile, AP_GetVitalMaximumValue(mobile, VITALID_LIFE) + 3);
+          MoveObjectToLocation(mobile,0,0,0,"britannia_alt",MOVEOBJECT_FORCELOCATION);
+          mobile.kill();
         endif
         send_attack(caster, mobile, 41);
     endif

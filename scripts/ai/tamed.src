@@ -59,7 +59,7 @@ program TamedAI()
   start_script(":taming:happyCounter", parms);
   master := SystemFindObjectBySerial(masterserial, SYSFIND_SEARCH_OFFLINE_MOBILES);
   if(!master)
-    ApplyRawDamage(me, AP_GetVital(me, VITALID_LIFE)+ 1);
+    me.kill();
     return;
   endif
   me.setmaster(master);
@@ -433,7 +433,7 @@ function release()
 	    PlayStationaryEffect( me.x, me.y, me.z, FX_SMOKE, 0xa, 0xa );
 	    MoveObjectToLocation(me, 0, 0, 0, "britannia_alt", MOVEOBJECT_FORCELOCATION);
 	    SetObjProperty(me, "guardkill", 1);
-	    ApplyRawDamage( me, AP_GetVitalMaximumValue(me, VITALID_LIFE) + 3 );
+	    me.kill();
 	else
 	    say("*Argh*");
 	    return;
@@ -451,8 +451,8 @@ function release()
       dismountme(mounted_char);
     endif
     PlayStationaryEffect(me.x, me.y, me.z, FX_SMOKE, 0xa, 0xa, 0, me.realm);
-    MoveObjectToLocation(me,5288, 1176, 0,"britannia_alt",MOVEOBJECT_FORCELOCATION); // problem for new map
-    ApplyRawDamage(me, AP_GetVital(me, VITALID_LIFE)+ 3);
+    MoveObjectToLocation(me,5288, 1176, 0,"britannia_alt",MOVEOBJECT_FORCELOCATION);
+    me.kill();
   else
     if(GetObjProperty(me,"mounted"))
       char := GetObjProperty(me,"mounted_on");
@@ -914,7 +914,7 @@ function flee(opponent)
 	else
 		MoveObjectToLocation(me,5288,1176,0,"britannia_alt",MOVEOBJECT_FORCELOCATION);
 		SetObjProperty(me,"guardkill",1);
-		ApplyRawDamage(me, AP_GetVitalMaximumValue(me, VITALID_LIFE)+ 3);
+		me.kill();
 	endif
     else
       numflees := numflees + 1;

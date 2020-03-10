@@ -9,7 +9,7 @@ function sleepmode()
   if(GetObjProperty(me,"killme"))
     SetObjProperty(me, "guardkill", 1);
     MoveObjectToLocation(me, 5276, 1185, 0, "britannia_alt", MOVEOBJECT_FORCELOCATION);
-    ApplyRawDamage(me, AP_GetVital(me, VITALID_LIFE)+1);
+    me.kill();
   endif
   EraseObjProperty(me,"#flees");
   DisableMainEvents();
@@ -34,8 +34,8 @@ function sleepmode()
                                 PlaySoundEffect(me, SFX_SPELL_EXPLOSION);
                                 PlayStationaryEffect(me.x, me.y, me.z, FX_EXPLODE_3, 7, 0x10, 0, me.realm);
                                 sleepms(5);
-                                MoveObjectToLocation(me,0,0,0, "britannia_alt", MOVEOBJECT_FORCELOCATION); // problem for new map
-                                ApplyRawDamage(me, AP_GetVital(me, VITALID_LIFE) + 3);
+                                MoveObjectToLocation(me,0,0,0, "britannia_alt", MOVEOBJECT_FORCELOCATION);
+                                me.kill();
                               endif
       SYSEVENT_ENGAGED:    if((!(ev.source).npctemplate) || (((ev.source).script == "employed") || ((ev.source).script == "tamed")))
                              if (me.hidden)

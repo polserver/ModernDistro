@@ -58,7 +58,7 @@ function upkeep(me)
         cost := AP_GetVital(critter, VITALID_LIFE) /2;
         days := GetObjProperty(critter,"days");
         if(days >4)
-          ApplyRawDamage(critter, AP_GetVital(critter, VITALID_LIFE) + 5);
+          critter.Kill();
         else
           mystorage := mystorage - 1;
           days := days + 1;

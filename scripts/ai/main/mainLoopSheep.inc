@@ -28,8 +28,8 @@ function main_AI_loop()
                                   PlaySoundEffect(me, SFX_SPELL_EXPLOSION);
                                   PlayStationaryEffect(me.x, me.y, me.z, FX_EXPLODE_3, 7, 0x10, 0, me.realm);
                                   sleepms(5);
-                                  MoveObjectToLocation(me,0,0,0,"britannia_alt",MOVEOBJECT_FORCELOCATION); // problem for new map
-                                  ApplyRawDamage(me, AP_GetVital(me, VITALID_LIFE) + 3);
+                                  MoveObjectToLocation(me,0,0,0,"britannia_alt",MOVEOBJECT_FORCELOCATION);
+                                  me.kill();
                                 endif
         SYSEVENT_ENGAGED:       RunLikeHell(ev.source);
         EVID_HERDING:           Herd(ev);

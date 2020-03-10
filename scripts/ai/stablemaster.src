@@ -230,7 +230,7 @@ function sellanimal(who)
 	  say(pet.name + " is worth $" + buyamount);
 	  SetObjProperty(pet, "guardkill", 1);
 	  MoveObjectToLocation(pet, 5555, 1111, 0, "britannia_alt", MOVEOBJECT_FORCELOCATION); // new map problem
-	  ApplyRawDamage(pet, AP_GetVital(pet, VITALID_LIFE) + 10);
+	  pet.Kill();
 	  CreateItemInBackpack(who, 0x0eed, buyamount);
 	  return;
     endif

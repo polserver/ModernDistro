@@ -28,7 +28,7 @@ program LightningEffect()
     SetRegionLightLevel("Background", cint(daymoon[CURRENTLIGHT]));
     thundelay := RandomInt(5);
     if (thundelay)
-      sleep(thundelay);		
+      sleep(thundelay);
     endif
     foreach who in EnumerateOnlineCharacters()
       if (who.x <= 5119)
@@ -61,5 +61,5 @@ function DoBolt(who)
   PlaySoundEffect(who, SOUND_EFFECT_THUNDER);
   SetObjProperty(who, "#heardbolt", 1);
   MoveObjectToLocation(mob,0,0,0, "britannia_alt", MOVEOBJECT_FORCELOCATION); // newmap problem
-  ApplyRawDamage( mob, mob.hp+2 );
+  mob.,Kill();
 endfunction

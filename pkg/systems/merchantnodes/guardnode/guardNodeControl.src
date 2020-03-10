@@ -128,7 +128,7 @@ function DespawnAll()
     var hp := AP_GetVital(thing, VITALID_LIFE);
     if(hp)
       MoveObjectToLocation(thing, 5279, 1184, 0, "britannia", MOVEOBJECT_FORCELOCATION); // newmap problem
-      ApplyRawDamage(thing, Cint(hp + 100));
+      thing.kill();
     endif
   endforeach
   npclist := array;

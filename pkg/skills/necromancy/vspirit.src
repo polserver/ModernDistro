@@ -22,8 +22,6 @@ program vengeful_spirit( params )
 		bonus := int/5;
 	endif
 
-
-
 	detach();
 
 	var spirit := CreateNpcFromTemplate("vengefulspirit", caster.x, caster.y, caster.z);
@@ -37,7 +35,6 @@ program vengeful_spirit( params )
 
 	sleep((necroskill+sspeak+bonus) / 10);
 	MoveObjectToLocation(spirit,0,0,0, spirit.realm,MOVEOBJECT_FORCELOCATION);
-	ApplyRawDamage(spirit, AP_GetVital(spirit, VITALID_LIFE) + 3);
-
+	spirit.kill();
 
 endprogram

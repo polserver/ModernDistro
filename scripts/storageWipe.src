@@ -23,7 +23,7 @@ program storagewipe()
 	endnum := npctest.serial;
 	RevokePrivilege( npctest, "invul" );
 	SetObjProperty(npctest, "guardkill", 1);
-	ApplyRawDamage( npctest, 510 );
+	npctest.kill();
 
 	print("Wiping orphaned storage locations");
 	var tamedstorage, merchantstorage, inv_fs, inv_pb, inv_1c;

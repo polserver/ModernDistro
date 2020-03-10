@@ -24,19 +24,19 @@ function main_AI_loop()
 					if (!slave)
 						MoveObjectToLocation(me,5288,1176,0,"britannia_alt",MOVEOBJECT_FORCELOCATION);
 						SetObjProperty(me,"guardkill",1);
-						ApplyRawDamage( me, AP_GetVitalMaximumValue(me, VITALID_LIFE) + 3 );
+						me.kill();
 					endif
 				else
 					if (!master)
 						MoveObjectToLocation(me,5288, 1176, 0,"britannia_alt",MOVEOBJECT_FORCELOCATION);
 						SetObjProperty(me,"guardkill",1);
-						ApplyRawDamage( me, AP_GetVitalMaximumValue(me, VITALID_LIFE) + 3 );
+						me.kill();
 					endif
 				endif
 			else
 				MoveObjectToLocation(me,5288, 1176, 0,"britannia_alt",MOVEOBJECT_FORCELOCATION);
 				SetObjProperty(me,"guardkill",1);
-				ApplyRawDamage( me, AP_GetVitalMaximumValue(me, VITALID_LIFE) + 3 );
+				me,kill();
 			endif
 			endif
 			ev := sleepmode();

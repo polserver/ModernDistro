@@ -190,7 +190,7 @@ function ValidateSpawns()
 				else
 					MoveObjectToLocation(npc, 6066, 1, 0, "britannia", MOVEOBJECT_FORCELOCATION);
 					RevokePrivilege(npc, "invul");
-					ApplyRawDamage(npc, AP_GetVital(npc, VITALID_LIFE) + 100);
+					npc.kill();
 				endif
 			endif
 			sleepms(2);
@@ -203,7 +203,7 @@ function ValidateSpawns()
 		else
 			MoveObjectToLocation(npc, 6066, 1, 0, "britannia", MOVEOBJECT_FORCELOCATION);
 			RevokePrivilege(npc, "invul");
-			ApplyRawDamage(npc, AP_GetVital(npc, VITALID_LIFE) + 100);
+			npc.kill();
 		endif
 		sleepms(2);
 	endforeach
@@ -222,7 +222,7 @@ function DespawnAll()
 		if(hp)
 			MoveObjectToLocation(thing, 6066, 1, 0, "britannia", MOVEOBJECT_FORCELOCATION);
 			RevokePrivilege(thing, "invul");
-			ApplyRawDamage(thing, Cint(hp + 100));
+			thing.kill();
 		endif
 		sleepms(2);
 	endforeach

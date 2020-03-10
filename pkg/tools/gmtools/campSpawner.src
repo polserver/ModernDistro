@@ -53,7 +53,7 @@ program spawntest(item)
       themob := SystemFindObjectBySerial(CInt(mobile));
       mobarray.erase(returnindex(mobarray, mobile));
       SetObjProperty(themob, "guardkill", 1);
-      ApplyRawDamage(themob, 2000);
+      themob.kill();
     endforeach
     if(amt > 0)
       i := 1;

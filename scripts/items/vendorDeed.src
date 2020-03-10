@@ -44,7 +44,7 @@ program makevendor(who, deed)
       if(!DestroyItem(deed))
         RevokePrivilege(place, "invul");
         SetObjProperty(place, "guardkill", 1);
-        ApplyRawDamage(place, (AP_GetVital(place, VITALID_LIFE) + 5));
+        place.kill();
       endif
     endif
   else

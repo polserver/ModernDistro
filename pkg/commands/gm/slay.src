@@ -9,7 +9,7 @@ program textcmd_kill( who )
 	if (mob)
 		if (!mob.dead)
 			RevokePrivilege( mob, "invul" );
-			ApplyRawDamage( mob, CInt(AP_GetVital(mob, HITS)) + 100 );
+			mob.Kill();
 		endif
 
 	endif

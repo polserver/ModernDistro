@@ -71,7 +71,7 @@ function DeleteAccount(acctname, act);
           if(thing.objtype == 0xf021)
             ms := GetObjProperty(thing, "serial");
             mt := SystemFindObjectBySerial(ms);
-            ApplyRawDamage(mt, 2000);
+            mt.Kill();
           endif
           MoveItemToContainer(thing, chr.backpack);
         endif

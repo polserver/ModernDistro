@@ -184,7 +184,7 @@ function Fight(opponent)
   sleepms(100);
   PlayLightningBoltEffect(opponent);
   sleepms(100);
-  ApplyRawDamage(opponent, AP_GetVital(opponent, VITALID_LIFE) + 10);
+  opponent.Kill();
   sleep(1);
   PerformAction(me, 17);
   sleepms(200);

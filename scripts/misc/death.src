@@ -132,58 +132,58 @@ endprogram
 function dismount(corpse)
 	var mount := 0;GetEquipmentByLayer( corpse, 25 );
 	foreach item in EnumerateItemsInContainer(corpse)
-	  if (item.objtype == 0xf021)
-		mount := item;
-		break;
-	  endif
+		if (item.objtype == 0xf021)
+			mount := item;
+			break;
+		endif
 	endforeach
 	if (!mount)
-	  return;
+		return;
 	endif
 	var critter := "";
 	case (mount.graphic)
-	0x3ea2: critter := "horse";
-	0x3e9f: critter := "horse2";
-	0x3ea0: critter := "horse3";
-	0x3ea1: critter := "horse4";
-	0x3ea6:	critter := "llama";
-	0x3ea3:	critter := "desertostard";
-	0x3ea4:	critter := "frenziedostard";
-	0x3ea5:	critter := "forestostard";
+		0x3ea2: critter := "horse";
+		0x3e9f: critter := "horse2";
+		0x3ea0: critter := "horse3";
+		0x3ea1: critter := "horse4";
+		0x3ea6:	critter := "llama";
+		0x3ea3:	critter := "desertostard";
+		0x3ea4:	critter := "frenziedostard";
+		0x3ea5:	critter := "forestostard";
 	endcase
 	if (mount.color == 1109)
-	  critter := "nightmare";
+		critter := "nightmare";
 	endif
 	DestroyItem( mount );
 endfunction
 
 function dismountme(who, corpse)
-  var mount := GetEquipmentByLayer(who, 25 );
-  var clone := GetObjProperty(corpse,"npctemplate");
-  var newcorpse := CreateNpcFromTemplate(clone, corpse.x, corpse.y, corpse.z, 0, corpse.realm);
-  var serial := newcorpse.serial;
-  SetObjProperty(newcorpse,"myserial", serial);
-  newcorpse.color := corpse.color;
-  newcorpse.facing := who.facing;
-  MoveObjectToLocation(newcorpse, who.x, who.y, who.z, who.realm, MOVEOBJECT_FORCELOCATION);
-  var x := newcorpse.x;
-  var y := newcorpse.y;
-  var z := newcorpse.z;
-  newcorpse.facing := who.facing;
-  ApplyRawDamage(newcorpse, AP_GetVital(newcorpse, VITALID_LIFE)+3);
-  var contain;
-  foreach cpse in ListItemsAtLocation(x, y, z, who.realm );
-    if(CInt(GetObjProperty(cpse,"myserial")) == serial)
-      contain := cpse;
-      break;
-    endif
-  endforeach
-  contain.name := corpse.name;
-  foreach item in EnumerateItemsInContainer(corpse, ENUMERATE_ROOT_ONLY)
-    MoveItemToContainer(item, contain);
-  endforeach
-  DestroyItem(corpse);
-  DestroyItem(mount);
+	var mount := GetEquipmentByLayer(who, 25 );
+	var clone := GetObjProperty(corpse,"npctemplate");
+	var newcorpse := CreateNpcFromTemplate(clone, corpse.x, corpse.y, corpse.z, 0, corpse.realm);
+	var serial := newcorpse.serial;
+	SetObjProperty(newcorpse,"myserial", serial);
+	newcorpse.color := corpse.color;
+	newcorpse.facing := who.facing;
+	MoveObjectToLocation(newcorpse, who.x, who.y, who.z, who.realm, MOVEOBJECT_FORCELOCATION);
+	var x := newcorpse.x;
+	var y := newcorpse.y;
+	var z := newcorpse.z;
+	newcorpse.facing := who.facing;
+	newcorpse.kill();
+	var contain;
+	foreach cpse in ListItemsAtLocation(x, y, z, who.realm );
+		if(CInt(GetObjProperty(cpse,"myserial")) == serial)
+			contain := cpse;
+			break;
+		endif
+	endforeach
+	contain.name := corpse.name;
+	foreach item in EnumerateItemsInContainer(corpse, ENUMERATE_ROOT_ONLY)
+		MoveItemToContainer(item, contain);
+	endforeach
+	DestroyItem(corpse);
+	DestroyItem(mount);
 endfunction
 
 ///////////////////

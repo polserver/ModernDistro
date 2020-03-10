@@ -127,7 +127,7 @@ program use_spawnpoint(who, spawnpoint)
 	  spawn := "NONE";
     else
 	  SetObjProperty(thecritter, "summoned", 1);
-	  ApplyRawDamage(thecritter, AP_GetVital(thecritter, VITALID_LIFE)+3);
+	  thecritter.kill();
     endif
   else
     var thecritter := CreateNpcFromTemplate(GetCritter(i), spawnpoint.x, spawnpoint.y, spawnpoint.z, 0, spawnpoint.realm);
@@ -136,7 +136,7 @@ program use_spawnpoint(who, spawnpoint)
 	  spawn := "NONE";
     else
 	  SetObjProperty(thecritter, "summoned", 1);
-	  ApplyRawDamage(thecritter, AP_GetVital(thecritter, VITALID_LIFE)+3);
+	  thecritter.kill();
     endif
   endif
   SetObjProperty(spawnpoint, "Amount",   amount);

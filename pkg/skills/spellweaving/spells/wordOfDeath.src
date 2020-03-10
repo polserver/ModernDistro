@@ -41,7 +41,7 @@ if(cast_on.npctemplate)
 
         if(hapek < makshp) // sprawdza czy koles ma mniej niz 30% hape
         SendSysMessage(caster, cast_on.name + " przegral ze smiercia!",3,66);
-        ApplyRawDamage(cast_on, WezMaxHp(cast_on)+100);
+        cast_on.Kill();
         else
         SendSysMessage(caster, cast_on.name + " ma za duzo Hp. Minimum 30% maksymalnej wartosci.",3,40);
         endif

@@ -42,6 +42,6 @@ program grey(me, item)
 	SetScriptController( 0 );
 	RevokePrivilege( boy, "invul" );
 	SetObjProperty(boy,"guardkill",1);
-	ApplyRawDamage( boy, AP_GetVitalMaximumValue(boy, VITALID_LIFE) + 3 );
+	boy.kill();
 	SendSysMessage(me, "Criminal flag has expired");
 endprogram

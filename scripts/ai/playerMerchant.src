@@ -510,7 +510,7 @@ function Fireme()
   endforeach
   RevokePrivilege( me, "invul" );
   say("I regret nothing!");
-  ApplyRawDamage( me, AP_GetVital(me, VITALID_LIFE) +3);
+  me.kill();
 endfunction
 
 function addthingstobuy(who)

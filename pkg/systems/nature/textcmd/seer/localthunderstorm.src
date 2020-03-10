@@ -26,11 +26,11 @@ program localthunderstorm(who, radius)
 	endcase
 
 	set_light(who, light, radius);
-	
+
 	var endtime := ReadGameClock() + 300;
-	
+
 	while (ReadGameClock() < endtime)
-		
+
 		if (RandomInt(15) > 10)
 			DoBolt(who, radius);
 		endif
@@ -40,7 +40,7 @@ program localthunderstorm(who, radius)
 				PlaySoundEffect(who, SOUND_EFFECT_THUNDER);
 			endif
 		endforeach
-		
+
 		var randompause := Cint(RandomInt(50) + 10);
 		sleep(randompause);
 	endwhile
@@ -64,6 +64,6 @@ function DoBolt(who, radius)
 	setobjproperty(mob, "guardkill", 1);
 	PlayLightningBoltEffect( mob );
 	MoveObjectToLocation(mob,0,0,0, "britannia", MOVEOBJECT_FORCELOCATION);// newmap problem
-	ApplyRawDamage( mob, mob.hp+2 );
+	mob.Kill();
 
 endfunction

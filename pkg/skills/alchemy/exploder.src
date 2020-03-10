@@ -3,6 +3,7 @@ use os;
 use util;
 
 include ":attributes:attributes";
+include ":damage:damage";
 
 program exploder(parms)
 	var potion := parms[1];
@@ -18,14 +19,14 @@ program exploder(parms)
 	endif
 	ReleaseItem(potion); // allows bomb to be destroyed
 	var dmg := 3;
-  
+
 	// creating a location variable to store the item data so we can destroy the item.
 	var location := struct;
 	location.+x := thecenter.x;
 	location.+y := thecenter.y;
 	location.+z := thecenter.z;
 	location.+objtype := potion.objtype;
-  
+
 	// and it goes out in a bang!
 	PlayStationaryEffect( potion.x, potion.y, potion.z, 0x36b0, 7, 10, 1, potion.realm);
 	PlaySoundEffect(potion, 0x208);
@@ -48,7 +49,7 @@ program exploder(parms)
 		if ( critter.npctemplate )
 			dmg := dmg / 5;
 		endif
-		ApplyRawDamage(critter, dmg);
+		ApplyRawDamageEx(critter, dmg, DMG_PHYSICAL);
 	endforeach
 
 	// Then everything near it goes out in a bang

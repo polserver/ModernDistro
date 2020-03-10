@@ -36,6 +36,6 @@ program createlightsource(caster)
     PlaySoundEffect(caster, SFX_SPELL_SUMMON_ELEMENTAL);
     Detach();
     sleep(120);
-    ApplyRawDamage(thecritter, AP_GetVital(thecritter, VITALID_LIFE) + 3); //should kill it off
+    thecritter.kill();
 
 endprogram

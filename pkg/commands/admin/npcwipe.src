@@ -12,7 +12,7 @@ program npcwipe(who)
 	    if(!npc.ip)
 			if((npc.graphic == 0x190 || npc.graphic == 0x191))
 				SetObjProperty(npc, "guardkill", 1);
-				ApplyRawDamage(npc, AP_GetVital(npc, VITALID_LIFE) + 100);
+				npc.Kill();
 			endif
 	    endif
 		SleepMS(20);
@@ -35,7 +35,7 @@ program npcwipe(who)
 			if(npc.graphic == 0x190 || npc.graphic == 0x191)
 				RevokePrivilege(npc, "invul" );
 				SetObjProperty(npc, "guardkill", 1);
-				ApplyRawDamage(npc, AP_GetVital(npc, VITALID_LIFE) + 100);
+				npc.Kill();
 				SendSysMessage(who, "Wiped an NPC!", color :=33);
 			endif
 	    endif

@@ -8,30 +8,20 @@ include ":attributes:attributes";
 
 program cast_fireball( caster, effect, sound )
 
-if (!effect)
-        SendSysMessage(caster, "this command plays a moving effect, then kills the target. Usage: ekill <effect>");
-        return;
-endif
+	if (!effect)
+			SendSysMessage(caster, "this command plays a moving effect, then kills the target. Usage: ekill <effect>");
+			return;
+	endif
 
-var tsound := CInt(sound);
-var teffect := CInt(effect);
+	var tsound := CInt(sound);
+	var teffect := CInt(effect);
 
     var parms := {};
     var cast_on := Target( caster );
     if (!cast_on)
         return;
     endif
-
-    // FIXME make sure you targetted a mobile
-
-
-     PlaySoundEffect( cast_on, tsound  );
-    PlayMovingEffect( caster, cast_on,
-                      teffect,
-                      5,
-                       1 );
-
-
-
-   ApplyRawDamage( cast_on, AP_GetVitalMaximumValue(cast_on, VITALID_LIFE) + 10  );
+	PlaySoundEffect( cast_on, tsound  );
+    PlayMovingEffect( caster, cast_on, teffect, 5, 1 );
+	cast_on.kill();
 endprogram
