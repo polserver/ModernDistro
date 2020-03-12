@@ -674,7 +674,7 @@ endfunction
 
 ///////////////////////////////////////////////////
 //
-// KillMobile(mob, repsys:=0)
+// KillMobile(mob, repsys:=0, attacker := 0)
 //
 // Purpose:	Kills a mobile with
 //			repsys call optional.
@@ -695,7 +695,7 @@ endfunction
 //							  is sent in the repsys parameter.
 //
 // Return:
-// Noting.
+// Nothing.
 //
 ///////////////////////////////////////////////////////
 function KillMobile(mob, repsys:=0, attacker := 0)
