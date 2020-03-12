@@ -6,6 +6,7 @@ use cfgfile;
 include "include/eventID";
 include ":attributes:attributes";
 include "include/sysEvent";
+include ":damage:damage";
 include "include/dist";
 include "util/bank";
 
@@ -128,7 +129,7 @@ function DespawnAll()
     var hp := AP_GetVital(thing, VITALID_LIFE);
     if(hp)
       MoveObjectToLocation(thing, 5279, 1184, 0, "britannia", MOVEOBJECT_FORCELOCATION); // newmap problem
-      thing.kill();
+      KillMobile(thing);
     endif
   endforeach
   npclist := array;

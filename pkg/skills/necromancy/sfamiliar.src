@@ -2,20 +2,20 @@
 
 
 include ":magery:summon";
+include ":damage:damage";
 
-
-program chrcast_sfamiliar( params )
+program summon_familiar( params )
 	var caster := params[1];
 	var info := params[2]; // Struct containing additional info about the spell.
 	var spellID := params[3];
 	var targ := params[4]; // Target of spell if required.
 
-	var familiar :=systemfindobjectbyserial(Cint(getobjproperty(caster, "familiar")));
+	var familiar :=SystemFindObjectBySerial(Cint(getobjproperty(caster, "familiar")));
 
 	if(familiar)
-		MoveObjectToLocation(familiar,10,10,10, familiar.realm,MOVEOBJECT_FORCELOCATION);
-		familiar.kill();
-		eraseobjproperty(caster, "familiar");
+		MoveObjectToLocation(familiar, 10, 10, 10, familiar.realm, MOVEOBJECT_FORCELOCATION);
+		KillMobile(familiar);
+		EraseObjProperty(caster, "familiar");
 	endif
 
 	var wisp := Createnpcfromtemplate("shadowwisp", caster.x, caster.y, caster.z, 0, caster.realm);
@@ -24,11 +24,11 @@ program chrcast_sfamiliar( params )
 	//playsoundeffect(wisp, 534);
 	PlayObjectCenteredEffectEx( wisp, 0x3728, 1, 10, 9910, 0, 0 );
 	wisp.setmaster(caster);
-	setobjproperty(wisp, "master", caster.serial);
+	SetObjProperty(wisp, "master", caster.serial);
 	SetObjProperty(wisp, "summoned",1);
-	setobjproperty(wisp, "familiar", 1);
-	setobjproperty(wisp, "shadowwisp", 1);
-	setobjproperty(caster, "familiar", wisp.serial);
+	SetObjProperty(wisp, "familiar", 1);
+	SetObjProperty(wisp, "shadowwisp", 1);
+	SetObjProperty(caster, "familiar", wisp.serial);
 	wisp.script:= "familiar";
-	restartscript(wisp);
+	RestartScript(wisp);
 endprogram

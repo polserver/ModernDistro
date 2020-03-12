@@ -4,7 +4,8 @@ use util;
 use os;
 
 include "setlight";
-include "../../nature";
+include ":nature:nature";
+include ":nature:nature";
 
 const SOUND_EFFECT_THUNDER:=  0x002a;
 
@@ -64,6 +65,6 @@ function DoBolt(who, radius)
 	setobjproperty(mob, "guardkill", 1);
 	PlayLightningBoltEffect( mob );
 	MoveObjectToLocation(mob,0,0,0, "britannia", MOVEOBJECT_FORCELOCATION);// newmap problem
-	mob.Kill();
+	KillMobile(mob);
 
 endfunction

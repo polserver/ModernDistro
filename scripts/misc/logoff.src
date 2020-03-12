@@ -7,11 +7,12 @@ use os;
 include "include/math";
 include "include/eventID";
 include ":attributes:attributes";
+include ":damage:damage";
 include "include/clock";
 include ":timeutils:time";
 
 const EVID_UNEQUIP   := 0x123456;
-const EVID_DISCHARGE := 0x123457;
+//const EVID_DISCHARGE := 0x123457;
 
 program onlogoff(who)
     var time_logged_in, real_life_time, time_online, dmy, month, timestring;
@@ -31,7 +32,7 @@ program onlogoff(who)
       var ser := Cint(GetObjProperty(mount, "serial"));
       var critter := SystemFindObjectBySerial(ser);
       if(critter)
-        critter.kill();
+        KillMobile(critter);
       endif
       DestroyItem(mount);
     else

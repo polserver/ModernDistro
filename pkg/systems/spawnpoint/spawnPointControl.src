@@ -1,7 +1,9 @@
 use uo;
 use os;
 use util;
+
 include ":attributes:attributes";
+include ":damage:damage";
 
 program spawnpointcontrol(spawnpoint)
   var spawn := GetObjProperty(spawnpoint, "Spawn");
@@ -73,7 +75,7 @@ function KillChildren(spawnpoint)
         i := SystemFindObjectBySerial(x);
         SetObjProperty(i, "summoned", 1);
         RevokePrivilege(i, "invul" );
-        i.kill();
+        KillMobile(i);
       endif
     endforeach
   endif

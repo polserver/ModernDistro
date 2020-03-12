@@ -1,6 +1,7 @@
 use os;
 use uo;
 include "include/canAccess";
+include ":damage:damage";
 include ":attributes:attributes";
 
 const SEARCH_RANGE := 10;
@@ -44,7 +45,7 @@ program makevendor(who, deed)
       if(!DestroyItem(deed))
         RevokePrivilege(place, "invul");
         SetObjProperty(place, "guardkill", 1);
-        place.kill();
+        KillMobile(place);
       endif
     endif
   else

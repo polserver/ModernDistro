@@ -3,6 +3,7 @@ use uo;
 use os;
 
 include "include/startEqp";
+include ":damage:damage";
 include ":keys:key";
 
 var chestarray := {};
@@ -53,7 +54,7 @@ program spawntest(item)
       themob := SystemFindObjectBySerial(CInt(mobile));
       mobarray.erase(returnindex(mobarray, mobile));
       SetObjProperty(themob, "guardkill", 1);
-      themob.kill();
+      KillMobile(themob);
     endforeach
     if(amt > 0)
       i := 1;

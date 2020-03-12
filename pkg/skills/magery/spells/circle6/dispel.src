@@ -4,6 +4,7 @@ use cfgfile;
 use cliloc;
 
 include ":attributes:attributes";
+include ":damage:damage";
 include ":magery:spells";
 
 var npccfg := ReadConfigFile("npcdesc");
@@ -34,8 +35,8 @@ program dispel ( parms )
     if(master)
       var resist := GetAttribute(master, RESISTING_SPELLS);
       if((RandomInt(99) + 1) < resist)
-        MoveObjectToLocation(cast_on,0,0,0, "britannia", MOVEOBJECT_FORCELOCATION); // newmap problem
-        cast_on.Kill();
+		MoveObjectToLocation(cast_on,0,0,0, "britannia", MOVEOBJECT_FORCELOCATION);
+		KillMobile(cast_on, 1);
       endif
       send_attack(caster, cast_on, 41);
     endif

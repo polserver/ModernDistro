@@ -1,7 +1,9 @@
 use os;
 use uo;
 use boat;
+
 include ":attributes:attributes";
+include ":damage:damage";
 
 program textcmd_kill( who )
 
@@ -9,7 +11,7 @@ program textcmd_kill( who )
 	if (mob)
 		if (!mob.dead)
 			RevokePrivilege( mob, "invul" );
-			mob.Kill();
+			KillMobile(mob);
 		endif
 
 	endif

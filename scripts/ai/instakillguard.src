@@ -7,8 +7,10 @@ use cfgfile;
 include "include/eventID";
 include ":npcs:randName";
 include "include/client";
+include ":damage:damage";
 //include "include/spawnnet";
 include ":npcs:garment";
+
 var me := Self();
 // replykey(me);// From spawn net inc
 
@@ -129,7 +131,7 @@ function ClearGuard()
   PlaySoundEffect(me, 0x1ff);
   PlayStationaryEffect( me.x, me.y, me.z, FX_SMOKE, speed:=0xa, loop:=0xa, realm := me.realm );
   MoveObjectToLocation(me, 5283,1184,0);
-  me.Kill();
+  KillMobile(me);
 endfunction
 
 function Closedistance(targ)

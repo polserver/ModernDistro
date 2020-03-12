@@ -1,8 +1,10 @@
 use os;
 use uo;
 use cfgfile;
+
 include "include/client";
 include ":attributes:attributes";
+include ":damage:damage";
 
 program textcmd_kill( who )
 
@@ -16,7 +18,7 @@ program textcmd_kill( who )
 
 		if((mob.cmdlevel) && mob.cmdlevel > who.cmdlevel)
 			RevokePrivilege( who, "invul" );
-			who.kill();
+			KillMobile(who);
 			return;
 		endif
 
@@ -29,7 +31,7 @@ program textcmd_kill( who )
 
 		if (!mob.dead)
 			if (mob.npctemplate)
-				MoveObjectToLocation(mob, 5288, 1176, 0, "britannia_alt", 0x40000000);
+				MoveObjectToLocation(mob, 5288, 1176, 0, "britannia_alt", MOVEOBJECT_FORCELOCATION);
 				SetObjProperty(mob, "guardkill", 1);
 			else
 				var prop := { };
@@ -43,17 +45,17 @@ program textcmd_kill( who )
 			endif
 
 			RevokePrivilege( mob, "invul" );
-			mob.kill();
+			KillMobile(mob);
 
 		else
 			if (!mob.isA(POLCLASS_NPC))
 				SendSysMessage(who,"Already dead!");
 			else
 				Resurrect( mob );
-				MoveObjectToLocation(mob, 5288, 1176, 0, who.realm, 0x40000000);
+				MoveObjectToLocation(mob, 5288, 1176, 0, who.realm, MOVEOBJECT_FORCELOCATION);
 				SetObjProperty(mob, "guardkill", 1);
 				RevokePrivilege( mob, "invul" );
-				mob.kill();
+				KillMobile(mob);
 			endif
 		endif
 

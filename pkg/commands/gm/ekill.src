@@ -4,6 +4,7 @@ use os;
 use util;
 
 include "include/client";
+include ":damage:damage";
 include ":attributes:attributes";
 
 program cast_fireball( caster, effect, sound )
@@ -23,5 +24,5 @@ program cast_fireball( caster, effect, sound )
     endif
 	PlaySoundEffect( cast_on, tsound  );
     PlayMovingEffect( caster, cast_on, teffect, 5, 1 );
-	cast_on.kill();
+	KillMobile(cast_on);
 endprogram

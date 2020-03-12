@@ -5,6 +5,7 @@ use uo;
 use os;
 
 include ":attributes:attributes";
+include ":damage:damage";
 
 program PoisonScript(params)
 	var mobile := params[1];
@@ -43,7 +44,7 @@ program PoisonScript(params)
 
 	PrintTextAbove(mobile, "*A dark borer that was incubating in "+mobile.name+"'s stomach rips its way out!*", 3, 55);
 	var baby := CreateNPCFromTemplate(":brainai:darkborer", mobile.x, mobile.y, mobile.z, 0, mobile.realm);
-	mobile.Kill();
+	KillMobile(mobile);
 
 	SleepMS(100);
 	if ( mobile.acctname && mobile.dead )

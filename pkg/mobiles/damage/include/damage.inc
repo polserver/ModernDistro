@@ -22,6 +22,7 @@ include "include/NPCUtil";
 include ":attributes:attributes";
 include ":magery:spells";
 
+
 /*
  * http://uo.stratics.com/content/guides/resistance.shtml
  * Damage constants listed here to prevent typos in scripts.
@@ -641,7 +642,6 @@ endfunction
 
 ///////////////////////////////////////////////////
 //
-//
 // LifeDrain(source, damage, percent)
 //
 // Purpose: To use a percentage of the damage done
@@ -662,13 +662,49 @@ endfunction
 
 function LifeDrain(source, damage, percent)
 
-    percent := CDbl(percent);
-    percent := percent / 100;
-    var amt := CInt(CDbl(damage) * percent);
-    HealDamage(source, amt);
-    SendSysMessage(source, amt + " life force from your opponent was applied to heal you.", 2, 66);
+	percent := CDbl(percent);
+	percent := percent / 100;
+	var amt := CInt(CDbl(damage) * percent);
+	HealDamage(source, amt);
+	SendSysMessage(source, amt + " life force from your opponent was applied to heal you.", 2, 66);
 
-    return amt;
+	return amt;
 
 endfunction
 
+///////////////////////////////////////////////////
+//
+// KillMobile(mob, repsys:=0)
+//
+// Purpose:	Kills a mobile with
+//			repsys call optional.
+//
+// Parameters:	Type		  Description
+// mob		-	mobile ref	- The mobile to kill.
+// repsys	-	Boolean		- if set sends the current
+//							  process as the repsys parameter to
+//							  the kill() method.
+//							  0 does not call repsys with the
+//							  current process.
+//							  Default is 0.
+// attacker	-	mobile ref	- Optional parameter.There may be
+//							  instances where current process
+//							  may not refer to an attacker.
+//							  If this occurs you may pass a
+//							  mobile ref to insure the attacker
+//							  is sent in the repsys parameter.
+//
+// Return:
+// Noting.
+//
+///////////////////////////////////////////////////////
+function KillMobile(mob, repsys:=0, attacker := 0)
+	if (!repsys)
+		mob.kill();
+	elseif(attacker)
+		mob.kill(attacker);
+	else
+		var contrl:=GetProcess().controller; // Gets the mobile ref of the killer.
+		mob.kill(contrl);
+	endif
+Endfunction

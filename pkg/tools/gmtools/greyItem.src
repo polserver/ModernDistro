@@ -1,6 +1,8 @@
 use uo;
 use os;
+
 include ":attributes:attributes";
+include ":damage:damage";
 
 program grey(me, item)
     if (me.cmdlevel < 2)
@@ -42,6 +44,6 @@ program grey(me, item)
 	SetScriptController( 0 );
 	RevokePrivilege( boy, "invul" );
 	SetObjProperty(boy,"guardkill",1);
-	boy.kill();
+	KillMobile(boy);
 	SendSysMessage(me, "Criminal flag has expired");
 endprogram

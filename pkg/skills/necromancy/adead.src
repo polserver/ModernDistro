@@ -1,7 +1,7 @@
 // Deviates from official spell
 
 include ":magery:summon";
-
+include ":damage:damage";
 
 program animate_dead( params )
 	var caster := params[1];
@@ -36,7 +36,7 @@ program animate_dead( params )
 	Detach();
 	sleep(200);
 	MoveObjectToLocation(deadnpc,0,0,0, deadnpc.realm, MOVEOBJECT_FORCELOCATION);
-	deadnpc.kill();
+	KillMobile(deadnpc);
 
 
 endprogram

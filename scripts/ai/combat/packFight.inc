@@ -1,4 +1,8 @@
+
+
 include ":attributes:attributes";
+include ":damage:damage";
+
 function Fight( opponent )
   if ((opponent.cmdlevel > 0) || (opponent.serial == me.serial))
     SetWarMode(0);
@@ -94,7 +98,7 @@ function flee(opponent)
     if ( numflees > 10 )
       MoveObjectToLocation(me,5288,1176,0,"britannia_alt",MOVEOBJECT_FORCELOCATION);
       SetObjProperty(me,"guardkill",1);
-      me.Kill();
+      KillMobile(me);
     else
       numflees := numflees + 1;
     endif

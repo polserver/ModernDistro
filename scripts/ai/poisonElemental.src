@@ -13,7 +13,7 @@ include "include/objtype";
 include "include/dist";
 include ":npcs:NPCCast";
 include "include/anchors";
-include ":magery:spellRestrictions";
+include ":magery:spells";
 include "ai/main/killPCsLoop";
 include "ai/combat/fight";
 include "ai/setup/spellSetup";

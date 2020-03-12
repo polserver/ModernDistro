@@ -1,8 +1,11 @@
+
+
 include ":magery:summon";
+include ":damage:damage";
 include ":magery:spellRestrictions";
 
 
-program chrcast_sfamiliar( parms )
+program summon_fiend parms )
 	var circle := 1;
 	var delivery := "notarget";
 	var noto := "neutral";
@@ -16,7 +19,7 @@ program chrcast_sfamiliar( parms )
 
 	if(fey)
 		MoveObjectToLocation(fey,0,0,0, fey.realm,MOVEOBJECT_FORCELOCATION);
-		fey.kill();
+		KillMobile(fey);
 		eraseobjproperty(caster, "fey");
 	endif
 

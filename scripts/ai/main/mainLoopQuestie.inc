@@ -1,4 +1,8 @@
+
+
 include ":attributes:attributes";
+include ":damage:damage";
+
 function main_AI_loop()
 
     var ev;
@@ -24,13 +28,13 @@ function main_AI_loop()
 					if (!slave)
 						MoveObjectToLocation(me,5288,1176,0,"britannia_alt",MOVEOBJECT_FORCELOCATION);
 						SetObjProperty(me,"guardkill",1);
-						me.kill();
+						KillMobile(me);
 					endif
 				else
 					if (!master)
 						MoveObjectToLocation(me,5288, 1176, 0,"britannia_alt",MOVEOBJECT_FORCELOCATION);
 						SetObjProperty(me,"guardkill",1);
-						me.kill();
+						KillMobile(me);
 					endif
 				endif
 			else

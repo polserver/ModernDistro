@@ -19,6 +19,7 @@ include "include/dist";
 include "include/findCity";
 include "include/begging";
 include ":npcs:trainSkill";
+include ":damage:damage";
 
 const RESPAWN_MINUTES := 30;     // In how many minutes will the NPC respawn if killed.
 const MAX_SKILLS      := 48;     // There are currently 48 Skills.
@@ -230,7 +231,7 @@ function sellanimal(who)
 	  say(pet.name + " is worth $" + buyamount);
 	  SetObjProperty(pet, "guardkill", 1);
 	  MoveObjectToLocation(pet, 5555, 1111, 0, "britannia_alt", MOVEOBJECT_FORCELOCATION); // new map problem
-	  pet.Kill();
+	  KillMobile(pet);
 	  CreateItemInBackpack(who, 0x0eed, buyamount);
 	  return;
     endif

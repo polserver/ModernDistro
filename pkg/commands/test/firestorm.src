@@ -4,6 +4,7 @@ use util;
 
 include "include/client";
 include ":attributes:attributes";
+include ":damage:damage";
 
 program flamewind(who)
   var newtarg;
@@ -31,7 +32,7 @@ function RainDamage(targ)
       PlayObjectCenteredEffect(targ, 0x36cb, 7, 0x10);
       PlaySoundEffect(targ, 0x228);
       SetObjProperty(targ, "guardkill", 1);
-      targ.kill();
+      KillMobile(targ);
     endif
   endforeach
 endfunction

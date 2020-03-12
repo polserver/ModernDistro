@@ -1,4 +1,7 @@
+
+
 include "include/client";
+include ":damage:damage";
 include ":attributes:attributes";
 
 function main_AI_loop()
@@ -29,7 +32,7 @@ function main_AI_loop()
                                   PlayStationaryEffect(me.x, me.y, me.z, FX_EXPLODE_3, 7, 0x10, 0, me.realm);
                                   sleepms(5);
                                   MoveObjectToLocation(me,0,0,0,"britannia_alt",MOVEOBJECT_FORCELOCATION);
-                                  me.kill();
+                                  KillMobile(me);
                                 endif
         SYSEVENT_ENGAGED:       RunLikeHell(ev.source);
         EVID_HERDING:           Herd(ev);

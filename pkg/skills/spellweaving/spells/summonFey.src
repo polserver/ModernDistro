@@ -1,4 +1,5 @@
 include ":magery:summon";
+include ":damage:damage";
 include ":magery:spellRestrictions";
 
 
@@ -17,7 +18,7 @@ program chrcast_sfamiliar( parms )
 
 	if(fey)
 		MoveObjectToLocation(fey,0,0,0, fey.realm,MOVEOBJECT_FORCELOCATION);
-		fey.Kill();
+		KillMobile(fey);
 		EraseGlobalProperty(caster, "fey");
 	endif
 

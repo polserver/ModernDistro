@@ -19,6 +19,7 @@ include "ai/main/sleepMode";
 include ":npcs:skillLists";
 include ":npcs:garment";
 include "include/begging";
+include ":damage:damage";
 
 const HALT_THRESHOLD := 2;
 var following;
@@ -109,7 +110,7 @@ program CastleGuard()
     elseif((ReadGameClock() > killtime) && (killtime != 0))
       MoveObjectToLocation(me, 5555, 1111, 0, "britannia", MOVEOBJECT_FORCELOCATION); // newmap problem
       SetObjProperty(me, "guardkill", 1);
-      me.Kill();
+      KillMobile(me);
       break;
     endif
     if(escortee)
@@ -171,8 +172,8 @@ function idleloop()
       grabloot();
       next_wander := ReadGameClock() + 10;
     elseif((ReadGameClock() > killtime) && (killtime != 0))
-      MoveObjectToLocation(me, 5555, 1111, 0, "britannia", MOVEOBJECT_FORCELOCATION); // newmap problem
-      me.Kill();
+      MoveObjectToLocation(me, 5555, 1111, 0, "britannia", MOVEOBJECT_FORCELOCATION);
+      KillMobile(me);
       break;
     endif
   endwhile

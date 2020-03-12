@@ -9,6 +9,7 @@ include "include/sysEvent";
 include "include/mrcSpawn";
 include "include/utility";
 include "include/dist";
+include ":damage:damage";
 //include "util/bank";
 
 var npclist := {};
@@ -190,7 +191,7 @@ function ValidateSpawns()
 				else
 					MoveObjectToLocation(npc, 6066, 1, 0, "britannia", MOVEOBJECT_FORCELOCATION);
 					RevokePrivilege(npc, "invul");
-					npc.kill();
+					KillMobile(npc);
 				endif
 			endif
 			sleepms(2);
@@ -203,7 +204,7 @@ function ValidateSpawns()
 		else
 			MoveObjectToLocation(npc, 6066, 1, 0, "britannia", MOVEOBJECT_FORCELOCATION);
 			RevokePrivilege(npc, "invul");
-			npc.kill();
+			KillMobile(npc);
 		endif
 		sleepms(2);
 	endforeach
@@ -222,7 +223,7 @@ function DespawnAll()
 		if(hp)
 			MoveObjectToLocation(thing, 6066, 1, 0, "britannia", MOVEOBJECT_FORCELOCATION);
 			RevokePrivilege(thing, "invul");
-			thing.kill();
+			KillMobile(thing);
 		endif
 		sleepms(2);
 	endforeach

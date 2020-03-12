@@ -1,7 +1,9 @@
 use os;
 use uo;
 use boat;
+
 include ":attributes:attributes";
+include ":damage:damage";
 
 program textcmd_kill( who )
     var tgt := TargetCoordinates( who );
@@ -11,7 +13,7 @@ program textcmd_kill( who )
         if (!mob.dead)
             RevokePrivilege( mob, "invul" );
             SetObjProperty(mob, "guardkill", 1);
-            mob.kill();
+            KillMobile(mob);
         else
             SendSysMessage( who, "That Tickles!" );
         endif

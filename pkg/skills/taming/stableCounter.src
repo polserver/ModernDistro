@@ -1,6 +1,8 @@
 use uo;
 use os;
+
 include ":attributes:attributes";
+include ":damage:damage";
 
 program stablecounter(parms)
   var me := parms[1];
@@ -58,7 +60,7 @@ function upkeep(me)
         cost := AP_GetVital(critter, VITALID_LIFE) /2;
         days := GetObjProperty(critter,"days");
         if(days >4)
-          critter.Kill();
+          KillMobile(critter);
         else
           mystorage := mystorage - 1;
           days := days + 1;

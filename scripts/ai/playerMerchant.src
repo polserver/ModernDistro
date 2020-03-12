@@ -17,6 +17,7 @@ include "include/client";
 include ":npcs:NPCBackpacks";
 include ":gumps:yesNoSizable";
 include "include/canAccess";
+include ":damage:damage";
 
 const STARTHAIR := 0x2030;
 const ENDHAIR := 0x2060;
@@ -510,7 +511,7 @@ function Fireme()
   endforeach
   RevokePrivilege( me, "invul" );
   say("I regret nothing!");
-  me.kill();
+  KillMobile(me);
 endfunction
 
 function addthingstobuy(who)

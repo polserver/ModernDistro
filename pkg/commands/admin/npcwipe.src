@@ -1,6 +1,9 @@
 use uo;
 use os;
+
 include ":attributes:attributes";
+include ":damage:damage";
+
 /*
 program npcwipe(who)
   set_critical(0);
@@ -35,7 +38,7 @@ program npcwipe(who)
 			if(npc.graphic == 0x190 || npc.graphic == 0x191)
 				RevokePrivilege(npc, "invul" );
 				SetObjProperty(npc, "guardkill", 1);
-				npc.Kill();
+				KillMobile(npc);
 				SendSysMessage(who, "Wiped an NPC!", color :=33);
 			endif
 	    endif

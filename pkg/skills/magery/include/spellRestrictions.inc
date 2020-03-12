@@ -289,6 +289,7 @@ endfunction
 
 
 function CalcSpellDamage(circle, caster, cast_on)
+  cast_on := cast_on;
   var die_string := circle+"d8";
   var dmg := RandomDiceRoll(die_string);
   dmg := dmg + CInt(AP_GetSkill(caster, MAGERY)/10);

@@ -4,6 +4,7 @@ use os;
 use cfgfile;
 
 include "include/mrcSpawn";
+include":damage:damage";
 
 program destroy(item)
   foreach thing in GetObjProperty(item, "NpcList")
@@ -11,7 +12,7 @@ program destroy(item)
     if(npc)
       RevokePrivilege(npc, "invul");
       SetObjProperty(npc, "guardkill", 1);
-      npc.Kill();
+      KillMobile(npc);
     endif
   endforeach
   var type := GetObjProperty(item, "Type");

@@ -32,7 +32,7 @@ program MainHitScript(attacker, defender, weapon, armor, basedamage, rawdamage)
 	// Cheat checker
 	//
 	if ( attacker == defender )
-		attacker.kill();
+		KillMobile(attacker);
 	elseif ( attacker.hidden || defender.hidden )
 		return 0;
 	elseif ( !attacker.npctemplate )

@@ -2,11 +2,13 @@ use vitals;
 use uo;
 use os;
 
+include ":damage:damage";
+
 program purge(who)
   foreach critter in ListMobilesNearLocation(who.x, who.y, who.z, 20, who.realm)
     if((critter.npctemplate) && (critter.script != "tamed"))
       SetObjProperty(critter, "guardkill", 1);
-      critter.kill();
+      KillMobile(critter);
     endif
   endforeach
 endprogram

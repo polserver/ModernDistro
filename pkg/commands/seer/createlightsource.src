@@ -4,6 +4,7 @@ use os;
 
 include "include/client";
 include ":attributes:attributes";
+include ":damage:damage";
 
 program createlightsource(caster)
 
@@ -36,6 +37,6 @@ program createlightsource(caster)
     PlaySoundEffect(caster, SFX_SPELL_SUMMON_ELEMENTAL);
     Detach();
     sleep(120);
-    thecritter.kill();
+    KillMobile(thecritter);
 
 endprogram

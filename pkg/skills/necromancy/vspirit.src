@@ -4,7 +4,8 @@ use uo;
 use vitals;
 
 include ":attributes:attributes";
-include ":magery:spellRestrictions";
+include ":magery:spells";
+include ":damage:damage";
 
 program vengeful_spirit( params )
 	var caster := params[1];
@@ -35,6 +36,6 @@ program vengeful_spirit( params )
 
 	sleep((necroskill+sspeak+bonus) / 10);
 	MoveObjectToLocation(spirit,0,0,0, spirit.realm,MOVEOBJECT_FORCELOCATION);
-	spirit.kill();
+	KillMobile(spirit);
 
 endprogram

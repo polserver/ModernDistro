@@ -7,6 +7,7 @@ use cfgfile;
 include "include/client";
 include ":attributes:attributes";
 include ":npcs:NPCBackpacks";
+include ":damage:damage";
 include ":virtue:noto";
 //include "systems:spawnregion:spawnRegion";
 //include ":spawnregion:spawnRegion";
@@ -170,7 +171,7 @@ function dismountme(who, corpse)
 	var y := newcorpse.y;
 	var z := newcorpse.z;
 	newcorpse.facing := who.facing;
-	newcorpse.kill();
+	KillMobile(newcorpse);
 	var contain;
 	foreach cpse in ListItemsAtLocation(x, y, z, who.realm );
 		if(CInt(GetObjProperty(cpse,"myserial")) == serial)

@@ -1,6 +1,8 @@
 use uo;
 use os;
+
 include ":attributes:attributes";
+include ":damage:damage";
 
 var spawneditlayout :=
 {
@@ -127,7 +129,7 @@ program use_spawnpoint(who, spawnpoint)
 	  spawn := "NONE";
     else
 	  SetObjProperty(thecritter, "summoned", 1);
-	  thecritter.kill();
+	  KillMobile(thecritter);
     endif
   else
     var thecritter := CreateNpcFromTemplate(GetCritter(i), spawnpoint.x, spawnpoint.y, spawnpoint.z, 0, spawnpoint.realm);
@@ -136,7 +138,7 @@ program use_spawnpoint(who, spawnpoint)
 	  spawn := "NONE";
     else
 	  SetObjProperty(thecritter, "summoned", 1);
-	  thecritter.kill();
+	  KillMobile(thecritter);
     endif
   endif
   SetObjProperty(spawnpoint, "Amount",   amount);

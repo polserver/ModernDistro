@@ -3,6 +3,8 @@ use uo;
 use vitals;
 use storage;
 
+include ":damage:damage";
+
 program storagewipe()
 
 	set_critical(0);//without list line it runs fast, goes RunAway, makes megalag.
@@ -23,7 +25,7 @@ program storagewipe()
 	endnum := npctest.serial;
 	RevokePrivilege( npctest, "invul" );
 	SetObjProperty(npctest, "guardkill", 1);
-	npctest.kill();
+	KillMobile(npctest);
 
 	print("Wiping orphaned storage locations");
 	var tamedstorage, merchantstorage, inv_fs, inv_pb, inv_1c;
