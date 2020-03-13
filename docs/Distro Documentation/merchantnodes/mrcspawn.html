@@ -3,12 +3,21 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=windows-1252">
     <meta http-equiv="Content-Language" content="en-us">
-    <title>Merchant Inventory Control</title>
+    <title>Merchant Nodes</title>
     <link rel="stylesheet" type="text/css" href="docs.css">
   </head>
   <body>
     <div id="container">
+      <div style="text-align: center;"> </div>
       <div id="header">
+        <div style="text-align: center;"> </div>
+        <h1 style="text-align: center;">Merchant Nodes and mrcspawn<br>
+        </h1>
+        <div style="text-align: center;"> </div>
+        <p style="text-align: center;">For guard nodes in the Distro, by <a href="mailto:distro@polserver.com">Yukiko</a>.</p>
+        <hr>
+      </div>
+      <div id="content">
         <h1 style="text-align: center;">Merchant Inventory Control<br>
         </h1>
         <div style="text-align: center;"> </div>
@@ -16,73 +25,100 @@
           <a href="mailto:distro@polserver.com">Yukiko</a>.</p>
         <hr>
         <h2 style="text-align: center;">Controlling Merchant's Inventory</h2>
+        <div><big><big><span style="font-weight: bold;">About merchant's gold
+                and inventory:<br>
+              </span>Vendors have a limited amount of gold to work with. As a
+              vendor buys and sells goods, his pool of available gold will
+              increase or decrease. Players that sell a lot of items to NPCs
+              will find that the NPC cannot afford to purchase anymore items and
+              may not be able to afford to restock his normal stock of items.
+              Vendors spend their profit to restock their own regular inventory.
+              Once a vendor runs out of money, he must sell some of his current
+              stock before he can restock to normal levels. When a vendor sells
+              out of a particular item in a given stock cycle, he will attempt
+              to purchase an increased amount during his next restock. This
+              amount may increase up to 20 times his base value.. if a vendor
+              does not sell the elevated items, he will stop stocking them until
+              he reaches his base inventory and then continue from that base.<br>
+              <br>
+            </big></big><big><big><span style="font-weight: bold;">Controlling a
+                merchant's inventory.<br>
+              </span>The items a merchant, or vendor, may buy or sell is
+              controlled by the contents of the mrcspawn.cfg file located in the
+              merchantnodes package in the config directory. The file has two
+              (2) types of elements, the MerchantType and ProductGroup.<br>
+              <br>
+            </big></big><big><big><span style="font-weight: bold;">These are
+                examples of the two types of elements in mrcspawn.cfg.<br>
+              </span>The first element defines the merchant type and the second
+              element defines a group of items. Any item you wish a merchant to
+              buy or sell must be in a group. <code></code>The format of the
+              elements and the properties within each element are pretty
+              straight forward.<br>
+              <br>
+            </big></big><big><big>We will take a look at the MerchantType
+              element first. The element <i>key</i> is the merchant's NPC
+              template name as it appears in the npcdesc.cfg file. Each property
+              contains a <em>property name</em>, either "Sells" or "Buys",
+              followed by a string, the group of items from which the merchant
+              sells or buys. As you can see with the Mage element, there are a
+              number of magic related groups that can be sold or purchased by
+              the NPC.<br>
+            </big></big><br>
+          MerchantType&nbsp; Mage<br>
+          {<br>
+          &nbsp;&nbsp;&nbsp; Sells Reagents<br>
+          &nbsp;&nbsp;&nbsp; Sells Runes<br>
+          &nbsp;&nbsp;&nbsp; Sells Spellbook<br>
+          &nbsp;&nbsp;&nbsp; Sells Circle3spells<br>
+          &nbsp;&nbsp;&nbsp; Sells Circle2spells<br>
+          &nbsp;&nbsp;&nbsp; Sells Circle1spells<br>
+          &nbsp;&nbsp;&nbsp; Buys&nbsp; reagents<br>
+          &nbsp;&nbsp;&nbsp; Buys&nbsp; allscrolls<br>
+          &nbsp;&nbsp;&nbsp; Buys&nbsp; runes<br>
+          &nbsp;&nbsp;&nbsp; Buys&nbsp; wands<br>
+          }<br>
+          <br>
+          <big><big>Now let's take a look at a ProductGroup <em>element</em>.
+              As you can see in the example below you have the <em>element type</em>,
+              ProductGroup. The <em>element key</em> is the name of the group,
+              in this case, Reagents. Contained within the braces is a list of
+              items in that group.<br>
+              <br>
+              The format for defining a ProductGroup property is:<br>
+            </big></big><big><big>"Item", ObjType number, or item name as it
+              appears in the itemdesc.cfg and the maximum amount of that item
+              the NPC can have in stock.</big></big><br>
+          <br>
+          ProductGroup&nbsp;&nbsp;&nbsp; Reagents<br>
+          {<br>
+          &nbsp;&nbsp;&nbsp; Item&nbsp;&nbsp;&nbsp; blackpearl 100 //black pearl<br>
+          &nbsp;&nbsp;&nbsp; Item&nbsp;&nbsp;&nbsp; 0xF7B&nbsp; 100 //blood moss<br>
+          &nbsp;&nbsp;&nbsp; Item&nbsp;&nbsp;&nbsp; 0xF84&nbsp; 100 //garlic<br>
+          &nbsp;&nbsp;&nbsp; Item&nbsp;&nbsp;&nbsp; 0xF85&nbsp; 100 //ginseng<br>
+          &nbsp;&nbsp;&nbsp; Item&nbsp;&nbsp;&nbsp; 0xF86&nbsp; 100 //mandrake
+          root<br>
+          &nbsp;&nbsp;&nbsp; Item&nbsp;&nbsp;&nbsp; 0xF88&nbsp; 100 //nightshade<br>
+          &nbsp;&nbsp;&nbsp; Item&nbsp;&nbsp;&nbsp; 0xF8C&nbsp; 100 //sulphurous
+          ash<br>
+          &nbsp;&nbsp;&nbsp; Item&nbsp;&nbsp;&nbsp; 0xF8D&nbsp; 100 //spider's
+          silk<br>
+          }<br>
+          <br>
+          <big><big>You can create additional product groups and add those to
+              existing merchant's lists. If you create new merchants you can add
+              them to mrcspawn.cfg by creating their own MerchantType <em>element</em>
+              as well.<br>
+              <br>
+            </big></big><br>
+          <big><big>That is about it for understanding how to edit the
+              mrcspawn.cfg file.</big></big></div>
+        <big>
+        </big>
       </div>
-      <div id="content"><big><big><span style="font-weight: bold;">These are
-              examples of the two types of elements in mrcspawn.cfg.<br>
-            </span>The first element defines the merchant type and the second
-            element defines a group of items. Any item you wish a merchant to
-            buy or sell must be in a group. <code></code>The format of the
-            elements and the properties within each element are pretty straight
-            forward.<br>
-            <br>
-            We will take a look at the MerchantType element first. The element <i>key</i>
-            is the merchant's NPC template name as it appears in the npcdesc.cfg
-            file. Each property contains a <em>property name</em>, either
-            "Sells" or "Buys", followed by s string, the group of items from
-            which the merchant sells or buys. As you can see with the Mage
-            element, there are a number of magic related groups that can be sold
-            or purchased by the NPC.<br>
-          </big></big><br>
-        MerchantType&nbsp; Mage<br>
-        {<br>
-        &nbsp;&nbsp;&nbsp; Sells Reagents<br>
-        &nbsp;&nbsp;&nbsp; Sells Runes<br>
-        &nbsp;&nbsp;&nbsp; Sells Spellbook<br>
-        &nbsp;&nbsp;&nbsp; Sells Circle3spells<br>
-        &nbsp;&nbsp;&nbsp; Sells Circle2spells<br>
-        &nbsp;&nbsp;&nbsp; Sells Circle1spells<br>
-        &nbsp;&nbsp;&nbsp; Buys&nbsp; reagents<br>
-        &nbsp;&nbsp;&nbsp; Buys&nbsp; allscrolls<br>
-        &nbsp;&nbsp;&nbsp; Buys&nbsp; runes<br>
-        &nbsp;&nbsp;&nbsp; Buys&nbsp; wands<br>
-        }<br>
-        <br>
-        <big><big>Now let's take a look at the ProductGroup <em>element</em>.
-            As you can see in the example below you have the <em>element type</em>,
-            ProductGroup, followed by a list of items in that group. The format
-            for defining a ProductGroup property is:<br>
-          </big></big><big><big>"Item", ObjType number and the maximum amount of
-            that item the NPC can have in stock. The comment after the item
-            explains what item the ObjType is. The comments are not necessary
-            but are highly recommended.</big></big><br>
-        <br>
-        ProductGroup&nbsp;&nbsp;&nbsp; Reagents<br>
-        {<br>
-        &nbsp;&nbsp;&nbsp; Item&nbsp;&nbsp;&nbsp; 0xF7A&nbsp; 100 //black pearl<br>
-        &nbsp;&nbsp;&nbsp; Item&nbsp;&nbsp;&nbsp; 0xF7B&nbsp; 100 //blood moss<br>
-        &nbsp;&nbsp;&nbsp; Item&nbsp;&nbsp;&nbsp; 0xF84&nbsp; 100 //garlic<br>
-        &nbsp;&nbsp;&nbsp; Item&nbsp;&nbsp;&nbsp; 0xF85&nbsp; 100 //ginseng<br>
-        &nbsp;&nbsp;&nbsp; Item&nbsp;&nbsp;&nbsp; 0xF86&nbsp; 100 //mandrake
-        root<br>
-        &nbsp;&nbsp;&nbsp; Item&nbsp;&nbsp;&nbsp; 0xF88&nbsp; 100 //nightshade<br>
-        &nbsp;&nbsp;&nbsp; Item&nbsp;&nbsp;&nbsp; 0xF8C&nbsp; 100 //sulphurous
-        ash<br>
-        &nbsp;&nbsp;&nbsp; Item&nbsp;&nbsp;&nbsp; 0xF8D&nbsp; 100 //spider's
-        silk<br>
-        }<br>
-        <br>
-        <big><big>You can create additional product groups and add those to
-            existing merchant's lists. If you create new merchants you can add
-            them to mrcspawn.cfg by creating their own MerchantType <em>element</em>
-            as well.<br>
-            <br>
-          </big></big><br>
-        <big><big>That is about it for understanding how to edit the
-            mrcspawn.cfg file.<br>
-            <br>
-            <br>
-            <br>
-          </big></big><br>
+      <div id="footer">
+        <p>Last Update: 2020-03-13 by Yukiko<br>
+        </p>
       </div>
     </div>
   </body>

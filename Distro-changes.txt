@@ -1,0 +1,5 @@
+Distro Change Log.
+I have decided to start this change log, again. Hopefully, this time I will be more consistent.
+
+Yukiko:	Updated and fixed parts of the Distro Documentation.
+Yukiko:	Added setLight.inc to the nature package.
