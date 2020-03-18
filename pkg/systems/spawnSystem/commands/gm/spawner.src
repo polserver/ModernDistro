@@ -1,26 +1,28 @@
 /*
+        Maintened by *Edwards
 
-	spawnSystem originally created by Austin for the 0.97 Distro
+        2010-02-24
 
-	Bugs fixed by Edwards
-
-	Adapted for the Basic Distro by Yukiko 10-Sep-2015
-
-
+        Last Modifications 2010-02-24
+             * Fixed: will now display clearly all groups, regions, realms, ...
+             * Fixed: display of options
 */
 use uo;
 use os;
+use cliloc;
 
 include ":gumps:gumps";
 include ":gumps:gumps_ex";
-include ":gumps:gumpPrompt";
-include ":gumps:yesNo";
-include ":gumps:requestGump";
+include ":gumps:gumpprompt";
+include ":gumps:yesno";
+include ":gumps:requestgump";
 include ":spawnsystem:commonTasks";
 include ":spawnsystem:engines";
 include ":spawnsystem:realms";
 include ":spawnsystem:regions";
 include ":spawnsystem:groups";
+include "include/security";
+include "include/string";
 
 // Used for input ranges
 CONST REALM_START	:= 0x1000;
@@ -56,6 +58,10 @@ CONST GENER_TEXT_START	:= 0xF000;
 
 program SpawnerCMD( who )
 
+        if( !AuthorizationCode( who ))
+                SendSysMessageCL( who, 1042023); // Cancelled.
+                return 0;
+        endif
 
 	var input := SHOW_REALMS_BTN;
 	var cur_menu := SHOW_REALMS_BTN;
@@ -69,8 +75,8 @@ program SpawnerCMD( who )
 				input := BuildRegionListGump( who, cur_realm );
 			elseif( cur_menu == SHOW_THIS_REGION )
 				input := BuildRegionGump( who, cur_realm, cur_region );
-			elseif( cur_menu == ADD_REALM_BTN )
-				input := BuildAddRealmGump( who );
+			//elseif( cur_menu == ADD_REALM_BTN )
+				//input := BuildAddRealmGump( who );
 			elseif( cur_menu == ADD_REGION_BTN )
 				input := BuildRegionGump( who, cur_realm );
 			elseif( cur_menu == SHOW_GROUPS_BTN )
@@ -297,19 +303,20 @@ function BuildRegionGump( who, realm_name, region_name:="" )
 
 	var coords := SS_GetRegionCoordinates( region_name );
 
+
 	GFTextLine( gump, 155, 80, 2100, "Coordinates" );
-	GFTextLine( gump, 245, 80, 2100, "X1" );
-	GFResizePic( gump, 230, 100, GFGetCfgConst( "Backgrounds", "GOLDTRIM" ), 45, 28 );
-	GFTextEntry( gump, 236, 104, 35, 20, 2100, CInt( coords.x1 ), X1_TEXT_POS );
-	GFTextLine( gump, 285, 80, 2100, "Y1" );
-	GFResizePic( gump, 270, 100, GFGetCfgConst( "Backgrounds", "GOLDTRIM" ), 45, 28 );
-	GFTextEntry( gump, 276, 104, 35, 20, 2100, CInt( coords.y1 ), Y1_TEXT_POS );
-	GFTextLine( gump, 335, 80, 2100, "X2" );
-	GFResizePic( gump, 320, 100, GFGetCfgConst( "Backgrounds", "GOLDTRIM" ), 45, 28 );
-	GFTextEntry( gump, 326, 104, 35, 20, 2100, CInt( coords.x2 ), X2_TEXT_POS );
-	GFTextLine( gump, 375, 80, 2100, "Y2" );
-	GFResizePic( gump, 360, 100, GFGetCfgConst( "Backgrounds", "GOLDTRIM" ), 45, 28 );
-	GFTextEntry( gump, 366, 104, 35, 20, 2100, CInt( coords.y2 ), Y2_TEXT_POS );
+	GFTextLine( gump, 250, 80, 2100, "X1" );
+	GFResizePic( gump, 230, 100, GFGetCfgConst( "Backgrounds", "GOLDTRIM" ), 55, 28 );
+	GFTextEntry( gump, 236, 104, 45, 20, 2100, CInt( coords.x1 ), X1_TEXT_POS );
+	GFTextLine( gump, 300, 80, 2100, "Y1" );
+	GFResizePic( gump, 280, 100, GFGetCfgConst( "Backgrounds", "GOLDTRIM" ), 55, 28 );
+	GFTextEntry( gump, 286, 104, 45, 20, 2100, CInt( coords.y1 ), Y1_TEXT_POS );
+	GFTextLine( gump, 360, 80, 2100, "X2" );
+	GFResizePic( gump, 340, 100, GFGetCfgConst( "Backgrounds", "GOLDTRIM" ), 55, 28 );
+	GFTextEntry( gump, 346, 104, 45, 20, 2100, CInt( coords.x2 ), X2_TEXT_POS );
+	GFTextLine( gump, 405, 80, 2100, "Y2" );
+	GFResizePic( gump, 390, 100, GFGetCfgConst( "Backgrounds", "GOLDTRIM" ), 55, 28 );
+	GFTextEntry( gump, 396, 104, 45, 20, 2100, CInt( coords.y2 ), Y2_TEXT_POS );
 
 	GFTextLine( gump, 500, 80, 2100, "Spawn Wait (Sec.)" );
 	GFResizePic( gump, 525, 100, GFGetCfgConst( "Backgrounds", "GOLDTRIM" ), 65, 28 );
@@ -385,7 +392,8 @@ function BuildRegionGump( who, realm_name, region_name:="" )
 				if( key >= GENER_TEXT_START )
 					var position := key-GENER_TEXT_START;
 					var group_name := group_names[position];
-					var max_amt := GFExtractData( input, key );
+					var max_amt := ValidateStringInteger(GFExtractData( input, key ));
+					Print(max_amt);
 					var enabled := GFExtractData( input, ENABLED_START+position );
 					SS_AddGroupToRegion( region_name, group_name, max_amt, enabled );
 				endif
@@ -393,10 +401,11 @@ function BuildRegionGump( who, realm_name, region_name:="" )
 			endforeach
 		endif
 
-		var x1 := GFExtractData( input, X1_TEXT_POS );
-		var y1 := GFExtractData( input, Y1_TEXT_POS );
-		var x2 := GFExtractData( input, X2_TEXT_POS );
-		var y2 := GFExtractData( input, Y2_TEXT_POS );
+		var x1 := ValidateStringInteger(GFExtractData( input, X1_TEXT_POS ));
+		var y1 := ValidateStringInteger(GFExtractData( input, Y1_TEXT_POS ));
+		var x2 := ValidateStringInteger(GFExtractData( input, X2_TEXT_POS ));
+		var y2 := ValidateStringInteger(GFExtractData( input, Y2_TEXT_POS ));
+
 		var wait := GFExtractData( input, WAIT_TEXT_POS );
 
 		SS_SetRegionCoordinates( region_name, x1, y1, x2, y2 );
@@ -572,3 +581,4 @@ function VisitRegionCenter( who, region_name )
 
 	return 1;
 endfunction
+

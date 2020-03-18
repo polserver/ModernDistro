@@ -548,3 +548,58 @@ Function SortArrayABC(arr, dir := 1, subindex := 0)
 
   return newarray;
 EndFunction
+
+//////////////////////////////////////////////////////
+//
+// StripLeadingZero(str)
+// Purpose:
+// Strips leading zeros from a string except for "0x".
+// This is needed because POL assumes a leading zero
+// on a string representation of an integer is octal
+// notation. If you send such a string to the CInt()
+// function, you will get back an integer but it
+// will be the base 10 conversion of an octal value.
+//
+// Parameters:
+// str - The string from which to strip leading zeros.
+//
+// Returns:
+// A string representation of a hexadecimal integer
+// if the first 2 characters were "0x" or a string
+// representation of a decimal number with leading
+// zeros, if any, removed or an error if the string
+// contains any characters that are not valid integer
+// digits.
+//
+// Note: Validation is performed for valid hexadecimal
+// and decimal string representations of integers.
+//
+//////////////////////////////////////////////////////
+function ValidateStringInteger(str)
+
+	var hex_numbers := {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+						"A", "a", "B", "b", "C", "c", "D", "d", "E", "e", "F", "f"};
+
+	var dec_numbers := {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+	if(str[1,2] == "0x")
+		for x := 1 to str.length()
+			if(str[x,x] in hex_numbers)
+				return str;
+			else
+				return error {"errortext" := "Not a valid string representation of an integer."};
+			endif
+		endfor
+		return str;
+	else
+		for x := 1 to str.length()
+			if(str[x,x] in dec_numbers)
+				str := Trim(str, TRIM_LEFT, "0");
+				return str;
+			else
+				return error {"errortext" := "Not a valid string representation of an integer."};
+			endif
+		endfor
+	endif
+
+endfunction
+

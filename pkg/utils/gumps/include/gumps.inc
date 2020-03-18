@@ -711,7 +711,7 @@ function GFRadioButton(byref gump, x, y, unp_id, pres_id, status:=0, btn_value:=
 endfunction
 
 /*
- * GFTextEntry(byref gump, x, y, width, height, txt_color, ini_text, lmt)
+ * GFTextEntry(byref gump, x, y, width, height, txt_color, ini_text, txt_id:=0, lmt)
  *
  * Purpose
  * Adds a text-entry to the gump.

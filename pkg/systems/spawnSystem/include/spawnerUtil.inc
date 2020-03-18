@@ -1,9 +1,9 @@
 /*
 
 	spawnSystem originally created by Austin for the 0.97 Distro
-	
+
 	Bugs fixed by Edwards
-	
+
 	Adapted for the Basic Distro by Yukiko 10-Sep-2015
 
 
@@ -29,28 +29,28 @@ function SS_GetSpawnCoords( coords, realm_name )
 
 	var spawn_coords := SS_SelectCoordsInArea( coords.x1, coords.y1, coords.x2, coords.y2 );
 	var z_pos := CInt( GetWorldHeight( spawn_coords.x, spawn_coords.y, realm_name ));
- 
-        spawn_coords.+z := z_pos;
-        spawn_coords.+realm := realm_name;
- 
-        return spawn_coords;
+
+	spawn_coords.+z := z_pos;
+	spawn_coords.+realm := realm_name;
+
+	return spawn_coords;
 endfunction
 
 function SS_ItemValidLocation( spawn_coords )
 
-        var list_near := ListItemsAtLocation( spawn_coords.x, spawn_coords.y, spawn_coords.z, spawn_coords.realm );
-        if( list_near.Size() )
-          return 0;
-        endif
- 
-        var list_statics := ListMultisInBox( spawn_coords.x-4, spawn_coords.y-4, spawn_coords.z, spawn_coords.x+4, spawn_coords.y+4, spawn_coords.z, spawn_coords.realm );
-        if( list_statics.Size() )
-          return 0;
-        endif
-        
-        if(SS_IsInHouse( spawn_coords ))
-          return 0;
-        endif
+	var list_near := ListItemsAtLocation( spawn_coords.x, spawn_coords.y, spawn_coords.z, spawn_coords.realm );
+	if( list_near.Size() )
+		return 0;
+	endif
+
+	var list_statics := ListMultisInBox( spawn_coords.x-4, spawn_coords.y-4, spawn_coords.z, spawn_coords.x+4, spawn_coords.y+4, spawn_coords.z, spawn_coords.realm );
+	if( list_statics.Size() )
+		return 0;
+	endif
+
+	if(!SS_IsInHouse( spawn_coords ))
+		return 0;
+	endif
 
 	return 1;
 endfunction
@@ -61,10 +61,14 @@ function SS_NPCValidLocation( spawn_coords )
 		return 0;
 	endif
 
-  var list_statics := ListMultisInBox( spawn_coords.x-4, spawn_coords.y-4, spawn_coords.z, spawn_coords.x+4, spawn_coords.y+4, spawn_coords.z, spawn_coords.realm );
-  if( list_statics.Size() )
-      return 0;
-  endif
+	var list_statics := ListMultisInBox( spawn_coords.x-4, spawn_coords.y-4, spawn_coords.z, spawn_coords.x+4, spawn_coords.y+4, spawn_coords.z, spawn_coords.realm );
+	if( list_statics.Size() )
+		return 0;
+	endif
+
+	if(!SS_IsInHouse( spawn_coords ))
+		return 0;
+	endif
 
 	return 1;
 endfunction
@@ -103,33 +107,33 @@ endfunction
 
 function SS_FindSpawnZone( creature )
 
-        var areas := SS_GetRegionNames();
+	var areas := SS_GetRegionNames();
 
-        var found := array{};
-        foreach region_name in areas
+	var found := array{};
+	foreach region_name in areas
 
-                var coords := SS_GetRegionCoordinates( region_name );
+		var coords := SS_GetRegionCoordinates( region_name );
 
-                var MinX := coords.x1,
-                    MaxX := coords.x2,
-                    MinY := coords.y1,
-                    MaxY := coords.y2,
-                    Realm := SS_GetRegionRealm( region_name );
+		var MinX := coords.x1,
+		MaxX := coords.x2,
+		MinY := coords.y1,
+		MaxY := coords.y2,
+		Realm := SS_GetRegionRealm( region_name );
 
-                if( SS_IsInBox( creature, MinX, MaxX, MinY, MaxY, Realm ))
-                        found.Append( region_name );
-                endif
+		if( SS_IsInBox( creature, MinX, MaxX, MinY, MaxY, Realm ))
+			found.Append( region_name );
+		endif
 
-                SleepMS(5);
-        endforeach
+		SleepMS(5);
+	endforeach
 
 	return found;
 endfunction
 
 function SS_IsInBox( mobile, x1, x2, y1, y2, realm )
 
-         if( mobile.realm == realm )
-	        if(( mobile.x > x1 && mobile.x < x2 ) && ( mobile.y > y1 && mobile.y < y2 ))
+	if( mobile.realm == realm )
+		if(( mobile.x > x1 && mobile.x < x2 ) && ( mobile.y > y1 && mobile.y < y2 ))
 			return 1;
 		endif
 	endif
@@ -139,7 +143,7 @@ endfunction
 
 function SS_IsInHouse( spawn_coords )
 	var isInHouse;
-  
+
   // Are we trying to spawn in a static house?
 	isInHouse := FindHouseForLocation (spawn_coords.x, spawn_coords.y, spawn_coords.z, spawn_coords.realm);
 

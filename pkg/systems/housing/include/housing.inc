@@ -38,6 +38,8 @@ function FindHouseForLocation (x, y, z, map)
 			0x0bd0:
 				if (IsLocationWithinHouseSign (item, x, y, z))
 					return item;
+				else
+					return 0;
 				endif
 		endcase
 	endforeach
@@ -52,7 +54,7 @@ endfunction
 function IsInsideTheHouse(char, sgn)
 
   return IsLocationWithinHouseSign (sgn, char.x, char.y, char.z);
-  
+
 endfunction
 
 ///////////////////
@@ -179,4 +181,4 @@ function CanBuildHere(who)
   endforeach
   return 0;
 
-endfunction 
+endfunction
