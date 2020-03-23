@@ -19,7 +19,7 @@
  * GFSendGump(mobile, byref gump)
  * GFSetRadioGroup(byref gump, group_id)
  * GFTextCrop(byref gump, x, y, width, height, hue:=0, text:="")
- * GFTextEntry(byref gump, x, y, width, height, txt_color, ini_text:="", lmt := 0)
+ * GFTextEntry(byref gump, x, y, width, height, txt_color, ini_text:="", txt_id:=0, lmt := 0)
  * GFTextLine(byref gump, x, y, hue:=0, text:="")
  * GFTilePic(byref gump, x, y, tile_id, hue := 0)
  * GFDrawWrappedText(byref gump, x, y, text_lines, txt_color)
@@ -711,7 +711,7 @@ function GFRadioButton(byref gump, x, y, unp_id, pres_id, status:=0, btn_value:=
 endfunction
 
 /*
- * GFTextEntry(byref gump, x, y, width, height, txt_color, ini_text, txt_id:=0, lmt)
+ * GFTextEntry(byref gump, x, y, width, height, txt_color, ini_text, txt_id:=0, lmt := 0)
  *
  * Purpose
  * Adds a text-entry to the gump.
