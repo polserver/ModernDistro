@@ -360,8 +360,8 @@ function BuildRegionGump( who, realm_name, region_name:="" )
 			if( group_names[lines] )
 				var group := group_list[name];
 				GFTextLine( gump, 225, y_pos, 2100, name );
-
-				GFTextEntry( gump, 400, y_pos, 40, 20, 2100, group.max_amt, GENER_TEXT_START+lines );
+				GFResizePic( gump, 395, y_pos - 4, GFGetCfgConst( "Backgrounds", "GOLDTRIM" ), 35, 28 );
+				GFTextEntry( gump, 400, y_pos, 40, 20, 2100, group.max_amt, GENER_TEXT_START+lines, 3 );
 
                                 var cur_spawns := CInt( SS_GetSpawnsInRegionGroup( region_name, name ).Size() );
 				GFTextLine( gump, 490, y_pos, 2100, cur_spawns );

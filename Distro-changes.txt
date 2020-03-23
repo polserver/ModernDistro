@@ -42,3 +42,10 @@ Yukiko:	Added a parameter, lmt to limit the length of text that can be entered i
 		the element, to the comment header definition to the GFTextEntry function
 		in :gumps:gumps.inc. This parameter was added to the function a while back
 		by ThisIsMe but was not added to the function definition in the comment header.
+
+2020-03-19
+Yukiko: Added to the spawn system GM command :spawnSystem:commands/gm/spawner.src,
+		a gold trimmed backgound to the Max Amount text entry field on the Rgion
+		Information-Group Settings gump. The Max Amount is now limited to three (3) digits.
+Yukiko: Fixed some case mismatch include file refs in :spawnSystem:commands/gm/spawner.src
+
