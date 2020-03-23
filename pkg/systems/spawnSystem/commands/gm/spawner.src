@@ -14,7 +14,7 @@ use cliloc;
 include ":gumps:gumps";
 include ":gumps:gumps_ex";
 include ":gumps:gumpPrompt";
-include ":gumps:yesno";
+include ":gumps:yesNo";
 include ":gumps:requestGump";
 include ":spawnsystem:commonTasks";
 include ":spawnsystem:engines";
