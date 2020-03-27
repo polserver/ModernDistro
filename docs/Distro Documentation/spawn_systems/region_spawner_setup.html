@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    <meta http-equiv="Content-Language" content="en-us">
+    <title>Region Spawner Setup</title>
+    <link rel="stylesheet" type="text/css" href="docs.css">
+  </head>
+  <body>
+    <div id="container">
+      <div style="text-align: center;"> </div>
+      <div id="header">
+        <div style="text-align: center;"> </div>
+        <h1 style="text-align: center;">Spawn System Documentation<br>
+        </h1>
+        <div style="text-align: center;"> </div>
+        <p style="text-align: center;">For the Spawn System package in the
+          Distro, by <a href="mailto:distro@polserver.com">Yukiko</a>.</p>
+        <hr>
+        <h2 style="text-align: center;">Region Spawner Setup</h2>
+      </div>
+      <div id="content"><big id="fred"><big style="font-weight: bold;">Setting-up
+            the Region Spawner:</big><br>
+          I will sometimes refer to the spawn system as the "region spawner"
+          because that is what it does, spawns regions. Some people also call
+          these types of spawn systems as <i>area spawners</i>. I will also use
+          "facet" or "facets", at times, to refer to POL's internal name for the
+          various maps, <em>realms</em>.<br>
+          <br>
+          The region spawner will populate user defined regions in a realm with
+          NPCs, reagents or items, from user defined groups. It is intended for
+          large areas that need to be spawned with random NPCs or items. from
+          predefined groups. For example, if you need to spawn a forest with
+          "forest animals" you can define a group containing animals you might
+          find in a forest. Then define the corners of the forest region and
+          have your forest animals assigned to that region. <br>
+          <br>
+          You should familiarize yourself with the region spawner by reading the
+          following guide or keep the guide open in your browser to refer to.<br>
+          <br>
+          Use the command <b>.spawner</b> to open the region spawner (spawn
+          system) gump.<br>
+        </big>
+        <hr style="width: 100%; height: 2px;"><big><big style="font-weight: bold;">The
+            region spawner gump:<br>
+          </big></big><big>The gump has a menu on the left and the working area
+          on the right. When you first open it the working area shows the list
+          of facets (realms) that have been added to the spawn system. In the
+          example above you can see that Felucca (britannia) and Trammel
+          (britannia_alt) have been added to the list of</big><big> facets&nbsp;
+        </big><big>to be s</big><big>pawned.</big><br>
+        <br>
+        <img src="spawnerGumpRealmList.jpg" alt=""><big><br>
+          <br>
+          <b>The Add Realm gump:</b><br>
+          To add a facet, left-click on the Add Realm button and you will see a
+          list of available facets that can be added. As you click each button
+          of the additional facets you want to add, the facet you chose will be
+          removed from the list of available facets. To return to the realm
+          (facet) list, click on the Realm List in the menu on the left.<br>
+          <br>
+          <img src="spawnerGumpAddRealm.jpg" alt=""><br>
+          <br>
+          <b>The Regions List gump:</b><br>
+          To view the regions defined for a facet, or realm, click on the button
+          next to the facet. The Felucca facet (britannia realm) has predefined
+          regions as you can see in the following example.<br>
+          <br>
+          <img src="spawnerGumpRegionList.jpg" alt=""><br>
+          <br>
+          <b>The Region Information gump:</b><br>
+          To view the information about a particular region, click the button
+          next to that region. From here you can go to the region center, delete
+          the region or view the group settings for that region. You can rename
+          the region. You can change the spawn wait time. That is the time
+          between each spawn cycle. The region spawner will, at the appropriate
+          time, check a region and if the NPC count for each group in that
+          region. If the group's NPC count is less than the maximum, region
+          spawner will replace any missing NPCs for that group. If you choose to
+          delete the region, you will be prompted to confirm the delete. If you
+          make any changes, click the Apply button for those changes to take
+          place. To add groups to the region, click on the Regions List button.
+          Then find your new region in the list and click its button.<br>
+          <br>
+          <img src="spawnerGumpRegionInfo.jpg" alt=""><br>
+          <br>
+          <b>The Group Settings gump:</b><br>
+          Here are the group settings for the brigand_fort region. You can add a
+          group to spawn in this region by clicking on a button next to an empty
+          group name. If you click on a button next to a defined group, that
+          group will be removed from that region. You will <b><i>not</i></b> be
+          asked to confirm the removal of the group. It will simply be removed.
+          If you add another group to a region, insure that you set a Max Amount
+          of entries from the group to spawn, up to 999, and check the Enabled
+          check box is checked. Always remember to click the Apply button after
+          making any changes.<br>
+          <br>
+          <img src="spawnerGumpGroupSettings.jpg" alt=""><br>
+        </big><big><br>
+          <b>The Add Region gump:</b><br>
+          You can also define new regions for a facet. Note that you need to
+          select a facet in order to have this option, and Regions List
+          available. Before you add a region to the spawn system you need to
+          know the coordinates for the North-West X and Y (X1, Y1) and
+          South-East X an Y (X2, Y2) of that region. Go to the North-West corner
+          and enter the .whereat command. Target the NW corner and enter the X
+          and Y coordinates in X1 and Y1 respectively. Now do the same for the
+          SE corner but enter the X and Y in X2 and Y2. Now decide on a name for
+          this region and then decide what the delay should be between spawns of
+          this region. Click Apply. You now have a new region, ready for you to
+          add groups to it.<strong></strong><br>
+          <br>
+          <img src="spawnerGumpAddRegion.jpg" alt=""><br>
+          <br>
+          <br>
+          <b>The Group List gump:</b><br>
+          The region spawner spawns an area using groups of NPCs. These groups
+          can be user defined. However there are some predefined groups for the
+          developer to choose from. To see the defined groups click on the Group
+          List button. To view a particular group, click on the button next to
+          its name.<br>
+          <br>
+          <img src="spawnerGumpGroupList.jpg" alt=""><br>
+          <br>
+          <b>The Group Information gump:</b><br>
+          Here you can see the initial group information for the desertt2a
+          group. From here you can choose the Spawn Engine used to spawn that
+          region. I will have more to say on the Spawn Engines later. You can
+          also delete the group. If you choose to delete a group you will be
+          prompted to confirm your desire to delete the group before it is
+          deleted. The last thing, and the most important thing, is you can view
+          the group entries. These are the things in a group that you wish to
+          spawn in that region, in this case, desert NPCs.<br>
+          <br>
+          <img src="spawnerGumpGroupInfo.jpg" alt=""><br>
+          <br>
+          <b>The Group Entries gump:</b><br>
+          You can create groups of NPCs, items or reagents. I will refer mostly
+          to NPCs when talking about groups. Once you have decided on the type
+          of things you want to spawn, choose the appropriate Spawn Engine. If
+          you forget to choose an engine, the group is invalid and will not
+          save. These are the current entries for the group desertt2a. Note you
+          may add NPCs to the group. You may also remove NPCs from the group by
+          clicking in the entry and backspacing to delete the NPC. Press Apply
+          if you make any changes.<br>
+          <br>
+          <img src="spawnerGumpGroupEntries.jpg" alt=""><br>
+          <br>
+          <br>
+          I think that covers most of setting up a region. If you find I have
+          missed anything or made a mistake, feel free to contact the POL Distro
+          Team or make the addition or correction yourself and submit a pull
+          request on GitHub.<br>
+          <br>
+          <br>
+          <br>
+          <br>
+          <br>
+          <br>
+          <br>
+          <br>
+        </big><big><br>
+        </big><big><big><br>
+          </big></big><span style="font-weight: bold;"></span><br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <big><br>
+        </big></div>
+      <div id="footer">
+        <p>Last Update: 2020-03-19 by Yukiko<br>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

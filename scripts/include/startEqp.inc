@@ -398,10 +398,10 @@ endfunction
 //
 //  A 'Random' string follows the following form:
 //
-//  FORM                                    EXAMPLE
-//  --------------------------------------------------------------------
-//  "Random [Count] [GroupName]"            "Random 4 Reagents"
-//  "Random [Count] [GroupName] [chancetospawn]"   "Random 4 Reagents 50"
+//	FORM											sEXAMPLE
+//	--------------------------------------------------------------------
+//  "Random [Count] [GroupName]"					"Random 4 Reagents"
+//  "Random [Count] [GroupName] [chancetospawn]"	"Random 4 Reagents 50"
 //
 //  'Count' entries from 'GroupName' are chosen randomly.  The same entry
 //  will not be chosen twice.

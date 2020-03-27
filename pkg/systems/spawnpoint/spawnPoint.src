@@ -2,177 +2,258 @@ use uo;
 use os;
 
 include ":attributes:attributes";
+include ":gumps:gumps";
+include "include/string";
 include ":damage:damage";
 
-var spawneditlayout :=
-{
-    "page 0",
-    "gumppic    30   0  101",
-    "button    118  90 2130 2129  1   0 100",
-    "text       80 120   33    0",
-    "text       85 140    0    1",
-    "text       85 156    0    2",
-    "text       85 180   33    3",
-    "text      100 196    0    4",
-    "text      100 212    0    5",
-    "text       95 250   33    6",
-    "text       95 235   33   12",
-    "group       1",
-    "radio     180 235 210 211 0 99",
-    "textentry 160 140  40  15 50 1  7",
-    "textentry 160 156  40  15 50 2  8",
-    "textentry 155 196  30  15 50 3  9",
-    "textentry 155 212  30  15 50 4 10",
-    "textentry  65 268 160  15 50 5 11"
-};
-
-var spawneditdata :=
-{
-	"Spawn Point Data",
-	"Amount: ",
-	"Range: ",
-	"Delay (Minutes)",
-	"Min: ",
-	"Max: ",
-	"Monster Type",
-	"0",
-	"0",
-	"0",
-	"0",
-	"NONE",
-    "Ignore LOS"
-};
-
 program use_spawnpoint(who, spawnpoint)
-  EraseObjProperty(spawnpoint, "IgnoreLOS");
-  if(who.cmdlevel < 2)
-	return;
-  endif
-  var spawn := GetObjProperty(spawnpoint, "Spawn");
-  var amount := GetObjProperty(spawnpoint, "Amount");
-  var mindelay := GetObjProperty(spawnpoint, "MinDelay");
-  var maxdelay := GetObjProperty(spawnpoint, "MaxDelay");
-  var range := GetObjProperty(spawnpoint, "Range");
-  var i, x;
-  if(spawn == "NONE")
-	SendSysMessage(who, "Initializing new spawnpoint...");
-  else
-	spawneditdata[8] := CStr(amount);
-	spawneditdata[9] := CStr(range);
-	spawneditdata[10] := CStr(mindelay);
-	spawneditdata[11] := CStr(maxdelay);
-	spawneditdata[12] := CStr(spawn);
-  endif
-  var res := SendDialogGump(who, spawneditlayout, spawneditdata);
-  if(res[0] != 100)
-	SendSysMessage(who, "Aborted.");
-	return;
-  endif
-  for(i:=1; i<=5; i:=i+1);
-	if(!res[i])
-	  SendSysMessage(who, "Error: spawn data incomplete.  Aborting.");
-	  return;
+
+	var spawneditdata := {};
+	EraseObjProperty(spawnpoint, "IgnoreLOS");
+	if(who.cmdlevel < 2)
+		return;
 	endif
-  endfor
+	var initialized := GetObjProperty(spawnpoint, "Initialized");
+	var spawn := GetObjProperty(spawnpoint, "Spawn");
+	var amount := GetObjProperty(spawnpoint, "Amount");
+	var mindelay := GetObjProperty(spawnpoint, "MinDelay");
+	var maxdelay := GetObjProperty(spawnpoint, "MaxDelay");
+	var range := GetObjProperty(spawnpoint, "Range");
+	var i, x;
+//	if(spawn == "NONE")
+	if(!initialized)
+		SendSysMessage(who, "Initializing new spawnpoint...", color := 88);
+		spawneditdata[1] := "0";
+		spawneditdata[2] := "0";
+		spawneditdata[3] := "0";
+		spawneditdata[4] := "0";
+//		spawneditdata[5] := "NONE";
+		spawneditdata[5] := "";
+	else
+		spawneditdata[1] := CStr(amount);
+		spawneditdata[2] := CStr(range);
+		spawneditdata[3] := CStr(mindelay);
+		spawneditdata[4] := CStr(maxdelay);
+		spawneditdata[5] := CStr(spawn);
+	endif
+	var res := SpawnPointGump(who, spawneditdata);
+
+	// If res.keys size is < 7 the gump was closed by right-click.
+	if(res.Keys.Size() < 7)
+		SendSysMessage(who, "Cancelled.", color := 33);
+		return;
+	endif
+	for(i := 1; i <= 5; i := i + 1);
+		if(!res[i])
+			SendSysMessage(who, "Error: spawn data incomplete. i = " + CStr(i) + ".  Aborting.", color := 33);
+			return;
+		endif
+	endfor
 	x := len(res[1]);
 	i := res[1];
 	i := i[4, (x-3)];
+	i := ValidateStringInteger(i);
+	if(i.errortext)
+		SendSysMessage(who, "'Amount' is not a valid integer. Setting it to 1.", color := 33);
+		i := "1";
+	endif
 	amount := CInt(i);
 	x := len(res[2]);
 	i := res[2];
 	i := i[4, (x-3)];
+	i := ValidateStringInteger(i);
+	if(i.errortext)
+		SendSysMessage(who, "'Range' is not a valid integer. Setting it to 1.", color := 33);
+		i := "1";
+	endif
 	range := CInt(i);
 	x := len(res[3]);
 	i := res[3];
 	i := i[4, (x-3)];
+	i := ValidateStringInteger(i);
+	if(i.errortext)
+		SendSysMessage(who, "'Min' is not a valid integer. Setting it to 1.", color := 33);
+		i := "1";
+	endif
 	mindelay := CInt(i);
 	x := len(res[4]);
 	i := res[4];
 	i := i[4, (x-3)];
+	i := ValidateStringInteger(i);
+	if(i.errortext)
+		SendSysMessage(who, "'Max' is not a valid integer. Setting it to 1.", color := 33);
+		i := "1";
+	endif
 	maxdelay := CInt(i);
-  if((amount < 1) || (amount > 32))
-	SendSysMessage(who, "Amount must be between 1 and 32.  Setting to 1.");
-	amount := 1;
-  endif
-  if((range < 1) || (range > 32))
-	SendSysMessage(who, "Range must be between 1 and 32.  Setting to 1.");
-	range := 1;
-  endif
-  if((mindelay < 0) || (mindelay > 1440))
-	SendSysMessage(who, "MinDelay must be between 0 and 1440.  Setting to 1.");
-	mindelay := 1;
-  endif
-  if((maxdelay < 0) || (maxdelay > 1440))
-	SendSysMessage(who, "MaxDelay must be between 0 and 1440.  Setting to 1.");
-	maxdelay := 1;
-  endif
-  if(maxdelay < mindelay)
-	SendSysMessage(who, "MaxDelay cannot be less than MinDelay.   Setting equal.");
-	maxdelay := mindelay;
-  endif
-  x := len(res[5]);
-  i := res[5];
-  i := i[4, (x-3)];
-  spawn := i;
-  foreach thing in (res.keys)
-    if(thing == 99)
-      SetObjProperty(spawnpoint, "IgnoreLOS", 1);
-      break;
-    endif
-  endforeach
-  SendSysMessage(who, i);
-  var critterarray := {"ettins", "orchorde", "trolls", "lesserundead", "undead", "vermin", "orcs", "dracos", "lizardmen", "ratmen"};
-  if(!i in critterarray)
-    var thecritter := CreateNpcFromTemplate(i, spawnpoint.x, spawnpoint.y, spawnpoint.z, 0, spawnpoint.realm);
-    if(!thecritter)
-	  SendSysMessage(who, "Invalid creature type.");
-	  spawn := "NONE";
-    else
-	  SetObjProperty(thecritter, "summoned", 1);
-	  KillMobile(thecritter);
-    endif
-  else
-    var thecritter := CreateNpcFromTemplate(GetCritter(i), spawnpoint.x, spawnpoint.y, spawnpoint.z, 0, spawnpoint.realm);
-    if(!thecritter)
-	  SendSysMessage(who, "Invalid creature type.");
-	  spawn := "NONE";
-    else
-	  SetObjProperty(thecritter, "summoned", 1);
-	  KillMobile(thecritter);
-    endif
-  endif
-  SetObjProperty(spawnpoint, "Amount",   amount);
-  SetObjProperty(spawnpoint, "Range",    range);
-  SetObjProperty(spawnpoint, "MinDelay", mindelay);
-  SetObjProperty(spawnpoint, "MaxDelay", maxdelay);
-  SetObjProperty(spawnpoint, "Spawn",    spawn);
-  SetObjProperty(spawnpoint, "ResetMe",  1);
-  SendSysMessage(who, "Spawnpoint initialized.  Resetting spawn.  This may take a minute...");
-  spawnpoint.invisible := 1;
+	if((amount < 1) || (amount > 32))
+		SendSysMessage(who, "Amount must be between 1 and 32.  Setting to 1.", color := 66);
+		amount := 1;
+	endif
+	if((range < 1) || (range > 32))
+		SendSysMessage(who, "Range must be between 1 and 32.  Setting to 1.", color := 66);
+		range := 1;
+	endif
+	if((mindelay < 0) || (mindelay > 1440))
+		SendSysMessage(who, "MinDelay must be between 0 and 1440.  Setting to 1.", color := 66);
+		mindelay := 1;
+	endif
+	if((maxdelay < 0) || (maxdelay > 1440))
+		SendSysMessage(who, "MaxDelay must be between 0 and 1440.  Setting to 1.", color := 66);
+		maxdelay := 1;
+	endif
+	if(maxdelay < mindelay)
+		SendSysMessage(who, "MaxDelay cannot be less than MinDelay.   Setting equal.", color := 66);
+		maxdelay := mindelay;
+	endif
+	x := len(res[5]);
+	i := res[5];
+	i := i[4, (x-3)];
+	spawn := i;
+	foreach thing in (res.keys)
+		if(thing == 2002)
+			SetObjProperty(spawnpoint, "IgnoreLOS", 1);
+			break;
+		endif
+	endforeach
+	SendSysMessage(who, i);
+	var critterarray := {"ettins", "orchorde", "trolls", "lesserundead", "undead", "vermin", "orcs", "dracos", "lizardmen", "ratmen"};
+	if(!i in critterarray)
+		var thecritter := CreateNpcFromTemplate(i, spawnpoint.x, spawnpoint.y, spawnpoint.z, 0, spawnpoint.realm);
+		if(!thecritter)
+			SendSysMessage(who, "Invalid creature type.");
+//			spawn := "NONE";
+			spawn := "";
+		else
+			SetObjProperty(thecritter, "summoned", 1);
+			KillMobile(thecritter);
+		endif
+	else
+		var thecritter := CreateNpcFromTemplate(GetCritter(i), spawnpoint.x, spawnpoint.y, spawnpoint.z, 0, spawnpoint.realm);
+		if(!thecritter)
+			SendSysMessage(who, "Invalid creature type.");
+//			spawn := "NONE";
+			spawn := "";
+		else
+			SetObjProperty(thecritter, "summoned", 1);
+			KillMobile(thecritter);
+		endif
+	endif
+	SetObjProperty(spawnpoint, "Initialized",   1);
+	SetObjProperty(spawnpoint, "Amount",   amount);
+	SetObjProperty(spawnpoint, "Range",    range);
+	SetObjProperty(spawnpoint, "MinDelay", mindelay);
+	SetObjProperty(spawnpoint, "MaxDelay", maxdelay);
+	SetObjProperty(spawnpoint, "Spawn",    spawn);
+	SetObjProperty(spawnpoint, "ResetMe",  1);
+	SendSysMessage(who, "Spawnpoint initialized.  Resetting spawn.  This may take a minute...");
+	spawnpoint.invisible := 1;
 endprogram
 
 function GetCritter(type)
-  if(type == "vermin")
-    return "grat";
-  elseif(type == "orcs")
-     return "orc1";
-  elseif(type == "orchorde")
-    return "orclord";
-  elseif(type == "ratmen")
-    return "ratman1";
-  elseif(type == "lizardmen")
-    return "lizardman1";
-  elseif(type == "dracos")
-    return "dragon1";
-  elseif(type == "trolls")
-    return "troll1";
-  elseif(type == "undead")
-    return "shade";
-  elseif(type == "lesserundead")
-    return "zombie";
-  elseif(type == "ettins")
-    return "ettin";
-  else
-    return type;
-  endif
+	if(type == "vermin")
+		return "grat";
+	elseif(type == "orcs")
+		return "orc1";
+	elseif(type == "orchorde")
+		return "orclord";
+	elseif(type == "ratmen")
+		return "ratman1";
+	elseif(type == "lizardmen")
+		return "lizardman1";
+	elseif(type == "dracos")
+		return "dragon1";
+	elseif(type == "trolls")
+		return "troll1";
+	elseif(type == "undead")
+		return "shade";
+	elseif(type == "lesserundead")
+		return "zombie";
+	elseif(type == "ettins")
+		return "ettin";
+	else
+		return type;
+	endif
+endfunction
+////////////////////////////////////////////////////////////
+//
+//SpawnPointGump(who, spawn_point_data};
+//
+// Parameters:
+// who					- player who will receive the gump.
+// spawn_point_data		- Array containing spawn point info.
+//
+// Contents of the spawn_point_data array.
+// spawn_point_data[1]	- Amount to spawn.
+// spawn_point_data[2]	- Range from spawn point to spawn.
+// spawn_point_data[3]	- Minimum time to spawn.
+// spawn_point_data[4]	- Maximum time to spawn.
+// spawn_point_data[5]	- NPC template to spawn.
+//
+// Returns
+//
+// Created 3/20/2020 11:40:19 PM, with Gump Studio.
+// Exported with POLGumpExporter ver 1.1 for gump pkg
+function SpawnPointGump(who, spawn_point_data)
+
+	const AMOUNT_POS	:= 1001;
+	const RANGE_POS		:= 1002;
+	const MIN_POS		:= 1003;
+	const MAX_POS		:= 1004;
+	const NPC_TEMP_POS	:= 1005;
+	var gump := GFCreateGump();
+
+	GFPage(gump, 0);
+
+	//Image 1
+	GFGumpPic(gump, 185, 173, 1140, 0);
+	//Title Label
+	GFTextLine(gump, 334, 211, 66, "Spawn Point Data");
+	//Amount Label
+	GFTextLine(gump, 260, 236, 66, "Amount:");
+	//Range Label
+	GFTextLine(gump, 261, 262, 66, "Range:");
+	//Min Label
+	GFTextLine(gump, 383, 236, 66, "Min:");
+	//Max Label
+	GFTextLine(gump, 382, 262, 66, "Max:");
+	//Background 1
+	GFResizePic(gump, 313, 232, 2620, 35, 25);
+	//Background 2
+	GFResizePic(gump, 314, 260, 2620, 35, 25);
+	//Background 3
+	GFResizePic(gump, 412, 260, 2620, 35, 25);
+	//Background 4
+	GFResizePic(gump, 412, 232, 2620, 35, 25);
+	//Background 5
+	GFResizePic(gump, 255, 328, 2620, 250, 25);
+	//Ignore LOS Label
+	GFTextLine(gump, 316, 290, 66, "Ignore LOS");
+	//Okay Button
+	GFAddButton(gump, 358, 371, 2130, 2129, GF_CLOSE_BTN, 10);
+	//Ignore LOS Radio Button
+	GFCheckBox(gump, 416, 290, 210, 211, 0, 99);
+
+	//NPC Template Label
+	GFTextLine(gump, 255, 309, 66, "NPC Template:");
+	//Amount Text Entry
+	GFTextEntry(gump, 313, 234, 35, 15, 50, spawn_point_data[1], 1, 3);
+	//Range Text Entry
+	GFTextEntry(gump, 314, 262, 35, 15, 50, spawn_point_data[2], 2, 3);
+	//Min Text Entry
+	GFTextEntry(gump, 412, 234, 35, 15, 50, spawn_point_data[3], 3, 3);
+	//Max Text Entry
+	GFTextEntry(gump, 412, 262, 35, 15, 50, spawn_point_data[4], 4, 3);
+	//NPC Text Entry Text Entry
+	GFTextEntry(gump, 255, 330, 250, 15, 50, spawn_point_data[5], 5, 38);
+
+	var spawn_data := GFSendGump( who, gump );
+
+	spawn_data[1] := GFExtractData(spawn_data, 1001);
+	spawn_data[2] := ValidateStringInteger(GFExtractData(spawn_data, 1002));
+	spawn_data[3] := ValidateStringInteger(GFExtractData(spawn_data, 1003));
+	spawn_data[4] := ValidateStringInteger(GFExtractData(spawn_data, 1004));
+	spawn_data[5] := GFExtractData(spawn_data, 1005);
+
+	return spawn_data;
+
 endfunction

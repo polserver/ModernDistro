@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    <meta http-equiv="Content-Language" content="en-us">
+    <title>Spawn Point Setup</title>
+    <link rel="stylesheet" type="text/css" href="docs.css">
+  </head>
+  <body>
+    <div id="container">
+      <div style="text-align: center;"> </div>
+      <div id="header">
+        <div style="text-align: center;"> </div>
+        <h1 style="text-align: center;">Spawn Point Documentation<br>
+        </h1>
+        <div style="text-align: center;"> </div>
+        <p style="text-align: center;">For the Spawn System package in the
+          Distro, by <a href="mailto:distro@polserver.com">Yukiko</a>.</p>
+        <hr>
+        <h2 style="text-align: center;">Spawn Point Setup</h2>
+      </div>
+      <div id="content"><big id="fred"><big style="font-weight: bold;">Setting-up
+            a Spawn Point:</big><br>
+          Spawn points are invisible. Use the .info command to insure your
+          character has the <em>seeinvisitems</em> privilege enabled. Use the
+          create command to create a spawn point, .create spawnpoint and target
+          the location where you want to place it. Spawn points appear as small
+          crey figures. They are set as not movable. So there is no need to lock
+          them down.<br>
+          <br>
+          Use (double-click) the spawn point to open its configuration gump.<br>
+        </big>
+        <hr style="width: 100%; height: 2px;"><big><big style="font-weight: bold;">The
+            spawn point gump:<br>
+          </big></big><big>The spawn point gump is relatively straightforward.
+          It has six settings that you will use to configure the NPC your spawn
+          point will spawn. They are Amount, Range, Min, Max Ignore LOS, and NPC
+          Template.</big><br>
+        <big><br>
+        </big><big><img src="spawnPointGump.jpg" alt=""></big><br>
+        <big><br>
+        </big><br>
+        <big>&nbsp;Here are the details for each setting:<br>
+          <b>Amount:</b> The amount of the NPC you want to spawn.<br>
+          <b>Range:</b> The maximum distance from the spawn point to create the
+          NPC.<br>
+          <b>Min:</b> The minimum time, in minutes, between spawning an NPC.<br>
+          <b>Max:</b> The maximum time, in minutes, between spawning an NPC.<br>
+          <b>Ignore LOS:</b> Check this box and the spawn point will not perform
+          a line of sight check between the spawn point and the location where
+          the NPC will spawn.<br>
+          <b>NPC Template:</b> The name of the NPC to spawn, as it appears in
+          the npcdesc.cfg file.<br>
+          <br>
+          If you set the Amount to more than 1 NPC to spawn, the spawn point
+          will spawn each NPC one at a time until Amount has been reached, based
+          upon the Min and Max settings. There are situations when you might
+          want the spawn point to ignore line of sight, eg. spawning undead in a
+          cemetary where you might have headstones and other LOS obstructions. <br>
+          <br>
+        </big><br>
+        <big><br>
+        </big></div>
+      <div id="footer">
+        <p>Last Update: 2020-03-19 by Yukiko<br>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

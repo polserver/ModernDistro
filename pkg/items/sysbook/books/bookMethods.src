@@ -2,7 +2,7 @@ use uo;
 use os;
 
 exported function IsWritable(book)
-  if(GetObjProperty(book, "NoWrite") || ((book.container).objtype == 0x0a9f))
+  if(GetObjProperty(book, "NoWrite") || (book.container.IsBookshelf()))
     return 0;
   else
 //    if(book.movable == 0)
@@ -26,6 +26,11 @@ exported function GetTitle(book)
 endfunction
 
 exported function SetTitle(book, title)
+
+  if(GetObjProperty(book, "NoWrite") || (book.container.IsBookshelf()))
+    return 0;
+  endif
+
   title := Cleans(title);
 
   book.setprop("title", title);
@@ -42,6 +47,10 @@ exported function GetAuthor(book)
 endfunction
 
 exported function SetAuthor(book, author)
+
+  if(GetObjProperty(book, "NoWrite") || (book.container.IsBookshelf()))
+    return 0;
+  endif
   author := Cleans(author);
 
   book.setprop("author", author);
@@ -73,6 +82,10 @@ exported function GetLine(book, line)
 endfunction
 
 exported function SetLine(book, line, text)
+
+  if(GetObjProperty(book, "NoWrite") || (book.container.IsBookshelf()))
+    return 0;
+  endif
   var contents := book.getprop("contents");
   if(contents == error)
     contents := array;

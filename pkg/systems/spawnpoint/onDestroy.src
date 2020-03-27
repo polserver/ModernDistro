@@ -1,0 +1,32 @@
+/*
+ * Yukiko 2020-03-26
+ *
+ */
+
+use uo;
+
+include ":damage:damage";
+
+program OnDestroySpawnPoint(SpawnPoint)
+
+	var children := {};
+	children := GetObjProperty(SpawnPoint, "Children");
+	var mobile;
+
+	if ( !children )
+		return 1;
+	endif
+
+	foreach child in children
+		mobile := SystemFindObjectBySerial(CInt(child));
+		if(!mobile)
+			continue;
+		endif
+		if(!mobile.master)
+			SetObjProperty(mobile, "guardkill", 1);
+			KillMobile(mobile, 1);
+		endif
+	endforeach
+
+	return 1;
+endprogram

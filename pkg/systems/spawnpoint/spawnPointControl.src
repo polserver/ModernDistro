@@ -138,10 +138,7 @@ function CreateSpawn(spawnpoint)
       z := spawnpoint.z;
     endif
     if(!loscheck)
-	thingy := CreateItemAtLocation(6102, 20, 0, 0xeed, 1, "britannia_alt");
-	thingy.invisible := 1;
-	MoveObjectToLocation(thingy, x, y, z, spawnpoint.realm, MOVEOBJECT_FORCELOCATION);
-      if(CheckLineOfSight(spawnpoint, thingy))
+	  if(CheckLosBetween( spawnpoint.x, spawnpoint.y, spawnpoint.z, x, y, z, spawnpoint.realm ))
         var i := CreateNpcFromTemplate(spawn, x, y, z, 0, spawnpoint.realm);
         success := 1;
         return CInt(i.serial);

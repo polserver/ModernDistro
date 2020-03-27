@@ -1,9 +1,9 @@
 /*
 
 	spawnSystem originally created by Austin for the 0.97 Distro
-	
+
 	Bugs fixed by Edwards
-	
+
 	Adapted for the Basic Distro by Yukiko 10-Sep-2015
 
 
@@ -15,15 +15,15 @@ include ":spawnsystem:spawnerUtil";
 
 program command_WhereSpawner( mobile )
 
-        
+
         var zones := SS_FindSpawnZone( mobile );
         if( zones.Size() < 1 )
                 SendSysMessage( mobile, "You are not in any spawn region." );
                 return 0;
         endif
-        
+
         foreach region_name in zones
-                SendSysMessage( mobile, "SpawnRegion name: "+region_name );
+                SendSysMessage( mobile, "SpawnRegion name: "+region_name, color := 88 );
                 SleepMS(5);
         endforeach
 
