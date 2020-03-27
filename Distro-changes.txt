@@ -49,3 +49,18 @@ Yukiko: Added to the spawn system GM command :spawnSystem:commands/gm/spawner.sr
 		Information-Group Settings gump. The Max Amount is now limited to three (3) digits.
 Yukiko: Fixed some case mismatch include file refs in :spawnSystem:commands/gm/spawner.src
 
+2020-03-26
+Yukiko: Redesigned the spawn point gump.
+Yukiko: Added an onCreate.src file for spawn points to initialize the CProps on the
+		spawn point object instead of adding them in the itemdesc.cfg file.
+Yukiko: Added an onDestroy.src script to spawn points the will "guard kill" any non tamed
+		NPCs spawned by the spawn point when the spawn point is destroyed.
+Yukiko:	Changed spawnPointControl.src to use CheckLosBetween() to determine if the spawn point
+		has LOS to the place the NPC is supposed to spawn. Previously it created an
+		invisible gold coin and used CheckLineOfSight() to check LOS between the
+		spawn point and the gold coin.
+Yukiko:	Removed the CProps from the spawn point definition in :spawnPoint:itemdesc.cfg.
+Yukiko: Fixed an error in the function ValidateStringInteger() in /include/string.inc.
+Yukiko: Added documentation for the non merchant spawn systems to /docs/Distro Docs.
+Yukiko: Changed bookMethods.src in :sysbook:books to use the IsBookshelf() method to prevent
+		modifying book contents if a writable book is in a bookshelf.
