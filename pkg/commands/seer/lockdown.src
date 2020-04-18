@@ -13,6 +13,7 @@ program textcmd_lockdown(who)
         if (what.movable == 0)
                 SendSysMessage(who, "Released.");
                 what.movable := 1;
+				what.decayat := ReadGameClock() + 600;
         else
                 SendSysMessage(who, "Locked down.");
                 what.movable := 0;
