@@ -1,0 +1,19 @@
+/*
+        Maintened by *Edwards
+
+        2009-02-21
+*/
+use uo;
+
+program UnequipScript( mobile, item, start_up )
+
+	// Next 2 vars, used to fix unused var report by ecompile
+	item := item;
+	start_up := start_up;
+	
+	if( mobile.IsA( POLCLASS_NPC ))
+		mobile.run_speed := mobile.run_speed - 100;
+	endif
+	
+	return 1;
+endprogram

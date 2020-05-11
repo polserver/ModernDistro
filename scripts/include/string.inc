@@ -591,9 +591,10 @@ function ValidateStringInteger(str)
 		endfor
 		return str;
 	else
+		str := Trim(str, TRIM_LEFT, "0");
 		for x := 1 to str.length()
 			if(str[x,x] in dec_numbers)
-				str := Trim(str, TRIM_LEFT, "0");
+				// str := Trim(str, TRIM_LEFT, "0");
 				return str;
 			else
 				return error {"errortext" := "Not a valid string representation of an integer."};

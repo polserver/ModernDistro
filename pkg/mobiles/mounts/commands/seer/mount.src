@@ -1,0 +1,9 @@
+/*
+        Created by *Edwards
+*/
+use uo;
+use os;
+
+program command_Mount( who, type )
+
+endprogram

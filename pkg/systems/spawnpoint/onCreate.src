@@ -1,0 +1,20 @@
+/*
+ * Yukiko 2020-03-26
+ *
+ */
+
+use uo;
+
+program OnCreateSpawnPoint( SpawnPoint )
+
+//	SetObjProperty(SpawnPoint, "Spawn", "NONE");
+	SetObjProperty(SpawnPoint, "Spawn", "");
+	SetObjProperty(SpawnPoint, "Amount", 0);
+	SetObjProperty(SpawnPoint, "MinDelay", 0);
+	SetObjProperty(SpawnPoint, "MaxDelay", 0);
+	SetObjProperty(SpawnPoint, "Range", 0);
+	SetObjProperty(SpawnPoint, "Initialized", 0);
+
+	return 1;
+endprogram
+

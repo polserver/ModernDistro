@@ -699,6 +699,7 @@ endfunction
 //
 ///////////////////////////////////////////////////////
 function KillMobile(mob, repsys:=0, attacker := 0)
+
 	if (!repsys)
 		mob.kill();
 	elseif(attacker)
@@ -707,4 +708,5 @@ function KillMobile(mob, repsys:=0, attacker := 0)
 		var contrl:=GetProcess().controller; // Gets the mobile ref of the killer.
 		mob.kill(contrl);
 	endif
+
 Endfunction
