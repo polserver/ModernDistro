@@ -1,0 +1,17 @@
+use uo;
+
+program mount_log_on(who)
+
+	var mount := GetEquipmentByLayer(who, 25 );
+	if(!GetObjProperty(mount, "RewardMount"))
+		if(mount)
+			var animal := SystemFindObjectBySerial(CInt(GetObjProperty(mount,"serial")));
+			if(animal)
+				EraseObjProperty(animal,"onhold");
+			else
+				DestroyItem(mount);
+			endif
+		endif
+	endif
+
+endprogram

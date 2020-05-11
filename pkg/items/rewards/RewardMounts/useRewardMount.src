@@ -1,0 +1,70 @@
+//////////////////////////////
+// Use mount rewards
+//////////////////////////////
+use uo;
+use cliloc;
+
+include ":itemUtils:itemdesc";
+
+var mount_info := struct{"MountPiece", "SFX", "GFX", "Frames"};
+
+program UseMountRewards(who, item)
+
+	var cfg_elem := GetItemDescInfo(item.objtype);
+	var SFX := CInt(cfg_elem[item.objtype].SFX);
+	if(!SFX)
+		SFX := 0;
+	endif
+	mount_info.SFX := SFX;
+	var GFX := CInt(cfg_elem[item.objtype].GFX);
+	if(!GFX)
+		GFX := 0;
+	endif
+	mount_info.GFX := GFX;
+	var Frames := CInt(cfg_elem[item.objtype].Frames);
+	if(!Frames)
+		Frames := 0;
+	endif
+	mount_info.Frames := Frames;
+	var Hue := CInt(cfg_elem[item.objtype].Hue);
+	if(!Hue)
+		Hue := 0;
+	endif
+	mount_info.Hue := Hue;
+	if(item.container != who.backpack)
+        SendSysMessageCL(who, 1042593, color := 33); // That is not in your backpack.
+        return;
+    endif
+    if(GetEquipmentByLayer(who, 25))
+        SendSysMessageCL(who, 1042146, color := 33); // You cannot use this while mounted.
+        return;
+    endif
+	if(SFX)
+		PlaySoundEffect( who, SFX );
+	endif
+	if(GFX)
+		PlayObjectCenteredEffectEx( who, GFX, 1, Frames, Hue, 7 );
+	endif
+	Sleepms(800);
+    var MountPiece := CreateEtherealMountPiece(cfg_elem, item);
+    MountPiece := CreateItemAtLocation( who.x, who.y, who.z, MountPiece, 1, who.realm );
+	MountPiece.UnEquipScript := ":rewards:RewardMounts/UnEquipRewardMount";
+    EquipItem(who, MountPiece);
+
+    return;
+
+endprogram
+
+function CreateEtherealMountPiece(cfg_elem, reward)
+
+    var MountPiece := GetItemDescriptor( 0x1F021 );
+
+    MountPiece.Graphic := CInt(cfg_elem[reward.objtype].MountPiece);
+    MountPiece.Invisible := 1;
+    MountPiece.Movable := 1;
+	mount_info.MountPiece := reward.objtype;
+    MountPiece.CProps.Insert( "RewardMount", mount_info );
+
+    return MountPiece;
+
+endfunction

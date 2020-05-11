@@ -580,6 +580,7 @@ function OpenMyPack()
       return;
     endif
     mounttype := 0;
+
     case(me.graphic)
 		0xCC:	mounttype := 0x3EA2;	// Horse1
 		0xC8:	mounttype := 0x3E9F;	// Horse2
@@ -593,7 +594,7 @@ function OpenMyPack()
 		0xDA:	mounttype := 0x3EA4;	// Frenzied Ostard
 		0xDB:	mounttype := 0x3EA5;	// Forest Ostard
 		0x75:	mounttype := 0x3EA8;	// Silver Steed
-//		0x74:	mounttype := 0x3EB5;	// Nightmare 1 - Nightmare NOT visible when mounted!!!
+		0x74:	mounttype := 0x3EB5;	// Nightmare 1
 		0xB1:	mounttype := 0x3EA7;	// Nightmare 2
 		0xB2:	mounttype := 0x3EB6;	// Nightmare 3
 		0xB3:	mounttype := 0x3EB7;	// Nightmare 4
@@ -635,6 +636,7 @@ function OpenMyPack()
 		0x57F:	mounttype := 0x3ECB;	// Lasher - a rainbow highlighted unicorn.
 		0x5E6:	mounttype := 0x3ED1;	// coconut crab
     endcase
+
     if (mounttype == 0x3eb4 and master.graphic == 0x190) // male attempting to ride a unicorn
         SendSysMessage (master, "The unicorn only allows females to mount it.", color := 88);
         return;
@@ -658,7 +660,7 @@ function OpenMyPack()
     if(mounttype)
       if(MoveObjectToLocation(master,me.x,me.y,me.z,master.realm,0))
         master.facing := me.facing;
-        var mount := CreateItemAtLocation(5228, 1182, 0, 0x1f021,1, "britannia"); // newmap problem
+        var mount := CreateItemAtLocation(5228, 1182, 0, 0x1f021,1, "britannia");
         if(Cint(GetObjProperty(me, "summoned")) == 1)
           SetObjProperty(mount, "summoned", 1);
         endif

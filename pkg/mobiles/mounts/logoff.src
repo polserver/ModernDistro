@@ -1,0 +1,23 @@
+use uo;
+
+include ":damage:damage";
+
+program mount_log_off(who)
+
+	var mount := GetEquipmentByLayer(who, 25 );
+	if(!GetObjProperty(mount, "RewardMount"))
+		if(mount)
+			if(GetObjProperty(mount, "summoned"))
+				var ser := Cint(GetObjProperty(mount, "serial"));
+				var critter := SystemFindObjectBySerial(ser);
+				if(critter)
+					KillMobile(critter);
+				endif
+				DestroyItem(mount);
+			else
+				var animal := SystemFindObjectBySerial(CInt(GetObjProperty(mount,"serial")));
+				SetObjProperty(animal,"onhold", 1);
+			endif
+		endif
+	endif
+endprogram

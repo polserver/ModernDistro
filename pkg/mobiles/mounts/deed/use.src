@@ -1,0 +1,180 @@
+
+use uo;
+use cliloc;
+
+include ":gumps:gumps";
+
+program PetClaimDeed(who, ticket)
+
+	var name := GetObjProperty( ticket, "Name" );
+	var hits := GetObjProperty( ticket, "hits" );
+	var stamina := GetObjProperty( ticket, "Stamina" );
+	var mana := GetObjProperty( ticket, "Mana" );
+	var str := GetObjProperty( ticket, "Strength" );
+	var dex := GetObjProperty( ticket, "Dexterity" );
+	var int := GetObjProperty( ticket, "Intellect" );
+	var ar := GetObjProperty( ticket, "Armor" );
+	var wrestStr := GetObjProperty( ticket, "Wrestling" );
+	var tactStr := GetObjProperty( ticket, "Tactics" );
+	var mrStr := GetObjProperty( ticket, "ResSpells" );
+	var anatStr:= GetObjProperty( ticket, "Anatomy" );
+	var poisonStr := GetObjProperty( ticket, "Poisoning" );
+	var mageryStr := GetObjProperty( ticket, "Magery" );
+	var eiStr := GetObjProperty( ticket, "EvalInt" );
+	var medStr := GetObjProperty( ticket, "Meditation" );
+	var thepacktype := GetObjProperty( ticket, "PackType" );
+	var foodtype := GetObjProperty( ticket, "Food" );
+	var loyalty := GetObjProperty( ticket, "Loyalty" );
+
+	var gump := GFCreateGump();
+
+	GFPage(gump, 0);
+	GFResizePic(gump, 105, 90, 9200, 290, 300);
+	GFResizePic(gump, 115, 100, 3000, 270, 280);
+	GFHTMLArea(gump, 147, 108, 210, 18, "<center><i>"+CStr(name)+"</i></center>"); 	//Target's Name
+	GFAddButton(gump, 240, 77, 2093, 2093, GF_CLOSE_BTN, 0);
+	GFGumpPic(gump, 140, 138, 2091, 0);
+	GFGumpPic(gump, 140, 355, 2091, 0);
+
+	GFPage(gump, 1);
+	GFGumpPic(gump, 128, 152, 2086, 0);
+	GFAddHTMLLocalized(gump, 147, 150, 160, 18, 1049593); 						// Attributes
+
+	GFAddHTMLLocalized(gump, 153, 168, 160, 18, 1049578); 						// Hits
+	GFHTMLArea(gump, 280, 168, 75, 18, "<basefont color=#4A3929><div align=right>"+CStr(hits)+"</div>"); 							// Hits / Max Hits
+
+	GFAddHTMLLocalized(gump, 153, 186, 160, 18, 1049579); 						// Stamina
+	GFHTMLArea(gump, 280, 186, 75, 18, "<basefont color=#4A3929><div align=right>"+CStr(stamina)+"</div>"); 							// Stamina / Max Stamina
+
+	GFAddHTMLLocalized(gump, 153, 204, 160, 18, 1049580); 						// Mana
+	GFHTMLArea(gump, 280, 204, 75, 18, "<basefont color=#4A3929><div align=right>"+CStr(mana)+"</div>"); 							// Mana / MaxMana
+
+	GFAddHTMLLocalized(gump, 153, 222, 160, 18, 1028335); 						// Strength
+	GFHTMLArea(gump, 320, 222, 35, 18, "<basefont color=#4A3929><div align=right>"+CStr(str)+"</div>"); 									// Strength Value
+
+	GFAddHTMLLocalized(gump, 153, 240, 160, 18, 3000113); 						// Dexterity
+	GFHTMLArea(gump, 320, 240, 35, 18, "<basefont color=#4A3929><div align=right>"+CStr(dex)+"</div>"); 							// Dexterity Value
+
+	GFAddHTMLLocalized(gump, 153, 258, 160, 18, 3000112); 						// Intelligence
+	GFHTMLArea(gump, 320, 258, 35, 18, "<basefont color=#4A3929><div align=right>"+CStr(int)+"</div>"); 							// Intelligence Value
+
+	GFAddHTMLLocalized(gump, 153, 276, 160, 18, 1070793); 						// Barding Difficulty
+	GFHTMLArea(gump, 320, 276, 35, 18, "HtmlElement"); 							// Barding Difficulty Value
+
+	GFGumpPic(gump, 128, 296, 2086, 0);
+	GFAddHTMLLocalized(gump, 147, 296, 160, 18, 3001016); 						// Miscellaneous Header
+
+	GFAddHTMLLocalized(gump, 153, 314, 160, 18, 1049581); 						// Armor Rating
+	GFHTMLArea(gump, 320, 314, 35, 18, "<basefont color=#4A3929><div align=right>"+ar+"</div>"); 							// Armor Rating Value
+
+	GFGumpPic(gump, 240, 334, 2225, 0);											// Page Number
+	GFAddButton(gump, 340, 340, 2509, 2509, GF_PAGE_BTN, 2); 					// Page Forward
+	GFAddButton(gump, 128, 340, 2508, 2508, GF_PAGE_BTN, 5); 					// Page Back
+
+	GFPage(gump, 2);
+	GFGumpPic(gump, 128, 152, 2086, 0);
+	GFAddHTMLLocalized(gump, 147, 150, 160, 18, 1061645); 						// Resistances Header
+
+	GFAddHTMLLocalized(gump, 153, 168, 160, 18, 1061646); 						// Physical
+	GFHTMLArea(gump, 320, 168, 35, 18, "HtmlElement"); 							// Physical Resistance Value
+
+	GFAddHTMLLocalized(gump, 153, 186, 160, 18, 1061647); 						// Fire
+	GFHTMLArea(gump, 320, 186, 35, 18, "HtmlElement"); 							// Fire Resistance Value
+
+	GFAddHTMLLocalized(gump, 153, 204, 160, 18, 1061648); 						// Cold
+	GFHTMLArea(gump, 320, 204, 35, 18, "HtmlElement"); 							// Cold Resistance Value
+
+	GFAddHTMLLocalized(gump, 153, 222, 160, 18, 1061649); 						// Poison
+	GFHTMLArea(gump, 320, 222, 35, 18, "HtmlElement"); 							// Poison Resistance Value
+
+	GFAddHTMLLocalized(gump, 153, 240, 160, 18, 1061650); 						// Energy
+	GFHTMLArea(gump, 320, 240, 35, 18, "HtmlElement"); 							// Energy Resistance Value
+
+	GFGumpPic(gump, 240, 334, 2226, 0);											// Page Number
+	GFAddButton(gump, 340, 340, 2509, 2509, GF_PAGE_BTN, 3); 					// Page Forward (Page 2)
+	GFAddButton(gump, 128, 340, 2508, 2508, GF_PAGE_BTN, 1); 					// Page Back (Page 2)
+
+	GFPage(gump, 3);
+	GFGumpPic(gump, 128, 152, 2086, 0);
+	GFAddHTMLLocalized(gump, 147, 150, 160, 18, 1017319); 						// Damage Header
+
+	GFAddHTMLLocalized(gump, 153, 168, 160, 18, 1061646); 						// Physical
+	GFHTMLArea(gump, 320, 168, 35, 18, "HtmlElement"); 							// Physical Damage Value
+
+	GFAddHTMLLocalized(gump, 153, 186, 160, 18, 1061647); 						// Fire
+	GFHTMLArea(gump, 320, 186, 35, 18, "HtmlElement"); 							// Fire Damage Value
+
+	GFAddHTMLLocalized(gump, 153, 204, 160, 18, 1061648); 						// Cold
+	GFHTMLArea(gump, 320, 204, 35, 18, "HtmlElement"); 							// Cold Damage Value
+
+	GFAddHTMLLocalized(gump, 153, 222, 160, 18, 1061649); 						// Poison
+	GFHTMLArea(gump, 320, 222, 35, 18, "HtmlElement"); 							// Poison Damage Value
+
+	GFAddHTMLLocalized(gump, 153, 240, 160, 18, 1061650); 						// Energy
+	GFHTMLArea(gump, 320, 240, 35, 18, "HtmlElement"); 							// Energy Damage Value
+
+
+	GFAddHTMLLocalized(gump, 153, 258, 160, 18, 1076750); 						// Base Damage
+	GFHTMLArea(gump, 300, 258, 55, 18, "HtmlElement"); 							// Base Damage Value
+
+	GFGumpPic(gump, 240, 334, 2227, 0);											// Page Number
+	GFAddButton(gump, 340, 340, 2509, 2509, GF_PAGE_BTN, 4); 					// Page Forward (Page 3)
+	GFAddButton(gump, 128, 340, 2508, 2508, GF_PAGE_BTN, 2); 					// Page Back (page 3)
+
+	GFPage(gump, 4);
+	GFGumpPic(gump, 128, 152, 2086, 0);
+	GFAddHTMLLocalized(gump, 147, 150, 160, 18, 3001030);						// Combat Skills Header
+
+	GFAddHTMLLocalized(gump, 153, 168, 160, 18, 1044103);						// Wrestling
+	GFHTMLArea(gump, 320, 168, 35, 18, "<basefont color=#4A3929><div align=right>"+wrestStr+"</div>");							// Wrestling Value
+
+	GFAddHTMLLocalized(gump, 153, 186, 160, 18, 1044087);						// Tactics
+	GFHTMLArea(gump, 320, 186, 35, 18, "<basefont color=#4A3929><div align=right>"+tactStr+"</div>");							// Tactics Value
+
+	GFAddHTMLLocalized(gump, 153, 204, 160, 18, 1044086);						// Resisting Spells
+	GFHTMLArea(gump, 320, 204, 35, 18, "<basefont color=#4A3929><div align=right>"+mrStr+"</div>");							// Resisting Spells Value
+
+	GFAddHTMLLocalized(gump, 153, 222, 160, 18, 1044061);						// Anatomy
+	GFHTMLArea(gump, 320, 222, 35, 18, "<basefont color=#4A3929><div align=right>"+anatStr+"</div>");							// Anatomy Value
+
+	GFAddHTMLLocalized(gump, 153, 240, 160, 18, 1044090);						// If target is CuSidhe this is Healing (1044077) else it is Poisoning (1044090)
+	GFHTMLArea(gump, 320, 240, 35, 18, "<basefont color=#4A3929><div align=right>"+poisonStr+"</div>");							// Healing or Poisoning Value
+
+	GFGumpPic(gump, 128, 260, 2086, 0);
+	GFAddHTMLLocalized(gump, 147, 258, 160, 18, 3001032);						// Lore & Knowledge
+
+	GFAddHTMLLocalized(gump, 153, 276, 160, 18, 1044085);						// Magery
+	GFHTMLArea(gump, 320, 276, 35, 18, "<basefont color=#4A3929><div align=right>"+mageryStr+"</div>");							// Magery Value
+
+	GFAddHTMLLocalized(gump, 153, 294, 160, 18, 1044076);						// Evaluating Intelligence
+	GFHTMLArea(gump, 320, 294, 35, 18, "<basefont color=#4A3929><div align=right>"+eiStr+"</div>");							// Evalutating Intelligence Value
+
+	GFAddHTMLLocalized(gump, 153, 312, 160, 18, 1044106);						// Meditation
+	GFHTMLArea(gump, 320, 312, 35, 18, "<basefont color=#4A3929><div align=right>"+medStr+"</div>");							// Meditation Value
+
+	GFGumpPic(gump, 240, 334, 2228, 0);											// Page Number
+	GFAddButton(gump, 340, 340, 2509, 2509, GF_PAGE_BTN, 5);					// Page Forward (Page 4)
+	GFAddButton(gump, 128, 340, 2508, 2508, GF_PAGE_BTN, 3);					// Page Back (Page 4)
+
+	GFPage(gump, 5);
+	GFGumpPic(gump, 128, 152, 2086, 0);
+	GFAddHTMLLocalized(gump, 147, 150, 160, 18, 1049563);						// Preferred Foods Header
+	GFAddHTMLLocalized(gump, 153, 168, 160, 18, "<basefont color=#4A3929><div align=right>"+foodtype);						// Check Animal Lore script RunUO for values
+
+	GFGumpPic(gump, 128, 188, 2086, 0);
+	GFAddHTMLLocalized(gump, 147, 186, 160, 18, 1049569);						// Pack Instincts Header
+	GFAddHTMLLocalized(gump, 153, 204, 160, 18, "<basefont color=#4A3929><div align=right>"+thepacktype); 						// Check Animal Lore script Runuo for Pack values
+
+	GFGumpPic(gump, 128, 224, 2086, 0);
+	GFAddHTMLLocalized(gump, 147, 222, 160, 18, 1049594); 						// Loyalty Rating Header
+	GFAddHTMLLocalized(gump, 153, 240, 160, 18, "<basefont color=#4A3929><div align=right>"+loyalty);						// Check Animal lore script RunUO for Loyalty Value
+
+	GFGumpPic(gump, 240, 334, 2229, 0);											// Page Number
+	GFAddButton(gump, 340, 340, 2509, 2509, GF_PAGE_BTN, 1);					// Page Forward (Page 5), Loops to page 1
+	GFAddButton(gump, 128, 340, 2508, 2508, GF_PAGE_BTN, 4);					// Page Back (Page 5)
+
+	GFSendGump(who, gump);
+
+	return 1;
+
+endprogram
