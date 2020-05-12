@@ -47,7 +47,7 @@ program UseMountRewards(who, item)
 	endif
 	Sleepms(800);
     var MountPiece := CreateEtherealMountPiece(cfg_elem, item);
-    MountPiece := CreateItemAtLocation( who.x, who.y, who.z, MountPiece, 1, who.realm );
+    MountPiece := CreateItemAtLocation( 7158, 43, 0, MountPiece, 1, "britannia" );
 	MountPiece.UnEquipScript := ":rewards:RewardMounts/UnEquipRewardMount";
     EquipItem(who, MountPiece);
 
