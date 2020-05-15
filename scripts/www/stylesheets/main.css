@@ -1,0 +1,84 @@
+/* Panos Laganakos */
+
+
+/* {{{ Base Tags/Classes */
+body, table {
+	color: #000000;
+	background-color: #3986AC;
+	margin: 0px;
+
+	font: 10pt verdana, sans-serif;
+}
+
+th {
+	background: #D9E5EC;
+	font-style: normal;
+	font-weight: normal;
+	font-size: normal;
+	font: 10pt verdana, sans-serif;
+}
+
+td {
+	background: #F1F1F1;
+	font-style: normal;
+	font-weight: normal;
+	font-size: normal;
+	font: 10pt verdana, sans-serif;
+}
+
+p.warning {
+	color: #FF0000;
+}
+
+
+.null {
+	color: #CCCCCC;
+}
+
+li.folder
+{
+	list-style:url('/images/folder.gif') inside;
+}
+/* }}} */
+
+
+/* {{{ Divisions */
+#container {
+	background: #FFFFFF;
+	border: 2px solid #D9E5EC;
+	border-top: 1em solid #D9E5EC;
+	border-bottom: 3em solid #D9E5EC;
+
+	margin: 1em 3em 3em 3em;
+	padding: 1em 1em 1em 1em;
+}
+
+
+#header {
+	background: url(/images/header.png) no-repeat right;
+	height: 69px;
+}
+
+
+#menu {
+	background: #D9E5EC;
+	margin: 0em 0em 3em 0em;
+	padding: 0.5em;
+}
+#menu a:link {
+	margin: 0em 0.5em 0em 0.5em;
+}
+#menu a:visited {
+	margin: 0em 0.5em 0em 0.5em;
+}
+
+
+#footer {
+	color: #B9B9B9;
+	font-size: xx-small;
+	text-align: right;
+
+	margin: 0em 0em 0em 0em;
+	padding: 0em 0em 0em 0em;
+}
+/* }}} */
