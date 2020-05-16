@@ -1,0 +1,12 @@
+/* $Id: unloadall.src 373 2006-06-17 18:27:33Z austinheilman $
+ *
+ */
+
+use os;
+use uo;
+
+program textcmd_UnloadAll(who)
+	SendSysMessage(who, "Number of scripts unloaded: "+Unload_Scripts(""));
+
+	return 1;
+endprogram
