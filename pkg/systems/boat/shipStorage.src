@@ -1,7 +1,6 @@
 use os;
 use uo;
 
-include "include/utility";
 include "include/objtype";
 include ":boat:plankUtil";
 // include "../pkg/world/weather/weather";
@@ -17,7 +16,7 @@ program openshipstorage (character, shipstorage)
 		return;
 	endif
 	SendViewContainer (character, hold);
-	set_critical (0); 
+	set_critical (0);
 endprogram
 
 
