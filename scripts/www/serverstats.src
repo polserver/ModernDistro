@@ -22,13 +22,13 @@ Program HTMLPage()
 	else
 		OutputHTML();
 	endif
-	
+
 	return 1;
 endprogram
 
 function OutputXML()
 	WriteHTML("<CONTENT>");
-	
+
 	WriteHTML("<SERVER>");
 	WriteHTML("<CPU>"+CPU+"</CPU>");
 	WriteHTML("<RAM>"+RAM+"</RAM>");
@@ -38,7 +38,7 @@ function OutputXML()
 	WriteHTML("<LOCATION>"+LOCATION+"</LOCATION>");
 	WriteHTML("<TIMEZONE>"+TIMEZONE+"</TIMEZONE>");
 	WriteHTML("</SERVER>");
-	
+
 	var core_ref := POLCore();
 	WriteHTML("<POL>");
 	WriteHTML("<VERSION>"+core_ref.verstr+"</VERSION>");
@@ -52,9 +52,9 @@ function OutputXML()
 	WriteHTML("<RX>"+FormatBytes(core_ref.bytes_received)+"</RX>");
 	WriteHTML("<TX>"+FormatBytes(core_ref.bytes_sent)+"</TX>");
 	WriteHTML("</POL>");
-	
+
 	WriteHTML("</CONTENT>");
-	
+
 	return 1;
 endfunction
 
@@ -105,12 +105,12 @@ function OutputHTML()
 	WriteHTML("</DIV>");
 
 	WriteHTML("<DIV ID='footer'>");
-	WriteHTML("<P>Copyright &copy; 2006-2008 - POL Development Team.</P>");
+	WriteHTML("<P>Copyright &copy; 2006-2020 - POL Development Team.</P>");
 	WriteHTML("</DIV>");
 	WriteHTML("</DIV>");
 	WriteHTML("</BODY>");
 	WriteHTML("</HTML>");
-	
+
 	return 1;
 endfunction
 
