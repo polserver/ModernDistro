@@ -1,0 +1,43 @@
+use uo;
+use os;
+use util;
+use polsys;
+
+include ":npcs:NPCBackpacks";
+
+program fix_key_ring( mobile )
+	SendSysMessage( mobile, "Which keyring would you like to fix?", 0x3, 0x42 );
+	var old_ring := Target( mobile );
+
+	if( !old_ring )
+		SendSysMessage( mobile, "Cancelled action.", 0x3, 0x32 );
+		return 0;
+	elseif( old_ring.objtype != 0x1011 )
+		SendSysMessage( mobile, "That is not a keyring!", 0x3, 0x22 );
+		return 0;
+	endif
+
+	DuplicateKeyRing( mobile, old_ring );
+	return 1;
+endprogram
+
+function DuplicateKeyRing( mobile, keyring )
+	var new_keyring := CreateItemAtLocation( mobile.x, mobile.y, mobile.z, 0x1011, 1, mobile.realm ),
+		lockid := 0,
+		key_desc := 0,
+		key := 0;
+
+	var insidering := FindMyPack( keyring.serial );
+	foreach otherkey in EnumerateItemsInContainer( insidering )
+		Sleepms( 5 );
+		lockid := GetObjProperty( otherkey, "LockID" );
+		if( lockid )
+			key_desc := GetItemDescriptor( otherkey.objtype );
+			key_desc.CProps.Insert( "LockID", lockid );
+			key := CreateItemInContainer( new_keyring, key_desc, 1 );
+			if( key )
+				SetName( key, otherkey.desc );
+			endif
+		endif
+	endforeach
+endfunction

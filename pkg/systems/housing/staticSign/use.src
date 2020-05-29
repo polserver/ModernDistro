@@ -95,7 +95,7 @@ program use_static_sign( who, sign )
 			endif
 		endif
 
-		var lockid := AllocLockId();
+		var lockid := AllocateLockID();
 		packkey.SetLockId( lockid );
 		bankkey.SetLockId( lockid );
 		var box := ListObjectsInBox( nwx, nwy, -50, sex, sey, 50, sign.realm );
@@ -105,7 +105,7 @@ program use_static_sign( who, sign )
 		endif
 		foreach item in box
 		  if((item.objtype == UOBJECT_BRASS_SIGN) || (item.objtype == UOBJECT_WOOD_SIGN))
-			SetObjProperty(item, "LockId", lockid);
+			SetObjProperty(item, "LockID", lockid);
 		  else
 	//	    var arry := GetConfigStringKeys(doorcfg);
 	//	    foreach entry in arry
@@ -117,7 +117,7 @@ program use_static_sign( who, sign )
 					SetObjProperty(tile,"signserial", signserial);
 					tile.invisible := 1;
 					tile.movable := 0;
-					SetObjProperty(item, "LockId", lockid);
+					SetObjProperty(item, "LockID", lockid);
 				endif
 	//	    endforeach
 		  endif
@@ -337,9 +337,9 @@ function demolish( who, sign, nwx, nwy, sex, sey )
       itemt.movable := 1;
       EraseObjProperty(itemt, "lockeddown");
       SetObjProperty( sign, "numlockdowns", GetObjProperty( sign, "numlockdowns") + 1 );
-    elseif (GetObjProperty(itemt,"LockId"))
+    elseif (GetObjProperty(itemt,"LockID"))
       itemt.locked := 0;
-      EraseObjProperty(itemt,"LockId");
+      EraseObjProperty(itemt,"LockID");
       EraseObjProperty(itemt,"decay");
     elseif ((itemt.movable == 0) && ((itemt.x != sign.x) && (itemt.y != sign.y)))
 	if(!itemt.IsA(POLCLASS_DOOR))
@@ -351,7 +351,7 @@ function demolish( who, sign, nwx, nwy, sex, sey )
   EraseObjProperty(sign,"friendinfo");
   EraseObjProperty(sign,"builtdeed");
   EraseObjProperty(sign,"decay");
-  EraseObjProperty(sign,"LockId");
+  EraseObjProperty(sign,"LockID");
   EraseObjProperty(sign,"numsecure");
   EraseObjProperty(sign,"numlockdowns");
   EraseObjProperty(sign,"lastownername");
@@ -391,17 +391,17 @@ function ChangeHouseLocks( who, house, nwx, nwy, sex, sey )
   SendSysMessage( who, "Target the new master key." );
   var newkey := Target( who, "" );
   if( (newkey.IsKey()) && (!newkey.IsKeyRing()) )
-    var lockid := AllocLockId();
+    var lockid := AllocateLockID();
     var box := ListObjectsInBox( nwx, nwy, -50, sex, sey, 50, who.realm );
     newkey.SetLockId( lockid );
     foreach item in box
       if( ((item.objtype >= UOBJECT_DOORS_START) && (item.objtype <= UOBJECT_DOORS_END)))
         if (Distance(house, item) <= 2);
           item.locked := 1;
-          SetObjProperty(item, "LockId", lockid);
+          SetObjProperty(item, "LockID", lockid);
         endif
       elseif( (item.objtype == UOBJECT_BRASS_SIGN) || (item.objtype == UOBJECT_WOOD_SIGN) )
-        SetObjProperty(item, "LockId", lockid);
+        SetObjProperty(item, "LockID", lockid);
       endif
     endforeach
     SendSysMessage( who, "Locks Changed." );
@@ -417,7 +417,7 @@ function ChangeInteriorLocks( who, house, nwx, nwy, sex, sey )
       var arry := GetConfigStringKeys(doorcfg);
       foreach entry in arry
         if((CInt(entry) == item.objtype) && (Distance(house, item) >= 3))
-          var lockid := AllocLockId();
+          var lockid := AllocateLockID();
           SendSysMessage( who, "Target the new master key." );
           var newkey := Target( who, "" );
           if (!newkey)
@@ -427,7 +427,7 @@ function ChangeInteriorLocks( who, house, nwx, nwy, sex, sey )
           if( (newkey.IsKey() && !newkey.IsKeyRing()) )
             newkey.SetLockId( lockid );
             item.locked := 1;
-            SetObjProperty(item, "LockId", lockid);
+            SetObjProperty(item, "LockID", lockid);
             SendSysMessage( who, "The lock has been changed." );
           else
             SendSysMessage( who, "That is not a key!" );

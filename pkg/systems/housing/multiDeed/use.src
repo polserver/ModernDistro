@@ -79,23 +79,23 @@ function Buildhouse(who, deed)
   var lock := GetObjProperty(deed, "numlockdowns");
   var sec  := GetObjProperty(deed, "numsecure");
   if(DestroyItem(deed))
-    var lockid := AllocLockId();
+    var lockid := AllocateLockID();
     SetObjProperty(created.builtdeed, "builtserial",  created.house.serial);
     SetObjProperty(created.builtdeed, "new",          1);
     SetObjProperty(created.builtdeed, "numlockdowns", lock);
     SetObjProperty(created.builtdeed, "numsecure",    sec);
-    SetObjProperty(created.packkey,   "LockId",       lockid);
-    SetObjProperty(created.bankkey,   "LockId",       lockid);
+    SetObjProperty(created.packkey,   "LockID",       lockid);
+    SetObjProperty(created.bankkey,   "LockID",       lockid);
     SetObjProperty(created.house,     "numlockdowns", lock);
     SetObjProperty(created.house,     "numsecure",    sec);
     SetObjProperty(created.house,     "footage",      created.footage);
     foreach item in(created.house.components)
       if(((item.objtype >= UOBJECT_DOORS_START) &&(item.objtype <= UOBJECT_DOORS_END)) || item.objtype == UOBJECT_TENT_CHEST || item.objtype == 0x6ad)
         item.locked := 1;
-        SetObjProperty(item, "LockId", lockid);
+        SetObjProperty(item, "LockID", lockid);
         SetObjProperty(item, "signserial", created.house.serial);
       elseif((item.objtype == UOBJECT_BRASS_SIGN) || (item.objtype == UOBJECT_WOOD_SIGN) || (item.objtype == UOBJECT_WOOD_SIGNTWO))
-        SetObjProperty(item,"LockId",lockid);
+        SetObjProperty(item,"LockID",lockid);
         SetObjProperty(item, "signserial", created.house.serial);
         SetObjProperty(created.house, "signserial", item.serial);
       endif
@@ -185,7 +185,7 @@ function CreatehouseKeysAndBuiltDeed2(character, housetype, where, deed)
 	result .+ house := house;
 	result .+ footage := footage;
 	return result;
-endfunction 
+endfunction
 
 function CreatehouseKeysAndBuiltDeed(who, housetype, where, deed)
 	var bankbox	:= CP_GetStorageContainerForMobile( who, bank_region, CP_CREATE );

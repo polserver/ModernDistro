@@ -121,9 +121,9 @@ function demolish(sign)
       itemt.movable := 1;
       EraseObjProperty(itemt, "lockeddown");
       SetObjProperty(sign, "numlockdowns", GetObjProperty(sign, "numlockdowns") + 1);
-    elseif (GetObjProperty(itemt,"lockid"))
+    elseif (GetObjProperty(itemt,"LockID"))
       itemt.locked := 0;
-      EraseObjProperty(itemt,"lockid");
+      EraseObjProperty(itemt,"LockID");
       EraseObjProperty(itemt,"decay");
     elseif ((itemt.movable == 0) && ((itemt.x != sign.x) && (itemt.y != sign.y)))
 	if(!itemt.IsA(POLCLASS_DOOR))
@@ -135,7 +135,7 @@ function demolish(sign)
   EraseObjProperty(sign,"friendinfo");
   EraseObjProperty(sign,"builtdeed");
   EraseObjProperty(sign,"decay");
-  EraseObjProperty(sign,"lockid");
+  EraseObjProperty(sign,"LockID");
   EraseObjProperty(sign,"numsecure");
   EraseObjProperty(sign,"numlockdowns");
   EraseObjProperty(sign,"lastownername");

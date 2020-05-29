@@ -1,35 +1,21 @@
-/*
-        Maintained by The POL Distro Team
-
-        2018-07-25
-*/
 use uo;
 
-program OnInsert( who, keyring, movetype, insert_type, adding_item, existing_stack, amt_to_add )
+program OnInsert( mobile, keyring, movetype, insert_type, adding_item, existing_stack, amt_to_add )
 
-        //Avoid compiler warnings
-        amt_to_add := amt_to_add;
-        existing_stack := existing_stack;
-        insert_type := insert_type;
-        movetype := movetype;
-        
+	amt_to_add := amt_to_add;
+	existing_stack := existing_stack;
+	insert_type := insert_type;
+	movetype := movetype;
+
 	if( !adding_item.IsKey() )
-		SendSysMessage( who, "That is not a key." );
+		SendSysMessage( mobile, "Only keys can be put on a keyring.", 0x3, 0x22 );
+		return 0;
+	elseif( EnumerateItemsInContainer( keyring ).Size() >= keyring.MaxItems() )
+		SendSysMessage( mobile, "This keyring is full.", 0x3, 0x22 );
 		return 0;
 	endif
-	
-	SendSysMessage( who, "You put the key on the ring." );
-	
-	var numkeys := ( EnumerateItemsInContainer( keyring ).Size() )+1;
-	if( numkeys == 1 )
-		keyring.graphic := 5993;
-	elseif( numkeys >= 2 && numkeys <= 4 )
-		keyring.graphic := 5994;
-	elseif( numkeys >= 5 )
-		keyring.graphic := 5995;
-	endif
- 
-        SetObjProperty( keyring, "CantSteal", 1 );
-	
+
+	SendSysMessage( mobile, "You put the key on the ring." );
+
 	return 1;
 endprogram

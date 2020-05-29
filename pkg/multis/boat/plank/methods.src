@@ -1,0 +1,62 @@
+use uo;
+use os;
+use cfgfile;
+
+program Install()
+
+	return 1;
+endprogram
+
+//Public functions
+exported function Extend( plank )
+	if( !Extended( plank ))
+		plank.graphic := ConfigInfo( plank ).ChangeTo;
+	else
+		return 0;
+	endif
+endfunction
+
+exported function Retract( plank )
+
+	if( Extended( plank ))
+		if( CInt( Occupied( plank ).Size() ) < 1 )
+			plank.graphic := ConfigInfo( plank ).ChangeTo;
+			return 1;
+		else
+			return 0;
+		endif
+	else
+		return 0;
+	endif
+endfunction
+
+exported function Toggle( plank )
+
+	if( Extended( plank ))
+		Retract( plank );
+	else
+		Extend( plank );
+	endif
+endfunction
+
+exported function Extended( plank )
+
+	return ConfigInfo( plank ).Extended;
+endfunction
+
+exported function Occupied( plank )
+
+	return ListMobilesNearLocationEX( plank.x, plank.y, plank.z, 0, LISTEX_FLAG_NORMAL+LISTEX_FLAG_HIDDEN+LISTEX_FLAG_GHOST );
+endfunction
+
+exported function MoveOnto( plank, mobile )
+
+	MoveObjectToLocation( mobile, plank.x, plank.y, plank.z+1, plank.realm, MOVEOBJECT_FORCELOCATION );
+endfunction
+
+//Private function
+function ConfigInfo( plank )
+
+	var config := ReadConfigFile( ":boat:planks" );
+	return config[plank.graphic];
+endfunction

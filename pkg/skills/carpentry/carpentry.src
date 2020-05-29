@@ -181,8 +181,8 @@ function CarpentryItems(who, tool, objtype, amt)
 							SetObjProperty(theitem, "Lockable","1");
 							var lockid := CreateLockID();
 							var thekey := CreateItemInContainer(theitem, 0x100E, 1 );
-							SetObjProperty(thekey, "LockId", lockid);
-							SetObjProperty(theitem,"LockId", lockid);
+							SetObjProperty(thekey, "LockID", lockid);
+							SetObjProperty(theitem,"LockID", lockid);
 							SetObjProperty(theitem,"LockPickDiff", AP_GetSkill(who, TINKERING));
 							SendSysMessage(who, "Your tinker skill was sufficient to make the item lockable.");
 						endif

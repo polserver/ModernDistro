@@ -1,0 +1,105 @@
+use uo;
+use os;
+
+include ":itemutils:itemUtil";
+include "include/objtype";
+include ":multicommands:multicommands";
+include ":timeutils:time";
+include ":gumps:gumps";
+include ":keys:key";
+
+program UseBoatDeed( mobile, boat )
+
+	if( !useItem_check( mobile, boat, ITEM_INCONTAINER ))
+		return 0;
+	endif
+
+	var boat_serial := GetObjProperty( mobile, "HasBoat" );
+	if( boat_serial )
+		var boat := SystemFindObjectBySerial( boat_serial );
+		if( !boat )
+			EraseObjProperty( mobile, "HasBoat" );
+		else
+			SendSysMessage( mobile, "You already have a boat placed and can not place another." );
+			return 0;
+		endif
+	endif
+
+	var ship_name := boat.GetShipName();
+	if( ship_name.errortext )
+		SendSysMessage( mobile, "Error to get ship name -->"+ship_name.errortext );
+		return 0;
+	endif
+
+	var boat_flag := ForShipFacing( mobile );
+	var targ := Multi_GetTarget( mobile, ship_name, boat_flag, 10 );
+	if( !targ )
+		return 0;
+	endif
+
+	var multi := Multi_MakeMulti( mobile, ship_name, targ, boat_flag );
+	if( !multi )
+		return 0;
+	endif
+
+	var tillerman := multi.tillerman;
+	tillerman.SetShipType( boat.objtype );
+
+	var dest := DestroyItem( boat );
+	if( dest.errortext )
+		SendSysMessage( mobile, "Error destroying boat model -->"+dest.errortext, color := 33 );
+		return 0;
+	endif
+
+
+	tillerman.SetOwner( mobile );
+
+	SetObjProperty( mobile, "HasBoat", multi.serial );
+
+	MoveObjectToLocation( mobile, multi.x+1, multi.y+1, multi.z+3, multi.realm, MOVEOBJECT_FORCELOCATION );
+	// Create boat key
+	var LockID := AllocateLockId();
+	var key := CreateItemInBackpack(mobile, UOBJ_RUSTY_IRON_KEY);
+	key.SetLockId(LockID);
+	key.SetName("A boat key");
+	SetObjProperty(multi.portplank, "LockID", lockID);
+	SetObjProperty(multi.starboardplank, "LockID", lockID);
+	SetObjProperty(multi.hold, "LockID", lockID);
+
+	return 1;
+endprogram
+
+function ForShipFacing( mobile )
+	var gump := GFCreateGump();
+
+	GFClosable(gump, 0);
+	GFDisposable(gump, 0);
+	GFPage(gump, 0);
+	GFResizePic(gump, 15, 15, 9200, 220, 180);
+	GFResizePic(gump, 25, 25, 3000, 200, 160);
+	GFResizePic(gump, 35, 35, 3000, 180, 80);
+	GFAddButton(gump, 35, 120, 4005, 4007, GF_CLOSE_BTN, 1);
+	GFAddButton(gump, 130, 120, 4005, 4007, GF_CLOSE_BTN, 2);
+	GFAddButton(gump, 35, 150, 4005, 4007, GF_CLOSE_BTN, 3);
+	GFAddButton(gump, 130, 150, 4005, 4007, GF_CLOSE_BTN, 4);
+	GFAddHTMLLocalized(gump, 39, 39, 170, 70, 1116329);
+	GFTextLine(gump, 70, 120, 0, "WEST");
+	GFTextLine(gump, 165, 120, 0, "NORTH");
+	GFTextLine(gump, 70, 150, 0, "SOUTH");
+	GFTextLine(gump, 165, 150, 0, "EAST");
+
+	var input := GFSendGump(mobile, gump);
+
+	var flag;
+		input := input[0];
+
+	case( CInt( input ))
+		1:      flag := CRMULTI_FACING_WEST; break;
+		2:      flag := CRMULTI_FACING_NORTH; break;
+		3:      flag := CRMULTI_FACING_SOUTH; break;
+		4:      flag := CRMULTI_FACING_EAST; break;
+		Default:	SendSysMessage(mobile, "Cancelled."); break;
+	endcase
+
+	return flag;
+endfunction

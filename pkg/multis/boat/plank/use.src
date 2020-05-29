@@ -1,0 +1,29 @@
+use uo;
+
+include ":keys:key";
+
+program UsePlank( mobile, plank )
+
+	Detach();
+	var LockId := GetObjProperty(plank, "LockID");
+	if(plank.locked)
+		if(!KP_HasKeyForLock(mobile, LockId))
+			SendSysMessage(mobile, "That is locked.", color := 33);
+			return;
+		endif
+	endif
+
+	if( plank.Extended() )
+		if( mobile.multi != plank.multi )
+			if( Distance( mobile, plank ) <= 2 )
+				MoveObjectToLocation( mobile, plank.x, plank.y, plank.z+1, plank.realm, MOVEOBJECT_FORCELOCATION );
+			endif
+		else
+			plank.Retract();
+		endif
+	else
+		plank.Extend();
+	endif
+
+	return 1;
+endprogram

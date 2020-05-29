@@ -1,8 +1,3 @@
-/*
-        Maintained by The POL Distro Team
-
-        2018-07-25
-*/
 use uo;
 
 include ":keys:key";
@@ -31,13 +26,13 @@ program UseKey( who, key )
 		SendSysMessage( who, "That is not lockable." );
 		return 0;
 	endif
-	
+
 	if( key.KeyMatchesLock( targ ))
 		KP_ToggleLock( targ, who );
 	else
 		SendSysMessage( who, "This key does not match that lock." );
 	endif
-	
+
 	return 1;
 endprogram
 
@@ -45,7 +40,7 @@ function RenameKey( who, key )
 
 	var new_name := RequestGump( who, "Enter a name for this key", "Maximum length is 20 characters.", key.desc, CANCEL_BTN_ON );
 	var name_len := Len( new_name );
-	
+
 	if( !new_name )
 		SendSysMessage( who, "Cancelled." );
 		return 0;
@@ -62,7 +57,7 @@ function RenameKey( who, key )
 endfunction
 
 function CopyKey( who, key, targ )
-	
+
 	var key_id := key.GetLockId();
 	if( !key_id )
 		SendSysMessage( who, "You can not copy a blank key." );
@@ -71,9 +66,9 @@ function CopyKey( who, key, targ )
 		SendSysMessage( who, "The destination key is not blank." );
 		return 0;
 	endif
-	
+
 	targ.SetLockId( key_id );
 	SendSysMessage( who, "Done copying keys." );
-	
+
 	return 1;
 endfunction

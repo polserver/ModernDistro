@@ -1,11 +1,27 @@
-/////////////////////////////////////////////////////////////////////////////
-// The boat control script has been moved into the 'boat' package
-// which can be found in pkg/std/boat
-/////////////////////////////////////////////////////////////////////////////
+/*
+        Maintened by Pol Distro Team
 
+        2009-10-29
+
+        Purpose
+        This script acts as a control script for a boat. Use it for navigation commands
+        (e.g. the tillerman control script), boat decay, etc.
+
+        Note
+        The boat control script has been moved into the 'boat' package
+        which can be found in /pkg/systems/boat/
+*/
+use uo;
 use os;
 
-program autostart_boat( param )
-	start_script( ":boat:boat", param );
-endprogram
+Program CoreScript_Boat( multi )
 
+	var result := Start_Script( ":boat:multi/listener", multi );
+	if( result.errortext )
+		PrintTextAbove( multi, "Error initializing control script" );
+		PrintTextAbove( multi, ""+result.errortext );
+	endif
+
+	return result;
+
+endprogram

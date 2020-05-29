@@ -284,8 +284,8 @@ function CreateTreasureChest(item)
   chest.locked :=  1;
   chest.movable := 0;
   chest.usescript := ":tinkering:tinkerTraps";
-  var lockid := AllocLockId();
-  SetObjProperty( chest, "lockid", lockid );
+  var lockid := AllocateLockID();
+  SetObjProperty( chest, "LockID", lockid );
   var lootgroup;
   var strngth := 0;
   case(lvl)

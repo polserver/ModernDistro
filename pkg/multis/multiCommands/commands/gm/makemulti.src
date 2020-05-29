@@ -1,0 +1,52 @@
+use uo;
+use cfgfile;
+
+include ":multicommands:multicommands";
+
+program textcmd_MakeMulti( mobile, text )
+
+        var targ := Multi_GetTarget( mobile, text, CRMULTI_IGNORE_ALL );
+        if( !targ )
+                return 0;
+        endif
+
+        if( CheckCustomHousing( mobile, text ))
+                targ.z := targ.z - 10;
+        endif
+
+        var multi := Multi_MakeMulti( mobile, text, targ, CRMULTI_IGNORE_ALL );
+        if( !multi )
+                return 0;
+        endif
+
+	return 1;
+endprogram
+
+function CheckCustomHousing( mobile, text )
+
+        var cfg_custom := ReadConfigFile( ":multicommands:itemdesc" );
+        if( cfg_custom.errortext )
+                SendSysMessage( mobile, "Error reading cfg <:multicommands:itemdesc> -->"+cfg_custom.errortext );
+                return 0;
+        endif
+
+        var multi_elem := cfg_custom[text];
+        if( multi_elem.errortext )
+                SendSysMessage( mobile, "Error reading multi elem <"+text+"> -->"+multi_elem.errortext );
+                return 0;
+        endif
+
+        var name := CStr( multi_elem.Name );
+        if( name["boat"] )
+                //Just make sure boat are not include.
+                return 1;
+        endif
+
+        var deed_obj := multi_elem.DeedObjType;
+        if( deed_obj )
+                //We do not want to include deed house.
+                return 0;
+        endif
+
+        return 1;
+endfunction

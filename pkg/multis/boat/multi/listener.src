@@ -1,0 +1,483 @@
+use uo;
+use os;
+use boat;
+use cfgfile;
+use util;
+
+include ":boat:cmdParser";
+include ":boat:autoPilot";
+include "include/eventID";
+include "include/sounds";
+include ":gumps:gumps";
+include ":multicommands:multicommands";
+
+// Global Variables
+var g_cmd_cfg;
+var g_cmd_list;
+var g_wrap_cfg;
+
+program BoatController( boat )
+
+	var sleep_mode := 0; // Boolean
+	var last_effects := 0; // Tracks time (integer)
+	var cur_cmd := 0;    // Config elem or struct.
+	var cur_map := 0;    // Struct, cur_pin and an array of coordinates.
+
+	if( !Initialize( boat ))
+		return 0;
+	endif
+
+	while( boat )
+		var ev;
+
+		if( sleep_mode )
+			if( last_effects < ReadGameClock() )
+				PlaySoundEffect( boat, 0x14 );
+				DoEncounter( boat );
+
+				last_effects := ReadGameClock() + 120;
+			endif
+
+			ev := Wait_For_Event(120);
+		else
+			ev := Wait_For_Event(0);
+			var delay := ( boat.tillerman ).GetSpeed();
+			SleepMS( delay );
+		endif
+
+		if( ev )
+			ProcessEvent( boat, ev, cur_cmd, cur_map );
+			sleep_mode := 0;
+		elseif( !GetMobileBoat( boat ))
+			cur_cmd := 0;
+			cur_map := 0;
+		elseif( cur_map )
+			FollowMap( boat, cur_cmd, cur_map );
+		elseif( cur_cmd )
+			DoCommand( boat, cur_cmd, cur_cmd );
+			sleep_mode := 0;
+		elseif( ShouldSleep() )
+			sleep_mode := 1;
+		endif
+	endwhile
+
+	return 1;
+endprogram
+
+function Initialize( boat )
+
+	g_cmd_cfg := ReadConfigFile( ":boat:commands" );
+	if( !g_cmd_cfg )
+		PrintTextAbove( boat.tillerman, "Unable to open config :boat:commands ->"+g_cmd_cfg.errortext );
+		return 0;
+	endif
+
+	g_cmd_list := GetConfigStringArray( g_cmd_cfg["Heirarchy"], "CMD" );
+	if( !g_cmd_list )
+		PrintTextAbove( boat.tillerman, "Unable to load command list heirarchy. "+g_cmd_list.errortext );
+		return 0;
+	endif
+
+	g_wrap_cfg := ReadConfigFile( ":boat:worldWrap" );
+	if( !g_wrap_cfg )
+		PrintTextAbove( boat.tillerman, "Unable to open config :boat:worldWrap ->"+g_wrap_cfg.errortext );
+		return 0;
+	endif
+
+	SetObjProperty( boat.tillerman, "#PID", GetPid() );
+
+	if( !( boat.tillerman ).GetOwner() )
+		SetObjProperty( boat.tillerman, "NameSpec", "awaiting owner" );
+		while( !( boat.tillerman ).GetOwner() )
+			Sleep(2);
+		endwhile
+		EraseObjProperty( boat.tillerman, "NameSpec" );
+	endif
+
+	RegisterForSpeechEvents( boat, 12 );
+
+	return 1;
+endfunction
+
+function ShouldSleep()
+
+	return Events_Waiting();
+endfunction
+
+function ProcessEvent( boat, byref ev, byref cur_cmd, byref cur_map )
+
+	if( Lower( ev.text ) == "drydock" )
+		DryDock( ev.source, boat );
+	endif
+
+    var tillerman := boat.tillerman;
+	if( !tillerman.IsOnBoat( ev.source ))
+		return 0;
+	elseif( ev.source == tillerman )
+		return 0;
+	elseif( ev.source.dead )
+		return 0;
+	elseif( ev.text )
+		var commands := ParseCommands( ev.text, g_cmd_list );
+		if( commands.Size() <= 0 )
+			return 0;
+		else
+			cur_map := 0;
+		endif
+
+		// Run the command(s) in the order spoken.
+		PrintTextAbove( tillerman, "Aye captain.", 3, 55 );
+		foreach command in ( commands )
+			var new_cmd := g_cmd_cfg[command];
+			DoCommand( boat, cur_cmd, new_cmd );
+			SleepMS(2);
+		endforeach
+
+		return 1;
+	elseif( ev.item )
+		// Cancel the current command, load the pin coordinates.
+		cur_cmd := 0;
+		cur_map := struct;
+		cur_map.+PinId := 1;
+		cur_map.+Coords := ( ev.item ).GetPins();
+
+		// Store the map pins and the current pin # on the tillerman.
+		// This is to support the commands 'Continue', 'Goto #' 'Nav' 'Single #' and 'Start'
+		SetObjProperty( tillerman, "MapInfo", cur_map );
+		return 1;
+	endif
+
+	return 0;
+endfunction
+
+function FollowMap( boat, byref cur_cmd, byref cur_map )
+
+	// Still working on this part.
+	var cur_pin := cur_map.Coords[cur_map.PinId];
+	if( boat.x == cur_pin.x && boat.y == cur_pin.y )
+		cur_map.PinId += 1;
+		cur_cmd := 0;
+		// Update the map info with the new pin ID for the "continue" command.
+		SetObjProperty( boat.tillerman, "MapInfo", cur_map );
+		return 1;
+	elseif( cur_map.PinId > cur_map.Coords.Size() )
+		cur_map := 0;
+		cur_cmd := 0;
+		return 1;
+	endif
+
+	//To-Do:
+	// Make it more intelligent to:
+	// Determine if it is faster to world-wrap to a location.
+	// Determine if it is better to go "forward-left" or "forward-right" rather than turn a bunch of times.
+	//
+
+	var next_spot := BresenhamLine( boat.x, boat.y, cur_pin.x, cur_pin.y );
+	var facing := GetFacing( boat.x, boat.y, next_spot.x, next_spot.y );
+
+	// Its dirty.. but it works, heh.
+	cur_cmd := struct;
+	cur_cmd.+Direction := 0; //Forward movement.
+	cur_cmd.+Move := 1;
+
+	if( facing != boat.facing )
+		cur_cmd.+Turn := DetermineTurnCode( boat, facing );
+	endif
+
+	DoCommand( boat, cur_cmd, cur_cmd );
+	if( !cur_cmd )
+		cur_map := 0;
+	endif
+
+	return 1;
+endfunction
+
+function DoCommand( boat, byref cur_cmd, new_cmd )
+
+        var tillerman := boat.tillerman;
+	if( new_cmd.Anchor == 2 )
+		if( !tillerman.IsAnchored() )
+			tillerman.SetAnchorStatus(1);
+			PrintTextAbove( tillerman, "The anchor has been lowered.", 3, 55 );
+		else
+			PrintTextAbove( tillerman, "The anchor has already been lowered.", 3, 55 );
+		endif
+
+		cur_cmd := 0;
+	elseif( new_cmd.Anchor == 1 )
+		if( tillerman.IsAnchored() )
+			tillerman.SetAnchorStatus(0);
+			PrintTextAbove( tillerman, "The anchor has been raised.", 3, 55 );
+		else
+			PrintTextAbove( tillerman, "The anchor is already raised.", 3, 55 );
+		endif
+
+		cur_cmd := 0;
+	elseif( new_cmd.Speed == 2 )
+                var speed := tillerman.GetSpeed();
+                var new_speed := CInt( speed - 50 );
+                if( new_speed < 250 )
+                        new_speed := 250;
+                endif
+
+                tillerman.SetSpeed( new_speed );
+	elseif( new_cmd.Speed == 1 )
+                var speed := tillerman.GetSpeed();
+                var new_speed := CInt( speed + 50 );
+                if( new_speed > 450 )
+                        new_speed := 450;
+                endif
+
+                tillerman.SetSpeed( new_speed );
+	elseif( !tillerman.IsAnchored() )
+		if( new_cmd.Turn )
+			ClosePlanks( boat );
+			TurnBoat( boat, new_cmd.Turn );
+			// Maintain the current command.
+		endif
+
+		if( new_cmd.Move )
+                        ClosePlanks( boat );
+			var orig_x := boat.x;
+			var orig_y := boat.y;
+
+			MoveBoatRelative( boat, new_cmd.Direction );
+			if( orig_x == boat.x && orig_y == boat.y )
+				// Unable to move.
+				PrintTextAbove( tillerman, "Arrr we hit land!", 3, 55 );
+                                SmackEveryone( boat );
+				cur_cmd := 0;
+			else
+				CheckWorldWrap( boat );
+				// Keep following this command
+				cur_cmd := new_cmd;
+			endif
+		endif
+
+		if( new_cmd.Stop )
+			cur_cmd := 0;
+		endif
+	endif
+
+	return 1;
+endfunction
+
+function CheckWorldWrap( boat )
+
+	var realm_elem := g_wrap_cfg[boat.realm];
+	if( !realm_elem )
+		return 0;
+	endif
+
+	var new_x := boat.x;
+	var new_y := boat.y;
+
+	if( boat.x >= realm_elem.MaxX )
+		new_x := realm_elem.MinX;
+	elseif( boat.x <= realm_elem.MinX )
+		new_x := realm_elem.MaxX;
+	elseif( boat.y >= realm_elem.MaxY )
+		new_y := realm_elem.MinY;
+	elseif( boat.y <= realm_elem.MinY )
+		new_y := realm_elem.MaxY;
+	else
+		return 0;
+	endif
+
+	var result := MoveObjectToLocation( boat, new_x, new_y, boat.z, boat.realm );
+	if( result.errortext )
+		PrintTextAbove( boat.tillerman, "Unable to move to "+new_x+" "+new_y+" "+boat.z+" "+boat.realm );
+		PrintTextAbove( boat.tillerman, "Reason ->"+result.errortext );
+	else
+		PrintTextAbove( boat.tillerman, "Yar.. around tha' world we go!", 3, 55 );
+	endif
+
+	return result;
+endfunction
+
+function ClosePlanks( boat )
+
+	var plank_a := boat.starboardplank;
+	var plank_b := boat.portplank;
+
+	if( plank_a.Extended() )
+		plank_a.Retract();
+	endif
+
+	if( plank_b.Extended() )
+		plank_b.Retract();
+	endif
+
+	return 1;
+endfunction
+
+function DryDock( byref mobile, boat )
+
+	var tillerman := boat.tillerman;
+	if( !tillerman.IsOwner( mobile ) )
+		return 0;
+	elseif( tillerman.IsOnBoat( mobile ) )
+		return 0;
+	elseif( !ConfirmDryDock( mobile ))
+		return 0;
+	endif
+	// Destroy the key.
+	var dunsel_key := DestroyBoatKey(mobile, boat);
+	if(!dunsel_key)
+		SysLog("Error --> :boat/multi/listener.src - Could not find key for boat ser# " + Cstr(boat.serial));
+	endif
+	foreach item in ( boat.items )
+		SleepMS( 5 );
+		MoveObjectToLocation( item, mobile.x, mobile.y, mobile.z, mobile.realm, MOVEOBJECT_FORCELOCATION+MOVEITEM_IGNOREMOVABLE );
+	endforeach
+
+	foreach item in ( EnumerateItemsInContainer( boat.hold, ENUMERATE_ROOT_ONLY ) )
+		SleepMS( 5 );
+		MoveObjectToLocation( item, mobile.x, mobile.y, mobile.z, mobile.realm, MOVEOBJECT_FORCELOCATION+MOVEITEM_IGNOREMOVABLE );
+	endforeach
+
+	var ship_type := tillerman.GetShipType();
+	var dest := Multi_DestroyMulti( boat );
+	if( dest.errortext )
+		PrintTextAbove( boat, dest.errortext );
+		return 0;
+	endif
+
+	EraseObjProperty( mobile, "HasBoat" );
+
+	var new_boat := CreateItemInContainer( mobile.backpack, ship_type, 1 );
+	if( new_boat.errortext )
+		SendSysMessage( mobile, "Error creating new boat in your backpack -->"+new_boat.errortext );
+		return 0;
+	endif
+
+	return 1;
+endfunction
+
+function ConfirmDryDock( mobile )
+	var gump := GFCreateGump();
+
+	GFPage(gump, 0);
+	GFResizePic(gump, 15, 15, 5054, 220, 170);
+	GFResizePic(gump, 25, 25, 3000, 200, 150);
+	GFAddHTMLLocalized(gump, 35, 35, 180, 80, 1018319, 1, 0); //Do you wish to dry dock this boat?
+	GFAddButton(gump, 35, 115, 4005, 4007, GF_CLOSE_BTN, 33);
+	GFAddButton(gump, 35, 140, 4005, 4007, GF_CLOSE_BTN, 42);
+	GFAddHTMLLocalized(gump, 70, 115, 140, 25, 1011011); //CONTINUE
+	GFAddHTMLLocalized(gump, 70, 140, 140, 25, 1011012); //CANCEL
+
+	var result := GFSendGump( mobile, gump );
+
+	if( !result )
+		SendSysMessage( mobile, "Canceled." );
+		return 0;
+	endif
+
+	return ( result[0] == 33 );
+endfunction
+
+function SmackEveryone( boat )
+
+	foreach mobile in ( boat.mobiles )
+		SleepMS( 5 );
+		PerformAction( mobile, 0x14 );
+		PlaySoundEffect( mobile, CInt( GetHumanDamagedSounds( mobile ) ) );
+	endforeach
+
+	return 1;
+endfunction
+
+function DoEncounter( boat )
+
+	//Resurrect dead mobiles near the boat...
+	foreach mobile in ( boat.mobiles )
+		SleepMS( 5 );
+		if( mobile.dead )
+			Resurrect( mobile );
+		endif
+	endforeach
+
+	if( RandomInt( 4 ) >= 1 )
+		return 0;
+	endif
+
+	//Spawn Random Monsters near the boat if people on boat...
+	if( boat.mobiles.Size() < 1 )
+		return 0;
+	endif
+
+	var x := boat.x + RandomInt(10)-5;
+	if( x > boat.x )
+		x += 5;
+	else
+		x -= 5;
+	endif
+
+	var y := boat.y + RandomInt(10)-5;
+	if( y > boat.y )
+		y += 5;
+	else
+		y -= 5;
+	endif
+
+	var creature := ( boat.tillerman ).GetSeafaringCreatures();
+	if( creature.errortext )
+		PrintTextAbove( boat.tillerman, "Error to get evil creature <"+creature+"> -->"+creature.errortext );
+		return 0;
+	endif
+
+	var z := GetMapInfo( x, y ).z;
+	var created := CreateNpcFromTemplate( creature, x, y, z, 0, boat.realm );
+	if( created.errortext )
+		PrintTextAbove( boat.tillerman, "Error creating creature <"+created+"> -->"+created.errortext );
+		return 0;
+	endif
+
+	var event := Struct{"type":=EVID_ENTEREDAREA, "source":=( boat.mobiles ).RandomEntry()};
+	SendEvent( created, event );
+
+	created.SaveOnExit := 0;
+
+	return 1;
+endfunction
+
+function GetMobileBoat( boat )
+
+	foreach mobile in ( ListMobilesNearLocation( boat.x, boat.y, boat.z, 12, boat.realm ) )
+		SleepMS( 5 );
+		if( !boat.tillerman.IsOnBoat( mobile ))
+			continue;
+		elseif( mobile.dead )
+			continue;
+		endif
+
+		return 1;
+	endforeach
+
+	return 0;
+endfunction
+
+function DestroyBoatKey(byref mobile, boat)
+	// Find the ship's key in mobile's backpack.
+	var keylockid;
+	foreach item in EnumerateItemsInContainer(mobile.backpack, ENUMERATE_ROOT_ONLY)
+		if(item.IsKey())
+			keylockid := GetObjProperty (item, "LockID");
+			if (item.KeyMatchesLock(boat.hold))
+					DestroyItem(item);
+				return 1;
+			endif
+		endif
+		if(item.IsKeyRing())
+			foreach key in EnumerateItemsInContainer (item)
+				keylockid := GetObjProperty (key, "LockID");
+				if (key.KeyMatchesLock(boat.hold))
+					MoveItemToContainer(key, mobile.backpack);
+					DestroyItem(key);
+					return 1;
+				endif
+			endforeach
+		endif
+	endforeach
+	return 0;
+endfunction

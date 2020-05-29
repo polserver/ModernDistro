@@ -1351,13 +1351,13 @@ sign := sign;
   if(chk == 0)
     var lockids := {}, id;
     foreach thing in (house.components)
-      id := GetObjProperty(thing, "LockId");
+      id := GetObjProperty(thing, "LockID");
       if(id)
         lockids.append(id);
       endif
     endforeach
     foreach thing in EnumerateItemsInContainer(who.backpack)
-      id := GetObjProperty(thing, "LockId");
+      id := GetObjProperty(thing, "LockID");
       if(id)
         if(id in lockids)
           DestroyItem(thing);
@@ -1367,7 +1367,7 @@ sign := sign;
 	var bankbox	:= CP_GetStorageContainerForMobile( who, bank_region, CP_CREATE );
     if(bankbox)
       foreach thing in EnumerateItemsInContainer(bankbox)
-        id := GetObjProperty(thing, "LockId");
+        id := GetObjProperty(thing, "LockID");
         if(id)
           if(id in lockids)
             DestroyItem(thing);
@@ -1467,18 +1467,18 @@ function ChangeLocks(who,house)
   SendSysMessage(who,"target the new master key.");
   var addonitem,newkey:=Target(who);
   if((newkey.objtype>=KEYSTART) &&(newkey.objtype<=KEYEND) &&(newkey.objtype!=KEYRING))
-    var lockid:=AllocLockId();
+    var lockid:=AllocateLockID();
     newkey.SetLockId(lockid);
     foreach item in(house.components)
       if(((item.objtype>=UOBJECT_DOORS_START) &&(item.objtype<=UOBJECT_DOORS_END)))
         item.locked := 1;
-        SetObjProperty(item,"LockId",lockid);
+        SetObjProperty(item,"LockID",lockid);
       endif
     endforeach
     addonitem:=CInt(GetObjProperty(house,"component2"));
     if(addonitem)
       addonitem.locked:=1;
-      SetObjProperty(addonitem,"LockId",lockid);
+      SetObjProperty(addonitem,"LockID",lockid);
     endif
     SendSysMessage(who,"Locks have been changed.");
   else

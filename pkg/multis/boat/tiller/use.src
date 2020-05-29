@@ -1,0 +1,35 @@
+use uo;
+use os;
+
+include ":gumps:yesNo";
+include ":gumps:gumps";
+
+program UseScript( mobile, tillerman )
+
+        if( mobile.warmode )
+		PrintTextAbove( tillerman, "Stop that, or I'll throw ye overboard!", 3, 55 );
+                return 0;
+        elseif( mobile.cmdlevel >= 3 )
+		if( !tillerman.GetOwner() )
+			TakeOverBoat( mobile, tillerman );
+		endif
+        endif
+
+        var script := Start_Script( ":boat:navigator/navigator", {mobile, tillerman} );
+        if( script.errortext )
+	        SendSysMessage( mobile, "Error starting script <:boat:navigator/navigator> -->"+script.errortext );
+        endif
+
+	return 1;
+endprogram
+
+function TakeOverBoat( mobile, tillerman )
+
+	if( YesNo( mobile, "Do you want to set yourself as the owner of this boat?" ))
+		tillerman.SetOwner( mobile );
+		SendSysMessage( mobile, "Done!" );
+		return 1;
+	endif
+
+	return 0;
+endfunction

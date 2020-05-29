@@ -1,0 +1,14 @@
+use uo;
+
+program keyring_onInsert( mobile, keyring, movetype, inserttype, key, existing_stack, amount_to_add )
+	mobile := mobile;
+	movetype := movetype;
+	inserttype := inserttype;
+	key := key;
+	existing_stack := existing_stack;
+	amount_to_add := amount_to_add;
+
+	keyring.UpdateGraphicID();
+
+	return 1;
+endprogram

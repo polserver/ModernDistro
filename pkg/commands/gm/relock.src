@@ -21,7 +21,7 @@ program relock( who )
 
     var lockid := key.GetLockId();
 
-    SetObjProperty( lockeditem, "lockid", lockid );
+    SetObjProperty( lockeditem, "LockID", lockid );
 
     SendSysMessage( who, "Changed the item to match that key." );
 

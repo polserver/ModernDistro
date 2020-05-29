@@ -1,0 +1,163 @@
+use uo;
+use os;
+
+include ":gumps:gumps";
+include ":gumps:requestGump";
+
+program kering_gump( mobile )
+	SendSysMessage( mobile, "What keyring do you want to view?", 0x3, 0x42 );
+	var targ := Target( mobile );
+
+	if( !targ )
+		SendSysMessage( mobile, "Canceled.", 0x3, 0x32 );
+		return 0;
+	endif
+
+	ShowKeyRingGump( mobile, targ );
+
+	return 1;
+endprogram
+
+function ShowKeyRingGump( byref mobile, byref keyring )
+	var gump := GFCreateGump( 50,50 ),
+		i := 1,
+		button_y := 42,
+		keys := EnumerateItemsInContainer( keyring );
+
+	if( !keys.Size() )
+		SendSysMessage( mobile, "There are no keys on this keyring.", 0x3, 0x32 );
+		return 0;
+	endif
+
+	SendSysMessage( mobile, "You open the keyring.", 0x3, 0x42 );
+	GFPage( gump, 0 );
+	GFResizePic( gump, 0, 0, 9200, 250, 479 );
+	GFPicTiled( gump, 10, 10, 230, 22, 2624 );
+	GFAddAlphaRegion( gump, 10, 10, 230, 22 );
+	GFHTMLArea( gump, 15, 13, 195, 26, "<BASEFONT color=#B0E0E6>"+keyring.desc+"</BASEFONT>", 0, 0 );
+	GFAddButton( gump, 210, 10, 4011, 4013, GF_CLOSE_BTN, 33 ); // (Tooltip) 1011404 Change Name
+	GFToolTip( gump, 1011404 );
+
+	GFPicTiled( gump, 10, 37, 230, 405, 2624 );
+	GFAddAlphaRegion( gump, 10, 37, 230, 405 );
+
+	for( i:=1; i<=keys.Size(); i:=i+1 )
+		GFAddButton( gump, 15, button_y, 2117, 2118, GF_CLOSE_BTN, 100+i ); // (Tooltip) 1011270 Remove Now! 1011403 Remove
+		GFToolTip( gump, 1011403 );
+		GFHTMLArea( gump, 35, button_y-2, 200, 22, "<BASEFONT color=#FFFFE0>"+keys[i].desc+"</BASEFONT>", 0, 0 );
+
+		button_y := button_y + 20;
+	endfor
+
+	GFPicTiled( gump, 10, 447, 230, 22, 2624 );
+	GFAddAlphaRegion( gump, 10, 447, 230, 22 );
+	GFHTMLArea( gump, 15, 450, 195, 26, "<BASEFONT color=#B0E0E6>"+"Remove All Keys From Keyring?"+"</BASEFONT>", 0, 0 );
+	GFAddButton( gump, 210, 447, 4017, 4019, GF_CLOSE_BTN, 42 );
+
+	var result := GFSendGump( mobile, gump );
+	if( !result )
+		SendSysMessage( mobile, "Canceled.", 0x3, 0x32 );
+		return 0;
+	endif
+	result := result[0];
+
+	if( result == 33 )
+		return RenameKeyRing( mobile, keyring );
+	elseif( result == 42 )
+		return RemoveAllKeys( mobile, keyring );
+	elseif( result >= 101 && result <= 121 )
+		return RemoveKey( mobile, keyring, keys[CInt( result - 100 )] );
+	endif
+endfunction
+
+function RenameKeyRing( byref mobile, byref keyring )
+	var new_name := RequestGump( mobile, "Enter a name for this keyring", "Maximum length is 20 characters.", keyring.desc, CANCEL_BTN_ON );
+	var name_len := Len( new_name );
+
+	if( !new_name )
+		SendSysMessage( mobile, "Canceled.", 0x3, 0x32 );
+		return 0;
+	elseif( name_len > 20 )
+		SendSysMessage( mobile, "That name is too long.", 0x3, 0x22 );
+		return 0;
+	elseif( name_len < 1 )
+		SendSysMessage( mobile, "That name is too short.", 0x3, 0x22 );
+		return 0;
+	elseif( new_name )
+		SetName( keyring, new_name );
+		return 1;
+	endif
+endfunction
+
+function RemoveKey( byref mobile, byref keyring, byref key )
+	if( key.container == keyring )
+		MoveItemToContainer( key, mobile.backpack );
+		keyring.UpdateGraphicID();
+		return 1;
+	else
+		SendSysMessage( mobile, "That key does not appear to be on the keyring.", 0x3, 0x22 );
+		return 0;
+	endif
+endfunction
+
+function RemoveAllKeys( byref mobile, byref keyring )
+	var gump := GFCreateGump( 50,50 ),
+		container := mobile.backpack,
+		moved := 0;
+
+	GFPage( gump, 0 );
+	GFResizePic( gump, 0, 0, 9200, 245, 204 );
+	GFPicTiled( gump, 10, 10, 225, 184, 2624 );
+	GFAddAlphaRegion( gump, 10, 10, 225, 184 );
+	GFHTMLArea( gump, 15, 15, 215, 120, "<BASEFONT color=#B0E0E6>"+"Are you sure you would like to remove all keys from the keyring?"+"</BASEFONT>", 0, 0 );
+	GFAddButton( gump, 15, 140, 4005, 4007, GF_CLOSE_BTN, 33 );
+	GFHTMLArea( gump, 50, 143, 180, 22, "<BASEFONT color=#32CD32>"+"Yes, place them in my pack."+"</BASEFONT>", 0, 0 );
+	GFAddButton( gump, 15, 167, 4017, 4019, GF_CLOSE_BTN, 42 );
+	GFHTMLArea( gump, 50, 170, 180, 22, "<BASEFONT color=#FF4500>"+"No, not right now."+"</BASEFONT>", 0, 0 );
+
+	var result := GFSendGump( mobile, gump );
+	result := result[0];
+	if( !result || result == 42 )
+		SendSysMessage( mobile, "Canceled.", 0x3, 0x32 );
+		return 0;
+	endif
+
+	SendSysMessage( mobile, "Target the container to put the keys into (target self to place keys in inventory).", 0x3, 0x42 );
+	var targ := Target( mobile );
+	if( !targ )
+		SendSysMessage( mobile, "Canceled.", 0x3, 0x32 );
+		return 0;
+	endif
+
+	if( targ == mobile || targ == mobile.backpack )
+		targ := mobile.backpack;
+	endif
+
+	if( targ.IsA( POLCLASS_CONTAINER ) )
+		if( targ != mobile.backpack )
+			if( !( targ in EnumerateItemsInContainer( mobile.backpack ) ) )
+				SendSysMessage( mobile, "Selected container must be in your inventory.", 0x3, 0x22 );
+				return 0;
+			endif
+		endif
+		container := targ;
+	else
+		SendSysMessage( mobile, "That is not a container.", 0x3, 0x22 );
+		return 0;
+	endif
+
+	foreach item in ( EnumerateItemsInContainer( keyring ) )
+		SleepMS( 5 );
+		moved := MoveItemToContainer( item, container );
+		if( moved.errortext )
+			SendSysMessage( mobile, "Could not remove key from keyring.", 0x3, 0x22 );
+			if( item.container != keyring )
+				MoveItemToContainer( item, keyring );
+			endif
+			return 0;
+		endif
+		keyring.UpdateGraphicID();
+	endforeach
+
+	return 1;
+endfunction

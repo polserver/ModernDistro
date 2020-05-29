@@ -630,11 +630,18 @@ function OpenStorage(who, targ, input_info)
 	var storage_area := input_info.name;
 
 	// Kind of a kludge, but oh well, deal with it!
+	if ( storage_area == "WorldBank" )
+		//SendViewContainer(who, targ.backpack);
+		storage_area := CP_DEFAULT_AREA;
+	endif
+
+	// Kind of a kludge, but oh well, deal with it!
 	if ( storage_area == "backpack" )
 		SendViewContainer(who, targ.backpack);
 		return 1;
 	else
-		var container := CP_GetStorageContainerForMobile(targ, storage_area, CP_NOCREATE);
+		//var container := CP_GetStorageContainerForMobile(targ, storage_area, CP_NOCREATE);
+		var container := CP_GetStorageContainerForMobile(targ, storage_area, CP_CREATE);
 		SendOpenSpecialContainer(who, container);
 		UpdateMobile( who, UPDATEMOBILE_RECREATE );
 		return;

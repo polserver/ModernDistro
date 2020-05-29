@@ -1,0 +1,18 @@
+use uo;
+use os;
+
+program textcommand_getMultiSerial( mobile )
+
+        var targ := Target( mobile );
+        if( !targ )
+                SendSysMessage( mobile, "Cancelled." );
+                return 0;
+        elseif( !targ.multi )
+                SendSysMessage( mobile, "No multi found at this location." );
+                return 0;
+        endif
+
+	SendSysMessage( mobile, "Multi Serial: "+targ.multi.serial );
+
+        return 1;
+endprogram

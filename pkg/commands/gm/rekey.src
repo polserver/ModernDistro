@@ -14,13 +14,13 @@ program rekey( who )
 
     if (lockeditem.isa(POLCLASS_DOOR) or lockeditem.isa(POLCLASS_CONTAINER))
 
-        var lockid := AllocLockId();
+        var lockid := AllocateLockID();
 
-        SetObjProperty( lockeditem, "lockid", lockid );
+        SetObjProperty( lockeditem, "LockID", lockid );
 
         var key := CreateItemInBackpack( who, 0x100f, 1 );
 		key.SetLockId(lockid);
-//        SetObjProperty( key, "lockid", lockid );
+//        SetObjProperty( key, "LockID", lockid );
 
         SendSysMessage( who, "Created a key in your pack.", color := 66 );
     else

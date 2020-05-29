@@ -53,7 +53,7 @@ program staticDestroy( sign )
 	  else
 	      if(item.IsA(POLCLASS_DOOR))
 			item.locked := 0;
-			EraseObjProperty(item, "LockId");
+			EraseObjProperty(item, "LockID");
 	      endif
 	  endif
 	endforeach

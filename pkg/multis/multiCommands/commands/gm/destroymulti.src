@@ -1,0 +1,31 @@
+use uo;
+
+include ":multicommands:multicommands";
+
+program textcmd_DestroyMulti( mobile, serial )
+
+        var multi;
+	if( !serial )
+		SendSysMessage( mobile, "Target an item in the multi." );
+		var targ := Target( mobile, TGTOPT_NOCHECK_LOS );
+		if( !targ.multi )
+			SendSysMessage( mobile, "It doesn't have a multi property." );
+			return 0;
+		endif
+                multi := targ.multi;
+        else
+        	multi := SystemFindObjectBySerial( CInt( serial ));
+                if( multi.errortext )
+                        SendSysMessage( mobile, "Error finding multi serial "+serial+" -->"+multi.errortext );
+                        return 0;
+                endif
+	endif
+
+        var dest := Multi_DestroyMulti( multi );
+        if( dest.errortext )
+                PrintTextAbove( multi, dest.errortext );
+                return 0;
+        endif
+
+	return 1;
+endprogram

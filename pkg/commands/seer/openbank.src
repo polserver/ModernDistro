@@ -1,15 +1,15 @@
 
 use uo;
 
-include "util/bank";
+include ":containers:storageAreas";
 
 program open_bank( who )
 
              var bankbox, whom;
              whom := Target (who);
-           
-             bankbox := FindBankBox( whom );
+
+             bankbox := CP_GetStorageContainerForMobile( whom, CP_DEFAULT_AREA, CP_CREATE );
 
              SendOpenSpecialContainer( who, bankbox );
-   
+
 endprogram

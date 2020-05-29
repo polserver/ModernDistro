@@ -1,0 +1,10 @@
+use uo;
+
+program CountItems(who)
+
+	SendSysMessage(who, "Target a container:", color := 88);
+	var thing := Target(who);
+	var stuff := EnumerateItemsInContainer(thing);
+	SendSysMessage(who, "The container holds " + CStr(stuff.Size()) + " item(s) inside.", color := 66);
+
+endprogram

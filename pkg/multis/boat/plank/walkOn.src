@@ -1,0 +1,24 @@
+use uo;
+use os;
+
+include "include/facings";
+
+program PlankWalkOn( mobile, plank )
+
+        plank := plank; //Avoid compiler warnings
+
+        var get_land := GetPointsByFacing( mobile.x, mobile.y, mobile.facing, 2 );
+        foreach pos in get_land
+	        var z_pos := GetStandingHeight( pos.x, pos.y, mobile.z, mobile.realm ).z;
+                if( CheckLosBetween( mobile.x, mobile.y, mobile.z, pos.x, pos.y, z_pos, mobile.realm ))
+                        var move := MoveObjectToLocation( mobile, pos.x, pos.y, z_pos, mobile.realm, MOVEOBJECT_FORCELOCATION );
+                        if( move )
+                                //We found the ground, abord searching.
+                                break;
+                        endif
+                endif
+                SleepMS(5);
+        endforeach
+
+	return 1;
+endprogram

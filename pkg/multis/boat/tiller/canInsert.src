@@ -1,0 +1,19 @@
+use uo;
+
+program canInsert( mobile, container, move_type, inserttype, adding_item, existing_stack, amount_to_add )
+
+        //Avoid compiler warnings
+        move_type := move_type;
+        inserttype := inserttype;
+        existing_stack := existing_stack;
+        amount_to_add := amount_to_add;
+
+
+	if( adding_item.IsA( POLCLASS_MAP ))
+		container.FollowMap( mobile, adding_item );
+	endif
+
+	MoveItemToContainer( adding_item, mobile.container );
+
+	return 1;
+endprogram

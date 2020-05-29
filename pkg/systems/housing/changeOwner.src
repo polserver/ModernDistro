@@ -58,7 +58,7 @@ program ChangeHouseOwner(who, title)
     var housetype := house.objtype;
     var footage := FindBoxArray(housetype, house);
     SetObjProperty(house, "footage", footage);
-    var lockid := AllocLockId();
+    var lockid := AllocateLockID();
     packkey.SetLockId( lockid );
     bankkey.SetLockId( lockid );
     var lists := GetObjProperty(house, "footage");
@@ -72,12 +72,12 @@ program ChangeHouseOwner(who, title)
     endforeach
     foreach itemt in itemlist
       if((itemt.objtype == UOBJECT_BRASS_SIGN) || (itemt.objtype == UOBJECT_WOOD_SIGN))
-        SetObjProperty(itemt, "LockId",       lockid);
+        SetObjProperty(itemt, "LockID",       lockid);
         SetObjProperty(itemt, "ownerserial",  who.serial);
         SetObjProperty(itemt, "owneracct",    who.acctname);
       elseif(((itemt.objtype >= UOBJECT_DOORS_START) && (itemt.objtype <= UOBJECT_DOORS_END)))
         itemt.locked := 1;
-        SetObjProperty(itemt, "LockId", lockid);
+        SetObjProperty(itemt, "LockID", lockid);
       else
         EraseObjProperty(itemt, "houseserial");
         if((GetObjProperty(itemt, "secure") == 1) && (itemt.movable == 0))

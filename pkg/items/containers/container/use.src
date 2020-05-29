@@ -17,7 +17,15 @@ program useContainer( mobile, container )
 //	if ( equipped.objtype == container.objtype )
 //		return 0;
 //	endif
-	
+
+	var LockId := GetObjProperty(container, "LockID");
+	if(container.locked)
+		if(!KP_HasKeyForLock(mobile, LockId))
+			SendSysMessage(mobile, "That is locked.", color := 33);
+			return;
+		endif
+	endif
+
 	var item_cfg := ReadConfigFile( ":*:itemdesc" );
 	item_cfg := item_cfg[container.graphic];
 

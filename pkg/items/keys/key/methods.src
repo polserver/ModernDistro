@@ -1,8 +1,3 @@
-/*
-        Maintained by The POL Distro Team
-        
-        2018-07-25
-*/
 use uo;
 
 program Install()
@@ -13,35 +8,35 @@ endprogram
 exported function IsKey( key )
 
 	key := key; // Avoid compiler warning
- 
+
 	return 1;
 endfunction
 
 exported function GetLockId( key )
 
-	return GetObjProperty( key, "LockId" );
+	return GetObjProperty( key, "LockID" );
 endfunction
 
 exported function SetLockId( key, lock_id )
 
-	SetObjProperty( key, "LockId", lock_id );
+	SetObjProperty( key, "LockID", lock_id );
 endfunction
 
 exported function KeyMatchesLock( key, lock_id )
 
 	if( lock_id.IsA( POLCLASS_ITEM ))
-		lock_id := GetObjProperty( lock_id, "LockId" );
+		lock_id := GetObjProperty( lock_id, "LockID" );
 	endif
 
 	var key_id := GetLockId( key );
 	if( !key_id )
 		return 0;
 	elseif( key_id != lock_id )
-                if( key_id == "Staff" )
-		          return 1;
-                else
-                          return 0;
-                endif
+		if( key_id == "Staff" )
+			return 1;
+		else
+			return 0;
+		endif
 	else
 		return 1;
 	endif

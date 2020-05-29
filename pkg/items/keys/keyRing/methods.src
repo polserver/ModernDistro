@@ -1,19 +1,33 @@
-/*
-        Maintained by The POL Distro Team
-        
-        2018-07-25
-*/
 use uo;
+use os;
+use cfgfile;
 
-program Install()
-
+program install_keyring_methods()
 	return 1;
 endprogram
 
-exported function IsKeyRing( keyring )
+exported function IsKeyring( keyring )
+	keyring := keyring;
 
-	keyring := keyring; // Avoid compiler warning
- 
 	return 1;
 endfunction
 
+exported function MaxItems( keyring )
+	var cfg_file := ReadConfigFile( ":keys:itemdesc" ),
+		cfg_elem := FindConfigElem( cfg_file, keyring.objtype );
+
+	return CInt( cfg_elem.Maxkeys );
+endfunction
+
+exported function UpdateGraphicID( keyring )
+	var key_count := Len( EnumerateItemsInContainer( keyring ) );
+	if( key_count < 1 )
+		keyring.graphic := 0x1011;
+	elseif( key_count < 3 )
+		keyring.graphic := 0x1769;
+	elseif( key_count < 5 )
+		keyring.graphic := 0x176A;
+	else
+		keyring.graphic := 0x176B;
+	endif
+endfunction

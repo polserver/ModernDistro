@@ -78,7 +78,7 @@ program ChangeHouseOwner(who, deed)
 	if(!MoveItemToContainer( deed, bankbox, x := -1, y := -1 ))
 		GumpPrompt(who, "I could not move the deed to your bankbox. It might be full. You need to make room for it in your bank.", hue := 33);
 	endif
-    var lockid := AllocLockId();
+    var lockid := AllocateLockID();
     packkey.SetLockId( lockid );
     bankkey.SetLockId( lockid );
     var box := ListObjectsInBox( nwx, nwy, -50, sex, sey, 50, sign.realm );
@@ -94,15 +94,15 @@ program ChangeHouseOwner(who, deed)
 		endif
 
 		if((item.objtype == UOBJECT_BRASS_SIGN) || (item.objtype == UOBJECT_WOOD_SIGN))
-			SetObjProperty(item, "LockId", lockid);
+			SetObjProperty(item, "LockID", lockid);
 		elseif(item.IsA(POLCLASS_DOOR))
 			item.locked := 1;
-			SetObjProperty(item, "LockId", lockid);
+			SetObjProperty(item, "LockID", lockid);
 			if(!tileflag)
 				var tile :=CreateItemAtLocation(item.x, item.y, item.z, 0x18889, 1, item.realm);
 				SetObjProperty(tile,"signserial", signserial);
 			endif
-			SetObjProperty(item, "LockId", lockid);
+			SetObjProperty(item, "LockID", lockid);
 		endif
 	//        endforeach
     endforeach

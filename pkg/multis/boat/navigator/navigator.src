@@ -1,0 +1,128 @@
+use uo;
+
+include ":gumps:gumps";
+include ":gumps:yesno";
+
+program UseScript( parms )
+
+        var mobile := parms[1],
+            tillerman := parms[2];
+
+	while( mobile.connected )
+		var text := Send_Commands( mobile, tillerman );
+		if( !text )
+			break;
+		endif
+	endwhile
+
+	return 1;
+endprogram
+
+function Send_Commands( mobile, tillerman )
+
+        //Initialize the gump
+        var gump := GFCreateGump();
+
+        //Load Main Background
+	GFResizePic( gump, 0, 0, GFGetCfgConst( "Defaults", "BackGround" ), 200, 375 );
+
+        GFResizePic( gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 172, 25 );
+
+        //BackgroundAreas
+	GFResizePic( gump, 15, 45, GFGetCfgConst( "Defaults", "ForeGround" ), 172, 320 );
+        GFAddAlphaRegion( gump, 0, 0, 200, 375 );
+
+	GFTextMid( gump, 15, 17, 185, 1720, "Boat Options" );
+
+        GFGumpPic( gump, 80, 110, 2529 );
+
+	GFAddButton( gump, 78, 60, 4500, 4500, GF_CLOSE_BTN, 0xA01 ); //North
+	GFAddButton( gump, 115, 70, 4501, 4501, GF_CLOSE_BTN, 0xA02 ); //North-East
+	GFAddButton( gump, 125, 110, 4502, 4502, GF_CLOSE_BTN, 0xA03 ); //East
+	GFAddButton( gump, 110, 150, 4503, 4503, GF_CLOSE_BTN, 0xA04 ); //Sud-East
+	GFAddButton( gump, 78, 160, 4504, 4504, GF_CLOSE_BTN, 0xA05 ); //Sud
+	GFAddButton( gump, 40, 150, 4505, 4505, GF_CLOSE_BTN, 0xA06 ); //Sud-West
+	GFAddButton( gump, 30, 110, 4506, 4506, GF_CLOSE_BTN, 0xA07 ); //West
+	GFAddButton( gump, 40, 70, 4507, 4507, GF_CLOSE_BTN, 0xA08 ); //North-West
+
+	GFAddButton( gump, 37, 215, 4014, 4015, GF_CLOSE_BTN, 0xA09 ); // Turn Left
+	GFTextLine( gump, 73, 215, 1720, "Turn Boat" );
+	GFAddButton( gump, 140, 215, 4005, 4006, GF_CLOSE_BTN, 0xA10 ); // Turn Rigth
+
+	GFAddButton( gump, 37, 245, 4017, 4018, GF_CLOSE_BTN, 0xA11 );
+	GFTextLine( gump, 73, 245, 1720, "Stop Boat" );
+
+	GFAddButton( gump, 37, 270, 4020, 4021, GF_CLOSE_BTN, 0xA16 );
+	GFTextLine( gump, 73, 270, 1720, "Drydock Boat" );
+
+	GFTextLine( gump, 50, 300, 1720, "Anchor" );
+	GFAddButton( gump, 35, 320, 5600, 5604, GF_CLOSE_BTN, 0xA12 );
+	GFTextLine( gump, 55, 320, 2100, "Raise" );
+	GFAddButton( gump, 35, 340, 5602, 5606, GF_CLOSE_BTN, 0xA13 );
+	GFTextLine( gump, 55, 340, 2100, "Drop" );
+
+	GFTextLine( gump, 130, 300, 1720, "Speed" );
+	GFAddButton( gump, 115, 320, 5600, 5604, GF_CLOSE_BTN, 0xA14 );
+	GFTextLine( gump, 135, 320, 2100, "Up" );
+	GFAddButton( gump, 115, 340, 5602, 5606, GF_CLOSE_BTN, 0xA15 );
+	GFTextLine( gump, 135, 340, 2100, "Down" );
+
+        //And now we need to know the answer...
+        var input := GFSendGump( mobile, gump );
+        if( !input )
+                return 0;
+        endif
+
+        var command;
+        if( input[0xA01] )
+                PrintTextAbove( mobile, "Forward" );
+                command := "Forward";
+        elseif( input[0xA02] )
+                PrintTextAbove( mobile, "Forward Right" );
+                command := "Forward Right";
+        elseif( input[0xA03] )
+                PrintTextAbove( mobile, "Right" );
+                command := "Right";
+        elseif( input[0xA04] )
+                PrintTextAbove( mobile, "Backward Right" );
+                command := "Backward Right";
+        elseif( input[0xA05] )
+                PrintTextAbove( mobile, "Back" );
+                command := "Back";
+        elseif( input[0xA06] )
+                PrintTextAbove( mobile, "Backward Left" );
+                command := "Backward Left";
+        elseif( input[0xA07] )
+                PrintTextAbove( mobile, "Left" );
+                command := "Left";
+        elseif( input[0xA08] )
+                PrintTextAbove( mobile, "Forward Left" );
+                command := "Forward Left";
+        elseif( input[0xA09] )
+                PrintTextAbove( mobile, "Turn Left" );
+                command := "Turn Left";
+        elseif( input[0xA10] )
+                PrintTextAbove( mobile, "Turn Right" );
+                command := "Turn Right";
+        elseif( input[0xA11] )
+                PrintTextAbove( mobile, "Stop" );
+                command := "Stop";
+        elseif( input[0xA12] )
+                PrintTextAbove( mobile, "Raise Anchor" );
+                command := "Raise Anchor";
+        elseif( input[0xA13] )
+                PrintTextAbove( mobile, "Drop Anchor" );
+                command := "Drop Anchor";
+        elseif( input[0xA14] )
+                PrintTextAbove( mobile, "Speed Up" );
+                command := "Speed Up";
+        elseif( input[0xA15] )
+                PrintTextAbove( mobile, "Speed Down" );
+                command := "Speed Down";
+        elseif( input[0xA16] )
+                PrintTextAbove( mobile, "Drydock" );
+                command := "Drydock";
+        endif
+
+	return tillerman.SendCmd( mobile, CStr( command ));
+endfunction
