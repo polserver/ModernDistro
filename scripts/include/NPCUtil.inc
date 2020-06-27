@@ -19,7 +19,7 @@ use cfgfile;
 //
 
 function NpcWander()
-    case RandomInt( 8 )
+    case (RandomInt( 8 ))
         0: 1: 2: 3: 4: 5:
             Move( Self().facing );
         6:

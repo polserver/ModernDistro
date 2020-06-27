@@ -234,7 +234,7 @@ function post_combat()
 endfunction
 
 function CloseDistance( opponent )
-  case Distance( me, opponent )
+  case (Distance( me, opponent ))
     1:
     0:       return 1;
     default: RunToward( opponent );

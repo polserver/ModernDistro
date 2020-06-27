@@ -120,7 +120,7 @@ program npcdeath(corpse)
   if(GetObjProperty(corpse, "summoned"))
     DestroyItem(corpse);
   elseif(GetObjProperty(corpse, "nocorpse"))
-    foreach item in EnumerateItemsInContainer(corpse);
+    foreach item in EnumerateItemsInContainer(corpse)
       MoveObjectToLocation(item, corpse.x, corpse.y, corpse.z, corpse.realm, MOVEOBJECT_FORCELOCATION);
     endforeach
     DestroyItem(corpse);
