@@ -645,7 +645,7 @@ function IsStoneArmor (byref armor)
 endfunction
 
 function IsStoneShield (byref shield)
-	case shield.graphic)
+	case (shield.graphic)
 		0x4205:
 		0x420B:
 			return 1;

@@ -44,7 +44,7 @@ program textcmd_CommandBar( mobile )
 		elseif( cur_menu == CMDLIST_BTN )
 			gump := RetrieveGump( main_elem, "CmdLvl-"+mobile.cmdlevel+"PkgList", mobile );
 		elseif( cur_menu == CMDLVLS_BTN )
-			gump := gump := RetrieveGump( main_elem, "Levels", mobile );
+			gump := RetrieveGump( main_elem, "Levels", mobile );
 		elseif( cur_menu == SETTINGS_BTN )
 			gump := SettingsMenu( mobile );
 		elseif( cur_menu == PKG_START )

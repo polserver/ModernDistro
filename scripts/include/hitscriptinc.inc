@@ -27,7 +27,7 @@ endfunction
 
 function AdjustNoto(attacker, defender)
 
-	if !(defender.dead)
+	if (!defender.dead)
 		return 0;
 	endif
 
@@ -38,7 +38,7 @@ function AdjustNoto(attacker, defender)
 	var KMod := 1;
 
 	Fame := Fame + CInt( (vFame / 10) / ( CInt(Log10(Fame)) + 1 ) );
-	if !(defender.npctemplate)
+	if (!defender.npctemplate)
 		vFame := CInt(vFame * 0.9);
 	endif
 
