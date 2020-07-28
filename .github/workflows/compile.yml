@@ -54,7 +54,7 @@ jobs:
         with:
           status: success
           job: Compile test
-          nofail: false
+          nofail: true
   notify_on_cancel:
     needs: compile_test
     runs-on: "ubuntu-latest"
