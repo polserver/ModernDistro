@@ -41,7 +41,6 @@ jobs:
         with:
           status: failure
           job: Compile test
-          nofail: false
   notify_on_success:
     needs: compile_test
     runs-on: "ubuntu-latest"
@@ -54,7 +53,6 @@ jobs:
         with:
           status: success
           job: Compile test
-          nofail: false
   notify_on_cancel:
     needs: compile_test
     runs-on: "ubuntu-latest"
@@ -67,4 +65,3 @@ jobs:
         with:
           status: cancelled
           job: Compile test
-          nofail: false
