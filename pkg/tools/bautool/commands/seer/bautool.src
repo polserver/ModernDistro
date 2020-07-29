@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// bautool - bequemes Erzeugen und Ver�ndern von Items und Itemgruppen
+// bautool - bequemes Erzeugen und Verändern von Items und Itemgruppen
 //
 // Author: Turley
 // eMail : michi.at.www@gmx.de
@@ -7,7 +7,7 @@
 // Konfigurationsdateien
 // - Menustruktur
 //   - bautoolmenues.cfg
-// - Erstellt Rechtecke mit Tiles (Zuf�llig oder nur einen)
+// - Erstellt Rechtecke mit Tiles (Zufällig oder nur einen)
 //   - bautoolrandom.cfg
 // - Erstellt einzelne Items
 //   - bautooleinzel.cfg
@@ -18,9 +18,9 @@
 // ToDo:
 // Zufallsding
 //  - Auswahlliste wie Random/Einzel/Sets
-//  - W�hlt aus plus Wahrscheinlichkeiten
+//  - Wählt aus plus Wahrscheinlichkeiten
 //  - Wenn fertig zusammengestellt Eck-Koords angeben und
-//    createn, immer auf Maph�he
+//    createn, immer auf Maphöhe
 
 Use cfgfile;
 Use os;
