@@ -13,10 +13,6 @@ CONST PROFILE_REQUEST_MODE := 0;
 CONST OFFSET_MODE := 3;
 
 exported function HandleCharProfileRequest( character, byref packet )
-
-
-	Start_Script("parseCharProfile", { character, packet });
-
+	Start_Script("parseCharProfile", array { character, packet });
 	return 1;
-
 endfunction

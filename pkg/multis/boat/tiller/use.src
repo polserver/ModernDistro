@@ -6,19 +6,19 @@ include ":gumps:gumps";
 
 program UseScript( mobile, tillerman )
 
-        if( mobile.warmode )
+	if( mobile.warmode )
 		PrintTextAbove( tillerman, "Stop that, or I'll throw ye overboard!", 3, 55 );
-                return 0;
-        elseif( mobile.cmdlevel >= 3 )
+		return 0;
+	elseif( mobile.cmdlevel >= 3 )
 		if( !tillerman.GetOwner() )
 			TakeOverBoat( mobile, tillerman );
 		endif
-        endif
+	endif
 
-        var script := Start_Script( ":boat:navigator/navigator", {mobile, tillerman} );
-        if( script.errortext )
-	        SendSysMessage( mobile, "Error starting script <:boat:navigator/navigator> -->"+script.errortext );
-        endif
+	var script := Start_Script( ":boat:navigator/navigator", array {mobile, tillerman} );
+	if( script.errortext )
+		SendSysMessage( mobile, "Error starting script <:boat:navigator/navigator> -->"+script.errortext );
+	endif
 
 	return 1;
 endprogram
