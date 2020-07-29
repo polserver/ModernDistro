@@ -30,7 +30,7 @@ include ":virtue:virtue";
 
 program gump_virtue_gump(who)
 
-	var choice := {};
+	var choice := array {};
 	var virtuedesc := "";
 	var virtueinfo := "Click a Virtue symbol to see its description.";
 
@@ -106,7 +106,7 @@ endprogram
 
 function showGump(who, virtuedesc)
 	var virtue_gump := GFCreateGump();
-	var result :={};
+	var result := array {};
 	result[0] := 0;
 	GFPage(virtue_gump, 0);
 

@@ -28,7 +28,7 @@ program textcmd_openGuild( mobile )
                 return 0;
         endif
 
-        var start := Start_Script( ":guilds:guildMenu", {targ, mobile} );
+        var start := Start_Script( ":guilds:guildMenu", array {targ, mobile} );
         if( start.errortext )
                 SendSysMessage( mobile, "Error starting <:guilds:guildMenu> from command viewGuild -->"+start.errortext );
         endif

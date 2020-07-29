@@ -9,7 +9,7 @@ include ":damage:damage";
 
 program OnDestroySpawnPoint(SpawnPoint)
 
-	var children := {};
+	var children := array {};
 	children := GetObjProperty(SpawnPoint, "Children");
 	var mobile;
 

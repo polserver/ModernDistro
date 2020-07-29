@@ -11,16 +11,16 @@ include ":virtue:settings";
 include "include/findCity";
 
 // virtues are the canonical names of the eight virtues.
-var virtues :=	{"valor", "honor", "compassion", "justice", "honesty", "spirituality", "sacrifice", "humility"};
+var virtues := array {"valor", "honor", "compassion", "justice", "honesty", "spirituality", "sacrifice", "humility"};
 
 // mantras are the words that must be spokenafter using the meditation skill near a shrine.
 // Their order corresponds to the order of the virtues above, ie. Ra must be spoken at the Valor shine,
 // Summ at the Honor shrint etc.
-var mantras :=  {"Ra",    "Summ",   "Mu",        "Beh",     "Ahm",     "Om",           "Cah",       "Lum"};
+var mantras := array {"Ra",    "Summ",   "Mu",        "Beh",     "Ahm",     "Om",           "Cah",       "Lum"};
 
 // words_of_power - These are never used in game but they are documented and are included here
 // for possible future expansion of the Distro. Their order corresponds to the order of the virtues above.
-var words_of_power := {"Inopia", "Infama", "Vilis", "Malum", "Fallax", "Ignavus", "Avidus", "Veramocor"};
+var words_of_power := array {"Inopia", "Infama", "Vilis", "Malum", "Fallax", "Ignavus", "Avidus", "Veramocor"};
 
 var settings := VS_GetSettingsCfgElem("Settings");
 

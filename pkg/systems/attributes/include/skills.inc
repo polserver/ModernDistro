@@ -385,7 +385,7 @@ function AwardPoints(who, skillid, skillpoints)
 			SetObjProperty(who,"SkillArray", skillarray);
 			endif
 			var skill := AP_AttributeNameToSkillId(attributeid);
-			var newarray := {};
+			var newarray := array {};
 			foreach thing in skillarray
 			if((thing != skill) and (GetBaseSkill(who, thing) > 0))
 				newarray.append(thing);

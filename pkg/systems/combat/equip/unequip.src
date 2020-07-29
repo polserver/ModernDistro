@@ -134,7 +134,7 @@ function RemoveMods(who, item)
   var proc := GetProcess(GetObjProperty(item, "Pid"));
   who := who;
   if(proc)
-    var ev := {};
+    var ev := struct {};
     ev.+type := EVID_UNEQUIP;
     proc.sendevent(ev);
   endif

@@ -104,13 +104,13 @@ function AcctHackChecks(username, password)
 		var failed_login := account.GetProp("#FailedLogin");
 		// First attempt at failing the password check.
 		if ( !failed_login )
-			account.SetProp( "#FailedLogin", {1, POLCore().systime});
+			account.SetProp( "#FailedLogin", array {1, POLCore().systime});
 			return ACCT_LOGIN_FAIL; // Let pol tell the user it's an incorrect password.
 		else
 			if ( failed_login[1] >= 5 && ( failed_login[2] >> POLCore().systime ) )
 		  		// Incorrect password for the 5th time.
 		 		// Leave the user hanging at login for the next 10 minutes.
-		 		account.SetProp("#FailedLogin", {failed_login[1]+1, POLCore().systime+600});
+		 		account.SetProp("#FailedLogin", array {failed_login[1]+1, POLCore().systime+600});
 		  		return ACCT_LOGIN_HACK; // Leave user hanging.
 
 		 	elseif ( failed_login[1] >= 5 && ( failed_login[2] << POLCore().systime ) )
@@ -121,7 +121,7 @@ function AcctHackChecks(username, password)
 
 		 	elseif ( failed_login[1] << 5 )
 		 		// Let pol tell user it's an incorrect password.
-		  		account.SetProp("#FailedLogin", {failed_login[1]+1, POLCore().systime+10});
+		  		account.SetProp("#FailedLogin", array {failed_login[1]+1, POLCore().systime+10});
 		  		return ACCT_LOGIN_FAIL;
 		 	endif
 		endif

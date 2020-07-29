@@ -8,7 +8,7 @@ include ":damage:damage";
 
 program use_spawnpoint(who, spawnpoint)
 
-	var spawneditdata := {};
+	var spawneditdata := array {};
 	EraseObjProperty(spawnpoint, "IgnoreLOS");
 	if(who.cmdlevel < 2)
 		return;
@@ -116,7 +116,7 @@ program use_spawnpoint(who, spawnpoint)
 		endif
 	endforeach
 	SendSysMessage(who, i);
-	var critterarray := {"ettins", "orchorde", "trolls", "lesserundead", "undead", "vermin", "orcs", "dracos", "lizardmen", "ratmen"};
+	var critterarray := array {"ettins", "orchorde", "trolls", "lesserundead", "undead", "vermin", "orcs", "dracos", "lizardmen", "ratmen"};
 	if(!i in critterarray)
 		var thecritter := CreateNpcFromTemplate(i, spawnpoint.x, spawnpoint.y, spawnpoint.z, 0, spawnpoint.realm);
 		if(!thecritter)

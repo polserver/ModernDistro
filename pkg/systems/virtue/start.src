@@ -7,9 +7,9 @@ program VirtueSystemStart()
 
 	print("Starting Virtue system");
 
-	var facets := {"Felucca", "Trammel", "Ilshenar"};
-	var relms := {"britannia", "britannia_alt", "ilshenar"};
-	var coordinates := {};
+	var facets := array {"Felucca", "Trammel", "Ilshenar"};
+	var relms := array {"britannia", "britannia_alt", "ilshenar"};
+	var coordinates := array {};
 	var shrine_marker;
 
 	foreach facet in facets

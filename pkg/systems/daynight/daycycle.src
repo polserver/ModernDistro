@@ -11,8 +11,8 @@ use cfgfile;
 	var daylength := GetConfigInt(elm, "Length");
 	var transition := GetConfigInt(elm, "Transition");
 	var nightlength := GetConfigInt(elm, "Night");
-	var dawnmsgs := { };
-	var duskmsgs := { };
+	var dawnmsgs := array { };
+	var duskmsgs := array { };
 	var season := "Spring";
 	var d, n, t, time, i;
 	

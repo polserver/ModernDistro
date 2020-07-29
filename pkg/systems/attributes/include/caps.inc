@@ -25,7 +25,7 @@ endfunction
 
 function AP_NewSkillCaps( who )
 
-	var cap_array := {},
+	var cap_array := array {},
 	attributes := AP_ListAttributesByType( "Skill" );
 
 	foreach skill in attributes

@@ -76,7 +76,7 @@ function strengthBoost(who,item)
     gain := 5;
   endif
   SetObjProperty(item, "#equipped", who.serial);
-  var parms := {who, item};
+  var parms := array {who, item};
   start_script("chargeUpkeep", parms);
   return 1;
 endfunction
@@ -124,7 +124,7 @@ function invisibility(who,item)
     gain := 5;
   endif
   SetObjProperty(item, "#equipped", who.serial);
-  var parms := {who, item};
+  var parms := array {who, item};
   start_script("chargeUpkeep", parms);
   return 1;
 endfunction
@@ -135,7 +135,7 @@ function sight(who,item)
     gain := 5;
   endif
   SetObjProperty(item, "#equipped", who.serial);
-  var parms := {who, item};
+  var parms := array {who, item};
   start_script("chargeUpkeep", parms);
   return 1;
 endfunction
@@ -146,7 +146,7 @@ function protection(who,item)
     gain := 5;
   endif
   SetObjProperty(item, "#equipped", who.serial);
-  var parms := {who, item};
+  var parms := array {who, item};
   start_script("chargeUpkeep", parms);
   return 1;
 endfunction
@@ -157,7 +157,7 @@ function reflect(who,item)
     gain := 5;
   endif
   SetObjProperty(item, "#equipped", who.serial);
-  var parms := {who, item};
+  var parms := array {who, item};
   start_script("chargeUpkeep", parms);
   return 1;
 endfunction

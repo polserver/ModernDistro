@@ -10,7 +10,7 @@ include ":damage:damage";
 include "include/dist";
 include "util/bank";
 
-var npclist := {};
+var npclist := array {};
 var spawn, amt, item, status;
 var cfgfile := ReadConfigFile("::gzone");
 var npccfg  := ReadConfigFile("::npcdesc");

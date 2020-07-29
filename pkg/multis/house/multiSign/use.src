@@ -12,14 +12,14 @@ const KEYSTART := 0x100e;
 const KEYEND := 0x1013;
 const KEYRING := 0x1011;
 
-var nonlayout := {
+var nonlayout := array {
  "page 0",
  "gumppic 240 0 100",
  "text 270 30 48 0",
  "text 270 50 48 31"
  };
 
-var nondata := {
+var nondata := array {
 ""
 };
 
@@ -238,7 +238,7 @@ var data := array(
 
 
 
-var layoutbanlift := {
+var layoutbanlift := array {
 "page 0",                                // Page 0
 "resizepic 100 100 2600 400 300",        // Grey background
 "resizepic 147 359 5100 310 25",         // Square Grey box
@@ -294,7 +294,7 @@ var layoutbanlift := {
 
 };
 
-var databanlift := {
+var databanlift := array {
 "Lift a Ban",
 "",
 "",
@@ -379,7 +379,7 @@ var layoutfriendremove := {
 
 };
 
-var datafriendremove := {
+var datafriendremove := array {
 "Remove a friend",
 "",
 "",
@@ -409,7 +409,7 @@ var datafriendremove := {
 };
 
 
-var layoutfriendlist := {
+var layoutfriendlist := array {
 "page 0",                                // Page 0
 "resizepic 100 100 2600 400 300",        // Grey background
 "resizepic 147 359 5100 310 25",         // Square Grey box
@@ -445,7 +445,7 @@ var layoutfriendlist := {
 
 };
 
-var datafriendlist := {
+var datafriendlist := array {
 "Friends of the house",
 "",
 "",
@@ -475,7 +475,7 @@ var datafriendlist := {
 };
 
 
-var layoutbanlist := {
+var layoutbanlist := array {
 "page 0",                                // Page 0
 "resizepic 100 100 2600 400 300",        // Grey background
 "resizepic 147 359 5100 310 25",         // Square Grey box
@@ -511,7 +511,7 @@ var layoutbanlist := {
 
 };
 
-var databanlist := {
+var databanlist := array {
 "Enemies of the house",
 "",
 "",
@@ -543,7 +543,7 @@ var databanlist := {
 
 
 
-var layoutcownremove := {
+var layoutcownremove := array {
 "page 0",                                // Page 0
 "resizepic 100 100 2600 400 300",        // Grey background
 "resizepic 147 359 5100 310 25",         // Square Grey box
@@ -597,7 +597,7 @@ var layoutcownremove := {
 "button 160 363 5223 5223 0 1 30"       // Previous Page
 };
 
-var datacownremove := {
+var datacownremove := array {
 "Remove a Co-owner",
 "",
 "",
@@ -627,7 +627,7 @@ var datacownremove := {
 };
 
 
-var layoutcownlist := {
+var layoutcownlist := array {
 "page 0",                                // Page 0
 "resizepic 100 100 2600 400 300",        // Grey background
 "resizepic 147 359 5100 310 25",         // Square Grey box
@@ -664,7 +664,7 @@ var layoutcownlist := {
 
 };
 
-var datacownlist := {
+var datacownlist := array {
 "Co-owners of the house",
 "",
 "",
@@ -693,7 +693,7 @@ var datacownlist := {
 ""
 };
 
-var checklayout := array(
+var checklayout := array (
 
 "page 0",
 "gumppic   0  50 0206            ",
@@ -737,7 +737,7 @@ var checklayout := array(
 "button  205 250  243  241 1 0  0"
 );
 
-var checkdata := array(
+var checkdata := array (
 "Declaring this house public will unlock",
 "the front doors and make them not lockable.",
 "Are you sure you want to do this?"

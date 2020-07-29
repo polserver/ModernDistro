@@ -10,9 +10,8 @@ include "include/mrcSpawn";
 include "include/utility";
 include "include/dist";
 include ":damage:damage";
-//include "util/bank";
 
-var npclist := {};
+var npclist := array {};
 var spawn, amt, item, status, rng, tmplate;
 var npccfg := ReadConfigFile("::npcdesc");
 

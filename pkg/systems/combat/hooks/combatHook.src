@@ -59,7 +59,7 @@ exported function Attack(attacker, defender)
 
 	// If ammo_consumed then start the missileAnim animation script.
 	if ( ammo_consumed )
-		Start_Script(":combat:missileAnim",{a_info, d_info});
+		Start_Script(":combat:missileAnim", array {a_info, d_info});
 	endif
 
 

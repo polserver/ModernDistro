@@ -4,13 +4,13 @@ use uo;
 
 include "include/math";
 include "include/eventID";
-var stff := {};
-var players := {};
-var coun := {};
-var gm := {};
+var stff := array {};
+var players := array {};
+var coun := array {};
+var gm := array {};
 
 program online_server()
-  stff := {};
+  stff := array {};
   while(1)
 	var ev := wait_for_event(3600);
 	if(ev)
@@ -86,7 +86,7 @@ function logoff(ev)
   endif
   SetObjProperty(who, "LastLog", ReadGameClock());
   if(who.cmdlevel >= 1)
-    var holder := {};
+    var holder := array {};
     foreach thing in stff
       if(thing != who)
         holder.append(thing);

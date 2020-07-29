@@ -379,7 +379,7 @@ function ProcessInput(who, account, input)
 	if ( input[0] > CHAR_INFO_START )
 		input := (input[0] - CHAR_INFO_START);
 		var char := account.GetCharacter(input).serial;
-		Start_Script(":commands:gm/info", {who, char});
+		Start_Script(":commands:gm/info", array {who, char});
 	elseif ( input[BAN_BTN] )
 		AccountBanner(who, account);
 	elseif ( input[DISABLE_BTN] )

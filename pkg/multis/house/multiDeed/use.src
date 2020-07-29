@@ -303,8 +303,8 @@ function FindBoxArray(housetype, house)
 endfunction
 
 function smallhousearray(house, x, y, z)
-  var boxarray := {};
-  var box1 := {};
+  var boxarray := array {};
+  var box1 := array {};
   box1.append(x - 2);
   box1.append(y - 2);
   box1.append(z + 7);
@@ -312,7 +312,7 @@ function smallhousearray(house, x, y, z)
   box1.append(y + 2);
   box1.append(z + 27);
   boxarray[1] := box1;
-  var banarray := {};
+  var banarray := array {};
   var bantile;
   bantile := CreateItemAtLocation(x-1, y+4, Z+4, "bantile", 1, house.realm);
   banarray.append(bantile.serial);
@@ -328,8 +328,8 @@ function smallhousearray(house, x, y, z)
 endfunction
 
 function largehousearray(house, x, y, z)
-  var boxarray := {};
-  var box1 := {};
+  var boxarray := array {};
+  var box1 := array {};
   box1.append(x - 6);
   box1.append(y - 6);
   box1.append(z + 7);
@@ -337,7 +337,7 @@ function largehousearray(house, x, y, z)
   box1.append(y + 5);
   box1.append(z + 27);
   boxarray[1] := box1;
-  var banarray := {};
+  var banarray := array {};
   var bantile;
     PrintTextAbove(house, "H: " + house.objtype);
   if(house.objtype == 0x6072)
@@ -372,8 +372,8 @@ function largehousearray(house, x, y, z)
 endfunction
 
 function twostoryarray(house, x, y, z)
-  var boxarray := {};
-  var box1 := {};
+  var boxarray := array {};
+  var box1 := array {};
   box1.append(x - 6);
   box1.append(y - 6);
   box1.append(z + 7);
@@ -389,7 +389,7 @@ function twostoryarray(house, x, y, z)
   box1.append(y + 5);
   box1.append(z + 47);
   boxarray[2] := box1;
-  var banarray := {};
+  var banarray := array {};
   var bantile;
   bantile := CreateItemAtLocation(x-4, y+7, Z+4, "bantile", 1, house.realm);
   banarray.append(bantile.serial);
@@ -408,8 +408,8 @@ function twostoryarray(house, x, y, z)
 endfunction
 
 function bigtowerarray(house, x, y, z)
-  var boxarray := {};
-  var box1 := {};
+  var boxarray := array {};
+  var box1 := array {};
   box1.append(x - 6);
   box1.append(y - 6);
   box1.append(z + 6);
@@ -425,7 +425,7 @@ function bigtowerarray(house, x, y, z)
   box1.append(y + 5);
   box1.append(z + 86);
   boxarray[2] := box1;
-  var banarray := {};
+  var banarray := array {};
   var bantile;
   bantile := CreateItemAtLocation(x-1, y+8, Z+3, "bantile", 1, house.realm);
   banarray.append(bantile.serial);
@@ -456,8 +456,8 @@ function bigtowerarray(house, x, y, z)
 endfunction
 
 function castlearray(house, x, y, z)
-  var boxarray := {};
-  var box1 := {};
+  var boxarray := array {};
+  var box1 := array {};
   box1.append(x - 14);
   box1.append(y - 14);
   box1.append(z     );
@@ -465,7 +465,7 @@ function castlearray(house, x, y, z)
   box1.append(y + 14);
   box1.append(z + 47);
   boxarray[1] := box1;
-  var banarray := {};
+  var banarray := array {};
   var bantile;
   bantile := CreateItemAtLocation(x-1, y+16, Z+3, "bantile", 1, house.realm);
   banarray.append(bantile.serial);
@@ -520,8 +520,8 @@ function castlearray(house, x, y, z)
 endfunction
 
 function keeparray(house, x, y, z)
-  var boxarray := {};
-  var box1 := {};
+  var boxarray := array {};
+  var box1 := array {};
   box1.append(x - 10);
   box1.append(y - 10);
   box1.append(z     );
@@ -529,7 +529,7 @@ function keeparray(house, x, y, z)
   box1.append(y + 11);
   box1.append(z + 47);
   boxarray[1] := box1;
-  var banarray := {};
+  var banarray := array {};
   var bantile;
   bantile := CreateItemAtLocation(x-1, y+11, Z+3, "bantile", 1, house.realm);
   banarray.append(bantile.serial);

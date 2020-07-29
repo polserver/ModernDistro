@@ -9,8 +9,8 @@ program spawnpointcontrol(spawnpoint)
   var spawn := GetObjProperty(spawnpoint, "Spawn");
   var amount := GetObjProperty(spawnpoint, "Amount");
   var i, x;
-  var spawnqueue := {};
-  var children := {};
+  var spawnqueue := array {};
+  var children := array {};
   spawn := GetObjProperty(spawnpoint, "Spawn");
   while(spawn == "NONE")
     sleep(10);
@@ -80,7 +80,7 @@ function KillChildren(spawnpoint)
     endforeach
   endif
   var amount := GetObjProperty(spawnpoint, "Amount");
-  var spawnqueue := {};
+  var spawnqueue := array {};
   children := {};
   for(i:=1; i<=amount; i:=i+1);
     spawnqueue[i] := "Empty";

@@ -5,19 +5,19 @@ use math;
 include ":attributes:attributes";
 include ":virtue:virtue";
 
-var nototitles :=
+var nototitles := array 
 {
-    {"Outcast",     "Wretched",     "Nefarious", "Dread",         "Dread"},
-    {"Despicable",  "Dastardly",    "Wicked",    "Evil",          "Evil"},
-    {"Scoundrel",   "Malicious",    "Vile",      "Villainous",    "Dark"},
-    {"Unsavory",    "Dishonorable", "Ignoble",   "Sinister",      "Sinister"},
-    {"Rude",        "Disreputable", "Notorious", "Infamous",      "Dishonored"},
-    {"None",        "Notable",      "Prominent", "Reknowned",     ""},
-    {"Fair",        "Upstanding",   "Reputable", "Distinguished", "Distinguished"},
-    {"Kind",        "Respectable",  "Proper",    "Eminent",       "Eminent"},
-    {"Good",        "Honorable",    "Admirable", "Noble",         "Noble"},
-    {"Honest",      "Commendable",  "Famed",     "Illustrious",   "Illustrious"},
-    {"Trustworthy", "Estimable",    "Great",     "Glorious",      "Glorious"}
+    array {"Outcast",     "Wretched",     "Nefarious", "Dread",         "Dread"},
+    array {"Despicable",  "Dastardly",    "Wicked",    "Evil",          "Evil"},
+    array {"Scoundrel",   "Malicious",    "Vile",      "Villainous",    "Dark"},
+    array {"Unsavory",    "Dishonorable", "Ignoble",   "Sinister",      "Sinister"},
+    array {"Rude",        "Disreputable", "Notorious", "Infamous",      "Dishonored"},
+    array {"None",        "Notable",      "Prominent", "Reknowned",     ""},
+    array {"Fair",        "Upstanding",   "Reputable", "Distinguished", "Distinguished"},
+    array {"Kind",        "Respectable",  "Proper",    "Eminent",       "Eminent"},
+    array {"Good",        "Honorable",    "Admirable", "Noble",         "Noble"},
+    array {"Honest",      "Commendable",  "Famed",     "Illustrious",   "Illustrious"},
+    array {"Trustworthy", "Estimable",    "Great",     "Glorious",      "Glorious"}
 };
 
 function AdjustNoto(attacker, defender)
