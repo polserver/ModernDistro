@@ -11,9 +11,9 @@ program	text_command_createnpc(who, template)
 
 
 
-	var	mercscripts := {"appraiser", "barber", "banker", "bucsBanker", "bucsTownHealer", "davesHealer",
+	var	mercscripts := array {"appraiser", "barber", "banker", "bucsBanker", "bucsTownHealer", "davesHealer",
 						"healer", "merchant", "stablemaster", "townguard", "townHealer"};
-	var	guardscripts := {"townGuard", "instakillGuard"};
+	var	guardscripts := array {"townGuard", "instakillGuard"};
 	var	npc_config := ReadConfigFile("::npcdesc");
 	var node :="";
 	var	NPC_entry;
@@ -104,7 +104,7 @@ endprogram
 
 	function DisplayNPCSelectionMenu (who)
 		var npcmenu := CreateMenu ("Select an NPC type:");
-		var thegroups := {};
+		var thegroups := array {};
 		var index := 1;
 		var Groups_cfg := ReadConfigFile("NPC_Groups");
 		var NPC_Groups := GetConfigStringKeys( Groups_cfg );
@@ -141,7 +141,7 @@ endprogram
 		endif
 
 		var npcmenu2 := CreateMenu ("Select an NPC type:");
-		var thenpcs := {};
+		var thenpcs := array {};
 		foreach entry in thenpctypes
 			var template := SplitWords (entry)[1];
 			var graphic := CInt (SplitWords (entry)[2]);

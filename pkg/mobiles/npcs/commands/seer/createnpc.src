@@ -24,9 +24,9 @@ include ":gumps:yesNo";
 
 program	text_command_createnpc(who, template)
 
-	var	mercscripts := {"appraiser", "barber", "banker", "bucsBanker", "bucsTownHealer", "davesHealer",
+	var	mercscripts := array {"appraiser", "barber", "banker", "bucsBanker", "bucsTownHealer", "davesHealer",
 						"healer", "merchant", "stablemaster", "townguard", "townHealer"};
-	var	guardscripts := {"townGuard", "instakillGuard"};
+	var	guardscripts := array {"townGuard", "instakillGuard"};
 	var	npc_config := ReadConfigFile("::npcdesc");
 	var node :="none";
 	var	NPC_entry;
@@ -113,8 +113,8 @@ endfunction
 
 function DisplayNPCSelectionMenu(who)
 
-	var Taxonomy_props := {};
-	var NPC_List := {};
+	var Taxonomy_props := array {};
+	var NPC_List := array {};
 	var Taxonomy_Selection := "";
 	var NPC_Selection := "";
 	var NPC_Taxonomy_df := OpenDataFile( ":npcs:NPCsByTaxonomy" );
@@ -123,7 +123,7 @@ function DisplayNPCSelectionMenu(who)
 
 	var Settings_cfg := ReadConfigFile(":npcs:settings");
 	var tax_elem := FindConfigElem( settings_cfg, "Taxonomy" );
-	var Tax_desc := {};
+	var Tax_desc := array {};
 	foreach Tax_prop in Taxonomy_props
 		Tax_desc[_Tax_prop_iter] := Tax_prop + " - " + GetConfigString( tax_elem, Tax_prop );
 	endforeach

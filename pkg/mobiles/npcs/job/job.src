@@ -174,9 +174,7 @@ endfunction
 
 function GetJobType (byref unused player, byref unused merchant)
 	// The following mods were added by Yukiko on 04-Oct-2006 to make this a general purpose "job" system.
-    var tradelist := {};
-
-    tradelist := {34, 37, 7, 11, 13, 23, 12, 44, 45, 18};
+    var tradelist := array {34, 37, 7, 11, 13, 23, 12, 44, 45, 18};
     var index:= RandomInt(9) +1;
     return tradelist[index];
 endfunction

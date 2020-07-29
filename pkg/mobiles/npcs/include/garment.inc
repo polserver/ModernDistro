@@ -55,7 +55,7 @@ function EquipItemString(who, str, lastcolor)
       var colorg := FindConfigElem(couleurs, params[2]);
       if(colorg)
         var str := GetConfigStringArray(colorg, "Color");
-        var ar := {};
+        var ar := array {};
         var rndint := RandomInt(len(str)) + 1;
         ar := SplitWords(str[rndint]);
         if(len(ar) > 1)
@@ -85,7 +85,7 @@ function EquipItemString(who, str, lastcolor)
       var itemg := FindConfigElem(vetements, objname);
       if(itemg)
         var str := GetConfigStringArray(itemg, "Item");
-        var newarray := {};
+        var newarray := array {};
         var i := 1;
         var sex := "";
         foreach str3 in str
