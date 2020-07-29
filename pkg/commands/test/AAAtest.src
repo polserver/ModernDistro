@@ -10,16 +10,16 @@ use uo;
 include ":attributes:attributes";
 
 program test_cmd(who, text)
+	text := text;
 
-		who.resist_fire_cap_mod := 100;
-		who.resist_cold_cap_mod := 100;
-		who.resist_energy_cap_mod := 100;
-		who.resist_physical_cap_mod := 100;
-		who.resist_poison_cap_mod := 100;
-		var level3 := CStr(11)+"\t"+CStr(11)+"\t"+CStr(11)+"\t"+CStr(10)+"\t"+CStr(10)+"\t"+CStr(10)+"\t"+CStr(10);
-		who.addBuff(1043, 10, 1075835, 1075836, level3);
-		SendSysMessage(who, "True Stat " + CStr(AP_GetTrueStat(who, DEXTERITY)), color := 88);
-		SendSysMessage(who, "Stat " + CStr(AP_GetStat(who, DEXTERITY)), color := 88);
-		SendSysMessage(who, "Magery " + CStr(AP_GetSkill(who, MAGERY)), color := 88);
-
+	who.resist_fire_cap_mod := 100;
+	who.resist_cold_cap_mod := 100;
+	who.resist_energy_cap_mod := 100;
+	who.resist_physical_cap_mod := 100;
+	who.resist_poison_cap_mod := 100;
+	var level3 := CStr(11)+"\t"+CStr(11)+"\t"+CStr(11)+"\t"+CStr(10)+"\t"+CStr(10)+"\t"+CStr(10)+"\t"+CStr(10);
+	who.addBuff(1043, 10, 1075835, 1075836, level3);
+	SendSysMessage(who, "True Stat " + CStr(AP_GetTrueStat(who, DEXTERITY)), color := 88);
+	SendSysMessage(who, "Stat " + CStr(AP_GetStat(who, DEXTERITY)), color := 88);
+	SendSysMessage(who, "Magery " + CStr(AP_GetSkill(who, MAGERY)), color := 88);
 endprogram

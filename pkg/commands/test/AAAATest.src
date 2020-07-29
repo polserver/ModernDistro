@@ -30,8 +30,7 @@ include ":timedScripts:timedScripts";
 include ":timedScripts:poisonUtil";
 include ":gumps:requestGump";
 
-program test_cmd(who, text)
-
+program test_cmd(who, unused text)
 	var trgt := Target(who);
 	SendSysMessage(who, cstr(trgt.Tactics));
 	trgt := Target(who);

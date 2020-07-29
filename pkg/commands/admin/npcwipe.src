@@ -28,7 +28,7 @@ endprogram
 */
 program npcwipe(who)
   set_critical(0);
-  var x, y, z;
+  var x, y; //, z;
   for(x:=6144; x>16; x:=x -32)
     for(y:=16; y<4096; y:=y+32)
 //      for(z:=-100; z<=100; z:=z+10)
