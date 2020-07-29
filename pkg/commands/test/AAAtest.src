@@ -9,9 +9,7 @@ use uo;
 
 include ":attributes:attributes";
 
-program test_cmd(who, text)
-	text := text;
-
+program test_cmd(who, unused text)
 	who.resist_fire_cap_mod := 100;
 	who.resist_cold_cap_mod := 100;
 	who.resist_energy_cap_mod := 100;
