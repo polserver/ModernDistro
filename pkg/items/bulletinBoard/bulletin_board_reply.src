@@ -19,7 +19,7 @@ exported function RequestMessage( mobile, byref packet )
 		return 1;
 	endif
 
-	return run_Script_to_completion( ":bulletinboard:scripts/items/bulletinBoard/use", { 3, mobile, bulletin_board, message } );
+	return run_Script_to_completion( ":bulletinboard:scripts/items/bulletinBoard/use", array { 3, mobile, bulletin_board, message } );
 endfunction
 
 exported function RequestMessageSummary( mobile, byref packet )
@@ -36,7 +36,7 @@ exported function RequestMessageSummary( mobile, byref packet )
 		return 1;
 	endif
 
-	return run_Script_to_completion( ":bulletinboard:scripts/items/bulletinBoard/use", { 4, mobile, bulletin_board, message } );
+	return run_Script_to_completion( ":bulletinboard:scripts/items/bulletinBoard/use", array { 4, mobile, bulletin_board, message } );
 endfunction
 
 exported function PostMessage(mobile, byref packet)
@@ -55,7 +55,7 @@ exported function PostMessage(mobile, byref packet)
 		endif
 	endif
 
-	return run_Script_to_completion( ":bulletinboard:scripts/items/bulletinBoard/use", { 5, mobile, packet } );
+	return run_Script_to_completion( ":bulletinboard:scripts/items/bulletinBoard/use", array { 5, mobile, packet } );
 endfunction
 
 exported function RemoveMessage( mobile, byref packet )

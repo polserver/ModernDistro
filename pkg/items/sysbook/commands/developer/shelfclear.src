@@ -25,11 +25,11 @@ program shelfclear(who)
 		return 0;
 	endif
 	var count := 0;
-	var bookshelf_keys := {};
+	var bookshelf_keys := array {};
 	var shelfdata := RetrieveOrInitBookshelfDB();
 	var shelf, bookshelf_object;
 	bookshelf_keys := shelfdata.Keys();
-	foreach key in bookshelf_keys
+	foreach key in bookshelf_keys // this look wrong, why iterate over emtpy array? Missing code?
 		shelf := shelfdata.FindElement(key);
 		bookshelf_object := SystemFindObjectBySerial(key);
 		if(bookshelf_object)

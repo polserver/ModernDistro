@@ -29,7 +29,7 @@ program use_scroll(who, scroll)
   var spellname := GetConfigString(element, "script");
   spellname := spellname; // compiler warning stopper
   PrintTextAbove( who, GetConfigString(element, "PowerWords") );
-  var parms := {};
+  var parms := array {};
   parms[1] := "#scroll";
   parms[2] := who;
   parms[3] := scroll;

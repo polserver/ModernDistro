@@ -3,9 +3,8 @@ use file;
 
 include "include/myUtil";
 
-var coinarray := {};
+var coinarray := array {};
 var createdamt := 0;
-
 
 function createcoins( cont, cointype, numcoins )
 
@@ -61,7 +60,7 @@ endfunction
 function Create60kStacksInContainer(what_container, type, numstacks)
 
   var quantity := 60000;
-  var stackarray := {};
+  var stackarray := array {};
   var success;
   var what;
   var  arrayindex := 1;

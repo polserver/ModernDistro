@@ -7,7 +7,7 @@ program OrderBoard (user, board )
   var curday := ReadGameClock()/(GetDayLength()*60);
   var input, i, oldday, topic, space, age;
  
-  var layout := {
+  var layout := array {
     "page 0",
     "resizepic 50 50 3600 540 380",
     "resizepic 75 25 3600 200 50",
@@ -50,7 +50,7 @@ program OrderBoard (user, board )
   // "checkbox 10 30 210 211 0 2001",
   };
 
-  var data := {
+  var data := array {
     board.name,
     "Welcome to my Order Board, Please palce an order."
   };

@@ -18,14 +18,14 @@ program smelt_that_ore (who, ore)
 
 	// If meditating stop meditation.
 	EraseObjProperty(who, "IsMeditating");
-	SendSysMessageCL(who, 500134, {}, 3, 33); // You stop meditating.
+	SendSysMessageCL(who, 500134, array {}, 3, 33); // You stop meditating.
 	// If healing with bandages, stop healing.
 	EraseObjProperty(who, "HealTimer");
 	if(!can_access(who, ore))
 		return;
 	endif
 	if(ore.movable == 0)
-		SendSysMessageCL(who, 501973, {}, 3, 33); // You cannot use that.
+		SendSysMessageCL(who, 501973, array {}, 3, 33); // You cannot use that.
 		return;
 	endif
 	// Get the info from itemdesc files for the "ore" being used
@@ -36,7 +36,7 @@ function SmeltOre(who, ore, ingot, difficulty)
 		return;
 	endif
 	if(!Accessible(who, ore))
-		SendSysMessageCL(who, 501975, {}, 3, 33); // That is too far away.
+		SendSysMessageCL(who, 501975, array {}, 3, 33); // That is too far away.
 		return;
 	endif
 	var forge := TargetCoordinates(who);
@@ -54,7 +54,7 @@ function SmeltOre(who, ore, ingot, difficulty)
 		// We have to check Line Of Sight (LOS) to the targetted location because TargetCoordinates() has no
 		// flags for LOS check as does Target().
 		if(!CheckLosBetween( who.x, who.y, who.z, forge.x, forge.y, forge.z, who.realm ))
-			SendSysMessageCL(who,500876, {}, 3, 33); // You can't see that.
+			SendSysMessageCL(who,500876, array {}, 3, 33); // You can't see that.
 			return;
 		endif
 		// If the distance between the player and the forge is greater than 2 squares
@@ -63,11 +63,11 @@ function SmeltOre(who, ore, ingot, difficulty)
 		// messages can have text inserted in them. See the cliloc.em documentation
 		// for more information.
 		if(dist > 2)
-		SendSysMessageCL(who, 501975, {}, 3, 33); // That is too far away.
+		SendSysMessageCL(who, 501975, array {}, 3, 33); // That is too far away.
 			return;
 		endif
 		if(Distance(who, ore) > 2)
-			SendSysMessageCL(who, 501976, {}, 3, 33); // The ore is too far away.
+			SendSysMessageCL(who, 501976, array {}, 3, 33); // The ore is too far away.
 			return;
 		endif
 		if(SkillCheck(who, MINING, CDbl(difficulty), 10) > 0)
@@ -77,7 +77,7 @@ function SmeltOre(who, ore, ingot, difficulty)
 			ReserveItem(ingots);
 			if(ingots)
 				if(DestroyItem(ore))
-					SendSysMessageCL(who,50198, {}, 3, 66); // You smelt the ore removing the impurities and put the metal in your backpack.
+					SendSysMessageCL(who,50198, array {}, 3, 66); // You smelt the ore removing the impurities and put the metal in your backpack.
 					return;
 				else
 					CreateItemAtLocation(who.x, who.y, who.z, ingot, (GetAmount(ore) * 2), who.realm);
@@ -87,7 +87,7 @@ function SmeltOre(who, ore, ingot, difficulty)
 			endif
 		else
 			SubtractAmount(ore, 1);
-			SendSysMessageCL(who, 501989, {}, 3, 33); // You burn away the impurities but are left with no useable metal.
+			SendSysMessageCL(who, 501989, array {}, 3, 33); // You burn away the impurities but are left with no useable metal.
 			return;
 		endif
 	else

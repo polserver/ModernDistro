@@ -80,7 +80,7 @@ function StartEffect(who, spellid, item)
 endfunction
 
 function cast_clumsy(caster, cast_on)
-  SetObjProperty(cast_on, "LastHit", {caster.name, caster.serial, "clumsy"});
+  SetObjProperty(cast_on, "LastHit", array {caster.name, caster.serial, "clumsy"});
   if(MWReflected(cast_on))
     cast_on := caster;
   endif
@@ -97,7 +97,7 @@ function cast_clumsy(caster, cast_on)
 endfunction
 
 function cast_feeblemind(caster, cast_on)
-  SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "feeblemind" });
+  SetObjProperty(cast_on, "LastHit", array {caster.name,caster.serial, "feeblemind" });
   if (MWReflected(cast_on))
     cast_on := caster;
   endif
@@ -126,7 +126,7 @@ function cast_heal(caster, cast_on)
 endfunction
 
 function cast_weaken(caster, cast_on)
-  SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "weaken" });
+  SetObjProperty(cast_on, "LastHit", array {caster.name,caster.serial, "weaken" });
   if(MWReflected(cast_on))
     cast_on := caster;
   endif
@@ -143,7 +143,7 @@ endfunction
 
 function cast_harm(caster, cast_on)
   var dmg := MWCalcSpellDamage(2, 20,cast_on);
-  SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "harm"});
+  SetObjProperty(cast_on, "LastHit", array {caster.name,caster.serial, "harm"});
   if (MWReflected(cast_on))
     cast_on := caster;
   endif
@@ -159,7 +159,7 @@ endfunction
 
 function cast_fireball(caster, cast_on)
   var dmg := MWCalcSpellDamage(3, 30,cast_on);
-  SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "harm"});
+  SetObjProperty(cast_on, "LastHit", array {caster.name,caster.serial, "harm"});
   if (MWReflected(cast_on))
     cast_on := caster;
   endif
@@ -186,7 +186,7 @@ function cast_greatheal(caster, cast_on)
 endfunction
 
 function cast_lightning(caster, cast_on)
-  SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "lightning bolt"});
+  SetObjProperty(cast_on, "LastHit", array {caster.name,caster.serial, "lightning bolt"});
   var bdmg := RandomDiceRoll("4d4");
   var dmg := MWresisted(40, cast_on, bdmg);
   if (dmg < 1)
@@ -204,7 +204,7 @@ function cast_lightning(caster, cast_on)
 endfunction
 
 function cast_manadrain(caster, cast_on)
-  SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "mana drain" });
+  SetObjProperty(cast_on, "LastHit", array {caster.name,caster.serial, "mana drain" });
   if (MWReflected(cast_on))
     var tmp := cast_on;
     cast_on := caster;

@@ -152,8 +152,8 @@ function Carve_Corpse(who, cadaver, blade, craftingbag)
     endforeach
     DestroyItem(cadaver);
   elseif((c_type == 400) || (c_type == 401))
-    var beardlist := {0x203e, 0x203f, 0x2040, 0x2041, 0x204b, 0x204c, 0x204d };
-    var hairlist  := {0x2044, 0x2045, 0x2046, 0x2047, 0x2048, 0x2049, 0x204a, 0x203b, 0x203c, 0x203d };
+    var beardlist := array {0x203e, 0x203f, 0x2040, 0x2041, 0x204b, 0x204c, 0x204d };
+    var hairlist  := array {0x2044, 0x2045, 0x2046, 0x2047, 0x2048, 0x2049, 0x204a, 0x203b, 0x203c, 0x203d };
     foreach thing in EnumerateItemsInContainer(cadaver)
       if((thing.objtype in hairlist) || (thing.objtype in beardlist))
         DestroyItem(thing);
@@ -161,7 +161,7 @@ function Carve_Corpse(who, cadaver, blade, craftingbag)
         MoveObjectToLocation(thing, cadaver.x, cadaver.y, cadaver.z, cadaver.realm, MOVEOBJECT_FORCELOCATION);
       endif
     endforeach
-    var partsarray := {};
+    var partsarray := array {};
     var part;
     part := CreateItemAtLocation(cadaver.x-1, cadaver.y, cadaver.z, 0x1da0, 1, who.realm);
     partsarray.append(part);

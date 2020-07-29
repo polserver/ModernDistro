@@ -10,7 +10,7 @@ program use_decorator(who, theDecorator)
 var doMultiCheck := !(who.cmdlevel >= CMD_LEVEL_OVERRIDE);
 var theManipulation := GetObjProperty(theDecorator, "Manipulation");
 var theTarget;
-var origLoc := {};
+var origLoc := array {};
 
   if (theManipulation == error)
     theManipulation := "up";

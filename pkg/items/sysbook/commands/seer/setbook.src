@@ -16,7 +16,7 @@ use uo;
 use os;
 use util;
 
-var layout := {
+var layout := array {
   "page 0                         ",
   "gumppic   0   0 2321           ",
   "text    150  14    0    0      ",
@@ -39,7 +39,7 @@ var layout := {
   "radio   100 105 1209 1210 0 7  "
 };
 
-var data := {
+var data := array {
   "Book Graphic",
   "Random",
   " R/W",

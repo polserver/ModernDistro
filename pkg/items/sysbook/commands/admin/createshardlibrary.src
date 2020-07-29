@@ -26,7 +26,7 @@ program createshardlibrary(who)
 		return 0;
 	endif
 	var bookContents := struct;
-	var book_keys := {};
+	var book_keys := array {};
 	var book := 0;
 
 	// The extra spaces in the second string are to make the question the last line of text in the gump.

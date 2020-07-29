@@ -27,13 +27,13 @@ program shelfstock(who);
 		return 0;
 	endif
 
-	var bookshelf_keys := {};
+	var bookshelf_keys := array {}; 
 	var shelfdata := RetrieveOrInitBookshelfDB();
 	var shelf, bookshelf_object;
 	var max_books := 0;
 	var num_books := 0;
 	var num_to_add := 0;
-	foreach key in bookshelf_keys
+	foreach key in bookshelf_keys // this look wrong, why iterate over emtpy array? Missing code?
 		shelf := shelfdata.FindElement(key);
 		max_books := CInt(shelf.GetProp("MaxBooks"));
 		bookshelf_object := SystemFindObjectBySerial(key);

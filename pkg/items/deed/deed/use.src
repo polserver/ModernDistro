@@ -127,8 +127,8 @@ function BuildandSendOrientGump ( who, deed, sign, targ )
 endfunction
 
 function BuildItem ( who, deed, sign, targ, buildCFG, RetainColor, direction )
-	var created := {},
-	    the_serials	:= {};
+	var created := array {};
+	var the_serials	:= array {};
 	var cfg	:= ReadConfigFile ( buildCFG );
     if ( cfg.errortext )
         SendSysMessage ( who, "Error reading config Build CFG -->"+cfg.errortext );

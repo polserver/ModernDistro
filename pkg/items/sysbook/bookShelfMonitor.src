@@ -30,7 +30,7 @@ var SpawnOneBook := sysbook_settings.SpawnOneBook;
 
 program shelfstock();
 
-	var bookshelf_keys := {};
+	var bookshelf_keys := array {};
 	var shelfdata := RetrieveOrInitBookshelfDB();
 	var shelf, bookshelf_object;
 	var max_books := 0;

@@ -36,7 +36,7 @@ program BountifulChest(BountifulChest)
 	var time_until_next_dupe := CInt(BC_GetSettingsCfgElem("BountifulChest").TimeUntilNextDupe);
 
 	// plants holds the contents of the root container.
-	var plants := {};
+	var plants := array {};
 
 	// num_duplicates is a CProp placed on the herbal reagent placed in the chest by the player.
 	// It holds the number of times that herbal reagent has been copied.

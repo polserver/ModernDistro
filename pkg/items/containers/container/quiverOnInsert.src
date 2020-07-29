@@ -9,7 +9,7 @@ include ":containers:checks";
 
 program quiverCanInsert( character, container, unused movetype, unused inserttype, adding_item, unused existing_stack, unused amount_to_add )
 	// Add to this list for addtional ammo objtypes allowed in quivers.
-	var ammo_list := { 0xf3f, 0x1bfb };
+	var ammo_list := array { 0xf3f, 0x1bfb };
 
 	if( CP_IsLocked( container ))
 		SendSysMessage( character, "You can't insert items into locked containers." );

@@ -21,17 +21,17 @@ include ":sysbook:spawnShelf";
 
 program addtomasterlibrary(who)
 
-    var original_contents := {};
-    var contents := {};
-    var bookstuff := {};
+    var original_contents := array {};
+    var contents := array {};
+    var bookstuff := array {};
     var filename, sysbooks, book, title, author, nextspot;
     var curpage, curline, index;
     filename := ":sysbook:config/master_library";
 	while(1)
-		contents := {};
-		original_contents := {};
-		bookstuff := {};
-		index := {};
+		contents := array {};
+		original_contents := array {};
+		bookstuff := array {};
+		index := 0;
 		book := PromptUser(who);
 		title := GetObjProperty(book, "title");
 		author := GetObjProperty(book, "author");
@@ -125,7 +125,7 @@ endfunction
 //////////////////////////////////////////////////////////////////
 function truncate(oc)
 
-    var cont := {};
+    var cont := array {};
     var index;
     var junk := 1;
     for (index:=oc.size();index >= 1;index:=index-1)

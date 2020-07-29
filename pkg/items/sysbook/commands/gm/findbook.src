@@ -30,8 +30,8 @@ program createshardbook(who)
 		return 0;
 	endif
 	var bookContents := struct;
-	var book_keys := {};
-	var book_titles := {};
+	var book_keys := array {};
+	var book_titles := array {};
 	var selected_books := 0;
 	var the_book := 0;
 	book_keys := shard_library.Keys();

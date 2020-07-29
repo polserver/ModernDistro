@@ -40,7 +40,7 @@ endprogram
 
 function furnituredye(who)
 
-var layout := {
+var layout := array {
 "page 0",
 "resizepic 100 10 2600 350 355",
 "resizepic 120 54 5100 110 270",
@@ -598,7 +598,7 @@ var layout := {
 "radio 260 307 210 211 0 1148"
 };
 
-var data := {
+var data := array {
 "Furniture Dye Selection Menu",
 "Brown",
 "Chestnut",

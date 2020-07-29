@@ -44,7 +44,7 @@ program textcmd_redeed( mobile )
 		return 0;
 	endif
 
-	var created := {};
+	var created := array {};
 	foreach serial in the_serials
 		var part := SystemFindObjectBySerial( serial );
 		if( part )

@@ -18,7 +18,7 @@ program eat(who, food)
 		SendSysMessage(who, "Someone else is already using that.");
 		return 0;
 	endif
-	var magiceffect := {};
+	var magiceffect := array {};
 	magiceffect := GetObjTypeArray( food.objtype, "MagicEffect" );
 
 	var cfg_elem := GetItemDescInfo(food.objtype);
