@@ -98,7 +98,7 @@ program guardnode(itm)
 			DespawnAll();
 			ValidateSpawns();
 			while((GetObjProperty(item, "Status") == "off") or (GetGlobalProperty("noguards")))
-				var ev := os::wait_for_event(120);
+				os::wait_for_event(120); // check if this is working as it should
 			endwhile
 			SpawnAll();
 			ValidateSpawns();
@@ -124,7 +124,6 @@ function ValidateSpawns()
 endfunction
 
 function DespawnAll()
-	var chk := array;
 	foreach thing in npclist
 		var hp := AP_GetVital(thing, VITALID_LIFE);
 		if(hp)

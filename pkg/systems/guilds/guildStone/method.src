@@ -11,19 +11,14 @@ program Install()
 	return 1;
 endprogram
 
-exported function IsguildStone( item )
-
-	item := item; // Avoid compiler warnings.
-	
+exported function IsguildStone( unused item )
 	return 1;
 endfunction
 
 exported function SetGuild( item, guildid )
-
 	return SetObjProperty( item, "GuildID", guildid );
 endfunction
 
 exported function GetGuild( item )
-
 	return CInt( GetObjProperty( item, "GuildID" ));
 endfunction

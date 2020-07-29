@@ -116,17 +116,25 @@ endfunction
  * Returns 1
  *
  */
-function CalcSuccessPercent( mobile, attrib_name, difficulty, effective_skill )
+function CalcSuccessPercent( unused mobile, unused attrib_name, difficulty, effective_skill )
+	var sc_settings := AP_GetSettingsCfgElem( "Skills" );
+	var min_chance := CInt( sc_settings.MinChance );
+	var max_chance := CInt( sc_settings.MaxChance );
+	var percent := CInt( 50.0 + (( effective_skill - difficulty ) * 1.5 )); // For every 5 points difference there will be a +-10 for percent
 
-	var sc_settings := AP_GetSettingsCfgElem( "Skills" ),
-	min_chance := CInt( sc_settings.MinChance ),
-	max_chance := CInt( sc_settings.MaxChance ),
-	percent := CInt( 50.0 + (( effective_skill - difficulty ) * 1.5 )); // For every 5 points difference there will be a +-10 for percent
-
-	if( difficulty == -1 )
-		var neg1chance := CInt( sc_settings.MaxNeg1Chance ),
+	// Note: variable declaration was wrong so this may need some testing
+	/*
+		Previous version redeclared percent inside if so it was local only.
+		
+		var neg1chance := CInt( sc_settings.MaxNeg1Chance ), <<< that little coma instead of semicolon :-) 
 		percent := CInt( neg1chance * effective_skill / 150 );
-  endif
+
+		After change we now have new formula that may need checking for difficulty == -1 
+	*/
+	if( difficulty == -1 )
+		var neg1chance := CInt( sc_settings.MaxNeg1Chance );
+		percent := CInt( neg1chance * effective_skill / 150 );
+	endif
 
 	if( percent < min_chance )
 		percent := min_chance;

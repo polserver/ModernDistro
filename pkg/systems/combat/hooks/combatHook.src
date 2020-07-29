@@ -158,7 +158,7 @@ function DistanceChecks(byref a_info, byref d_info)
 	endif
 endfunction
 
-function AmmoChecks(byref a_info, byref d_info)
+function AmmoChecks(byref a_info, byref unused d_info)
 	// Get ammo type from the weapon, if there.
 	var ammo_type := CInt(GetObjProperty((a_info.mobile).weapon, "AmmoType"));
 	// If the weapon has an ammo type CProp but that ammo type is not

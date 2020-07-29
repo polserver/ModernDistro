@@ -33,9 +33,7 @@ Program Install()
 	Return 1;
 Endprogram
 
-exported function LoginHook(who, byref packet)
-	who := who; // Avoid compiler warnings.
-
+exported function LoginHook(unused who, byref packet)
 	var username := Packet.GetString(OFFSET_ACCOUNT_NAME, INFO_LEN);
 	var password := Packet.GetString(OFFSET_ACCOUNT_PASS, INFO_LEN);
 

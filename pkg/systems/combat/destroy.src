@@ -36,6 +36,9 @@ program destroy(item)
 endprogram
 
 function strgth(who,item)
+  who :=  who;
+  item := item;
+
   return 1;
 endfunction
 
@@ -48,6 +51,9 @@ function wizzohat(who,item)
 endfunction
 
 function cursed(who,item)
+  who :=  who;
+  item := item;
+
   return 0;
 endfunction
 
@@ -90,7 +96,7 @@ function protection(who,item)
   return 1;
 endfunction
 
-function RemoveMods(who, item)
+function RemoveMods(unused who, item)
   var proc := GetProcess(GetObjProperty(item, "Pid"));
   if(proc)
     var ev := {};
