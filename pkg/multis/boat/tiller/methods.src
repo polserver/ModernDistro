@@ -4,24 +4,18 @@ use os;
 use cfgfile;
 
 program Install()
-
 	return 1;
 endprogram
 
-exported function IsTillerMan( tiller )
-
-        tiller := tiller; //Avoid compiler warnings
-
+exported function IsTillerMan( unused tiller )
 	return 1;
 endfunction
 
 exported function IsOnBoat( tiller, object )
-
 	return ( tiller.multi == object.multi );
 endfunction
 
 exported function CanCommand( tiller, mobile )
-
 	if( IsOwner( tiller, mobile ))
 		return 1;
 	elseif( IsCrewMate( tiller, mobile ))
@@ -34,7 +28,6 @@ exported function CanCommand( tiller, mobile )
 endfunction
 
 exported function IsOwner( tiller, mobile )
-
 	if( mobile.serial == GetOwner( tiller ).serial )
 		return 1;
 	else
@@ -43,12 +36,10 @@ exported function IsOwner( tiller, mobile )
 endfunction
 
 exported function GetOwner( tiller )
-
 	return GetObjProperty( tiller, "Owner" );
 endfunction
 
 exported function SetOwner( tiller, owner )
-
 	var info := struct;
 	info.+name := owner.name;
 	info.+serial := owner.serial;
@@ -58,7 +49,6 @@ exported function SetOwner( tiller, owner )
 endfunction
 
 exported function GetCrewMates( tiller )
-
 	var crew_mates := GetObjProperty( tiller, "CrewMates" );
 	if( crew_mates == error )
 		crew_mates := array;
@@ -69,7 +59,6 @@ exported function GetCrewMates( tiller )
 endfunction
 
 exported function RemoveCrewMate( tiller, index )
-
 	var crew_mates := GetCrewMates( tiller );
 	var crew_mate := crew_mates[index];
 
@@ -80,7 +69,6 @@ exported function RemoveCrewMate( tiller, index )
 endfunction
 
 exported function AddCrewMate( tiller, mobile, index )
-
 	var crew_mates := GetCrewMates( tiller );
 
 	var info := struct;
@@ -98,26 +86,23 @@ exported function AddCrewMate( tiller, mobile, index )
 endfunction
 
 exported function IsCrewMate( tiller, mobile )
-
 	var crew_mates := GetCrewMates( tiller );
 	var i;
 	for( i:=1; i<=crew_mates.Size(); i:=i+1 )
 		if( crew_mates[i].name == mobile.name )
 			return i;
 		endif
-                SleepMS(5);
+		SleepMS(5);
 	endfor
 
 	return 0;
 endfunction
 
 exported function SetCrewMates( tiller, list )
-
 	return SetObjProperty( tiller, "CrewMates", list );
 endfunction
 
 exported function GetSpeed( tiller )
-
 	var speed := GetObjProperty( tiller, "Speed" );
 	if( !speed )
 		SetSpeed( tiller, 350 );
@@ -127,12 +112,10 @@ exported function GetSpeed( tiller )
 endfunction
 
 exported function SetSpeed( tiller, value )
-
 	return SetObjProperty( tiller, "Speed", value );
 endfunction
 
 exported function SetAnchorStatus( tiller, value )
-
 	if( value )
 		SetObjProperty( tiller, "Anchored", 1 );
 		SetObjProperty( tiller, "NameSpec", "Anchored" );
@@ -145,19 +128,16 @@ exported function SetAnchorStatus( tiller, value )
 endfunction
 
 exported function IsAnchored( tiller )
-
 	return GetObjProperty( tiller, "Anchored" );
 endfunction
 
 exported function GetListenerProcess( tiller )
-
 	var pid := CInt( GetObjProperty( tiller, "#PID" ));
 
 	return GetProcess( pid );
 endfunction
 
 exported function FollowMap( tiller, mobile, map )
-
 	var ev := struct;
 	ev.+item := map;
 	ev.+source := mobile;
@@ -168,7 +148,6 @@ exported function FollowMap( tiller, mobile, map )
 endfunction
 
 exported function SendCmd( tiller, mobile, text )
-
 	var ev := struct;
 	ev.+text := text;
 	ev.+source := mobile;
@@ -179,34 +158,31 @@ exported function SendCmd( tiller, mobile, text )
 endfunction
 
 exported function GetShipType( tiller )
-
 	return CInt( GetObjProperty( tiller, "ShipType" ));
 endfunction
 
 exported function SetShipType( tiller, type )
-
 	return SetObjProperty( tiller, "ShipType", CInt( type ));
 endfunction
 
 exported function GetSeafaringCreatures( tiller )
-
-    var cfg_file := ReadConfigFile( ":boat:seafaringCreatures" );
-    if( cfg_file.errortext )
+	var cfg_file := ReadConfigFile( ":boat:seafaringCreatures" );
+	if( cfg_file.errortext )
 		PrintTextAbove( tiller, "Error reading config file <:spawnsystem:defaultGroups> -->"+cfg_file.errortext );
 		return 0;
-    endif
+	endif
 
-    var elem_creature := cfg_file["Templates"];
-    if( elem_creature.errortext )
+	var elem_creature := cfg_file["Templates"];
+	if( elem_creature.errortext )
 		PrintTextAbove( tiller, "Error reading elem <Templates> -->"+elem_creature.errortext );
 		return 0;
-    endif
+	endif
 
-    var creatures := GetConfigStringArray( elem_creature, "Template" );
-    if( creatures.errortext )
+	var creatures := GetConfigStringArray( elem_creature, "Template" );
+	if( creatures.errortext )
 		PrintTextAbove( tiller, "Error reading elem <creatures> -->"+creatures.errortext );
 		return 0;
-    endif
+	endif
 
 	return creatures.RandomEntry();
 endfunction
