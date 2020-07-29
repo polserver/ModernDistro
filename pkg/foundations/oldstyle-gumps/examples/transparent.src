@@ -1,8 +1,8 @@
 use uo;
 use os;
 
-var data := { };
-var layout := {
+var data := array { };
+var layout := array {
 
 "resizepic 0 0 5054 530 417",
 "page 0",
