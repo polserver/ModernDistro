@@ -48,14 +48,14 @@ endenum
 /*
  * GetMonthName(month)
  *
- * Purpose
- * Returns the name of the month
+ * Purpose: Convert the month number to the month's abbreviated name.
+ *
  *
  * Parameters
- * month:   The month to get the name of
+ * Integer::month:	Ordinal number of the month.
  *
  * Return value
- * A string containing the name of the month
+ * A string containing the abbreviated name of the month
  *
  */
 function GetMonthName(month)
@@ -67,6 +67,75 @@ function GetMonthName(month)
 	return(mon_nam[month]);
 endfunction
 
+
+/*
+ * GetMonthFullName(month)
+ *
+ * Purpose: Convert the month number to the month's name.
+ *
+ *
+ * Parameters
+ * Integer::month:	Ordinal number of the month.
+ *
+ * Return value
+ * A string containing the full name of the month
+ *
+ */
+function GetMonthFullName(month)
+	var mon_nam := {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+
+	if( month > 12 || month <= 0 )
+		return error{"errortext":="Month '"+CStr(month)+"' out of range."};
+	endif
+	return(mon_nam[month]);
+endfunction
+
+
+/*
+ * GetMonthOrdinal(month)
+ *
+ * Purpose: Convert the month's name or abbreviation to
+ *			the ordinal number of the month.
+ *
+ *
+ * Parameters
+ * String::month:	Month full name or standard abbreviation.
+ *
+ * Return value
+ * An integer representing the ordinanal number of the month.
+ *
+ */
+function GetMonthOrdinal(month)
+
+	month := Lower(month);
+
+	case(month)
+		"jan":
+		"january":		return 01;
+		"feb":
+		"february":		return 02;
+		"mar":
+		"march":		return 03;
+		"apr":
+		"april":		return 04;
+		"may":			return 05;
+		"jun":
+		"june":			return 06;
+		"jul":
+		"july":			return 07;
+		"aug":
+		"august":		return 08;
+		"sep":
+		"september":	return 09;
+		"oct":
+		"october":		return 10;
+		"nov":
+		"november":		return 11;
+		"dec":
+		"december":		return 12;
+		default:		return error{"errortext":="Invalid month name for 'month' parameter."};
+	endcase
+endfunction
 
 /*
  * GetMonthLength(month, year)
@@ -94,6 +163,35 @@ function GetMonthLength(month, year := 0)
 	return(mon_lens[month]);
 endfunction
 
+
+/*
+ * GetMonthDifferential( byref current_month, byref previous_month )
+ *
+ * Purpose
+ * Returns the difference between month_1 and month_2
+ * The intended use of this function is to determine
+ * the number of months that have elapsed between
+ * current_month and previous_month.
+ *
+ * Parameters
+ * current_month:	Integer representing the first month.
+ * previous_month:	Integer representing the second month.
+ *
+ * Return value
+ * Integer indicating the the ordinal difference between
+ * the two months.
+ *
+ */
+function GetMonthDifferential( byref current_month, byref previous_month )
+
+    if( current_month <= 0 && current_month >= 13 )
+        return error{"errortext":="Invalid month numbers for 'month_1' parameter."};
+    elseif( previous_month <= 0 && previous_month >= 13 )
+        return error{"errortext":="Invalid month numbers for 'month_2' parameter."};
+    endif
+
+    return Abs( ( 12 + current_month - previous_month ) % 12 );
+endfunction
 
 /*
  * IsLeap(year)

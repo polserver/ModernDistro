@@ -11,14 +11,14 @@ program cast_mark(parms)
   var caster := parms[1];
   var info := parms[2];
   var interdiction;
-  
+
   var cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_NEUTRAL);
     if (!cast_on)
         SendSysMessageCL(caster, 1042023, color := 33); // Cancelled.
         return 0;
     endif
 
-  if (cast_on.IsRecallRune())
+  if (!cast_on.IsRecallRune())
     SendSysMessage(caster, "You can only cast that on a recall rune!", color := 33);
 	return;
   endif
@@ -26,7 +26,7 @@ program cast_mark(parms)
         SendSysMessageCL(caster, 1078497, color := 33); // You cannot use that right now
         return 0;
   endif
-  
+
   if(caster.multi)
     SendSysMessageCL(caster, 501800, color := 33); // You cannot mark an object at that location.
     PlaySoundEffect(caster,0x005d);

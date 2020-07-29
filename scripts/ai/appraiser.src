@@ -9,7 +9,6 @@ include ":npcs:randName";
 include "include/utility";
 include "include/client";
 include ":npcs:garment";
-//include "util/bank";
 include "include/anchors";
 include "include/dist";
 include ":npcs:skillLists";

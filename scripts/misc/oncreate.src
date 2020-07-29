@@ -2,8 +2,9 @@ use uo;
 
 include "include/startEqp";
 include ":timeutils:time";
+include ":containers:storageAreas";
 
-program oncreate(who, skillids, profession)
+program oncreate(who, skillids, unused profession)
    var dmy, hms;
 
   Sleep(1);
@@ -16,23 +17,22 @@ program oncreate(who, skillids, profession)
     endfor
     syslog("ALERT! Account " + account.name + " was banned for cheating.");
   endif
-  
-  
+
+
   if(CInt(who.truecolor) <= 32768)
     who.truecolor := who.truecolor + 32768;
     who.color := who.truecolor;
   endif
-  
+
   Sleep(2);
-  
+
   SetObjProperty(who, "OnCreate", ReadGameClock());
   dmy := FormatTime(GetTimeStruct(GetTime()), "<DAY>-<MON>-<YY>");
   hms := FormatTime(GetTimeStruct(GetTime()), "<HH>:<MM>:<SS>");
   SetObjProperty(who, "CreationDate", dmy + " " + hms);
-  
+
   Sleep(2);
-  
-  // MoveObjectToLocation( who, 2953, 922, 0, "britannia", MOVEOBJECT_FORCELOCATION ); //Vesper
+
     var has_backpack := GetEquipmentByLayer(who, 0x15);
     if (!has_backpack)
         var newbackpack := CreateItemAtLocation(who.x, who.y, who.z, 0xe75,1, who.realm);
@@ -41,6 +41,6 @@ program oncreate(who, skillids, profession)
           SysLog("Could not create a backpack on player " + who.name);
         endif
     endif
-
+	CP_GetStorageContainerForMobile( who, CP_DEFAULT_AREA, CP_CREATE );
    CreateStartingEquipment(who, skillids);
 endprogram

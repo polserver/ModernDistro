@@ -1,0 +1,11 @@
+use uo;
+
+include ":damage:damage";
+
+program do_damage(who, text)
+
+	SendSysMessage(who, "Do damage to whom?", color := 88);
+	var victim := Target(who, TGTOPT_NEUTRAL);
+	ApplyRawDamageEX(victim, CInt(text), DMG_PHYSICAL, who);
+
+endprogram
