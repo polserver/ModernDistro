@@ -31,7 +31,7 @@ function play(character, theskill, item, attrib)
 endfunction
 
 function findinstrument(character)
-  var instruments := {0x0eb1, 0x0eb2, 0x0eb3, 0x0eb4, 0x0e9c, 0x0e9d, 0x0e9e};
+  var instruments := array {0x0eb1, 0x0eb2, 0x0eb3, 0x0eb4, 0x0e9c, 0x0e9d, 0x0e9e};
   foreach item in EnumerateItemsInContainer(character.backpack)
     if(item.graphic in instruments)
       return item;

@@ -6,9 +6,9 @@ include ":attributes:attributes";
 //  See starteqp.cfg for a description of what we expect in the config file.
 //
 
-var unique_items_created := {};
+var unique_items_created := array {};
 var starteqp_cfg;
-;
+
 var template, ammotype, ammoamount, theammo;
 var magicspawnchance := 0;
 var magicadjustment  := 0;
@@ -161,7 +161,7 @@ function CreateFromItemString(who, str)
     var colorg := FindConfigElem(colors_cfg, params[2]);
     if(colorg)
       var str := GetConfigStringArray(colorg, "color");
-	  var ar := {};
+	  var ar := array {};
 	  var rndint := RandomInt(len(str)) + 1;
 	  ar := SplitWords(str[rndint]);
 	  if(len(ar) > 1)
@@ -281,7 +281,7 @@ function ClothTable(item)
 endfunction
 
 function ArmorTable(item)
-  var newarray := {1, 2};
+  var newarray := array {1, 2};
   var count := RandomInt(99) + 1;
   var counter;
   if(count >= 40)

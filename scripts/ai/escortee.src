@@ -30,7 +30,7 @@ var ev;
 var txt;
 var killtime := 0;
 var master;
-var spells := {};
+var spells := array {};
 var me := Self();
 var cast_pct;
 var num_casts;

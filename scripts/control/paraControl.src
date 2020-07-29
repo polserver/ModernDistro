@@ -20,7 +20,7 @@ program paracontrol(field)
     boss := SystemFindObjectBySerial(creater, SYSFIND_SEARCH_OFFLINE_MOBILES);
   endif
   SetScriptController(boss);
-  var parms := {};
+  var parms := array {};
   while(field)
     foreach cast_on in ListMobilesNearLocation(field.x, field.y, field.z, 0, field.realm)
       if((AP_GetVital(cast_on, VITALID_LIFE) > 1) && (cast_on.cmdlevel < 2))

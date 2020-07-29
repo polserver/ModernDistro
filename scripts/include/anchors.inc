@@ -10,6 +10,6 @@ function drop_anchor()
   if(dstart)
     SetAnchor(me.x, me.y, dstart, psub);
   endif
-  var parms := { me.x, me.y, me.z };
+  var parms := array { me.x, me.y, me.z };
   SetObjProperty(me, "Anchor", parms);
 endfunction

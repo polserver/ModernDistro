@@ -31,7 +31,7 @@ var ev;
 var txt;
 var killtime := 0;
 var master;
-var spells := {};
+var spells := array {};
 var me := Self();
 var cast_pct;
 var num_casts;
@@ -260,7 +260,7 @@ function TrainSkill(me, who, item)
         endforeach
         SetObjProperty(who,"SkillArray", skillarray);
       else
-        var holder := {};
+        var holder := array {};
         holder.append(trainskillid);
         foreach thing in skillarray
           if((thing != trainskillid) and (AP_GetTrueSkill(who, thing) > 0))

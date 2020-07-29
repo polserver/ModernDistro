@@ -233,7 +233,7 @@ function process_sale(who);
       PrintTextAbovePrivate(me, "Im sorry, but that is not for sale.", who);
       return;
     endif
-    var holder := {};
+    var holder := array {};
     set_critical(1);
     if(GetPayment(who, price))
       trg.movable:=1;
@@ -516,14 +516,14 @@ function Fireme()
 endfunction
 
 function addthingstobuy(who)
-    var buylist := {};
-    var buyprice := { };
-    var buyobj := { };
+    var buylist := array {};
+    var buyprice := array {};
+    var buyobj := array {};
     var i;
     if (!GetObjProperty(me,"buylist"))
-        buylist := {};
-        buyprice := {};
-        buyobj := { };
+        buylist := array {};
+        buyprice := array {};
+        buyobj := array {};
     else
         buylist := GetObjProperty(me,"buylist");
         buyprice := GetObjProperty(me,"buyprice");
@@ -537,9 +537,9 @@ function addthingstobuy(who)
         endif
     if (what.desc in buylist)
         PrintTextAbovePrivate(me, "I will no longer purchase "+what.desc, who);
-        var newbuylist := { };
-        var newbuyprice := { };
-        var newbuyobj := { };
+        var newbuylist := array {};
+        var newbuyprice := array {};
+        var newbuyobj := array {};
         for (i := 1; i<=len(buylist); i:=i+1)
             if (buylist[i] != what.desc)
                 newbuylist[len(newbuylist)+1] := buylist[i];
@@ -577,8 +577,8 @@ function addthingstobuy(who)
 endfunction
 
 function SpoutBuyList(you)
-  var buylist := {};
-  var buyprice := {};
+  var buylist := array {};
+  var buyprice := array {};
   var i;
   if (!GetObjProperty(me,"buylist"))
     PrintTextAbovePrivate(me, "I don't buy anything.", you);
@@ -603,9 +603,9 @@ function buyitem(you, it)
         NotifyMaster(you.name + " gave me an item of yours.");
         return;
     endif
-    var buylist := {};
-    var buyprice := { };
-    var buyobj := { };
+    var buylist := array {};
+    var buyprice := array {};
+    var buyobj := array {};
     var i;
     if (!GetObjProperty(me,"buylist"))
       PrintTextAbovePrivate(me, "I don't buy anything", you);

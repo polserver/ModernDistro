@@ -87,7 +87,7 @@ program merchant()
                                         PrintTextAbovePrivate(me, "I cannot afford any more of that", ev.source );
                                       endif
                                     elseif (txt ["job"])
-                                        var parms := { };
+                                        var parms := array { };
                                         parms[1] := ev.source;
                                         parms[2] := me;
                                         start_script (":job:job", parms);

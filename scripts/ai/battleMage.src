@@ -151,7 +151,7 @@ function Fight(opponent)
 	  return;
 	endif
   endif
-  var parms := {};
+  var parms := array {};
   parms[1] := me.x;
   parms[2] := me.y;
   parms[3] := me.z;

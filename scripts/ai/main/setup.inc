@@ -5,7 +5,7 @@ var ammotype;
 var ammoamount;
 var theammo;
 var master;
-var spells := {};
+var spells := array {};
 
 const SKILLID_HIDE := 21;
 

@@ -25,7 +25,7 @@ const UACTION_SALUTE        := 0x21;
 const HALT_THRESHOLD := 10; // how close before he barks?
 var speech := 99;
 var me := Self();
-var home := {me.x, me.y, me.z};
+var home := array {me.x, me.y, me.z};
 
 var equipt := GetObjProperty(me, "Equipt");
   if(me.name["<random>"])
@@ -241,7 +241,7 @@ function AddToHateList(crim)
 	if (crim.isA(POLCLASS_NPC))
 		return;
 	endif
-	var crooks := { };
+	var crooks := array { };
 	if (!GetObjProperty(me,"#Criminals") )
 		crooks[1] := crim.serial;
 		SetObjProperty(me,"#Criminals",crooks);
@@ -267,7 +267,7 @@ function CheckHateList( you )
 	if (you.isA(POLCLASS_NPC))
 		return;
 	endif
-	var crooks := { };
+	var crooks := array { };
 	if (!GetObjProperty(me,"#Criminals") )
 		return 0;//can't be on my list cause I don't have one
 	else

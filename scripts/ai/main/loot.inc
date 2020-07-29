@@ -29,7 +29,7 @@ function grabloot()
         return;
       endif
       if((item.objtype == UOBJ_CORPSE) && (!GetObjProperty(item.objtype, "npctemplate")))
-        var items := { };
+        var items := array { };
         foreach thingie in EnumerateItemsInContainer(item)
           if((thingie.objtype < STARTHAIR || thingie.objtype > ENDHAIR) &&(!CInt(GetObjProperty(thingie,"#ignoreit"))))
             items[len(items) + 1] := thingie;

@@ -35,7 +35,7 @@ use os;
 use basic;
 use basicio;
 
-const CONST_EMPTY := { };
+const CONST_EMPTY := array { };
 const CONST_NULL := "";
 
 // Constants for the RemoveSpaces() function.
@@ -59,8 +59,8 @@ function TruncateArticle(str)
 	str := CStr(str);
 	var i := len(str);
 
-	var an_articlelist := { "an ", "An ", "AN ", "aN " };
-	var a_articlelist := { "a ", "A " };
+	var an_articlelist := array { "an ", "An ", "AN ", "aN " };
+	var a_articlelist := array { "a ", "A " };
 
 	if ( str[1,3] in an_articlelist )
 		str := (str[4,i-3]);
@@ -88,7 +88,7 @@ endfunction
 function AddArticle(str)
 
 	str := CStr(str);
-	var vowellist := { "a", "A", "e", "E", "i", "I", "o", "O", "u", "U" };
+	var vowellist := array { "a", "A", "e", "E", "i", "I", "o", "O", "u", "U" };
 	var i := str[1];
 
 	if ( i in vowellist )
@@ -577,10 +577,10 @@ EndFunction
 //////////////////////////////////////////////////////
 function ValidateStringInteger(str)
 
-	var hex_numbers := {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-						"A", "a", "B", "b", "C", "c", "D", "d", "E", "e", "F", "f"};
+	var hex_numbers := array {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+								"A", "a", "B", "b", "C", "c", "D", "d", "E", "e", "F", "f"};
 
-	var dec_numbers := {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+	var dec_numbers := array {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
 	if(str[1,2] == "0x")
 		for x := 1 to str.length()
 			if(str[x,x] in hex_numbers)

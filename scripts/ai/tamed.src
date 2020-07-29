@@ -53,7 +53,7 @@ program TamedAI()
   Detach();
   var time := ReadGameClock();
   SetObjProperty(me,"countercheck", time);
-  var parms := {};
+  var parms := array {};
   parms[1] := me;
   parms[2] := time;
   start_script(":taming:happyCounter", parms);
@@ -935,7 +935,7 @@ function flee(opponent)
 endfunction
 
 function obediencecheck()
-  var arry := { 0xcc, 0xc8, 0xe2, 0xe4, 0x123, 0x124, 0xd2, 0xdb };
+  var arry := array { 0xcc, 0xc8, 0xe2, 0xe4, 0x123, 0x124, 0xd2, 0xdb };
   if(me.objtype in arry)
     return 1;
   endif

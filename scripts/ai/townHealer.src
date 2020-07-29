@@ -137,7 +137,7 @@ set_priority(50);
   endwhile
 
 function HealerStuff(mobile)
-  var parms := {me, mobile};
+  var parms := array {me, mobile};
   start_script("doRes", parms);
   return;
 endfunction

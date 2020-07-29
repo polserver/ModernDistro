@@ -115,7 +115,7 @@ function check_speech(text, byref speaker)
 	if (speaker.cmdlevel)
 		return;
 	endif
-	var myfriends := { };
+	var myfriends := array { };
 	var i := 0;
       for( i := 1; i <= 3; i := i+1 )
 		myfriends[i] := GetObjProperty(me,"friend"+i);

@@ -58,8 +58,8 @@
 
 var c34:=CChr(34);
 
-var length:={ };
-       length.+chars:={
+var length:= struct { };
+       length.+chars:= array {
          "",                   // Dummy (for Speed...)
          "|",                  //  2
          "`',.;:",             //  3
@@ -97,7 +97,7 @@ var length:={ };
          "VVVVVVVVVVVVVVV"+    // 16
          "MMMMMMMMMMMMMMM"+    // 18
          "WWWWWWWWWWWWWWW";    // 21
-       length.+width:={
+       length.+width:= array {
           2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
           12, 13, 14, 15, 16, 18, 21
        };

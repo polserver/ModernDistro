@@ -3,7 +3,7 @@ use os;
 
 include "include/help";
 include "include/eventID";
-var layout := {
+var layout := array {
 
 "resizepic 0 0 2600 600 450",
 "resizepic 40 45 2620 175 315",
@@ -75,7 +75,7 @@ var layout := {
 "button 220 342 210 211 0 1 8"
 };
 
-var data := {
+var data := array {
 
 "Greetings, traveler!",
 "This menu will help",
@@ -210,7 +210,7 @@ function counpage(who, thepage)
       break;
     endif
   endforeach
-  var newarry := {};
+  var newarry := array {};
   newarry.append(who.name);
   newarry.append(thepage);
   newarry.append(who.serial);
@@ -236,7 +236,7 @@ function gmpage(who, thepage)
       break;
     endif
   endforeach
-  var newarry := {};
+  var newarry := array {};
   newarry.append(who.name);
   newarry.append(thepage);
   newarry.append(who.serial);
@@ -246,7 +246,7 @@ function gmpage(who, thepage)
 endfunction
 
 function RemoveElement(arry, position)
-  var newarray := { };
+  var newarray := array { };
   foreach thing in arry
     if(thing != position)
       newarray.append(thing);

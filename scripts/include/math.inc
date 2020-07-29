@@ -367,7 +367,7 @@ function BitOut(x)
 	x := Cint(x);
 	var loop := 1;
 	var bitvalue := 0;
-	var ArrayX := {0,0,0,0,0,0,0,0};
+	var ArrayX := array {0,0,0,0,0,0,0,0};
 	var n;
 
 	while (loop <= 8)

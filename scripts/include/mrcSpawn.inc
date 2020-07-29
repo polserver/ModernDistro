@@ -107,7 +107,7 @@ function RestockInitialInventory(source, destination)
 	// When vendors start up, they need a slightly different script.
 	//var merchanttype := GetObjProperty(source, "MerchantType");
 	var multiplier, item_amt, mlt, things;
-	var newarray := {};
+	var newarray := array {};
 	foreach thing in EnumerateItemsInContainer(source)
 		newarray.append(thing.objtype);
 		item_amt := 0;
@@ -163,7 +163,7 @@ endfunction
 function RestockMyInventory(source, destination)
 	var merchanttype := GetObjProperty(source, "MerchantType");
 	var multiplier, item_amt, mlt, items, mygold;
-	var newarray := {}; // Array of what's for sale
+	var newarray := array {}; // Array of what's for sale
 	// cycle through everything that's for sale
 	foreach thing in EnumerateItemsInContainer(source)// this is the "ideal" stock.
 		newarray.append(thing.objtype);
@@ -230,14 +230,14 @@ endfunction
 
 function CountExisting(container, objtype)
 	var item_amt := 0;
-	var things := {};
+	var things := array {};
 	foreach thing in EnumerateItemsInContainer(container)
 		if((thing.objtype == objtype) and (Cint(GetObjProperty(thing, "ClearRestock")) == 0))
 			things.append(thing);
 			item_amt := item_amt + thing.amount;
 		endif
 	endforeach
-	var ary := {};
+	var ary := array {};
 	ary.append(item_amt);
 	ary.append(things);
 	return ary;
@@ -257,7 +257,7 @@ function ModifyPCSellList(merchanttype, customer)
 	var itemmark := -1;
 
 	// set buy price for each item to be 0 to start. This means it won't be sellable.
-        // Commented out by Yukiko - This section prevented us from setting custom buy prices for items
+	// Commented out by Yukiko - This section prevented us from setting custom buy prices for items
 /*
 	var iteminit := 0;
 
@@ -265,7 +265,7 @@ function ModifyPCSellList(merchanttype, customer)
 		item.buyprice := iteminit;
 	endforeach
 */
-	var buynobuyable := { };
+	var buynobuyable := array { };
 	var objtype;
 	var counter := 0;
 

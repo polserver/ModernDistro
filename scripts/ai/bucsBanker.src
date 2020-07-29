@@ -46,7 +46,7 @@ program banker();
 	EnableEvents(SYSEVENT_ITEM_GIVEN);
   DisableEvents(SYSEVENT_SPEECH);
 	var text;
-	var splitted := {};
+	var splitted := array {};
 
   while(1)
     var ev;

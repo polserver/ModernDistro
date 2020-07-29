@@ -2,7 +2,7 @@ use uo;
 
 program console_online( unused cmd )
     var chrs := EnumerateOnlineCharacters();
-    var names := {};
+    var names := array {};
     foreach chr in chrs
         names.append( chr.name );
     endforeach

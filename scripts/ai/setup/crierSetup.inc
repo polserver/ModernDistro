@@ -15,7 +15,7 @@ if(!me.backpack)
   var newbackpack := CreateItemAtLocation(me.x, me.y, me.z, 0xe75,1, me.realm);
   EquipItem(me, newbackpack);
 
-  var myhome := { };
+  var myhome := array { };
   myhome[1] := me.x;
   myhome[2] := me.y;
   myhome[3] := me.z;

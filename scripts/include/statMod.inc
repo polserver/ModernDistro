@@ -41,7 +41,7 @@ function DoTempMod(who, stat, amt, duration)
 	"p"  :  mod := "#pp";  who.setParalyzed(1);
   endcase
   SetObjProperty(who,mod,1);
-  var parms := {};
+  var parms := array {};
   parms[2] := who;
   parms[1] := stat;
   parms[3] := amt;

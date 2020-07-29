@@ -51,8 +51,8 @@ endfunction
 //returns all the 'top-level' items in container of objtype
 function ListRootItemsInContainerOfObjtype(container, objtype)
 
-	var ret := { };
-        foreach item in EnumerateItemsInContainer(container, ENUMERATE_ROOT_ONLY)
+	var ret := array { };
+	foreach item in EnumerateItemsInContainer(container, ENUMERATE_ROOT_ONLY)
 		if (item.objtype == objtype)
 			ret.append(item);
 		endif
@@ -123,7 +123,7 @@ endfunction
 //	Example: if used at a container with 2 stacks of 50 cloth, the function
 //		 would return {100, 1st_stack_of_cloth, 2nd_stack_of_cloth}.
 function GetStacksOfTypeInContainer (container, objtype)
-	var result := {0};
+	var result := array {0};
 	foreach item in EnumerateItemsInContainer(container)
 		if (item.objtype == objtype)
 			result.append(item);

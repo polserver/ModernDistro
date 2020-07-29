@@ -6,7 +6,7 @@ var ammoamount;
 var theammo;
 
 var master;
-var spells := {};
+var spells := array {};
 var me := Self();
 
 var cast_pct;

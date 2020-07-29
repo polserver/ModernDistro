@@ -36,7 +36,7 @@ program onlogon(who)
 	var rm := GetObjProperty(who, "ReportMenu");
 	if(rm)
 		var defender;
-		var rept := {};
+		var rept := array {};
 		foreach serial in rm
 			foreach chr in EnumerateOnlineCharacters()
 				if(chr.serial == serial)
@@ -56,7 +56,7 @@ program onlogon(who)
 	endif
 	var lr := GetObjProperty(who, "LoginReport");
 	if(lr)
-		var reportdata := {};
+		var reportdata := array {};
 		var jerk;
 		foreach serial in lr
 			jerk := SystemFindObjectBySerial(serial, SYSFIND_SEARCH_OFFLINE_MOBILES);
@@ -148,7 +148,7 @@ function TrackIP(who)
 	if(!ipstring)
 		ipstring := {};
 	endif
-	var holder := {};
+	var holder := array {};
 	var amt := len(ipstring);
 	foreach thing in ipstring
 		if((thing[1] != who.ip) and (amt < 20));
@@ -158,7 +158,7 @@ function TrackIP(who)
 		endif
 	endforeach
 	ipstring := holder;
-	var newarray := {};
+	var newarray := array {};
 	newarray.append(who.ip);
 	newarray.append(who.name);
 	ipstring.append(newarray);
@@ -192,7 +192,7 @@ endfunction
 const LONG_COUNT_DECAY_TIME := 144000; //40 hours
 const SHORT_COUNT_DECAY_TIME := 28800; //8 hours
 
-var layout := {
+var layout := array {
 "page 0",
 "nodispose",
 "noclose",
@@ -222,7 +222,7 @@ var layout := {
 "text 50 70 40 2"
 };
 
-var data := {
+var data := array {
 "Now is the time for retribution!",
 "Check zero or more players to report for your murder",
 "and press OKAY."
@@ -233,7 +233,7 @@ function SendReportGump(who, reportables)
 	FillInArrays(reportables);
 	var ret := SendDialogGump(who,layout,data);
 	if(!ret)
-		var reportdata := {};
+		var reportdata := array {};
 		foreach reportable in(reportables)
 			reportdata.append(reportable.serial);
 		endforeach
@@ -299,19 +299,19 @@ function AdjustMurderCounts(killer)
 	SetObjProperty(killer, "decayshortcountat", onlinetime + SHORT_COUNT_DECAY_TIME);
 endfunction
 
-var nototitles :=
+var nototitles := array 
 {
-    {"Outcast",     "Wretched",     "Nefarious", "Dread",         "Dread"},
-    {"Despicable",  "Dastardly",    "Wicked",    "Evil",          "Evil"},
-    {"Scoundrel",   "Malicious",    "Vile",      "Villainous",    "Dark"},
-    {"Unsavory",    "Dishonorable", "Ignoble",   "Sinister",      "Sinister"},
-    {"Rude",        "Disreputable", "Notorious", "Infamous",      "Dishonored"},
-    {"None",        "Notable",      "Prominent", "Renowned",     ""},
-    {"Fair",        "Upstanding",   "Reputable", "Distinguished", "Distinguished"},
-    {"Kind",        "Respectable",  "Proper",    "Eminent",       "Eminent"},
-    {"Good",        "Honorable",    "Admirable", "Noble",         "Noble"},
-    {"Honest",      "Commendable",  "Famed",     "Illustrious",   "Illustrious"},
-    {"Trustworthy", "Estimable",    "Great",     "Glorious",      "Glorious"}
+    array {"Outcast",     "Wretched",     "Nefarious", "Dread",         "Dread"},
+    array {"Despicable",  "Dastardly",    "Wicked",    "Evil",          "Evil"},
+    array {"Scoundrel",   "Malicious",    "Vile",      "Villainous",    "Dark"},
+    array {"Unsavory",    "Dishonorable", "Ignoble",   "Sinister",      "Sinister"},
+    array {"Rude",        "Disreputable", "Notorious", "Infamous",      "Dishonored"},
+    array {"None",        "Notable",      "Prominent", "Renowned",     ""},
+    array {"Fair",        "Upstanding",   "Reputable", "Distinguished", "Distinguished"},
+    array {"Kind",        "Respectable",  "Proper",    "Eminent",       "Eminent"},
+    array {"Good",        "Honorable",    "Admirable", "Noble",         "Noble"},
+    array {"Honest",      "Commendable",  "Famed",     "Illustrious",   "Illustrious"},
+    array {"Trustworthy", "Estimable",    "Great",     "Glorious",      "Glorious"}
 };
 
 function AdjustNoto(attacker, defender)
@@ -451,7 +451,7 @@ endfunction
 function RestoreMods(who)
 	foreach thing in ListEquippedItems(who)
 		if(GetObjProperty(thing, "Pid"))
-			var holder := {};
+			var holder := array {};
 			var gain := GetObjProperty(thing, "gain");
 			if(!gain)
 				gain := 5;
@@ -470,7 +470,7 @@ function RestoreMods(who)
 			holder.append(tpe);
 			holder.append(gain);
 			SetObjProperty(thing, "equipped", who.serial);
-			var parms := {who, thing};
+			var parms := array {who, thing};
 			start_script(":combat:chargeUpkeep", parms);
 			print("upkeep started");
 		endif
@@ -495,7 +495,7 @@ function RecordPlayerLogin (character)
 		endif
 	endif
 
-	var newlogon := {};
+	var newlogon := array {};
 	newlogon[1] := Systime_GetReadableTimeString();
 	newlogon[2] := character.ip;
 	newlogon[3] := character.name;

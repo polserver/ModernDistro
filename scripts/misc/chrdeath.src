@@ -9,7 +9,7 @@ include "include/reportMurder";
 include ":timedScripts:poisonUtil";
 include "include/utility";
 
-var allmyjunk := {};
+var allmyjunk := array {};
 var stackstuff := 0;
 
 
@@ -41,7 +41,6 @@ program chrdeath(corpse, ghost)
 	if(len(ghost.reportables)>0)
 		SendReportGump(ghost);
 	endif
-
 
 endprogram
 

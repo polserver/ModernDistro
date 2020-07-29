@@ -1,6 +1,6 @@
 use uo;
 
-var layout := {
+var layout := array {
 "page 0",
 "nodispose",
 "noclose",
@@ -10,7 +10,7 @@ var layout := {
 "text 332 264 40 0"
 };
 
-var data := {
+var data := array {
 "Resurrect Now?"
 };
 

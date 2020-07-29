@@ -41,16 +41,16 @@ function DoPoison(you)
     if(p_level < 1)
       p_level := 1;
     endif
-	if(p_level < poison_level)
-	  p_level := poison_level;
-	else
-	  SetObjProperty(you, "poison_level",CInt(p_level));
-	endif
-	Detach();
-	set_critical(0);
-    SetObjProperty(you, "LastHit", {me.name, me.serial, "poison spell"});
-	var passparms := {you, me, "snake venom"};
+    if(p_level < poison_level)
+      p_level := poison_level;
+    else
+      SetObjProperty(you, "poison_level",CInt(p_level));
+    endif
+    Detach();
+    set_critical(0);
+    SetObjProperty(you, "LastHit", array {me.name, me.serial, "poison spell"});
+    var passparms := array {you, me, "snake venom"};
     SetObjProperty(you, "PoisonStamp", ReadGameClock());
-	start_script(":spells:poisonDamage", passparms);
+    start_script(":spells:poisonDamage", passparms);
   endif
 endfunction

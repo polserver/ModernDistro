@@ -83,7 +83,7 @@ function appraise(who)
     return;
   endif
   checker := 0;
-  var deedarray := { 0x16019, 0x1601a, 0x1601b, 0x1601c, 0x1601d, 0x1601e, 0x16020, 0x16021, 0x16022, 0x16023, 0x16024, 0x16025, 0x16026 };
+  var deedarray := array { 0x16019, 0x1601a, 0x1601b, 0x1601c, 0x1601d, 0x1601e, 0x16020, 0x16021, 0x16022, 0x16023, 0x16024, 0x16025, 0x16026 };
   if(trg.objtype in deedarray)
     checker := 1;
   endif
@@ -103,7 +103,7 @@ endfunction
 
 function processdeedsale(who, trg)
   var checker := 0;
-  var deedarray := { 0x16019, 0x1601a, 0x1601b, 0x1601c, 0x1601d, 0x1601e, 0x16020, 0x16021, 0x16022, 0x16023, 0x16024, 0x16025, 0x16026 };
+  var deedarray := array { 0x16019, 0x1601a, 0x1601b, 0x1601c, 0x1601d, 0x1601e, 0x16020, 0x16021, 0x16022, 0x16023, 0x16024, 0x16025, 0x16026 };
   if(trg.objtype in deedarray)
     checker := 1;
   endif
@@ -121,7 +121,7 @@ function processdeedsale(who, trg)
   var cnfg := ReadConfigFile(":housing:itemdesc");
   var amt := cnfg[trg.objtype].VendorSellsFor;
   var holder;
-  var goldarray := {};
+  var goldarray := array {};
   var chk := 0;
   while(amt > 0)
      holder := 0;

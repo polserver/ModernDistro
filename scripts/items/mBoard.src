@@ -31,11 +31,10 @@ program messageboard( character, quadro )
     GFGumpPic( 0, 0, 0x087a );
     GFTextMid(240, 37, 0, 50, "FORUM OF THE CITY" );
 
-// Listar tópicos.
     topicos := GetObjPropertyNames( quadro );
     var i := 1;
     var pulalinha := 0;
-    var botoes := {};
+    var botoes := array {};
     topicos := Reverter(topicos);
 
     foreach topico in topicos
@@ -48,12 +47,11 @@ program messageboard( character, quadro )
             GFTextCrop( 130, 158+pulalinha, 240, 20, 50,  temp[1]);
             i := i + 1;
             pulalinha := pulalinha + 15;
-            // Até agora o forum só suporta 10 mensagens
         else
             EraseObjProperty(quadro, topico);
         endif
     endforeach
-// Não há nenhum topico
+
     if (!topicos.size())
         GFTextCrop( 130, 158, 240, 20, 50,  "There is not any topic.");
     endif
@@ -73,7 +71,6 @@ program messageboard( character, quadro )
 endprogram
 
 ////////////////////////////////////////////////////////////////////////
-//              Função Ler menssagens
 //              Read menssages function
 ////////////////////////////////////////////////////////////////////////
 
@@ -100,18 +97,14 @@ function LerMsg(character, quadro, index)
     GFGumpPic( 30, 90, 0x082b );
     GFGumpPic( 155, 90, 0x082b );
 
-// Texto
     var i := 0;
     foreach linha in (data[4])
         GFTextCrop( 30, 100+i, 330, 20, 0, linha );
         i := i + 15;
     endforeach
 
-// Apagar Tópico
     var remover := GFButtonID( 300, 305, 0x885, 0x885, 1 );
-// Responder
     var reply := GFButtonID( 35, 305, 0x884, 0x884, 1 );
-
     var resultado := GFSendGump( character );
 
     if (resultado[0] == remover.keyid)
@@ -126,33 +119,26 @@ function LerMsg(character, quadro, index)
     endif
 
 endfunction
+
 ////////////////////////////////////////////////////////////////////////
-//              Função Postar menssagens
 //              Function Post menssages
 ////////////////////////////////////////////////////////////////////////
 
 function Postarmsg(character, quadro);
     GFInitGump( 80, 20 );
-// Imagem de fundo
-// Background
     GFResizePic( 0, 0, 0x9d8, 400, 300 );
 // 'NEW MESSAGE' Title
-// Título 'NEW MESSAGE'
     GFGumpPic( 150, 15, 0x0883 );
-// Assunto
 // Subject
     GFTextLine( 30, 50, 0, "Subject:" );
     var subject := GFTextEntry( 90, 50, 270, 20, 50, "Subject" );
-// Linha Horizontal
 // Horizontal line
     GFGumpPic( 30, 70, 0x082b );
     GFGumpPic( 155, 70, 0x082b );
-// Botão 'POST'
 // Post Button
     var post := GFButtonID( 320, 275, 0x0886, 0x0886, 1);
-// Texto
 // Text
-    var conteudo := {};
+    var conteudo := array {};
     var i2 := 1;
     var i;
     for (i:=0; i<170; i:=i+15)
@@ -162,9 +148,8 @@ function Postarmsg(character, quadro);
         i2 := i2+1;
     endfor
     var resultado := GFSendGump( character );
-/// Extrai o Texto do Gump.
 /// Extract Text
-    var texto := {};
+    var texto := array {};
     i := 1;
     foreach key in conteudo
         var temp := resultado[key];
@@ -174,14 +159,12 @@ function Postarmsg(character, quadro);
             i := i+1;
         endif
     endforeach
-/// Extrai o Assunto do Gump
 /// Extract Subject
     subject := resultado[subject.keyid];
     subject := subject[6, len(subject)];
-// Gravar post.
 // Record post.
     if (resultado[0] == post.keyid)
-        var topico := {};
+        var topico := array {};
         topico[1] := subject;
         topico[2] := GetTimeofDay();
         topico[3] := ReadGameClock()/(GetDayLength()*60);
@@ -197,7 +180,6 @@ function Postarmsg(character, quadro);
 endfunction
 
 ////////////////////////////////////////////////////////////////////////
-//              Função para enviar Respostas
 //              Reply Function
 ////////////////////////////////////////////////////////////////////////
 
@@ -217,7 +199,6 @@ function Replymsg(byref character, nome)
     SendSysMessage(character, "The author doesn't meet online at the moment.");
 
 endfunction
-
 
 // array.sort() ?
 function Reverter( byref oldarray )

@@ -78,10 +78,10 @@ function IsInsideCity(thing)
 
 function WhatCityAmIIn(object)
 
-//  var regions_cfg;                                      // File ref to regions.cfg
-  var regions := {};                                    // Array of city names
-  var boundary := "";                                   // String containing the 4 coords defining a resgion.
-  var boundaries := {};                                 // Array with the boundary coords as each element.
+//  var regions_cfg;          // File ref to regions.cfg
+  var regions := array {};    // Array of city names
+  var boundary := "";         // String containing the 4 coords defining a resgion.
+  var boundaries := array {}; // Array with the boundary coords as each element.
   var answer := 0;
   var city := "";
   var isCity := "";
@@ -94,7 +94,6 @@ function WhatCityAmIIn(object)
   endif*/
 
   regions := GetConfigStringKeys( regions_cfg );          // Creates an array of city names
-
 
         foreach place in regions
             region := FindConfigElem( regions_cfg, place );
@@ -116,13 +115,11 @@ function WhatCityAmIIn(object)
 
 
       return city;
-
  endfunction
-
 
 function GetTownCurrency(town)
 
-  var regions := {};                                    // Array of city names
+  var regions := array {}; // Array of city names
   var region;
   var DEFAULTCURRENCY := 0x0EED;
   var FoundCurrency := "";
