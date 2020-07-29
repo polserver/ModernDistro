@@ -61,8 +61,6 @@ function ApplyDamageEX(mobile, amount, type:=DMG_FORCED, source:=0)
 		return 0;
 	endif
 
-	var settings := DMG_GetSettingsCfgElem("Settings");
-
 	if ( amount < 0 )
 		HealDamage(mobile, Abs(amount));
 	else
@@ -105,8 +103,6 @@ function ApplyRawDamageEX(mobile, amount, type:=DMG_FORCED, source:=0)
 		return 0;
 	endif
 
-	var settings := DMG_GetSettingsCfgElem("Settings");
-
 	if ( amount < 0 )
 		HealDamage(mobile, Abs(amount));
 	else
@@ -114,13 +110,14 @@ function ApplyRawDamageEX(mobile, amount, type:=DMG_FORCED, source:=0)
 			SetLastDamageInfo(mobile, amount, type, source);
 			SetScriptController(source);
 		endif
-  // Added for necro wraith form
-  if(source and GetObjProperty(source, "wraith"))
-    DoManaSuck(mobile, source, amount);
-  endif
-  if(GetObjProperty(source , "cursed_weapon"))
-    LifeDrain(source, amount, 50);
-  endif
+		
+		// Added for necro wraith form
+		if(source and GetObjProperty(source, "wraith"))
+			DoManaSuck(mobile, source, amount);
+		endif
+		if(GetObjProperty(source , "cursed_weapon"))
+			LifeDrain(source, amount, 50);
+		endif
 
 		ApplyRawDamage(mobile, amount);
 	endif
