@@ -24,6 +24,8 @@ jobs:
           echo "DisplaySummary=1" >>scripts/ecompile.cfg
           echo "DisplayWarnings=1" >>scripts/ecompile.cfg
           echo "CompileAspPages=1" >>scripts/ecompile.cfg
+          echo "ErrorOnWarning=1" >>scripts/ecompile.cfg
+          echo "ParanoiaWarnings=1" >>scripts/ecompile.cfg
 
       - name: Compile
         run: |
