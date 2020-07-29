@@ -70,7 +70,7 @@ program strangle( params )
 		dmg2 := cint (dmg * (5 - (Getvital(cast_on, "Stamina") / Getvitalmaximumvalue(cast_on, "Stamina")) * 2));
 
 		if(GetObjProperty(cast_on, "LastHit")[2] != caster.serial)
-			SetObjProperty(cast_on, "LastHit", {caster.name, caster.serial, "strangle" });
+			SetObjProperty(cast_on, "LastHit", array {caster.name, caster.serial, "strangle" });
 		endif
 
 		ApplyRawDamageEX(cast_on, Resisted(CInt(info.circle), caster, cast_on, dmg2), DMG_PHYSICAL, caster);

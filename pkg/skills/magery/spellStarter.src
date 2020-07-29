@@ -211,7 +211,7 @@ program SpellStarter(params)
 		info.+damage_typ := spell_elem.DamageType;
 		info.+difficulty := spell_elem.Difficulty;
 
-		var script := Start_Script(spell_elem.SpellScript, {mobile, info, spell_id, targ});
+		var script := Start_Script(spell_elem.SpellScript, array {mobile, info, spell_id, targ});
 		Detach();
 		EraseObjProperty(mobile, "#Casting");
 

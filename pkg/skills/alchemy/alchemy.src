@@ -19,14 +19,14 @@ program use_AlchTool(who, tool)
 		SendSysMessage(who, "That is already in use.");
 		return 0;
 	elseif( (!tool.movable) || !ReserveItem(tool) )
-		SendSysMessageCL(who, 501973, {}, 3, 33); // You cannot use that.
+		SendSysMessageCL(who, 501973, array {}, 3, 33); // You cannot use that.
 		return 0;
 	elseif( !(tool in EnumerateItemsInContainer(who.backpack)) )
-		SendSysMessageCL(who, 1042593, {}, 3, 33); // That is not in your backpack.
+		SendSysMessageCL(who, 1042593, array {}, 3, 33); // That is not in your backpack.
 		return 0;
 	endif
 	if( GetObjProperty(who, "#IsMeditating") )
-		SendSysMessageCL(who, 500134, {}, 3, 33); // You stop meditating.
+		SendSysMessageCL(who, 500134, array {}, 3, 33); // You stop meditating.
 		EraseObjProperty(who, "#IsMeditating");
 	endif
 	EraseObjProperty(who, "#HealTimer");
@@ -88,7 +88,7 @@ function makeAlchemyItems(who, what, amt, tool)
 				theitem := CreateCraftItem(who, craft_skill, use_on, use_on.objtype, what, material, itemname, reqd);
 				if( TypeOf(theitem) != "ItemRef" )
 					SubtractAmount(use_on, (material / 2));
-					SendSysMessageCL(who, 1044043, {}, 3, 33); // You failed to create the item, and some of your materials are lost.
+					SendSysMessageCL(who, 1044043, array {}, 3, 33); // You failed to create the item, and some of your materials are lost.
 					counter := counter + 1;
 					continue;
 				endif
@@ -110,7 +110,7 @@ function makeAlchemyItems(who, what, amt, tool)
 			endif
 			CheckToolWear (who, tool, craft_skill);
 		else
-			SendSysMessageCL(who, 502910, {}, 3, 33); // You don't have the resources required to make that item.
+			SendSysMessageCL(who, 502910, array {}, 3, 33); // You don't have the resources required to make that item.
 			return 0;
 		endif
 		counter := counter + 1;

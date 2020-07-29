@@ -7,7 +7,7 @@ include ":attributes:attributes";
 include "include/objtype";
 include "include/utility";
 
-var layout := {
+var layout := array {
 	"nodispose",
 	"page 0",
 	"resizepic 30 30 83 280 260",
@@ -56,7 +56,7 @@ var layout := {
 	"text 80 235 0 21"
 };
 
-var data := {
+var data := array {
 	"Select a color range:",
 	"One",
 	"Two",
@@ -81,7 +81,7 @@ var data := {
 	"Make current color permanent"
 };
 
-var layout2 := {
+var layout2 := array {
 	"nodispose",
 	"page 0",
 	"gumppic 0 50 2620",
@@ -99,7 +99,7 @@ var layout2 := {
 	"text 20 62 1102 0"
 };
 
-var data2 := {
+var data2 := array {
 	"Select a color:",
 	"Color1",
 	"Color2",

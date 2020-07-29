@@ -49,7 +49,7 @@ program track(who)
       AddMenuItem(track_list, 0x2106, "People");
     endif
     var thetarget := SelectMenuItem2(who, track_list);
-    var listtype := {};
+    var listtype;
     case(thetarget[1])
       8454: listtype := "Person";
       8399: listtype := "Animal";

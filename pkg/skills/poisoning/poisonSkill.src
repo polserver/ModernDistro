@@ -28,7 +28,7 @@ program do_poisoning( who )
 //    var elem;
     var stren;
     var point;
-	var hitscripts := {};
+	var hitscripts := array {};
     SendSysMessage( who, "Select a poison potion." );
     the_poison := Target(who, "");
     if (!the_poison)
@@ -108,7 +108,7 @@ program do_poisoning( who )
 					SendSysMessageCL(who, 1010517, color := 66 ); // You apply the poison.
 					hitscripts := GetObjProperty(the_item, "HitScripts");
 					if (!hitscripts)
-						hitscripts := {};
+						hitscripts := array {};
 						hitscripts[1] := ":combat:hitScripts/poisonHit";
 					else
 					  hitscripts.append(":combat:hitScripts/poisonHit");

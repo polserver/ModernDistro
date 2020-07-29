@@ -56,7 +56,7 @@ program herd(who)
                         SendSysMessage(who, npc.name + " can't see that location!");
                         return;
                 endif
-                var holder := {};
+                var holder := array {};
                 holder.append(location.x);
                 holder.append(location.y);
                 var ev := struct;

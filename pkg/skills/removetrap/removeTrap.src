@@ -44,7 +44,7 @@ program remove_trap(who)
                       item.usescript := "";
 		              EraseObjProperty( item, "trap_type" );
 		              EraseObjProperty( item, "trap_strength" );
-              "2" :   start_script(":traps:poisonTrapTriggered", {who, item, "You set off a poison trap!", trapstrength});
+              "2" :   start_script(":traps:poisonTrapTriggered", array {who, item, "You set off a poison trap!", trapstrength});
 
               "3" :   PlaySoundEffect(who, SFX_208);
                       SendSysMessage(who, "You set off an explosion trap!");

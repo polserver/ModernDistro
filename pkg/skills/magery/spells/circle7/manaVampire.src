@@ -26,7 +26,7 @@ program mana_drain ( parms )
 		return 0;
 	endif
 
-	SetObjProperty(cast_on, "LastHit", {caster.name, caster.serial, "mana vampire"});
+	SetObjProperty(cast_on, "LastHit", array {caster.name, caster.serial, "mana vampire"});
 
 	// Mana drained = caster's eval - target's resist
 	var mana_drained := AP_GetSkill(caster, EVALUATING_INTELLIGENCE) - AP_GetSkill(cast_on, RESISTING_SPELLS);

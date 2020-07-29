@@ -33,7 +33,7 @@ program mass_dispel ( parms )
   PlaySoundEffect( caster, 0x202 );
   //var ei := GetAttribute(caster, EVALUATING_INTELLIGENCE)/10;
   foreach mobile in targets
-	SetObjProperty(mobile, "LastHit", {caster.name, caster.serial, "mass dispel"});
+	SetObjProperty(mobile, "LastHit", array {caster.name, caster.serial, "mass dispel"});
     if(Reflected(mobile))
 	  mobile := caster;
     endif

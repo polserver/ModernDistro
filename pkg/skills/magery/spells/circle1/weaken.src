@@ -21,7 +21,7 @@ program cast_WEAKEN( parms )
     if ( !MS_MobileCheck(caster, cast_on) )
         return 0;
     endif
-  SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "weaken" });
+  SetObjProperty(cast_on, "LastHit", array {caster.name,caster.serial, "weaken" });
 
 	MS_PlaySpellSFX(info.spell_id, cast_on);
 	MS_PlaySpellGFX(info.spell_id, cast_on, caster);

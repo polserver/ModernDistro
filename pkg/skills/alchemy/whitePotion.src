@@ -7,10 +7,10 @@ include ":itemUtils:itemdesc";
 program use_whitepotion(who, potion)
 
 	if( (!potion.movable) || !ReserveItem(potion) )
-		SendSysMessageCL(who, 501973, {}, 3, 33); // You cannot use that.
+		SendSysMessageCL(who, 501973, array {}, 3, 33); // You cannot use that.
 		return 0;
 	elseif( !(potion in EnumerateItemsInContainer(who.backpack)) )
-		SendSysMessageCL(who, 1042593, {}, 3, 33); // That is not in your backpack.
+		SendSysMessageCL(who, 1042593, array {}, 3, 33); // That is not in your backpack.
 		return 0;
 	endif
 	var potion_info := GetItemDescInfo(GetObjtype( potion ));

@@ -10,7 +10,7 @@ include "include/objtype";
 const MINKARMA := 4000;
 const MINFAME := 4000;
 
-var zPleas := {
+var zPleas := array {
   "Spare some change?",
   "Alms for the poor?",
   "Donate to my charity?",
@@ -19,7 +19,7 @@ var zPleas := {
   "Spare a few gold?"
 };
 
-var zFails := {
+var zFails := array {
   "I think not",
   "Go away!",
   "Off with you, peasant!",
@@ -28,27 +28,27 @@ var zFails := {
   "Ye wont be getting any gold from me today"
 };
 
-var zBroke := {
+var zBroke := array {
   "Ain't got nothin' t' give ya!",
   "No' got nothin'. Sorry.",
   "Not much better off meself'.",
   "Maybe ye can spare a coin for me?"
 };
 
-var zEmpty := {
+var zEmpty := array {
   "Sorry, gave it all away already.",
   "Ain't got nothin' t' give ya!",
   "Nope. Gots nothing. Sorry.",
   "Your cohorts cleaned me out already!"
 };
 
-var zNone := {
+var zNone := array {
   "I'm sorry, I can give thee nothing.",
   "Does it look like I have pockets in this armor?",
   "Not while I'm on duty."
 };
 
-var zLowKarma := {
+var zLowKarma := array {
   "I will not give money to such as thee!",
   "Take off, eh?",
   "I do not give money to naughty evildoers!",

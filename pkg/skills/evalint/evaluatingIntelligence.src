@@ -9,7 +9,7 @@ include ":attributes:attributes";
 include "include/trainingskill";
 
 program EvaluatingIntelligence(who)
-        var data := {};
+        var data := array {};
         data[1] := "evalint";
         data[2] := ReadGameClock();
         data[3] := 16;

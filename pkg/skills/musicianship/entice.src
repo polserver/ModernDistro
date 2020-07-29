@@ -43,7 +43,7 @@ program enticement(who)
   else
     PrintTextAbovePrivate(subject, "Your music doesnt seem to have any effect.", who);
     if ((Randomint(10)+1)<= 3)
-      var ev := {};
+      var ev := struct {};
         ev.+source := who;
         ev.+type := EVID_PEACEMADE;
       SendEvent(subject,ev);

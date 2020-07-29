@@ -5,7 +5,7 @@ include ":attributes:attributes";
 include "include/trainingskill";
 
 program skill_hide(who)
-        var data := {};
+        var data := array {};
         data[1] := "hiding";
         data[2] := ReadGameClock();
         data[3] := 21;

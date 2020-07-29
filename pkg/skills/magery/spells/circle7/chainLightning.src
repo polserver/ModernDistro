@@ -25,7 +25,7 @@ program cast_chainlightning( parms )
 	// Get all targets in area excluding party and self. Damaged is divided by number of valid targets.
 	var area_size := CInt(GetConfigInt(info.spell_config, "AreaSize"));
 	var party_members := caster.party.members;
-	var excludes := {};
+	var excludes := array {};
 	if ( party_members == error )
 			excludes := array{caster.serial};
 	else
@@ -42,14 +42,14 @@ program cast_chainlightning( parms )
 	foreach vtarg in targs
 				// uoguide.com does not mention LOS needed for damage to target. That is why this if is commented out.
                 //if((CheckLineOfSight(vtarg, caster)) and (vtarg.cmdlevel < 2))
-                    SetObjProperty(vtarg, "LastHit", {caster.name, caster.serial, "chain lightning"});
+                    SetObjProperty(vtarg, "LastHit", array {caster.name, caster.serial, "chain lightning"});
                         if(Reflected(vtarg))
                             SendSysMessage (caster, "The spell was reflected back onto you!!!", color := 33);
                             vtarg := caster;
                         endif
 
                     damage := MS_GetSpellDamage(caster, vtarg, base_damage) / targs.Size();
-                    SetObjProperty(vtarg, "LastHit", {caster.name, caster.serial, "chain lightning"});
+                    SetObjProperty(vtarg, "LastHit", array {caster.name, caster.serial, "chain lightning"});
                     PlayLightningBoltEffect( vtarg );
                     PlaySoundEffect(vtarg, SFX_SPELL_LIGHTNING);
                     ApplySpellDamageEX(vtarg, damage, info.damage_type, caster);

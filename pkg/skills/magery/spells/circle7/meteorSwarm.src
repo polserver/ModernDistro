@@ -19,7 +19,7 @@ program cast_meteor( parms )
 	// Get all targets in area excluding party and self. Damaged is divided by number of valid targets.
 	var area_size := GetConfigInt(info.spell_config, "AreaSize");
 	var party_members := caster.party.members;
-	var excludes := {};
+	var excludes := array {};
 	if ( party_members == error )
 			excludes := array{caster.serial};
 	else

@@ -53,10 +53,10 @@ program exploder(parms)
 	endforeach
 
 	// Then everything near it goes out in a bang
-	var potions := {0xdc08, 0xdc09, 0xdc07};
+	var potions := array {0xdc08, 0xdc09, 0xdc07};
 	foreach item in ListItemsNearLocation(location.x, location.y, location.z, 1, who.realm)
 		if(item.objtype in potions)
-			var passparms := {item, who};
+			var passparms := array {item, who};
 			sleep(1); // Makes the cascading effect more dramatic and less instantaneous
 			start_script(":alchemy:exploder", passparms);
 		endif

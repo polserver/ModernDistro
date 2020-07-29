@@ -198,7 +198,7 @@ endfunction
 ///////////////////
 
 function LogTreeDestruction(who, tree);
-	var themessage := {
+	var themessage := array {
 		"Character: " + who.name,
 		"Account name: " + who.acctname,
 		"IP address: " + who.ip,
@@ -217,8 +217,8 @@ endfunction
 ///////////////////
 
 function AppendLog(who, themessage)
-	var log := {};
-	var prop := {};
+	var log := array {};
+	var prop := struct {};
 	prop.+pname := "";
 	prop.+pvalue := "";
 	foreach line in themessage

@@ -9,7 +9,7 @@ include "include/canAccess";
 program use_scroll(who, scroll)
 	EraseObjProperty(who, "IsMeditating");
 	EraseObjProperty(who, "HealTimer");
-	var params := {};
+
 	if(!can_access(who, scroll))
 		return;
 	endif
@@ -28,6 +28,8 @@ program use_scroll(who, scroll)
 	endif
 	
 	var spellid := GetSpellId( scroll );
+
+	var params := array {};
 	params[1] := who;
 	params[2] := spellid;
 	params[3] := scroll.objtype;

@@ -37,12 +37,12 @@ program poison_strike( params )
 	foreach person in persons
 
 		if(GetObjProperty(person, "LastHit")[2] != caster.serial)
-			SetObjProperty(person, "LastHit", {caster.name, caster.serial, "poisonstrike" });
+			SetObjProperty(person, "LastHit", array {caster.name, caster.serial, "poisonstrike" });
 		endif
 
 		var dmg := (necroskill + sspeak + bonus)/10;
 		ApplyRawDamage(person, Resisted(CInt(info.circle), caster, person, dmg / (Distance(person, cast_on) + 1)), DMG_POISON, caster);
-		var passparms := { person, caster, "poison spell", cint(plevel / (Distance(person, cast_on) + 1))};
+		var passparms := array { person, caster, "poison spell", cint(plevel / (Distance(person, cast_on) + 1))};
 		start_script(":spells:poisonDamage", passparms);
 		sleepms(2);
 	endforeach

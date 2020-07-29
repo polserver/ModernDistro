@@ -120,7 +120,7 @@ function TreeNearby(me, axe)
 endfunction
 
 function is_furniture(theobj, thing)
-  var miscobjtypes := { 0x17007, 0xA30, 0xA34, 0xA38, 0xFAE, 0x19E40};
+  var miscobjtypes := array { 0x17007, 0xA30, 0xA34, 0xA38, 0xFAE, 0x19E40};
   if((theobj >= 0x9a8) && (theobj <= 0x9ab))
     return 1;
   elseif((theobj >= 0xa2a) && (theobj <= 0xa2c))
@@ -237,7 +237,7 @@ function chopfurniture(me, theobj)
     var trapperserial := CInt(GetObjProperty(theobj, "trapper"));
     var trapper := SystemFindObjectBySerial(trapperserial, SYSFIND_SEARCH_OFFLINE_MOBILES);
     if(trapper)
-      SetObjProperty(me, "LastHit", {trapper.name, trapper.serial, "trapped chest" });
+      SetObjProperty(me, "LastHit", array {trapper.name, trapper.serial, "trapped chest" });
       SetScriptController(trapper);
     endif
     case (traptype)
@@ -249,7 +249,7 @@ function chopfurniture(me, theobj)
               EraseObjProperty( theobj, "trap_type" );
               EraseObjProperty( theobj, "trap_strength" );
 
-      "2" :   start_script(":traps:poisonTrapTriggered", {me, theobj, "You set off a poison trap!", trapstrength});
+      "2" :   start_script(":traps:poisonTrapTriggered", array {me, theobj, "You set off a poison trap!", trapstrength});
 
       "3" :   PlaySoundEffect(me, SFX_208);
               SendSysMessage(me, "You set off an explosion trap!");
@@ -352,8 +352,8 @@ function Carve_Corpse(who, cadaver)
     endforeach
     DestroyItem(cadaver);
   elseif((c_type == 400) || (c_type == 401))
-    var beardlist := {0x203e, 0x203f, 0x2040, 0x2041, 0x204b, 0x204c, 0x204d };
-    var hairlist  := {0x2044, 0x2045, 0x2046, 0x2047, 0x2048, 0x2049, 0x204a, 0x203b, 0x203c, 0x203d };
+    var beardlist := array {0x203e, 0x203f, 0x2040, 0x2041, 0x204b, 0x204c, 0x204d };
+    var hairlist  := array {0x2044, 0x2045, 0x2046, 0x2047, 0x2048, 0x2049, 0x204a, 0x203b, 0x203c, 0x203d };
     foreach thing in EnumerateItemsInContainer(cadaver)
       if((thing.objtype in hairlist) or (thing.objtype in beardlist))
         DestroyItem(thing);
@@ -361,7 +361,7 @@ function Carve_Corpse(who, cadaver)
         MoveObjectToLocation(thing, cadaver.x, cadaver.y, cadaver.z, cadaver.realm, MOVEOBJECT_FORCELOCATION);
       endif
     endforeach
-    var partsarray := {};
+    var partsarray := array {};
     var part;
     part := CreateItemAtLocation(cadaver.x-1, cadaver.y, cadaver.z, 0x1da0, 1);
     partsarray.append(part);

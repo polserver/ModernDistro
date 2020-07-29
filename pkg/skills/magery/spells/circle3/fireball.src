@@ -21,7 +21,7 @@ program cast_fireball(parms)
     if ( !MS_MobileCheck(caster, cast_on) )
         return 0;
     endif
-  SetObjProperty(cast_on, "LastHit", {caster.name, caster.serial, "fireball"});
+  SetObjProperty(cast_on, "LastHit", array {caster.name, caster.serial, "fireball"});
 
 
 	MS_PlaySpellSFX(info.spell_id, cast_on);

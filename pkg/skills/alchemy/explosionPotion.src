@@ -18,7 +18,7 @@ program use_explosionpotion(who, potion)
 	who.hidden := 0;
 
 	if( !GetObjProperty(potion, "#bomb") )
-		var parms := {};
+		var parms := array {};
 		parms[1] := potion;
 		parms[2] := who;
 		start_script(":alchemy:explosionTimer", parms);

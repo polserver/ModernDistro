@@ -29,7 +29,7 @@ program useScroll(who, scroll)
 	    endif
 	endif
 	
-	var script := Start_Script("spellStarter", {who, spell_id, scroll});
+	var script := Start_Script("spellStarter", array {who, spell_id, scroll});
 	if ( script.errortext )
 		SendSysMessage(who, "Error - Could not start spell starter ->"+script.errortext);
 		return 0;

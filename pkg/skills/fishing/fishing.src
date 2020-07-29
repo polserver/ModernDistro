@@ -208,7 +208,7 @@ function CriticalFailure(who, targetsquare)
   var it := CreateNpcFromTemplate("seaserpent", targetsquare.x, targetsquare.y, targetsquare.z, 0, who.realm);
   if(it)
     SendSysMessage(who, "Oops, that's not a fish!");
-    var ev := {};
+    var ev := struct {};
     ev.+type := EVID_ENGAGED;
     ev.+source := who;
     SendEvent(it, ev);

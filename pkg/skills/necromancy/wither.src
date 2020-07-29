@@ -25,7 +25,7 @@ program wither( params )
     PlaySoundEffect(caster, 0x1FB);
     PlaySoundEffect(caster, 0x10B);
 	foreach person in ListMobilesInLineOfSight(caster, 8)
-        SetObjProperty(person, "LastHit", {caster.name, caster.serial, "wither" });
+        SetObjProperty(person, "LastHit", array {caster.name, caster.serial, "wither" });
         PlayObjectCenteredEffectEx( person, 0x374A, 1, 30, 9502, 0, 3, 97 );
 		var daemon := Cint(GetObjProperty(person, "#Daemon"));
 		var daemonqual := daemon * 0.01;

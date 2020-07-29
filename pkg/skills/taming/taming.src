@@ -67,7 +67,7 @@ program tame( who )
     points := 0;
   endif
   var amt := len(ownerarray);
-  var holder := {};
+  var holder := array {};
   foreach thing in ownerarray
     if((thing != who.serial) and (amt < 10))
       holder.append(thing);

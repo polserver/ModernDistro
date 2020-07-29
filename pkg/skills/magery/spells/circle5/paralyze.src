@@ -25,7 +25,7 @@ program cast_paralyze( parms )
 	var spell_starter := GetProcess(info.pid);
 	spell_starter.SendEvent("continue");
 
-	SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "paralyze" });
+	SetObjProperty(cast_on, "LastHit", array {caster.name,caster.serial, "paralyze" });
 	MS_PlaySpellSFX(info.spell_id, cast_on);
 	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
 

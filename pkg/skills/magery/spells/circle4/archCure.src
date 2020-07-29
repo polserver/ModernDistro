@@ -17,7 +17,7 @@ program cast_archcure(parms)
 	// Get all targets in area that are in party.
 	var area_size := GetConfigInt(info.spell_config, "AreaSize");
 	var party_members := caster.party.members;
-	var includes := {};
+	var includes := array {};
 	if ( party_members == error )
 			includes := array{caster.serial};
 	else

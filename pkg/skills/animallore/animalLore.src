@@ -9,7 +9,7 @@ include ":timedScripts:timedScripts";
 var cfg := ReadConfigFile("::npcdesc");
 
 program animal_lore(who)
-        var data := {};
+        var data := array {};
         data[1] := "animallore";
         data[2] := ReadGameClock();
         data[3] := 2;

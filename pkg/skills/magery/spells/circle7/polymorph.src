@@ -50,12 +50,12 @@ program cast_polymorph( parms )
 	// Graphic property from the cfg file will be stored here.
 	var crit_graphic := 0;
 	// This will hold the colour property from the cfg file.
-	var crit_colour := {};
+	var crit_colour := 0;
 	// Theis array will hold the element references from the cfg file based
 	// on the critgroup value.
-	var critter_group := {};
+	var critter_group := array {};
 	// This array will hold all possible colours for a creature.
-	var colours :={};
+	var colours := array {};
 	// Used to hold a string article for the buff system.
 	var article := "";
 
@@ -128,7 +128,7 @@ endprogram
 function GetGroup(group);
 
 	// This array will hold element references to creatures from the cfg file.
-	var critters := {};
+	var critters := array {};
 	// Get all the keys from poly_cfg
 	var crit_keys := GetConfigStringKeys(poly_cfg);
 	// This will hold a reference to a single element from the config file.
@@ -161,7 +161,7 @@ endfunction
 function ReturnArticle(str)
 
 	var i := str[1];
-	var vowellist := { "a", "A", "e", "E", "i", "I", "o", "O", "u", "U" };
+	var vowellist := array { "a", "A", "e", "E", "i", "I", "o", "O", "u", "U" };
 
 	if ( i in vowellist )
 		return "an";
