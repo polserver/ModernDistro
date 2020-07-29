@@ -25,10 +25,6 @@
 // To do: Save output to a log file with date and time stamp.
 /////////////////////////////////////////////////////////////////////////////////
 
-
-
-
-
 use uo;
 use cfgfile;
 use file;
@@ -41,15 +37,14 @@ include ":timeutils:time";
 include "include/arrays";
 include ":gumps:gumps";
 
-
 program decoratefacets(who, text)
 
-	var things := {};			// Holds the array of keys (ObjTypes) of the items to be placed.
-	var places :={};			// Holds the list of locations to place an item
-	var selected_facets := {};	// An array that contains the facets to be decorated.
-	var element := "";			// Holds a cfg file element reference
-	var object := 0;			// The integer value of the items ObjType
-	var map := "";				// The realm to place the item
+	var things := array {};			// Holds the array of keys (ObjTypes) of the items to be placed.
+	var places := array {};			// Holds the list of locations to place an item
+	var selected_facets := array {}; // An array that contains the facets to be decorated.
+	var element := "";				// Holds a cfg file element reference
+	var object := 0;				// The integer value of the items ObjType
+	var map := "";					// The realm to place the item
 	var LogFile := "::/log/DecorateFacets";
 	// These things must be cleared for each new object
 	var itemname := "";			// Holds the items name if specified.
@@ -59,13 +54,13 @@ program decoratefacets(who, text)
 	var bookspawn := 0;			// If set adds the book shelf to the global book spawn system.
 	var itemamount := 1;		// Where more than 1 we need to create a stack.
 	/////////////////////////////////////////////////////////////////////
-	var itemsthere := {};		// Holder for anything at the location where the item is being placed.
-	var locxyz := {};			// The coords where an item is to be placed.
-	var dynamics := {};			// Array to hold results of ListItemsAtLocation.
-	var statics := {};			// Array to hold results of ListStaticsAtLocation
+	var itemsthere := array {};	// Holder for anything at the location where the item is being placed.
+	var locxyz := array {};		// The coords where an item is to be placed.
+	var dynamics := array {};	// Array to hold results of ListItemsAtLocation.
+	var statics := array {};	// Array to hold results of ListStaticsAtLocation
 	var createdthing := 0;		// The objref to the item when created
 	var createtheitem := 1;		// Flag used with duplicate statics check.
-	var files := {};			// The array that holds the file list for a directory
+	var files := array {};		// The array that holds the file list for a directory
 	var decorations := 0;		// The variable that holds the reference to the contents of the cfg files.
 	var itemx, itemy, itemz, container, graphic;
 	var decorate_all := 0;

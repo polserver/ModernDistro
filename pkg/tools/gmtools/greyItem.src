@@ -15,7 +15,7 @@ program grey(me, item)
 	  return;
 	endif
 	item.color := 910;
-	var parms := {};
+	var parms := struct {};
 	parms.+alignment := "good";
 	parms.+name := me.name + "'s whipping boy";
 	var boy := CreateNpcFromTemplate("person",5275,1174,0,parms, me.realm); // newmap problem

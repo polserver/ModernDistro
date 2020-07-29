@@ -16,7 +16,7 @@ function CreateTeleporters(facet)
     var toy;
     var toz;
     var torealm;
-    var telekeys := {};
+    var telekeys := array {};
     var cfg := ReadConfigFile(":decorateServer:teleporters");
     if(cfg.errortext)
       LogToFile(LogFile, "Cannot find teleporters.cfg", 1);

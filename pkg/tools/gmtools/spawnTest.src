@@ -4,7 +4,7 @@ use os;
 include "include/startEqp";
 include ":keys:key";
 
-var chestarray := {};
+var chestarray := array {};
 
 program spawntest(item)
   var rng := GetObjProperty(item,"range");
@@ -34,7 +34,7 @@ program spawntest(item)
 endprogram
 
 function cleanarray()
-  var newarray := {};
+  var newarray := array {};
   foreach chest in chestarray
     if((chest.locked == 0) || (chest.usescript != ":tinkering:tinkerTraps") || (!chest))
       DestroyItem(chest);

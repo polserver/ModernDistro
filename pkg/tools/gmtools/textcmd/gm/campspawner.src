@@ -104,7 +104,7 @@ program chestspawner(who)
     endif
     duration[1, find(duration, ": ", 1)+1]:="";
     var newduration := (CInt(duration) * 60);
-    var location := { item.x, item.y, item.z };
+    var location := array { item.x, item.y, item.z };
     SetObjProperty(item, "AnchorPoint", location);
     SetObjProperty(item, "level", level);
     SetObjProperty(item, "range", range);

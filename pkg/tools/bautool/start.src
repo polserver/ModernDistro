@@ -17,10 +17,8 @@
 use os;
 
 program startBautool()
-
-	var success := Start_Script(":bautool:commands/seer/bautool", {"Init"});
+	var success := Start_Script(":bautool:commands/seer/bautool", array {"Init"});
 	if(success.errortext)
 		SysLog(success.errortext);
 	endif
-
 endprogram

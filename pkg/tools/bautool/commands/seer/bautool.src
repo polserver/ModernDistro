@@ -182,8 +182,8 @@ EndProgram
 ///////////////////////////////////
 
 Function ShowMenu(who) // {{{
-  Var data:={}, layout:={}, nr, ebene;
-  Var ret, tile:={};
+  Var data:=array {}, layout:=array {}, nr, ebene;
+  Var ret, tile:=array {};
   Var element:=dictionary, back:=0;
   Var firstebene,secondebene,thirdebene,fourthebene,fifthebene,itemebene;
   Var color;
@@ -357,9 +357,9 @@ EndFunction // }}}
 ///////////////////////////////////
 
 Function BuildItems(byref layout,byref data,byref element,firstebene,secondebene:=0,thirdebene:=0,fourthebene:=0,fifthebene:=0,itemebene:=0) // {{{
-  Var tiles:={};
-  Var tiles1:={};
-  Var splittiles:={};
+  Var tiles:=array {};
+  Var tiles1:=array {};
+  Var splittiles:=array {};
 
   If (itemebene)
     layout:=dataelementMenu.getprop("LayoutItem_"+firstebene+"_"+secondebene+"_"+thirdebene+"_"+fourthebene+"_"+fifthebene+"_"+itemebene);
@@ -413,7 +413,7 @@ EndFunction // }}}
 ///////////////////////////////////
 
 Function CreateRandom(who, byref ret, byref tiles, byref tiles1, byref color, byref element) // {{{
-  Var tar1, tar2, item, x, y, z, Tarx, Tary, Tarx2, Tary2, itemdef, items:={}, itemserials:={};
+  Var tar1, tar2, item, x, y, z, Tarx, Tary, Tarx2, Tary2, itemdef, items:=array {}, itemserials:=array {};
 
   SendSysMessage(who, "Target first corner");
   tar1:=TargetCoordinates(who);
@@ -829,7 +829,7 @@ EndFunction // }}}
 ///////////////////////////////////
 
 Function CreateEinzel(who, byref ret, byref tiles, byref color) // {{{
-  Var z, itemdef:={}, iTarget, item, items:={}, itemserials:={};
+  Var z, itemdef:=array {}, iTarget, item, items:=array {}, itemserials:=array {};
 
   If (!tiles[ret.keys[2]])
     SendSysMessage(who, "No item selected");
@@ -856,7 +856,7 @@ Function CreateEinzel(who, byref ret, byref tiles, byref color) // {{{
       // Save item series
       If (!ret[ITEMMMULTICREATE])
         item.setprop(CPROP_INIT,item.serial);
-        item.setprop(CPROP_ITEMS,{item.serial});
+        item.setprop(CPROP_ITEMS,array {item.serial});
         If (ret[ITEMMODIFY])  // Change position
           If (!ModifyItems(who,item))
             SendSysMessage(who, "Abort");
@@ -968,9 +968,9 @@ EndFunction
 ///////////////////////////////////
 
 Function ModifyItemsManual(who) // {{{
-  Var retmodify, tar, inititem, items:={}, itemserials:={}, color, zstart, zend, temp, i, obj, tempitems:={};
+  Var retmodify, tar, inititem, items:=array {}, itemserials:=array {}, color, zstart, zend, temp, i, obj, tempitems:=array {};
   Var tar1, tar2, x1, x2, y1, y2, breakflag;
-  Var dupe:={}, dupeitem, dupeserials:={};
+  Var dupe:=array {}, dupeitem, dupeserials:=array {};
 
   While (who.connected)
     If (items<>{})
@@ -1270,7 +1270,7 @@ EndFunction // }}}
 ///////////////////////////////////
 
 Function MarkEdit(who) // {{{
-  Var ret,tar1, tar2,x1,x2,y1,y2,items:={}, itemref, inititem, itemserials, tempitems, obj,i;
+  Var ret,tar1, tar2,x1,x2,y1,y2,items:= array {}, itemref, inititem, itemserials, tempitems, obj,i;
 
   While (who.connected)
     ret:=SendDialogGump(who,layoutmark,datamark,10,50);
@@ -1515,11 +1515,11 @@ EndFunction // }}}
 ///////////////////////////////////
 
 Function ModifyItems(who,byref items) // {{{
-  Var retmodify, color, temp, dupe:={}, dupeitem, dupeserials:={};
+  Var retmodify, color, temp, dupe := array {}, dupeitem, dupeserials:= array {};
 
   If (TypeOfInt(items)!=OT_ARRAY)
     temp:=items;
-    items:={};
+    items:= array {};
     items.append(temp);
   EndIf
   While (who.connected)
@@ -1741,7 +1741,7 @@ EndFunction // }}}
 ///////////////////////////////////
 
 Function Init() // {{{
-  Var layoutraw:={"nodispose",
+  Var layoutraw:=array {"nodispose",
                   "page 0",
                   //"resizepic 500 0 3600 215 390",  // Background
                   //"resizepic 515 15 5054 185 30",  // title
@@ -1758,14 +1758,14 @@ Function Init() // {{{
                   "button 530 330 9721 9724 1 0 "+ITEMMODIFYMANUAL,
                   "htmlgump 572 335 100 30 2 0 0",
                   "page 1"};
-  Var dataraw:={"", //Titel
+  Var dataraw:=array {"", //Titel
                 "<basefont color="+HTML_DARKBLUE+">Back",
                 "<basefont color="+HTML_DARKBLUE+">Item Modify"};
 
   SysLog(".BAUTOOL Datafile begin");
   SetGlobalProperty("bautoolinit",1);
 
-  Var dataelement, layout:={}, data:={}, layoutp:={};
+  Var dataelement, layout:=array {}, data:=array {}, layoutp:=array {};
   Var element:=dictionary;
   Var cfgmenu:=ReadConfigFile("bautoolmenues");
 
@@ -1783,19 +1783,19 @@ Function Init() // {{{
         element[key][itemlist]:=array;
         ForEach itemkey in (GetConfigStringKeys(cfgrandom))  // Insert possible random
           If (cfgrandom[itemkey].list==itemlist)
-            element[key][itemlist].append({itemkey,"Random",cfgrandom[itemkey].name});
+            element[key][itemlist].append(array {itemkey,"Random",cfgrandom[itemkey].name});
           EndIf
           SleepMS(2);
         EndForEach
         ForEach itemkey in (GetConfigStringKeys(cfgeinzel))  // Insert possible single
           If (cfgeinzel[itemkey].list==itemlist)
-            element[key][itemlist].append({itemkey,"Einzel",cfgeinzel[itemkey].name});
+            element[key][itemlist].append(array {itemkey,"Einzel",cfgeinzel[itemkey].name});
           EndIf
           SleepMS(2);
         EndForEach
         ForEach itemkey in (GetConfigStringKeys(cfgset))  // Insert possible sets
           If (cfgset[itemkey].list==itemlist)
-            element[key][itemlist].append({itemkey,"Set",cfgset[itemkey].name});
+            element[key][itemlist].append(array {itemkey,"Set",cfgset[itemkey].name});
           EndIf
           SleepMS(2);
         EndForEach
@@ -1812,19 +1812,19 @@ Function Init() // {{{
             element[key][sub1key][itemlist]:=array;
             ForEach itemkey in (GetConfigStringKeys(cfgrandom))  // Insert possible random
               If (cfgrandom[itemkey].list==itemlist)
-                element[key][sub1key][itemlist].append({itemkey,"Random",cfgrandom[itemkey].name});
+                element[key][sub1key][itemlist].append(array {itemkey,"Random",cfgrandom[itemkey].name});
               EndIf
               SleepMS(2);
             EndForEach
             ForEach itemkey in (GetConfigStringKeys(cfgeinzel))  // Insert possible single
               If (cfgeinzel[itemkey].list==itemlist)
-                element[key][sub1key][itemlist].append({itemkey,"Einzel",cfgeinzel[itemkey].name});
+                element[key][sub1key][itemlist].append(array {itemkey,"Einzel",cfgeinzel[itemkey].name});
               EndIf
               SleepMS(2);
             EndForEach
             ForEach itemkey in (GetConfigStringKeys(cfgset))  // Insert possible sets
               If (cfgset[itemkey].list==itemlist)
-                element[key][sub1key][itemlist].append({itemkey,"Set",cfgset[itemkey].name});
+                element[key][sub1key][itemlist].append(array {itemkey,"Set",cfgset[itemkey].name});
               EndIf
               SleepMS(2);
             EndForEach
@@ -1841,19 +1841,19 @@ Function Init() // {{{
                 element[key][sub1key][sub2key][itemlist]:=array;
                 ForEach itemkey in (GetConfigStringKeys(cfgrandom))  // Insert possible random
                   If (cfgrandom[itemkey].list==itemlist)
-                    element[key][sub1key][sub2key][itemlist].append({itemkey,"Random",cfgrandom[itemkey].name});
+                    element[key][sub1key][sub2key][itemlist].append(array {itemkey,"Random",cfgrandom[itemkey].name});
                   EndIf
                   SleepMS(2);
                 EndForEach
                 ForEach itemkey in (GetConfigStringKeys(cfgeinzel))  // Insert possible single
                   If (cfgeinzel[itemkey].list==itemlist)
-                    element[key][sub1key][sub2key][itemlist].append({itemkey,"Einzel",cfgeinzel[itemkey].name});
+                    element[key][sub1key][sub2key][itemlist].append(array {itemkey,"Einzel",cfgeinzel[itemkey].name});
                   EndIf
                   SleepMS(2);
                 EndForEach
                 ForEach itemkey in (GetConfigStringKeys(cfgset))  // Insert possible sets
                   If (cfgset[itemkey].list==itemlist)
-                    element[key][sub1key][sub2key][itemlist].append({itemkey,"Set",cfgset[itemkey].name});
+                    element[key][sub1key][sub2key][itemlist].append(array {itemkey,"Set",cfgset[itemkey].name});
                   EndIf
                   SleepMS(2);
                 EndForEach
@@ -1870,19 +1870,19 @@ Function Init() // {{{
                     element[key][sub1key][sub2key][sub3key][itemlist]:=array;
                     ForEach itemkey in (GetConfigStringKeys(cfgrandom))  // Insert possible random
                       If (cfgrandom[itemkey].list==itemlist)
-                        element[key][sub1key][sub2key][sub3key][itemlist].append({itemkey,"Random",cfgrandom[itemkey].name});
+                        element[key][sub1key][sub2key][sub3key][itemlist].append(array {itemkey,"Random",cfgrandom[itemkey].name});
                       EndIf
                       SleepMS(2);
                     EndForEach
                     ForEach itemkey in (GetConfigStringKeys(cfgeinzel))  // Insert possible single
                       If (cfgeinzel[itemkey].list==itemlist)
-                        element[key][sub1key][sub2key][sub3key][itemlist].append({itemkey,"Einzel",cfgeinzel[itemkey].name});
+                        element[key][sub1key][sub2key][sub3key][itemlist].append(array {itemkey,"Einzel",cfgeinzel[itemkey].name});
                       EndIf
                       SleepMS(2);
                     EndForEach
                     ForEach itemkey in (GetConfigStringKeys(cfgset))  // Insert possible sets
                       If (cfgset[itemkey].list==itemlist)
-                        element[key][sub1key][sub2key][sub3key][itemlist].append({itemkey,"Set",cfgset[itemkey].name});
+                        element[key][sub1key][sub2key][sub3key][itemlist].append(array {itemkey,"Set",cfgset[itemkey].name});
                       EndIf
                       SleepMS(2);
                     EndForEach

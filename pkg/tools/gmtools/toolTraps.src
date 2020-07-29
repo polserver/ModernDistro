@@ -25,7 +25,7 @@ program open_trapped_item(character, item)
 		     EraseObjProperty( item, "trap_type" );
 		     EraseObjProperty( item, "trap_strength" );
 	         EraseObjProperty( item, "usescript" );
-        2:  start_script(":traps:poisonTrapTriggered", {character, item, "You set off a poison trap!", trapstrength});
+        2:  start_script(":traps:poisonTrapTriggered", array {character, item, "You set off a poison trap!", trapstrength});
              var scr := GetObjProperty(item,"usescript");
              if (!scr || scr == error)
                item.usescript := "";

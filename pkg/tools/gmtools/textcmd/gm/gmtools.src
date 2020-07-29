@@ -326,7 +326,7 @@ function setinfernotrap(who)
 endfunction
 
 function setsummonnpc(who)
-  var mobilearray := {};
+  var mobilearray := array {};
   SendSysMessage(who,"target the NPC you wish to call from the item");
   var npctarget := Target(who);
   if(!npctarget.isA(POLCLASS_NPC))
@@ -344,7 +344,7 @@ function setsummonnpc(who)
 endfunction
 
 function setsummongroup(who)
-  var mobilearray := {};
+  var mobilearray := array {};
   SendSysMessage(who,"to define the NPCs you wish to summon, the script will ask you to target 2 coordinates that it uses to create a box around the npcs");
   SendSysMessage(who,"the script will now ask you to choose the coordinates to create that box");
   SendSysMessage(who,"target the northwest corner of area your NPCs are stored");
@@ -383,10 +383,10 @@ function itemaddset(who)
   var whereleft := TargetCoordinates(who);
   var stuff := ListItemsNearLocation(whereleft.x,whereleft.y,whereleft.z, CInt(range), who.realm);
   var numthings := 1;
-  var totalthings := {};
+  var totalthings := array {};
   foreach thing in stuff
     totalthings.append(thing.objtype);
-    var itemnumber := {};
+    var itemnumber := array {};
     itemnumber.append(thing.x -whereleft.x);
     itemnumber.append(thing.y -whereleft.y);
     itemnumber.append(thing.z -whereleft.z);

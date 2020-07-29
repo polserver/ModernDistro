@@ -6,8 +6,8 @@ include "include/startEqp";
 include ":damage:damage";
 include ":keys:key";
 
-var chestarray := {};
-var mobarray := {};
+var chestarray := array {};
+var mobarray := array {};
 
 program spawntest(item)
   foreach thing in ListItemsNearLocation(item.x, item.y, item.z, 20, item.realm)
@@ -135,7 +135,7 @@ function create_guardians(item)
   var num := GetConfigInt( elem, "num");
   var rand, creature_template;
   var i := 1;
-  var mob_array := {};
+  var mob_array := array {};
   var critter;
   for( i := 1; i <= limit; i := i + 1 )
     rand := RandomInt(num) + 1;
