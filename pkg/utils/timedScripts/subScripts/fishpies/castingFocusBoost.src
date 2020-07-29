@@ -19,7 +19,7 @@ program TimedScript_castingFocusBoost(params)
 	var timers := TS_GetTimerNames(mobile);
 	foreach timer in timers
 		if(timer[1,4] == "Fish")
-			Run_Script(":timedScripts/subScripts/fishpies/end" + timer, {mobile});
+			Run_Script(":timedScripts/subScripts/fishpies/end" + timer, array {mobile});
 			break;
 		endif
 	endforeach

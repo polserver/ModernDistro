@@ -109,7 +109,7 @@ function LogOff(mobile, byref timer_list)
 			TS_ReportText("Error::LogOff() - Unable to find elem ["+_timer_iter+"] "+elem_info.errortext, TS_REPORT_SYSLOG);
 			continue;
 		elseif( elem_info.LogOffScript )
-			var script := Start_Script(elem_info.LogOffScript, {mobile, "LogOff"});
+			var script := Start_Script(elem_info.LogOffScript, array {mobile, "LogOff"});
 			if( script.errortext )
 				TS_ReportText("Error::LogOff() - ["+elem_info.LogOffScript+"] "+script.errortext, TS_REPORT_SYSLOG);
 			endif
@@ -153,7 +153,7 @@ function AddNewTimer(mobile, byref event, byref timer_list, byref num_poisons)
 
 	var script;
 	if ( elem_info.Script )
-		script := Start_Script(elem_info.Script, {mobile, event.attacker, event.level, event.amount});
+		script := Start_Script(elem_info.Script, array {mobile, event.attacker, event.level, event.amount});
 		if( script.errortext )
 			TS_ReportText("Error::AddNewTimer() - Unable to start script ["+elem_info.Script+"] ->"+script.errortext, TS_REPORT_SYSLOG);
 			return 0;

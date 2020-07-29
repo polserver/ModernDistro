@@ -59,7 +59,7 @@ endenum
  *
  */
 function GetMonthName(month)
-	var mon_nam := {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+	var mon_nam := array {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
 	if( month > 12 || month <= 0 )
 		return error{"errortext":="Month '"+CStr(month)+"' out of range."};
@@ -152,7 +152,7 @@ endfunction
  *
  */
 function GetMonthLength(month, year := 0)
-	var mon_lens := {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+	var mon_lens := array {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 	if( month > 12 || month <= 0 )
 		return error{"errortext":="Month '"+CStr(month)+"' out of range."};

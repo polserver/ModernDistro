@@ -90,13 +90,13 @@ endfunction
 // Yes/No with definable prompt and responses.
 /////////////////////////////////////////////////////////////
 function yesno_ex(who, prompt:="", yestext:="Yes", notext:="No")
-	var yesnolayout :=
+	var yesnolayout := array 
 	{
 		"page 0",
 		"noclose",
 		"resizepic 10 10 3600 300 140"
 	};
-	var yesnodata :=	{};
+	var yesnodata :=	array {};
 	yesnodata.append(prompt);
 	yesnolayout.append("text 30 25 500 " + (len(yesnodata)-1));
 

@@ -17,23 +17,23 @@ var cliloc_name :=  CInt(ts_cfg_elem.cliloc_name);
 var cliloc_desc :=  CInt(ts_cfg_elem.cliloc_desc);
 
 
-var Human_hair_types := array{ "cutHair", "ShortHair", "LongHair", "PonyTailHair", "MohawkHair",
+var Human_hair_types := array { "cutHair", "ShortHair", "LongHair", "PonyTailHair", "MohawkHair",
                     "PageBoyHair", "BunsHair", "AfroHair", "RecedingHair", "PigTailHair",
                     "KrisnaHair" };
-var human_beard_types := array{ "LongBeardHair", "ShortBeardHair", "GoateeHair", "MustacheHair",
+var human_beard_types := array { "LongBeardHair", "ShortBeardHair", "GoateeHair", "MustacheHair",
                      "MedShortBeardHair", "medlongbeard", "VandykeHair" };
 
-var elven_hair_types := {"elfmidlong", "elflongfeather", "elfshort", "elfmullet", "elfflower",
+var elven_hair_types := array {"elfmidlong", "elflongfeather", "elfshort", "elfmullet", "elfflower",
 					"elflonghair", "elftopknot", "elflongbraid", "elfbuns", "elfspikedhair"};
 
 // Gargoyle male head.
-var male_gargy_horns := {"MaleHornStyle1", "MaleHornStyle2", "MaleHornStyle3", "MaleHornStyle4",
+var male_gargy_horns := array {"MaleHornStyle1", "MaleHornStyle2", "MaleHornStyle3", "MaleHornStyle4",
 						"MaleHornStyle5", "MaleHornStyle6", "MaleHornStyle7", "MaleHornStyle8"};
 
-var gargy_facial_horns := {"FacialHornStyle1", "FacialHornStyle2", "FacialHornStyle3", "FacialHornStyle4"};
+var gargy_facial_horns := array {"FacialHornStyle1", "FacialHornStyle2", "FacialHornStyle3", "FacialHornStyle4"};
 
 
-var female_gargy_horns := {"FemaleHornStyle1", "FemaleHornStyle2", "FemaleHornStyle3", "FemaleHornStyle4",
+var female_gargy_horns := array {"FemaleHornStyle1", "FemaleHornStyle2", "FemaleHornStyle3", "FemaleHornStyle4",
 							"FemaleHornStyle5", "FemaleHornStyle6", "FemaleHornStyle7", "FemaleHornStyle8"};
 
 program TimedScript_Incognito(params)

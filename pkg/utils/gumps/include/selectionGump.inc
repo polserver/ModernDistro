@@ -152,7 +152,7 @@ endfunction
 *				 buttons are used. An array of strings selected if BTN_TYPE_CHECKBOX is used.
 *				 Error if no selection is made and the gump is closed by right-clicking it.
 */
-function SelectionGump2( mobile, title, options, btn_type:=BTN_TYPE_NORMAL, transparent := 0, tooltips :={} )
+function SelectionGump2( mobile, title, options, btn_type:=BTN_TYPE_NORMAL, transparent := 0, tooltips := array {} )
 
 	if( Lower( TypeOf( options )) != "array" )
 		return error{"errortext":="Options list must be an array."};
