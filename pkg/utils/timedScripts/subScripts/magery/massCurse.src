@@ -10,7 +10,6 @@ include ":timedScripts:timedScripts";
 
 program TimedScript_Curse(params)
 	var defender := params[1];
-	var attacker := params[2];
 	var percent := params[3];
 	var duration := params[4];
 

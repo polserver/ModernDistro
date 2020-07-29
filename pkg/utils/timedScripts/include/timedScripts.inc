@@ -34,13 +34,13 @@ CONST START_CONTROLLER			:= 0x1;
  *
  */
 function TS_GetCfgFile()
-	var cfg := ReadConfigFile(":timedScripts:timedScripts");
+	var timed_cfg := ReadConfigFile(":timedScripts:timedScripts");
 
-	if ( cfg.errortext )
-		TS_ReportText("Error::TS_GetSettingsCfgFile() - Unable to open [:timedScripts:timedScripts] ->"+cfg.errortext, TS_REPORT_SYSLOG);
+	if ( timed_cfg.errortext )
+		TS_ReportText("Error::TS_GetSettingsCfgFile() - Unable to open [:timedScripts:timedScripts] ->"+timed_cfg.errortext, TS_REPORT_SYSLOG);
 	endif
 
-	return cfg;
+	return timed_cfg;
 endfunction
 
 /*
@@ -62,13 +62,13 @@ function TS_GetCfgElem(elem_name, byref cfg_file:=0)
 		cfg_file := TS_GetCfgFile();
 	endif
 
-	var elem := cfg_file[elem_name];
+	var new_elem := cfg_file[elem_name];
 
-	if ( elem.errortext )
-		TS_ReportText("Error::TS_GetCfgElem - Unable to find elem ["+elem_name+"] ->"+elem.errortext, TS_REPORT_SYSLOG);
+	if ( new_elem.errortext )
+		TS_ReportText("Error::TS_GetCfgElem - Unable to find elem ["+elem_name+"] ->"+new_elem.errortext, TS_REPORT_SYSLOG);
 	endif
 
-	return elem;
+	return new_elem;
 endfunction
 
 /*
