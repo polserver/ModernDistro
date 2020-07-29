@@ -38,14 +38,14 @@ program test_cmd(who, unused text)
 	SendSysMessage(who, cstr(trgt.Tactics));
 	return;
 
-	var junk := {};
+	var junk := array {};
 	junk := {"fred", "wilma", "barney", "betty"};
 	SetObjProperty(who, "junk", junk);
 	return;
 
-	var taxonomies := {};
-	var Tax_NPC_list := {};
-	var NPC_keys := {};
+	var taxonomies := array {};
+	var Tax_NPC_list := array {};
+	var NPC_keys := array {};
 	var NPC_Ref := 0;
 	var class := 0;
 	var temp := 0;

@@ -9,7 +9,7 @@
 
 use uo;
 
-var crimeprops := {"longmurders",
+var crimeprops := array {"longmurders",
                    "decaylongcountat",
                    "permared",
                    "shortmurders",

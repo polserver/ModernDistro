@@ -49,7 +49,7 @@ function resign(guild,who)
 endfunction
 
 function findgm(guild)
-  var returninfo:={"In Vote", "0"},i,all:=guild.members,gm:=guild.getprop("gm");
+  var returninfo:= array {"In Vote", "0"},i,all:=guild.members,gm:=guild.getprop("gm");
   for(i:=1;i<=all.size();i:=i+1)
     if(all[i].serial==gm)
       returninfo[1]:=all[i].name;

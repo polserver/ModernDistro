@@ -3,8 +3,8 @@ use cfgfile;
 
 
 program addteleporter(who)
-  var elem := {};
   var cfg, maxint, origin_realm, where_to_realm;
+  var elem := struct {};
   elem.+pname;
   elem.+pvalue;
   var elems := array;

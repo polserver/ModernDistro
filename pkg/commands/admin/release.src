@@ -5,7 +5,7 @@ use os;
 program textcmd_release( who)
   var house := who.multi;
   var lists := GetObjProperty(house, "footage");
-  var itemlist := {};
+  var itemlist := array {};
   var holder := 0;
   if(lists)
     foreach thing in lists

@@ -130,7 +130,7 @@ function ComposeSubMenu()
   GFPage(1);
   var color := 0;
   var online := EnumerateOnlineCharacters();
-  var arry := {};
+  var arry := array {};
   foreach thing in online
     arry.append(thing.serial);
   endforeach
@@ -162,7 +162,7 @@ function ComposeSubMenu()
 endfunction
 
 function RemoveElement(arry, position)
-  var newarray := { };
+  var newarray := array { };
   foreach thing in arry
     if(thing != arry[position])
       newarray.append(thing);

@@ -3,7 +3,7 @@ use uo;
 use os;
 include "include/client";
 
-var layout := {
+var layout := array {
 "page 0",
 "resizepic 100 10 2600 350 355",
 "resizepic 120 54 5100 110 270",
@@ -562,7 +562,7 @@ var layout := {
 
 };
 
-var data := {
+var data := array {
 "Hair Color Selection Menu",
 "Brown",
 "Chestnut",

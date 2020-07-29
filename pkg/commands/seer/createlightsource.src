@@ -19,8 +19,7 @@ program createlightsource(caster)
     endif
     var thecritter;
 
-    var parms := {};
-
+    var parms := struct {};
     parms .+ script := "tamed";
 	parms .+ name := "a magical lightsource";
 

@@ -19,7 +19,7 @@ program textcmd_goxyz( who, text )
 		return;
 	endif
 	var params := SplitWords( text );
-	var facets := {"britannia", "britannia_alt", "ilshenar", "malas", "tokuno", "termur"};
+	var facets := array {"britannia", "britannia_alt", "ilshenar", "malas", "tokuno", "termur"};
 	var ZCoord := 0;
 	// Always default to the user's facet if they do not specify a facet.
 	var facet := who.realm;

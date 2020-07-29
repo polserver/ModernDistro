@@ -54,7 +54,7 @@ program textcmd_Info(who, serial)
 		targ := Target(who, TGTOPT_NOCHECK_LOS);
 	endif
 	if ( targ.IsA(POLCLASS_ITEM) )
-		start_script(":commands:/gm/iteminfo", {who, targ.serial});
+		start_script(":commands:/gm/iteminfo", array {who, targ.serial});
 		return 0;
 	endif
 

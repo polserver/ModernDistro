@@ -7,8 +7,8 @@ include ":gumps:yesNo";
 
 program textcmd_createnpc( who, template )
 
-	var	mercscripts := {"barber", "banker", "bucsBanker", "bucsTownHealer", "healer", "merchant", "stablemaster", "townguard", "townHealer"};
-	var	guardscripts := {"townGuard", "instakillGuard"};
+	var	mercscripts := array {"barber", "banker", "bucsBanker", "bucsTownHealer", "healer", "merchant", "stablemaster", "townguard", "townHealer"};
+	var	guardscripts := array {"townGuard", "instakillGuard"};
 	var	npc_config := ReadConfigFile("::npcdesc");
 	var	NPC_entry := FindConfigElem( npc_config, template );
 	var	ai_script := GetConfigString( NPC_entry, "Script" );

@@ -9,8 +9,8 @@ include ":timeutils:time";
 program textcmd_bug_reporter_script( who )
 
 
-    var prop1 := {};
-    var log1 := {};
+    var prop1 := array {};
+    var log1 := array {};
     var w1, description, elemkey;
 	var time := FormatTime(GetTimeStruct(GetTime()), "<HH>:<MM>:<SS> on <DAY>-<MON>-<YY>");
 

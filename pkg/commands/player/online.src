@@ -2,7 +2,7 @@ use uo;
 
 include "include/myUtil";
 
-var layout := {
+var layout := array {
 	"nodispose",
 	"page 0",
 	"resizepic 0 20 2620 310 470",
@@ -10,7 +10,7 @@ var layout := {
 	"text 20 29 40 0"
 };
 
-var data := {
+var data := array {
 	"Online Characters",
 	"Score"
 };

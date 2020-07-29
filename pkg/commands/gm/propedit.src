@@ -1180,7 +1180,7 @@ Function GetCPropNames(thing)
 	If (thing.isa(POLCLASS_UOBJECT))
 		//	Return GetObjPropertyNames(thing);
 
-		Var properties := { };
+		Var properties := array { };
 		Var append;
 
 	ForEach propname in GetObjPropertyNames(thing)

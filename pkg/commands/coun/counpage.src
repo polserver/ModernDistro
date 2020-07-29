@@ -136,7 +136,7 @@ function ComposeSubMenu()
 endfunction
 
 function RemoveElement(arry, position)
-  var newarray := { };
+  var newarray := array { };
   foreach thing in arry
     if(thing != arry[position])
       newarray.append(thing);

@@ -41,13 +41,13 @@ program textcmd_disarm(me, text)
 		MoveItemToContainer(weapontwo, mypack );
 	endif
 
-	var weapon := {};
-		weapon[1] := 0;
-		weapon[2] := 0;
-		weapon[3] := 0;
-		weapon[4] := 0;
-		weapon[5] := 0;
-		weapon[6] := 0;
+	var weapon := array {};
+	weapon[1] := 0;
+	weapon[2] := 0;
+	weapon[3] := 0;
+	weapon[4] := 0;
+	weapon[5] := 0;
+	weapon[6] := 0;
 
 	if ( GetObjProperty(me,"weapon") )
 		weapon := GetObjProperty(me,"weapon");
