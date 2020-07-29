@@ -4,7 +4,6 @@ use cfgfile;
 
 program jailkeeper()
   var relday;
-  var elem;
   var act;
   var ppl;
   while(1)

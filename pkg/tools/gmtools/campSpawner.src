@@ -10,7 +10,6 @@ var chestarray := {};
 var mobarray := {};
 
 program spawntest(item)
-  var rng := GetObjProperty(item,"range");
   foreach thing in ListItemsNearLocation(item.x, item.y, item.z, 20, item.realm)
     if(GetObjProperty(thing,"link") == item.serial)
       DestroyItem(thing);
@@ -34,7 +33,7 @@ program spawntest(item)
   endwhile
   var amt := GetObjProperty(item,"amount");
   var frq := GetObjProperty(item,"duration");
-  var chest, thechest, themob;
+  var thechest, themob;
   var i := 1;
   while(item)
     chestarray := GetObjProperty(item, "chestarray");
@@ -134,17 +133,17 @@ function create_guardians(item)
   endif
   var limit := GetObjProperty(item, "CritterAmount");
   var num := GetConfigInt( elem, "num");
-  var rand, template;
+  var rand, creature_template;
   var i := 1;
-  var mobarray := {};
+  var mob_array := {};
   var critter;
   for( i := 1; i <= limit; i := i + 1 )
     rand := RandomInt(num) + 1;
-    template := GetConfigString(elem, ("creature" + rand) );
-    critter := CreateGuardian(item, template);
-    mobarray.append(critter);
+    creature_template := GetConfigString(elem, ("creature" + rand) );
+    critter := CreateGuardian(item, creature_template);
+    mob_array.append(critter);
   endfor
-  SetObjProperty(item, "MobArray", mobarray);
+  SetObjProperty(item, "MobArray", mob_array);
   UnloadConfigFile(":gmtools:guardians");
 endfunction
 
@@ -154,11 +153,12 @@ function create_standards(item)
   if(rng > 10)
     rng := 10;
   endif
+  
   var checker := 0;
   if((rng == 0) || (rng == error))
     rng := 1;
   endif
-  var checkitem;
+
   while((checker == 0) && (item))
     checker := 1;
     case(rng)

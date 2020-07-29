@@ -320,7 +320,7 @@ endfunction
 function setinfernotrap(who)
   SendSysMessage(who,"set it where");
   var where := TargetCoordinates(who);
-  var landmine := CreateItemAtLocation(where.x, where.y, where.z, 0x1888a, 1, who.realm);
+  CreateItemAtLocation(where.x, where.y, where.z, 0x1888a, 1, who.realm);
   Detach();
   maintaingump(who);
 endfunction
@@ -986,7 +986,7 @@ endfunction
 ///////////////////////////////////
 // info functions contained here
 ///////////////////////////////////
-function info(who, character, trg)
+function info(who, character, unused trg)
   var online := 0;
   foreach char in EnumerateOnlineCharacters()
     if(char.serial == character)
@@ -1023,8 +1023,8 @@ function info(who, character, trg)
       11:
       14:
       13:
-      15: EditStat(who, character, result[0], trg);
-      16: EditSkill(who, character, reskey-1000, trg);
+      15: EditStat(who, character, result[0]);
+      16: EditSkill(who, character, reskey-1000);
       17: character.frozen := 1; SendSysMessage(who, character.name + " is frozen.");
       18: character.frozen := 0; SendSysMessage(who, character.name + " is unfrozen.");
       19: if(!character.isA(POLCLASS_NPC))
@@ -1130,7 +1130,7 @@ function FillInWeapon(who)
   endif
 endfunction
 
-function EditStat(who, character, result, trg)
+function EditStat(who, character, result)
     SendSysMessage(who, "Caution! Values are changed immediately, Integers only!. Hit ESC to cancel.");
     var val := CInt(RequestInput(who, who.backpack, "Enter a new value."));
     if(!val)
@@ -1154,7 +1154,7 @@ function EditStat(who, character, result, trg)
     endif
 endfunction
 
-function EditSkill(who, character, skill, trg);
+function EditSkill(who, character, skill);
     SendSysMessage(who, "Caution! Values are changed immediately, Integers only!. Hit ESC to cancel.");
     var val := CInt(RequestInput(who, who.backpack, "Enter a new value.")) * 10;
     if((!val) &&(val != 0))

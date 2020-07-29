@@ -19,7 +19,7 @@ program spawntest(item)
     print("Chest Spawner " + item.serial + " at: " + item.x + ", " + item.y + " is improperly configured");
     return;
   endif
-  var chest, current, thechest, newamt;
+  var current, newamt;
   CreateTreasureChests(item, amt);
   while(item)
     sleep(frq);

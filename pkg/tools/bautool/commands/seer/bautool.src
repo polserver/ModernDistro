@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// bautool - bequemes Erzeugen und Verändern von Items und Itemgruppen
+// bautool - bequemes Erzeugen und Verï¿½ndern von Items und Itemgruppen
 //
 // Author: Turley
 // eMail : michi.at.www@gmx.de
@@ -7,7 +7,7 @@
 // Konfigurationsdateien
 // - Menustruktur
 //   - bautoolmenues.cfg
-// - Erstellt Rechtecke mit Tiles (Zufällig oder nur einen)
+// - Erstellt Rechtecke mit Tiles (Zufï¿½llig oder nur einen)
 //   - bautoolrandom.cfg
 // - Erstellt einzelne Items
 //   - bautooleinzel.cfg
@@ -18,9 +18,9 @@
 // ToDo:
 // Zufallsding
 //  - Auswahlliste wie Random/Einzel/Sets
-//  - Wählt aus plus Wahrscheinlichkeiten
+//  - Wï¿½hlt aus plus Wahrscheinlichkeiten
 //  - Wenn fertig zusammengestellt Eck-Koords angeben und
-//    createn, immer auf Maphöhe
+//    createn, immer auf Maphï¿½he
 
 Use cfgfile;
 Use os;
@@ -892,7 +892,7 @@ EndFunction // }}}
 // CreateSet - ...
 ///////////////////////////////////
 
-Function CreateSet(who,byref ret,byref set,byref color) // {{{
+Function CreateSet(unused who, byref unused ret, byref unused set, byref unused color)
 /*  Var iTarget, items, itemserials:={}, wholeitems:={};
   Var z:=ret[ITEMPOS];
   z[1,6]:="";
@@ -961,7 +961,7 @@ Function CreateSet(who,byref ret,byref set,byref color) // {{{
     EndIf
   EndIf
   SendSysMessage(who, "Abort"); */
-EndFunction // }}}
+EndFunction
 
 ///////////////////////////////////
 // ModifyItemsManual - ...
