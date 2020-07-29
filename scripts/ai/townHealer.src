@@ -81,7 +81,7 @@ set_priority(50);
                                   else
                                     if(ev.text["buy"])
                                       TurnToward(ev.source);
-                                      var res := SendBuyWindow(ev.source, inv_fs, Self(), inv_pb);
+                                      SendBuyWindow(ev.source, inv_fs, Self(), inv_pb);
                                       foreach thing in EnumerateItemsInContainer((ev.source).backpack, ENUMERATE_ROOT_ONLY)
                                         EraseObjProperty(thing, "ClearRestock");
                                       endforeach
@@ -144,7 +144,7 @@ endfunction
 
 function lookiehere(who)
   var mobiles := ListMobilesNearLocation(who.x, who.y, who.z, 15);
-  var guard, num, i, hogcall, guardzone, element, range, timer, elem;
+  var num, hogcall, guardzone, element, range, timer, elem;
   var cfgfile := ReadConfigFile("::gzone");
   var entries := GetConfigStringKeys(cfgfile);
   foreach listing in entries

@@ -33,7 +33,6 @@ program storagewipe()
 	merchantstorage := FindStorageArea( "Merchant Storage" );
 
 	var containername;
-	var container;
 	var num := 0;
 	var mercs := 0;
 	var i;
@@ -61,5 +60,4 @@ program storagewipe()
 	print("Searched from " + startnum + " through " + endnum);
 	print("Total Tamed areas destroyed: "+num);
 	print("Total Merc areas destroyed: "+mercs);
-
 endprogram

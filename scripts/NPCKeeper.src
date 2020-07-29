@@ -159,15 +159,15 @@ program npckeep(who)
 	endif
   endif
   if(pncfg[who.npctemplate].ammotype)
-    var ammotype := pncfg[who.npctemplate].ammotype;
-    if(ammotype)
-      var ammoamount := pncfg[who.npctemplate].ammoamount;
-      if(!ammoamount)
-        ammoamount := 30;
+    var ammo_type := pncfg[who.npctemplate].ammotype;
+    if(ammo_type)
+      var ammo_amount := pncfg[who.npctemplate].ammoamount;
+      if(!ammo_amount)
+        ammo_amount := 30;
       endif
-      var theammo := CreateItemInBackpack(who, ammotype, ammoamount);
-      if(theammo.amount > ammoamount)
-        SubtractAmount(theammo, (theammo.amount - ammoamount));
+      var the_ammo := CreateItemInBackpack(who, ammo_type, ammo_amount);
+      if(the_ammo.amount > ammo_amount)
+        SubtractAmount(the_ammo, (the_ammo.amount - ammo_amount));
       endif
     endif
   endif

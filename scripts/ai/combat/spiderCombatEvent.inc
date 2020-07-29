@@ -8,25 +8,20 @@ function process_combat_event(opponent)
   endif
 endfunction
 
-function process_flee_event(opponent)
+function process_flee_event(unused opponent)
   return 0;
 endfunction
 
 function in_combat_event_loop(opponent, loops)
-
 	send_web(opponent);
 
 	if ( loops > 50 )
 		flee(opponent);
 		return;
 	endif
-
 endfunction
 
-
-
 function post_combat()
-
 	DisableCombatEvents();
 	EnableMainEvents();
 
@@ -35,18 +30,14 @@ function post_combat()
 
 	sleep(1);
 	look_around();
-
 endfunction
 
-function prepare_for_fight(opponent)
-
+function prepare_for_fight(unused opponent)
 	DisableMainEvents();
 	EnableCombatEvents();
-
 endfunction
 
 function send_web(opponent)
-
 	if (RandomInt(20) != 1)
 		return;
 	endif
@@ -55,17 +46,16 @@ function send_web(opponent)
 		return;
 	endif
 
-PrintTextAbove(me, "The spider spits a web!");
+	PrintTextAbove(me, "The spider spits a web!");
 
-//	-causes client crash-
-//
-//PlayMovingEffectXYZ( me.x, me.y, me.z,
-//                         opponent.x, opponent.y, opponent.z,
-//                         UOBJ_SPIDERWEB, 8, 0, 0, me.realm );
-//
-//	-causes client crash-
+	//	-causes client crash-
+	//
+	//PlayMovingEffectXYZ( me.x, me.y, me.z,
+	//                         opponent.x, opponent.y, opponent.z,
+	//                         UOBJ_SPIDERWEB, 8, 0, 0, me.realm );
+	//
+	//	-causes client crash-
 
-sleepms(1250);
-CreateItemAtLocation(opponent.x, opponent.y, opponent.z,UOBJ_SPIDERWEB,  1);
-
+	sleepms(1250);
+	CreateItemAtLocation(opponent.x, opponent.y, opponent.z,UOBJ_SPIDERWEB,  1);
 endfunction

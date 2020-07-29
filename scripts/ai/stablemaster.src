@@ -106,7 +106,7 @@ program stablemaster()
                                     elseif (text["sell"])
                                       if(GetObjProperty(inv_rs, "MyGold") >= 1000)
                                         TurnToward(ev.source);
-		                                sellanimal(ev.source);
+                                    sellanimal(ev.source);
                                       else
                                         PrintTextAbovePrivate(Self(), "I cannot afford any more of that", ev.source );
                                       endif
@@ -160,27 +160,27 @@ program stablemaster()
                                   mygold := mygold + ev.amount;
                                   SetObjProperty(inv_rs, "MyGold", mygold);
                                   foreach item in EnumerateItemsInContainer(ev.source.backpack )
-		                            petname :=GetObjProperty(item, "animalkind");
-		                            if(petname)
-		                              newpet := CreateNpcFromTemplate(petname, ev.source.x, ev.source.y,ev.source.z, 0, me.realm);
-		                              DestroyItem(item);
+                                petname :=GetObjProperty(item, "animalkind");
+                                if(petname)
+                                  newpet := CreateNpcFromTemplate(petname, ev.source.x, ev.source.y,ev.source.z, 0, me.realm);
+                                  DestroyItem(item);
                                       SetObjProperty(newpet, "master", ev.source.serial);
                                       SetObjProperty(newpet, "prevtamed", 1);
-		                              newpet.script := "tamed";
+                                  newpet.script := "tamed";
                                       RestartScript(newpet);
-		                            endif
+                                endif
                                   endforeach
                                   PlaySoundEffect(me, 0x38);
         SYSEVENT_ITEM_GIVEN:      if(ev.item.objtype == UOBJ_GOLDCOIN);
                                     TrainSkill(me, ev.source, ev.item);
-		                          else
-		                            TurnToward(ev.source);
-		                            Load_Ticket_Data(ev.source, ev.item);
-		                          endif
+                              else
+                                TurnToward(ev.source);
+                                Load_Ticket_Data(ev.source, ev.item);
+                              endif
       endcase
     endif
-	if(ReadGameClock() >= next_wander)
-	  begpurse(me);
+  if(ReadGameClock() >= next_wander)
+    begpurse(me);
       wander();
       if(coordist(me.x, me.y, myanchor[1], myanchor[2]) > 5)
         MoveObjectToLocation(me, myanchor[1], myanchor[2], myanchor[3], me.realm, MOVEOBJECT_FORCELOCATION);
@@ -193,34 +193,39 @@ endprogram
 
 function sellanimal(who)
   var i;
+
   say("What pet would you like to sell?");
-  var pet := Target(who);
-  if((!pet) || (pet==""))
-	SendSysMessage(who, "Cancelled.");
-	return;
+  var the_pet := Target(who);
+  if((!the_pet) || (the_pet==""))
+    SendSysMessage(who, "Cancelled.");
+    return;
   endif
-  var tempdata  := GetObjProperty(pet, "master");
-  var summoned  := GetObjProperty(pet, "summoned");
+
+  var tempdata  := GetObjProperty(the_pet, "master");
+  var summoned  := GetObjProperty(the_pet, "summoned");
   if(!tempdata)
-	say("I cannot buy that.");
-	return;
+    say("I cannot buy that.");
+    return;
   endif
-  if((pet.script == "tamed") && (tempdata == who.serial) && (!summoned))
+
+  if((the_pet.script == "tamed") && (tempdata == who.serial) && (!summoned))
     var theitem;
-	if((pet.objtype==0xd3) && (pet.color==0x02e6))
-	  theitem := CreateItemInContainer(inv_fs, 0x20cf, 1);
-	elseif(pet.objtype==0xd3)
-	  theitem := CreateItemInContainer(inv_fs, 0x2118, 1);
-	else
-	  for(i:=1;i<=sellimage.size();i:=i+1)
-		if(pet.objtype==sellimage[i])
-		  theitem := CreateItemInContainer(inv_fs, buyimage[i], 1);
-		  break;
-		endif
-	  endfor
-	endif
+    if((the_pet.objtype==0xd3) && (the_pet.color==0x02e6))
+      theitem := CreateItemInContainer(inv_fs, 0x20cf, 1);
+    elseif(the_pet.objtype==0xd3)
+      theitem := CreateItemInContainer(inv_fs, 0x2118, 1);
+    else
+      for(i:=1;i<=sellimage.size();i:=i+1)
+        if(the_pet.objtype==sellimage[i])
+          theitem := CreateItemInContainer(inv_fs, buyimage[i], 1);
+          break;
+        endif
+      endfor
+    endif
+
     SetObjProperty(theitem, "ClearRestock", (ReadGameClock() + 1800));
-	var buyamount := CInt(AP_GetStat(pet, STRENGTH) / 2);
+
+    var buyamount := CInt(AP_GetStat(the_pet, STRENGTH) / 2);
     var mygold := GetObjProperty(inv_rs, "MyGold");
     if(buyamount > mygold)
       say("Im sorry, but I cannot afford to buy any pets right now.");
@@ -228,22 +233,21 @@ function sellanimal(who)
     else
       mygold := mygold - buyamount;
       SetObjProperty(inv_rs, "MyGold", mygold);
-	  say(pet.name + " is worth $" + buyamount);
-	  SetObjProperty(pet, "guardkill", 1);
-	  MoveObjectToLocation(pet, 5555, 1111, 0, "britannia_alt", MOVEOBJECT_FORCELOCATION); // new map problem
-	  KillMobile(pet);
-	  CreateItemInBackpack(who, 0x0eed, buyamount);
-	  return;
+      say(the_pet.name + " is worth $" + buyamount);
+      SetObjProperty(the_pet, "guardkill", 1);
+      MoveObjectToLocation(the_pet, 5555, 1111, 0, "britannia_alt", MOVEOBJECT_FORCELOCATION); // new map problem
+      KillMobile(the_pet);
+      CreateItemInBackpack(who, 0x0eed, buyamount);
+      return;
     endif
-  elseif((pet.graphic == CID_HUMAN_MALE) || (pet.graphic == CID_HUMAN_FEMALE) )
-	say("Do I look like an Inn Keeper?!");
+  elseif((the_pet.graphic == CID_HUMAN_MALE) || (the_pet.graphic == CID_HUMAN_FEMALE) )
+    say("Do I look like an Inn Keeper?!");
   else
-	say("You could sell " + pet.name + " but that is not your pet.");
+    say("You could sell " + the_pet.name + " but that is not your pet.");
   endif
 endfunction
 
 function Save_Pet_Data(ticket, pet)
-  var tempdata;
   ticket.name := "Pet claim ticket for : " + pet.name;
   SetObjProperty(ticket, "StableMaster", me.serial);
   SetObjProperty(ticket, "petserial", pet.serial);
@@ -268,8 +272,8 @@ function Load_Ticket_Data(player, ticket)
     return;
   endif
   var tempdata := 0;
-  var newpet := 0;
-  var pet;
+  //var newpet := 0;
+  var the_pet;
   if(ticket.objtype == 0x14f0)
     tempdata := GetObjProperty(ticket, "petserial");
     say("Oh, let me find your pet for you. One moment, please.");
@@ -277,34 +281,34 @@ function Load_Ticket_Data(player, ticket)
     var petserial := GetObjProperty(ticket, "petserial");
     mystorage := GetObjProperty(me, "Pets");
     if(petserial in mystorage)
-      pet := SystemFindObjectBySerial(petserial);
+      the_pet := SystemFindObjectBySerial(petserial);
     endif
-    if(!pet)
+    if(!the_pet)
       say("Im sorry, but I dont have this pet,");
       sleep(1);
       say("perhaps you may have left him here too long?");
       DestroyItem(ticket);
       return;
     endif
-    SetObjProperty(pet, "master", player.serial);
-    SetObjProperty(pet, "prevtamed", 1);
-    EraseObjProperty(pet,"stabled");
-    EraseObjProperty(pet,"days");
-	pet.script := "tamed";
-    RestartScript(pet);
-    RevokePrivilege(pet, "invul");
-    MoveObjectToLocation(pet, player.x, player.y, player.z, player.realm, MOVEOBJECT_FORCELOCATION);
+    SetObjProperty(the_pet, "master", player.serial);
+    SetObjProperty(the_pet, "prevtamed", 1);
+    EraseObjProperty(the_pet,"stabled");
+    EraseObjProperty(the_pet,"days");
+  the_pet.script := "tamed";
+    RestartScript(the_pet);
+    RevokePrivilege(the_pet, "invul");
+    MoveObjectToLocation(the_pet, player.x, player.y, player.z, player.realm, MOVEOBJECT_FORCELOCATION);
     var holder := array;
     mystorage := GetObjProperty(me, "Pets");
     foreach thing in mystorage
-      if(thing != pet.serial)
+      if(thing != the_pet.serial)
         holder.append(thing);
       endif
     endforeach
     mystorage := holder;
     SetObjProperty(me, "Pets", mystorage);
-    EraseObjProperty(pet, "NextCounter");
-    say("Take care of " + pet.name + " and be sure to feed it!");
+    EraseObjProperty(the_pet, "NextCounter");
+    say("Take care of " + the_pet.name + " and be sure to feed it!");
     DestroyItem(ticket);
   else
     TakeItem(player, ticket);
@@ -343,7 +347,6 @@ function canclaim(player, pettemplate)
   endcase
   var conf := ReadConfigFile("::npcdesc");
   var elem;
-  var points := 0;
   elem := FindConfigElem(conf, pettemplate);
   if (!elem)
     return 0;
@@ -360,7 +363,7 @@ endfunction
 
 function Lookiehere(who)
   var mobiles := ListMobilesNearLocation(who.x, who.y, who.z, 15, who.realm);
-  var guard, num, i, hogcall, guardzone, element, range, timer, elem;
+  var num, hogcall, guardzone, element, range, timer, elem;
   var cfgfile := ReadConfigFile("::gzone");
   var entries := GetConfigStringKeys(cfgfile);
   foreach listing in entries
@@ -373,10 +376,10 @@ function Lookiehere(who)
     endif
   endforeach
   foreach npc in mobiles
-	if(!npc.acctname)
-	  elem := FindConfigElem(npccfg, npc.npctemplate);
-	  if(!elem.guardignore && !GetObjProperty(npc, "called"));
-		if((npc) && (npc.script != "tamed") && (npc.script != "light"))
+  if(!npc.acctname)
+    elem := FindConfigElem(npccfg, npc.npctemplate);
+    if(!elem.guardignore && !GetObjProperty(npc, "called"));
+    if((npc) && (npc.script != "tamed") && (npc.script != "light"))
           case(RandomInt(4) + 1)
             1: hogcall := "Guards! They're killing people here!";
             2: hogcall := "Guards! I pay my taxes and no guards? Guards!";
@@ -386,11 +389,11 @@ function Lookiehere(who)
           endcase
           PrintTextAbove(me, hogcall);
           if(guardzone == 1)
-		    SetObjProperty(npc, "called", 1);
+        SetObjProperty(npc, "called", 1);
             num := RandomInt(4) + 1;
             foreach mobile in ListMobilesNearLocation(me.x, me.y, me.z, 15, me.realm)
-		      if(mobile.npctemplate == "townguard")
-		        var ev := array;
+          if(mobile.npctemplate == "townguard")
+            var ev := array;
                 ev.+ type;
                 ev.+ source;
                 ev.type := EVID_PEACEMADE;
@@ -402,14 +405,14 @@ function Lookiehere(who)
               endif
             endforeach
           endif
-		endif
-	  endif
+    endif
+    endif
     else
-	  timer := GetObjProperty(npc, "guardstimer");
-	  if(npc.criminal && (timer < ReadGameClock() || timer.errortext))
+    timer := GetObjProperty(npc, "guardstimer");
+    if(npc.criminal && (timer < ReadGameClock() || timer.errortext))
         foreach mobile in ListMobilesNearLocation(me.x, me.y, me.z, 15, me.realm)
-		  if(mobile.npctemplate == "townguard")
-		    var ev := array;
+      if(mobile.npctemplate == "townguard")
+        var ev := array;
             ev.+ type;
             ev.+ source;
             ev.type := EVID_PEACEMADE;
@@ -421,8 +424,8 @@ function Lookiehere(who)
           endif
         endforeach
         SetObjProperty(npc, "guardstimer", ReadGameClock()+60);
-	  endif
-	endif
+    endif
+  endif
   endforeach
   sleep(1);
 endfunction

@@ -67,8 +67,8 @@ program CastleGuard()
   endif
   SetWarMode( 0 );
   set_priority(10);
-  var ph := SplitWords(me.name);
-  var myname := lower(ph[1]);
+  //var ph := SplitWords(me.name);
+  //var myname := lower(ph[1]);
   var destination := GetObjProperty(me, "Dest");
   SetObjProperty(me, "Waiting", 1);
   waittime := 120;
@@ -219,19 +219,19 @@ function Herd(ev)
   var ly := holder[2];
   var loops := 0;
   var opponent;
-  var waittime := 0;
+  var wait_time := 0;
   while(1)
 	if(!CloseIn(me, lx, ly))
 	  loops := loops + 1;
-	  waittime := 0;
+	  wait_time := 0;
 	else
 	  loops := 0;
-	  waittime := 1;
+	  wait_time := 1;
 	endif
 	if((loops >= 30) or (coordist(me.x, me.y, lx, ly) <= 1))
 	  break;
 	endif
-	ev := wait_for_event(waittime);
+	ev := wait_for_event(wait_time);
 	case (ev.type)
       SYSEVENT_DAMAGED: opponent := ev.source;
 			  		    SetOpponent(opponent);

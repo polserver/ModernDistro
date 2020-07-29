@@ -7,7 +7,7 @@ function process_combat_event(opponent)
   endif
 endfunction
 
-function process_flee_event(opponent)
+function process_flee_event(unused opponent)
   return 0;
 endfunction
 
@@ -28,7 +28,7 @@ function post_combat()
   look_around();
 endfunction
 
-function prepare_for_fight(opponent)
+function prepare_for_fight(unused opponent)
   DisableMainEvents();
   EnableCombatEvents();
 endfunction

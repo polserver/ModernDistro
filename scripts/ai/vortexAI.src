@@ -23,17 +23,19 @@ var idlesnd2 := CInt(npccfgfile[me.npctemplate].idlesound2);
 var masterserial := GetObjProperty(me, "master");
 
 program KillPlayers()
-  var master;
+  var the_master;
   foreach char in EnumerateOnlineCharacters()
     if(char.serial == masterserial)
-      master := char;
+      the_master := char;
       break;
     endif
   endforeach
-  if(!master)
-    master := SystemFindObjectBySerial(CInt(masterserial), SYSFIND_SEARCH_OFFLINE_MOBILES);
+
+  if(!the_master)
+    the_master := SystemFindObjectBySerial(CInt(masterserial), SYSFIND_SEARCH_OFFLINE_MOBILES);
   endif
-  SetScriptController( master );
+
+  SetScriptController( the_master );
   SetWarMode( 0 );
   main_AI_loop();
 endprogram
@@ -79,7 +81,7 @@ function Fight(opponent)
     opponent := 0;
 	return;
   endif
-  var oldprio := set_priority(50);
+  set_priority(50);
   SetOpponent(opponent);
   prepare_for_fight(opponent);
   TurnToward(opponent);

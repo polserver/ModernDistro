@@ -194,8 +194,7 @@ function Fight(opponent)
   me.concealed := 1;
   sleep(1);
   DestroyItem(gate);
-  var oldprio := set_priority(50);
-  oldprio := oldprio;
+  set_priority(50);
   var loops := 0;
   loops := loops;
   var ev;
@@ -215,6 +214,7 @@ function post_combat()
 	var allpoisons := TS_GetTimerNames(me, "P");
 	if(allpoisons.Size() > 0)
 		foreach poison in allpoisons
+			poison := poison; // Avoid compiler warnings
 			TS_CurePoison(me, 100000, "P", 5);
 		endforeach
 
@@ -413,11 +413,11 @@ function TrainSkill(me, who, item)
   endif
 endfunction
 
-function GoldForSkillGain( npc_skill, pc_skill, skillid )
+function GoldForSkillGain( npc_skill, pc_skill, unused skillid )
   var maxskill := npc_skill - pc_skill;
   return maxskill*10;
 endfunction
 
-function SkillGainForGold(npc_level, pc_level, trainskillid, goldreceived)
+function SkillGainForGold(unused npc_level, pc_level, unused trainskillid, goldreceived)
   return (goldreceived/10) + pc_level;
 endfunction

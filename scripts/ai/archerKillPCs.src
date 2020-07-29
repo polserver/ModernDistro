@@ -1,4 +1,3 @@
-
 /////////////////////////////////////////////////////////////////////////////
 //
 //  archerkillpcs.src: Archer AI
@@ -24,10 +23,8 @@ include ":npcs:randName";
 include "include/NPCUtil";
 include "include/objtype";
 include "include/anchors";
-//include "include/dist";
 include "ai/main/meanLoop";
 include "ai/combat/fight";
-//include "include/dist";
 include "include/speech";
 include "ai/main/defaultNonCombatEvent";
 include "ai/combat/defaultCombatEvent";
@@ -45,8 +42,8 @@ endif
 
 program KillPlayers()
   drop_anchor();
-  var next_wander := ReadGameClock() + 10;
-  var npccfg := ReadConfigFile("npcdesc");
+  //var next_wander := ReadGameClock() + 10;
+  //var npc_cfg := ReadConfigFile("npcdesc"); // this is weird... why is this here?
   EnableEvents( EVID_ENGAGED );
   EnableEvents( EVID_DISENGAGED );
   EnableEvents( EVID_DAMAGED );

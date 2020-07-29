@@ -2,8 +2,7 @@ use uo;
 
 include "include/clock";
 
-program about( cmd )
-
+program about( unused cmd )
     var system := polcore();
 
     print("System Message:    About" );
@@ -11,5 +10,4 @@ program about( cmd )
     print("    Designer:      Syzygy" );
     print("    Email          syzygy@pobox.com" );
     print("    Last Updated:  " + system.compiledate + " " + system.compiletime );
-
 endprogram

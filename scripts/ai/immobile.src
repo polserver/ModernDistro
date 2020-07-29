@@ -28,7 +28,7 @@ program KillPlayers()
 	main_AI_loop();
 endprogram
 
-function CloseDistance( opponent )
+function CloseDistance( unused opponent )
   sleepms(100);
 endfunction
 
