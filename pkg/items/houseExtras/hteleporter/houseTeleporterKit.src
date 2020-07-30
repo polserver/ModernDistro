@@ -20,7 +20,7 @@ program HouseTeleporterKit(who, htelekit)
 		return 0;
 		endif
 	endif
-	var result := {};
+	var result := array {};
 	var inpack := 0;
 	var bpack := EnumerateItemsInContainer(who.backpack);
 
@@ -143,7 +143,7 @@ endprogram
 
 function SendGump(me, housesign)
 
-	var res := {};
+	var res := array {};
 	var gump := array {
 //		"NoClose"
 		"page 0",
@@ -171,7 +171,7 @@ function SendGump(me, housesign)
 	endif
 
 
-	var data := {
+	var data := array {
 		"House teleporter placement:",
 		"<big>Decide where you want the first teleporter and click the 'This will place the primary teleporter'" +
 		" button. Target the spot inside your house that you want the teleporter. Now go to the location where" +

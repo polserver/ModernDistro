@@ -30,7 +30,7 @@ endprogram
 ///////////////////////////////////////////////////////////
 exported function IsHouseSign( byref unused sign )
 
-	var signs := {0xBD0, 0xBD2, 0x20BD1, 0x20BD2, 0x20BCF, 0x20BD0, 0x260FA};
+	var signs := array {0xBD0, 0xBD2, 0x20BD1, 0x20BD2, 0x20BCF, 0x20BD0, 0x260FA};
 	foreach thing in signs
 		thing := thing; // stops unused warning.
 		if(GetObjProperty(thing, "footage"))
@@ -54,7 +54,7 @@ endfunction
 // Returns: 1 if true and 0 if false.
 ///////////////////////////////////////////////////////////
 exported function IsStaticHouseSign( byref unused sign )
-	var signs := {CInt(0x20BD1), CInt(0x20BD2), CInt(0x20BCF), CInt(0x20BD0), CInt(0x260FA)};
+	var signs := array {CInt(0x20BD1), CInt(0x20BD2), CInt(0x20BCF), CInt(0x20BD0), CInt(0x260FA)};
 	foreach thing in signs
 		thing := thing; // stops unused warning.
 		if(GetObjProperty(thing, "footage"))
@@ -79,7 +79,7 @@ endfunction
 // Returns: 1 if true and 0 if false.
 ///////////////////////////////////////////////////////////
 exported function IsMultiHouseSign( byref unused sign )
-	var signs := {0xBD2, 0xBD0};
+	var signs := array {0xBD2, 0xBD0};
 	foreach thing in signs
 		thing := thing; // stops unused warning.
 		if(GetObjProperty(thing, "footage"))
@@ -522,7 +522,7 @@ endfunction
 ///////////////////////////////////////////////////////////
 exported function IsInHouseLists(sign, byref who, byref type)
 
-	var nfo := {};
+	var nfo := array {};
 	case(type)
 		1: nfo := GetObjProperty(sign, "coowners");
 		2: nfo := GetObjProperty(sign, "friendlist");

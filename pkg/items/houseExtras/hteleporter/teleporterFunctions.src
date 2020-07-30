@@ -21,7 +21,7 @@ program teleporter_use(who, teleporter)
 		SendSysMessageCL(who, 501975, color := 33); // That is too far away.
 		return 0;
 	endif
-	var options := {"Rename the teleporter.", "Set access level.", "Remove the teleporter"};
+	var options := array {"Rename the teleporter.", "Set access level.", "Remove the teleporter"};
 	var selection := TeleFunctionsGump( who, "Teleporter Functions", options, BTN_TYPE_RADIO );
 	if(selection.errortext)
 		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
@@ -63,7 +63,7 @@ function SetAccess(who, tele)
 	endif
 
 
-	var options := {"Owner", "Co-Owners", "Friends", "Anyone"};
+	var options := array {"Owner", "Co-Owners", "Friends", "Anyone"};
 	var selection := TeleFunctionsGump( who, "Set Access Restriction:", options, BTN_TYPE_RADIO );
 	var choice := selection in options;
 	case(choice)

@@ -191,7 +191,7 @@ function HouseFunction(house, event, num)
 	//////////////////////////////////////////////
 
 	var lists := GetObjProperty(house_sign, "footage");
-	var itemlist := {};
+	var itemlist := array {};
 	var holder;
 	foreach thing in lists
 		holder := ListObjectsInBox(thing[1], thing[2], thing[3], thing[4], thing[5],thing[6], house.realm);
@@ -226,7 +226,7 @@ function HouseFunction(house, event, num)
 					if(DeedObjType)
 						itemt := CreateItemInBackpack(event.source, CInt(DeedObjType));
 						if(!itemt)
-							SendSysMessageCL(event.source, 1045150, {}, 3, 33);	// "There is not enough room in your backpack for the deed."
+							SendSysMessageCL(event.source, 1045150, array {}, 3, 33);	// "There is not enough room in your backpack for the deed."
 							return;
 						endif
 						itemt.color := CInt(DeedColor);
@@ -291,7 +291,7 @@ function secure(sign, event)
 	endif
 	if(GetObjProperty(sign, "RemainingSecures"))
 	var lists := GetObjProperty(sign, "footage");
-	var itemlist := {};
+	var itemlist := array {};
 	var holder;
 	foreach thing in lists
 		holder := ListObjectsInBox(thing[1], thing[2], thing[3], thing[4], thing[5],thing[6], sign.realm);
@@ -413,7 +413,7 @@ endfunction
 function demolish(sign)
 	var house := SystemFindObjectBySerial(GetObjProperty(sign, "houseserial"));
 	var lists := GetObjProperty(sign, "footage");
-	var itemlist := {};
+	var itemlist := array {};
 	foreach entry in lists
 		foreach thing in ListObjectsInBox(entry[1], entry[2], entry[3], entry[4], entry[5],entry[6], house.realm)
 			itemlist.append(thing);

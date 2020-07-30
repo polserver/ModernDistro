@@ -65,7 +65,7 @@ function RemoveMods(who)
 	foreach item in ListEquippedItems(who)
 		var proc := GetProcess(GetObjProperty(item, "Pid"));
 		if(proc)
-			var ev := {};
+			var ev := struct {};
 			ev.+type := EVID_UNEQUIP;
 			proc.sendevent(ev);
 		endif

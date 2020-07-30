@@ -45,7 +45,7 @@ sign := sgn;
 		var bankbox := FindBankBox( who );
 		var signserial := CInt(sign.serial);
 
-		var extdoors :={};
+		var extdoors := array {};
 		if (!yesNo(who, "Do you want to buy this house?"))
 			SendSysMessage(who, "Canceled.");
 			return 0;

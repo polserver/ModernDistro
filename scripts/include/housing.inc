@@ -77,7 +77,7 @@ endfunction
 /////////////////////////////////////////////////////////////////////////////////////////
 function StatusCheck(byref who, type)
 
-	var nfo := {};
+	var nfo := array {};
 	case(type)
 		1: nfo := GetObjProperty(sign, "coowners");
 		2: nfo := GetObjProperty(sign, "friends");
@@ -160,7 +160,7 @@ function GetHousePricePerSquare(town)
 	UnloadConfigFile("regions");
 	var  reg_cfg := ReadConfigFile("::regions/regions");               // Reads regions.cfg
 
-	var regions := {};                                    // Array of city names
+	var regions := array {};                                // Array of city names
 	//var boundary := "";                                   // String containing the 4 coords defining a resgion.
 	//var boundaries := {};                                 // Array with the boundary coords as each element.
 	//var yes := 0;
@@ -196,7 +196,7 @@ return sqprice;
 endfunction
 
 function GetHouseItems(map)
-	var itemlist := {};
+	var itemlist := array {};
 	foreach thing in footage
 		var holder := ListObjectsInBox(thing[1], thing[2], thing[3], thing[4], thing[5],thing[6], map);
 		foreach obj in holder
@@ -226,7 +226,7 @@ function IsInHouse(trg)
 endfunction
 
 function GetHouseMobiles()
-	var itemlist := {};
+	var itemlist := array {};
 	foreach thing in footage
 		var holder := ListObjectsInBox(thing[1], thing[2], thing[3], thing[4], thing[5],thing[6]);
 		foreach obj in holder

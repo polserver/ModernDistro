@@ -323,7 +323,7 @@ var databanlift := array {
 ""
 };
 
-var layoutfriendremove := {
+var layoutfriendremove := array {
 "page 0",                                // Page 0
 "resizepic 100 100 2600 400 300",        // Grey background
 "resizepic 147 359 5100 310 25",         // Square Grey box
@@ -905,7 +905,7 @@ function DeleteFriend(hsign,who)
 	var fillname;
 	var retval1 := 0;
 	var friendlist := hsign.GetFriendList();
-	var newlist := {};
+	var newlist := array {};
 	foreach thing in friendlist
 		fillname := SystemFindObjectBySerial(thing);
 		if(!fillname)
@@ -939,7 +939,7 @@ function ListFriend(hsign, who)
 	var z := 0;
 	var fillname;
 	var friendlist := hsign.GetFriendList();
-	var newlist := {};
+	var newlist := array {};
 	foreach thing in friendlist
 		fillname := SystemFindObjectBySerial(thing);
 		if(!fillname)
@@ -1005,7 +1005,7 @@ function DeleteBan(hsign,who)
 	var fillname;
 	var retval1 := 0;
 	var banlist := hsign.GetBanList();
-	var newlist := {};
+	var newlist := array {};
 	foreach thing in banlist
 		fillname := SystemFindObjectBySerial(thing, SYSFIND_SEARCH_OFFLINE_MOBILES);
 		if(fillname)
@@ -1037,9 +1037,9 @@ function ListBan(hsign, who)
 	var fillname;
 	var banlist := hsign.GetBanList();
 	if(!banlist)
-		banlist := {};
+		banlist := array {};
 	endif
-	var newlist := {};
+	var newlist := array {};
 	foreach thing in banlist
 		fillname := SystemFindObjectBySerial(thing, SYSFIND_SEARCH_OFFLINE_MOBILES);
 		if(fillname)
@@ -1090,7 +1090,7 @@ function DeleteCoowner(hsign,who)
 	var fillname;
 	var retvalue := 0;
 	var coownlist := hsign.GetCoOwnerList();
-	var newlist := {};
+	var newlist := array {};
 	foreach thing in coownlist
 		fillname := SystemFindObjectBySerial(thing, SYSFIND_SEARCH_OFFLINE_MOBILES);
 		if(fillname)
@@ -1126,7 +1126,7 @@ function ListCoowner(sign, who)
 	var z := 0;
 	var fillname;
 	var coownlist := sign.GetCoOwnerList();
-	var newlist := {};
+	var newlist := array {};
 	foreach thing in coownlist
 		fillname := SystemFindObjectBySerial(thing, SYSFIND_SEARCH_OFFLINE_MOBILES);
 		if(fillname)
@@ -1297,7 +1297,7 @@ endfunction
 function demolish(house, sign, who, bank_region)
 	sign := sign;
 	var lists := GetObjProperty(sign, "footage");
-	var itemlist := {};
+	var itemlist := array {};
 	var holder, chk := 0;
 	foreach thing in lists
 		holder := ListObjectsInBox(thing[1], thing[2], thing[3], thing[4], thing[5],thing[6], house.realm);
@@ -1330,7 +1330,7 @@ function demolish(house, sign, who, bank_region)
 		endif
 	endif
 	if(chk == 0)
-		var LockIDs := {}, id;
+		var LockIDs := array {}, id;
 		foreach thing in (house.components)
 			id := GetObjProperty(thing, "LockID");
 			if(id)

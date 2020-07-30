@@ -170,7 +170,7 @@ case (carpet_type)
 endcase
 
 var piece;
-var the_serials	:= {};
+var the_serials	:= array {};
 
 	for( i := x1+1; i <= x2-1; i := i + 1 )
 		for( j := y1+1; j <= y2-1; j := j + 1 )
@@ -266,7 +266,7 @@ var the_serials	:= {};
 	SetObjProperty(piece, "lockdownsused", carpet_tiles);
 
 	// Add multi part CProps.
-	var carpet_pieces := {};
+	var carpet_pieces := array {};
 	for( i := x1+1; i <= x2-1; i := i + 1 )
 		for( j := y1+1; j <= y2-1; j := j + 1 )
 			carpet_pieces := ListItemsAtLocation( i, j, carpet_z, who.realm );

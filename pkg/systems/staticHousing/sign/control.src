@@ -220,7 +220,7 @@ function HouseFunction(event, num)
 				if(DeedObjType)
 					var itemd := CreateItemInBackpack(event.source, CInt(DeedObjType));
 					if(!itemd)
-						SendSysMessageCL(event.source, 1045150, {}, 3, 33);	// "There is not enough room in your backpack for the deed."
+						SendSysMessageCL(event.source, 1045150, array {}, 3, 33);	// "There is not enough room in your backpack for the deed."
 						return;
 					endif
 					itemd.color := CInt(DeedColor);
@@ -652,7 +652,7 @@ function VendorCommands(ev)
   foreach thing in vlist
     var npc := SystemFindObjectBySerial(thing);
     var split := SplitWords(npc.name);
-    npclist.append({lower(split[1]), npc});
+    npclist.append( array {lower(split[1]), npc});
   endforeach
   var text := lower(ev.text);
   var who := ev.source;
