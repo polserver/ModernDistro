@@ -81,6 +81,7 @@ ecompile.log
 leftovers.txt
 orphans.txt
 pol.cfg
+*.bak
 
 # POL binaries and cfg
 pol.exe
