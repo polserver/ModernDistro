@@ -874,7 +874,7 @@ endprogram
 //////////////////////////////////
 
 function AddFriend(hsign, who)
-  var friendlist := hsign.GetFriendList();
+  //var friendlist := hsign.GetFriendList();
   SendSysMessageCL(who, 501317, color := 88); // Target the person you wish to name a friend of your household.
   var targetchr := Target(who);
   if(!targetchr)
@@ -961,7 +961,7 @@ endfunction
 ////////////////////////////
 
 function AddBan(hsign, who)
-	var banlist := hsign.GetBanList();
+	//var banlist := hsign.GetBanList();
 	SendSysMessageCL(who, 502014, color := 88); // Select the victim.
 	var targetchr := Target(who);
 	if(!targetchr)
@@ -1054,7 +1054,7 @@ function ListBan(hsign, who)
 endfunction
 
 function AddCoowner(hsign, who)
-	var coownlist := hsign.GetCoOwnerList();
+	//var coownlist := hsign.GetCoOwnerList();
 	SendSysMessageCL(who, 502020, color := 88); // Click on the player whom you wish to make a co-owner.
 	var targetchr := Target(who);
 	if(!targetchr)

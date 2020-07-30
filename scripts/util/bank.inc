@@ -14,7 +14,8 @@ include ":containers:storageAreas";
 include "include/objtype";
 include "include/myUtil";
 
-function FindBankBox( character, bank_obj_name_prefix := "Bankbox of " )
+function FindBankBox( character,  bank_obj_name_prefix := "Bankbox of " )
+	bank_obj_name_prefix := bank_obj_name_prefix; // Avoid compiler warnings
 
 	var bank_region := CP_DEFAULT_AREA;
 	var bankbox		:= CP_GetStorageContainerForMobile( character, bank_region, CP_CREATE );

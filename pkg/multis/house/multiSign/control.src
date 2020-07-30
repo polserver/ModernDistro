@@ -182,7 +182,7 @@ function HouseFunction(house, event, num)
 		SendSysMessage(event.source, "Cancelled.");
 		return;
 	endif
-	var sign := SystemFindObjectBySerial(GetObjProperty(house, "signserial"));
+	var house_sign := SystemFindObjectBySerial(GetObjProperty(house, "signserial"));
   	// Set-up in case this item is a deeded item.
 	var DeedObjType := GetObjProperty( itemt, "DeedObjType" );
 	var DeedColor := GetObjProperty( itemt, "DeedColor" );
@@ -190,7 +190,7 @@ function HouseFunction(house, event, num)
 	OtherItems := GetObjProperty( itemt, "OtherItems" );
 	//////////////////////////////////////////////
 
-	var lists := GetObjProperty(sign, "footage");
+	var lists := GetObjProperty(house_sign, "footage");
 	var itemlist := {};
 	var holder;
 	foreach thing in lists
@@ -201,12 +201,12 @@ function HouseFunction(house, event, num)
 	endforeach
 	if(itemt in itemlist)
 		case(num)
-			1:	if(GetObjProperty(sign, "RemainingLockdowns") > 0)
+			1:	if(GetObjProperty(house_sign, "RemainingLockdowns") > 0)
 					if(itemt.movable == 1)
 						itemt.movable := 0;
 						SetObjProperty(itemt, "lockeddown", 1);
 						SetObjProperty(itemt, "houseserial", house.serial);
-						SetObjProperty(sign, "RemainingLockdowns", GetObjProperty(sign, "RemainingLockdowns") - 1);
+						SetObjProperty(house_sign, "RemainingLockdowns", GetObjProperty(house_sign, "RemainingLockdowns") - 1);
 						SendSysMessage(event.source, 501721, color := 66); // Locked down!
 					elseif((itemt.movable == 0) && (GetObjProperty(itemt,"lockeddown") ==1))
 						SendSysMessageCL(event.source, 501719, color := 33); // This is already locked down!
@@ -234,7 +234,7 @@ function HouseFunction(house, event, num)
 							itemt := SystemFindObjectBySerial(part);
 							DestroyItem(itemt);
 						endforeach
-						sign.AddLockdown();
+						house_sign.AddLockdown();
 						return;
 					endif
 					/////////////////////////////////////////////////////
@@ -245,14 +245,14 @@ function HouseFunction(house, event, num)
 							oldscript := "";
 						endif
 						itemt.usescript := oldscript;
-						SetObjProperty(sign, "RemainingSecures", GetObjProperty(sign, "RemainingSecures") + 1);
+						SetObjProperty(house_sign, "RemainingSecures", GetObjProperty(house_sign, "RemainingSecures") + 1);
 						EraseObjProperty(itemt, "oldscript");
 						EraseObjProperty(itemt, "boxserial");
 					endif
 					EraseObjProperty(itemt, "signserial");
 					itemt.movable := 1;
 					EraseObjProperty(itemt, "lockeddown");
-					SetObjProperty(sign, "RemainingLockdowns", GetObjProperty(sign, "RemainingLockdowns") + 1);
+					SetObjProperty(house_sign, "RemainingLockdowns", GetObjProperty(house_sign, "RemainingLockdowns") + 1);
 					SendSysMessage(event.source, "Released.");
 					return;
 				elseif ((itemt.movable == 0) &&(GetObjProperty(itemt,"secure") ==1))
@@ -262,7 +262,7 @@ function HouseFunction(house, event, num)
 						oldscript := "";
 					endif
 					itemt.usescript := oldscript;
-					SetObjProperty(sign, "RemainingSecures", GetObjProperty(sign, "RemainingSecures") + 1);
+					SetObjProperty(house_sign, "RemainingSecures", GetObjProperty(house_sign, "RemainingSecures") + 1);
 					EraseObjProperty(itemt, "signserial");
 					EraseObjProperty(itemt, "oldscript");
 					itemt.movable := 1;

@@ -6,7 +6,7 @@ include "doors";
 include ":attributes:attributes";
 
 program use_door(chr, door)
-  var doordesc, dooroptions, configuration, refresh, flowoption, closelocked, house, hs, ss, sign, item, stuff;
+  var door_desc, dooroptions, configuration, refresh, flowoption, closelocked, house, hs, ss, sign, item, stuff;
   var signarray := array(0x1600E, 0x1600F, 0x16010, 0x16011);
   var friend;
   if(GetObjProperty(door, "#inuse"))

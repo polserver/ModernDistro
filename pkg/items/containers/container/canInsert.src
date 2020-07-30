@@ -26,11 +26,11 @@ program canInsert( mobile, container, move_type, unused inserttype, unused addin
 endprogram
 
 function ContainerIsSecured( mobile, container )
-	var sign := GetHouseSign ( mobile );
+	var house_sign := GetHouseSign ( mobile );
 	if ( !container.IsSecured() )
 		// Nothing to worry about.
 		return 0;
-	elseif ( sign.IsAffiliated( sign, mobile ) >= container.GetSecureLevel() )
+	elseif ( house_sign.IsAffiliated(mobile) >= container.GetSecureLevel() )
 		return 0;
 	else
 		return 1;
