@@ -1,0 +1,93 @@
+use os;
+use uo;
+
+include "include/client";
+include ":attributes:attributes";
+
+program houseTeleporter(mobile, htele)
+	var house := SystemFindObjectBySerial( GetObjProperty( htele, "houseserial" ));
+	var othertele := SystemFindObjectBySerial(GetObjProperty(htele, "Othertele"));
+	var otherhouse := SystemFindObjectBySerial(GetObjProperty(othertele, "houseserial"));
+	var securitylevel := 0;					// The security level of the person trying to access the container.
+	var securedlevel := 0;					// The security level that is assigned to the htele.
+	var seclevel := "";
+	var secure := 0;
+	var cantele := 0;
+	var coownerinfo := GetObjProperty(house, "coownlist");
+	if(!coownerinfo)
+		coownerinfo :={};
+	endif
+	var friendinfo := GetObjProperty(house,"friendlist");
+	if(!friendinfo)
+		friendinfo :={};
+	endif
+	var tox := GetObjProperty( htele, "DestX" );
+	var toy := GetObjProperty( htele, "DestY" );
+	var toz := GetObjProperty( htele, "DestZ" );
+	var torealm := GetObjProperty( htele, "DestRealm" );
+	if (!torealm)
+		torealm := "britannia";
+	endif
+
+	if((mobile.npctemplate) && (mobile.script != "employed") && (mobile.script != "tamed") && (mobile.script != "escortee"))
+		return;
+	endif
+	secure := CInt(GetObjProperty(htele, "secure"));
+	if(secure)												// Is the teleporter secured?
+		seclevel := GetObjProperty(htele, "AccessLevel");
+		// SecuredLevels are: O = owner, C = co-owners, F = friends, A = all house affiliates.
+		case(seclevel)
+			"O": securedlevel := 1;				// Secured for owner
+			"C": securedlevel := 2;				// Secured for co-owner
+			"F": securedlevel := 3;				// Secured for friends
+			"A": securedlevel := 4;				// Secured for all house affiliates, ie. owner, co-owners and friends have access.
+		endcase
+
+		if((GetObjProperty( house, "ownerserial" ) == mobile.serial) || (GetObjProperty( house, "owneraccount" ) == mobile.acctname))
+			securitylevel := 1;
+			cantele := 1;											// Owners have universal access to teleporters
+		elseif((mobile.serial in coownerinfo) && securedlevel == 2)
+			securitylevel := 2;
+		elseif((mobile.serial in friendinfo) && securedlevel == 3)
+			securitylevel := 3;
+		elseif(securitylevel)
+			securitylevel := 4;
+		elseif(mobile.cmdlevel >= 2)
+			cantele := 1;
+		endif
+
+		// Need to account for banned list in destination teleporter's location!
+		if(mobile.serial in GetObjProperty(otherhouse, "banlist"))
+			SendSysMessage(mobile, "You were banned from entering the house", color := 33);
+			SendSysMessage(mobile, "where the other teleporter is located.", color := 33);
+			cantele := 0;
+		endif
+		if((securitylevel != securedlevel) && !cantele)
+			return 0;
+		endif
+	endif
+
+	// set_critical(1);
+	if(GetObjProperty(mobile,"#justtelepported") )
+		return;
+	endif
+
+	foreach critter in ListMobilesNearLocation(htele.x, htele.y, htele.z, 8, htele.realm);
+		if(((critter.script == "employed") && (CInt(GetObjProperty(critter, "master")) == mobile.serial)) || ((critter.script == "escortee") && (CInt(GetObjProperty(critter, "Escortee")) == mobile.serial)) || ((critter.script == "tamed") && (CInt(GetObjProperty(critter, "master")) == mobile.serial)))
+			SetObjProperty(critter, "Pause", 1);
+			MoveObjectToLocation(critter, htele.x, htele.y, htele.z, torealm, MOVEOBJECT_FORCELOCATION);
+			EraseObjProperty(critter, "Pause");;
+		endif
+	endforeach
+
+	if((securitylevel == securedlevel) || cantele)
+		SetObjProperty(mobile,"#justtelepported",1);
+		PlayObjectCenteredEffect(htele, FX_SMOKE, 10, 10);
+		MoveObjectToLocation(mobile, tox, toy, toz, torealm );
+		sleep(1);
+		EraseObjProperty(mobile,"#justtelepported");
+	endif
+
+	// set_critical(0);
+
+endprogram

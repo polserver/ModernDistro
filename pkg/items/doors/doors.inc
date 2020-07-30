@@ -132,8 +132,8 @@ function IsLocked (who, door)
 		return 0;
 	endif
 
-	var doorlockid := GetObjProperty (door, "LockID");
-	if (!doorlockid)
+	var doorLockID := GetObjProperty (door, "LockID");
+	if (!doorLockID)
 		return 1;
 	endif
 
@@ -147,7 +147,7 @@ function IsLocked (who, door)
     endif
 /*		if(item.IsKeyRing())
 				foreach key in EnumerateItemsInContainer (FindMyPack (item.serial))
-					keylockid := GetObjProperty (key, "LockID");
+					keyLockID := GetObjProperty (key, "LockID");
           if (item.KeyMatchesLock(door))
             PrintTextAbovePrivate (door, "You quickly unlock, use and re-lock the door", who);
 						return 0;

@@ -26,7 +26,6 @@ program SpellStarter(params)
 		SendSysMessage(mobile, "You are already doing something.", color := 33);
 		return 0;
 	endif
-
 	var spell_elem := MS_GetSpellsCfgElem(spell_id);
 	var manacost := CInt(spell_elem.ManaCost);
 	// If spell is set to 'TestOnly 1', then it requires cmdlevel or #SpellTester CProp before it can be used.

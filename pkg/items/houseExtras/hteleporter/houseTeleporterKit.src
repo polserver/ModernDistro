@@ -1,0 +1,211 @@
+use uo;
+use os;
+
+include "include/housing";
+include ":houseExtras:settings";
+include "include/canAccess";
+
+var htele1 := 0;
+var htele2 := 0;
+var settings := HE_GetSettingsCfgElem("Settings");
+
+program HouseTeleporterKit(who, htelekit)
+
+
+	var targ := 0;
+	var housesign1 := FindHouseForLocation (who.x, who.y, who.z, who.realm);
+	if(!housesign1)
+		if(!housesign1.IsObjectInsideHouse(who))
+		SendSysMessage(who, "You must be in a house to place house teleporters.", color := 33);
+		return 0;
+		endif
+	endif
+	var result := {};
+	var inpack := 0;
+	var bpack := EnumerateItemsInContainer(who.backpack);
+
+	if(!settings.AllowHouseTeleporters)
+		SendSysMessage(who, "You are prevented from placing a teleporter in a house.", color := 33);
+		SendSysMessage(who, "Cancelled.", color := 33);
+		return 0;
+	endif
+
+	foreach item in bpack
+		if (item.serial == htelekit.serial)
+			inpack := 1;
+		endif
+	endforeach
+	if (inpack == 0)
+		SendSysMessage(who, "The House Teleporter Kit must be in your backpack to use it.", color := 33);
+		SendSysMessage(who, "Cancelled.", color := 33);
+		return 0;
+	endif
+
+	if(!housesign1.IsOwner(who)/*(who.serial == GetObjProperty(housesign1, "ownerserial"))*/)
+		SendSysMessage(who, "You can only place house teleporters inside a house that you own.", color := 33);
+		SendSysMessage(who, "Aborting the task.", color := 33);
+		return 0;
+	elseif((settings.LimitHouseTeleporters) && (CInt(GetObjProperty(housesign1, "numhteles")) >= CInt(settings.MaxHouseTeleporters)))
+		SendSysMessage(who, "You already have the maximum number of 'primary' teleporters in your house.", color := 33);
+		SendSysMessage(who, "Cancelled.", color := 33);
+		return 0;
+	endif
+
+	result := SendGump(who, housesign1);
+	if(!result)
+		SendSysMessage(who, "Cancelled.", color := 33);
+		return 0;
+	elseif(result[0] == 1 )
+		targ := TargetCoordinates(who);
+		htele1 := CreateItemAtLocation(targ.x, targ.y, targ.z, "housetele", 1, targ.realm);
+		if(!htele1)
+			SendSysMessage(who, "I wasn't able to create the teleporter there.", color := 33);
+			SendSysMessage(who, "Aborting the task.", color := 33);
+			return 0;
+		endif
+		htele1.movable := 0;
+		SendSysMessage(who, "Locked Down.", color := 66);
+		ReleaseItem(htele1);
+	endif
+
+	// Placing secondary teleporter.
+	result := SendGump(who, housesign1);
+	// var housesign2 := FindHouseForLocation (who.x, who.y, who.z, who.realm);
+	// Cancel button pressed.
+	if(!result)
+		SendSysMessage(who, "Cancelled.", color := 33);
+		DestroyItem(htele1);
+		return 0;
+	elseif(result[0] == 2 )
+		targ := TargetCoordinates(who);
+		if(!targ)
+			SendSysMessage(who, "Cancelled.", color := 33);
+			SendSysMessage(who, "Removing the primary teleporter.", color := 33);
+			DestroyItem(htele1);
+			return 0;
+		endif
+		var housesign2 := FindHouseForLocation (targ.x, targ.y, targ.z, targ.realm);
+		if(!housesign2.IsObjectInsideHouse(targ))
+			SendSysMessage(who, "You can only place house teleporters inside a house.", color := 33);
+			SendSysMessage(who, "Removing the primary teleporter and aborting.", color := 33);
+			DestroyItem(htele1);
+			return 0;
+		endif
+		if(!(housesign2 && (housesign2.IsOwner(who)/*who.serial == GetObjProperty(housesign2, "ownerserial")*/)))
+			SendSysMessage(who, "You can only place house teleporters inside a house that you own.", color := 33);
+			SendSysMessage(who, "Removing the primary teleporter and aborting.", color := 33);
+			DestroyItem(htele1);
+			return 0;
+		endif
+		htele2 := CreateItemAtLocation(targ.x, targ.y, /*GetStandingHeight( targ.x, targ.y, targ.z, who.realm )*/targ.z, "housetele", 1, targ.realm);
+		if(!htele2)
+			SendSysMessage(who, "I wasn't able to create the teleporter there.", color := 33);
+			SendSysMessage(who, "Removing the primary teleporter and aborting.", color := 33);
+			DestroyItem(htele1);
+			return 0;
+		endif
+		htele2.movable := 0;
+		SendSysMessage(who, "Locked Down.", color := 66);
+		ReleaseItem(htele2);
+		htele1.invisible := 0;
+		htele2.invisible := 0;
+		SetObjProperty(htele1, "DestX", htele2.x);
+		SetObjProperty(htele1, "DestY", htele2.Y);
+		SetObjProperty(htele1, "DestZ", htele2.z);
+		SetObjProperty(htele1, "DestRealm", htele2.realm);
+		SetObjProperty(htele1, "signserial", housesign1.serial);
+		SetObjProperty(htele1, "Othertele", htele2.serial);
+		SetObjProperty(htele1, "Primary", 1);
+		SetObjProperty(htele2, "DestX", htele1.x);
+		SetObjProperty(htele2, "DestY", htele1.y);
+		SetObjProperty(htele2, "DestZ", htele1.z);
+		SetObjProperty(htele2, "DestRealm", htele1.realm);
+		SetObjProperty(htele2, "Othertele", htele1.serial);
+		SetObjProperty(htele2, "signserial", housesign2.serial);
+
+		if(settings.LimitHouseTeleporters)
+			SetObjProperty(housesign1, "numhteles", CInt(GetObjProperty(housesign1, "numhteles")) + 1);
+		endif
+		SendSysMessage(who, "You have successfully installed", color := 66);
+		SendSysMessage(who, "Your house teleporters.", color := 66);
+	else
+		// We should never land here!
+		SendSysMessage(who, "Something weird happened.", color := 33);
+		SendSysMessage(who, "Post this problem in the 'Bugs' forum", color :=  33);
+		SendSysMessage(who, "Removing the primary teleporter and aborting.", color := 33);
+		DestroyItem(htele1);
+		return 0;
+	endif
+	DestroyItem(htelekit);
+
+
+endprogram
+
+function SendGump(me, housesign)
+
+	var res := {};
+	var gump := array {
+//		"NoClose"
+		"page 0",
+		"resizepic 110 184 9250 573 322",
+		"text 294 213 1153 0",
+//		"text 283 262 1153 1",
+//		"text 278 295 1153 2",
+//		"button 235 262 208 209 0 0 1",
+//		"button 235 295 208 209 1 0 2",
+		"button 524 461 241 243 1 0 0",
+		"htmlgump 151 295 491 150 1 1 1"
+	};
+	if(!htele1)
+		gump.append("text 278 262 1153 2");
+		gump.append("button 235 262 208 209 1 0 1");
+	else
+		gump.append("text 278 262 1153 2");
+		gump.append("button 235 262 208 209 1 0 2");
+	endif
+
+	if(settings.LimitHouseTeleporters)
+		gump.append("text 159 461 1153 3");
+		gump.append("text 289 461 1153 4");
+		gump.append("text 326 461 1153 5");
+	endif
+
+
+	var data := {
+		"House teleporter placement:",
+		"<big>Decide where you want the first teleporter and click the 'This will place the primary teleporter'" +
+		" button. Target the spot inside your house that you want the teleporter. Now go to the location where" +
+		" you want the secondary teleporter and click the 'This will place the secondary teleporter' button." +
+		" Target the spot inside your house that you want the teleporter.
+
+		Only the owner of a house may place a teleporter. Owners can set the acces level to the teleporter. You can choose the" +
+		" level of access by double-clicking the teleporter. This will set the same level of access on both of the teleporters." +
+		" If you do not set the access level, anyone may use them." +
+		" You may place the primary in one house and the secondary in another house. You may cancel the" +
+		" placement of the teleporters at any time and start over whenever you wish up until you have placed the secondary" +
+		" teleporter. If you cancel the operation your primary teleporter will be removed and returned to your kit." +
+		" There may be a limit on the number of 'primary' teleporters you are allowed per house. If there is a limit," +
+		" the amount you have available will be displayed at the bottom of the placement window that opens when you use the kit." +
+		" If there is a limit of 'primary' teleporters, secondary teleporters do not count against the 'primary' teleporter limit." +
+		" So for example, suppose you own 5 houses. If the limit of 'primary' teleporters is 3 you could have a teleporter in 4 of your 5 houses" +
+		" and have the secondary teleporters for those 4 houses in your 5th house. Also, placing house teleporters does not use any lock down spaces" +
+		" for either location.</big>"
+		};
+
+	if(!htele1)
+		data.append("This will place the primary teleporter.");
+	else
+		data.append("This will place the secondary teleporter");
+	endif
+
+	if(settings.LimitHouseTeleporters)
+		data.append("You can place up to");
+		data.append(CStr(CInt(settings.MaxHouseTeleporters) - CInt(GetObjProperty(housesign, "numhteles"))));
+		data.append("'primary' teleporters.");
+	endif
+
+
+
+	res := SendDialogGump(me, gump, data);
+	return res;
+endfunction

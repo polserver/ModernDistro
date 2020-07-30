@@ -1,0 +1,212 @@
+use uo;
+use cliloc;
+
+include ":houseExtras:settings";
+include ":gumps:selectionGump";
+include ":gumps:yesNoSizable";
+include "include/canAccess";
+include "include/housing";
+
+var settings := HE_GetSettingsCfgElem("Settings");
+
+
+program teleporter_use(who, teleporter)
+
+	sign := FindHouseForLocation(who.x, who.y, who.z, who.realm);
+	if(who.serial != CInt(GetObjProperty(sign, "ownerserial")))
+		SendSysMessage(who, "Only the house owner can access teleporter functions.", color := 33);
+		return 0;
+	endif
+	if(!Accessible(who, teleporter, 2))
+		SendSysMessageCL(who, 501975, color := 33); // That is too far away.
+		return 0;
+	endif
+	var options := {"Rename the teleporter.", "Set access level.", "Remove the teleporter"};
+	var selection := TeleFunctionsGump( who, "Teleporter Functions", options, BTN_TYPE_RADIO );
+	if(selection.errortext)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return 0;
+	endif
+	var choice := selection in options;
+	case(choice)
+		1: RenameTele(who, teleporter);
+		2: SetAccess(who, teleporter);
+		3: RemoveTeleporter(who, teleporter);
+		default: SendSysMessage(who, "Something isn't working.", color := 33);
+	endcase
+
+	return 1;
+
+endprogram
+
+function RenameTele(who, tele)
+
+	var new_name := RequestGump(who, "What do you want to name it?", "", "", CANCEL_BTN_ON, txt_lmt := 0);
+	if(!new_name)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return 0;
+	endif
+
+	tele.name := new_name;
+	SendSysMessage(who, "Teleporter renamed to '" + new_name + "'.", color := 66);
+
+endfunction
+
+function SetAccess(who, tele)
+
+	var access_level := "";
+	var othertele := SystemFindObjectBySerial(GetObjProperty(tele, "Othertele"));
+	var othertelehouse := FindHouseForLocation (othertele.x, othertele.y, othertele.z, othertele.realm);
+	if(!othertele)
+		SendSysMessage(who, "Something is wrong. I can't find the matching teleporter.", color := 33);
+		SendSysMessage(who, "This is a bug. Please report it.", color := 33);
+	endif
+
+
+	var options := {"Owner", "Co-Owners", "Friends", "Anyone"};
+	var selection := TeleFunctionsGump( who, "Set Access Restriction:", options, BTN_TYPE_RADIO );
+	var choice := selection in options;
+	case(choice)
+		1:	access_level := "O";
+		2:	access_level := "C";
+		3:	access_level := "F";
+		4:	access_level := "";
+	endcase
+	SetObjProperty(tele,  "houseserial", sign.serial);
+	SetObjProperty(tele, "AccessLevel", access_level);
+	SetObjProperty(tele,  "secure",      1);
+	SetObjProperty(othertele,  "houseserial", othertelehouse.serial);
+	SetObjProperty(othertele,  "secure",      1);
+	SetObjProperty(othertele, "AccessLevel", access_level);
+
+endfunction
+
+function RemoveTeleporter(who, tele)
+
+	var msg := "This will remove both teleporters, both this one and the destination teleporter. Do you want to do this?";
+	if(YesNoSizable(who, msg))
+		var othertele := SystemFindObjectBySerial(GetObjProperty(tele, "Othertele"));
+		if(!othertele)
+			SendSysMessage(who, "I cannot locate the destination teleporter!", color := 33);
+			SendSysMessage(who, "I will remove this teleporter anyway.", color := 33);
+		endif
+		var housesign := SystemFindObjectBySerial(GetObjProperty(tele, "signserial"));
+		if(GetObjProperty(tele, "Primary"))
+			if(settings.LimitHouseTeleporters)
+				SetObjProperty(housesign, "numhteles", CInt(GetObjProperty(housesign, "numhteles")) - 1);
+				if(GetObjProperty(housesign, "numhteles") < 0)
+					SetObjProperty(housesign, "numhteles", 0);
+				endif
+			endif
+		endif
+		DestroyItem(tele);
+		if(othertele)
+			housesign := SystemFindObjectBySerial(GetObjProperty(othertele, "signserial"));
+			if(GetObjProperty(othertele, "Primary"))
+				if(settings.LimitHouseTeleporters)
+					SetObjProperty(housesign, "numhteles", CInt(GetObjProperty(housesign, "numhteles")) - 1);
+					if(GetObjProperty(housesign, "numhteles") < 0)
+						SetObjProperty(housesign, "numhteles", 0);
+					endif
+				endif
+			endif
+			DestroyItem(othertele);
+		endif
+		SendSysMessage(who, "Removed.", color := 66);
+		return;
+	endif
+	SendSysMessage(who, "Cancelled.", color := 33);
+endfunction
+/*
+ * TeleFunctionsGump(mobile, title, options, btn_type)
+ *
+ * Purpose
+ * Creates a gump with buttons and text.
+ *
+ * Parameters
+ * mobile:	Mobile to send the gump to.
+ * title:   string that will be used for gump's title.
+ * options:	Array containing strings to display next to the buttons.
+ * btn_type:	Type of button to display next to the text.
+ *
+ * Return Values
+ * Returns a single value from the options array if RADIO or NORMAL are used.
+ * Returns an array of option values if CHECKBOX is used.
+ * Returns an error on failure.
+ *
+ */
+function TeleFunctionsGump( mobile, title, options, btn_type:=BTN_TYPE_NORMAL )
+
+	if( Lower( TypeOf( options )) != "array" )
+		return error{"errortext":="Options list must be an array."};
+	endif
+
+	var s_gump := GFCreateGump();
+	var options_length := options.size();
+
+	GFResizePic( s_gump, 0, 0, GFGetCfgConst( "Defaults", "BackGround" ), 310, CInt((20 * options_length)  + 95) + (options_length * 10));
+	GFResizePic( s_gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 280, CInt((20 * options_length) + 65) + (options_length * 10));
+
+	//GFAddAlphaRegion( s_gump, 0, 0, 310, 480 );
+
+	GFTextMid( s_gump, 15, 20, 280, 1720, title );
+
+	GFAddButton( s_gump, 125, CInt(20 * options_length + 70)/* + (options_length * 10)*/, 2128, 2129, GF_CLOSE_BTN, OKAY_BTN );
+
+	GFPage( s_gump, 1 );
+	var num_options := options.Size();
+	var y_pos := 60;
+	foreach entry in ( options )
+		case( btn_type )
+			BTN_TYPE_NORMAL:
+				GFAddButton( s_gump, 30, y_pos+3, 2117, 2118, GF_CLOSE_BTN, _entry_iter );
+				break;
+			BTN_TYPE_CHECKBOX:
+				GFCheckBox( s_gump, 30, y_pos, 210, 211, 0, _entry_iter );
+				break;
+			BTN_TYPE_RADIO:
+				GFRadioButton( s_gump, 30, y_pos, 210, 211, 0, _entry_iter );
+				break;
+		endcase
+
+		GFTextLine( s_gump, 60, y_pos, 2100, entry );
+		y_pos := y_pos+20;
+
+		SleepMS(2);
+	endforeach
+
+	var input := GFSendGump( mobile, s_gump );
+	if( !input[0] )
+		return error{"errortext":="No option was selected."};
+	endif
+	var selections_made := 0;
+	case( btn_type )
+		BTN_TYPE_NORMAL:
+			var val := input[0];
+			return options[val];
+		BTN_TYPE_CHECKBOX:
+			var values := array;
+			foreach key in ( input.keys )
+				if( key >= 1 && key <= num_options )
+					values.Append( options[key] );
+					selections_made := 1;
+				endif
+				SleepMS(2);
+
+			endforeach
+			// The following returns an error if no checkboxes were checked and the Okay button is clicked.
+			if(selections_made)
+				return values;
+			else
+				return error{"errortext":="No option was selected."};
+			endif
+		BTN_TYPE_RADIO:
+			foreach key in ( input.keys )
+				if ( key >= 1 && key <= num_options )
+					return options[key];
+				endif
+				SleepMS(2);
+			endforeach
+	endcase
+endfunction
+

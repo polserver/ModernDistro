@@ -179,10 +179,10 @@ function CarpentryItems(who, tool, objtype, amt)
 					if( craft_config[theitem.objtype].lockable )
 						if( SkillCheck(who, TINKERING, 40, 40) > 0 )
 							SetObjProperty(theitem, "Lockable","1");
-							var lockid := CreateLockID();
+							var LockID := CreateLockID();
 							var thekey := CreateItemInContainer(theitem, 0x100E, 1 );
-							SetObjProperty(thekey, "LockID", lockid);
-							SetObjProperty(theitem,"LockID", lockid);
+							SetObjProperty(thekey, "LockID", LockID);
+							SetObjProperty(theitem,"LockID", LockID);
 							SetObjProperty(theitem,"LockPickDiff", AP_GetSkill(who, TINKERING));
 							SendSysMessage(who, "Your tinker skill was sufficient to make the item lockable.");
 						endif

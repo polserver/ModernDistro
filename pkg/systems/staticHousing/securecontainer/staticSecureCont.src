@@ -1,0 +1,53 @@
+use os;
+use uo;
+
+program use_securecontainer(who, item)
+	var house := SystemFindObjectBySerial( GetObjProperty( item, "houseserial" ));
+//	var chestserial := item.serial;
+	var securitylevel := 0;					// The security level of the person trying to access the container.
+	var securedlevel := 0;					// The security level that is assigned to the container.
+	var seclevel := GetObjProperty(item, "SecuredLevel");
+	var coownerinfo := GetObjProperty(house, "coownlist");
+	var friendinfo := GetObjProperty(house,"friendlist");
+
+	// GMs and above have access to all secured things.
+	if(who.cmdlevel >= 3)
+		if(item.isA(POLCLASS_CONTAINER))
+			SendViewContainer( who, item );
+			SendSysMessage( who, "You open the secure container.", 1, 66 );
+			return 1;
+		endif
+	endif
+	// SecuredLevels are: O = owner, C = co-owners, F = friends, A = all house affiliates.
+
+	case(seclevel)
+		"O": securedlevel := 1;				// Secured for owner
+		"C": securedlevel := 2;				// Secured for co-owner
+		"F": securedlevel := 3;				// Secured for friends
+		"A": securedlevel := 4;				// Secured for all house affiliates, ie. owner, co-owners and friends have access.
+	endcase
+
+	if((GetObjProperty( house, "ownerserial" ) == who.serial) || (GetObjProperty( house, "owneraccount" ) == who.acctname))
+		securitylevel := 1;
+	elseif((who.serial in coownerinfo) && securedlevel == 2)
+		securitylevel := 2;
+	elseif((who.serial in friendinfo) && securedlevel == 3)
+		securitylevel := 3;
+	elseif(securitylevel)
+		securitylevel := 4;
+	endif
+
+	if(securitylevel == securedlevel)
+		if(item.isA(POLCLASS_CONTAINER))
+			SendViewContainer( who, item );
+			SendSysMessage( who, "You open the secure container.", 1, 66 );
+			if(GetObjProperty(item, "oldscript" == "wear_and_tear") || GetObjProperty(item, "oldscript" == ":carpentry:wear_and_tear"))
+				Start_Script(":carpentry:wear_and_tear", item);
+			endif
+			return 1;
+		endif
+	elseif(!securitylevel)
+		SendSysMessage( who, "You can't use this.", 1, 33 );
+		return 0;
+	endif
+endprogram

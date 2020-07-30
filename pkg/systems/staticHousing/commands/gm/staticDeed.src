@@ -1,0 +1,367 @@
+use uo;
+use os;
+use util;
+use cliloc;
+
+include ":keys:key";
+include "include/client";
+include "include/objtype";
+include "include/findCity";
+include ":gumps:gumps";
+include ":staticHousing:settings";
+include "include/housing";
+
+var who;
+var signgraphic;
+var LockID := AllocateLockId();
+var x1,y1,x2,y2;
+
+var totalarea := 0;
+var temparea := 0;
+var templvl := 0;
+var price := 0;
+var pricepersquare := 1;
+var settings := SH_GetSettingsCfgElem("Settings");
+
+program textcmd_staticdeed(character)
+
+	who := character;
+	var ppsdb := settings.PricePerSquareDeterminedBy;
+	case(ppsdb)
+		"Default":	pricepersquare := CInt(settings.DefaultPricePerSquare);
+		"City":		pricepersquare := GetCityPrice(who);							// regions.cfg needs entry for HouePerSquarePrice
+		"Market":	pricepersquare := GetMarketPrice();							// This will be written in the future
+		default:
+	endcase
+	var h_gump := GFCreateGump();
+	GFPage( h_gump, 0 );
+	GFResizePic( h_gump, 0, 0, 5120, 440, 470 ); //dark menu background
+	GFResizePic( h_gump, 10, 10, 5054, 420, 420 ); //light menu background
+	GFTextLine( h_gump, 132, 17, 0, "Static Housing Manager" );
+	GFTextLine( h_gump, 130, 15, COLOR_YELLOW, "Static Housing Manager" );
+	GFTextLine( h_gump, 30, 60, COLOR_GREEN, "Choose Sign Type:" );
+	GFTextLine( h_gump, 30, 160, COLOR_GREEN, "You will now be prompted with a series of cursors." );
+	GFTextLine( h_gump, 30, 180, COLOR_GREEN, "Each pair of cursors will be used to configure the" );
+	GFTextLine( h_gump, 30, 200, COLOR_GREEN, "total numer of squares that encompass the house." );
+	GFTextLine( h_gump, 30, 220, COLOR_GREEN, "You must target the Northwest corner then the" );
+	GFTextLine( h_gump, 30, 240, COLOR_GREEN, "Southeast corner in that order for each pair of cursors." );
+	GFTilePic( h_gump, 50, 100, 0xbd1);
+	GFTilePic( h_gump, 150, 100, 0xbd2);
+	GFTilePic( h_gump, 250, 100, 0xbcf);
+	GFTilePic( h_gump, 350, 100, 0xbd0);
+	GFSetRadioGroup( h_gump, 1 );
+	GFRadioButton( h_gump, 40, 100, 210, 211, 1, 1 );
+	GFRadioButton( h_gump, 140, 100, 210, 211, 0, 2 );
+	GFRadioButton( h_gump, 240, 100, 210, 211, 0, 3 );
+	GFRadioButton( h_gump, 340, 100, 210, 211, 0, 4 );
+	var ok    := GFAddButton( h_gump, 280, 435, 249, 248, GF_CLOSE_BTN, 0 );
+	ok := ok;
+	var close := GFAddButton( h_gump, 360, 435, 242, 241, GF_CLOSE_BTN, 5 );
+	var ret   := GFSendGump( who, h_gump );
+	if((ret[close.keyid]) or (ret[0] == 1))
+		SendSysMessage(who, "Cancelled.", 3, 40);
+		return;
+	else
+	foreach key in (ret.keys)
+
+		case(key)
+			1: signgraphic := 0x20bd1;
+			2: signgraphic := 0x20bd2;
+			3: signgraphic := 0x20bcf;
+			4: signgraphic := 0x20bd0;
+			5: SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+			   return;
+		endcase
+
+	endforeach
+	endif
+
+	var chk := 1;
+	var holder := array;
+	SendSysMessage(who, "Press <esc> to cancel the target cursors when you are done defining your boxes.", color := 88);
+	sleepms(500);
+	while(chk)
+		var tmp := array;
+		SendSysMessage(who, "Target the North West corner of the box.", color := 88);
+		var trg := TargetCoordinates(who);
+		if(!trg)
+			if(!holder.size())
+				SendSysMessage(who, "No area selected. Aborting.", color := 33);
+				return 0;
+
+			endif
+			SendSysMessageCL(Who, 1042023, color := 33); // Cancelled.
+			chk := 0;
+			break;
+		else
+			tmp.append(trg.x);
+			tmp.append(trg.y);
+			tmp.append(trg.z);
+			x1 := trg.x;
+			y1 := trg.y;
+		endif
+		sleepms(500);
+		SendSysMessage(who, "Now target the South East corner of the box.", color := 88);
+		trg := TargetCoordinates(who);
+		if(!trg)
+			SendSysMessageCL(Who, 1042023, color := 33); // Cancelled.
+			chk := 0;
+			break;
+		else
+			templvl := Cint(GetLevel());
+			var lvl := 20 * Cint(templvl);
+			tmp.append(trg.x);
+			tmp.append(trg.y);
+			tmp.append(trg.z + lvl);
+
+			x2 := trg.x;
+			y2 := trg.y;
+			temparea := HArea(x1, y1, x2, y2);					// Get the basic area of the coordinates.
+			temparea := temparea * CInt(templvl);				// Divide lvl by 20 to get the actual number of floors. Then multiply that by coord area to find sq. feet.
+			totalarea += temparea;					// Add this section to any other sections we've selected previously.
+		endif
+		holder.append(tmp);
+		sleepms(10);
+	endwhile
+	var ct := 0;
+	sleepms(500);
+	sign := PlaceSign();
+	if(!sign)
+		SendSysMessage(who, "Canceled.", 3, 40);
+		return;
+	endif
+	GenerateLockdowns(holder);
+	SendSysMessage(who, "Now Target only the exterior doors to the house.", color := 88);
+	SendSysMessage(who, "Press <esc> when done targeting. Remember not to target doors to interior rooms.", color := 88);
+	holder := array;
+	chk := 1;
+	ct := 0;
+	while(chk)
+		var trg := Target(who, TGTOPT_NOCHECK_LOS);
+		if(!trg)
+			if(ct < 1)
+				SendSysMessage(who, "You must target at least one door.", 3, 40);
+			else
+				chk := 0;
+			endif
+		else
+			holder.append(trg.serial);
+			ct += 1;
+			SendSysMessage(who, Cstr(ct) + " door(s) selected.", color := 66);
+		endif
+		sleepms(500);
+	endwhile
+	SetObjProperty(sign, "exteriordoors", holder);
+	SetObjProperty(sign, "Setup", 1);
+	SetObjProperty(sign, "LockID", LockID);
+	SendSysMessage(who, "Done selecting doors.", color := 66);
+	SendSysMessage(who, "Finished 'creating' the house.", color := 66);
+	SetupHouse();
+endprogram
+
+function PlaceSign()
+	SendSysMessage(who, "Where do you wish to place the house sign?", color := 88);
+	var where := TargetCoordinates(who);
+	if(!where)
+		SendSysMessage(who, "Cancelled.", 3, 40);
+		return 0;
+	endif
+	var hsign := makesign(where.x, where.y, where.z);
+
+	if(!hsign)
+		SendSysMessage(who, "ERROR: Unable to create sign!", 3, 40);
+		return 0;
+	endif
+	return hsign;
+endfunction
+
+function makesign(x, y, z)
+	var postgraphic;
+	case(signgraphic)
+		0x20bd1: postgraphic := 0xb99;
+		0x20bd2: postgraphic := 0xb98;
+		0x20bcf: postgraphic := 0xb99;
+		0x20bd0: postgraphic := 0xb98;
+	endcase
+	var hsign := CreateItemAtLocation(x, y, z, 0x260FA, 1, who.realm); // Need to change ObjType for the sign if different than the one here
+	if(!hsign)
+		return 0;
+	endif
+	hsign.graphic := signgraphic;
+	hsign.movable := 0;
+	hsign.name := "a house";
+	var post := CreateItemAtLocation(x, y, z, 0x0b98, 1, who.realm);
+	if(!post)
+		DestroyItem(hsign);
+		return 0;
+	endif
+	post.movable := 0;
+	post.graphic := postgraphic;
+	return hsign;
+endfunction
+
+function figurelockdowns(nwx, nwy, nwz, sex, sey, sez)
+	var x := (sex - nwx);
+	var y := (sey - nwy);
+	var z := Cint((sez - nwz) / 20);
+	//var l := Cint((x * y * z) / 3);
+	var l := Cint((x * y * z) / CInt(settings.LockdownDivisor));
+	if(l < 25)
+		//l := 25;
+		l := CInt(settings.MinLockdowns);
+	endif
+	return l;
+endfunction
+
+function figuresecures(nwx, nwy, nwz, sex, sey, sez)
+	var x := (sex - nwx);
+	var y := (sey - nwy);
+	var z := Cint((sez - nwz) / 20);
+	//var s := Cint((x * y * z) / 50);
+	var s := Cint((x * y * z) / CInt(settings.SecureDivisor));
+	if(s < 1)
+		//s := 1;
+		s := CInt(settings.MinSecures);
+	endif
+	return s;
+endfunction
+
+function SetupHouse()
+	var bantiles := array;
+	var parts := array;
+	var housevalue := 0;
+	var exteriordoors := GetObjProperty(sign, "exteriordoors");
+	foreach thing in GetObjProperty(sign, "footage")
+		var box := ListObjectsInBox(thing[1], thing[2], thing[3], thing[4], thing[5], thing[6], who.realm);
+		foreach item in box
+			if(item.IsA(POLCLASS_DOOR))
+				if(item in exteriordoors)
+					item.locked := 1;
+				else
+					item.locked := 0;
+				endif
+				var tile := CreateItemAtLocation(item.x, item.y, item.z, 0x260FC, 1, who.realm); // This is the static bantile
+				SetObjProperty(tile, "signserial", sign.serial);
+				tile.invisible := 1;
+				SetObjProperty(item, "LockID", LockID);
+				bantiles.append(tile.serial);
+				parts.append(item.serial);
+			endif
+		endforeach
+	endforeach
+	if(settings.HouseValuesCount)
+		if(settings.HouseValuesDeterminedBy == "HousesOwned")
+			housevalue := 1;
+		elseif(settings.HouseValuesDeterminedBy == "Price")
+			housevalue := CInt(GetObjProperty(sign, "price")) / CInt(settings.HouseValueDivisor);
+		elseif(settings.HouseValuesDeterminedBy == "Size")
+			housevalue := sign.CalculateHouseValueBySize();
+		endif
+		SetObjProperty(sign, "housevalue", housevalue);
+	endif
+	SetObjProperty(sign, "bantiles", bantiles);
+	SetObjProperty(sign, "components", parts);
+	SetObjProperty(sign, "lastownername", "Eric N. Swanson"); // No previous owner so "Hail to the creator of eScript and POL!"
+	SetObjProperty(sign, "lastownerserial", 0);
+endfunction
+
+function GetLevel()
+	var h_gump := GFCreateGump();
+	GFPage( h_gump, 0 );
+	GFResizePic( h_gump, 0, 0, 5120, 440, 270 ); //dark menu background
+	GFResizePic( h_gump, 10, 10, 5054, 420, 220 ); //light menu background
+	GFTextLine( h_gump, 132, 17, 0, "Static Housing Manager" );
+	GFTextLine( h_gump, 130, 15, COLOR_YELLOW, "Static Housing Manager" );
+	GFTextLine( h_gump, 30, 60, COLOR_GREEN, "Select how many stories tall this box is:" );
+	GFTextLine( h_gump, 60, 100, COLOR_GREEN, "1" );
+	GFTextLine( h_gump, 160, 100, COLOR_GREEN, "2" );
+	GFTextLine( h_gump, 260, 100, COLOR_GREEN, "3" );
+	GFTextLine( h_gump, 360, 100, COLOR_GREEN, "4" );
+	GFSetRadioGroup( h_gump, 1 );
+	GFRadioButton( h_gump, 40, 100, 210, 211, 1, 1 );
+	GFRadioButton( h_gump, 140, 100, 210, 211, 0, 2 );
+	GFRadioButton( h_gump, 240, 100, 210, 211, 0, 3 );
+	GFRadioButton( h_gump, 340, 100, 210, 211, 0, 4 );
+	GFAddButton( h_gump, 280, 235, 249, 248, GF_CLOSE_BTN, 5 );
+	var ret := GFSendGump( who, h_gump );
+	foreach key in (ret.keys)
+
+		case(key)
+		 1: return 1;
+		 2: return 2;
+		 3: return 3;
+		 4: return 4;
+		endcase
+	endforeach
+endfunction
+
+function GenerateLockdowns(holder)
+	var nl := 0;
+	var ns := 0;
+	var pps := 0;
+	var anl := 0;
+	var ans := 0;
+	foreach thing in holder
+		nl := nl + figurelockdowns(thing[1], thing[2], thing[3], thing[4], thing[5], thing[6]);
+		ns := ns + figuresecures(thing[1], thing[2], thing[3], thing[4], thing[5], thing[6]);
+	endforeach
+	var h_gump := GFCreateGump();
+	GFPage( h_gump, 0 );
+	GFResizePic( h_gump, 0, 0, 5120, 440, 270 ); //dark menu background
+	GFResizePic( h_gump, 10, 10, 5054, 420, 220 ); //light menu background
+	GFTextLine( h_gump, 132, 17, 0, "Static Housing Manager" );
+	GFTextLine( h_gump, 130, 15, COLOR_YELLOW, "Static Housing Manager" );
+	GFTextLine( h_gump, 130, 15, COLOR_YELLOW, "Static Housing Manager" );
+	GFTextLine( h_gump, 30, 50, COLOR_GREEN, "Below is the per square price for this house and" );
+	GFTextLine( h_gump, 30, 70, COLOR_GREEN, "the generated lockdowns/secures based" );
+	GFTextLine( h_gump, 30, 90, COLOR_GREEN, "on the cubic area of the house. Some values may" );
+	GFTextLine( h_gump, 30, 110, COLOR_GREEN, "be able to be changed if necessary." );
+	GFTextLine( h_gump, 60, 140, COLOR_GREEN, "Generated price per square:" );
+	GFTextLine( h_gump, 60, 160, COLOR_GREEN, "Generated Number of Lockdowns:" );
+	GFTextLine( h_gump, 60, 180, COLOR_GREEN, "Generated Number of Secures:" );
+
+	if(CInt(settings.PriceEditable) == 1)
+		pps := GFTextEntry( h_gump, 300, 140, 100, 20, COLOR_GREEN, pricepersquare );
+	else
+		pps := GFTextLine( h_gump, 300, 140, COLOR_GREEN, pricepersquare );
+	endif
+	if(CInt(settings.LockDownsEditable) == 1)
+		anl := GFTextEntry( h_gump, 300, 160, 100, 20, COLOR_GREEN, nl );
+	else
+		anl := GFTextLine( h_gump, 300, 160, COLOR_GREEN, nl );
+	endif
+	if(CInt(settings.SecuresEditable) == 1)
+		ans := GFTextEntry( h_gump, 300, 180, 100, 20, COLOR_GREEN, ns );
+	else
+		ans := GFTextLine( h_gump, 300, 180, COLOR_GREEN, ns );
+	endif
+
+	GFAddButton( h_gump, 280, 235, 249, 248, GF_CLOSE_BTN, 0 );
+	var ret := GFSendGump( who, h_gump );
+	pps := Cint(SplitWords(ret[pps])[2]);
+	anl := Cint(SplitWords(ret[anl])[2]);
+	ans := Cint(SplitWords(ret[ans])[2]);
+	SetObjProperty(sign, "footage", holder);
+	SetObjProperty(sign, "MaxLockdowns", anl);
+	SetObjProperty(sign, "MaxSecures", ans);
+	SetObjProperty(sign, "RemainingLockdowns", 0x0);
+	SetObjProperty(sign, "RemainingSecures", 0x0);
+	price := pps * totalarea;
+	SetObjProperty(sign, "Price", price);
+	SetObjProperty(sign, "NewHouse", 1);
+
+	sign.name := "For Sale " + price + " Gold." + " Lockdowns: " + CStr(GetObjProperty(sign, "MaxLockdowns")) + " Secures: " + CStr(GetObjProperty(sign, "MaxSecures"));
+
+endfunction
+
+function HArea(x1,y1,x2,y2)
+
+	var x;
+	var y;
+	var a;
+	x := x2-x1;
+	y := y2-y1;
+	a := x * y;
+	return a;
+
+endfunction

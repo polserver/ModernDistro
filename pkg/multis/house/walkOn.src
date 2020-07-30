@@ -1,0 +1,44 @@
+use cfgfile;
+use cliloc;
+use os;
+use uo;
+
+
+include ":multihousing:multihouse_settings";
+
+program walk_on_bantile(who, tile)
+	var hsign := GetHSign( who, tile );
+	var ownerser := hsign.GetOwnerSerial();
+	var	coownerinfo := coownerinfo := hsign.GetCoOwnerList();
+	if(ownerser == who.serial)
+		SetObjProperty(hsign,"decay", (ReadGameClock() + get_abandon_time()));
+//		SendSysMessage(who, "Your house is refreshed.", color := 66);
+	elseif(who.serial in coownerinfo)
+		SetObjProperty(hsign,"decay", (ReadGameClock() + get_abandon_time()));
+//		SendSysMessage(who, "Your house is refreshed.", color := 66);
+	endif
+
+	var banlist := hsign.GetBanList();
+	if(!banlist)
+		return;
+	endif
+	if(who.serial in banlist)
+		MoveObjectToLocation( who, hsign.x, hsign.y, hsign.z, hsign.realm, MOVEOBJECT_FORCELOCATION );
+		SendSysMessageCL(who, 501340, color := 33); // You have been banned from this house.
+	endif
+endprogram
+
+function GetHSign( byref who, byref tile )
+
+	foreach sign in ListObjectsInBox (who.x-32, who.y-32, -128, who.x+32, who.y+32, +127, who.realm)
+		if(sign.objtype in {0xBD2, 0xBD0, 0x20BD1, 0x20BD2, 0x20BCF, 0x20BD0, 0x260FA})
+			if(CInt(GetObjProperty(sign, "houseserial")) == CInt(GetObjProperty(tile, "houseserial")))
+				if(GetObjProperty(sign, "footage"))
+					return sign;
+				endif
+			endif
+		endif
+	endforeach
+	return 0;
+endfunction
+

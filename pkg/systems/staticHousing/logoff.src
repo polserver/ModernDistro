@@ -1,0 +1,75 @@
+use uo;
+use util;
+use math;
+use file;
+use os;
+
+include "include/math";
+include "include/eventID";
+include ":attributes:attributes";
+include "include/clock";
+include ":timeutils:time";
+
+const EVID_UNEQUIP   := 0x123456;
+//const EVID_DISCHARGE := 0x123457;
+
+program onlogoff(who)
+    var time_logged_in, real_life_time, time_online, dmy, month, timestring;
+	var acct := FindAccount(who.acctname);
+	acct.setprop("LastLogin", readGameclock());
+	var sessiontime := ReadGameClock() - GetObjProperty(who,"logontime");
+	var timer := GetObjProperty(who,"onlinetimer");
+	if(!timer)
+		timer := 0;
+	endif
+	SetObjProperty(who,"onlinetimer",timer+sessiontime);
+	EraseObjProperty(who,"LoggedIn");
+	RemoveMods(who);
+
+	staffnotify(who);
+
+    dmy := FormatTime(GetTimeStruct(GetTime()), "<DAY>-<MON>-<YY>");
+    month := FormatTime(GetTimeStruct(GetTime()), "<MON>-<YY>");
+    time_logged_in := GetObjProperty(who, "logontime");
+    real_life_time := GetObjProperty(who, "Real_Life_login_Time");
+    time_online := ReadGameClock() - CInt(time_logged_in);
+    timestring := GetTimeDesc (time_online, showseconds := 1);
+    LogToFile("::log/activity_" + month + ".log", who.name +" on account " + who.acctname + " logged on at " + real_life_time +
+    " and was online for " + timestring);
+    EraseObjProperty(who, "Real_Life_login_Time");
+    EraseObjproperty(who, "bloodoath");
+    EraseObjproperty(who, "evilomen");
+    EraseObjproperty(who, "mindrot");
+    EraseObjproperty(who, "EnemyOfOne");
+    EraseObjProperty(who, "strangle");
+
+endprogram
+
+function staffnotify(who)
+	var pid := 0;
+	while(!pid)
+		sleepms(50);
+		pid := GetGlobalProperty("#stafflist");
+	endwhile
+	pid := getprocess(pid);
+	if(!pid)
+		return;
+	endif
+	var k := struct;
+	k.+player := who;
+	k.+type  := EVID_PLAYER_LOGOFF;
+	pid.sendevent(k);
+endfunction
+
+function RemoveMods(who)
+	foreach item in ListEquippedItems(who)
+		var proc := GetProcess(GetObjProperty(item, "Pid"));
+		if(proc)
+			var ev := {};
+			ev.+type := EVID_UNEQUIP;
+			proc.sendevent(ev);
+		endif
+	endforeach
+	EraseObjProperty(who, "EquipTimers");
+	return;
+endfunction

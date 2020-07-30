@@ -1,0 +1,15 @@
+use uo;
+use os;
+
+include "include/housing";
+
+program onlogon(who)
+
+	var hsign := GetHouseSign( who );
+	if(hsign.IsBanned(who))
+		MoveObjectToLocation(who, hsign.x, hsign.y, hsign.z, hsign.realm, MOVEOBJECT_FORCELOCATION);
+		SendSysMessage(who, "You have been banned from this house!", color := 33);
+		Start_Script("houseBan", {hsign, who});
+	endif
+endprogram
+

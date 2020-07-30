@@ -1,7 +1,7 @@
 use uo;
 use os;
 
-include ":gumps:old-gumps";
+include ":gumps:gumps";
 include "include/client";
 
 const CMD_LEVEL_OVERRIDE := 2;
@@ -23,12 +23,12 @@ var origLoc := {};
     SendSysMessage(who, "Cancelled.");
     return;
   endif
-  
+
   if (theTarget.serial == theDecorator.serial)
     ChangeManipulation(who, theDecorator, theManipulation);
     return;
   endif
-  
+
   if (doMultiCheck)
     if (who.multi == error)
       SendSysMessage(who, "You aren't in a house!");
@@ -48,7 +48,7 @@ var origLoc := {};
   origLoc := {theTarget.x, theTarget.y, theTarget.z};
 
   DoManipulation(who, theDecorator, theTarget);
-  
+
   if (doMultiCheck)
     if (who.multi == error)
       SendSysMessage(who, "You aren't in a house!");
@@ -244,35 +244,35 @@ var retKey;
 var theRadioButtons := array;
 var i;
 
-  GFInitGump(0,0);
-  GFPage(0);
-  GFResizePic(0,0,BKGND_STONE,400,400);
+  var d_gump := GFCreateGump(0,0);
+  GFPage( d_gump, 0 );
+  GFResizePic( d_gump, 0, 0, 5100, 400, 400 );
 
-  theRadioButtons[1] := GFRadioButton( 50, 50, 0xD0, 0xD1, currManipulation == "up");
+  theRadioButtons[1] := GFRadioButton( d_gump, 50, 50, 0xD0, 0xD1, currManipulation == "up" );
   GFTextLine(75, 50, COLOR_RED, "Nudge Up");
-  theRadioButtons[2] := GFRadioButton( 50, 75, 0xD0, 0xD1, currManipulation == "down");
+  theRadioButtons[2] := GFRadioButton( d_gump, 50, 75, 0xD0, 0xD1, currManipulation == "down" );
   GFTextLine(75, 75, COLOR_RED, "Nudge Down");
-  GFGumpPic(175,175,0x9E1);
-  theRadioButtons[3] := GFRadioButton( 188, 150, 0xD0, 0xD1, currManipulation == "north");
-  theRadioButtons[4] := GFRadioButton( 188, 230, 0xD0, 0xD1, currManipulation == "south");
-  theRadioButtons[5] := GFRadioButton( 155, 194, 0xD0, 0xD1, currManipulation == "west");
-  theRadioButtons[6] := GFRadioButton( 220, 194, 0xD0, 0xD1, currManipulation == "east");
+  GFGumpPic( d_gump, 175, 175, 0x9E1 );
+  theRadioButtons[3] := GFRadioButton( d_gump, 188, 150, 0xD0, 0xD1, currManipulation == "north" );
+  theRadioButtons[4] := GFRadioButton( d_gump, 188, 230, 0xD0, 0xD1, currManipulation == "south" );
+  theRadioButtons[5] := GFRadioButton( d_gump, 155, 194, 0xD0, 0xD1, currManipulation == "west" );
+  theRadioButtons[6] := GFRadioButton( d_gump, 220, 194, 0xD0, 0xD1, currManipulation == "east" );
 
-  theRadiobuttons[7] := GFRadioButton( 200, 50, 0xD0, 0xD1, currManipulation == "flip");
+  theRadiobuttons[7] := GFRadioButton( d_gump, 200, 50, 0xD0, 0xD1, currManipulation == "flip" );
   GFTextLine(225, 50, COLOR_RED, "Flip");
 
-  theCancelButton := GFButtonID(200, 350, 0x996, 0x995, 1);
-  theOkButton := GFButtonID(150, 350, 0x994, 0x993, 1);
+  theCancelButton := GFAddButton( d_gump, 200, 350, 0x996, 0x995, GF_CLOSE_BTN, 0 );
+  theOkButton := GFAddButton( d_gump, 150, 350, 0x994, 0x993, GF_CLOSE_BTN, 0 );
 
-  retKey := GFSendGump(who);
-  
+  retKey := GFSendGump( who, d_gump );
+
   if (retKey[theOkButton.keyid] == 1)
     for (i:=1; i<=7; i:=i+1)
       if (retKey[theRadioButtons[i].keyid] == 1)
         break;
       endif
     endfor
-    
+
     if ((i <= 7) && (i>0))
       case (i)
         1: SetObjProperty(theDecorator, "Manipulation", "up");
@@ -301,19 +301,19 @@ var theSign := GetHouseSign(theHouse);
     SendSysMessage(who, "You aren't a co-owner here.");
     return 0;
   endif
-  
+
   return 1;
 
 endfunction
 
 function isCoOwner(who, house)
-var ownerAcct := GetObjProperty(house, "owneracct");
-var coOwnList := GetObjProperty(house, "coownlist");
+var ownerserial := GetObjProperty(house, "ownerserial");
+var coOwnList := GetObjProperty(house, "coowners");
 
-  if (who.acctname == ownerAcct)
+  if (who.serial == ownerserial)
     return 1;
   endif
-  
+
   if (who.serial in coOwnList)
     return 1;
   endif
@@ -327,10 +327,10 @@ var components := theMulti.components;
 
   foreach component in components
     case (component.objtype)
-      0xbcf:
-      0xbd0:
-      0xbd1:
-      0xbd2: return component;
+      0x1600E:
+      0x1600F:
+      0x16010:
+      0x16011: return component;
     endcase
   endforeach
 

@@ -1,0 +1,417 @@
+use uo;
+use os;
+use cfgfile;
+
+include ":gumps:gumps";
+include "include/housing";
+
+var original_movable;
+
+Const OPTION_MOVE_UP			:= 1;
+Const OPTION_MOVE_DOWN			:= 2;
+Const OPTION_MOVE_NORTH			:= 3;
+Const OPTION_MOVE_NORTH_EAST	:= 4;
+Const OPTION_MOVE_EAST			:= 5;
+Const OPTION_MOVE_SOUTH_EAST	:= 6;
+Const OPTION_MOVE_SOUTH			:= 7;
+Const OPTION_MOVE_SOUTH_WEST	:= 8;
+Const OPTION_MOVE_WEST			:= 9;
+Const OPTION_MOVE_NORTH_WEST	:= 10;
+Const OPTION_ROTATE				:= 11;
+Const OPTION_LOCK_UNLOCK		:= 12;
+Const OPTION_SECURE_UNSECURE	:= 13;
+
+program decorate (who)
+	//Make sure we're inside of our house
+	var hsign := FindHouseForLocation(who.x, who.y, who.z, who.realm);
+	var houseowner := CInt(GetObjProperty(hsign, "ownerserial"));
+	var iscoowner := 0;
+	var isfriend := 0;
+	isfriend := isfriend;
+	iscoowner := iscoowner;
+	houseowner := houseowner;
+	sign := hsign;
+	if(!sign.IsCoOwnerOrOwner(who))
+		SendSysMessage(who, "Only owner or co-owners can use the decorator tool here.", color := 33);
+		return 0;
+	endif
+
+	SendSysMessage(who, "Select an item to manipulate.", color := 88);
+	var item := Target (who, TGTOPT_NOCHECK_LOS);
+	if (!item || item.npctemplate || item.acctname)
+		SendSysMessage(who, "Cancelled.", 0x3, 0x21);
+		return;
+	endif
+
+	//make sure its in their house, or, if its in their backpack, put it down where they're standing
+	if (!FindHouseForLocation(item.x, item.y, item.z, item.realm))
+		if (item.container)
+			var tempitem := item;
+			var move_success := 0;
+			repeat
+				if (tempitem.container == who.backpack)
+					hsign := FindHouseForLocation(who.x, who.y, who.z, who.realm);
+					if (!hsign)
+						SendSysMessage(who, "You must be inside of your house to use this tool!", 0x3, 0x21);
+						return;
+					endif
+
+					item.movable := 1;
+					MoveObjectToLocation( item,who.x,who.y,who.z, who.realm, MOVEOBJECT_FORCELOCATION );
+					move_success := 1;
+				else
+					tempitem := tempitem.container;
+					if (!tempitem)
+						SendSysMessage(who, "That item is not in your backpack.", 0x3, 0x21);
+						return;
+					endif
+				endif
+			until (!who || !item || move_success == 1);
+
+			if (!move_success)
+				SendSysMessage(who, "That item is not within your house!", 0x3, 0x21);
+				return;
+			endif
+		else
+			SendSysMessage(who, "That item is not within your house!", 0x3, 0x21);
+			return;
+		endif
+	endif
+
+	if (!item.movable)
+		if (!IsLockedDownMovableItem (item, hsign))
+			SendSysMessage(who, "You can't move that.", 0x3, 0x21);
+			SendSysMessage(who, "Try releasing it first.");
+			return;
+		endif
+	endif
+
+	if (!ReserveItem (item))
+		SendSysMessage(who, "You cannot adjust that item right now.", 0x3, 0x21);
+		return;
+	endif
+	original_movable := item.movable;
+
+	repeat
+		var option := DisplayGumpOptions (who, item, hsign);
+		if (!option)
+			return;
+		endif
+
+		case (option)
+			// Looks like you could add targetting here for a 'new item' button.
+			OPTION_MOVE_NORTH:
+				MoveItemInDirection(who, hsign, item, 0, -1);
+
+			OPTION_MOVE_NORTH_EAST:
+				MoveItemInDirection(who, hsign, item, 1, -1);
+
+			OPTION_MOVE_EAST:
+				MoveItemInDirection(who, hsign, item, 1, 0);
+
+			OPTION_MOVE_SOUTH_EAST:
+				MoveItemInDirection(who, hsign, item, 1, 1);
+
+			OPTION_MOVE_SOUTH:
+				MoveItemInDirection(who, hsign, item, 0, 1);
+
+			OPTION_MOVE_SOUTH_WEST:
+				MoveItemInDirection(who, hsign, item, -1, 1);
+
+			OPTION_MOVE_WEST:
+				MoveItemInDirection(who, hsign, item, -1, 0);
+
+			OPTION_MOVE_NORTH_WEST:
+				MoveItemInDirection(who, hsign, item, -1, -1);
+
+			OPTION_MOVE_UP:
+				if (item.z >= who.z + 15)
+					SendSysMessage(who, "You can't raise that any higher.", 0x3, 0x21);
+				else
+					ManipulateItemHeight(item, 1);
+				endif
+
+			OPTION_MOVE_DOWN:
+				if (item.z <= who.z)
+					SendSysMessage(who, "You can't lower that any further.", 0x3, 0x21);
+				else
+					ManipulateItemHeight(item, -1);
+				endif
+
+			OPTION_ROTATE:
+				if (GetObjProperty (item, "otheritems"))
+					SendSysMessage(who, "You can't rotate that item!", 0x3, 0x21);
+				else
+					RotateItem (item);
+				endif
+
+			OPTION_LOCK_UNLOCK:
+				ReleaseItem (item);
+				var parms := array{};
+				parms[1] := hsign;
+				parms[2] := who;
+				parms[3] := item;
+				parms[4] := HOUSE_LOCKDOWN_ITEM;
+				run_script_to_completion (":staticHousing:lockunlock", parms);
+				original_movable := item.movable;
+				ReserveItem (item);
+
+			OPTION_SECURE_UNSECURE:
+				ReleaseItem (item);
+				var parms := array{};
+				parms[1] := hsign;
+				parms[2] := who;
+				parms[3] := item;
+				parms[4] := HOUSE_SECURE_CONTAINER;
+				run_script_to_completion (":staticHousing:lockunlock", parms);
+				original_movable := item.movable;
+				ReserveItem (item);
+			default:
+				SendSysMessage(who, "That isn't supposed to happen!  Whaaa!", 0x3, 0x21);
+				return;
+		endcase
+	until (!who || !item);
+endprogram
+
+///////////////////
+//  Display the gump and let the player select what to do
+///////////////////
+function DisplayGumpOptions (who, item, sign)
+	var gump := GFCreateGump(50, 50);
+
+	GFPage(gump, 0);
+	GFResizePic(gump, 0, 0, 5054, 220, 520);
+	GFPicTiled(gump, 10, 10, 200, 20, 2624);
+	GFAddAlphaRegion(gump, 10, 10, 200, 20);
+	GFPicTiled(gump, 10, 40, 200, 190, 2624);
+	GFAddAlphaRegion(gump, 10, 40, 200, 190);
+	GFPicTiled(gump, 10, 240, 200, 160, 2624);
+	GFAddAlphaRegion(gump, 10, 240, 200, 160);
+	GFPicTiled(gump, 10, 410, 200, 100, 2624);
+	GFAddAlphaRegion(gump, 10, 410, 200, 100);
+
+	GFHTMLArea(gump, 10, 13, 200, 20, "<basefont color=#FFFFFF><CENTER>DECORATOR'S TOOL</CENTER>");
+	GFAddButton(gump, 130, 60, 4501, 4501, GF_CLOSE_BTN, OPTION_MOVE_NORTH);
+	GFAddButton(gump, 85, 40, 4500, 4500, GF_CLOSE_BTN, OPTION_MOVE_NORTH_WEST);
+	GFAddButton(gump, 40, 60, 4507, 4507, GF_CLOSE_BTN, OPTION_MOVE_WEST);
+	GFAddButton(gump, 130, 160, 4503, 4503, GF_CLOSE_BTN, OPTION_MOVE_EAST);
+	GFAddButton(gump, 40, 160, 4505, 4505, GF_CLOSE_BTN, OPTION_MOVE_SOUTH);
+	GFAddButton(gump, 85, 180, 4504, 4504, GF_CLOSE_BTN, OPTION_MOVE_SOUTH_EAST);
+	GFAddButton(gump, 20, 110, 4506, 4506, GF_CLOSE_BTN, OPTION_MOVE_SOUTH_WEST);
+	GFAddButton(gump, 150, 110, 4502, 4502, GF_CLOSE_BTN, OPTION_MOVE_NORTH_EAST);
+
+	GFAddButton(gump, 25, 250, 5600, 5604, GF_CLOSE_BTN, OPTION_MOVE_UP);
+	GFAddButton(gump, 25, 280, 5602, 5606, GF_CLOSE_BTN, OPTION_MOVE_DOWN);
+	GFHTMLArea(gump, 50, 248, 150, 20, "<basefont color=#FFFFFF><CENTER>RAISE ITEM</CENTER>");
+	GFHTMLArea(gump, 50, 278, 150, 20, "<basefont color=#FFFFFF><CENTER>LOWER ITEM</CENTER>");
+
+	if (item.movable)
+		GFAddButton(gump, 20, 340, 4005, 4007, GF_CLOSE_BTN, OPTION_LOCK_UNLOCK); //Lockdown Item button
+		GFHTMLArea(gump, 50, 343, 150, 20, "<basefont color=#FFFFFF><CENTER>LOCK-DOWN ITEM</CENTER>");
+		GFAddButton(gump, 20, 370, 4005, 4007, GF_CLOSE_BTN, OPTION_SECURE_UNSECURE); //Secure Item Button
+		GFHTMLArea(gump, 50, 373, 150, 20, "<basefont color=#FFFFFF><CENTER>SECURE ITEM</CENTER>");
+	elseif (GetObjProperty (item, "secured"))
+		GFAddButton(gump, 20, 370, 4005, 4007, GF_CLOSE_BTN, OPTION_SECURE_UNSECURE); //Secure Item Button
+		GFHTMLArea(gump, 50, 373, 150, 20, "<basefont color=#FFFFFF><CENTER>UNSECURE ITEM</CENTER>");
+	else
+		GFAddButton(gump, 20, 340, 4005, 4007, GF_CLOSE_BTN, OPTION_LOCK_UNLOCK); //Lockdown Item button
+		GFHTMLArea(gump, 50, 343, 150, 20, "<basefont color=#FFFFFF><CENTER>RELEASE ITEM</CENTER>");
+	endif
+	//Only some items are rotatable
+	var rotatecfg := ReadConfigFile (":furniture:rotate");
+	var elem := rotatecfg[item.graphic];
+	if (elem)
+		GFAddButton(gump, 20, 310, 4005, 4007, GF_CLOSE_BTN, OPTION_ROTATE);
+		GFHTMLArea(gump, 50, 313, 150, 20, "<basefont color=#FFFFFF><CENTER>ROTATE ITEM</CENTER>");
+	endif
+	//GFAddButton(gump, 20, 420, 4005, 4007, GF_CLOSE_BTN, OPTION_VIEW_hsign);
+	//GFHTMLArea(gump, 10, 423, 200, 20, "<basefont color=#FFFFFF><CENTER>VIEW HOUSE SIGN</CENTER>");
+	GFHTMLArea(gump, 10, 448, 200, 20, "<basefont color=#FFFFFF><CENTER>LOCKDOWNS: " + CStr(sign.GetLockdowns()) + " / " + CStr(sign.GetMaxLockdowns()) + "</CENTER>", 0, 0);
+	GFHTMLArea(gump, 10, 473, 200, 20, "<basefont color=#FFFFFF><CENTER>SECURES: " + CStr(sign.GetSecures()) + " / " +  CStr(sign.GetMaxSecures()) + "</CENTER>", 0, 0);
+	var gump_return := GFSendGump(who, gump);
+
+	if (!gump_return[0])
+		SendSysMessage(who, "Cancelled.", 0x3, 0x21);
+		return;
+	endif
+	return gump_return[0];
+endfunction
+
+
+
+
+///////////////////
+//  Determines if its an item that can be raised or lowered even though its locked down
+///////////////////
+
+function IsLockedDownMovableItem (byref item, byref hsign)
+	if (item.movable)
+		return 1;
+	endif
+
+	if (GetObjProperty (item, "lockeddown"))
+		if (GetObjProperty (item, "lockeddown") == hsign.serial)
+			if (GetObjProperty (item, "otheritems"))
+				return 1;
+			endif
+
+			case (item.objtype)
+				0x0A70:	//
+				0x0A71:	//
+				0x0A72:	//
+				0x0A73:	//
+				0x0A74:	//
+				0x0A75:	//	Lots of beds
+				0x0A76:	//
+				0x0A77:	//
+				0x0A60:	//
+				0x0A61:	//
+				0x0A5E:	//
+				0x0A5F:	//
+				0x105F:	//
+				0x1060:	//	Looms
+				0x1061:	//
+				0x1062:	//
+				0x1920:	//
+				0x1922:	//	Mills
+				0x192C:	//
+				0x192E:	//
+				0x0FE6:	//
+				0x0FE7:	//
+				0x0FE8:	//
+				0x0FE9:	//
+				0x0FEA:	//	Pentagrams
+				0x0FEB:	//
+				0x0FEC:	//
+				0x0FED:	//
+				0x0FEE:	//
+				0x1E36:	//
+				0x1E37:	//
+				0x1E38:	//
+				0x1E39:	//
+				0x1E3A:	//	Brown Bearskin Rug
+				0x1E3B:	//
+				0x1E3C:	//
+				0x1E3D:	//
+				0x1E3E:	//
+				0x1E40:	//
+				0x1E41:	//
+				0x1E42:	//
+				0x1E43:	//
+				0x1E44:	//
+				0x1E45:	//
+				0x1E46:	//
+				0x1E47:	//
+				0x1E48:	//
+				0x1E49:	//
+				0x1E4A:	//
+				0x1E4B:	//
+				0x1E4C:	//
+				0x1E4D:	//	White Bearskin Rug
+				0x1E4E:	//
+				0x1E4F:	//
+				0x1E50:	//
+				0x1E51:	//
+				0x1E53:	//
+				0x1E54:	//
+				0x1E55:	//
+				0x1E56:	//
+				0x1E57:	//
+				0x1E58:	//
+				0x1E59:	//
+				0x1E5A:	//
+				0x1E5B:	//
+				0x0953:	//
+				0x0959:	//
+				0x0937:	//
+				0x093D:	//
+				0x0475:	//	Fireplaces
+				0x0489:	//
+				0x0482:	//
+				0x047B:	//
+				0x094B:	//
+				0x0945:	//
+				0x0967:	//
+				0x0961:	//
+				0x092B:	//
+				0x092C:	//	ovens
+				0x0931:	//
+				0x0930:	//
+						return 0;
+			default:
+				return 1;
+			endcase;
+			return 1;
+		endif
+	endif
+
+	if (GetObjProperty (item, "secured"))
+		if (GetObjProperty (item, "secured") == hsign.serial)
+			return 1;
+		endif
+	endif
+
+	return 0;
+endfunction
+
+///////////////////
+//  Rotates the item, if possible
+///////////////////
+function RotateItem (item)
+	var rotatecfg := ReadConfigFile (":furniture:rotate");
+	var elem := rotatecfg[item.graphic];
+	if (elem)
+		if (elem.newgraphic)
+			item.graphic := elem.newgraphic;
+		endif
+	endif
+endfunction
+
+///////////////////
+//  Moves an item in a given direction.
+//	Moved the code here into a single function as it was
+//	being used in 4 different places with very slight
+//	variations.
+///////////////////
+function MoveItemInDirection(who, hsign, item, newx := 0, newy := 0)
+	if (!hsign.IsLocationInsideHouse(item.x + newx, item.y + newy, item.z))
+		SendSysMessage(who, "That would put the item outside of your house!", 0x3, 0x21);
+	elseif(!CheckLosAt( who, item.x + newx, item.y + newy, item.z ))
+		SendSysMessage(who, "The new location is out of line of sight!", 0x3, 0x21);
+	elseif (GetObjProperty (item, "otheritems"))
+		set_critical (1);
+		foreach serialnum in GetObjProperty (item, "otheritems")
+			var theitem := SystemFindObjectBySerial (serialnum);
+			if (theitem)
+				theitem.movable := 1;
+				MoveObjectToLocation( theitem, theitem.x + newx, theitem.y + newy, theitem.z, theitem.realm, flags := MOVEOBJECT_FORCELOCATION );
+				theitem.movable := 0;
+			endif
+		endforeach
+		set_critical (0);
+	else
+		item.movable := 1;
+		MoveObjectToLocation( item, item.x + newx, item.y + newy, item.z, item.realm, flags := MOVEOBJECT_FORCELOCATION );
+		item.movable := original_movable;
+	endif
+endfunction
+
+function ManipulateItemHeight(item, newz := 0)
+	if (GetObjProperty (item, "otheritems"))
+		set_critical (1);
+		foreach serialnum in GetObjProperty (item, "otheritems")
+			var theitem := SystemFindObjectBySerial (serialnum);
+			if (theitem)
+				theitem.movable := 1;
+				MoveObjectToLocation( theitem, theitem.x, theitem.y, theitem.z + newz, theitem.realm, flags := MOVEOBJECT_FORCELOCATION );
+
+				theitem.movable := 0;
+			endif
+		endforeach
+		set_critical (0);
+	else
+		item.movable := 1;
+		MoveObjectToLocation( item, item.x, item.y, item.z + newz, item.realm, flags := MOVEOBJECT_FORCELOCATION );
+		item.movable := original_movable;
+	endif
+endfunction

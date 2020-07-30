@@ -10,31 +10,36 @@
 use os;
 use storage;
 
+include ":containers:storageAreas";
 include "include/objtype";
 include "include/myUtil";
 
 function FindBankBox( character, bank_obj_name_prefix := "Bankbox of " )
-  var worldbank := OpenWorldBank();
-  var bank_obj_name := bank_obj_name_prefix + character.serial;
-  var bankbox := FindRootItemInStorageArea( worldbank, bank_obj_name );
-  var bankgump := UOBJ_BANKBOX;
+
+	var bank_region := CP_DEFAULT_AREA;
+	var bankbox		:= CP_GetStorageContainerForMobile( character, bank_region, CP_CREATE );
+
+  // var worldbank := OpenWorldBank();
+  // var bank_obj_name := bank_obj_name_prefix + character.serial;
+  // var bankbox := FindRootItemInStorageArea( worldbank, bank_obj_name );
+  // var bankgump := UOBJ_BANKBOX;
 //	case(bank_obj_name_prefix)
 //		"Bankbox of "	: bankgump := UOBJ_BANKBOX;
 //		"magicbag_"		: bankgump:= UOBJ_MAGICBAG;
 //		"gm_backpack_"	: bankgump := UOBJ_GMPACK;
 //	endcase*/
-	if(bank_obj_name_prefix == "Bankbox of ")
-		bankgump := UOBJ_BANKBOX;
-	endif
-	if(bank_obj_name_prefix == "magicbag_")
-		bankgump := UOBJ_MAGICBAG;
-	endif
-	if(bank_obj_name_prefix == "gm_backpack_")
-		bankgump := UOBJ_GMPACK;
-	endif
-  if (!bankbox)
-    bankbox := CreateRootItemInStorageArea( worldbank, bank_obj_name, bankgump );
-  endif
+	// if(bank_obj_name_prefix == "Bankbox of ")
+		// bankgump := UOBJ_BANKBOX;
+	// endif
+	// if(bank_obj_name_prefix == "magicbag_")
+		// bankgump := UOBJ_MAGICBAG;
+	// endif
+	// if(bank_obj_name_prefix == "gm_backpack_")
+		// bankgump := UOBJ_GMPACK;
+	// endif
+  // if (!bankbox)
+    // bankbox := CreateRootItemInStorageArea( worldbank, bank_obj_name, bankgump );
+  // endif
   if(!bankbox)
     syslog( "Unable to find or create bankbox for " + character.serial );
   endif

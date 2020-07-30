@@ -6,8 +6,7 @@ use cliloc;
 include ":itemutils:itemUtil";
 include "include/string";
 include ":containers:containers";
-include ":housing:housing";
-//include ":staticHousing:houseItem";
+include "include/housing";
 include ":gumps:yesNo";
 include ":keys:key";
 
@@ -21,20 +20,20 @@ var opposing  := 0;
 //500272 //You cannot build near the stairs.
 program Place_Deeded_Item ( who, deed )
 
-	var sign := FindHouseForLocation (who.x, who.y, who.z, who.realm);
+	var hsign := GetHouseSign(who);
 	if(who.cmdlevel <= 2)
 		//Sign stuff
-		if ( !sign )
+		if ( !hsign )
 			SendSysMessageCL(who, 500275, color := 33); // You can only build this in a house.
 		return 0;
-		endif	
-		
-		if ( !sign.IsCoOwnerOrOwner( who ) )
+		endif
+
+		if ( !hsign.IsACoOwnerOrOwner( who ) )
 			SendSysMessageCL(who, 1152907, color := 33); // You must be owner or co-owner of a house to place addons in it.
 		return 0;
 		endif
 	endif
-	
+
 	var InBackpack := useItem_check ( who, deed, ITEM_INCONTAINER );
 	if(!InBackpack)
 		return 0;
@@ -44,15 +43,15 @@ program Place_Deeded_Item ( who, deed )
 		SendSysMessageCL(who, 1042009, color := 33); // You cannot use this deed at this time.
 		return 0;
 	endif
-	
+
 	foreach item in ListItemsNearLocation (who.x, who.y, who.z, 1, who.realm)
  		if (item.IsDoor())
 			SendSysMessageCL(who, 500271, color := 33); // You cannot build near the door.
 			return;
   		endif
 	endforeach
-	
-	SendSysMessageCL( who, 1049780, color := 66 ); // Where would you like to place this decoration?
+
+	SendSysMessageCL( who, 1049780, color := 88 ); // Where would you like to place this decoration?
 	var start := TargetCoordinates( who );
 	if( !start )
 		SendSysMessageCL( who, 1042021, color := 33 ); // Cancelled
@@ -60,11 +59,12 @@ program Place_Deeded_Item ( who, deed )
 	elseif( !CheckLosAt( who, CInt( start.x ), CInt( start.y ), CInt( start.z )))
 		SendSysMessageCL( who, 500950, color := 33 ); // You cannot see that.
 		return 0;
-	elseif( !IsLocationWithinHouseSign (sign, start.x, start.y, start.z) )
+	//elseif( !IsInMultiHouse(who) )
+	elseif( !hsign.IsLocationInsideHouse(start))
 		SendSysMessageCL( who, 500275, color := 33); // You can only build this in a house.
 		return 0;
 	endif
-	
+
 	BuildandSendOrientGump(who, deed, sign, start);
 endprogram
 
@@ -74,13 +74,13 @@ function BuildandSendOrientGump ( who, deed, sign, targ )
 //        SendSysMessage ( who, "Error reading config :deed:itemdesc -->"+item_cfg.errortext );
 //    return 0;
 //    endif
-	
+
 	var cfg_info := GetItemDescInfo( deed.objtype ),
 	buildCFG := CStr ( cfg_info.BuildCFG ),
 	RetainColor := CInt ( cfg_info.RetainColor );
 	//var element := FindConfigElem ( item_cfg, deed.objtype ),
 	//	buildCFG := GetConfigString ( element, "BuildCFG" );
-		
+
 	if(!BuildCFG)
 		SendSysMessageCL ( who, 500273, color := 33); // This add-on deed is blank.
 	return 0;
@@ -98,7 +98,7 @@ function BuildandSendOrientGump ( who, deed, sign, targ )
 		BuildItem(who, deed, sign, targ, buildCFG, RetainColor, 1);
 	return 1;
 	endif
-		
+
 	var multiplier, ItemY, intorient;
 	var gump := GFCreateGump(30, 50);
 	GFPage(gump, 0);
@@ -117,11 +117,11 @@ function BuildandSendOrientGump ( who, deed, sign, targ )
 	endforeach
 
 	var input := GFSendGump ( who, gump );
-	
+
 	if( !input )
 		SendSysMessageCL ( who, 1042021, color := 33 ); // Cancelled
 	return 0;
-	endif	
+	endif
 	input := input[0];
 	BuildItem ( who, deed, sign, targ, buildCFG, RetainColor, input );
 endfunction
@@ -134,36 +134,42 @@ function BuildItem ( who, deed, sign, targ, buildCFG, RetainColor, direction )
         SendSysMessage ( who, "Error reading config Build CFG -->"+cfg.errortext );
     return 0;
     endif
-	var cfg_elem := FindConfigElem ( cfg, direction ); 
+	var cfg_elem := FindConfigElem ( cfg, direction );
 	var component := GetConfigStringArray ( cfg_elem, "Component" );
-	var zed := GetHouseZoneBaseZLevel ( targ, sign );
+	var zed;
+	if(!targ.multi)
+		zed := GetHouseZoneBaseZLevel ( targ, sign );
+	else
+		 zed := targ.z;
+	endif
 	var broken, newx, newy, newz, founddoor := 0, founditem := 0, outside := 0;
 	//Let's check to ensure that this deed is placed properly, ensuring that the item does not
 	//pop out of the house, that there are no doors being blocked, no items other than carpets/rugs
-	//below the item. 
+	//below the item.
 	//ToDo: Check for static items at the item's location
+	var targStHt := GetStandingHeight(targ.x, targ.y, targ.z, targ.realm);
 	foreach item in ( component )
 		broken := SplitWords(item);
 		newx := targ.x + CInt(broken[2]);
 		newy := targ.y + CInt(broken[3]);
-		newz := targ.z + CInt(broken[4]);
-		if ( !IsLocationWithinHouseSign ( sign, newx, newy, newz ) )
+		newz := targStHt.z + CInt(broken[4]);
+		if ( !sign.IsLocationInsideHouse(struct{"x" := newx, "y" := newy, "z" := newz, "realm" := targ.realm}) )
 			outside := 1;
 		endif
-		
+
 		foreach possitem in ListItemsAtLocation ( newx, newy, zed, targ.realm )
 			if( !possitem.IsCarpet () )
 				founditem := 1;
 			endif
 		endforeach
-		
+
 		foreach possdoor in ListItemsNearLocation ( newx, newy, zed, 1, targ.realm )
 			if (possdoor.IsDoor () )
 				founddoor := 1;
 			endif
 		endforeach
 	endforeach
-	
+
 	var the_item, failed := 0;
 	if (outside == 0 && founddoor == 0 && founditem == 0 )
 		foreach item in ( component )
@@ -177,9 +183,9 @@ function BuildItem ( who, deed, sign, targ, buildCFG, RetainColor, direction )
 				failed := 1;
 				break;
 			endif
-				
+
 			created.Append ( the_item );
-			the_serials.Append ( the_item.serial );			
+			the_serials.Append ( the_item.serial );
 		endforeach
 	elseif ( failed == 1 )
 		foreach thing in created
@@ -196,11 +202,11 @@ function BuildItem ( who, deed, sign, targ, buildCFG, RetainColor, direction )
 	elseif ( founddoor == 1 )
 		SendSysMessageCL ( who, 500271, color := 33 ); // You cannot build near the door.
 		return 0;
-	elseif ( founditem == 1 )  
+	elseif ( founditem == 1 )
 		SendSysMessageCL ( who, 1156219, color := 33 ); // You cannot place this there!
 		return 0;
 	endif
-		
+
 	if(PlacedWell(who))
 		var created_size := CInt ( created.Size() );
 		foreach part in created
@@ -213,7 +219,7 @@ function BuildItem ( who, deed, sign, targ, buildCFG, RetainColor, direction )
 			SetObjProperty( part, "OtherItems", the_serials );
 			SetObjProperty( part, "lockeddown", 1);
 			SetObjProperty( part, "signserial", sign.serial);
-			//SetObjProperty( sign, "numlockdowns", GetObjProperty(sign, "numlockdowns") - 1);
+			//SetObjProperty( sign, "RemainingLockdowns", GetObjProperty(sign, "RemainingLockdowns") - 1);
 			SendSysMessage( who, "Locked Down.", 3, 66);
 
 	//	Let's place the lockdown property on only the last item placed by the deed
@@ -221,13 +227,13 @@ function BuildItem ( who, deed, sign, targ, buildCFG, RetainColor, direction )
 			if ( _part_iter == created_size )
 				// Added to prevent "That is not yours to lock down!" in SetLockdownInfo function.
 				part.movable := 1;
-				SetLockdownInfo( sign, who, part, "lockeddown" ); 
+				SetLockdownInfo( sign, who, part, "lockeddown" );
 			endif
 			SleepMS(5);
 		endforeach
 		// Deeded items will take up  one (1) lockdown no matter how many parts the item has.
 		// This corrects the lockdowns removed per part by the call to SetLockdownInfo.
-        //SetObjProperty(sign, "numlockdowns", GetObjProperty(sign, "numlockdowns") + created_size);
+        //SetObjProperty(sign, "RemainingLockdowns", GetObjProperty(sign, "RemainingLockdowns") + created_size);
 
 		DestroyItem ( deed );
 	else
@@ -243,7 +249,7 @@ function destroy_parts( created )
 		DestroyItem ( part );
 		SleepMS(5);
 	endforeach
- 
+
         return 1;
 endfunction
 
@@ -258,13 +264,13 @@ function PlacedWell(who)
 	GFAddHTMLLocalized ( gump, 50, 105, 180, 20, 1046363 ); //No
 	GFAddButton ( gump, 20, 135, 4005, 4007, GF_CLOSE_BTN, 0 );
 	GFAddHTMLLocalized ( gump, 50, 135, 180, 20, 1046362 ); //Yes
-	
+
 	var input := GFSendGump ( who, gump );
 	input := input[0];
 	if ( input == 0x1 )
 		return 0;
 	else
 		return 1;
-	endif 
+	endif
 endfunction
 

@@ -10,10 +10,9 @@ use cliloc;
 
 include ":keys:key";
 include ":traps:traps";
-include ":housing:housing";
 
 program useContainer( mobile, container )
-	
+
 	var item_cfg := ReadConfigFile( ":*:itemdesc" );
 	item_cfg := item_cfg[container.graphic];
  	if( container.container.IsA( POLCLASS_CORPSE ))

@@ -19,9 +19,9 @@ program relock( who )
        return;
     endif
 
-    var lockid := key.GetLockId();
+    var LockID := key.GetLockId();
 
-    SetObjProperty( lockeditem, "LockID", lockid );
+    SetObjProperty( lockeditem, "LockID", LockID );
 
     SendSysMessage( who, "Changed the item to match that key." );
 

@@ -459,10 +459,10 @@ endfunction
 
 function DestroyBoatKey(byref mobile, boat)
 	// Find the ship's key in mobile's backpack.
-	var keylockid;
+	var keyLockID;
 	foreach item in EnumerateItemsInContainer(mobile.backpack, ENUMERATE_ROOT_ONLY)
 		if(item.IsKey())
-			keylockid := GetObjProperty (item, "LockID");
+			keyLockID := GetObjProperty (item, "LockID");
 			if (item.KeyMatchesLock(boat.hold))
 					DestroyItem(item);
 				return 1;
@@ -470,7 +470,7 @@ function DestroyBoatKey(byref mobile, boat)
 		endif
 		if(item.IsKeyRing())
 			foreach key in EnumerateItemsInContainer (item)
-				keylockid := GetObjProperty (key, "LockID");
+				keyLockID := GetObjProperty (key, "LockID");
 				if (key.KeyMatchesLock(boat.hold))
 					MoveItemToContainer(key, mobile.backpack);
 					DestroyItem(key);

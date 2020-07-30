@@ -10,7 +10,7 @@ use cliloc;
 
 include ":keys:key";
 include ":traps:traps";
-include ":housing:housing";
+include "include/housing";
 
 program useContainer( mobile, container )
 //	var equipped := GetEquipmentByLayer ( mobile, 0x15 );
@@ -71,7 +71,7 @@ endfunction
 
 function ContainerIsSecured( mobile, container )
 
-	var sign := FindHouseSign ( mobile );
+	var sign := GetHouseSign ( mobile );
 	if ( !container.IsSecured() )
 		// Nothing to worry about.
 		return 0;

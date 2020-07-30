@@ -48,7 +48,7 @@ endfunction
 function CreateTreasureChests(item, amt)
   var lvl := GetObjProperty(item, "level");
   var rng := GetObjProperty(item, "range");
-  var newx, newy, newz, checker, type, gfx, lootgroup, chest, lockid, strngth, traptype;
+  var newx, newy, newz, checker, type, gfx, lootgroup, chest, LockID, strngth, traptype;
   if(rng > 10)
     rng := 10;
   endif
@@ -83,8 +83,8 @@ function CreateTreasureChests(item, amt)
     chest.locked :=  1;
     chest.movable := 0;
     chest.usescript := ":tinkering:tinkerTraps";
-    lockid := AllocateLockID();
-    SetObjProperty(chest, "LockID", lockid);
+    LockID := AllocateLockID();
+    SetObjProperty(chest, "LockID", LockID);
     SetObjProperty(chest, "level", lvl);
     strngth := 0;
     case(lvl)

@@ -4,14 +4,15 @@ use cfgfile;
 
 include "include/utility";
 
-  UnloadConfigFile("regions");
-  var  regions_cfg := ReadConfigFile("::regions/regions");               // Reads regions.cfg
-/*    if(!regions_cfg.errortext)
-      Broadcast("findCity.inc: Can't read regions.cfg", 2, 33);
-      Broadcast(regions_cfg.errortext, 2, 33);
-      return 0;
-    endif
-*/
+UnloadConfigFile("regions");
+var  regions_cfg := ReadConfigFile("//regions/regions");               // Reads regions.cfg
+
+if(!regions_cfg.errortext)
+	Broadcast("findCity.inc: Can't read regions.cfg", 2, 33);
+	Broadcast(regions_cfg.errortext, 2, 33);
+	return 0;
+endif
+
 
 ////////////////////////////////////////////////////////////
 //
@@ -37,7 +38,7 @@ function IsInsideCity(thing)
   var city := "";
   var isCity := "";
   var region;
-  
+
   regions := GetConfigStringKeys( regions_cfg );          // Creates an array of city names
 
 
@@ -55,7 +56,7 @@ function IsInsideCity(thing)
 
         endforeach
       return answer;
- 
+
  endfunction
 
 
@@ -85,16 +86,16 @@ function WhatCityAmIIn(object)
   var city := "";
   var isCity := "";
   var region;
-  
+
 /*  regions_cfg := ReadConfigFile("../regions/regions");               // Reads cities.cfg
   if(!regions_cfg)
     Broadcast("findCity: Can't read regions.cfg", 2, 33);
     return 0;
   endif*/
-  
+
   regions := GetConfigStringKeys( regions_cfg );          // Creates an array of city names
-  
-  
+
+
         foreach place in regions
             region := FindConfigElem( regions_cfg, place );
             //cityboundary := FindConfigElem( cityinfo, place );
@@ -108,14 +109,14 @@ function WhatCityAmIIn(object)
               endif
 
         endforeach
-        
+
         if(!answer)
               city := "notincity";
         endif
-        
-        
+
+
       return city;
- 
+
  endfunction
 
 
@@ -130,36 +131,36 @@ function GetTownCurrency(town)
     Broadcast("findCity.inc: Can't read regions.cfg", 2, 33);
     return 0;
   endif*/
-  
+
   regions := GetConfigStringKeys( regions_cfg );          // Creates an array of city names
-  
+
         foreach place in regions
             region := FindConfigElem( regions_cfg, place );
             if(Lower(place) == Lower(town))
               FoundCurrency := region[place]."Currency";
-              
+
                 if(!FoundCurrency)
                   return CInt(DEFAULTCURRENCY);
                 endif
-                
+
               break;
             endif
 
         endforeach
-  
- 
-        
+
+
+
       return CInt(FoundCurrency);
- 
+
  endfunction
 
 
- 
-  
+
+
  ////////////////////////////////////////////////////////////////////
  // This is the old FindCity function with city bounds hard coded.
  ////////////////////////////////////////////////////////////////////
- 
+
  function FindCity(me)
   if(me.x>=1244 && me.y>=1530 && me.x<=1704 && me.y<=1758)
     return "Britain";

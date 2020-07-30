@@ -1,0 +1,22 @@
+use os;
+use uo;
+
+include ":staticHousing:settings";
+
+var settings := SH_GetSettingsCfgElem("Settings");
+
+program walk_on_bantile(who, tile)
+	var signserial := CInt(GetObjProperty(tile, "signserial"));
+	var sign := SystemFindObjectBySerial(signserial);
+	var banlist := GetObjProperty(sign, "banlist");
+	if(who.acctname)
+		sign.RefreshHouse();
+	endif
+	if(!banlist)
+		return;
+	endif
+	if(who.serial in banlist)
+		MoveObjectToLocation( who, sign.x, sign.y, sign.z, sign.realm, MOVEOBJECT_FORCELOCATION );
+		SendSysMessage(who, "You are banned from that house and cannot enter it!");
+	endif
+endprogram

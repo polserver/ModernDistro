@@ -1,4 +1,5 @@
 use basic;
+use storage;
 
 include "include/myUtil";
 
@@ -39,23 +40,23 @@ function IsLocationAccessible(character, x, y, z)
   return CheckLosAt( character, x, y, z );
 endfunction
 
-/////////////////// 
-// Sends messages to all online GMs. Useful for important errors 
-/////////////////// 
+///////////////////
+// Sends messages to all online GMs. Useful for important errors
+///////////////////
 
-function SendGMErrorMessage(text, syslogit := 0, mincmdlevel := 1) 
-    if ( syslogit ) 
-        syslog(text); 
-    endif 
+function SendGMErrorMessage(text, syslogit := 0, mincmdlevel := 1)
+    if ( syslogit )
+        syslog(text);
+    endif
 
-    foreach player in EnumerateOnlineCharacters() 
-        if ( player.cmdlevel ) 
-            if ( player.cmdlevel >= mincmdlevel ) 
-                SendSysMessage(player, "Staff system message: " + text, color := 220); 
-            endif 
-        endif 
-    endforeach 
-endfunction 
+    foreach player in EnumerateOnlineCharacters()
+        if ( player.cmdlevel )
+            if ( player.cmdlevel >= mincmdlevel )
+                SendSysMessage(player, "Staff system message: " + text, color := 220);
+            endif
+        endif
+    endforeach
+endfunction
 
 //////////////////////////////////////////////////////////////////////////////////////
 //
@@ -66,7 +67,7 @@ endfunction
 //
 //  Parameters:
 //  Name                  Type
-//  object                UO_OBJECT reference                  
+//  object                UO_OBJECT reference
 //  boundary              Array containing the {nwx, nwy, sex, sey}
 //                        The function assumes that the 'boundary' parameter
 //                        might contain numeric values as strings in its elements.
@@ -85,12 +86,12 @@ endfunction
 //////////////////////////////////////////////////////////////////////////////////////////////
 //  Determines if the object is within a rectangle at a specified Z coordinate
 //
-//  Note: The scope of this function is to determine whether an object 
+//  Note: The scope of this function is to determine whether an object
 //  lies within a two dimwnsional area at a specified Z coordinate.
 //
 //  Parameters:
 //  Name                  Type
-//  object                UO_OBJECT reference                  
+//  object                UO_OBJECT reference
 //  boundary              Array containing the {nwx, nwy, sex, sey}
 //  ZCoord                The desired Z level
 //

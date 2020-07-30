@@ -1,0 +1,115 @@
+Instructions for player's use of the static housing system.
+
+Hello and welcome to your new house. I have tried to make this system as familiar and easy to use for those who have used other
+housing systems. Hopefully I have done it right. This is by no means a comprehensive explanation of all of the features 
+in this package. Instead I will try to cover items that might be new or slightly different from other housing systems 
+you may have used.
+
+I wish to thank, and give credit to, those from whom I have borrowed heavily to create this package. Bishop Ebonhand, 
+who created the first static housing system and also created the second version that I used to create this system. The other 
+person, or group, that deserves thanks is Drocket and the original World of Dreams development team from whom I got the 
+idea for unattended house sales. If your server admin has set-up the static houses for sale in advance, the ability to buy 
+a house unaided, without waiting on a GM to respond to a page to set-up the house for purchase, is extremely convenient.
+Admin Yukiko.
+
+Here is a list of definitions that are useful to know.
+
+The owner: This is pretty obvious. It's the person who bought the house, probably you.
+
+Co-owners: These are characters you have added to your co-owners list. Currently co-owners have only a few extra privileges 
+compared to house friends. You may have up to 5 co-owners on your list.
+
+Friends: These are characters you have added to your friends list. You may have up to 20 house friends on your list.
+
+House Affiliates: The Owner, Co-owners, and Friends of the house are house affiliates.
+
+House affiliates have various privileges based on their level. The level in order of highest to lowest is:
+Owner, Co-owner, and Friend. Pretty obvious huh?
+
+Secure container: This is a special 'property' that is assigned to a container, which the owner may make available 
+to house affiliates, that is secure and cannot be opened by anyone who is not a house affiliate. Secure containers 
+can be assigned a 'security level'. Security levels are:
+Owner     - only the owner may access the secure container.
+Co-owner  - only co-owners may access the secure container.
+Friends   - only friends may access the secure container.
+Affiliate - any house affiliate may access the secure container.
+The only exception to this is the owner who has universal access to ALL secure containers.
+Owners, please use your right of access sparingly. Don't abuse it or you'll lose the trust of your friends.
+It is provided in cases where you have a clear reason to inspect the contents 
+of someone's container. For example if you suspect someone of stealing from other affiliates.
+
+Ban tiles: There are invisible ban tiles placed inside every door. These tiles prevent anyone that you have banned or 
+placed on your 'Enemy List' from entering your house. Think of them as invisible guardians that 'give the boot' to 
+unwanted characters. Should a banned character step across the threshold of a door he will immediately be teleported 
+outside to the sign and informed that he is not welcome.
+
+House affiliates are assigned on a character by character basis and are not account wide. Alternate characters on an 
+account must be added when that alternate character is logged in. Only characters with an account may be made a house 
+affiliate. Sorry no NPCs.
+
+House affiliates have one prevailing privilege to non affiliates. Being a house affiliate provides 'safe logout' 
+or instant logout for them when they are inside of the house boundaries. Another benefit is they can be given access to 
+'secure' containers.
+
+There are several 'speech commands' that the house responds to.
+They are listed below with the level of affiliate that can use them.
+
+Available to all affilates:
+
+remove thyself - You will get a target. The player you target will be removed from the house.
+Note: This does not ban the player from re-entering the house later.
+
+reveal thyself - This command will reveal any players within the house that are hidden.
+
+Available to co-owners and owners:
+i wish to lock this down - The item you target will be locked down and cannot be moved nor will it decay.
+
+i wish to release this - The item you target will be released and can be moved and can decay.
+
+i wish to place a trash barrel - This will place a trash barrel at your location. Only 1 trash barrel per house.
+
+i ban thee - This will cause the targetted player to be ejected from the house and they will be placed on 
+			 the house enemies list. The player will not be able to re-enter the house unless she is removed from 
+			 the enemies list using the house sign by the owner or a co-owner.
+			 
+i wish to secure this - Use this command to secure a container. There are various levels of security which can 
+             be applied to a secure container. If you say 'i wish to secure this for a coowner', friends of
+			 the house will not have access to the container. The options are 'i wish to secure this for a friend',
+			 'i wish to secure this for friends', 'i wish to secure this for a coowner',
+			 'i wish to secure this for coowners', 'i wish to secure this for the owner', and 
+			 'i wish to secure this for all'. Co-owners can also be spelled 'co-owner' or 'co-owners'.
+			 If you do not specify the level of security and just say 'i wish to secure this' you will be 
+			 presented with a gump where you must specify a security level. When you secure a container for 
+			 'all', any house affiliate has access.
+
+Depending on how this static housing system has been configured by the administrator, there may be a limit 
+on the houses you may own. I have tried to make setting this limit as flexible as possible. As this is an 
+option that can be enabled contact the staff of the server for more information.
+
+
+The house sign provides additional functionality to your house. Briefly here are the things that can be 
+done from the house sign:
+Owners can change the name of the house, add co-owners, friends, and enemies to the lists. Owners can 
+remove co-owners, friends, and enemies from the lists and they can rekey interior and exterior locks.
+
+Co-owners can add friends, and enemies. Co-owners can remove friends and enemies from the lists.
+
+Note: If a character is in the house when she is added to the enemy list she is 'booted out' to the 
+sign and is banned from re-entry until she is removed from the enemy list.
+
+
+Refeshing the house: I decided to take a different approach to the old method of using the doors to refresh the house.
+Instead ban tiles do the job.  The owner or any co-owner walking on a ban tile also refreshes the decay timer on the house, thus 
+extending the life of the house. Unlike other housing systems which use the doors as one method of refreshing 
+the house. You will be notified that this has happened when the owner or co-owner walks over an invisible ban tile.
+Also, double-clicking the sign and using house commands will refresh the decay timer.
+
+
+This system also has, as an option, the placement of house teleproters. If the administrator of the server 
+has enabled the option for players to place house teleporters in houses this can be done by acquiring a 
+house teleporter kit. This kit will allow the player to place two teleporters. One 'origin' teleporter 
+and one 'destination' teleporter. The teleporters are two-way despite the names. They may be placed 
+in the same house or one may be placed in one house you own and the other in another house you own. 
+Only the owner may place teleporters within a house. Access to the teleporters can be restricted by 
+by double-clicking them which will open a gump with several options besides restricting access.
+Only the owner can access the teleporter functions menu.

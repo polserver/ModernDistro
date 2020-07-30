@@ -33,4 +33,5 @@ program setpages(who, text)
 		endif
 		SetObjProperty(trg, "maxpages", page_count);
 	endwhile
+
 endprogram

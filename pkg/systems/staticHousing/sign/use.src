@@ -1,0 +1,656 @@
+// footage { nwx, nwy, lowerz, sex, sey, upperz }
+use uo;
+use os;
+use cliloc;
+use cfgfile;
+
+include ":keys:key";
+include "util/bank";
+include ":gumps:yesNo";
+include "include/findCity";
+include "include/housing";
+include ":staticHousing:settings";
+include ":staticHousing:gumpMessage";
+include ":staticHousing:staticlayout";
+include ":staticHousing:coownerlayout";
+include ":staticHousing:friendlayout";
+include ":staticHousing:defaultlayout";
+include ":staticHousing:signSelectionFunctions";
+
+const KEYSTART := 0x100e;
+const KEYEND := 0x1013;
+const KEYRING := 0x1011;
+
+var settings := SH_GetSettingsCfgElem("Settings");
+var signname;
+
+program static_sign_use(who, sgn)
+
+var exteriordoor := 0;
+var totalhousevalue := 0;
+totalhousevalue := totalhousevalue;
+var hv := 1;
+var totalvalueofhouses := 0;
+var maxhousevalue := CInt(settings.MaxHouseValue);
+sign := sgn;
+  if(!sign)
+    sign := who[2];
+    who := who[1];
+  endif
+
+// Added to support pre-deeded houses
+    // This is when the house is 'new', the sign showing 'For Sale'.
+    if(GetObjProperty(sign, "NewHouse"))
+		var price := sign.GetHousePrice();
+		var bankbox := FindBankBox( who );
+		var signserial := CInt(sign.serial);
+
+		var extdoors :={};
+		if (!yesNo(who, "Do you want to buy this house?"))
+			SendSysMessage(who, "Canceled.");
+			return 0;
+		endif
+
+		// Determine if we have a "house values count" setting.
+		// If we do, calculate the value of the current house and see if the player's
+		// TotalValueOfHouses + the house she is trying to buy exceeds the
+		// MaxHouseValue a player can own based on the settings.
+		if(CInt(settings.HouseValuesCount))
+			hv := DetermineHouseValue(CInt(GetObjProperty(sign, "Price")));
+			if(settings.HouseValueAppliedTo == "Character")						// If it applies on a per character basis
+				totalvalueofhouses := CInt(GetObjProperty(who, "TotalValueOfHouses"));
+			elseif(settings.HouseValueAppliedTo == "Account")					// If it applies on a per account basis
+				totalvalueofhouses := CInt(GetObjProperty(who.acct, "TotalValueOfHouses"));
+			endif
+			SetObjProperty(sign, "housevalue", hv);
+			if((totalvalueofhouses + hv) > maxhousevalue)
+				SendSysMessage(who, "You cannot buy this house because the 'house value'", 3, 40);
+				SendSysMessage(who, "of the house plus the value of the houses you already own", 3, 40);
+				SendSysMessage(who, "would exceed the maximum allowed.", 3, 40);
+				return 0;
+			endif
+		endif
+
+		set_critical( 1 );
+		var created := CreateBuiltDeed(who, sign, bankbox);
+		set_critical( 0 );
+
+		if (!created)
+			SendSysMessage( who, "ERROR: Unable to create built deed!", color := 33 );
+			SendSysMessage(who, "Your bank box might be too full. Try removing some items from it.", 1, 33);
+			SendSysMessage(who, "Then come back and try buying this house again.", 1, 33);
+			Print(created.errortext);
+		  return 0;
+		endif
+
+		var packkey := CreateItemInBackpack( who, UOBJ_GOLD_KEY );
+
+		if (!packkey)
+			SendSysMessage( who, "Your backpack is too full! Cannot create the key.", 1, 33);
+			SendSysMessage(who, "Aborting. You must make room before buying this house.", 1, 33);
+			DestroyItem(created);
+			return 0;
+		endif
+
+		var bankkey := CreateItemInContainer( bankbox, UOBJ_GOLD_KEY );
+
+		if (!bankkey)
+			SendSysMessage( who, "Your bankbox is too full! Cannot create the extra key!", 1, 33);
+			SendSysMessage(who, "Aborting. You must make room before buying this house.", 1, 33);
+			DestroyItem(created);
+			DestroyItem( packkey );
+			return 0;
+		endif
+
+		// Determine how much gold the buyer has in his bank box.
+		// If enough to buy the house then SpendCoin
+		// If not does he have enough gold in the bank plus the gold in his pack?
+		// If so spend all the gold in his bank and the difference in his pack.
+		// Else tell him he's sore out of luck.
+		if (!who.spendgold (price))
+			SendSysMessage(who, "You don't have enough money in your backpack to buy it.", 1, 33);
+			SendSysMessage(who, "Checking your bank box...", color := 56);
+			Sleep(2);
+			if(!SpendCoin(who, price, bankbox, UOBJ_GOLD_COIN))
+				SendSysMessage(who, "You don't have enough in the bank to buy it either. Sorry.", 1, 33);
+				DestroyItem(created);
+				DestroyItem(packkey);
+				DestroyItem(bankkey);
+				return 0;
+			endif
+		endif
+
+		var LockID := CInt(GetObjProperty( sign, "LockID" ));
+		SetObjProperty( packkey, "LockID", LockID );
+		SetObjProperty( bankkey, "LockID", LockID );
+		extdoors := GetObjProperty(sign, "exteriordoors");
+		foreach item in extdoors
+				exteriordoor := SystemFindObjectBySerial(CInt(item));
+				if(exteriordoor.IsA(POLCLASS_DOOR))
+					exteriordoor.locked := 1;
+					var tile :=CreateItemAtLocation(exteriordoor.x, exteriordoor.y, exteriordoor.z, 0x260FC, 1, exteriordoor.realm);
+					SetObjProperty(tile,"signserial", signserial);
+					tile.invisible := 1;
+					tile.movable := 0;
+					SetObjProperty(exteriordoor, "LockID", LockID);
+				endif
+		endforeach
+		SendSysMessage(who, "Congratulations! You are the new owner of this house.", 1, 66);
+		Sleep(3);
+		EraseObjProperty(sign, "NewHouse");
+		///////////////////////////////////////////////////////
+		// Need to make sure relevant sign CProps are assigned to the sign and builtdeed  created == builtdeed
+		///////////////////////////////////////////////////////
+		SetObjProperty(sign, "lastownerserial", 0);
+		SetObjProperty(sign, "lastownername", "Eric N. Swanson"); // No previous owner so "Hail to the eScript and POL creator!"
+		SetObjProperty(sign, "ownerserial", who.serial);
+		SetObjProperty(sign, "builtdeed", created.serial);
+		SetObjProperty(sign, "signserial", sign.serial);
+		SetObjProperty(sign, "owneraccount", who.acctname);
+		SetObjProperty(sign, "RemainingLockdowns", GetObjProperty(sign, "MaxLockdowns"));
+		SetObjProperty(sign, "RemainingSecures", GetObjProperty(sign, "MaxSecures"));
+		SetObjProperty( created, "footage", GetObjProperty(sign, "footage"));
+		SetObjProperty( created, "MaxLockdowns", GetObjProperty(sign, "MaxLockdowns"));
+		SetObjProperty( created, "MaxSecures", GetObjProperty(sign, "MaxSecures"));
+		SetObjProperty( created, "Price", GetObjProperty(sign, "Price"));
+		SetObjProperty( created, "exteriordoors", GetObjProperty(sign, "exteriordoors"));
+
+		EraseObjProperty(sign, "friends");
+		EraseObjProperty(sign, "coowners");
+		EraseObjProperty(sign, "banlist");
+
+		// Determine if we have a "house values count" setting.
+		// If we do calculate the value of the current house and assign it to the approprite object.
+		if(CInt(settings.HouseValuesCount))
+			hv := DetermineHouseValue(CInt(GetObjProperty(sign, "Price")));
+			if(settings.HouseValueAppliedTo == "Character")
+				totalvalueofhouses := CInt(GetObjProperty(who, "TotalValueOfHouses")) + hv;
+				SetObjProperty(who, "TotalValueOfHouses", totalvalueofhouses );
+			elseif(settings.HouseValueAppliedTo == "Account")
+				totalvalueofhouses := CInt(GetObjProperty(who.acct, "TotalValueOfHouses")) + hv;
+				SetObjProperty(who.acct, "TotalValueOfHouses", totalvalueofhouses );
+			endif
+		endif
+
+
+		SendSysMessage( who, "You have taken ownership of the house.", 1, 66);
+		gumpmessage(who, "A key has been placed in your backpack. The deed is in your bank box along with a spare key.");
+		Sign.name := "A house sign";
+		SetObjProperty( sign, "ownername", who.name );
+		sign.RefreshHouse();
+		return 1;
+    endif
+
+
+	sign.RefreshHouse();
+  Detach();
+
+// End new house purchase stuff
+
+  sign := sgn;
+  if(!sign)
+    sign := who[2];
+    who := who[1];
+  endif
+  footage := GetObjProperty(sign, "footage");
+  var addonitem, founditem;
+  addonitem := addonitem;
+  founditem := founditem;
+  var friend := sign.IsInHouseLists(who, 2);
+  var cown := sign.IsInHouseLists(who, 1);
+  cown := cown;
+  var acct := GetObjProperty(sign, "owneraccount");
+  acct := acct;
+  sign.RefreshHouse();
+  SendSysMessageCL(who, 1043293, color := 66); // Your house's age and contents have been refreshed.
+
+  var ownerserial := GetObjProperty(sign, "ownerserial");  // the house owner...
+  var result;
+  SetPlaqueName( sign );
+  Detach();
+
+  if( who.serial == ownerserial )
+    data[25] := who.name;
+    SetObjProperty( sign, "ownername", who.name );
+  else
+    data[25] := GetObjProperty( sign, "ownername" );
+  endif
+
+  data[26] := CInt(sign.GetLockdowns());
+  data[27] := CInt(sign.GetSecures());
+  var coownerinfo := sign.GetCoOwnerList();
+  var friendinfo := sign.GetFriendList();
+  var enemyinfo := sign.GetBanList();
+  var i:=0;
+  for (i:=1;i<=20;i:=i+1)
+    var coownername := (SystemFindObjectBySerial(coownerinfo[i]).name);
+    var friendname := (SystemFindObjectBySerial(friendinfo[i]).name);
+    var enemyname := (SystemFindObjectBySerial(enemyinfo[i]).name);
+    if (friendname == error)
+      friendname := " ";
+    endif
+    if (enemyname == error)
+      enemyname := " ";
+    endif
+    if (coownername == error)
+      coownername := " ";
+    endif
+    data[i+27] := (friendname);
+    data[(i+47)] := (enemyname);
+    data[(i+67)] := (coownername);
+  endfor
+  friend := 0;
+  for (i:=1;i<=20;i:=i+1)
+    var friendserial := friendinfo[i];
+    var coownerserial := coownerinfo[i];
+    if (friendserial == who.serial)
+      friend := 1;
+    endif
+    if (coownerserial == who.serial)
+      friend := 2;
+    endif
+  endfor
+  if (friend == 1)
+    result := SendDialogGump( who, friendlayout, data );
+  elseif (friend == 2)
+    result := SendDialogGump( who, coownerlayout, data );
+  elseif ((friend == 0) && (who.cmdlevel < 3) && (who.serial != ownerserial))
+    result := SendDialogGump( who, defaultlayout, data );
+    return;
+  else
+	result := SendDialogGump( who, ownerlayout, data );
+  endif
+  case (result[0])
+            1:var newname := RequestInput( who, sign, "Enter a name for this house." );
+              if( (len(newname) > 17) )
+                SendSysMessage( who, "House sign names may not be longer than 17 characters." );
+              else
+                SetName( sign, newname );
+                SetObjProperty(sign,"signname",newname);
+              endif
+            2: ChangeInteriorLocks( who, sign );
+//            3: demolish( who, sign, nwx, nwy, sex, sey );
+            4: AddFriend(sign, who);
+            5: AddEnemy(sign, who);
+//            6: ChangeHouseLocks( who, sign, nwx, nwy, sex, sey );
+            6: ChangeLocks(sign, who);
+            7: removefriend(who, sign, friendinfo[1]);
+            8: removefriend(who, sign, friendinfo[2]);
+            9: removefriend(who, sign, friendinfo[3]);
+           10: removefriend(who, sign, friendinfo[4]);
+           11: removefriend(who, sign, friendinfo[5]);
+           12: removefriend(who, sign, friendinfo[6]);
+           13: removefriend(who, sign, friendinfo[7]);
+           14: removefriend(who, sign, friendinfo[8]);
+           15: removefriend(who, sign, friendinfo[9]);
+           16: removefriend(who, sign, friendinfo[10]);
+           17: removefriend(who, sign, friendinfo[11]);
+           18: removefriend(who, sign, friendinfo[12]);
+           19: removefriend(who, sign, friendinfo[13]);
+           20: removefriend(who, sign, friendinfo[14]);
+           21: removefriend(who, sign, friendinfo[15]);
+           22: removefriend(who, sign, friendinfo[16]);
+           23: removefriend(who, sign, friendinfo[17]);
+           24: removefriend(who, sign, friendinfo[18]);
+           25: removefriend(who, sign, friendinfo[19]);
+           26: removefriend(who, sign, friendinfo[20]);
+           27: removeenemy(who, sign, enemyinfo[1]);
+           28: removeenemy(who, sign, enemyinfo[2]);
+           29: removeenemy(who, sign, enemyinfo[3]);
+           30: removeenemy(who, sign, enemyinfo[4]);
+           31: removeenemy(who, sign, enemyinfo[5]);
+           32: removeenemy(who, sign, enemyinfo[6]);
+           33: removeenemy(who, sign, enemyinfo[7]);
+           34: removeenemy(who, sign, enemyinfo[8]);
+           35: removeenemy(who, sign, enemyinfo[9]);
+           36: removeenemy(who, sign, enemyinfo[10]);
+           37: removeenemy(who, sign, enemyinfo[11]);
+           38: removeenemy(who, sign, enemyinfo[12]);
+           39: removeenemy(who, sign, enemyinfo[13]);
+           40: removeenemy(who, sign, enemyinfo[14]);
+           41: removeenemy(who, sign, enemyinfo[15]);
+           42: removeenemy(who, sign, enemyinfo[16]);
+           43: removeenemy(who, sign, enemyinfo[17]);
+           44: removeenemy(who, sign, enemyinfo[18]);
+           45: removeenemy(who, sign, enemyinfo[19]);
+           46: removeenemy(who, sign, enemyinfo[20]);
+           47: removecoowner(who, sign, coownerinfo[1]);
+           48: removecoowner(who, sign, coownerinfo[2]);
+           49: removecoowner(who, sign, coownerinfo[3]);
+           50: removecoowner(who, sign, coownerinfo[4]);
+           51: removecoowner(who, sign, coownerinfo[5]);
+           52: addcoowner(sign, who);
+    endcase
+endprogram
+
+function ChangeSign(who, result)
+  var signgraph := result[0];
+  if(sign.graphic == 3024 || sign.graphic == 3026 || sign.graphic == 3026 || sign.graphic == 3026)
+    SetObjProperty(sign, "oldsignprop", sign.graphic);
+    sign.graphic := signgraph;
+  else
+    sign.graphic := signgraph;
+  endif
+endfunction
+
+function Eject(who)
+	var targ := Target(who, TGTOPT_NOCHECK_LOS);
+	if(!targ)
+		SendSysMessage(who, "Canceled.", 3, 40);
+	elseif(!targ.isa(POLCLASS_MOBILE))
+		SendSysMessage(who, "You may only eject mobiles.", 3, 40);
+	elseif(targ.cmdlevel)
+		SendSysMessage(who, "You cannot eject staff!", 3, 40);
+	elseif(targ.npctemplate == "playervendor")
+		SendSysMessage(who, "You cannot eject player vendors.", 3, 40);
+	elseif(!IsInHouse(who))
+		SendSysMessage(who, "You can only eject people in your house.", 3, 40);
+	else
+		MoveObjectToLocation(targ, sign.x, sign.y, GetWorldHeight(sign.x, sign.y, targ.realm), MOVEOBJECT_FORCELOCATION, targ.realm);
+		SendSysMessage(who, targ.name + " was ejected!", 1, 66);
+		SendSysMessage(targ, who.name + " has ejected you from the house!", 3, 40);
+	endif
+endfunction
+
+function checklists(who, list1, list2)
+  var newarray := array;
+  var lista := GetObjProperty(sign, list1);
+  if(!lista)
+    lista := array;
+    SetObjProperty(sign, list1, lista);
+  else
+    if(who.serial in lista)
+      foreach thing in lista
+        if(thing != who.serial)
+          newarray.append(thing);
+        endif
+      endforeach
+      SetObjProperty(sign, list1, newarray);
+    endif
+  endif
+  newarray := array;
+  lista := GetObjProperty(sign, list2);
+  if(!lista)
+    lista := array;
+    SetObjProperty(sign, list2, lista);
+  else
+    if(who.serial in lista)
+      foreach thing in lista
+        if(thing != who.serial)
+          newarray.append(thing);
+        endif
+      endforeach
+      SetObjProperty(sign, list2, newarray);
+    endif
+  endif
+endfunction
+
+
+function SetPlaqueName( sign )
+	var sgnname := GetObjProperty(sign,"signname");
+	if(!sgnname)
+		sgnname := "";
+	endif
+	var split := SplitWords( sgnname );
+	var j;
+	for( j := 1; j <= 5; j := j + 1 )
+		if( !split[j] )
+			split[j] := "";
+		endif
+	endfor
+	if( len(sgnname) <= 12 )
+		data[1] := sgnname;
+	elseif( (len(split[1]) + len(split[2]) + len(split[3]) + 2) <= 12 )
+		data[1] := split[1] + " " + split[2] + " " + split[3];
+		data[2] := split[4] + " " + split[5];
+	elseif( len(split[1]) + len(split[2]) + 1 <= 12 )
+		data[1] := split[1] + " " + split[2];
+		data[2] := split[3] + " " + split[4] + " " + split[5];
+	elseif( len(split[1]) <= 12 )
+		data[1] := split[1];
+		data[2] := split[2] + " " + split[3] + " " + split[4] + " " + split[5];
+	endif
+endfunction
+
+
+function ChangeLocks(sign, byref who)
+	SendSysMessage(who, "Target the new master key.", 1, 66);
+	// var addonitem;
+	var newkey := Target(who);
+	if(!newkey)
+		SendSysMessage(who, "Cancelled.", 1, 33);
+		return 0;
+	endif
+	if(newkey.IsKey() && !newkey.IsKeyring())
+		var LockID := AllocateLockId();
+		SetObjProperty(newkey, "LockID", LockID);
+		SetObjProperty(sign, "LockID", LockID);
+		foreach thing in GetObjProperty(sign, "exteriordoors")
+			var item := SystemFindObjectBySerial(thing);
+			item.locked := 1;
+			SetObjProperty(item, "LockID", LockID);
+		endforeach
+// Cannot remember why this next code was here but
+// I am leaving it here for now.
+/*		addonitem := CInt(GetObjProperty(sign, "component2"));
+		if(addonitem)
+			addonitem.locked := 1;
+			SetObjProperty(addonitem, "LockID", LockID);
+		endif */
+		SendSysMessage(who, "Locks have been changed.", 1, 66);
+	else
+		SendSysMessage(who, "That is not a key!", 3, 40);
+	endif
+endfunction
+
+function CreateBuiltDeed( who, sign, bankbox)
+    var builtdeed := CreateItemInContainer( bankbox, 0x28888 );
+    if (!builtdeed)
+      PrintTextAbovePrivate( who, "Your bank box is too full!", who );
+      return 0; // not built
+    endif
+    SetName(builtdeed, "a static house at " + sign.x + ", " + sign.y + ", " + sign.z + ", " + sign.realm + "." );
+    SetObjProperty(sign,"builtdeed", builtdeed.serial);
+    SetObjProperty(builtdeed, "Price", GetObjProperty(sign, "Price"));
+    return builtdeed;
+endfunction
+
+function ChangeInteriorLocks( who, house )
+	footage := GetObjProperty(house, "footage");
+	var extdoors := GetObjProperty(house, "exteriordoors");
+	SendSysMessage( who, "Target the new master key.", 1, 88 );
+	var newkey := Target( who, "" );
+	if (!newkey)
+		SendSysMessage(who, "Canceled.", 1, 33);
+		return;
+	endif
+	if( !newkey.IsKey() && newkey.IsKeyring() )
+		SendSysMessage( who, "That is not a key!", 1, 33 );
+		return;
+	endif
+
+	var LockID := AllocateLockId();
+	SetObjProperty( newkey, "LockID", LockID );
+	foreach box in footage
+		foreach item in box
+			if((item.isA(POLCLASS_DOOR)) && (Distance(house, item) >= 3) && !(item in extdoors))
+				item.locked := 1;
+				SetObjProperty(item, "LockID", LockID);
+			endif
+		endforeach
+	endforeach
+	SendSysMessage( who, "The interior door locks have been changed.", 1, 66 );
+endfunction
+
+function AddFriend( sign, who )
+	var removecoown := 0;
+	SendSysMessageCL( who, 501317, color := 88); // Target the person you wish to name a friend of your household.
+	var targetchr := Target( who);
+	if(!targetchr)
+		SendSysMessageCL( who, 1042023, color := 33); // Cancelled.
+		return 0;
+	endif
+	if (targetchr.IsA(POLCLASS_NPC))
+		SendSysMessageCL(who, 501372, color := 33); // This person cannot be a friend of the house.
+		return 0;
+	endif
+	if(sign.IsACoowner(targetchr))
+		if (!yesNo(who, targetchr.name + " is a co-owner. Are you sure?"))
+			SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+			return 0;
+		endif
+		removecoown := 1;
+	endif
+	var test := sign.AddFriend(targetchr);
+	if (!test)
+		SendSysMessageCL(who, 501376, color := 33); // This person is already on your friends list!
+		return 0;
+	elseif(test == -1)
+		SendSysMessageCL(who, 501375, color := 33); // Your friends list is full!
+		return 0;
+	endif
+	if(removecoown)
+		sign.RemoveCoOwner(targetchr);
+	endif
+  SendSysMessage( who, targetchr.name + " is now a friend of this house.", 1, 66 );
+endfunction
+
+function addenemy( sign, who )
+	var removefrnd := 0;
+	var removecoown := 0;
+	SendSysMessageCL(who, 501325, color := 88); // Target the individual to ban from this house.
+	var targetchr := Target(who);
+	if(!targetchr)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return 0;
+	elseif(targetchr == who)
+		SendSysMessageCL(who, 1115838, color := 33); // You cannot ban yourself!
+		return 0;
+	elseif(!targetchr.acct)
+		SendSysMessageCL(who, 1062040, color := 33); // You cannot ban that.
+		return 0;
+	elseif(targetchr.cmdlevel >= 2)
+		SendSysMessage(who, "You cannot ban staff!", 3, 33);
+		return 0;
+	elseif(sign.IsAFriend(targetchr))
+		if (!yesNo(who, targetchr.name + " is a friend. Are you sure?"))
+			SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+			return 0;
+		else
+			removefrnd := 1;
+		endif
+	elseif(sign.IsACoOwner(targetchr))
+		if (!yesNo(who, targetchr.name + " is a co-owner. Are you sure?"))
+			SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+			return 0;
+		else
+			removecoown := 1;
+		endif
+	endif
+	var test := sign.AddBan(targetchr);
+	if(test == -1)
+		SendSysMessageCL(who, 1149994, color := 33); // Your ban list is full!
+		SendSysMessage(who, "You need to remove a ban before you can ban " + targetchr.name + ".", color := 33);
+		return 0;
+	elseif(!test)
+		SendSysMessageCL(who, 501356, color := 33);	// This person is already banned!
+		return 0;
+	endif
+	if(removefrnd)
+		sign.RemoveFriend(targetchr);
+	elseif(removecoown)
+		sign.RemoveCoOwner(targetchr);
+	endif
+	SendSysMessageCL(who, 1042839, CAscZ(targetchr.name), color := 66); // ~1_PLAYER_NAME~ has been banned from this house.
+	SendSysMessageCL(targetchr, 501340, color := 33); // You have been banned from this house.
+	MoveObjectToLocation(targetchr, sign.x, sign.y, sign.z, sign.realm, MOVEOBJECT_FORCELOCATION);
+
+endfunction
+
+function addcoowner( sign, who )
+
+	var removeban := 0;
+	SendSysMessageCL(who, 501328, color := 88); // Target the person you wish to name a co-owner of your household.
+	var targetchr := Target(who);
+	if(!targetchr)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return 0;
+	elseif(targetchr == who)
+		SendSysMessage(who, "You cannot be the owner and a co-owner of a house.", color := 33);
+		return 0;
+	elseif(!targetchr.acct)
+		SendSysMessageCL(who, 501362, color := 33); // That can't be a co-owner of the house.
+		return 0;
+	elseif(sign.IsAFriend(targetchr))
+		sign.RemoveFriend(targetchr);
+	elseif(sign.IsABanned(targetchr))
+		if (!yesNo(who, targetchr.name + " is on your ban list. Are you sure?"))
+			SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+			return 0;
+		else
+			removeban := 1;
+		endif
+	endif
+	var test := sign.AddCoOwner(targetchr);
+	if(test == -1)
+		SendSysMessageCL(who, 501368, color := 33); // Your co-owner list is full!
+		SendSysMessage(who, "You need to remove a co-owner before you can add " + targetchr.name + " as a co-owner.", color := 33);
+		return 0;
+	elseif(!test)
+		SendSysMessageCL(who, 501369, color := 33);	// This person is already on your co-owner list!
+		return 0;
+	endif
+	if(removeban)
+		sign.RemoveBan(targetchr);
+	endif
+	SendSysMessage(who, targetchr.name + " is now a co-owner of this house.", color := 66);
+	SendSysMessageCL(targetchr, 501343, color := 88); // You have been made a co-owner of this house.
+
+endfunction
+
+function removefriend(who, hsign, information )
+  var friendinfo := GetObjProperty(hsign,"friends");
+  var ind := returnindex(friendinfo, information);
+  var friend := SystemFindObjectBySerial(information);
+  if (ind == 0)
+    SendSysMessage(who, "That slot doesnt contain a friend.", 1, 33);
+    return;
+  endif
+  hsign.RemoveFriend(friend);
+  SendSysMessage(who, friend.name + " is no longer a friend of this house.", 1, 66);
+endfunction
+
+function removecoowner(who, hsign, information )
+  var coownerinfo := GetObjProperty(hsign,"coowners");
+  var ind := returnindex(coownerinfo, information);
+  var coowner := SystemFindObjectBySerial(information);
+  if (ind == 0)
+    SendSysMessage(who, "That slot doesnt contain a co-owner.", 1, 33);
+    return;
+  endif
+  hsign.RemoveCoOwner(coowner);
+  SendSysMessage(who, coowner.name + " is no longer a co-owner of this house.", 1, 66);
+endfunction
+
+function removeenemy(who, hsign, information )
+  var enemyinfo := GetObjProperty(hsign,"banlist");
+  var ind := returnindex(enemyinfo, information);
+  var enemy := SystemFindObjectBySerial(information);
+  if (ind == 0)
+    SendSysMessage(who, "That slot doesnt contain an enemy.", 1, 33);
+    return;
+  endif
+  hsign.RemoveBan(enemy);
+  SendSysMessage(who, enemy.name + " is no longer an enemy of this house.", 1, 66);
+endfunction
+
+function returnindex(friendinfo, information)
+      var i;
+      for (i := 1; i <= len(friendinfo); i := i + 1)
+            if (friendinfo[i] == information)
+                  return i;
+            endif
+      endfor
+      return 0;
+endfunction
+

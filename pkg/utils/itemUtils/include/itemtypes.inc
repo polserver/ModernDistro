@@ -60,7 +60,7 @@ function IsHair (byref hair)
 
 	case (hair.objtype)
 		0x203b:	//Short Hair
-		0x203c:	//Long Hair 
+		0x203c:	//Long Hair
 		0x203d:	//Pony Tail
 		0x2044:	//MoHawk
 		0x2045:	//Page Boy
@@ -848,13 +848,13 @@ endfunction
 function IsMusicalInstrument(byref item)
 
 	case(item.objtype)
-		0x27067:    //FLUTE	
+		0x27067:    //FLUTE
 		0x0e9d:    //TAMBORINE
 		0x0e9e:    //TAMBORINE2
 		0x0eb3:    //LUTE
-		0x0eb4:    //LUTE2	
+		0x0eb4:    //LUTE2
 		0x0e9c:    //DRUM
-		0x0eb2:    //HARP	
+		0x0eb2:    //HARP
 		0x0eb1:    //STANDING HARP
 		return 1;
 		default: return 0;
@@ -967,7 +967,7 @@ endfunction
 ///////////////////
 
 function IsOre(byref use_on)
-  if ((use_on.objtype >= 0x26300 && use_on.objtype <= 0x26308 || 
+  if ((use_on.objtype >= 0x26300 && use_on.objtype <= 0x26308 ||
   use_on.objtype >= 0x26205 && use_on.objtype <= 0x26213))
     return 1;
   else
@@ -980,7 +980,7 @@ endfunction
 ///////////////////
 
 function IsIngot(use_on)
-  if ((use_on.objtype >= 0x26309 && use_on.objtype <= 0x26312 || 
+  if ((use_on.objtype >= 0x26309 && use_on.objtype <= 0x26312 ||
   use_on.objtype >= 0x26245 && use_on.objtype <= 0x26254 || use_on.objtype == 0x26216))
     return 1;
   else
@@ -995,7 +995,7 @@ endfunction
 ///////////////////
 
 function IsIngotObjtype(use_on)
-  if ((use_on >= 0x26309 && use_on <= 0x26312 || 
+  if ((use_on >= 0x26309 && use_on <= 0x26312 ||
   use_on >= 0x26245 && use_on <= 0x26254 || use_on == 0x26216))
     return 1;
   else
@@ -1189,7 +1189,7 @@ function IsSteedContainer(item)
 	elseif (item.objtype >= 0x0a97 && item.objtype <= 0x0a9e)    //EmptyBookShelf
 		return 1;
         endif
-       
+
 	return 0;
 
 endfunction
@@ -1212,7 +1212,7 @@ function IsBone(byref item)
     0x0ed7: //dragon
             return 1;
 		default: return 0;
-	endcase 
+	endcase
 endfunction
 
 function IsAKey (byref item)
@@ -1288,9 +1288,12 @@ function IsSign (item)
 		0xc44:
 		0x1f28:
 		0x1f29:
+		0x1600E:
+		0x1600F:
+		0x16010:
+		0x16011:
 		0x17060:
-		0x1708a:
-			return 1;
+		0x1708a:	return 1;
 	endcase
 	if (item.objtype >= 0xba3 and item.objtype <= 0xc0e)
 		return 1;
@@ -1368,7 +1371,7 @@ endfunction
 
 function IsMedableArmor (byref armor)
 	var cfg := ReadConfigFile (":*:itemdesc");
-	if ((cfg[armor.objtype].blockcircle) && (cfg[armor.objtype].blockcircle < 6)) 
+	if ((cfg[armor.objtype].blockcircle) && (cfg[armor.objtype].blockcircle < 6))
 		return 0;
 	endif
 	return 1;

@@ -8,7 +8,7 @@ use cliloc;
 
 include ":BountifulChest:settings";
 include ":containers:checks";
-include ":housing:housing";
+include "include/housing";
 
 program canInsert( mobile, BountifulChest, move_type, unused inserttype, adding_item, unused existing_stack, unused amount_to_add )
 
@@ -44,7 +44,7 @@ endprogram
 
 function ContainerIsSecured( mobile, container )
 
-	var sign := FindHouseSign ( mobile );
+	var sign := GetHouseSign ( mobile );
 	if ( !container.IsSecured() )
 		// Nothing to worry about.
 		return 0;

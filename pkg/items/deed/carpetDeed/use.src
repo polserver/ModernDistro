@@ -3,22 +3,31 @@ use os;
 
 include ":deed:carpet";
 include ":gumps:gumps";
-include ":housing:housing";
+include "include/housing";
 
 program gump_CarpetSelection(who, carpet_deed)
 //Check house junk such as "is in house" and "lockdowns"
-	var lockdowns, sign := FindHouseSign (who);
-	//var sign := FindHouseForLocation (who.x, who.y, who.realm);
-	
-	if (!IsInsideTheHouse (who, sign))
-		SendSysMessage (who, "You must be in your house to use this!");
-	return;
-	else
-	lockdowns := GetObjProperty(sign, "numlockdowns");
-		if (lockdowns <= 0)
-			SendSysMessage(who, "You do not have encough lockdowns for this to be placed.");
+	var lockdowns;
+	sign := GetHouseSign(who);
+
+//	sign := IsInsieMultiHouseSign(who);
+	if (!sign.IsObjectInsideHouse(who))
+		SendSysMessage (who, "You must be in a house to use this deed.", color := 33);
 		return;
-		endif
+	endif
+	// Now we determine whether the player is the owner
+	// or a co-owner.
+	if(sign.IsCoOwnerOrOwner(who))
+		lockdowns := GetObjProperty(sign, "RemainingLockdowns");
+	else
+		SendSysMessage(who, "You must be the owner or co-owner to use the deed.", color := 33);
+		return;
+	endif
+	// End of determination of player's status.
+
+	if (lockdowns <= 0)
+		SendSysMessage(who, "You do not have encough lockdowns for this to be placed.");
+		return;
 	endif
 	if(!ReserveItem(carpet_deed))
 		SendSysMessage(who, "That item is already in use.");
@@ -30,7 +39,7 @@ program gump_CarpetSelection(who, carpet_deed)
 	var hue := carpet_deed.color;
 
 	var gump := GFCreateGump();
-	
+
 	GFPage(gump, 0);
 	GFResizePic(gump, 0, 0, 9250, 390, 265);
 	GFPicTiled(gump, 15, 35, 360, 215, 2624);
@@ -60,17 +69,17 @@ program gump_CarpetSelection(who, carpet_deed)
 	GFTilePic(gump, 216, 189, 2729, hue);
 	GFAddButton(gump, 290, 182, 2328, 2329, GF_CLOSE_BTN, 12);
 	GFTilePic(gump, 306, 189, 2739, hue);
-	
+
 	var carpet_selection := GFSendGump(who, gump);
-	
+
 	var buttons := carpet_selection.keys;
 //Let's determine what button was selected, oh the drudgery
 	var menu_choice;
-	foreach button in buttons 
+	foreach button in buttons
 		menu_choice := button;
-	endforeach	
-	
-//gump closed	
+	endforeach
+
+//gump closed
 	if (!carpet_selection)
 		SendSysMessage(who, "Cancelled.");
 	return;
@@ -84,13 +93,13 @@ program gump_CarpetSelection(who, carpet_deed)
         SendSysMessage(who, "Cancelled.");
     return;
     endif
-	
+
 	if (!CheckLosAt(who, target_one.x, target_one.y, target_one.z))
 		SendSysMessage(who, "Target not within line of sight.");
 	return;
 	endif
-    
-    if (!IsLocationWithinHouseSign(sign, target_one.x, target_one.y, target_one.z))
+
+    if (!sign.IsObjectInsideHouse(target_one))
         SendSysMessage(who, "Location out of house borders.");
 	return;
     endif
@@ -108,12 +117,12 @@ program gump_CarpetSelection(who, carpet_deed)
 		SendSysMessage(who, "Target not within line of sight.");
 	return;
 	endif
-	
-    if ( !IsLocationWithinHouseSign(sign, target_two.x, target_two.y, target_two.z) )
+
+    if ( !sign.IsObjectInsideHouse(target_two) )
         SendSysMessage(who, "Location out of house borders.");
 	return;
     endif
-	
+
 //LOS Check between both targets, using player's current realm for confirmation, is this proper? Who knows?
 	var LOSCheck := CheckLosBetween(target_one.x, target_one.y, target_one.z, target_two.x, target_two.y, target_two.z, who.realm);
 	if (!LOSCheck)
@@ -157,16 +166,16 @@ program gump_CarpetSelection(who, carpet_deed)
     if ((X_Axis == 0) || (Y_Axis == 0))
         SendSysMessage(who, "Carpet area too small.");
     return;
-    endif	
+    endif
     if ((X_Axis > 8) || (Y_Axis > 8))
         SendSysMessage(who, "Carpet area too big, can only be 8 tiles in each direction.");
     return;
-    endif	
+    endif
 
 //Determine lockdowns consumed by placed carpet
 	var carpet_tiles := ((X_Axis + Y_Axis) / 2);
 
-//Build me a carpet puease
+//Build me a carpet please
 CreateCarpet(who, x1, y1, x2, y2, carpet_z, hue, menu_choice, carpet_deed, sign, carpet_tiles);
 DestroyItem(carpet_deed);
 endprogram

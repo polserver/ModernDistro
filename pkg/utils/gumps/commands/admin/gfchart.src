@@ -1,0 +1,82 @@
+//--> control <--
+//
+// CONTROL:TEXTCMD/GM/CONTROL.SRC
+//
+// Displays a 640x480 GUMP colour-chart :)
+//
+// Creator: TJ Houston (Myrathi)
+// Contact: myrathi@templar.dhs.org
+//
+// Created: 05-Apr-2000
+// Updated: 24-Apr-2000
+//
+use uo;
+use basic;
+
+//include ":gumps:old-gumps";
+include ":gumps:gumps";
+
+
+// Gump constants
+//
+const WINX_MAX := 640;
+const WINY_MAX := 480;
+const BKGND_GOLDTRIM            := 2620;  // Gold-press, black backing
+
+program textcmd_gfchart( who )
+
+	// Check to see if it's ICP calling this script
+	// if so, who[1] holds "ICP"
+	// and... who[2] holds <player> or '-1' (test run)
+	//
+	var me;
+	if ( who[1] == "ICP" )
+		me := who[2];
+	else
+		me := who;
+	endif
+
+	// Check for ICP doing a "test run". If so, return "I'm here!" :-)
+	if ( me == -1 )
+		return 1;
+	endif
+
+	who := me;
+
+	// Continue with the normal text-command :)
+
+	var exit_but;
+
+	//GFInitGump();
+	var gump := GFCreateGump( 50,50 );
+//	GFNoClose();
+//	GFNoMove();
+
+	GFResizePic(gump, 0, 0, BKGND_GOLDTRIM, WINX_MAX+3, WINY_MAX+4);
+	GFTextMid(gump, 0, 6, WINX_MAX, 67, "Text and Gump Colour Chart" );
+	exit_but :=	GFAddButton(gump, WINX_MAX - 63, 11, 0x849, 0x848, 1); // Cancel  (0x81C, 0x81B = OKAY)
+
+	var i;
+	for( i := 1; i <= 40 ; i := i + 1 )
+		GFTextLine(gump, 16, i*11+15, i, "aeiouAEIOU12345 - " + CStr(i) );
+		GFTextLine(gump, 206, i*11+15, i+40, "aeiouAEIOU12345 - " + CStr(i+40) );
+		if ( i < 21 )
+			GFTextLine(gump, 396, i*11+15, i+80, "aeiouAEIOU12345 - " + CStr(i+80) );
+		endif
+	endfor
+
+	GFTextMid(gump, 396, 26*11, 234, 90, "Black is colour '0' only!" );
+	GFTextMid(gump, 396, 28*11, 234, 90, "Pure white is '910'." );
+	GFTextMid(gump, 396, 31*11, 234, 90, "Colours 1-100 repeat from 101." );
+	GFTextMid(gump, 396, 32*11+4, 234, 90, "(Black never repeats!)" );
+
+	GFTextRight(gump, WINX_MAX - 7, WINY_MAX - 36, 32, "v1.1 - Myrathi" );
+	GFTextRight(gump, WINX_MAX - 7, WINY_MAX - 21, 32, "myrathi@templar.dhs.org" );
+
+	var retv := GFSendGump( who, gump );
+	if ( !retv && (retv <> 0) )
+		SendSysMessage( who, "Please close any other user-gumps and try again." );
+		return;
+	endif
+
+endprogram

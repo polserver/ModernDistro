@@ -1,0 +1,1289 @@
+// methods for signs
+
+
+use uo;
+use os;
+
+include "include/housing";
+include ":staticHousing:settings";
+
+var settings := SH_GetSettingsCfgElem("Settings");
+
+
+program Install()
+
+	return 1;
+endprogram
+
+///////////////////////////////////////////////////////////
+//
+// IsHouseSign( sign )
+//
+// Purpose: Determines if the passed
+// object is a valid house sign. It will return
+// the object ref for both static and multi
+// house signs.
+// Parameter: objref:: sign
+//
+// Returns: 1 if true or 0 if false
+//
+///////////////////////////////////////////////////////////
+exported function IsHouseSign( byref unused sign )
+
+	var signs := {0xBD0, 0xBD2, 0x20BD1, 0x20BD2, 0x20BCF, 0x20BD0, 0x260FA};
+	foreach thing in signs
+		thing := thing; // stops unused warning.
+		if(GetObjProperty(thing, "footage"))
+			return 1;
+		endif
+	endforeach
+		return 0;
+endfunction
+
+///////////////////////////////////////////////////////////
+// function IsStaticHouseSign(sign)
+//
+// Purpose: Tests whether a sign is a static house sign
+// Parameters: loc - an object with the following
+// members - x, y, z, realm.
+// This is essentially the same code as
+// IsLocationInsideHouse(). It is included to prevent
+// ambiguity in scripts but either function will
+// give the same results.
+//
+// Returns: 1 if true and 0 if false.
+///////////////////////////////////////////////////////////
+exported function IsStaticHouseSign( byref unused sign )
+	var signs := {CInt(0x20BD1), CInt(0x20BD2), CInt(0x20BCF), CInt(0x20BD0), CInt(0x260FA)};
+	foreach thing in signs
+		thing := thing; // stops unused warning.
+		if(GetObjProperty(thing, "footage"))
+			return 1;
+		endif
+	endforeach
+	return 0;
+
+endfunction
+
+///////////////////////////////////////////////////////////
+// function IsMultiHouseSign(sign)
+//
+// Purpose: Tests whether a sign is a multi house sign
+// Parameters: loc - an object with the following
+// members - x, y, z, realm.
+// This is essentially the same code as
+// IsLocationInsideHouse(). It is included to prevent
+// ambiguity in scripts but either function will
+// give the same results.
+//
+// Returns: 1 if true and 0 if false.
+///////////////////////////////////////////////////////////
+exported function IsMultiHouseSign( byref unused sign )
+	var signs := {0xBD2, 0xBD0};
+	foreach thing in signs
+		thing := thing; // stops unused warning.
+		if(GetObjProperty(thing, "footage"))
+			return 1;
+		endif
+	endforeach
+	return 0;
+
+endfunction
+
+///////////////////////////////////////////////////////////
+// function IsLocationInsideHouse(sign, byref loc)
+//
+// Purpose: Tests whether a location is inside a house
+// Parameters: byref loc - an object with the following
+// members - x, y, z, realm. The loc parameter can be
+// a location returned from a TargetCoordinates()
+// function call.
+//
+// Returns: 1 if true and 0 if false.
+///////////////////////////////////////////////////////////
+exported function IsLocationInsideHouse(sign, byref loc)
+	footage := GetObjProperty (sign, "footage");
+	var chk := 0;
+	foreach thing in footage
+		if ( (loc.realm == sign.realm) &&
+			(loc.x >= thing[1] && loc.x <= thing[4]) &&
+			(loc.y >= thing[2] && loc.y <= thing[5]) &&
+			(loc.z >= thing[3] && loc.z <= thing[6]) )
+			chk := 1;
+			break;
+		endif
+		if(chk)
+			break;
+		endif
+	endforeach
+	return chk;
+endfunction
+
+///////////////////////////////////////////////////////////
+// function IsObjectInsideHouse(sign, byref loc)
+//
+// Purpose: Tests whether a location is inside a house
+// Parameters: byref loc - an object with the following
+// members - x, y, z, realm.
+// This is essentially the same code as
+// IsLocationInsideHouse(). It is included to prevent
+// ambiguity in scripts but either function will
+// give the same results.
+//
+// Returns: 1 if true and 0 if false.
+///////////////////////////////////////////////////////////
+exported function IsObjectInsideHouse(byref sign, byref object)
+	footage := GetObjProperty (sign, "footage");
+	var chk := 0;
+	foreach thing in footage
+		if ( (object.realm == sign.realm) &&
+			(object.x >= thing[1] && object.x <= thing[4]) &&
+			(object.y >= thing[2] && object.y <= thing[5]) &&
+			(object.z >= thing[3] && object.z <= thing[6]) )
+			return 1;
+			chk := 1;
+			break;
+		endif
+		if(chk)
+			break;
+		endif
+	endforeach
+	return chk;
+
+endfunction
+
+///////////////////////////////////////////////////////////////
+// RefreshHouse(sign)
+//
+// Refreshes the decay timer based on settings.RefreshTime
+// Formula is ReadGameClock() + (CInt(RefreshTime) * 360 * 24)
+// RefreshTime times 60 seconds times 60 minutes times 24 hours
+//
+//////////////////////////////////////////////////////////////
+exported function RefreshHouse(sign)
+
+	SetObjProperty(sign,"decay", ReadGameClock() + (CInt(settings.RefreshTime) * 360 * 24));
+    return 1;
+
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// FunctionName( params )
+//
+// Purpose: Used to determine if a static house is new,
+// eg. unowned.
+//
+//
+// Parameter Type:
+//
+// Returns: Integer. 1 if the NewHouse CProp is = to 1
+// or 0 if it is not.
+//
+///////////////////////////////////////////////////////////
+////////////////////////////////////////////////
+// This is only used by the static housing
+// system. It is included in both the static
+// house sign and the multi house sign method
+// scripts because they are essentially
+// copies of each other.
+///////////////////////////////////////////////
+exported function IsNewHouse( sign )
+
+	return GetObjProperty(sign, "NewHouse") == 1;;
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// GetLockdowns( sign )
+//
+// Purpose: Get the number of unused lockdowns
+// on a house.
+//
+//
+// Parameter Type: objref:: sign (implied)
+//
+// Returns: Integer:: The number of unused lockdowns
+// on a house.
+//
+///////////////////////////////////////////////////////////
+exported function GetLockdowns( sign )
+
+	return CInt( GetObjProperty( sign, "RemainingLockdowns" ));
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// GetMaxLockdowns( sign )
+//
+// Purpose: Get the maximum number of lockdowns available
+// for a house.
+//
+//
+// Parameter objref:: sign (implied)
+//
+// Returns: Integer:: The maximum number of lockdowns
+// available for a house.
+//
+///////////////////////////////////////////////////////////
+exported function GetMaxLockdowns( sign )
+
+	return CInt( GetObjProperty( sign, "MaxLockdowns" ));
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// GetSecures( sign )
+//
+// Purpose: Get the number of unused secures
+// on a house.
+//
+//
+// Parameter objref:: sign (implied)
+//
+// Returns: Integer:: The number of unused secures
+// on a house.
+//
+///////////////////////////////////////////////////////////
+exported function GetSecures( sign )
+
+	return CInt( GetObjProperty( sign, "RemainingSecures" ));
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// GetMaxSecures( sign )
+//
+// Purpose: Get the maximum number of secures available
+// for a house.
+//
+//
+// Parameter objref:: sign (implied)
+//
+// Returns: Integer:: The maximum number of secures
+// available for a house.
+//
+///////////////////////////////////////////////////////////
+exported function GetMaxSecures( sign )
+
+	return CInt( GetObjProperty( sign, "MaxSecures" ));
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// GetFootage( sign )
+//
+// Purpose: Used to retrieve the array of rectangles
+// mapped to a house.
+//
+// Parameter objref:: sign (implied)
+//
+// Returns: array:: of 6 integers or an array of arrays
+// of 6 integers. Each set of 6 integers are the
+// coordinates of a rectangle:
+// x1, y1, z1, x2, y2, z2
+//
+///////////////////////////////////////////////////////////
+exported function GetFootage( sign )
+
+return GetObjProperty(sign, "footage");
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// GetHousePrice( sign )
+//
+// Purpose: Used to retrieve the price of the house
+//
+// Parameter objref:: sign (implied)
+//
+// Returns: integer:: price
+//
+///////////////////////////////////////////////////////////
+exported function GetHousePrice( sign )
+
+return GetObjProperty(sign, "Price");
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// AddLockdown( sign )
+//
+// Purpose: Simply adds 1 to the number of lockdowns
+// a house has available. Used when releasing an item.
+//
+//
+// Parameter: objref:: sign (implied)
+//
+// Returns: Nothing.
+//
+///////////////////////////////////////////////////////////
+exported function AddLockdown( sign )
+	var temp := GetLockdowns(sign);
+	temp := temp + 1;
+	if(temp > sign.GetMaxLockdowns(sign))
+		temp := GetMaxLockdowns(sign);
+	endif
+	SetObjProperty(sign, "RemainingLockdowns", temp);
+	return;
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// SubtractLockdown( sign )
+//
+// Purpose: Simply subtracts 1 from the number of
+// lockdownsa a house has available. Used when locking
+// down an item.
+//
+//
+// Parameter: objref:: sign (implied)
+//
+// Returns: Nothing.
+//
+///////////////////////////////////////////////////////////
+exported function SubtractLockdown( sign )
+	var temp := GetLockdowns(sign);
+	temp := temp - 1;
+	if(temp < 0)
+		temp := 0;
+	endif
+	SetObjProperty(sign, "RemainingLockdowns", temp);
+	return;
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// AddSecure( sign )
+//
+// Purpose: Simply adds 1 to the number of secures
+// a house has available. Used when unsecuring
+// a container
+//
+// Parameter: objref:: sign (implied)
+//
+// Returns: Nothing.
+//
+///////////////////////////////////////////////////////////
+exported function AddSecure( sign )
+	var temp := GetLockdowns(sign);
+	temp := temp + 1;
+	if(temp > GetMaxSecures(sign))
+		temp := GetMaxSecures(sign);
+	endif
+	SetObjProperty(sign, "RemainingSecures", temp);
+	return;
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// SubtractSecure( sign )
+//
+// Purpose: Simply subtracts 1 from the number of
+// secures a house has available. Used when securing
+// an container.
+//
+//
+// Parameter: objref:: sign (implied)
+//
+// Returns: Nothing.
+//
+///////////////////////////////////////////////////////////
+exported function SubtractSecure( sign )
+	var temp := GetSecures(sign);
+	temp := temp - 1;
+	if(temp < 0)
+		temp := 0;
+	endif
+	SetObjProperty(sign, "RemainingSecures", temp);
+	return;
+endfunction
+
+//////////////////////////////////////////////////////////
+//
+// Updates numlockdowns by ldamount after a check to
+// make sure we are not at maxlockdowns.
+// Usage: sign.UpdateLockdowns(5) will add 5 lockdowns
+// to numlockdowns. If ldamount is not passed it will
+// add 1 to numlockdowns.
+// Returns 1 if successful or 0 if we are at
+// maxlockdowns and -1 if we are at 0 numlockdowns
+// and if adding ldamount will drop us below 0
+// numlockdowns. This could happen when we are removing
+// lockdowns, it shouldn't but it could.
+//
+//////////////////////////////////////////////////////////
+exported function UpdateLockdowns( sign, ldamount := 1 )
+	var numlockdowns := CInt( GetObjProperty( sign, "RemainingLockdowns" ));
+	var maxlockdowns := CInt( GetObjProperty( sign, "MaxLockdowns" ));
+	if(numlockdowns == maxlockdowns)
+		return 0;
+	// elseif((numlockdowns + ldamount) < 0) // Original operation - kept for debugging purposes
+	elseif((numlockdowns - ldamount) < 0)
+		return -1;
+	endif
+	// numlockdowns := numlockdowns + ldamount; // Original operation - kept for debugging purposes
+	numlockdowns := numlockdowns - ldamount;
+	SetObjProperty(sign, "RemainingLockdowns", numlockdowns);
+	return 1;
+endfunction
+
+//////////////////////////////////////////////////////
+//
+// Updates numsecures by secamount after a check to
+// make sure we are not at maxsecures.
+// Usage: sign.UpdateSecures(5) will add 5 secures
+// to numsecures. If secamount is not passed it will
+// add 1 to numsecures.
+// Returns 1 if successful or 0 if we are at
+// maxsecures and -1 if we are at 0 numsecures
+// and if adding secamount will drop us below 0
+// numsecures. This could happen when we are removing
+// secures, it shouldn't but it could.
+//
+//////////////////////////////////////////////////////
+exported function UpdateSecures( sign, secamount := 1 )
+	var numsecures := CInt( GetObjProperty( sign, "RemainingSecures" ));
+	var maxsecures := CInt( GetObjProperty( sign, "MaxSecures" ));
+	if(numsecures == maxsecures)
+		return 0;
+	// elseif((numsecures + secamount) < 0) // Original operation - kept for debugging purposes
+	elseif((numsecures - secamount) < 0) // Original operation - kept for debugging purposes
+		return -1;
+	endif
+	// numsecures := numsecures + secamount; // Original operation - kept for debugging purposes
+	numsecures := numsecures - secamount;
+	SetObjProperty(sign, "RemainingSecures", numsecures);
+	return 1;
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// IsCoOwnerOrOwner( sign, byref mobile )
+//
+// Purpose: Determines if the passed mobile is the owner
+// or a co-owner of the house belonging to the sign.
+//
+//
+// Parameters: objref:: sign (implied). objref:: mobile
+//
+// Returns: integer:: 1 if mobile is the owner or a
+// co-owner or 0 if not.
+//
+///////////////////////////////////////////////////////////
+exported function IsCoOwnerOrOwner(sign, byref mobile)
+	if (mobile.serial in GetObjProperty(sign,"coowners") || mobile.serial == GetObjProperty(sign, "ownerserial"))
+		return 1;
+	endif
+
+	// if (mobile.acctname == (GetObjProperty(sign, "owneracct") ) )
+		// return 1;
+	// endif
+	return 0;
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// IsAffiliated( sign, byref mobile )
+//
+// Purpose: Determines if the mobile is the owner,
+// co-owner, or friend (an affiliate) of the house.
+//
+// Parameters: objref:: sign (implied). objref:: mobile
+//
+// Returns: integer::
+//          4 if owner
+//          3 if co-owner
+//          2 if friend
+//          1 if guild member (for guild houses)
+//          0 if none of the above
+//
+// Note: Guild houses are not yet implemented.
+//
+///////////////////////////////////////////////////////////
+exported function IsAffiliated( sign, byref mobile )
+
+	if( sign.IsOwner( mobile ))
+		return 4;
+	elseif( IsACoowner( sign, mobile ))
+		return 3;
+	elseif( IsAFriend( sign, mobile ))
+		return 2;
+//	elseif( IsGuildAffiliate( sign, mobile ))
+//		return 1;
+//	elseif( mobile.cmdlevel >= 3 )
+//		return 4;
+	else
+		return 0;
+	endif
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// IsInHouseLists(sign, byref who, byref type)
+//
+// Purpose: Checks whether or not the supplied "who" is
+// on any of the house lists as specified.
+// Usage: IsInHouseLists(who, 1)
+// Will tell you if "who" is a co-owner.
+//
+// Parameters:
+// objref:: sign (implied), objref:: mobile, integer:: type
+// type can be 1 - coowners, 2 - friendlist or 3 - banlist
+//
+// Returns: integer:: - 1 if in a list or 0 if not.
+//
+///////////////////////////////////////////////////////////
+exported function IsInHouseLists(sign, byref who, byref type)
+
+	var nfo := {};
+	case(type)
+		1: nfo := GetObjProperty(sign, "coowners");
+		2: nfo := GetObjProperty(sign, "friendlist");
+		3: nfo := GetObjProperty(sign, "banlist");
+	endcase
+	if(who.serial in nfo)
+		return 1;
+	else
+		return 0;
+	endif
+endfunction
+
+// Owner methods
+///////////////////////////////////////////////////////////
+//
+// IsOwner( sign, byref mobile )
+//
+// Purpose: Determines if the passed mobile is the owner
+// of the house associated with the sign.
+//
+//
+// Parameters: objref:: sign (implied), objref:: mobile
+//
+// Returns: integer:: 1 if the mobile is the owner or
+// 0 if not.
+//
+///////////////////////////////////////////////////////////
+exported function IsOwner( sign, byref mobile )
+
+	If(mobile.serial == CInt( GetObjProperty( sign, "ownerserial" )))
+		return 1;
+	endif
+	return 0;
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// GetOwnerName( sign )
+//
+// Purpose: Retrieves the name of the owner.
+//
+//
+//
+// Parameter: objref:: sign
+//
+// Returns: string:: String from the sign CProp
+// "Owner".
+//
+///////////////////////////////////////////////////////////
+exported function GetOwnerName( sign )
+	return GetObjProperty( sign, "Owner" );
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// GetOwnerSerial( sign )
+//
+// Purpose: Retrieves the owner's serial.
+//
+//
+//
+// Parameter: objref:: sign
+//
+// Returns: integer:: The serial stored in the sign CProp
+// "ownerserial".
+//
+///////////////////////////////////////////////////////////
+exported function GetOwnerSerial( sign )
+
+	return CInt( GetObjProperty( sign, "ownerserial" ));
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// SetOwnerName( sign, byref owner )
+//
+// Purpose: Stores the name of owner in the sign CProp
+// "Owner".
+//
+//
+// Parameters: objref:: sign (implied), objref:: owner
+//
+// Returns: Nothing.
+//
+///////////////////////////////////////////////////////////
+exported function SetOwnerName( sign, byref owner )
+	return SetObjProperty(sign, "Owner", owner.name );
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// SetOwnerSerial( sign, byref owner )
+//
+// Purpose: Stores the owner's serial in the sign CProp
+// "ownerserial".
+//
+//
+// Parameters: objref:: sign (implied), objref:: owner
+//
+// Returns: Nothing.
+//
+///////////////////////////////////////////////////////////
+exported function SetOwnerSerial( sign, byref owner )
+	return SetObjProperty(sign, "ownerserial", owner.serial );
+endfunction
+
+// Co-Owner Stuff
+///////////////////////////////////////////////////////////
+//
+// IsACoOwner( sign, byref mobile )
+//
+// Purpose: Determines if the passed mobile is
+// is a co-owner
+//
+//
+// Parameter: objref:: sign (implied), objref:: mobile
+//
+// Returns: integer:: 1 if mobile is a co-owner or
+// 0 if not.
+//
+///////////////////////////////////////////////////////////
+exported function IsACoOwner( sign, byref mobile )
+	if(mobile.serial in GetObjProperty(sign, "coowners"))
+		return 1;
+	endif
+	return 0;
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// GetCoOwnerList( sign )
+//
+// Purpose: Retrieves an array from the sign CProp
+// that contains the serials of the co-owners.
+//
+//
+// Parameter: objref:: sign (implied)
+//
+// Returns: array:: of integers or empty array.
+//
+///////////////////////////////////////////////////////////
+exported function GetCoOwnerList( sign )
+
+	var CoOwner_list := GetObjProperty( sign, "coowners" );
+	if( !CoOwner_list )
+		CoOwner_list := {};
+	endif
+
+	return CoOwner_list;
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// AddCoOwner( sign, byref mobile )
+//
+// Purpose: Adds the passed mobile to the house
+// co-owner list, if possible.
+//
+// Parameters: sign (implied), objref:: mobile
+//
+// Returns: 1 if successful
+//          0 if mobile is already on the list
+//          -1 if the list is full
+//
+///////////////////////////////////////////////////////////
+exported function AddCoOwner( sign, byref mobile )
+	var coownerinfo := GetObjProperty(sign,"coowners");
+	if (!coownerinfo)
+		coownerinfo := {};
+	endif
+	var arraysize := len(coownerinfo);
+	arraysize := arraysize + 1;
+	if (arraysize > 20)
+		return -1;
+	endif
+
+	if(IsACoOwner( sign, mobile ))
+		return 0;
+	endif
+
+	coownerinfo[len(coownerinfo) + 1] := mobile.serial;
+	SetObjProperty(sign, "coowners", coownerinfo);
+	return 1;
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// SetCoOwnerList( sign, byref list )
+//
+// Purpose: Assigns the passed list to the sign CProp
+// "coowners".
+//
+//
+// Parameters: objref:: sign (implied), array:: of
+// integers containing the serials of the co-owners/
+//
+// Returns: Nothing.
+//
+///////////////////////////////////////////////////////////
+exported function SetCoOwnerList( sign, byref list )
+	return SetObjProperty( sign, "coowners", list );
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// WipeCoOwnerList( sign )
+//
+// Purpose: Removes from the sign the CProp "coowners".
+//
+//
+//
+// Parameter: objref:: sign (implied)
+//
+// Returns: Nothing.
+//
+///////////////////////////////////////////////////////////
+exported function WipeCoOwnerList( sign )
+	return EraseObjProperty( sign, "coowners" );
+endfunction
+
+
+///////////////////////////////////////////////////////////
+//
+// RemoveCoOwner( sign, byref mobile )
+//
+// Purpose: Removes a friend from the coowners list.
+//
+//
+//
+// Parameters: objref:: sign (implied), objref:: mobile
+//
+// Returns: integer:: 1 if successful
+//                    0 if friendlist is empty
+//                    -1 if mobile not in coowners
+//
+///////////////////////////////////////////////////////////
+exported function RemoveCoOwner( sign, byref mobile )
+
+	var coowners := GetObjProperty(sign,"coowners");
+	// There are no co-owners in the coowners list.
+	if (!coowners || (coowners.size() == 0))
+		return 0;
+	endif
+	var index := mobile.serial in coowners;
+	// mobile is not in coowners.
+	if(!index)
+		return -1;
+	endif
+	coowners.erase(index);
+	SetObjProperty(sign, "coowners", coowners);
+	return 1;
+
+endfunction
+
+// Friend Methods
+///////////////////////////////////////////////////////////
+//
+// IsAFriend( sign, byref mobile )
+//
+// Purpose: Determines if the passed mobile is in the
+// friend list array stored in the sign CProp "friendlist"
+//
+//
+// Parameters: objref:: sign (implied), objref:: mobile
+//
+// Returns: integer:: 1 if mobile's serial is in the
+// friend list array or 0 if not.
+//
+///////////////////////////////////////////////////////////
+exported function IsAFriend( sign, byref mobile )
+	if(mobile.serial in GetObjProperty(sign, "friendlist"))
+		return 1;
+	endif
+	return 0;
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// GetFriendList( sign )
+//
+// Purpose: Retrieves the list of house friends.
+//
+//
+// Parameter: objref:: sign (implied)
+//
+// Returns: array:: of integers or an empty array if the
+// CProp "friendlist" is empty or doesn't exist.
+//
+///////////////////////////////////////////////////////////
+exported function GetFriendList( sign )
+
+	var friendlist := GetObjProperty( sign, "friendlist" );
+	if( !friendlist )
+		friendlist := {};
+	endif
+
+	return friendlist;
+endfunction
+
+///////////////////////////////////////////////////////////
+// AddFriend( sign, byref mobile )
+//
+// Purpose: Adds the serial of the passed mobile to
+// the house friend list, if possible.
+//
+// Parameters: objref:: sign (implied), objref:: mobile
+//
+//
+// Returns: 1 if successful
+//          0 if mobile is already on the list
+//          -1 if the list is full
+///////////////////////////////////////////////////////////
+exported function AddFriend( sign, byref mobile )
+
+	var friendlist := GetObjProperty(sign,"friendlist");
+	if (!friendlist)
+		friendlist := {};
+	endif
+	var arraysize := len(friendlist);
+	arraysize := arraysize + 1;
+	if (arraysize > 20)
+		return -1;
+	endif
+
+	if(IsAFriend( sign, mobile ))
+		return 0;
+	endif
+
+	friendlist[len(friendlist) + 1] := mobile.serial;
+	SetObjProperty(sign, "friendlist", friendlist);
+	return 1;
+
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// RemoveFriend( sign, byref mobile )
+//
+// Purpose: Removes a friend from the friendlist.
+//
+//
+//
+// Parameters: objref:: sign (implied), objref:: mobile
+//
+// Returns: integer:: 1 if successful
+//                    0 if friendlist is empty
+//                    -1 if mobile not in friendlist
+//
+///////////////////////////////////////////////////////////
+exported function RemoveFriend( sign, byref mobile )
+
+	var friendlist := GetObjProperty(sign,"friendlist");
+	// There are no friends in the friendlist.
+	if (!friendlist || (friendlist.size() == 0))
+		return 0;
+	endif
+	var index := mobile.serial in friendlist;
+	// mobile is not in friendlist.
+	if(!index)
+		return -1;
+	endif
+	friendlist.erase(index);
+	SetObjProperty(sign, "friendlist", friendlist);
+	return 1;
+
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// SetFriendList( sign, byref list )
+//
+// Purpose: Assigns the passed array, list, to the sign
+// CProp "friendlist".
+//
+//
+// Parameter: objref:: sign (implied), array:: of integers
+//
+// Returns: Nothing.
+//
+///////////////////////////////////////////////////////////
+exported function SetFriendList( sign, byref list )
+	return SetObjProperty( sign, "friendlist", list );
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// WipeFriendList( sign )
+//
+// Purpose: Erases the sign CProp "friendlist".
+//
+//
+//
+// Parameter: objref:: sign
+//
+// Returns: Nothing.
+//
+///////////////////////////////////////////////////////////
+exported function WipeFriendList( sign )
+	return EraseObjProperty( sign, "friendlist" );
+endfunction
+
+// Ban Methods
+///////////////////////////////////////////////////////////
+//
+// IsBanned( sign, mobile )
+//
+// Purpose: Determines if the passed mobile is in the
+// ban list.
+//
+//
+// Parameter: objref:: sign (implied), objref:: mobile
+//
+// Returns: integer:: 1 if they're a banned and 0 if not.
+//
+///////////////////////////////////////////////////////////
+exported function IsBanned(sign, byref mobile)
+
+   var nfo := nfo := GetObjProperty(sign, "banlist");
+
+  if(mobile.serial in nfo)
+    return 1;
+  else
+    return 0;
+  endif
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// AddBan( sign, byref mobile )
+//
+// Purpose: Adds a player to the house
+// ban list.
+//
+// Parameters: objref:: sign (implied), objref:: mobile
+//
+// Returns: integer:: 1 if successful
+//          0 if mobile is already on the list
+//          -1 if the list is full
+//
+///////////////////////////////////////////////////////////
+exported function AddBan( sign, byref mobile )
+
+	var banlist := GetObjProperty(sign,"banlist");
+	if (!banlist)
+		banlist := {};
+	endif
+	var arraysize := len(banlist);
+	arraysize := arraysize + 1;
+	if (arraysize >= 20)
+		return -1;
+	endif
+
+	if(IsBanned( sign, mobile ))
+		return 0;
+	endif
+
+	banlist[len(banlist) + 1] := mobile.serial;
+	SetObjProperty(sign, "banlist", banlist);
+	return 1;
+
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// RemoveBan( sign, byref mobile )
+//
+// Purpose: Removes a banned mobile from the banlist.
+//
+//
+//
+// Parameters: objref:: sign (implied), objref:: mobile
+//
+// Returns: integer:: 1 if successful
+//                    0 if friendlist is empty
+//                    -1 if mobile not in banlist
+//
+///////////////////////////////////////////////////////////
+exported function RemoveBan( sign, byref mobile )
+
+	var banlist := GetObjProperty(sign,"banlist");
+	// There are no friends in the banlist.
+	if (!banlist || (banlist.size() == 0))
+		return 0;
+	endif
+	var index := mobile.serial in banlist;
+	// mobile is not in banlist.
+	if(!index)
+		return -1;
+	endif
+	banlist.erase(index);
+	SetObjProperty(sign, "banlist", banlist);
+	return 1;
+
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// GetBanList( sign )
+//
+// Purpose: Retrieves the list of people banned from
+// entering the house.
+//
+//
+// Parameter: objref:: sign (implied)
+//
+// Returns: array:: of integers from the sign CProp
+// "banlist" or an empty array if the CProp "banlist"
+// is empty or doesn't exist.
+//
+///////////////////////////////////////////////////////////
+exported function GetBanList( sign )
+	var banlist := GetObjProperty( sign, "banlist" );
+	if( !banlist )
+		banlist := {};
+	endif
+	return banlist;
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// SetBanList( sign, byref list )
+//
+// Purpose: Assigns the passed array, list, to the sign
+// CProp "banlist".
+//
+//
+// Parameter: objref:: sign (implied), array:: of integers
+//
+// Returns: Nothing.
+//
+///////////////////////////////////////////////////////////
+exported function SetBanList( sign, byref list )
+	return SetObjProperty( sign, "banlist", list );
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// ClearBanList( sign )
+//
+// Purpose: Erases the sign CProp "friendlist".
+//
+//
+//
+// Parameter: objref:: sign
+//
+// Returns: Nothing.
+//
+///////////////////////////////////////////////////////////
+exported function ClearBanList( sign )
+	return EraseObjProperty( sign, "banlist" );
+endfunction
+
+// Guild Methods
+// Note: House guild stuff is not yet implemented.
+///////////////////////////////////////////////////////////
+//
+// IsGuildAffiliate( sign, byref mobile )
+//
+// Purpose: Determines if the passed mobile is a member
+// of the guild associated with the house.
+//
+//
+// Parameters: objref:: sign (implied), objref:: mobile
+//
+// Returns: integer:: 1 if the house is a guild house
+// and the passed mobile is a member of that guild or
+// 0 if the house is not a guild house or, if it is
+// a guild house, the mobile is not a member of that
+// guild.
+//
+///////////////////////////////////////////////////////////
+exported function IsGuildAffiliate( sign, byref mobile )
+
+	var isGuildHouse := GetGuildStone( sign );
+	if ( isGuildHouse && mobile.guildid == isGuildHouse )
+		return 1;
+	endif
+
+	return 0;
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// SetGuildStone( sign, byref guildid )
+//
+// Purpose: Assigns a guild ID to the sign
+// CProp "GuildStone"
+//
+//
+// Parameters: objref:: sign (implied), integer:: guildid
+//
+// Returns: Nothing.
+//
+///////////////////////////////////////////////////////////
+exported function SetGuildStone( sign, byref guildid )
+
+	return SetObjProperty( sign, "GuildStone", guildid );
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// GetGuildStone( sign )
+//
+// Purpose: Retrieves the guild ID from the sign CProp
+// "GuildStone".
+//
+//
+// Parameter: objref:: sign (implied)
+//
+// Returns: integer::
+//
+///////////////////////////////////////////////////////////
+exported function GetGuildStone( sign )
+
+	return GetObjProperty( sign, "GuildStone" );
+endfunction
+
+///////////////////////////////////////////////////////////
+//
+// EraseGuildStone( sign )
+//
+// Purpose: Erases the sign CProp "GuildStone".
+//
+//
+//
+// Parameter: objref:: sign (implied)
+//
+// Returns: Nothing.
+//
+///////////////////////////////////////////////////////////
+exported function EraseGuildStone( sign )
+
+	return EraseObjProperty( sign, "GuildStone" );
+endfunction
+
+
+
+///////////////////////////////////////////////////////////
+//
+// GetHouseSize(sign)
+//
+// Purpose: Determines the "square squarage", a word play
+// on "square footage", of a house.
+//
+//
+// Parameter: ubjref:: sign (implied)
+//
+// Returns: integer::
+//
+///////////////////////////////////////////////////////////
+exported function GetHouseSize(sign)
+	footage := GetObjProperty(sign, "footage");
+	var x1, y1, z1, x2, y2, z2, x, y, area := 0;
+	if(!footage)
+		return 0;
+	endif
+	foreach thing in footage
+			x1 := thing[1];
+			y1 := thing[2];
+			z1 := thing[3];
+			x2 := thing[4];
+			y2 := thing[5];
+			z2 := thing[6];
+			x := x2-x1+1;
+			y := y2-y1+1;
+			area := area + x * y;
+	endforeach
+	return area;
+endfunction
+
+exported function GetItemsInHouse(sign)
+	var itemlist := {};
+	foreach thing in footage
+		var holder := ListObjectsInBox(thing[1], thing[2], thing[3], thing[4], thing[5],thing[6], sign.realm);
+		foreach obj in holder
+			if(!obj.isa(POLCLASS_MOBILE))
+				itemlist.append(obj);
+			endif
+		endforeach
+	endforeach
+  return itemlist;
+endfunction
+
+// The following commented out functions need to be modified to work with the Distro house pricing system.
+/*
+exported function GetHouseValueOfSign( sign )
+	if (GetObjProperty (sign, "housevalue"))
+		return CInt(GetObjProperty(sign, "housevalue"));
+	else
+		return CalculateHouseValueBySize( sign );
+	endif
+endfunction
+
+exported function CalculateHouseValueBySize( sign )
+	var area := GetHouseSize( sign );
+	if( area >= 1070 )
+		return 50;
+	elseif( area < 1070 && area >= 820 )
+		return CInt((area-820) / 115) + 40;
+	elseif( area < 820 && area >= 520 )
+		return CInt((area-520) / 50) + 30;
+	elseif( area >= 245 )
+		return CInt((area-245) / 25) + 15;
+	else
+		return CInt(area / 17.5) + 1;
+	endif
+endfunction
+
+exported function GetHouseValueOfSign( sign )
+	var HV;
+	if (GetObjProperty ( sign, "housevalue" ) )
+		return CInt ( GetObjProperty ( sign, "housevalue" ) );
+	else
+		HV := CalculateHouseValueBySize( sign );
+		SetObjProperty ( sign, "housevalue", CInt ( HV ) );
+		return HV;
+	endif
+endfunction
+
+exported function CalculateHouseValueBySize( sign )
+	var area := GetHouseSize( sign );
+	if( area >= 1070 )
+		return 50;
+	elseif( area < 1070 && area >= 820 )
+		return CInt((area-820) / 115) + 40;
+	elseif( area < 820 && area >= 520 )
+		return CInt((area-520) / 50) + 30;
+	elseif( area < 520 && area >= 245 )
+		return CInt((area-245) / 25) + 15;
+	else
+		return CInt(area / 17.5) + 1;
+	endif
+endfunction
+
+exported function CalculateHousePriceBySize(sign)
+	var area := GetHouseSize( sign );
+	if( area >= 870 )
+		return CInt(area * 6500);
+	elseif( area < 870 && area >= 521 )
+		return CInt(area * 5000);
+	elseif( area < 521 && area >= 321 )
+		return CInt(area * 4000);
+	elseif( area < 321 && area >= 101 )
+		return CInt(area * 3500);
+	else
+		return CInt(area * 3000);
+	endif
+endfunction
+*/
+

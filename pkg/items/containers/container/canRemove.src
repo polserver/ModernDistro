@@ -8,7 +8,7 @@ use cliloc;
 
 include ":containers:checks";
 include ":containers:canRemove";
-include ":housing:housing";
+include "include/housing";
 
 program canRemove( mobile, container, item, move_type )
 
@@ -18,7 +18,7 @@ program canRemove( mobile, container, item, move_type )
         if( !Anti_Fast_Loot( mobile ))
                 return 0;
         endif
-        
+
 	if( mobile.cmdlevel >= 2 )
 		return 1;
 	elseif( move_type == MOVETYPE_COREMOVE )
@@ -30,13 +30,13 @@ program canRemove( mobile, container, item, move_type )
 		SendSysMessageCL ( mobile, 503301, color := 33 ); // You don't have permission to do that.
 		return 0;
 	endif
- 
+
 	return 1;
 endprogram
 
 function ContainerIsSecured( mobile, container )
 
-	var sign := FindHouseSign ( mobile );
+	var sign := GetHouseSign ( mobile );
 	if ( !container.IsSecured() )
 		// Nothing to worry about.
 		return 0;

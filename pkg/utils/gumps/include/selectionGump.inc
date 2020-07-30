@@ -53,7 +53,7 @@ function SelectionGump( mobile, title, options, btn_type:=BTN_TYPE_NORMAL )
 	GFResizePic( s_gump, 0, 0, GFGetCfgConst( "Defaults", "BackGround" ), 310, 480 );
 	GFResizePic( s_gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 280, 450 );
 
-        GFAddAlphaRegion( s_gump, 0, 0, 310, 480 );
+	GFAddAlphaRegion( s_gump, 0, 0, 310, 480 );
 
 	GFTextMid( s_gump, 15, 20, 280, 1720, title );
 	GFAddButton( s_gump, 135, 440, 2128, 2129, GF_CLOSE_BTN, OKAY_BTN );
@@ -238,3 +238,4 @@ function SelectionGump2( mobile, title, options, btn_type:=BTN_TYPE_NORMAL, tran
 			endforeach
 	endcase
 endfunction
+

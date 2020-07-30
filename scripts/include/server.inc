@@ -264,9 +264,9 @@ Const PROP_HS_C_OWNERNAME := "lastownername";
 Const PROP_HS_C_FRIENDS := "friends";
 // moored
 Const PROP_HS_C_FIXED := "lockeddown";
-Const PROP_HS_C_FIX_NUM := "numlockdowns";
+Const PROP_HS_C_FIX_NUM := "RemainingLockdowns";
 // SC = secure container
-Const PROP_HS_C_SC_NUM := "numsecure";
+Const PROP_HS_C_SC_NUM := "RemainingSecures";
 Const PROP_HS_C_SC_BOX := "boxserial";
 Const PROP_HS_C_SC_HOUSE := "houseserial";
 // Props for rental ad

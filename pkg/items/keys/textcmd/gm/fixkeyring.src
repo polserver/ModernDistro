@@ -23,17 +23,17 @@ endprogram
 
 function DuplicateKeyRing( mobile, keyring )
 	var new_keyring := CreateItemAtLocation( mobile.x, mobile.y, mobile.z, 0x1011, 1, mobile.realm ),
-		lockid := 0,
+		LockID := 0,
 		key_desc := 0,
 		key := 0;
 
 	var insidering := FindMyPack( keyring.serial );
 	foreach otherkey in EnumerateItemsInContainer( insidering )
 		Sleepms( 5 );
-		lockid := GetObjProperty( otherkey, "LockID" );
-		if( lockid )
+		LockID := GetObjProperty( otherkey, "LockID" );
+		if( LockID )
 			key_desc := GetItemDescriptor( otherkey.objtype );
-			key_desc.CProps.Insert( "LockID", lockid );
+			key_desc.CProps.Insert( "LockID", LockID );
 			key := CreateItemInContainer( new_keyring, key_desc, 1 );
 			if( key )
 				SetName( key, otherkey.desc );

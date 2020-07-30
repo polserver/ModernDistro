@@ -14,7 +14,7 @@ use util;
 
 include ":datafile:datafile";
 include ":spawnsystem:regions";
-include ":housing:housing";
+include "include/housing";
 
 function SS_SelectCoordsInArea( x1, y1, x2, y2 )
 
@@ -142,12 +142,12 @@ function SS_IsInBox( mobile, x1, x2, y1, y2, realm )
 endfunction
 
 function SS_IsInHouse( spawn_coords )
-	var isInHouse;
+	var IsLocInHouse;
 
-  // Are we trying to spawn in a static house?
-	isInHouse := FindHouseForLocation (spawn_coords.x, spawn_coords.y, spawn_coords.z, spawn_coords.realm);
+	// Are we trying to spawn in a static house?
+	IsLocInHouse := FindHouseForLocation (spawn_coords.x, spawn_coords.y, spawn_coords.z, spawn_coords.realm);
 
-	if(IsInHouse)
+	if(IsLocInHouse)
 		return 0;
 	endif
 

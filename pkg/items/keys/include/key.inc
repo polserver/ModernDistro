@@ -148,7 +148,7 @@ endfunction
  */
 function DuplicateKeyRing( byref keyring )
 	var failed := 0,
-		lockid := 0,
+		LockID := 0,
 		key_desc := 0,
 		key := 0,
 		on_ring := FindMyPack( keyring.serial );
@@ -159,10 +159,10 @@ function DuplicateKeyRing( byref keyring )
 
 	foreach otherkey in EnumerateItemsInContainer( on_ring )
 		Sleepms( 5 );
-		lockid := GetObjProperty( otherkey, "LockID" );
-		if( lockid )
+		LockID := GetObjProperty( otherkey, "LockID" );
+		if( LockID )
 			key_desc := GetItemDescriptor( otherkey.objtype );
-			key_desc.CProps.Insert( "LockID", lockid );
+			key_desc.CProps.Insert( "LockID", LockID );
 			key := CreateItemInContainer( keyring, key_desc, 1 );
 			if( key )
 				SetName( key, otherkey.desc );

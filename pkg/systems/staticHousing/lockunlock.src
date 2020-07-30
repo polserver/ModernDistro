@@ -1,0 +1,698 @@
+use uo;
+use os;
+use cliloc;
+use cfgfile;
+
+include "include/utility";
+include "include/housing";
+
+program lockunlockitem (parms)
+	var sign := parms[1];
+	var character := parms[2];
+	if (!sign or !character)
+		return;
+	endif
+
+	if (!sign.IsAFriend ( character))
+		if (!character.cmdlevel)
+			return;
+		else
+			SendSysMessage(character, "Command level override");
+		endif
+	endif
+
+	if (!FindHouseForLocation (character.x, character.y, character.z, character.realm))
+		return;
+	endif
+
+	var item := parms[3];
+	if (!item)
+		item := Target (character, TGTOPT_NOCHECK_LOS);
+		if (!item)
+			SendSysMessage(character, "Canceled.");
+			return;
+		endif
+	endif
+
+	var lockdownoption := parms[4];
+	if (!lockdownoption)
+		lockdownoption := HOUSE_LOCKDOWN_ITEM;
+	endif
+
+	case (lockdownoption)
+		HOUSE_LOCKDOWN_ITEM:
+		HOUSE_RELEASE_ITEM:
+			HouseLockUnlockItem (sign, character, item);
+		HOUSE_SECURE_CONTAINER:
+		HOUSE_RELEASE_CONTAINER:
+			HouseSecureReleaseContainer (sign, character, item);
+		HOUSE_DISPLAY_ITEM:
+			HouseDisplayItem (sign, character, item);
+		HOUSE_RAISE_ITEM:
+			HouseRaiseItem (sign, character, item);
+		HOUSE_LOWER_ITEM:
+			HouseLowerItem (sign, character, item);
+		default:
+			HouseLockUnlockItem (sign, character, item);
+	endcase
+
+endprogram
+
+
+///////////////////
+//  Locks and unlocks items in the house
+///////////////////
+
+function HouseLockUnlockItem (sign, character, item)
+	var containerthingie := 0;
+	//if (IsContainer (item) and (item.movable))
+	if (item.container && (item.movable))
+		if (len (EnumerateItemsInContainer (item)) or item.locked)
+			SendSysMessage(character, "You cannot lockdown containers.");
+			SendSysMessage(character, "Wish to secure it instead.");
+			return;
+		//Fix for spellbooks, trashcans and potion kegs
+		else
+			containerthingie := 1;
+		endif
+	endif
+
+	if (GetObjProperty (item, "secured"))
+		if (systemfindobjectbyserial (getobjproperty (item,"secured")))
+			SendSysMessage(character, "That item is secured.");
+			return;
+		else
+			eraseobjproperty (item, "secured");
+			item.movable := 1;
+		endif
+	endif
+
+	if (GetObjProperty (item, "displaycontainer"))
+		if (systemfindobjectbyserial (getobjproperty (item, "displaycontainer")))
+			SendSysMessage(character, "That item is set as a display case");
+			return;
+		else
+			eraseobjproperty (item, "displaycontainer");
+		endif
+	endif
+
+
+	if (!sign.IsLocationInsideHouse(character, item))
+		SendSysMessage(character, "That location is not in the house.", color := 33);
+		return;
+	endif
+
+	if (item == sign || item.objtype == 0x0bd0 || item.objtype == 0x0bd2)
+		SendSysMessage(character, "Canceled.");
+		return;
+	endif
+
+	if (item.IsDoor())
+		SendSysMessage(character, "That's a door!");
+		return;
+	endif
+
+	if (!ReserveItem (item))
+		SendSysMessage(character, "It appears to be in use.");
+		return;
+	endif
+	ReleaseItem (item);
+
+	var lockdowns := sign.GetLockdowns();
+	var maxlockdowns := sign.GetMaxLockdowns();
+
+	if (item.movable)
+		if (lockdowns >= maxlockdowns)
+			//SendSysMessage(character, "You have no more lockdowns remaining!");
+			SendSysMessageCL(character, 1005379, color := 33); //This action would exceed the lockdown limit of this house.
+			return;
+		endif
+
+		if (!containerthingie)
+			item.movable := 0;
+			SetObjProperty (item, "lockeddown", sign.serial);
+			sign.UpdateLockdowns();
+			PrintTextAbovePrivate( item, "That is lockeddown.", character, 0x3, 0x42 );
+		//we can lock down containers with no items in them, but to prevent the player from using them
+		//for storage, we replace them with another item with a changed graphic
+		else
+			var newitem := CreateItemAtLocation (item.x, item.y, item.z, 0X0A2A, 1, item.realm);
+			newitem.graphic := item.graphic;
+			newitem.name := item.desc;
+			newitem.color := item.color;
+			if ( GetObjProperty (item, "LockID") )
+				SetObjProperty (newitem, "LockID", GetObjProperty (item, "LockID") );
+			endif
+			SetObjProperty (newitem, "olditem", item.objtype);
+			newitem.movable := 0;
+			SetObjProperty (newitem, "lockeddown", sign.serial);
+			sign.UpdateLockdowns();
+			PrintTextAbovePrivate( item, "That is lockeddown.", character, 0x3, 0x42 );
+			DestroyItem (item);
+		endif
+	elseif (GetObjProperty (item, "lockeddown"))
+		//leftover old house items
+		if (GetObjProperty (item, "lockeddown") == sign.serial)
+			if (!IsADeedItem (character, item))
+				ReleaseLockedDownItem (character, item);
+				EraseObjProperty (item, "lockeddown");
+				sign.UpdateLockdowns(-1);
+			endif
+		else
+			SendSysMessage(character, "You cannot release that!");
+			return;
+		endif
+	else
+		if (!IsADeedItem (character, item))
+			SendSysMessage(character, "You cannot release that!");
+		endif
+		return;
+	endif
+endfunction
+
+///////////////////
+//  Secures and unsecures items in the house
+///////////////////
+function HouseSecureReleaseContainer (sign, character, item)
+	if(!sign.IsLocationInsideHouseMsg(character, item))
+		return;
+	endif
+
+	if (GetObjProperty(item,"lockeddown"))
+		sendsysmessage(character,"That item is locked down");
+		return;
+	endif
+
+	if (item == sign or item.objtype == 0x20bd0 || item.objtype == 0x20bcf || item.objtype == 0x20bd1 ||
+		item.objtype == 0x20bd2 || item.objtype == 0x260FA)
+		SendSysmessage( character, "Canceled." );
+		return;
+	endif
+
+	if (item.IsDoor())
+		SendSysmessage( character, "That's a door!" );
+		return;
+	endif
+
+	if ( len(EnumerateItemsInContainer(item)) > 125 )
+		sendsysmessage(character,"There are too many items in that container!");
+		return;
+	endif
+
+	if (!ReserveItem (item))
+		SendSysMessage(character, "It appears to be in use.");
+		return;
+	endif
+	ReleaseItem (item);
+
+	var secures := CInt(Getobjproperty (sign, "secures"));
+	var maxsecures := CInt(sign.GetMaxSecures());
+
+	if (item.movable)
+		if (secures >= maxsecures )
+			SendSysMessage(character, "You have no more secure containers remaining!");
+			return;
+		endif
+
+		item.movable := 0;
+		setobjproperty (item, "secured", sign.serial);
+		PrintTextAbovePrivate( item, "That is secure.", character, 0x3, 0x42 );
+	elseif (GetObjProperty (item, "secured"))
+		if ( getobjproperty( item, "secured") == sign.serial )
+			if (!IsADeedItem(character, item))
+				item.movable := 1;
+				PrintTextAbovePrivate( item, "(no longer secure)", character, 0x3, 0x21 );
+				EraseObjProperty( item, "secured");
+			endif
+		else
+			if (systemfindobjectbyserial(getobjproperty(item,"secured")))
+				SendSysMessage(character, "You cannot unsecure that.");
+				return;
+			else
+				eraseobjproperty (item, "secured");
+				item.movable := 1;
+				PrintTextAbovePrivate( item, "(no longer secure)", character, 0x3, 0x21 );
+				return;
+			endif
+		endif
+	else
+		sendsysmessage( character, "That is not secured.");
+		return;
+	endif
+endfunction
+
+
+
+
+///////////////////
+//  Secures and unsecures items in the house
+///////////////////
+
+function HouseDisplayItem(sign, character, item)
+//	if(!IsInside(character, sign, item))
+	if(!FindHouseForLocation(character.x, character.y, character.z, character.realm))
+		return;
+	endif
+
+	if(!GetObjProperty(item, "displaycontainer") and !item.movable)
+		SendSysMessage(character, "That item is not on display", 1, 33);
+		return;
+	endif
+
+
+	if (item == sign or item.objtype == 0x20bd0 || item.objtype == 0x20bcf || item.objtype == 0x20bd1 ||
+		item.objtype == 0x20bd2 || item.objtype == 0x260FA)
+		SendSysmessage( character, "Canceled.", 1, 33 );
+		return;
+	endif
+
+	if (item.isA(POLCLASS_DOOR))
+		SendSysmessage( character, "That's a door!", 1, 33 );
+		return;
+	endif
+
+	if (!item.isa (POLCLASS_CONTAINER))
+		SendSysMessage(character, "You can only put containers on display", 1, 33);
+		return;
+	endif
+
+	if ( len(EnumerateItemsInContainer(item)) > 32 )
+		SendSysMessage(character,"There are too many items in that container to display it! (32 items max.)", 1, 33);
+		return;
+	endif
+
+	if (!ReserveItem (item))
+		SendSysMessage(character, "It appears to be in use.", 1, 33);
+		return;
+	endif
+	ReleaseItem (item);
+
+	if (item.movable)
+		foreach subitem in EnumerateItemsInContainer(item)
+			if ( Len(EnumerateItemsInContainer (subitem)))
+				SendSysMessage(character, "But " + subitem.desc + " has items in it!");
+				return;
+			elseif (!ReserveItem(subitem) or !subitem.movable)
+				SendSysMessage(character, subitem.desc + " appears to be in use.");
+				return;
+			endif
+			ReleaseItem (subitem);
+		endforeach
+
+		var lockdowns := sign.GetLockdowns();
+		var maxlockdowns := sign.GetMaxLockdowns ();
+
+		if (lockdowns >= maxlockdowns)
+			SendSysMessage(character, "You have no more lockdowns remaining!", 1, 33);
+			return;
+		endif
+
+		foreach subitem in EnumerateItemsInContainer(item)
+			subitem.movable := 0;
+		endforeach
+		item.movable := 0;
+		SetObjProperty (item, "lockeddown", sign.serial);
+		sign.UpdateLockdowns();
+		SetObjProperty (item, "displaycontainer", sign.serial);
+		PrintTextAbovePrivate (item, "Ready to show off!", character, 0x3, 0x42);
+	else
+		foreach subitem in EnumerateItemsInContainer(item)
+			subitem.movable := 1;
+		endforeach
+		item.movable := 1;
+		EraseObjProperty (item, "lockeddown");
+		sign.UpdateLockdowns(-1);
+		EraseObjProperty (item, "displaycontainer");
+		PrintTextAbovePrivate( item, "(no longer locked down)", character, 0x3, 0x21 );
+	endif
+endfunction
+
+
+
+
+///////////////////
+//  Raises an item by increasing its Z
+///////////////////
+
+function HouseRaiseItem (sign, character, item)
+	if (!sign.IsLocationInsideHouseMsg(character, item))
+		return;
+	endif
+
+	if (!item.movable)
+		if (!IsLockedDownMovableItem (item))
+			SendSysMessage(character, "You can't move that.");
+			return;
+		endif
+	endif
+
+	if (item == sign or item.objtype == 0x20bd0 || item.objtype == 0x20bcf || item.objtype == 0x20bd1 ||
+		item.objtype == 0x20bd2 || item.objtype == 0x260FA)
+		SendSysMessage(character, "You can't move the house sign!");
+		return;
+	endif
+
+	if (item.IsDoor())
+		SendSysMessage(character, "That's a door!");
+		return;
+	endif
+
+	if (item.z >= character.z + 19)
+		SendSysMessage(character, "You can't raise that any higher.");
+		return;
+	endif
+
+	var oldmovable := item.movable;
+	item.movable := 1;
+	MoveObjectToLocation( item, item.x, item.y, item.z + 1, item.realm, MOVEOBJECT_FORCELOCATION );
+	item.movable := oldmovable;
+endfunction
+
+
+
+
+///////////////////
+//  Lowers an item by decreasing its Z
+///////////////////
+
+function HouseLowerItem (sign, character, item);
+	if (!sign.IsLocationInsideHouseMsg(character, item))
+		return;
+	endif
+
+	if (!item.movable)
+		if (!IsLockedDownMovableItem (item))
+			SendSysMessage(character, "You can't move that.");
+			return;
+		endif
+	endif
+
+	if (item == sign or item.objtype == 0x20bd0 || item.objtype == 0x20bcf || item.objtype == 0x20bd1 ||
+		item.objtype == 0x20bd2 || item.objtype == 0x260FA)
+		SendSysMessage(character, "You can't move the house sign!");
+		return;
+	endif
+
+	if (item.IsDoor())
+		SendSysMessage(character, "That's a door!");
+		return;
+	endif
+
+	if (item.z <= character.z)
+		SendSysMessage(character, "You can't lower that any more.");
+		return;
+	endif
+
+	var oldmovable := item.movable;
+	item.movable := 1;
+	MoveObjectToLocation( item, item.x, item.y, item.z - 1, item.realm, flags := MOVEOBJECT_FORCELOCATION );
+	item.movable := oldmovable;
+endfunction
+
+
+
+
+///////////////////
+//  Determines if its an item that can be raised or lowered even though its locked down
+///////////////////
+
+function IsLockedDownMovableItem (byref item)
+	case (item.objtype)
+		0x0A07:	//
+		0x0A0C:	// wall scones and torches
+		0x09FD:	//
+		0x0A02:	//
+			return 1;
+
+		0x0c83:	//
+		0x0c87:	//
+		0x0c89:	//
+		0x0c84:	//
+		0x0c8a:	//
+		0x0c88:	//
+		0x0c8e:	// Plants
+		0x0c86:	// and
+		0x0cbe:	// flowers
+		0x0cbf:	//
+		0x0c85:	//
+		0x0cc0:	//
+		0x0cc1:	//
+		0x0c8b:	//
+		0x0c8c:	//
+		0x0c8d:	//
+		0x0c9f:	//
+			return 1;
+	endcase
+	return 0;
+endfunction
+
+
+
+
+///////////////////
+//  determines if the item is one that is placed by a deed.  If so, it makes a new deed.
+///////////////////
+
+function IsADeedItem (me, it)
+	if (!it)
+		return 0;
+	endif
+
+	//banners
+	if (it.objtype >= 0x15ae and it.objtype <= 0x15f5)
+		CreateItemInBackpack (me, 0x2B00D, 1);				// need info on item - probably a banner deed
+		DestroyItem (it);
+		return 1;
+	endif
+
+	//the new, prefered way to do multipart items
+	if (GetObjProperty (it, "deedobjtype") )
+		var deedobjtype := GetObjProperty (it, "deedobjtype");
+		var deedcolor := GetObjProperty (it, "deedcolor");
+		var thedeed := CreateItemInBackpack (me, deedobjtype, 1);
+		if (!thedeed)
+			PrintTextAbovePrivate (me, "*Your backpack is full!*", me, 0x3, 0x21);
+			return 1;
+		endif
+		if (deedcolor)
+			thedeed.color := deedcolor;
+		endif
+
+		foreach serial in GetObjProperty (it, "otheritems")
+			var item := SystemFindObjectBySerial (serial);
+			if (item.isa(POLCLASS_CONTAINER))
+				foreach anitem in EnumerateItemsInContainer(item, ENUMERATE_ROOT_ONLY)
+					MoveObjectToLocation( anitem, item.x, item.y, item.z, item.realm, flags := MOVEOBJECT_FORCELOCATION );
+				endforeach
+			endif
+			DestroyItem (item);
+		endforeach
+		if (it)
+			if (it.isa(POLCLASS_CONTAINER))
+				foreach anitem in EnumerateItemsInContainer(it, ENUMERATE_ROOT_ONLY)
+					MoveObjectToLocation( anitem, it.x, it.y, it.z, it.realm, flags := MOVEOBJECT_FORCELOCATION );
+				endforeach
+			endif
+			DestroyItem (it);
+		endif
+		return 1;
+	endif
+
+	if (GetObjProperty (it, "lockdowndestroy"))
+		DestroyItem (it);
+		return 1;
+	endif
+
+
+	case (it.objtype)
+		0x0FAF:	//anvil
+		0x0FB0:	//
+			CreateItemInBackPack (me, 0x2B000, 1);		// need help with the item - sure these are all deeds
+			DestroyItem (it);
+			return 1;
+		0x0FB1:	//forge
+			CreateItemInBackPack (me, 0x2B001, 1);
+			DestroyItem (it);
+			return 1;
+		0x1070:	//training dummy
+		0x1074:	//
+			CreateItemInBackPack (me, 0x2B002, 1);
+			DestroyItem (it);
+			return 1;
+		0x1EC0:	//pickpocket dip
+		0x1EC3:	//
+			CreateItemInBackPack (me, 0x2B003, 1);
+			DestroyItem (it);
+			return 1;
+		0x1015:	//
+		0x1019:	//spinning wheel
+		0x101C:	//
+		0x10A4:	//
+			CreateItemInBackPack (me, 0x2B004, 1);
+			DestroyItem (it);
+			return 1;
+		0x2B00F:	//	fishtank
+			CreateItemInBackpack (me, 0x2B00E, 1);
+			foreach serial in GetObjProperty (it, "fishtankparts")
+				var item := SystemFindObjectBySerial (serial);
+				DestroyItem (item);
+			endforeach
+		0x2B011:	//	christmastree
+			CreateItemInBackpack (me, 0x2B010, 1);
+			foreach serial in GetObjProperty (it, "otheritemparts")
+				var item := SystemFindObjectBySerial (serial);
+				DestroyItem (item);
+			endforeach
+		0x0A70:	//
+		0x0A71:	//
+		0x0A72:	//
+		0x0A73:	//
+		0x0A74:	//
+		0x0A75:	//	Lots of beds
+		0x0A76:	//
+		0x0A77:	//
+		0x0A60:	//
+		0x0A61:	//
+		0x0A5E:	//
+		0x0A5F:	//
+			var stufftodestroy := array{0x0A70, 0x0A71, 0x0A72, 0x0A73, 0x0A74, 0x0A75, 0x0A76, 0x0A77, 0x0A60, 0x0A61, 0x0A5E, 0x0A5F};
+			DestroyDeedStuff (me, 0x2B005, it.x, it.y, it.z, it.realm, stufftodestroy, 1);
+		0x105F:	//
+		0x1060:	//	Looms
+		0x1061:	//
+		0x1062:	//
+			var stufftodestroy := array{0x105F, 0x1060, 0x1061, 0x1062};
+			DestroyDeedStuff (me, 0x2B006, it.x, it.y, it.z, it.realm, stufftodestroy, 1);
+		0x1920:	//
+		0x1922:	//	Mills
+		0x192C:	//
+		0x192E:	//
+			var stufftodestroy := array{0x1920, 0x1922, 0x192C, 0x192E};
+			DestroyDeedStuff (me, 0x2B007, it.x, it.y, it.z, it.realm, stufftodestroy, 1);
+		0x0FE6:	//
+		0x0FE7:	//
+		0x0FE8:	//
+		0x0FE9:	//
+		0x0FEA:	//	Pentagrams
+		0x0FEB:	//
+		0x0FEC:	//
+		0x0FED:	//
+		0x0FEE:	//
+			var stufftodestroy := array{0x0FE6, 0x0FE7, 0x0FE8, 0x0FE9, 0x0FEA, 0x0FEB, 0x0FEC, 0x0FED, 0x0FEE};
+			DestroyDeedStuff (me, 0x2B009, it.x, it.y, it.z, it.realm, stufftodestroy, 2);
+		0x1E36:	//
+		0x1E37:	//
+		0x1E38:	//
+		0x1E39:	//
+		0x1E3A:	//	Brown Bearskin Rug
+		0x1E3B:	//
+		0x1E3C:	//
+		0x1E3D:	//
+		0x1E3E:	//
+		0x1E40:	//
+		0x1E41:	//
+		0x1E42:	//
+		0x1E43:	//
+		0x1E44:	//
+		0x1E45:	//
+		0x1E46:	//
+		0x1E47:	//
+		0x1E48:	//
+			var stufftodestroy := array{0x1E36, 0x1E37, 0x1E38, 0x1E39, 0x1E3A, 0x1E3B, 0x1E3C, 0x1E3D, 0x1E3E, 0x1E40, 0x1E41, 0x1E42, 0x1E43, 0x1E44, 0x1E45, 0x1E46, 0x1E47, 0x1E48};
+			DestroyDeedStuff (me, 0x2B009, it.x, it.y, it.z, it.realm, stufftodestroy, 2);
+		0x1E49:	//
+		0x1E4A:	//
+		0x1E4B:	//
+		0x1E4C:	//
+		0x1E4D:	//	White Bearskin Rug
+		0x1E4E:	//
+		0x1E4F:	//
+		0x1E50:	//
+		0x1E51:	//
+		0x1E53:	//
+		0x1E54:	//
+		0x1E55:	//
+		0x1E56:	//
+		0x1E57:	//
+		0x1E58:	//
+		0x1E59:	//
+		0x1E5A:	//
+		0x1E5B:	//
+			var stufftodestroy := array{0x1E49, 0x1E4A, 0x1E4B, 0x1E4C, 0x1E4D, 0x1E4E, 0x1E4F, 0x1E50, 0x1E51, 0x1E53, 0x1E54, 0x1E55, 0x1E56, 0x1E57, 0x1E58, 0x1E59, 0x1E5A, 0x1E5B};
+			DestroyDeedStuff (me, 0x2B00A, it.x, it.y, it.z, it.realm, stufftodestroy, 2);
+		0x0953:	//
+		0x0959:	//
+		0x0937:	//
+		0x093D:	//
+		0x0475:	//	Fireplaces
+		0x0489:	//
+		0x0482:	//
+		0x047B:	//
+		0x094B:	//
+		0x0945:	//
+		0x0967:	//
+		0x0961:	//
+			var stufftodestroy := array{0x0953, 0x0959, 0x0937, 0x093D, 0x0475, 0x0489, 0x0482, 0x047B, 0x094B, 0x0945, 0x0967, 0x0961};
+			DestroyDeedStuff (me, 0x2B00B, it.x, it.y, it.z, it.realm, stufftodestroy, 1);
+		0x092B:	//
+		0x092C:	//	ovens
+		0x0931:	//
+		0x0930:	//
+			var stufftodestroy := array{0x092B, 0x092C, 0x0930, 0x0931};
+			DestroyDeedStuff (me, 0x2B00C, it.x, it.y, it.z, it.realm, stufftodestroy, 1);
+
+		0x0c83:	//
+		0x0c87:	//
+		0x0c89:	//
+		0x0c84:	//
+		0x0c8a:	//
+		0x0c88:	//Flowers, which just get destroyed and don't return a deed (or seed, in this case)
+		0x0c8e:	//
+		0x0c86:	//
+		0x0cbe:	//
+		0x0cbf:	//
+		0x0c85:	//
+		0x0cc0:	//
+		0x0cc1:	//
+		0x0c8b:	//
+		0x0c8c:	//
+		0x0c8d:	//
+		0x0c9f:	//
+		0x0c9f:
+		0x0c8f:
+		0x0db8:
+		0x0cc8:
+		0x0ceb:
+		0x0cef:
+			DestroyItem (it);
+		0x12db:	// curtains
+			DestroyItem (it);
+			CreateItemInBackpack (me, 0x2B017, 1);
+		default:
+			return 0;
+	endcase
+	return 1;
+endfunction
+
+///////////////////
+//  destroys all the deed item parts in the immediate area
+//	Added parameters me and obj to the function call to address
+//	deeds not being created when a player's pack is full where me
+//	is the player and obj is the deed's obj number you're intending
+//	to create in their pack.
+///////////////////
+function DestroyDeedStuff (me, obj, x, y, z, rlm, stufftodestroy, range)
+	var deed := CreateItemInBackpack (me, obj, 1);
+	if(!deed)
+		PrintTextAbovePrivate(me, "*Your backpack is full.*", me, 0x3, 0x21);
+	return 0;
+	endif
+
+	foreach objtype in stufftodestroy
+		foreach item in ListItemsNearLocationOfType (x, y, z, range, objtype, rlm);
+			DestroyItem (item);
+		endforeach
+	endforeach
+endfunction
+
+

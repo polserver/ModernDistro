@@ -10,6 +10,7 @@ include "include/mrcSpawn";
 include "include/utility";
 include "include/dist";
 include ":damage:damage";
+//include "util/bank";
 
 var npclist := {};
 var spawn, amt, item, status, rng, tmplate;

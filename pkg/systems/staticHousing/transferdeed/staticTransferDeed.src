@@ -1,0 +1,134 @@
+////////////////////////////////////////////////////////////////
+// PKG: statichousing                                         //
+// version: 2.70                                              //
+// Maintainer: POL Distro Team                                //
+// email: pol-distro-support@sourceforge.net                  //
+//                                                            //
+// notes:                                                     //
+//   this housing package includes only static housing.       //
+////////////////////////////////////////////////////////////////
+use uo;
+use os;
+use cfgfile;
+
+include ":gumps:yesNo";
+include ":staticHousing:gumpMessage";
+include ":staticHousing:settings";
+include "util/bank";
+include ":keys:key";
+
+const UOBJECT_BRASS_SIGN := 0x20bd2;
+const UOBJECT_WOOD_SIGN := 0x20bd0;
+
+program ChangeHouseOwner(who, deed)
+	var buyerpack := EnumerateItemsInContainer(who.backpack);
+	var signserial:= GetObjProperty(deed, "signserial");
+	var sign := SystemFindObjectBySerial(signserial );
+	var footage :=	GetObjProperty( deed, "footage");
+	footage := footage;
+	var maxlockdowns := GetObjProperty( deed, "MaxLockdowns");
+	maxlockdowns := maxlockdowns;
+	var maxsecures := GetObjProperty( deed, "MaxSecures");
+	maxsecures := maxsecures;
+	var price := GetObjProperty( deed, "Price");
+	price := price;
+    var bankbox := FindBankBox( who );
+	var btcheck := 0;
+	var inpack := 0;
+
+	// The deed must be in the purchaser's backpack
+	foreach item in buyerpack
+		if (item.serial == deed.serial)
+			inpack := 1;
+		endif
+	endforeach
+	if (inpack == 0)
+		SendSysMessage(who,"You must have the deed in your backpack to take possession of this house", color := 33);
+		return 0;
+	endif
+
+	// You can't buy a house you already own
+	if (CInt(GetObjProperty(sign, "ownerserial")) == who.serial)
+		SendSysMessage(who, "You already own this house!", color := 33);
+		return;
+	endif
+	if ( !sign )
+		SendSysMessage( who, "The deed points to an invalid sign!", color := 33 );
+		return;
+	endif
+
+	var lastowner := SystemFindObjectBySerial(CInt(GetObjProperty(sign, "ownerserial")));
+	SetObjProperty( sign, "lastownername", lastowner.name );
+	SetObjProperty( sign, "lastownerserial", lastowner );
+	var tile;
+	var things;
+	var exteriordoors, exteriordoor;
+
+
+    var packkey := CreateItemInBackpack( who, UOBJ_GOLD_KEY );
+    if (!packkey)
+		gumpmessage(who, "I couldn't create the key in your backpack. It might be full. The transfer has been aborted until you have room for the key.", hue := 33);
+        return 0;
+    endif
+    var bankkey := CreateItemInContainer( bankbox, UOBJ_GOLD_KEY );
+    if (!bankkey)
+		gumpmessage(who, "I couldn't create the spare key in your bankbox. It might be full. You will need to make a spare key as soon as possible.", hue := 33);
+        return 0;
+    endif
+	if(!MoveItemToContainer( deed, bankbox, x := -1, y := -1 ))
+		gumpmessage(who, "I could not move the deed to your bankbox. It might be full. You need to make room for it in your bank.", hue := 33);
+        return 0;
+	endif
+
+    var LockID := AllocateLockId();
+    SetObjProperty( packkey, "LockID", LockID );
+    SetObjProperty( bankkey, "LockID", LockID );
+
+	// Only lock the exterior doors.
+	exteriordoors := GetObjProperty(sign, "exteriordoors");
+	foreach item in exteriordoors
+			exteriordoor := SystemFindObjectBySerial(CInt(item));
+			if(exteriordoor.IsA(POLCLASS_DOOR))
+				exteriordoor.locked := 1;
+				SendSysMessage(who, "Door lockid == " + CStr(LockID), color := 88);
+				SetObjProperty(exteriordoor, "LockID", LockID);
+			endif
+	endforeach
+
+	// Place ban tiles at all doors. We're reusing the 'exteriordoors' variable here to represent all doors. Sorry for any confusion. :)
+	exteriordoors := GetObjProperty(sign, "components");
+	foreach item in exteriordoors
+			exteriordoor := SystemFindObjectBySerial(CInt(item));
+			if(exteriordoor.IsA(POLCLASS_DOOR))
+				// Check for the presence of ban tiles at doors.
+				things := ListItemsAtLocation( exteriordoor.x, exteriordoor.y, exteriordoor.z, exteriordoor.realm );
+				foreach thing in things
+					if(thing.objtype := 0x260FC)
+						btcheck := thing;					// There is one
+					else
+						btcheck := 0;
+					endif
+				endforeach
+				if(!btcheck)								// No ban tile there so create one
+					tile := CreateItemAtLocation(exteriordoor.x, exteriordoor.y, exteriordoor.z, 0x260FC, 1, exteriordoor.realm);
+				else										// Ban tile present so make tile == the ban tile found
+					tile := btcheck;
+				endif
+				SetObjProperty(tile,"signserial", signserial);
+				tile.invisible := 1;
+				tile.movable := 0;
+			endif
+	endforeach
+	EraseObjProperty(sign, "friends");
+	EraseObjProperty(sign, "coowners");
+	EraseObjProperty(sign, "enemies");
+	SetObjProperty(sign, "builtdeed", deed.serial);
+	SetObjProperty(sign, "owneraccount", (who.acctname));
+	SetObjProperty(sign, "LockID", LockID);
+	SetObjProperty(sign, "ownerserial", who.serial);
+	SetObjProperty(sign, "ownername", who.name);
+	sign.RefreshHouse();
+	SendSysMessage( who, "You have taken ownership of the house.", color := 66);
+	gumpmessage(who, "A key has been placed in your backpack. The deed is in your bank box along with a spare key.");
+	Sign.name := "A house sign";
+endprogram

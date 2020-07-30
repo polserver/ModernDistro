@@ -4,11 +4,10 @@ use cfgfile;
 
 include "doors";
 include ":attributes:attributes";
-// include "../pkg/items/housing/house";
 
 program use_door(chr, door)
   var doordesc, dooroptions, configuration, refresh, flowoption, closelocked, house, hs, ss, sign, item, stuff;
-  var signarray := array(0xbd2, 0xbd0, 0xbd1);
+  var signarray := array(0x1600E, 0x1600F, 0x16010, 0x16011);
   var friend;
   if(GetObjProperty(door, "#inuse"))
     return;
@@ -48,7 +47,7 @@ program use_door(chr, door)
         endif
       endforeach
     endif
-    friend := isfriend(chr, sign); // multi friend finder
+    friend := sign.IsFriend(chr); // multi friend finder
     if(friend)
       SendSysMessage(chr, "Your house and it's contents have been refreshed.");
       SetObjProperty(sign,"decay", (ReadGameClock()+ 864000));
@@ -118,7 +117,7 @@ function IsAFriend (sign, who)
 				return 1;
 			endif
 		endif
-	endforeach 
+	endforeach
 
 	return 0;
 endfunction */
@@ -138,4 +137,4 @@ function isfriend(who, house)
     friend := 1;
   endif
   return friend;
-endfunction 
+endfunction

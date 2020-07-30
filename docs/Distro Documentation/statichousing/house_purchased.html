@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    <meta http-equiv="Content-Language" content="en-us">
+    <title>Static Housing Documentation</title>
+    <link rel="stylesheet" type="text/css" href="docs.css">
+  </head>
+  <body>
+    <div id="container">
+      <div id="header">
+        <h1 style="text-align: center;">Static Housing Documentation<br>
+        </h1>
+        <div style="text-align: center;"> </div>
+        <p style="text-align: center;">For the statichousing package in the
+          Distro,
+          by <a href="mailto:distro@polserver.com">Yukiko</a>.</p>
+        <hr>
+        <h2 style="text-align: center;">What happens when a player buys a house?</h2>
+      </div>
+      <div id="content"><big><big>When a player double-clicks on a For
+            Sale sign she is presented with a gump asking if she wants to buy
+            the house. If she clicks "Yes" the system looks first in her
+            backpack to see if she has the required gold to purchase the house.
+            If not, the system checks her bank chest for the required gold.
+            Assuming she has the gold either in her backpack or in the bank, the
+            system will subtract the gold from the appropriate place and she
+            will take possession of the house. I did not program the system to
+            combine the two sources to see if her total gold, backpack and bank
+            chest, equaled the purchase price of the house.<br>
+            <br>
+            Once the gold the gold is removed she is given two keys, one is
+            placed in her backpack and one in her bank chest.&nbsp; This system
+            differs from the World of Dreams static housing system because a</big></big><big><big>
+            deed for the house is also placed in her bank chest. The deed allows
+            her to sell her house, using the secure trading gump, to another
+            player if she so desires.<br>
+            <br>
+            She or a co-owner must either use the house sign or walk into the
+            house before the decay time expires. The setting RefreshTime in the
+            static housing settings determines the number of real life days are
+            allowed before a house "decays" and is returned to a "For Sale"
+            state.<br>
+          </big></big><br>
+      </div>
+    </div>
+  </body>
+</html>

@@ -9,8 +9,14 @@ use polsys;
 use storage;
 
 include ":servmgmt:header";
+include ":servmgmt:HTTPSecurityChecks";
 
 Program HTMLPage()
+	if (!HTTPSecurity())
+		notAuthorizedMsg();
+		return;
+	endif
+
 	DoHeader("Server Management Index");
 
 	WriteHTML("<DIV ID='container'>");

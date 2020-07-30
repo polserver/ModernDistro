@@ -3,6 +3,7 @@ use basic;
 use os;
 use uo;
 use util;
+use cliloc;
 
 include "util/bank";
 include ":attributes:attributes";
@@ -22,8 +23,6 @@ include ":damage:damage";
 const STARTHAIR := 0x2030;
 const ENDHAIR := 0x2060;
 
-set_priority( 50 );
-
 var inv_fs, inv_pb;
 var me := Self();
 var master := CInt(GetObjProperty(me, "master"));
@@ -42,8 +41,10 @@ set_critical(1);
   SetGlobalProperty("pcvendors", vendors);
 set_critical(0);
 
-program merchant()
-  Detach();
+set_priority( 50 );
+
+program player_merchant()
+  // Detach();
   run_script_to_completion("NPCKeeper", me);
   start_script(":playervendor:payCounter", me);
   var nme := SplitWords(me.name);
@@ -80,32 +81,27 @@ program merchant()
     if(ev)
       var who := ev.source;
       case (ev.type)
-	    SYSEVENT_DOUBLECLICKED: if(CheckLineOfSight(me, who))
-                                  SendOpenSpecialContainer(who, inv_fs);
-                                else
-                                  SendSysMessage(who, "You cannot see that.");
-                                endif
         SYSEVENT_SPEECH:        text := lower(ev.text);
-                                if((text[firstname] and text["buy"]) or (text["vendor"] and text["buy"]))
+                                if((text[firstname] && text["buy"]) || (text["vendor"] && text["buy"]))
                                   TurnToward(who);
                                   if(!CheckLineOfSight(me, who))
-                                    PrintTextAbovePrivate(me, "Who is speaking? I cannot see you.", who);
+                                    PrintTextAbovePrivateCL(who, me, 1005349, color := 33); // I cannot see you.
                                   else
                                     process_sale(ev.source);
                                   endif
-                                elseif((text[firstname] and text["purchase"]) or (text["vendor"] and text["purchase"]))
+                                elseif((text[firstname] && text["purchase"]) || (text["vendor"] && text["purchase"]))
                                   if(who.serial == master)
                                     addthingstobuy(who);
                                   endif
-                                elseif(((text[firstname]) && (text["dismiss"])) and (ev.source.serial == master))
+                                elseif(((text[firstname]) && (text["dismiss"])) && (ev.source.serial == master))
                                   TurnToward(who);
-                                  if(yesNoSizable(who, "Fire him?"))
+                                  if(yesNoSizable(who, "Fire the vendor?"))
                                     Fireme();
                                   endif
-                                elseif((text[firstname] and text["sell"]) or (text["vendor"] and text["sell"]))
+                                elseif((text[firstname] && text["sell"]) || (text["vendor"] && text["sell"]))
                                   TurnToward(who);
                                   SpoutBuyList(who);
-                                elseif((text[firstname] and text["contact"]) or (text["vendor"] and text["contact"]))
+                                elseif((text[firstname] && text["contact"]) || (text["vendor"] && text["contact"]))
                                   TurnToward(who);
                                   if(who.serial == master)
                                     cont := recontact(who);
@@ -113,19 +109,19 @@ program merchant()
                                   else
                                     PrintTextAbovePrivate(me, "You may contact my employer " + cont, who);
                                   endif
-                                elseif(((text[firstname] and text["collect"]) or (text["vendor"] and text["collect"])) && (who.serial == master))
+                                elseif(((text[firstname] && text["collect"]) || (text["vendor"] && text["collect"])) && (who.serial == master))
                                   TurnToward(who);
                                   cashout(who);
-                                elseif(((text[firstname] and text["gold"]) or (text["vendor"] and text["gold"])) && (who.serial == master))
+                                elseif(((text[firstname] && text["gold"]) || (text["vendor"] && text["gold"])) && (who.serial == master))
                                   TurnToward(who);
                                   cashout(who);
-                                elseif(((text[firstname] and text["status"]) or (text["vendor"] and text["status"])) && (who.serial == master))
+                                elseif(((text[firstname] && text["status"]) || (text["vendor"] && text["status"])) && (who.serial == master))
                                   TurnToward(who);
                                   statuscheck(who);
-                                elseif(((text[firstname] and text["info"]) or (text["vendor"] and text["info"])) && (who.serial == master))
+                                elseif(((text[firstname] && text["info"]) || (text["vendor"] && text["info"])) && (who.serial == master))
                                   TurnToward(who);
                                   statuscheck(who);
-                                elseif(((text[firstname] and text["wear"]) or (text["vendor"] and text["wear"])) && (who.serial == master))
+                                elseif(((text[firstname] && text["wear"]) || (text["vendor"] && text["wear"])) && (who.serial == master))
                                   TurnToward(who);
                                   PrintTextAbovePrivate(me, "What shall I wear?", who);
                                   var this := Target(who);
@@ -140,17 +136,22 @@ program merchant()
                                       PrintTextAbovePrivate(me, "That is too far away.", ev.source);
                                     endif
                                   endif
-                                elseif(((text[firstname] and text["strip"]) or (text["vendor"] and text["strip"])) && (who.serial == master))
+                                elseif(((text[firstname] && text["strip"]) || (text["vendor"] && text["strip"])) && (who.serial == master))
                                   TurnToward( who );
                                   PrintTextAbovePrivate(me, "Ooh, I think I feel a draft!", who);
                                   strip_items(who);
-                                elseif((text[firstname] and text["help"]) or (text["vendor"] and text["help"]))
+                                elseif((text[firstname] && text["help"]) || (text["vendor"] && text["help"]))
                                   TurnToward( who );
                                   PrintTextAbovePrivate(me, "I will obey the following orders:", who);
                                   sleep(1);
                                   PrintTextAbovePrivate(me, "dismiss, sell, contact, collect,", who);
                                   sleep(2);
                                   PrintTextAbovePrivate(me, "wear, strip, status and purchase", who);
+                                endif
+	    SYSEVENT_DOUBLECLICKED: if(CheckLineOfSight(me, who))
+                                  SendOpenSpecialContainer(who, inv_fs);
+                                else
+                                  SendSysMessageCL(who, 501816, color := 33); // You are too far away to do that.
                                 endif
         SYSEVENT_ITEM_GIVEN:    if(who.serial == master)
                                   SetObjProperty(ev.container, "Hold", 1);
@@ -286,7 +287,7 @@ function process_sale(who);
 endfunction
 
 function stockitem(tev)
-  if((tev.item.objtype == UOBJ_GOLD_COIN) and (!tev.container))
+  if((tev.item.objtype == UOBJ_GOLD_COIN) && (!tev.container))
     TakeGold(tev);
     return;
   endif

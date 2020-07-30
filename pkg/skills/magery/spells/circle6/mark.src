@@ -5,7 +5,6 @@ use cliloc;
 
 include ":magery:spells";
 include "include/objtype";
-include ":housing:housing";
 
 program cast_mark(parms)
   var caster := parms[1];
