@@ -30,7 +30,7 @@ program teleporter_use(who, teleporter)
 	var choice := selection in options;
 	case(choice)
 		1: RenameTele(who, teleporter);
-		2: SetAccess(who, teleporter);
+		2: SetAccess(who, sign, teleporter);
 		3: RemoveTeleporter(who, teleporter);
 		default: SendSysMessage(who, "Something isn't working.", color := 33);
 	endcase
@@ -52,7 +52,7 @@ function RenameTele(who, tele)
 
 endfunction
 
-function SetAccess(who, tele)
+function SetAccess(who, sign, tele)
 
 	var access_level := "";
 	var othertele := SystemFindObjectBySerial(GetObjProperty(tele, "Othertele"));

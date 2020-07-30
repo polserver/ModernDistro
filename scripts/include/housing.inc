@@ -195,7 +195,7 @@ return sqprice;
 
 endfunction
 
-function GetHouseItems(map)
+function GetHouseItems(footage, map)
 	var itemlist := {};
 	foreach thing in footage
 		var holder := ListObjectsInBox(thing[1], thing[2], thing[3], thing[4], thing[5],thing[6], map);
@@ -244,12 +244,12 @@ endfunction
 ///////////////////
 function GetHouseZoneBaseZLevel(targ, sign)
 	// var homeinfo := GetObjProperty (sign, "homeinfo");
-	footage := GetObjProperty (sign, "footage");
+	var footage := GetObjProperty (sign, "footage");
 	if (!footage)
 		return;
 	endif
 
-  var zlevel := 0;
+	var zlevel := 0;
   	foreach thing in footage
 		if ( (targ.realm == sign.realm) && (targ.x >= thing[1] && targ.x <= thing[4]) && (targ.y >= thing[2] && targ.y <= thing[5]) &&
 			(targ.z >= thing[3] && targ.z <= thing[6]) )

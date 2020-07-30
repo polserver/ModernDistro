@@ -30,8 +30,8 @@ program decorate (who)
 	isfriend := isfriend;
 	iscoowner := iscoowner;
 	houseowner := houseowner;
-	sign := hsign;
-	if(!sign.IsCoOwnerOrOwner(who))
+	//sign := hsign;
+	if(!hsign.IsCoOwnerOrOwner(who))
 		SendSysMessage(who, "Only owner or co-owners can use the decorator tool here.", color := 33);
 		return 0;
 	endif
@@ -176,7 +176,7 @@ endprogram
 ///////////////////
 //  Display the gump and let the player select what to do
 ///////////////////
-function DisplayGumpOptions (who, item, sign)
+function DisplayGumpOptions (who, item, hsign)
 	var gump := GFCreateGump(50, 50);
 
 	GFPage(gump, 0);
@@ -226,8 +226,8 @@ function DisplayGumpOptions (who, item, sign)
 	endif
 	//GFAddButton(gump, 20, 420, 4005, 4007, GF_CLOSE_BTN, OPTION_VIEW_hsign);
 	//GFHTMLArea(gump, 10, 423, 200, 20, "<basefont color=#FFFFFF><CENTER>VIEW HOUSE SIGN</CENTER>");
-	GFHTMLArea(gump, 10, 448, 200, 20, "<basefont color=#FFFFFF><CENTER>LOCKDOWNS: " + CStr(sign.GetLockdowns()) + " / " + CStr(sign.GetMaxLockdowns()) + "</CENTER>", 0, 0);
-	GFHTMLArea(gump, 10, 473, 200, 20, "<basefont color=#FFFFFF><CENTER>SECURES: " + CStr(sign.GetSecures()) + " / " +  CStr(sign.GetMaxSecures()) + "</CENTER>", 0, 0);
+	GFHTMLArea(gump, 10, 448, 200, 20, "<basefont color=#FFFFFF><CENTER>LOCKDOWNS: " + CStr(hsign.GetLockdowns()) + " / " + CStr(hsign.GetMaxLockdowns()) + "</CENTER>", 0, 0);
+	GFHTMLArea(gump, 10, 473, 200, 20, "<basefont color=#FFFFFF><CENTER>SECURES: " + CStr(hsign.GetSecures()) + " / " +  CStr(hsign.GetMaxSecures()) + "</CENTER>", 0, 0);
 	var gump_return := GFSendGump(who, gump);
 
 	if (!gump_return[0])

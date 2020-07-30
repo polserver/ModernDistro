@@ -13,8 +13,8 @@ include ":staticHousing:settings";
 var owneracct;
 var settings := SH_GetSettingsCfgElem("Settings");
 
-program StaticSignListener(sgn)
-	sign := sgn;
+program StaticSignListener(sign)
+	// sign := sgn;
 	// I think this should replace the while loop that follows it.
 	while(GetObjProperty(sign, "NewHouse"))
 		sleep(100);
@@ -25,17 +25,17 @@ program StaticSignListener(sgn)
 	if(!GetObjProperty(sign, "decay"))
 		sign.RefreshHouse();
 	endif
-	footage := GetObjProperty(sign, "footage");
+	// var footage := GetObjProperty(sign, "footage");
 	RegisterForSpeechEvents(sign, 30);
 	while(sign)
 		var ev := wait_for_event(120);
 		if(ev)
-			handle_speech(ev);
+			handle_speech(sign, ev);
 		endif
 		var decaytime := GetObjProperty(sign, "decay");
 		if(!GetObjProperty(sign, "nodecay"))
 			if(ReadGameClock() > decaytime)
-				demolish();
+				demolish(sign);
 			elseif((decaytime - ReadGameClock()) > 861000)
 				SetObjProperty(sign, "DecayMessage", "[this house is like new]");
 			elseif((decaytime - ReadGameClock()) > 604800)
@@ -58,7 +58,7 @@ function cleareventque()
 	until(!(ev := os::wait_for_event(0)));
 endfunction
 
-function handle_speech(event)
+function handle_speech(sign, event)
 	sign.RefreshHouse();
 	var who := event.source;
 	owneracct := GetObjProperty(sign, "owneraccount");
@@ -72,19 +72,19 @@ function handle_speech(event)
 	endif
 	var text := lower(event.text);
 	if((text["i wish to lock this down"]) && (sec >= 2) && (IsInHouse(who)))
-		HouseFunction(event, 1);
+		HouseFunction(sign, event, 1);
 	elseif((text["i wish to release this"]) && (sec >= 2) && (IsInHouse(who)))
-		HouseFunction(event, 2);
+		HouseFunction(sign, event, 2);
 	elseif((text["i wish to secure this"]) && (sec >= 2) && (IsInHouse(who)))
-		secure(event, text);
+		secure(sign, event, text);
 	elseif((text["i wish to unsecure this"]) && (sec >= 2) && (IsInHouse(who)))
 		unsecure(event);
 	elseif((text["remove thyself"]) && (sec >= 1) && (IsInHouse(who)))
 		remove(event);
 	elseif((text["i ban thee"]) && (sec >= 2) && (IsInHouse(who)))
-		housebanning(event);
+		housebanning(sign, event);
 	elseif((text["i wish to place a trash barrel"]) && (sec >= 2) && (IsInHouse(who)))
-		trashbarrel(event);
+		trashbarrel(sign, event);
 	elseif((text["reveal thyself"]) && (IsInHouse(who)))
 		reveal(event);
 	elseif((text["am i in the house"]) && (IsInHouse(who)))
@@ -134,7 +134,7 @@ function remove(event)
   endif
 endfunction
 
-function trashbarrel(event)
+function trashbarrel(sign, event)
   var who := event.source;
   var barrelcheck := GetObjProperty(sign, "barrelserial");
   if(barrelcheck)
@@ -165,7 +165,7 @@ function trashbarrel(event)
   endif
 endfunction
 
-function HouseFunction(event, num)
+function HouseFunction(sign, event, num)
 	var who := event.source;
 	var item := Target(who, TGTOPT_NOCHECK_LOS);
 	var remteles := 0;
@@ -180,8 +180,8 @@ function HouseFunction(event, num)
 	var OtherItems := array;
 	OtherItems := GetObjProperty( item, "OtherItems" );
 	//////////////////////////////////////////////
-	footage := GetObjProperty(sign, "footage");
-  var itemlist := GetHouseItems(item.realm);
+	var fotage := GetObjProperty(sign, "footage");
+	var itemlist := GetHouseItems(fotage, item.realm);
 	if(item in itemlist)
 		case(num)
 			// Lock down
@@ -290,7 +290,7 @@ function HouseFunction(event, num)
 	endif
 endfunction
 
-function secure(event, unused text)
+function secure(sign, event, unused text)
 	if(!GetObjProperty(sign, "RemainingSecures"))
 		SendSysMessageCL(event.source, 1008142, color := 33); // The maximum number of secure items has been reached :
 		return 0;
@@ -344,7 +344,7 @@ function secure(event, unused text)
 		return;
 	elseif(GetObjProperty(sign, "RemainingSecures") >= 1)
 		footage := GetObjProperty(sign, "footage");
-		var itemlist := GetHouseItems(who.realm);
+		var itemlist := GetHouseItems(footage, who.realm);
 		if(item in itemlist)
 			if(item.movable == 0)
 				if(GetObjProperty(sign, "RemainingLockdowns") < GetObjProperty(sign, "MaxLockdowns"))
@@ -461,7 +461,7 @@ function unsecure(event)
 	endif
 endfunction
 
-function housebanning(event)
+function housebanning(sign, event)
 	var who := event.source;
 	var removefrnd := 0;
 	var removecoown := 0;
@@ -546,9 +546,9 @@ function housebanning(event)
 	// endif
 endfunction
 
-function demolish()									// Decay timer has ran out. House will go up for sale.
-	footage := GetObjProperty(sign, "footage");
-	var itemlist := GetHouseItems(sign.realm);
+function demolish(sign)									// Decay timer has ran out. House will go up for sale.
+	var fotage := GetObjProperty(sign, "footage");
+	var itemlist := GetHouseItems(fotage, sign.realm);
 	var totalvalueofhouses := 0;
 	var hv := 0;
 	SetObjProperty(sign, "lastownername", GetObjProperty(sign, "ownername"));

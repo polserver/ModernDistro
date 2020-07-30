@@ -65,7 +65,7 @@ program Place_Deeded_Item ( who, deed )
 		return 0;
 	endif
 
-	BuildandSendOrientGump(who, deed, sign, start);
+	BuildandSendOrientGump(who, deed, hsign, start);
 endprogram
 
 function BuildandSendOrientGump ( who, deed, sign, targ )

@@ -125,12 +125,12 @@ program textcmd_staticdeed(character)
 	endwhile
 	var ct := 0;
 	sleepms(500);
-	sign := PlaceSign();
-	if(!sign)
+	var hsign := PlaceSign();
+	if(!hsign)
 		SendSysMessage(who, "Canceled.", 3, 40);
 		return;
 	endif
-	GenerateLockdowns(holder);
+	GenerateLockdowns(holder, hsign);
 	SendSysMessage(who, "Now Target only the exterior doors to the house.", color := 88);
 	SendSysMessage(who, "Press <esc> when done targeting. Remember not to target doors to interior rooms.", color := 88);
 	holder := array;
@@ -151,12 +151,12 @@ program textcmd_staticdeed(character)
 		endif
 		sleepms(500);
 	endwhile
-	SetObjProperty(sign, "exteriordoors", holder);
-	SetObjProperty(sign, "Setup", 1);
-	SetObjProperty(sign, "LockID", LockID);
+	SetObjProperty(hsign, "exteriordoors", holder);
+	SetObjProperty(hsign, "Setup", 1);
+	SetObjProperty(hsign, "LockID", LockID);
 	SendSysMessage(who, "Done selecting doors.", color := 66);
 	SendSysMessage(who, "Finished 'creating' the house.", color := 66);
-	SetupHouse();
+	SetupHouse(sign);
 endprogram
 
 function PlaceSign()
@@ -226,7 +226,7 @@ function figuresecures(nwx, nwy, nwz, sex, sey, sez)
 	return s;
 endfunction
 
-function SetupHouse()
+function SetupHouse(sign)
 	var bantiles := array;
 	var parts := array;
 	var housevalue := 0;
@@ -295,7 +295,7 @@ function GetLevel()
 	endforeach
 endfunction
 
-function GenerateLockdowns(holder)
+function GenerateLockdowns(holder, sign)
 	var nl := 0;
 	var ns := 0;
 	var pps := 0;
