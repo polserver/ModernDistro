@@ -2,8 +2,6 @@ use uo;
 
 include "include/clock";
 
-program time( cmd )
-
+program time( unused cmd )
     print("System Message: The time in game is " + GetTimeofDay() );
-
 endprogram

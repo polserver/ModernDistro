@@ -11,7 +11,7 @@ function process_combat_event(opponent)
   endif
 endfunction
 
-function process_flee_event(opponent)
+function process_flee_event(unused opponent)
   return 0;
 endfunction
 
@@ -40,7 +40,7 @@ function in_combat_event_loop(opponent, loops)
   endif
 endfunction
 
-function prepare_for_fight(opponent)
+function prepare_for_fight(unused opponent)
   DisableMainEvents();
   EnableCombatEvents();
 endfunction

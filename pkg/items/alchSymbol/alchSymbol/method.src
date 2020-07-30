@@ -2,8 +2,6 @@ program Install()
 	return 1;
 endprogram
 
-exported function IsAlchemySymbol( item )
-	item := item; // Avoid unused var compiler warning
-
+exported function IsAlchemySymbol( unused item )
 	return 1;
 endfunction

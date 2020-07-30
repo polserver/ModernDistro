@@ -341,7 +341,7 @@ endfunction
  *   int
  *
 */
-function MS_GetPoisonLevel(mobile, targ)
+function MS_GetPoisonLevel(mobile, unused targ)
 	var poison_level := CDbl(AP_GetSkill(mobile, MAGERY) + AP_GetSkill(mobile, POISONING)) / 2;
 
 	if ( poison_level < 65.1 )
@@ -358,7 +358,9 @@ function MS_GetPoisonLevel(mobile, targ)
 endfunction
 
 
-function MS_PlaySpellSFX(spellid, targ, success:=1)
+function MS_PlaySpellSFX(spellid, targ, success := 1)
+	success := success; // Avoid compiler warnings
+
 	var cfg_elem := MS_GetSpellsCfgElem(spellid);
 	var sfx := CInt(GetConfigInt(cfg_elem, "SFX"));
 	if(GetGlobalProperty("Debug"))
@@ -547,7 +549,7 @@ function CalcSpellDamage(circle, caster, cast_on)
 endfunction
 
 // Function for quickly grabbing nearby mobiles that are not in excludes or that are in includes
-function MS_GetValidTargets(targ, area_size:=1, check_los:=1, excludes:={}, includes:={})
+function MS_GetValidTargets(targ, area_size:=1, unused check_los, excludes:={}, includes:={})
 	var targs := array;
 
 	if ( !targ.realm )

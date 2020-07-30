@@ -59,7 +59,6 @@ program textcnd_createnpode(who)
     tmparray := SplitWords(tmparray);
     var tmplt := CStr(tmparray[2]);
     SetObjProperty(node, "Template", tmplt);
-    var count := 0;
     if(res[11])
       SetObjProperty(node, "Template", 1); // merchant
     else

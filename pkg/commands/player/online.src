@@ -31,8 +31,7 @@ program textcmd_online (character)
 endprogram
 
 
-function FillInArrays(character)
-
+function FillInArrays(unused character)
 	var playercount := 0;
 	var pagecount := 1;
 	var ypos := 70;

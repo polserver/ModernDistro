@@ -2,17 +2,13 @@ use uo;
 use os;
 
 program Install()
-
 	return 1;
 endprogram
 
-exported function IsCurtain ( item )
-
-        item := item; //Avoid compiler warnings
-        
+exported function IsCurtain ( unused item )
 	return 1;
 endfunction
 
-exported function CloseOpenCurtains ( curtain )
+exported function CloseOpenCurtains ( unused curtain )
 
 endfunction

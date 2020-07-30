@@ -26,7 +26,7 @@ program dispel ( parms )
         return 0;
     endif
 
-  var magery := GetAttribute(caster, MAGERY);
+  //var magery := GetAttribute(caster, MAGERY);
   var summoned := GetObjProperty( cast_on, "summoned");
   if(summoned == 1)
     PlaySoundEffect( caster, 0x202 );

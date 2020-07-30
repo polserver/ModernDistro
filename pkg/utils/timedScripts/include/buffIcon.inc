@@ -20,11 +20,8 @@ use polsys;
 function UpdateBuffIcon( mobile, byref cfg_elem, byref event )
 
         var buff_icon := CInt( cfg_elem.BuffIcon );
-        var cliloc_name :=  CInt(cfg_elem.cliloc_name);
-        var cliloc_desc :=  CInt(cfg_elem.cliloc_desc);
         if( buff_icon )
-            var level := event.level,
-            amount := event.amount;
+            var amount := event.amount;
             if(amount)
                 mobile.delbuff(buff_icon);
             endif

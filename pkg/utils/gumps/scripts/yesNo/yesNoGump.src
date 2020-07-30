@@ -30,7 +30,7 @@ program Gump_YesNo( params )
 	var x_pos := 30;
 	GFAddButton( yn_gump, ( x_pos+3 ), 160, 4005, 4007, GF_CLOSE_BTN, 0xA1 );
 	foreach line in ( GFWordWrap( yes_text, 355 ))
-		line := line; // Avoid Compiler Warnings!
+		line := line; // Avoid Compiler Warnings
 		GFAddHTMLLocalized( yn_gump, ( x_pos + 40 ), 162, 160, 18, 1074976 );
 		x_pos += 30;
 		SleepMS(2);
@@ -39,7 +39,7 @@ program Gump_YesNo( params )
 	x_pos := 140;
 	GFAddButton( yn_gump, ( x_pos+3 ), 160, 4005, 4007, GF_CLOSE_BTN, 0xA2 );
 	foreach line in ( GFWordWrap( no_text, 355 ))
-		line := line; // Avoid Compiler Warnings!
+		line := line; // Avoid Compiler Warnings
 		GFAddHTMLLocalized( yn_gump, ( x_pos + 40 ), 162, 160, 18, 1074977 );
 		x_pos += 20;
 		SleepMS(2);

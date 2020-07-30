@@ -1,24 +1,18 @@
 use uo;
 
 program Install()
-
 	return 1;
 endprogram
 
-exported function IsKey( key )
-
-	key := key; // Avoid compiler warning
-
+exported function IsKey( unused key )
 	return 1;
 endfunction
 
 exported function GetLockId( key )
-
 	return GetObjProperty( key, "LockID" );
 endfunction
 
 exported function SetLockId( key, lock_id )
-
 	SetObjProperty( key, "LockID", lock_id );
 endfunction
 

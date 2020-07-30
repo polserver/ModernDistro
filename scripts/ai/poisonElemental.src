@@ -88,9 +88,9 @@ function spellattack(opponent)
   endif
 endfunction
 
-function prepare_for_fight(opponent)
+function prepare_for_fight(unused opponent)
   if(!CInt(GetObjProperty(me, "mr")))
-	CastSpell(me,me,"reflect");
+    CastSpell(me,me,"reflect");
   endif
   DisableMainEvents();
   EnableCombatEvents();

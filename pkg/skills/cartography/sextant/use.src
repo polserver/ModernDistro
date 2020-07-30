@@ -5,12 +5,10 @@
 use uo;
 use math;
 
-program useScript(who, sextant)
+program useScript(who, unused sextant)
 	PrintTextAbovePrivate(who, ToSextant(who.x, who.y), who);
-	
 	return 1;
 endprogram
-
 
 function ToSextant(x, y)
 	var latitude_direction, longitude_direction;

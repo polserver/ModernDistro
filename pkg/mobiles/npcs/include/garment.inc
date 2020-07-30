@@ -8,17 +8,15 @@ var templt;
 
 function Habille(who, categ)
   var group;
-  var equipt;
   couleurs := ReadConfigFile("::colors");
   vetements := ReadConfigFile("::cloths");
   templt := ReadConfigFile("::equip2");
-  foreach equipt in ListEquippedItems(who)
-    DestroyItem(equipt);
+  foreach equipped_item in ListEquippedItems(who)
+    DestroyItem(equipped_item);
   endforeach
   if(couleurs && vetements && templt)
     group := FindConfigElem(templt, categ);
     if(group)
-      var str;
       var lastc := 0;
       foreach str in GetConfigStringArray(group, "Equip")
             lastc := EquipItemString(who, str, lastc);
@@ -87,7 +85,6 @@ function EquipItemString(who, str, lastcolor)
       var itemg := FindConfigElem(vetements, objname);
       if(itemg)
         var str := GetConfigStringArray(itemg, "Item");
-        var str3;
         var newarray := {};
         var i := 1;
         var sex := "";

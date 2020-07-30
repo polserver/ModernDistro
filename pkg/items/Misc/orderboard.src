@@ -115,7 +115,6 @@ program OrderBoard (user, board )
     return;
   endif
 
-  var data2 := {};
   layout := {
     "page 0",
     "resizepic 50 50 3600 540 380",

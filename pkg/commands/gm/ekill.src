@@ -17,12 +17,12 @@ program cast_fireball( caster, effect, sound )
 	var tsound := CInt(sound);
 	var teffect := CInt(effect);
 
-    var parms := {};
-    var cast_on := Target( caster );
-    if (!cast_on)
-        return;
-    endif
+	var cast_on := Target( caster );
+	if (!cast_on)
+		return;
+	endif
+
 	PlaySoundEffect( cast_on, tsound  );
-    PlayMovingEffect( caster, cast_on, teffect, 5, 1 );
+	PlayMovingEffect( caster, cast_on, teffect, 5, 1 );
 	KillMobile(cast_on);
 endprogram

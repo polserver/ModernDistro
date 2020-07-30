@@ -5,9 +5,8 @@ include ":damage:damage";
 
 program animate_dead( params )
 	var caster := params[1];
-	var info := params[2]; // Struct containing additional info about the spell.
-	var spellID := params[3];
-
+	//var info := params[2]; // Struct containing additional info about the spell.
+	//var spellID := params[3];
 
 	SendSysMessage(caster, "Animate what corpse?", 1, 88);
 	var cast_on := Target(caster);
@@ -23,8 +22,6 @@ program animate_dead( params )
 		return 0;
 	endif
 
-
-
 	var deadnpc := CreateNpcFromTemplate("zombie", cast_on.x, cast_on.y, cast_on.z, 0, cast_on.realm);
 	deadnpc.script := "KillNPCs";
 	PlaySoundEffect(deadnpc, 0x1FB);
@@ -37,6 +34,4 @@ program animate_dead( params )
 	sleep(200);
 	MoveObjectToLocation(deadnpc,0,0,0, deadnpc.realm, MOVEOBJECT_FORCELOCATION);
 	KillMobile(deadnpc);
-
-
 endprogram

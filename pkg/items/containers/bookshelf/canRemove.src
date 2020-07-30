@@ -1,23 +1,18 @@
 /*
-        Maintained by The POL Distro Team
+	Maintained by The POL Distro Team
 
-        2018-07-25
+	2018-07-25
 */
 use uo;
 
 include ":containers:checks";
 include ":containers:canRemove";
 
-program canRemoveScript( mobile, container, item, movetype )
+program canRemoveScript( mobile, container, unused item, unused movetype )
+	if( !Anti_Fast_Loot( mobile ))
+		return 0;
+	endif
 
-        //Avoid compiler warnings
-        item := item;
-        movetype := movetype;
-
-        if( !Anti_Fast_Loot( mobile ))
-                return 0;
-        endif
-        
 	if( CP_IsLocked( container ))
 		SendSysMessage( mobile, "You can't remove items from locked containers." );
 		return 0;

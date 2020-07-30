@@ -5,10 +5,6 @@
 */
 use uo;
 
-program canDestroy( container )
-
-        //Avoid compiler warnings
-        container := container;
-        
+program canDestroy( unused container )
 	return 1;
 endprogram

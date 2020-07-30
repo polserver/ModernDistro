@@ -5,14 +5,10 @@ use cfgfile;
 include ":itemutils:itemdesc";
 
 program Install()
-
 	return 1;
 endprogram
 
-exported function IsIngot( item )
-
-	item := item; // Avoid compiler warnings.
-
+exported function IsIngot( unused item )
 	return 1;
 endfunction
 

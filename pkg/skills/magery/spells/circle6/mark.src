@@ -7,45 +7,50 @@ include ":magery:spells";
 include "include/objtype";
 
 program cast_mark(parms)
-  var caster := parms[1];
-  var info := parms[2];
-  var interdiction;
+	var caster := parms[1];
+	var info := parms[2];
 
-  var cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_NEUTRAL);
-    if (!cast_on)
-        SendSysMessageCL(caster, 1042023, color := 33); // Cancelled.
-        return 0;
-    endif
+	var cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_NEUTRAL);
+	if (!cast_on)
+		SendSysMessageCL(caster, 1042023, color := 33); // Cancelled.
+		return;
+	endif
 
-  if (!cast_on.IsRecallRune())
-    SendSysMessage(caster, "You can only cast that on a recall rune!", color := 33);
-	return;
-  endif
-  if ( !Accessible( caster, cast_on ) )
-        SendSysMessageCL(caster, 1078497, color := 33); // You cannot use that right now
-        return 0;
-  endif
+	if (!cast_on.IsRecallRune())
+		SendSysMessage(caster, "You can only cast that on a recall rune!", color := 33);
+		return;
+	endif
 
-  if(caster.multi)
-    SendSysMessageCL(caster, 501800, color := 33); // You cannot mark an object at that location.
-    PlaySoundEffect(caster,0x005d);
-    PlayObjectCenteredEffect(caster, 0x3735,0x0a, 0x1e);
-    return;
-  endif
-  if(((caster.x >= 5120) && (caster.x <= 5375) && (caster.y >= 0) && (caster.y <= 255)) or (caster.multi))
-    SendSysMessageCL(caster, 501800, color := 33); // You cannot mark an object at that location.
-    return;
-  endif
-  if (!Accessible(caster, cast_on))
-	SendSysMessage(caster, "You can't reach that!", color := 33);
-  endif
-  if(!ReserveItem(cast_on))
-    SendSysMessageCL(caster, 502632, color := 33); // The spell fizzles.
-    return;
-  endif
-  PlayObjectCenteredEffect(  caster, FX_MARK_EFFECT, 10, 10);
-  PlaySoundEffect( caster, SFX_SPELL_MARK );
-  cast_on.SetDestination(caster.x, caster.y, caster.z, caster.realm);
+	if (!Accessible( caster, cast_on ))
+		SendSysMessageCL(caster, 1078497, color := 33); // You cannot use that right now
+		return;
+	endif
 
-  SetName(cast_on, "a marked recall rune");
+	if(caster.multi)
+		SendSysMessageCL(caster, 501800, color := 33); // You cannot mark an object at that location.
+		PlaySoundEffect(caster,0x005d);
+		PlayObjectCenteredEffect(caster, 0x3735,0x0a, 0x1e);
+		return;
+	endif
+
+	if(((caster.x >= 5120) && (caster.x <= 5375) && (caster.y >= 0) && (caster.y <= 255)) or (caster.multi))
+		SendSysMessageCL(caster, 501800, color := 33); // You cannot mark an object at that location.
+		return;
+	endif
+
+	if (!Accessible(caster, cast_on))
+		SendSysMessage(caster, "You can't reach that!", color := 33);
+		return;
+	endif
+
+	if(!ReserveItem(cast_on))
+		SendSysMessageCL(caster, 502632, color := 33); // The spell fizzles.
+		return;
+	endif
+
+	PlayObjectCenteredEffect(  caster, FX_MARK_EFFECT, 10, 10);
+	PlaySoundEffect( caster, SFX_SPELL_MARK );
+	cast_on.SetDestination(caster.x, caster.y, caster.z, caster.realm);
+
+	SetName(cast_on, "a marked recall rune");
 endprogram

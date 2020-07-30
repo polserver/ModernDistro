@@ -7,14 +7,7 @@ use uo;
 use cfgfile;
 use util;
 
-program OnRemove( character, container, item, item_amount, movetype )
-
-        //Avoid compiler warnings
-        movetype := movetype;
-        item_amount := item_amount;
-        item := item;
-        character := character;
-
+program OnRemove( unused character, container, unused item, unused item_amount, unused movetype )
 	var shelf_cfg := ReadConfigFile( ":containers:bookshelf" );
 	if( !shelf_cfg )
 		return 1;

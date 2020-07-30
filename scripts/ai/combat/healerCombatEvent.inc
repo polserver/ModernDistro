@@ -42,7 +42,7 @@ function in_combat_event_loop(opponent, loops)
   endif
 endfunction
 
-function prepare_for_fight(opponent)
+function prepare_for_fight(unused opponent)
   if (GetObjProperty(me, "mr") != "1")
     CastSpell(me,me,"reflect");
   endif

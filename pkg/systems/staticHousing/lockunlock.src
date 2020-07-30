@@ -7,13 +7,13 @@ include "include/utility";
 include "include/housing";
 
 program lockunlockitem (parms)
-	var sign := parms[1];
+	var house_sign := parms[1];
 	var character := parms[2];
-	if (!sign or !character)
+	if (!house_sign or !character)
 		return;
 	endif
 
-	if (!sign.IsAFriend ( character))
+	if (!house_sign.IsAFriend ( character))
 		if (!character.cmdlevel)
 			return;
 		else
@@ -42,18 +42,18 @@ program lockunlockitem (parms)
 	case (lockdownoption)
 		HOUSE_LOCKDOWN_ITEM:
 		HOUSE_RELEASE_ITEM:
-			HouseLockUnlockItem (sign, character, item);
+			HouseLockUnlockItem (house_sign, character, item);
 		HOUSE_SECURE_CONTAINER:
 		HOUSE_RELEASE_CONTAINER:
-			HouseSecureReleaseContainer (sign, character, item);
+			HouseSecureReleaseContainer (house_sign, character, item);
 		HOUSE_DISPLAY_ITEM:
-			HouseDisplayItem (sign, character, item);
+			HouseDisplayItem (house_sign, character, item);
 		HOUSE_RAISE_ITEM:
-			HouseRaiseItem (sign, character, item);
+			HouseRaiseItem (house_sign, character, item);
 		HOUSE_LOWER_ITEM:
-			HouseLowerItem (sign, character, item);
+			HouseLowerItem (house_sign, character, item);
 		default:
-			HouseLockUnlockItem (sign, character, item);
+			HouseLockUnlockItem (house_sign, character, item);
 	endcase
 
 endprogram

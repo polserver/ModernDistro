@@ -1,13 +1,7 @@
 use uo; 
 use os; 
 
-program fseffect(who, what, lastx, lasty, lastz) 
-
-    lastx := lastx;
-    lasty := lasty;
-    lastz := lastz;
-    
-    PlayObjectCenteredEffect(who, 0x3709, 0x0a, 0x1e ); 
-    PlaySoundEffect(who,0xf8); 
-
+program fseffect(who, unused what, unused lastx, unused lasty, unused lastz) 
+	PlayObjectCenteredEffect(who, 0x3709, 0x0a, 0x1e ); 
+	PlaySoundEffect(who,0xf8); 
 endprogram 

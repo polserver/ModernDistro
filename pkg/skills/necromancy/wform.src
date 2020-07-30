@@ -7,9 +7,9 @@ include ":damage:damage";
 program wraith_form( params )
 
 	var caster := params[1];
-	var info := params[2]; // Struct containing additional info about the spell.
-	var spellID := params[3];
-	var cast_on := params[4]; // Target of spell if required.
+	//var info := params[2]; // Struct containing additional info about the spell.
+	//var spellID := params[3];
+	//var cast_on := params[4]; // Target of spell if required.
 
 	if(Getobjproperty(caster, "wraith"))
 		PlayObjectCenteredEffectEx( caster, 0x374A, 1, 15, 9902, 4, 3, 1108 );

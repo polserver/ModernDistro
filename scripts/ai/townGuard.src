@@ -131,7 +131,7 @@ endfunction
 
 function lookiehere(who)
   var mobiles := ListMobilesNearLocation(who.x, who.y, who.z, 15, me.realm);
-  var guard, num, i, hogcall, guardzone, element, range, timer, elem;
+  var guardzone, element, range, timer, elem;
   var cfgfile := ReadConfigFile("::gzone");
   var entries := GetConfigStringKeys(cfgfile);
   foreach listing in entries
@@ -194,7 +194,7 @@ function sleepmode()
           endif
 	endforeach
 	var ev;
-    var parms array;
+    var parms := array;
     parms[1] := "#MOB";
     parms[2] := me;
     parms[3] := me;
@@ -249,7 +249,7 @@ function AddToHateList(crim)
 	else
 		crooks := GetObjProperty(me,"#Criminals");
 	endif
-	var i;
+
 	foreach crook in crooks;
 		if ( crook == crim.serial )
 			return;//already hate him.
@@ -273,7 +273,7 @@ function CheckHateList( you )
 	else
 		crooks := GetObjProperty(me,"#Criminals");
 	endif
-	var i;
+
 	foreach crook in crooks;
 		if ( crook == you.serial )
 			return 1;//hate you.
@@ -331,8 +331,7 @@ function Fight( opponent )
 			SendEvent(mobile, ev);
 		endif
 	endforeach
-
-  var oldprio := set_priority(50);
+  set_priority(50);
   SetOpponent( opponent );
   prepare_for_fight( opponent );
   TurnToward( opponent );

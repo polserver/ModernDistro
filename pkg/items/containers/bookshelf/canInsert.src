@@ -2,14 +2,7 @@ use uo;
 
 include ":containers:checks";
 
-program CanInsert( character, container, movetype, inserttype, adding_item, existing_stack, amount_to_add )
-
-        //Avoid compiler warnings
-        amount_to_add := amount_to_add;
-        existing_stack := existing_stack;
-        inserttype := inserttype;
-        movetype := movetype;
-        
+program CanInsert( character, container, unused movetype, unused inserttype, adding_item, unused existing_stack, unused amount_to_add )
 	if( adding_item.IsBook() )
 		return 1;
 	elseif( CP_IsLocked( container ))

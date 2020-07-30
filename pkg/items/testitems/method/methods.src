@@ -4,14 +4,11 @@ use os;
 include ":itemutils:itemdesc";
 
 program Install()
-
 	return 1;
 endprogram
 
-exported function test( testitem999 )
-
-        Print("I'm printing to the conaole.");
-
+exported function test( unused testitem999 )
+	Print("I'm printing to the conaole.");
 	return 1;
 endfunction
 

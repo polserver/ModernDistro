@@ -145,7 +145,7 @@ endfunction
 function CreateFromItemString(who, str)
   var params := SplitWords(str);
   var count, objname, color, chance;
-  var couleurs := ReadConfigFile("::colors");
+  var colors_cfg := ReadConfigFile("::colors");
   count := RandomDiceRoll(CStr(params[1]));
   params[1] := params[2];
   params[2] := params[3];
@@ -158,7 +158,7 @@ function CreateFromItemString(who, str)
     color := CInt(params[2]);
   elseif (params[2])
     color := 0;
-    var colorg := FindConfigElem(couleurs, params[2]);
+    var colorg := FindConfigElem(colors_cfg, params[2]);
     if(colorg)
       var str := GetConfigStringArray(colorg, "color");
 	  var ar := {};

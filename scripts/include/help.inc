@@ -24,8 +24,8 @@ function staffcheck(type)
   k.+pid := getpid();
   stafflist.sendevent(k);
   var ev := wait_for_event(10);
-  var data := ev.data;
-  return data;
+  var evdata := ev.data;
+  return evdata;
 endfunction
 
 function pagecheck(serial, type)

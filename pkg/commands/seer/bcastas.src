@@ -1,10 +1,7 @@
 use uo;
 
-
-program bcastas(who, msg)
-
-if (msg)
-        Broadcast(msg);
-endif
-
+program bcastas(unused who, msg)
+	if (msg)
+		Broadcast(msg);
+	endif
 endprogram

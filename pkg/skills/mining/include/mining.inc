@@ -53,8 +53,8 @@ endfunction
  *
  */
 function ListOreTypes()
-	var settings := MSP_GetSettingsCfgElem("OreTypes");
-	return GetConfigStringArray(settings, "OreType");
+	var ore_types_elem := MSP_GetSettingsCfgElem("OreTypes");
+	return GetConfigStringArray(ore_types_elem, "OreType");
 endfunction
 
 /*

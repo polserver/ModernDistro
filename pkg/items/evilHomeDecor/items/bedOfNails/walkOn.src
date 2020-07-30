@@ -2,13 +2,13 @@ use uo;
 use os;
 use util;
 
-program BedOfNails_WalkOn ( who, bed, lastx, lasty, lastz )
-	var bloodcoordinatemodifier := array { -1, 0, 1 };
+program BedOfNails_WalkOn ( who, unused bed, unused lastx, unused lasty, unused lastz )
+	//var bloodcoordinatemodifier := array { -1, 0, 1 };
 	var malesoundarray := array { 1342, 1343, 1344 };
 	var femalesoundarray := array { 1339, 1340, 1341 };
 	var randbloodmodx := CInt ( RandomDiceRoll ( "1d3" ) );
 	var randbloodmody := Cint ( RandomDiceRoll ( "1d3" ) );
-	var amountofblood := RandomInt ( 8 );
+	//var amountofblood := RandomInt ( 8 );
 	
 	if ( who.gender == 0 )
 		PlaySoundEffect ( who, CInt(malesoundarray[Cint(randbloodmodx)]) );

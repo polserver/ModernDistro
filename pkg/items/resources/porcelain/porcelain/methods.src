@@ -5,14 +5,10 @@ use cfgfile;
 include ":itemutils:itemdesc";
 
 program Install()
-
 	return 1;
 endprogram
 
-exported function IsPorcelain( item )
-
-	item := item; // Avoid compiler warnings.
-
+exported function IsPorcelain( unused item )
 	return 1;
 endfunction
 

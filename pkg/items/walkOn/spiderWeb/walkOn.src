@@ -7,7 +7,7 @@ use uo;
 
 include ":timedScripts:timedScripts";
 
-program WalkOn(mobile, spiderweb)
+program WalkOn(mobile, unused spiderweb)
 	if ( mobile.cmdlevel >= 2 )
 		return 0;
 	elseif ( mobile.dead )

@@ -5,12 +5,10 @@ use cfgfile;
 include ":itemutils:itemdesc";
 
 program Install()
-
 	return 1;
 endprogram
 
 exported function GetDropSound ( item )
-	
 	if ( item.Amount <= 1 )
 		return 0x2E2;
 	elseif ( item.Amount <= 50 )
@@ -18,7 +16,6 @@ exported function GetDropSound ( item )
 	else
 		return 0x2E4;
 	endif
-	
 endfunction
 
 exported function GetGemGrade ( item )
@@ -27,16 +24,10 @@ exported function GetGemGrade ( item )
 	return CInt( cfg_info.Grade );
 endfunction
 
-exported function IsAmber( item )
-
-	item := item; // Avoid compiler warnings.
-
+exported function IsAmber( unused item )
 	return 1;
 endfunction
 
-exported function IsGem( item )
-
-	item := item; // Avoid compiler warnings.
-
+exported function IsGem( unused item )
 	return 1;
 endfunction

@@ -17,10 +17,7 @@ program Install()
 endprogram
 
 exported function SetForArea(map, area_name, realm_name)
-
-	var config := ReadConfigFile(":maps:areas-"+realm_name);
-	var FacetNum := 0,
-		FacetName:= "Felucca";
+	var config := ReadConfigFile(":maps:areas-" + realm_name);
 	if ( !config )
 		return config; // Contains an error.
 	endif
@@ -30,13 +27,15 @@ exported function SetForArea(map, area_name, realm_name)
 		Print("maps --> method no area_name");
 		return elem; // Contains an error.
 	endif
+
+	var FacetNum := 0;
 	case( realm_name )
-		"britannia":		FacetNum :=0;
-		"britannia_alt":	FacetNum :=1;
-		"ilshenar":			FacetNum :=2;
-		"malas":			FacetNum :=3;
-		"tokuno":			FacetNum :=4;
-		"termur":			FacetNum :=5;
+		"britannia":		FacetNum := 0;
+		"britannia_alt":	FacetNum := 1;
+		"ilshenar":			FacetNum := 2;
+		"malas":			FacetNum := 3;
+		"tokuno":			FacetNum := 4;
+		"termur":			FacetNum := 5;
 	endcase
 
 	map.xeast		:= elem.XEast;

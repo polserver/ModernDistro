@@ -12,7 +12,6 @@ var cliloc_desc :=  CInt(ts_cfg_elem.cliloc_desc);
 
 program TimedScript_NightSight(params)
 	var defender := params[1];
-	var attacker := params[2];
 	var duration := params[4];
 
 	defender.setlightlevel(0, duration);

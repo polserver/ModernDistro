@@ -10,14 +10,11 @@ include ":timedScripts:timedScripts";
 
 program TimedScript_Paralysis(params)
 	var defender := params[1];
-	var attacker := params[2];
 	var duration := params[4];
 	var ts_cfg_elem := TS_GetCfgElem("Paralysis");
 	var buff_icon := CInt( ts_cfg_elem.BuffIcon );
 	var cliloc_name :=  CInt(ts_cfg_elem.cliloc_name);
 	var cliloc_desc :=  CInt(ts_cfg_elem.cliloc_desc);
-
-
 
 	PlaySoundEffect(defender, 0x205);
 	SendSysMessage(defender, "You are unable to move.");

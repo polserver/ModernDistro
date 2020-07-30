@@ -4,8 +4,7 @@ use util;
 
 include ":itemutils:itemdesc";
 
-program Pixie_use ( who, pixie )
-	who := who; // Avoid compiler warnings
+program Pixie_use ( unused who, pixie )
 	var sounds := GetObjTypeArray ( pixie.graphic, "Sounds" );
 	
 	var playsound := sounds.randomentry();

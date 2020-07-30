@@ -13,15 +13,12 @@ function process_combat_event(opponent)
   endif
 endfunction
 
-function prepare_for_fight(opponent)
-
+function prepare_for_fight(unused opponent)
 	DisableMainEvents();
 	EnableCombatEvents();
-
 endfunction
 
 function post_combat()
-
 	DisableCombatEvents();
 	EnableMainEvents();
 
@@ -30,5 +27,4 @@ function post_combat()
 
 	sleep(1);
 	look_around();
-
 endfunction

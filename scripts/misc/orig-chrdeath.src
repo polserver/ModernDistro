@@ -65,7 +65,6 @@ function CheckForDivineRes(who, corpse)
     PrintTextAbove(who, who.name + " has been restored by the Gods!");
     PlaySoundEffect(who, 0x11e);
     var itemlist := EnumerateItemsInContainer(corpse);
-    var x;
     var mypack := GetEquipmentByLayer(who, 0x15);
     foreach x in itemlist
       if (!EquipItem(who, x) )

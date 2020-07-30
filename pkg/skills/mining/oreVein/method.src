@@ -10,9 +10,7 @@ program Install()
 	return 1;
 endprogram
 
-exported function IsOreVein(item)
-	item := item; // avoid compiler warning
-	
+exported function IsOreVein(unused item)
 	return 1;
 endfunction
 

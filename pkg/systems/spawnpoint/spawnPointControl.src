@@ -121,7 +121,7 @@ function CreateSpawn(spawnpoint)
     spawn := GetCritter(spawn);
   endif
   var range := GetObjProperty(spawnpoint, "Range");
-  var x, y, z, thingy, success := 0;
+  var x, y, z, success := 0;
   var i := 1;
   while(success == 0)
     if(range == 0)

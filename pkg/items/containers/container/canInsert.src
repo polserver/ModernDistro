@@ -9,14 +9,7 @@ use cliloc;
 include ":containers:checks";
 include "include/housing";
 
-program canInsert( mobile, container, move_type, inserttype, adding_item, existing_stack, amount_to_add )
-
-        //Avoid compiler warnings
-        amount_to_add := amount_to_add;
-        existing_stack := existing_stack;
-        adding_item := adding_item;
-        inserttype := inserttype;
-
+program canInsert( mobile, container, move_type, unused inserttype, unused adding_item, unused existing_stack, unused amount_to_add )
 	if( move_type == MOVETYPE_COREMOVE )
 		return 1;
 	elseif( mobile.cmdlevel >= 2 )
@@ -33,13 +26,11 @@ program canInsert( mobile, container, move_type, inserttype, adding_item, existi
 endprogram
 
 function ContainerIsSecured( mobile, container )
-
-	var sign := GetHouseSign ( mobile );
-	var home := SystemFindObjectBySerial(GetObjProperty(sign, "signserial"));
+	var house_sign := GetHouseSign ( mobile );
 	if ( !container.IsSecured() )
 		// Nothing to worry about.
 		return 0;
-	elseif ( sign.IsAffiliated( sign, mobile ) >= container.GetSecureLevel() )
+	elseif ( house_sign.IsAffiliated(mobile) >= container.GetSecureLevel() )
 		return 0;
 	else
 		return 1;

@@ -71,11 +71,11 @@ endfunction
 
 function ContainerIsSecured( mobile, container )
 
-	var sign := GetHouseSign ( mobile );
+	var house_sign := GetHouseSign ( mobile );
 	if ( !container.IsSecured() )
 		// Nothing to worry about.
 		return 0;
-	elseif ( sign.IsAffiliated( mobile ) >= container.GetSecureLevel() )
+	elseif ( house_sign.IsAffiliated( mobile ) >= container.GetSecureLevel() )
 		return 0;
 	elseif ( mobile.cmdlevel >= 3 )
 		SendSysMessageCL ( mobile, 501646, color := 66 ); // This item is secure but your Godly powers allow access.

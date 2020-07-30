@@ -3,8 +3,8 @@ use uo;
 
 program use_securecont(who, item)
   var house := SystemFindObjectBySerial( GetObjProperty( item, "signserial" ));
-  var secure := 0, chestserial := item.serial;
-  var cown;
+  var secure := 0;
+
   if ((GetObjProperty( house, "ownerserial" ) == who.serial) || (GetObjProperty( house, "owneracct" ) == who.acctname))
      secure := 1;
   else

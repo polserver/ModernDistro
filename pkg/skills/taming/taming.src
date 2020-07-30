@@ -83,7 +83,6 @@ program tame( who )
   endif
   var thename := get_name(thecreature.name);
   var critterhp := AP_GetVital(thecreature, VITALID_LIFE);
-  var count;
   var counter := 0;
   sleep(1);
   while(counter < 4)

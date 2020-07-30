@@ -140,7 +140,6 @@ program do_poisoning( who )
 						SendSysMessage(who,"Those must be poisoned in groups of 10.");
 						return 0;
 					endif
-					var objtype;
 					// Convert arrows and crossbow bolts to the poisoned versions.
 					obj := CreateItemInBackpack( who, "parrow", 10 );
 					SetObjProperty(obj, "PoisonStrength", stren);

@@ -28,12 +28,12 @@ use cfgfile;
  */
 function AP_GetSettingsCfgFile()
 
-	var cfg := ReadConfigFile( ":attributes:settings" );
-	if( cfg.errortext )
-		SysLog( "Error::AP_GetSettingsCfgFile() - Unable to open [:attributes:settings.cfg] ->"+cfg.errortext );
+	var att_cfg := ReadConfigFile( ":attributes:settings" );
+	if( att_cfg.errortext )
+		SysLog( "Error::AP_GetSettingsCfgFile() - Unable to open [:attributes:settings.cfg] ->" + att_cfg.errortext );
 	endif
 
-	return cfg;
+	return att_cfg;
 endfunction
 
 /*
@@ -56,10 +56,10 @@ function AP_GetSettingsCfgElem( elem_name, byref cfg_file:=0 )
 		cfg_file := AP_GetSettingsCfgFile();
 	endif
 
-	var elem := cfg_file[elem_name];
-	if( elem.errortext )
-		SysLog( "Error::AP_GetSettingsCfgElem() - Unable to find elem ["+elem_name+"] ->"+elem.errortext );
+	var cfg_elem := cfg_file[elem_name];
+	if( cfg_elem.errortext )
+		SysLog( "Error::AP_GetSettingsCfgElem() - Unable to find elem ["+elem_name+"] ->" + cfg_elem.errortext );
 	endif
 
-	return elem;
+	return cfg_elem;
 endfunction

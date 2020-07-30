@@ -5,7 +5,7 @@ function Fight(opponent)
     opponent := 0;
 	return;
   endif
-  /*var oldprio :=*/ set_priority(50); // 'oldprio' unnecessary unless we're going to restore it
+  set_priority(50);
   SetOpponent(opponent);
   prepare_for_fight(opponent);
   TurnToward(opponent);

@@ -15,12 +15,13 @@ function find_or_create_storage( areaname )
 endfunction
 
 function find_or_create_item(storage, name, objtype := 0x1966a)
-  var item := FindRootItemInStorageArea(storage, name);
-  if(item)
-	return item;
-  endif
-  item := CreateRootItemInStorageArea( storage, name, objtype);
-  return item;
+	var item_found := FindRootItemInStorageArea(storage, name);
+	if(item_found)
+		return item_found;
+	endif
+
+	item_found := CreateRootItemInStorageArea( storage, name, objtype);
+	return item_found;
 endfunction
 
 function IsLocationAccessible(character, x, y, z)

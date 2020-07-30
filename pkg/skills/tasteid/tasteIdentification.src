@@ -15,8 +15,6 @@ program do_tasteid( character )
 	var cfg := AP_GetAttributeCfgElem( ITEM_IDENTIFICATION );
 	var thepoints := cfg.AwardDefault;
     var the_item;
-    var contents;
-    var poison_level;
     var poison_descr;
     var content_descr;
     var alchemcfg := ReadConfigFile(":adval:itemdesc");

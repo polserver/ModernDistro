@@ -6,7 +6,7 @@ include "doors";
 include ":attributes:attributes";
 
 program use_door(chr, door)
-  var doordesc, dooroptions, configuration, refresh, flowoption, closelocked, house, hs, ss, sign, item, stuff;
+  var door_desc, dooroptions, configuration, refresh, flowoption, closelocked, house, hs, ss, sign, item, stuff;
   var signarray := array(0x1600E, 0x1600F, 0x16010, 0x16011);
   var friend;
   if(GetObjProperty(door, "#inuse"))
@@ -20,7 +20,7 @@ program use_door(chr, door)
             endif
         endforeach
   SetObjProperty(door, "#inuse", 1);
-  doordesc := ReadConfigFile("itemdesc");
+  door_desc := ReadConfigFile("itemdesc");
   dooroptions := ReadConfigFile("door");
   configuration := FindConfigElem(dooroptions, "doors");
   refresh := GetConfigString(configuration, "DoorsRefresh");
@@ -77,7 +77,7 @@ program use_door(chr, door)
       endif */
       foreach potentialdoor in ListObjectsInBox((door.x-1),(door.y-1),(door.z),(door.x+1),(door.y+1),(door.z))
         if(!potentialdoor.hp)
-          var doortype := doordesc[potentialdoor.objtype].doortype;
+          var doortype := door_desc[potentialdoor.objtype].doortype;
           if((doortype) && (door != potentialdoor))
             if((!potentialdoor.locked) && (!GetObjProperty(potentialdoor, "WhenOpened")))
               start_script(":doors:openDoor", potentialdoor);

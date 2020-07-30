@@ -16,7 +16,7 @@ function process_combat_event(opponent)
   endif
 endfunction
 
-function process_flee_event(opponent)
+function process_flee_event(unused opponent)
   return 0;
 endfunction
 
@@ -37,7 +37,7 @@ function post_combat()
   look_around();
 endfunction
 
-function prepare_for_fight(opponent)
+function prepare_for_fight(unused opponent)
   DisableMainEvents();
   EnableCombatEvents();
 endfunction
@@ -64,7 +64,7 @@ function do_damage(evsource)
   endif
 endfunction
 
-function CanEat(character, item)
+function CanEat(unused character, item)
   if ( ( item.objtype >= 0x2030 ) && (item.objtype <= 0x2060) )
     return 0;
   endif

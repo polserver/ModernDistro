@@ -11,19 +11,16 @@ program Install()
 	return 1;
 endprogram
 
-exported function IsLog( item )
-	item := item; // Avoid compiler warnings.
-	
+exported function IsLog( unused item )
 	return 1;
 endfunction
 
 exported function GetRessourceName( item )
-
-        var item_elem := GetItemDescInfo( item.objtype );
-        if( item_elem.errortext )
-                PrintTextAbove( item, "Error reading description of item -->"+item_elem.errortext );
-                return 0;
-        endif
+	var item_elem := GetItemDescInfo( item.objtype );
+	if( item_elem.errortext )
+			PrintTextAbove( item, "Error reading description of item -->"+item_elem.errortext );
+			return 0;
+	endif
 
 	return CStr( item_elem.IName );
 endfunction

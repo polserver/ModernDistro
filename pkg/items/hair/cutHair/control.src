@@ -6,7 +6,7 @@
 use uo;
 use os;
 
-program ControlScript(cuthair)
+program ControlScript(unused cuthair)
 	//Sleep(90);
 	//DestroyItem(cuthair);
 	

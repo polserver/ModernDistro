@@ -40,7 +40,7 @@ function ApplyProtection(caster)
 	var resist_spells_amt := AP_GetSkill(caster, RESISTING_SPELLS);
 
 	// Get the amount caster's Inscription skill will negate the penalties for Protection.
-	var  inscr_help := CInt(AP_GetSkill(caster, INSCRIPTION) / 20);
+	//var  inscr_help := CInt(AP_GetSkill(caster, INSCRIPTION) / 20);
 
 	// Calculate the Physical Resistance penalty.
 	var phys_resist_penalty := 10 + (RandomInt(6));
@@ -104,7 +104,7 @@ endfunction
  * FC above the cap will not counteract the negative effect of this spell.
  * The protection spell has an indefinite duration, becoming active when cast,
  * and deactivated when re-cast. This spell, along with Reactive Armor and
- * Magic Reflection, will stay on—even after logging out —- until you
- * “turn it off” by casting it again. The spell effect will be purged
+ * Magic Reflection, will stay on even after logging out - until you
+ * turn it off by casting it again. The spell effect will be purged
  * when dying, and Protection has to be re-cast after death.
 */

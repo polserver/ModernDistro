@@ -57,8 +57,7 @@ endfunction
 
 function SendConferences(targ:="", conference_name:="", conference_pass:="")
 	var conferences := CH_GetDataElem("Conferences");
-	var packet;
-	
+
 	if ( conference_name )
 		if ( CH_CheckDebug() )
 			Print("Sending conferences ("+conference_name+") to "+targ);
@@ -78,7 +77,6 @@ function SendConferences(targ:="", conference_name:="", conference_pass:="")
 			SendChatPacket(CreateConferencePacket(conference, conference_pass), targ);
 		endforeach
 	endif
-	
 endfunction
 
 function CreateConferencePacket(conference_name, conference_pass)

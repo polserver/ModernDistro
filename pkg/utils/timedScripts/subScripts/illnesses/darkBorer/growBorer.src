@@ -43,7 +43,7 @@ program PoisonScript(params)
 	dowhile( duration > 0 );
 
 	PrintTextAbove(mobile, "*A dark borer that was incubating in "+mobile.name+"'s stomach rips its way out!*", 3, 55);
-	var baby := CreateNPCFromTemplate(":brainai:darkborer", mobile.x, mobile.y, mobile.z, 0, mobile.realm);
+	CreateNPCFromTemplate(":brainai:darkborer", mobile.x, mobile.y, mobile.z, 0, mobile.realm);
 	KillMobile(mobile);
 
 	SleepMS(100);

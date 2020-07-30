@@ -7,9 +7,9 @@ include ":attributes:attributes";
 
 program horrific_beast( params )
 	var caster := params[1];
-	var info := params[2]; // Struct containing additional info about the spell.
-	var spellID := params[3];
-	var cast_on := params[4]; // Target of spell if required.
+	//var info := params[2]; // Struct containing additional info about the spell.
+	//var spellID := params[3];
+	//var cast_on := params[4]; // Target of spell if required.
 
 	if (Getobjproperty(caster, "poly")  == 1)
 		SendSysMessage(caster,"You are under the influence of the spell!");

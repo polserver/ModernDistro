@@ -204,7 +204,7 @@ function normalusage(who, item)
   endcase
 endfunction
 
-function stobj(who, item)
+function stobj(unused who, item)
   SetObjProperty(item, "#inuse", 1);
   var il := GetObjProperty(item, "il");
   var note := GetObjProperty(item,"note");
@@ -246,8 +246,7 @@ function trappedswitch(who, item, mid, stt, snd)
          PlayObjectCenteredEffect( who, FX_EXPLODE_3, 10,10);
          var dmg :=(RandomInt(20) + CInt(trapstrength));
          ApplyRawDamageEX(who, dmg, DMG_PHYSICAL);
-    4:   var dmg;
-         var victims := ListMobilesNearLocation( item.x, item.y, item.z, 5, item.realm);
+    4:   var victims := ListMobilesNearLocation( item.x, item.y, item.z, 5, item.realm);
          Detach();
          foreach mob in victims
          var dmg :=(RandomInt(20) + CInt(trapstrength));
@@ -265,7 +264,7 @@ function trappedswitch(who, item, mid, stt, snd)
   EraseObjProperty(item, "#inuse");
 endfunction
 
-function alterpassage(who, item, stt, snd);
+function alterpassage(who, item, unused stt, snd);
   var la := GetObjProperty(item,"links");
   var obj;
   foreach entry in la
@@ -282,7 +281,6 @@ function alterpassage(who, item, stt, snd);
   speakr.movable := 0;
   speakr.graphic := 0x1;
   var pl := GetObjProperty(item,"partsarray");
-  var i;
   var stp;
   var a := 0;
   if(GetObjProperty(item, "status") == "on")
@@ -559,7 +557,7 @@ function teleporter(who, item, mid, stt, snd)
   EraseObjProperty(item, "#inuse");
 endfunction
 
-function linkdoor(who, item)
+function linkdoor(unused who, item)
   SetObjProperty(item, "#inuse", 1);
   Detach();
   var da := GetObjProperty(item, "ds");
@@ -622,7 +620,7 @@ function bindlights(who, item)
   SetObjProperty(item,"partsarray", newarray);
 endfunction
 
-function createtrap(who, item, type);
+function createtrap(unused who, item, type);
   SetObjProperty(item,"function", "trap");
   SetObjProperty(item,"trap_type", type);
 endfunction
@@ -684,9 +682,7 @@ function setprp(who, item, result)
   var newarray := {};
   var note:=result[12];
   note[1, find(note, ": ", 1)+1]:="";
-  var subnote;
-  var i;
-  subnote:=result[13];
+  var subnote := result[13];
   subnote[1, find(subnote, ": ", 1)+1]:="";
   var trg;
   while(1)
@@ -722,7 +718,6 @@ function linkteleport(who, item)
 endfunction
 
 function GMTResisted(who, amt)
-  var magery  := CInt(RandomInt(99)+1);
   var evalint := CInt(RandomInt(99)+1);
   var halfamt := amt/2;
   var rezamt := CInt(((RandomInt(halfamt)+1) * evalint ) / 100);

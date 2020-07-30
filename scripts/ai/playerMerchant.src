@@ -73,7 +73,6 @@ program player_merchant()
   SetObjProperty(me,"serial", me.serial);
   EnableEvents( SYSEVENT_ITEM_GIVEN + SYSEVENT_MERCHANT_SOLD + SYSEVENT_DOUBLECLICKED);
   EnableEvents( SYSEVENT_SPEECH, 4);
-  var res;
   var ev;
   var text;
   while(1)
@@ -346,6 +345,7 @@ function stockitem(tev)
       else
         var items := 0;
         foreach thing in EnumerateItemsInContainer(item)
+          thing := thing; // Avoid compiler warnings
           items := 1;
           break;
         endforeach

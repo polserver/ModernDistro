@@ -60,9 +60,9 @@ function in_combat_event_loop(opponent, loops)
   endif
 endfunction
 
-function prepare_for_fight(opponent)
+function prepare_for_fight(unused opponent)
   if (!CInt(GetObjProperty(me, "mr")))
-	CastSpell(me,me,"reflect");
+    CastSpell(me,me,"reflect");
   endif
   DisableMainEvents();
   EnableCombatEvents();
@@ -70,7 +70,7 @@ endfunction
 
 function post_combat()
   if ( AP_GetVital(me, VITALID_LIFE) < (AP_GetStat(me, STRENGTH)-10))
-	CastSpell(me,me,"greaterHeal");
+	  CastSpell(me,me,"greaterHeal");
   endif
   if (TS_GetTimerNames(me, "P").size() > 0)
     CastSpell(me, me, "cure");

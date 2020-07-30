@@ -36,53 +36,54 @@ program gump_virtue_gump(who)
 
 	// valor info
 	var valordesc := "valor is Courage to stand up against risks. That which answers when great deeds are called for and the cloak that protects the other virtues.";
-	var valorprin := "Pure Courage";
-	var valormantra := "Ra";
+	// var valorprin := "Pure Courage";
+	// var valormantra := "Ra";
 
 	// Courage info
 	var honordesc := "honor is Courage to seek and uphold the Truth. that which shirks no duty.";
-	var honorprin := "Truth, Courage";
-	var honormantra := "Summ";
+	// var honorprin := "Truth, Courage";
+	// var honormantra := "Summ";
 
 	// Compassion info
 	var compassiondesc := "Compassion is Love of others. The quality that compels one to share the journeys of others.";
-	var compassionprin := "Pure Love";
-	var compassionmantra := "Mu";
+	// var compassionprin := "Pure Love";
+	// var compassionmantra := "Mu";
 
 	// Justice info
 	var justicedesc := "Justice is Truth, tempered by Love. That which should be the same for nobles and serfs alike.";
-	var justiceprin := "Truth, Love";
-	var justicemantra := "Beh";
+	// var justiceprin := "Truth, Love";
+	// var justicemantra := "Beh";
 
 	// Honesty info
 	var honestydesc := "Honesty is scrupulous respect for Truth - the willingness never to deceive oneself or another.";
-	var honestyprin := "Pure Truth ";
-	var honestymantra := "Ahm";
+	// var honestyprin := "Pure Truth ";
+	// var honestymantra := "Ahm";
 
 	// Sprituality info
 	var spiritualitydesc := "Spirituality is to seek Truth, Love and Courage from one's own self and the world around. That which, in knowing the self, knows all.";
-	var spiritualityprin := "Truth, Love, and Courage";
-	var spiritualitymantra := "Om";
+	// var spiritualityprin := "Truth, Love, and Courage";
+	// var spiritualitymantra := "Om";
 
 	// Sacrifice info
 	var sacrificedesc := "Sacrifice is Courage to give oneself in name of Love. That which is loathe to place the self above all else.";
-	var sacrificeprin := "Love, Courage";
-	var sacrificemantra := "Cah";
+	// var sacrificeprin := "Love, Courage";
+	// var sacrificemantra := "Cah";
 
 	// Humility info
 	var humilitydesc := "Humility is the opposite of Pride which is the absence of Truth, Love or Courage. That which serfs are born with, but nobles must strive to attain.";
-	var humilityprin := "Truth, Love, and Courage independently";
-	var humilitymantra := "Lum";
-// Cliloc 1052051 - Humility desc
-// Cliloc 1052053 - Sacrifice desc
-// Cliloc 1052054 - Compassion desc
-// Cliloc 1052056 - Spirituality desc
-// Cliloc 1052057 - Valor desc
-// Cliloc 1052058 - Honor desc
-// Cliloc 1052059 - Justice desc
-// Cliloc 1052060 - Honesty desc
+	// var humilityprin := "Truth, Love, and Courage independently";
+	// var humilitymantra := "Lum";
 
-// Cliloc 1051008 - Seeker
+	// Cliloc 1052051 - Humility desc
+	// Cliloc 1052053 - Sacrifice desc
+	// Cliloc 1052054 - Compassion desc
+	// Cliloc 1052056 - Spirituality desc
+	// Cliloc 1052057 - Valor desc
+	// Cliloc 1052058 - Honor desc
+	// Cliloc 1052059 - Justice desc
+	// Cliloc 1052060 - Honesty desc
+	// Cliloc 1051008 - Seeker
+
 	repeat
 	//virtuedesc := "";
 	setVirtueHues(who);
@@ -104,9 +105,7 @@ program gump_virtue_gump(who)
 endprogram
 
 function showGump(who, virtuedesc)
-
 	var virtue_gump := GFCreateGump();
-	var Ultima;
 	var result :={};
 	result[0] := 0;
 	GFPage(virtue_gump, 0);
@@ -279,9 +278,7 @@ function setVirtueHues(who)
 
 endfunction
 
-
 function getVirtueValues(who)
-var virtues := {"Valor", "Honor", "Compassion", "Justice", "Honesty", "Spirituality", "Sacrifice", "Humility"};
 	valorAmount := VS_GetVirtueAmount(who, "Valor");
 	SendSysMessage(who, "ValorAmt == " + CStr(valorAmount));
 	honorAmount := VS_GetVirtueAmount(who, "Honor");
@@ -292,7 +289,6 @@ var virtues := {"Valor", "Honor", "Compassion", "Justice", "Honesty", "Spiritual
 	sacrificeAmount := VS_GetVirtueAmount(who, "Sacrifice");
 	humilityAmount := VS_GetVirtueAmount(who, "Humility");
 endfunction
-
 
 function inRange(val, low, high)
 

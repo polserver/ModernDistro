@@ -223,7 +223,7 @@ endfunction
 function DisplayAttributes(targ, byref gump, byref entry, byref y_pos)
 	var type := entry[2];
 	var attributes := AP_ListAttributesByType(type);
-	var attrib_cfg := ReadConfigFile(":*:attributes");
+
 	//
 	// Notes about the first page of showing attributes:
 	// 1. The Y position they start showing on is dynamic.

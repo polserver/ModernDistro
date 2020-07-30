@@ -5,10 +5,7 @@ program Install()
 	return 1;
 endprogram
 
-exported function IsForge( item )
-
-	item := item; // Avoid compiler warnings.
-
+exported function IsForge( unused item )
 	return 1;
 endfunction
 

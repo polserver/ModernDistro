@@ -9,7 +9,7 @@ program Install()
 	return 1;
 endprogram
 
-exported function IsFireField(field)
+exported function IsFireField(unused field)
 	return 1;
 endfunction
 

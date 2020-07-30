@@ -9,7 +9,7 @@ include ":damage:damage";
 program pain_spike( params )
 	var caster := params[1];
 	var info := params[2]; // Struct containing additional info about the spell.
-	var spellID := params[3];
+	//var spellID := params[3];
 	var circle := info.circle;
 
 	SendSysMessage(caster, "Select your victim:", 1, 88);

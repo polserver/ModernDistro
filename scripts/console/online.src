@@ -1,6 +1,6 @@
 use uo;
 
-program console_online( cmd )
+program console_online( unused cmd )
     var chrs := EnumerateOnlineCharacters();
     var names := {};
     foreach chr in chrs

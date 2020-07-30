@@ -290,7 +290,7 @@ function HouseFunction(event, num)
 	endif
 endfunction
 
-function secure(event, text)
+function secure(event, unused text)
 	if(!GetObjProperty(sign, "RemainingSecures"))
 		SendSysMessageCL(event.source, 1008142, color := 33); // The maximum number of secure items has been reached :
 		return 0;

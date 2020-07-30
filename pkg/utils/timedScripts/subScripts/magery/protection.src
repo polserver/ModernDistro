@@ -11,8 +11,6 @@ include ":damage:damage";
 
 program TimedScript_Protection(params)
 	var defender := params[1];
-	var attacker := params[2];
-	var points := params[3];
 	params := 0;
 	var mods := struct;
 

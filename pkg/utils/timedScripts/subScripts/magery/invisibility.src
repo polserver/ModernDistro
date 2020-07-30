@@ -10,7 +10,6 @@ include ":timedScripts:timedScripts";
 
 program TimedScript_Invisiblity(params)
 	var defender := params[1];
-	var attacker := params[2];
 	params := 0;
 	var ts_cfg_elem := TS_GetCfgElem("Invisibility");
 	var buff_icon := CInt( ts_cfg_elem.BuffIcon );
