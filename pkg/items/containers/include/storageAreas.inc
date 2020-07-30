@@ -20,12 +20,14 @@ use polsys;
 use storage;
 
 // * Global Variables *
-CONST CP_NOCREATE	:= 0x0;
-CONST CP_CREATE		:= 0x1;
+const CP_NOCREATE	:= 0x0;
+const CP_CREATE		:= 0x1;
 
-CONST CP_DEFAULT_AREA	:= "World Bank";
-CONST CP_DEFAULT_PREFIX	:= "[Root Container] ";
-//CONST CP_DEFAULT_PREFIX	:= "Bankbox of ";
+const CP_DEFAULT_AREA	:= "World Bank";
+const CP_MERCHANT_AREA	:= "Merchant Storage";
+const CP_DEFAULT_PREFIX	:= "[Root Container] ";
+
+var container_type := "BankBox";
 
 /*
  * Set the 'box_type' variable to the object name of the container type
@@ -39,7 +41,7 @@ CONST CP_DEFAULT_PREFIX	:= "[Root Container] ";
  * Ideally, you should make an object type with the name 'BankBox' to better
  * control the number of items that can be put in the storage container.
  */
-var container_type	:= "BankBox";
+// var container_type	:= "BankBox";
 
 // Toggles the bank related debug messages on and off.
 var STORAGE_DEBUG	:= 1;
@@ -134,7 +136,7 @@ function CP_GetStorageAreaContainer( container_id, storage_area_name:=0, create:
 endfunction
 
 /*
- * CP_CreateStorageAreaContainer(container_id, storage_area_name)
+ * CP_CreateStorageAreaContainer(container_id, storage_area_name, container_type)
  *
  * Purpose
  * Creates a root container in a storage area.

@@ -52,7 +52,7 @@ function anyitems()
 
   foreach item in backpack
     timeleft:=(GetObjProperty(item,"time")-ReadGameClock());
-    
+
     if ((!timeleft) or (timeleft == ""))
     elseIf (timeleft<0)
 	updateplayers(item);
