@@ -2,13 +2,9 @@ use uo;
 use os;
 
 program Install()
-
 	return 1;
 endprogram
 
-exported function IsDecoDeed( item )
-
-        item := item; //Avoid compiler warnings
-        
+exported function IsDecoDeed( unused item )
 	return 1;
 endfunction

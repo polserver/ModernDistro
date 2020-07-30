@@ -9,7 +9,7 @@ program Install()
 	return 1;
 endprogram
 
-exported function IsPoisonField(field)
+exported function IsPoisonField(unused field)
 	return 1;
 endfunction
 

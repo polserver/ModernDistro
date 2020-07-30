@@ -12,9 +12,7 @@ program Install()
 	return 1;
 endprogram
 
-exported function IsLog( item )
-	item := item; // Avoid compiler warnings.
-	
+exported function IsLog( unused item )
 	return 1;
 endfunction
 

@@ -3,14 +3,11 @@ use os;
 use cfgfile;
 
 program Install()
-
 	return 1;
 endprogram
 
-exported function IsContainer( container )
-
+exported function IsContainer( unused container )
 	// object.IsA(POLCLASS_CONTAINER) is more ideal but this allows for securable containers without checking for objtypes
-	container := container; //Avoid compiler warnings
 
 	return 1;
 endfunction
@@ -23,7 +20,6 @@ exported function GetBaseMaterial( container )
 endfunction
 
 exported function IsSecured( container )
-
 	var secured := GetObjProperty( container, "secured" );
 	if( !secured )
 		secured := 0;
@@ -33,5 +29,5 @@ exported function IsSecured( container )
 endfunction
 
 exported function GetSecureLevel( container )
-		return IsSecured( container ).level;
+	return IsSecured( container ).level;
 endfunction

@@ -174,7 +174,7 @@ endfunction
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 function Status (stone)
 
-    var maxcharges := GetObjProperty(stone, "MaxCharges");
+    //var maxcharges := GetObjProperty(stone, "MaxCharges");
     var charges := GetObjProperty(stone, "Charges");
     var capacity := GetObjProperty(stone, "MaxCapacity");
     var amt := GetObjProperty(stone, "Amount");

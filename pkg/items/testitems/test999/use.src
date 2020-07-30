@@ -1,8 +1,7 @@
 use uo;
 use os;
 
-program useLight( who, testitem999 )
-
+program useLight( unused who, testitem999 )
 	testitem999.test();
 
 	return 1;

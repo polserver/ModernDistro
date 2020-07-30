@@ -9,7 +9,7 @@ program Install()
 	return 1;
 endprogram
 
-exported function IsEnergyField(field)
+exported function IsEnergyField(unused field)
 	return 1;
 endfunction
 

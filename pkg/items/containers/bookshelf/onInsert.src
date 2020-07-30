@@ -7,16 +7,7 @@ use uo;
 use cfgfile;
 use util;
 
-program OnInsert( character, container, movetype, inserttype, adding_item, existing_stack, amount_to_add )
-
-        //Avoid compiler warnings
-        amount_to_add := amount_to_add;
-        existing_stack := existing_stack;
-        adding_item := adding_item;
-        inserttype := inserttype;
-        movetype := movetype;
-        character := character;
-
+program OnInsert( unused character, container, unused movetype, unused inserttype, unused adding_item, unused existing_stack, unused amount_to_add )
 	var cfg := ReadConfigFile( ":containers:bookshelf" );
 	if( !cfg )
 		return 1;

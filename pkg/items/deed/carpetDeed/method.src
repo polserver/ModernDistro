@@ -6,9 +6,6 @@ program Install()
 	return 1;
 endprogram
 
-exported function IsCarpetDeed( item )
-
-        item := item; //Avoid compiler warnings
-        
+exported function IsCarpetDeed( unused item )
 	return 1;
 endfunction

@@ -9,14 +9,11 @@ program Install()
 	return 1;
 endprogram
 
-exported function IsCorpse( corpse )
-
-	corpse := corpse; //Avoid compiler warnings
+exported function IsCorpse( unused corpse )
 	return 1;
 endfunction
 
 exported function GetOwner( corpse )
-
 	if( corpse.ownerserial )
 		return SystemFindObjectBySerial( corpse.ownerserial );
 	elseif( CInt( GetObjProperty( corpse, "ownerserial" )))
@@ -25,7 +22,6 @@ exported function GetOwner( corpse )
 endfunction
 
 exported function SetOwner( corpse, serial )
-
 	if( serial.IsA( POLCLASS_UOBJECT ))
 		serial := serial.serial;
 	endif
@@ -34,7 +30,6 @@ exported function SetOwner( corpse, serial )
 endfunction
 
 exported function NPCTemplate( corpse )
-
 	var template := GetObjProperty( corpse, "npctemplate" );
 	if( template )
 		return NPC_GetNPCConfig( template );

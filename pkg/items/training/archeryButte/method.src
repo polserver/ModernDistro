@@ -6,13 +6,9 @@
 use uo;
 
 program Install()
-
 	return 1;
 endprogram
 
-exported function IsArcheryBute( item )
-
-	item := item; // Avoid compiler warnings.
-	
+exported function IsArcheryBute( unused item )
 	return 1;
 endfunction

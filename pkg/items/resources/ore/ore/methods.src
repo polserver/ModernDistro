@@ -5,21 +5,14 @@ use cfgfile;
 include ":itemutils:itemdesc";
 
 program Install()
-
 	return 1;
 endprogram
 
-exported function IsOre( item )
-
-	item := item; // Avoid compiler warnings.
-
+exported function IsOre( unused item )
 	return 1;
 endfunction
 
-exported function IsSmeltable( item )
-
-	item := item; // Avoid compiler warnings.
-
+exported function IsSmeltable( unused item )
 	return 1;
 endfunction
 

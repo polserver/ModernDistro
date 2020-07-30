@@ -4,12 +4,11 @@
  
 use uo;
 
-
 program Install()
 	return 1;
 endprogram
 
-exported function IsSpiderWeb(field)
+exported function IsSpiderWeb(unused field)
 	return 1;
 endfunction
 

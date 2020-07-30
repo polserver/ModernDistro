@@ -9,7 +9,7 @@ program Install()
 	return 1;
 endprogram
 
-exported function IsParalyzeField(field)
+exported function IsParalyzeField(unused field)
 	return 1;
 endfunction
 
