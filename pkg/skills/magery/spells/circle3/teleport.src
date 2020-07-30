@@ -8,8 +8,7 @@ include ":attributes:attributes";
 program cast_teleport( parms )
   var caster := parms[1];
   var info := parms[2];
-  var interdiction;
-  
+
   var cast_on := MS_TargetCoordinates(caster, info.targ, "Select a target.");
       if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
         cast_on := parms[4];

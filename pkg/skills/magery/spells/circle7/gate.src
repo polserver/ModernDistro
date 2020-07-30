@@ -12,7 +12,6 @@ include ":magery:isValidLoc";
 program spell_gate(parms)
   var caster := parms[1];
   var info := parms[2];
-  var	success := 0;
 
   var cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_NEUTRAL);
    if (!cast_on)

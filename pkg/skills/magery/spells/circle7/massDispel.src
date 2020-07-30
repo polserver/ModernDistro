@@ -31,7 +31,7 @@ program mass_dispel ( parms )
   var range := CInt(magery / 20);
   var targets := ListMobilesNearLocation( cast_on.x, cast_on.y, cast_on.z, range, caster.realm );
   PlaySoundEffect( caster, 0x202 );
-  var ei := GetAttribute(caster, EVALUATING_INTELLIGENCE)/10;
+  //var ei := GetAttribute(caster, EVALUATING_INTELLIGENCE)/10;
   foreach mobile in targets
 	SetObjProperty(mobile, "LastHit", {caster.name, caster.serial, "mass dispel"});
     if(Reflected(mobile))

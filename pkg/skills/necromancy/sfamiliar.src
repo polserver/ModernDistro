@@ -1,17 +1,15 @@
 // Deviates from official spell
 
-
 include ":magery:summon";
 include ":damage:damage";
 
 program summon_familiar( params )
 	var caster := params[1];
-	var info := params[2]; // Struct containing additional info about the spell.
-	var spellID := params[3];
-	var targ := params[4]; // Target of spell if required.
+	//var info := params[2]; // Struct containing additional info about the spell.
+	//var spellID := params[3];
+	//var targ := params[4]; // Target of spell if required.
 
 	var familiar :=SystemFindObjectBySerial(Cint(getobjproperty(caster, "familiar")));
-
 	if(familiar)
 		MoveObjectToLocation(familiar, 10, 10, 10, familiar.realm, MOVEOBJECT_FORCELOCATION);
 		KillMobile(familiar);

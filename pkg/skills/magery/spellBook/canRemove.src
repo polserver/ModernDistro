@@ -5,7 +5,7 @@
 use uo;
 use os;
 
-program canRemove(mobile, container, item, move_type)
+program canRemove(mobile, container, unused item, move_type)
 	if ( mobile.cmdlevel )
 		return 1;
 	elseif ( move_type == MOVETYPE_COREMOVE )

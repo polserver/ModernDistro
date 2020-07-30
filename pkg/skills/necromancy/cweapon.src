@@ -4,36 +4,33 @@ use vitals;
 include ":magery:spellRestrictions";
 
 program curse_weapon( params )
-	var caster := params[1];
-	var info := params[2]; 				// Struct containing additional info about the spell.
-	var spellID := params[3];
-	var cast_on := params[4]; 			// Target of spell if required.
-
-	var necroskill := Cint(GetAttribute(caster, NECROMANCY));
-	var sspeak := Cint(GetAttribute(caster, SPIRIT_SPEAK));
-	var int := AP_GetStat(caster, INTELLIGENCE);
+	var spell_caster := params[1];
+	//var info := params[2]; 				// Struct containing additional info about the spell.
+	//var spellID := params[3];
+	//var cast_on := params[4]; 			// Target of spell if required.
+	//var necroskill := Cint(GetAttribute(spell_caster, NECROMANCY));
+	var sspeak := Cint(GetAttribute(spell_caster, SPIRIT_SPEAK));
+	//var int := AP_GetStat(spell_caster, INTELLIGENCE);
 	var duration := ((sspeak * 10) / 34) + 1;
 
 	detach();
-	PlaySoundEffect(caster, 0x387);
-	PlayObjectCenteredEffectEx( caster, 0x3779, 1, 15, 9905, 32, 0, 2 );
+	PlaySoundEffect(spell_caster, 0x387);
+	PlayObjectCenteredEffectEx( spell_caster, 0x3779, 1, 15, 9905, 32, 0, 2 );
 	Sleep(1);
-	PlayObjectCenteredEffectEx( caster, 0x37B9, 1, 14, 9902, 32, 255, 5 );
+	PlayObjectCenteredEffectEx( spell_caster, 0x37B9, 1, 14, 9902, 32, 255, 5 );
 
-	if(GetObjProperty(caster.weapon, "cursed"))
-		SendSysMessage(caster, "This weapon has already been cursed!");
+	if(GetObjProperty(spell_caster.weapon, "cursed"))
+		SendSysMessage(spell_caster, "This weapon has already been cursed!");
 		return 0;
 	endif
 
-	SetObjProperty(caster.weapon , "cursed", 1);
-	SetObjProperty(caster , "cursed_weapon", 1);
+	SetObjProperty(spell_caster.weapon , "cursed", 1);
+	SetObjProperty(spell_caster , "cursed_weapon", 1);
 	sleep(duration);
-	Eraseobjproperty(caster.weapon, "cursed");
-	Eraseobjproperty(caster, "cursed_weapon");
-	PlayObjectCenteredEffectEx( caster, 0x3779, 1, 15, 9905, 32, 0, 2 );
+	Eraseobjproperty(spell_caster.weapon, "cursed");
+	Eraseobjproperty(spell_caster, "cursed_weapon");
+	PlayObjectCenteredEffectEx( spell_caster, 0x3779, 1, 15, 9905, 32, 0, 2 );
 	Sleep(1);
-	PlayObjectCenteredEffectEx( caster, 0x37B9, 1, 14, 9902, 32, 255, 5 );
-	playsoundeffect(caster, 0x1EB);
-
-
+	PlayObjectCenteredEffectEx( spell_caster, 0x37B9, 1, 14, 9902, 32, 255, 5 );
+	playsoundeffect(spell_caster, 0x1EB);
 endprogram

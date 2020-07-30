@@ -150,7 +150,7 @@ function CheckGlobalOre(who, targ)
 	return 1;
 endfunction
 
-function CanMine(who, tool, targ, orig_x, orig_y)
+function CanMine(who, tool, unused targ, orig_x, orig_y)
 	if ( who.hidden )
 		SendSysMessage(who, "You stop mining to remain hidden.");
 		return 0;

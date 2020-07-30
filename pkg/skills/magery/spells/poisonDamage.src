@@ -10,7 +10,6 @@ include ":damage:damage";
 program poisondamage (passparms)
   var who      := passparms[1];
   var attacker := passparms[2];
-  var weapon   := passparms[3];
   var level    := passparms[4];
   var pfield   := Cint(passparms[5]);
   if(who.npctemplate)

@@ -4,15 +4,13 @@ use uo;
 use vitals;
 
 include ":attributes:attributes";
-//include ":magery:spellRestrictions";
 include ":damage:damage";
-
 
 program wither( params )
 	var caster := params[1];
 	var info := params[2]; // Struct containing additional info about the spell.
-	var spellID := params[3];
-	var cast_on := params[4]; // Target of spell if required.
+	//var spellID := params[3];
+	//var cast_on := params[4]; // Target of spell if required.
 
     var necroskill := Cint(AP_GetSkill(caster, NECROMANCY));
     var sspeak := Cint(AP_GetSkill(caster, SPIRIT_SPEAK));
@@ -22,7 +20,6 @@ program wither( params )
     if(caster.ip)
         bonus := int/5;
     endif
-
 
     var  dmg := ((necroskill + sspeak)/2) + bonus;
     PlaySoundEffect(caster, 0x1FB);
@@ -44,6 +41,4 @@ program wither( params )
         ApplyRawDamageEX(person, Resisted(CInt(info.circle), caster, person, dmg), DMG_PHYSICAL, caster);
         dmg := dmg/2; // Below applyrawdamage because it reduces the damage by half after 1 patch
     endforeach
-
-
 endprogram

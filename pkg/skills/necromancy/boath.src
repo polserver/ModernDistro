@@ -8,8 +8,8 @@ include ":attributes:attributes";
 
 program blood_oath( params )
 	var caster := params[1];
-	var info := params[2]; // Struct containing additional info about the spell.
-	var spellID := params[3];
+	//var info := params[2]; // Struct containing additional info about the spell.
+	//var spellID := params[3];
 
 	SendSysMessage(caster, "Select your victim:", 1, 88);
 	var cast_on := Target(caster);
@@ -38,6 +38,4 @@ program blood_oath( params )
 	Detach();
 	sleep(duration);
 	Eraseobjproperty(cast_on, "bloodoath");
-
-
 endprogram

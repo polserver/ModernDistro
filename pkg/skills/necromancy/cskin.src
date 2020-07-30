@@ -6,18 +6,13 @@ include ":damage:damage";
 
 program corpse_skin( params )
 	var caster := params[1];
-	var info := params[2]; // Struct containing additional info about the spell.
-	var spellID := params[3];
-
+	//var info := params[2]; // Struct containing additional info about the spell.
+	//var spellID := params[3];
 
 	SendSysMessage(caster, "Select your victim:", 1, 88);
 	var cast_on := Target(caster);
-
-
 	var targrs := Cint(GetAttribute(cast_on, RESISTING_SPELLS));
 	var sspeak := Cint(GetAttribute(caster, SPIRIT_SPEAK));
-
-
 	var duration := CInt(((sspeak - targrs) / 2.5) + 40);
 
 	if(!cast_on.isa(POLCLASS_MOBILE))
@@ -43,5 +38,4 @@ program corpse_skin( params )
 	ModifyResistance(caster, "Poison", 15);
 	ModifyResistance(caster, "Cold", 1-0);
 	ModifyResistance(caster, "Physical", -10);
-
 endprogram

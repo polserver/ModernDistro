@@ -5,11 +5,11 @@ include "include/client";
 include ":attributes:attributes";
 
 function summon_creature( caster, circle := 8, npctemplate, cast_loc, controldiff := 50, summontype := "undefined" )
-    var thecritter;
-    var magery := GetAttribute(caster, MAGERY);
-    var duration := 20 + (magery * 2);
-    var attributelist := { "None" };
-    var parms := struct, totem, totemtype;
+	summontype := summontype; // fix ecompile warning
+	var thecritter;
+	var magery := GetAttribute(caster, MAGERY);
+	var duration := 20 + (magery * 2);
+	var parms := struct;
 
 	if (SkillCheck(caster, MEDITATION, controldiff, (circle * 50) ) )
 		parms .+ script := "tamed";

@@ -9,11 +9,10 @@ include ":damage:damage";
 program poison_strike( params )
 	var caster := params[1];
 	var info := params[2]; // Struct containing additional info about the spell.
-	var spellID := params[3];
+	//var spellID := params[3];
 
 	SendSysMessage(caster, "Select your victim:", 1, 88);
 	var cast_on := Target(caster);
-
 
 	var necroskill := Cint(AP_GetSkill(caster, NECROMANCY));
 	var sspeak := Cint(AP_GetSkill(caster, SPIRIT_SPEAK));

@@ -9,8 +9,8 @@ include ":damage:damage";
 
 program vengeful_spirit( params )
 	var caster := params[1];
-	var info := params[2]; // Struct containing additional info about the spell.
-	var spellID := params[3];
+	//var info := params[2]; // Struct containing additional info about the spell.
+	//var spellID := params[3];
 	var cast_on := params[4]; // Target of spell if required.
 
 	var necroskill := Cint(AP_GetSkill(caster, NECROMANCY));

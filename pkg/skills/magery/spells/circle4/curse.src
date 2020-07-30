@@ -25,6 +25,8 @@ program cast_curse( parms )
         return 0;
     endif
 
+// Not sure what tekproxy was thinking with the following but he commented it out so I am leaving it in.
+/*
 	// Note: Skill gain is a little too easy
 	var resist_skill := AP_GetSkill(caster, RESISTING_SPELLS);
 	var diff := info.difficulty + (15 * (resist_skill / 100.0));
@@ -32,10 +34,8 @@ program cast_curse( parms )
 	if ( adv_diff_bonus < 0 )
 			adv_diff_bonus := 0;
 	endif
-	var adv_diff := resist_skill + adv_diff_bonus;
 
-// Not sure what tekproxy was thinking with the following but he commented it out so I am leaving it in.
-/*
+	var adv_diff := resist_skill + adv_diff_bonus;
 	for i := 1 to 1000
 		diff := info.difficulty + (15 * (resist_skill / 100.0));
 		adv_diff_bonus := info.difficulty + CInt(((RandomInt(150) + 1.0) - (15 * (resist_skill / 100.0) * 10)) / 10.0);
@@ -53,7 +53,7 @@ program cast_curse( parms )
 
 	// Str increase % = (Eval / 10 + 1)
 	var percent := CDbl((AP_GetSkill(caster, MAGERY) / 10) + 1);
-	var points := CInt(AP_GetSkill(caster, MAGERY) * (percent / 100));
+	//var points := CInt(AP_GetSkill(caster, MAGERY) * (percent / 100));
 
 	// Duration: ((Eval / 5) + 1) * 6
 	var duration := ((AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 5) + 1) * 6;

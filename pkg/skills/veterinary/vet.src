@@ -18,8 +18,8 @@ program use_bandages (parms)
   var who := parms[2];
   var bandage := parms[3];
   EraseObjProperty(who, "IsMeditating");
-  var sleeptime;
-  var anatomy:= GetAttribute(who, ANATOMY);
+
+  //var anatomy:= GetAttribute(who, ANATOMY);
   if(dist(who, patient) > 2)
     SendSysMessage(who, "Your patient is too far away.", color := 33);
     return;
@@ -60,8 +60,6 @@ program use_bandages (parms)
 endprogram
 
 function heal(who, patient, bandy)
-  var wx:= who.x;
-  var wy:= who.y;
   var chp;
   var healing := AP_GetSkill(who, VETERINARY);
 	if(bandy.IsEnhancedBandage())
@@ -140,8 +138,6 @@ function heal(who, patient, bandy)
 endfunction
 
 function cure(who, patient, bandy)
-  var wx:= who.x;
-  var wy:= who.y;
   var chp;
   var healing := AP_GetSkill(who, VETERINARY);
 	if(bandy.IsEnhancedBandage())
