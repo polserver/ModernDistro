@@ -11,25 +11,32 @@ include "include/housing";
 include ":staticHousing:settings";
 
 var owneracct;
+var ownerser;
 var settings := SH_GetSettingsCfgElem("Settings");
+footage := sign.GetFootage();
 
 program StaticSignListener(sign)
-	// sign := sgn;
+
 	// I think this should replace the while loop that follows it.
 	while(GetObjProperty(sign, "NewHouse"))
 		sleep(100);
 	endwhile
+	// I have tried to understand why this while loop is here.
+	// It looks like it was intended to prevent house commands
+	// from being recognized until after 2.77 hours had passed
+    // on a new shard. But I do not understand why.
 	while(ReadGameClock() < 10000)
 		sleep(10);
 	endwhile
 	if(!GetObjProperty(sign, "decay"))
 		sign.RefreshHouse();
 	endif
-	// var footage := GetObjProperty(sign, "footage");
 	RegisterForSpeechEvents(sign, 30);
+	footage := sign.GetFootage();
 	while(sign)
 		var ev := wait_for_event(120);
 		if(ev)
+			Print("Control " + footage);
 			handle_speech(sign, ev);
 		endif
 		var decaytime := GetObjProperty(sign, "decay");
@@ -61,9 +68,10 @@ endfunction
 function handle_speech(sign, event)
 	sign.RefreshHouse();
 	var who := event.source;
-	owneracct := GetObjProperty(sign, "owneraccount");
+	// owneracct := GetObjProperty(sign, "owneraccount");
+	ownerser := GetObjProperty(sign, "ownerserial");
 	var sec;
-	if(who.acctname == owneracct)						// Owner
+	if(who.serial == ownerser)							// Owner
 		sec := 3;
 	elseif(statuscheck(who, 1) == 1)					// Co-owner
 		sec := 2;
