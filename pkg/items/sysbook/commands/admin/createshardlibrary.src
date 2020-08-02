@@ -14,7 +14,7 @@ use datafile;
 use cfgfile;
 
 include ":sysbook:sysBook";
-include ":gumps:yesNoSizable";
+include ":gumps:confirmationSizable";
 
 program createshardlibrary(who)
 
@@ -32,7 +32,7 @@ program createshardlibrary(who)
 	// The extra spaces in the second string are to make the question the last line of text in the gump.
 	var prompt :=	"This command creates all of the in-game books in a container of your choice. " +
 					"Please ensure the container can hold a lot of items.                   Do you wish to continue?";
-	var do_it := YesNoSizable(who, prompt);
+	var do_it := confirmationSizable(who, prompt);
 	if(!do_it)
 		return 0;
 	endif

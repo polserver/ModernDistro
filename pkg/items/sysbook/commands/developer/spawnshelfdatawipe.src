@@ -17,7 +17,7 @@ use datafile;
 
 include ":sysbook:spawnShelf";
 include ":sysbook:sysBook";
-include ":gumps:yesNoSizable";
+include ":gumps:confirmationSizable";
 
 program spawnshelfdatawipe(who);
 
@@ -25,7 +25,7 @@ program spawnshelfdatawipe(who);
 	var prompt :=	"This will clear the spawnshelf datafile. If you continue, NO bookshelves " +
 					"will spawn sysbooks until you use .newspawnshelf to add bookshelves to the data file. " +
 					"Please think before you continue!             Do you wish to continue?";
-	var do_it := YesNoSizable(who, prompt);
+	var do_it := confirmationSizable(who, prompt);
 	if(!do_it)
 		return 0;
 	endif

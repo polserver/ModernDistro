@@ -368,7 +368,7 @@ endfunction
  *		Otherwise, if clicked, it will return the value. If set to 0, it will assign the
  *		next available usable number.
  * tilepic_id The graphic number of the item you wish to portray as an item.
- * hue        Well fairly self explanitory I think but changed the color of the gump object.
+ * hue        Well fairly self explanatory I think but changes the color of the gump object.
  * width      The width active area of the button
  * height     The height active area of the button
  *

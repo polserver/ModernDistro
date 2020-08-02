@@ -15,14 +15,14 @@ use datafile;
 
 include ":sysbook:spawnShelf";
 include ":sysbook:sysBook";
-include ":gumps:yesNoSizable";
+include ":gumps:confirmationSizable";
 
 program shelfstock(who);
 
 	// The extra spaces in the second string are to make the question the last line of text in the gump.
 	var message :=	"This command removes bookshelves from the database that no longer exist and " +
 					"immediately restocks all shelves to their MaxBooks value.                  Do you wish to continue?";
-	var do_it := YesNoSizable(who, message);
+	var do_it := confirmationSizable(who, message);
 	if(!do_it)
 		return 0;
 	endif

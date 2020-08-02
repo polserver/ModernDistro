@@ -3,7 +3,7 @@ use cliloc;
 
 include ":houseExtras:settings";
 include ":gumps:selectionGump";
-include ":gumps:yesNoSizable";
+include ":gumps:confirmationSizable";
 include "include/canAccess";
 include "include/housing";
 
@@ -84,7 +84,7 @@ endfunction
 function RemoveTeleporter(who, tele)
 
 	var msg := "This will remove both teleporters, both this one and the destination teleporter. Do you want to do this?";
-	if(YesNoSizable(who, msg))
+	if(confirmationSizable(who, msg))
 		var othertele := SystemFindObjectBySerial(GetObjProperty(tele, "Othertele"));
 		if(!othertele)
 			SendSysMessage(who, "I cannot locate the destination teleporter!", color := 33);

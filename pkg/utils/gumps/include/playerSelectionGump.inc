@@ -4,6 +4,20 @@ use util;
 
 include ":gumps:gumps";
 
+/*
+ * SelectCharacter( mobile, cmdlevel:=0 )
+ *
+ * Purpose
+ * Sends a list of players to the character from whic he may select one.
+ *
+ * Parameters
+ * mobile:     Reference to the character which should receive the gump
+ * cmdlevel:   Determines the command level of players to include in the list.
+ *
+ * Return value
+ * A character reference, or error if the user closes the gump without selecting a character.
+ *
+ */
 function SelectCharacter( mobile, cmdlevel:=0 )
 
         var gump := GFCreateGump();

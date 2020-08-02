@@ -18,7 +18,7 @@ include ":gumps:gumps_ex";
  * GumpPrompt(mobile, text, movable:=0, hue:=1153)
  *
  * Purpose
- * Template to create a simple prompt window.
+ * Template to create a simple prompt window with a message and an "OKAY" button.
  *
  * Parameters
  * mobile:	Mobile to send the gump to.
@@ -56,7 +56,8 @@ endfunction
  * GumpPrompt2(mobile, text, movable:=0, hue:=1153)
  *
  * Purpose
- * Template to create a simple prompt window.
+ * Template to create a simple prompt window with a message and an "OKAY" button.
+ * Same as GumpPrompt but with a different, darker, border and background.
  *
  * Parameters
  * mobile:	Mobile to send the gump to.

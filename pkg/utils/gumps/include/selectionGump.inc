@@ -17,24 +17,25 @@ use os;
 
 include ":gumps:gumps";
 
-CONST BTN_TYPE_RADIO	:= 0x1;
-CONST BTN_TYPE_CHECKBOX	:= 0x2;
-CONST BTN_TYPE_NORMAL	:= 0x4;
-CONST BTN_NOTYPE	:= 0x8;
+CONST BTN_TYPE_RADIO	:= 0x1;	// Allows selecting one item in the list. "OKAY" must be clicked to return selections.
+CONST BTN_TYPE_CHECKBOX	:= 0x2;	// Allows multiple selections in the list. "OKAY" must be clicked to return the selections.
+CONST BTN_TYPE_NORMAL	:= 0x4;	// Allows selecting on item in the list. Gump returns choice when selection is made.
+CONST BTN_NOTYPE		:= 0x8; // Displays a list of strings contained in options with no selection button.
 
 CONST OKAY_BTN		:= 0xA00;
 
 /*
- * SelectionGump(mobile, title, options, btn_type)
+ * SelectionGump( mobile, title, options, btn_type:=BTN_TYPE_NORMAL )
  *
  * Purpose
- * Creates a rectangle shaped gump with buttons and text.
+ * Creates gump with a list in a gump with optional ways to select an item or
+ * multiple items from the list. See the comments for the button types above.
  *
  * Parameters
  * mobile:	Mobile to send the gump to.
- * title:   string that will be used for gump's title.
+ * title:   String that will be used for gump's title.
  * options:	Array containing strings to display next to the buttons.
- * btn_type:	Type of button to display next to the text.
+ * btn_type:	Type of button to display next to the items in the list.
  *
  * Return Values
  * Returns a single value from the options array if RADIO or NORMAL are used.

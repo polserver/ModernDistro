@@ -2,13 +2,13 @@ use uo;
 use os;
 
 include "include/client";
-include ":gumps:yesNoSizable";
+include ":gumps:confirmationSizable";
 
 program point (who)
 	if (who.concealed)
 		SendSysMessage (who, "Are you really sure you want to do that?");
 		SendSysMessage (who, "Players will be able to see.");
-		if (!yesNoSizable (who, "Continue?"))
+		if (!confirmationSizable (who, "Continue?"))
 			return;
 		endif
 	endif

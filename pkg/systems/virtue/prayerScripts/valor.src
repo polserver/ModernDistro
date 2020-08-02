@@ -2,7 +2,7 @@ use uo;
 use os;
 use basic;
 
-include ":gumps:yesNoSizable";
+include ":gumps:confirmationSizable";
 include ":attributes:attributes";
 include ":timedScripts:poisonUtil";
 include "include/client";
@@ -134,7 +134,7 @@ program valorshrine(params)
 	VS_SetVirtueAmount(who, virtue_shrine, virtue_rating);
 
 	if (grantblessing)
-		res := YesNoSizable(who, "Do you wish to receive the blessings of " + virtue_shrine + "?", 88);
+		res := confirmationSizable(who, "Do you wish to receive the blessings of " + virtue_shrine + "?", 88);
 		if (res)
 			PlayObjectCenteredEffect(who, 0x373a, 0x10, 0x10);
 			PlaySoundEffect(who, 0x1ec);

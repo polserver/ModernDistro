@@ -16,7 +16,7 @@ include "include/findCity";
 include ":itemUtils:itemdesc";
 include ":gumps:gumps";
 include ":gumps:requestGump";
-include ":gumps:yesNoSizable";
+include ":gumps:confirmationSizable";
 include ":currency:currency";
 include ":accounts:accounts";
 
@@ -199,7 +199,7 @@ function BuyBankersNote(who, me, currency := 0xEED)
 		return 0;
 	endif
 
-	var agree := yesNoSizable(who, "There is a nominal fee of 10 coins additional charge for the Note. Do you accept?");
+	var agree := confirmationSizable(who, "There is a nominal fee of 10 coins additional charge for the Note. Do you accept?");
 	if(!agree)
 		PrintTextAbove(me, "Very well then. Perhaps later.", 1, 39);
 		return 0;
@@ -241,7 +241,7 @@ function CashBankersOrder(me, event)
 	var payee := GetObjProperty(event.item, "Payee");
 	var payeeserial := CInt(GetObjProperty(event.item, "PayeeSerial"));
 	if(event.source.serial == CInt(GetObjProperty(event.item, "PurchaserSerial")))
-		var accept := yesNoSizable(event.source, "Do you wish to cancel this Banker's Order and get a refund?");
+		var accept := confirmationSizable(event.source, "Do you wish to cancel this Banker's Order and get a refund?");
 		if(!accept)
 			PrintTextAbove(me, "Very well then. The Banker's Order has been returned to you.", 1, 39);
 			MoveItemToContainer(event.source.backpack, event.item);
@@ -265,7 +265,7 @@ function CashBankersOrder(me, event)
 		DestroyItem(event.item);
 		return 1;
 	elseif(event.source.serial == payeeserial)
-		var accept := yesNoSizable(event.source, "Do you wish to redeem this Banker's Order for the coins?");
+		var accept := confirmationSizable(event.source, "Do you wish to redeem this Banker's Order for the coins?");
 		if(!accept)
 			PrintTextAbove(me, "Very well then. The Banker's Order has been returned to you.", 1, 39);
 			MoveItemToContainer(event.source.backpack, event.item);

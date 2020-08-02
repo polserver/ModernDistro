@@ -3,8 +3,7 @@ use uo;
 use util;
 
 include "include/client";
-include ":gumps:yesNoSizable";
-// include "include/skills";
+include ":gumps:confirmationSizable";
 include ":attributes:attributes";
 
 Const JOBS_AVAILABLE_PER_MERCHANT		:= 5;
@@ -84,7 +83,7 @@ program job (parms)
 	var endtime := ReadGameClock() + 300;
 
 	PrintTextAbovePrivate (merchant, "If you will make " + amount + " " + itemname + ", I will pay you for them.", player, color := 88);
-	if (!yesNoSizable (player,"Accept?") )
+	if (!confirmationSizable (player,"Accept?") )
 		PrintTextAbovePrivate (merchant, "Very well.", player, color := 33);
 		EraseObjProperty (player, "#workingonajob");
 		return;

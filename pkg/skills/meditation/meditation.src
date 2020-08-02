@@ -6,7 +6,7 @@ use cfgfile;
 include "include/client";
 include "include/objtype";
 include ":attributes:attributes";
-include ":gumps:yesNoSizable";
+include ":gumps:confirmationSizable";
 include ":virtue:virtue";
 
 const SFX_MEDITATION := SFX_FA;
@@ -42,7 +42,7 @@ program meditation(who)
 	endif
 
 	var shrinelist := ListItemsNearLocationOfType(who.x, who.y, who.z, 3, shrine_marker, who.realm);
-		if (YesNoSizable(who, "Do you wish to pray at the shrine of " + VS_Capitalize(GetObjProperty(shrinelist[1], "Virtue")) + "?", 88) )
+		if (confirmationSizable(who, "Do you wish to pray at the shrine of " + VS_Capitalize(GetObjProperty(shrinelist[1], "Virtue")) + "?", 88) )
 			var theshrine := shrinelist[1];
 			start_script( ":virtue:prayerScripts/" + (GetObjProperty(shrinelist[1], "Virtue") ), { who, GetObjProperty(theshrine, "Virtue") } );
 			return 1;

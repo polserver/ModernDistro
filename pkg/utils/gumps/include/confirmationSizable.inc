@@ -4,12 +4,28 @@ const MAX_YESNO_LINES := 7;
 
 var hue := 1152;
 
-function YesNoSizable(me, prompt, hue := 1152)
+/*
+ * ConfirmationSizable(who, prompt, hue := 1152)
+ *
+ * Purpose
+ * Sends an "OKAT"/"CANCEL" gump that resizes depending on the text length.
+ * It uses either the small or large gump pics that look like shields for the background.
+ *
+ * Parameters
+ * who:      Reference to the character which should receive the gump
+ * prompt:   The text to be displayed.
+ * hue:      Text colour.
+ *
+ * Return value
+ * 1 if "OKAY" is clicked or 0 if "CANCEL" is clicked or gump is right clicked.
+ *
+ */
+function ConfirmationSizable(who, prompt, hue := 1152)
   hue := hue;
   if (len(prompt) <= 10)
-    return SmallYesNo(me, prompt);
+    return SmallYesNo(who, prompt);
   else
-    return BigYesNo(me, prompt);
+    return BigYesNo(who, prompt);
   endif
 endfunction
 

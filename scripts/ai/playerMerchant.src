@@ -16,7 +16,7 @@ include "include/mrcSpawn";
 include "include/dist";
 include "include/client";
 include ":npcs:NPCBackpacks";
-include ":gumps:yesNoSizable";
+include ":gumps:confirmationSizable";
 include "include/canAccess";
 include ":damage:damage";
 
@@ -94,7 +94,7 @@ program player_merchant()
                                   endif
                                 elseif(((text[firstname]) && (text["dismiss"])) && (ev.source.serial == master))
                                   TurnToward(who);
-                                  if(yesNoSizable(who, "Fire the vendor?"))
+                                  if(confirmationSizable(who, "Fire the vendor?"))
                                     Fireme();
                                   endif
                                 elseif((text[firstname] && text["sell"]) || (text["vendor"] && text["sell"]))

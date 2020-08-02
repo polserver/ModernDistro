@@ -14,7 +14,7 @@ use os;
 include ":gumps:gumps";
 include ":gumps:gumps_ex";
 
-/* 
+/*
  * YesNo(mobile, prompt, yes_text, no_text, delay)
  *
  * Purpose
@@ -34,13 +34,13 @@ include ":gumps:gumps_ex";
  */
 function YesNo( mobile, prompt:="", yes_text:="Yes", no_text:="No", delay:=0 )
 
-        var parms := array{mobile, prompt, yes_text, no_text, delay};
-        
-        var script := Run_Script( ":gumps:scripts/yesNo/yesNoGump", parms );
+        var params := array{mobile, prompt, yes_text, no_text, delay};
+
+        var script := Run_Script( ":gumps:scripts/yesNo/yesNoGump", params );
         if( script.errortext )
                 SendSysMessage( mobile, "Error starting script <:gumps:yesNoGump> -->"+script.errortext );
                 return 0;
         endif
- 
+
 	return script;
 endfunction

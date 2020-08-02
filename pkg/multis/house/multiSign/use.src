@@ -3,7 +3,7 @@ use os;
 use cliloc;
 
 include ":keys:key";
-include ":gumps:yesNoSizable";
+include ":gumps:confirmationSizable";
 include ":containers:storageAreas";
 
 const UOBJECT_DOORS_START := 0x0675;
@@ -826,7 +826,7 @@ program Mulit_House_sign(who, sign)
 			5:	ListFriend(sign, who);                                    //list friends
 			6:	AddFriend(sign, who);                                     //add friend
 			7:	DeleteFriend(sign, who);                                  //delete friend
-			8:	if(SmallYesNo(who,"Clear List?"))                               //clear friend list
+			8:	if(confirmationSizable(who,"Clear List?"))                               //clear friend list
 					sign.WipeFriendsList();
 					SendSysMessage(who,"Friend list has been cleared.", color := 66);
 				else

@@ -13,14 +13,14 @@ use uo;
 use os;
 
 include ":sysbook:spawnShelf";
-include ":gumps:yesNoSizable";
+include ":gumps:confirmationSizable";
 
 program shelfclear(who)
 
 	// The extra spaces in the second string are to make the question the last line of text in the gump.
 	var message :=	"This command deletes all books from all book spawn shelves. " +
 					"It does not remove the shelves from the spawn database.   Do you wish to continue?";
-	var do_it := YesNoSizable(who, message);
+	var do_it := confirmationSizable(who, message);
 	if(!do_it)
 		return 0;
 	endif

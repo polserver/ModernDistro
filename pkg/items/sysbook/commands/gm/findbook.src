@@ -17,7 +17,6 @@ use datafile;
 use cfgfile;
 
 include ":sysbook:sysBook";
-include ":gumps:yesNoSizable";
 include ":gumps:selectionGump";
 
 program createshardbook(who)
