@@ -1,0 +1,310 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    <meta http-equiv="Content-Language" content="en-us">
+    <title>Gumps Documentation</title>
+    <link rel="stylesheet" type="text/css" href="docs.css">
+  </head>
+  <body>
+    <div id="container">
+      <div id="header">
+        <h1 style="text-align: center;">GUMPS DOCUMENTATION</h1>
+        <p>Version 1.5, by <a href="mailto:AustinHeilman@Gmail.com">Austin
+            Heilman</a>.</p>
+        <hr>
+        <h2>SelectionGump.inc</h2>
+      </div>
+      <div id="content">
+        <table style="border-collapse: collapse" id="AutoNumber1" width="100%" cellspacing="0"
+          cellpadding="2" bordercolor="#111111" border="0">
+          <tbody>
+            <tr>
+              <td bordercolorlight="#000000" bordercolordark="#000000" style="border-style:solid; border-width:1; "
+                colspan="2" align="center" width="1%" bgcolor="#C0C0C0"> <br>
+                <b><font face="Tahoma" size="2">SelectionGump.inc Functions</font></b><br>
+                &nbsp;</td>
+            </tr>
+            <tr>
+              <td bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style: none; border-left-width: medium; border-right-style: none; border-right-width: medium; "
+                colspan="2" align="center" width="1%">&nbsp;</td>
+            </tr>
+            <!---->
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Constants</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">The following
+                  constants are in gumps_ex.inc</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2"><br>
+                  <b>Constants for RequestGump()</b><br>
+                  CONST
+                  BTN_TYPE_RADIO&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  := 0x1;&nbsp;&nbsp;&nbsp; // Allows selecting one item in the
+                  list. "OKAY" must be clicked to return selections.<br>
+                  CONST BTN_TYPE_CHECKBOX&nbsp;&nbsp;&nbsp; :=
+                  0x2;&nbsp;&nbsp;&nbsp; // Allows multiple selections in the
+                  list. "OKAY" must be clicked to return the selections.<br>
+                  CONST BTN_TYPE_NORMAL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :=
+                  0x4;&nbsp;&nbsp;&nbsp; // Allows selecting on item in the
+                  list. Gump returns choice when selection is made.<br>
+                  CONST
+                  BTN_NOTYPE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  := 0x8;&nbsp;&nbsp;&nbsp; // Displays a list of strings
+                  contained in options with no selection button.<br>
+                  <br>
+                  CONST OKAY_BTN&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; := 0xA00;<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <!---->
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">SelectionGump</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">( mobile,
+                  title, options, btn_type:=BTN_TYPE_NORMAL )</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">mobile</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Mobile reference to send the gump to.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">title</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">String that will be used for gump's title.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">options</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Array containing strings to display next to the
+                  buttons.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font size="2"><span style="font-family: Tahoma;">btn_type</span></font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Constant - Type of button to display next to the
+                  items in the list.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Creates gump
+                  with a list in a gump with optional ways to select an item or<br>
+                  multiple items from the list. See the comments for the button
+                  types above.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Returns a
+                  single value from the options array if RADIO or NORMAL are
+                  used.<br>
+                  Returns an array of option values if CHECKBOX is used.<br>
+                  Returns an error, "No option was selected.", if the gump is
+                  right clicked .</font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <!---->
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">SelectionGump2</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">mobile, title,
+                  options, btn_type:=BTN_TYPE_NORMAL, transparent := 0, tooltips
+                  :={} )</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">mobile</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Mobile reference to send the gump to.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">title</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">String that will be used for gump's title.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">options</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Array containing strings to display next to the
+                  buttons.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font size="2"><span style="font-family: Tahoma;">btn_type</span></font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Constant - Type of button to display next to the
+                  items in the list.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font size="2"><span style="font-family: Tahoma;">transparent</span></font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Integer - If set to 1 makes the gump transparent.
+                  This parameter is optional and<br>
+                  defaults to no transparency but if you pass a tooltips
+                  parameter you must<br>
+                  specify this parameter.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font size="2"><span style="font-family: Tahoma;">tooltips</span></font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Array of tooltips corresponding to each item in the
+                  options array.<br>
+                  These can be custom string tooltips or integer cliloc numbers.<br>
+                  This parameter is optional and defaults to an empty array<br>
+                  (no tooltips) if no tooltip array is passed to the function.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Creates gump
+                  with a list in a gump with optional ways to select an item or<br>
+                  multiple items from the list. See the comments for the button
+                  types above.<br>
+                  The gump can be set to transparent.<br>
+                  Tooltips can be assigned to each item in the list and will be
+                  displayed when hovering over the item.<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">The user's
+                  selection which will be a single string if BTN_TYPE_NORMAL or
+                  BTN_TYPE_RADIO<br>
+                  buttons are used. An array of strings selected if
+                  BTN_TYPE_CHECKBOX is used.<br>
+                  Error if no selection is made and the gump is closed by
+                  right-clicking it.</font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <!---->
+          </tbody>
+        </table>
+      </div>
+      <div id="footer">
+        <p>Last Update: $Id: selectionGump.html 375 2020-07-01 18:47
+          Yukiko $</p>
+      </div>
+    </div>
+  </body>
+</html>

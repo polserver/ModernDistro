@@ -1,0 +1,2583 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    <meta http-equiv="Content-Language" content="en-us">
+    <title>Gumps Documentation</title>
+    <link rel="stylesheet" type="text/css" href="docs.css">
+  </head>
+  <body>
+    <div id="container">
+      <div id="header">
+        <h1 style="text-align: center;">GUMPS DOCUMENTATION</h1>
+        <p>Version 1.5, by <a href="mailto:AustinHeilman@Gmail.com">Austin
+            Heilman</a>.</p>
+        <hr>
+        <h2>gumps.inc</h2>
+      </div>
+      <div id="content">
+        <table style="border-collapse: collapse" id="AutoNumber1" width="100%" cellspacing="0"
+          cellpadding="2" bordercolor="#111111" border="0">
+          <tbody>
+            <tr>
+              <td bordercolorlight="#000000" bordercolordark="#000000" style="border-style:solid; border-width:1; "
+                colspan="2" align="center" width="1%" bgcolor="#C0C0C0"> <br>
+                <b><font face="Tahoma" size="2">gumps.inc Functions</font></b><br>
+                &nbsp;</td>
+            </tr>
+            <tr>
+              <td bordercolorlight="#000000" bordercolordark="#000000" style="border-left-style: none; border-left-width: medium; border-right-style: none; border-right-width: medium; "
+                colspan="2" align="center" width="1%"> &nbsp;</td>
+            </tr>
+            <!---->
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">GFCreateGump</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">(x:=0, y:=0,
+                  width:=0, height:=0)</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">x</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The X offset for drawing the gump (from upper left).</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">y</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The Y offset for drawing the gump (from the top).</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">width</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Optional - Sets the width of the gump. Can be used
+                  with GFResizePic()</font></td>
+            </tr>
+            <tr>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">height</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Optional - Sets the height of the gump. Can be used
+                  with GFResizePic()</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Creates the
+                  base gump that is passed to the other functions for changing.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Returns a
+                  struct.</font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <!---->
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">GFClosable</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">(byref gump,
+                  bool)</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Reference to the gump that will be changed.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">bool</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Sets wether or not the gump can't be closed.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Sets the gump
+                  closable 1/0. Default is 1.<br>
+                  If set to 0, the gump can not be closed by right clicking on
+                  it.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Returns 1 on
+                  success.<br>
+                  Returns error on failure.</font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">GFDisposable</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">(byref gump,
+                  bool)</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Reference to the gump that will be changed.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">bool</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Sets wether or not the gump is disposable.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Sets the gump's
+                  dispoable setting 1/0. Default is 1.<br>
+                  Seems to no longer have any effect. (Deprecated setting?)</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Returns 1 on
+                  success.<br>
+                  Returns error on failure.</font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <!---->
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">GFMovable</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">(byref gump,
+                  bool)</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Reference to the gump that will be changed.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">bool</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Sets wether or not the gump is movable.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">If enabled,
+                  allows the gump to be dragged around on the user's screen.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Returns 1 on
+                  success.<br>
+                  Returns error on failure.</font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">GFPage</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">(byref gump,
+                  bool)</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Reference to the gump that will be changed.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">page_num</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The integer representing the page's number.<br>
+                  (page '0' is the background, always visible)</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Sets the page
+                  number to write to on the gump.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Returns 1 on
+                  success.</font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <!---->
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">GFResizePic</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">(byref gump, x,
+                  y, gump_id, width, height)</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Reference to the gump that will be changed.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">x</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The top-left spot of the X axis.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">y</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The top-left spot of the Y axis.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump_id</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The decimal number of the gump ID to resize.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">width</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The height (pixels) of how far to scale the gump
+                  picture downwards from position X.<br>
+                  Default is the gump's height.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">height</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The height (pixels) of how far to scale the gump
+                  picture downwards from position Y.<br>
+                  Default is the gump's height.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Resizes a
+                  picture on a gump.<br>
+                  Note: Only certain gump sets can be resized. See GumpInfo.cfg
+                  for IDs of known resizable pictures.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Returns 1 on
+                  success.</font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <!---->
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">GFAddAlphaRegion</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">(byref gump, x,
+                  y, width, height)</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Reference to the gump that will be changed.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">x</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The top-left spot of the X axis.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">y</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The top-left spot of the Y axis.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">width</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The width (pixels) of the transparency area from
+                  position X.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">height</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The height (pixels) of the transparency area from
+                  position Y.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Adds an alpha
+                  (transparent) region to the gump.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Returns 1 on
+                  success.</font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <!---->
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">GFAddButton</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">(byref gump, x,
+                  y, off_id, on_id, btn_type:=GF_PAGE_BTN, btn_value:=0)</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Reference to the gump that will be changed.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">x</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">X coordinate to place the button on.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">y</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Y coordinate to place the button on.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">off_id</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The default graphic of the button.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">on_id</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The graphic of the button when it is clicked.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">btn_type</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The type of button to create.<br>
+                  GF_PAGE_BTN - Will move the gump to another page.<br>
+                  GF_CLOSE_BTN - Will close the gump and return the value of the
+                  button and other data.<br>
+                  GF_DUMMY_BTN - Seems to do nothing but change the graphic when
+                  you click. </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">btn_value</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">If the button type if set to a page, it will go to
+                  the assigned page number.<br>
+                  Otherwise, if clicked, it will return the value. If set to 0,
+                  it will assign the next available usable number.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Adds a button
+                  (page/reply) to the gump.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Return value is
+                  the button value.</font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <!---->
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">GFRadioButton</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">(byref gump, x,
+                  y, unp_id, pres_id, status, btn_value)</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Reference to the gump that will be changed.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">x</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">X coordinate to place the button on.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">y</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Y coordinate to place the button on.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">unp_id</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The unpressed gump graphic id of the check-box.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">press_id</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The checked gump graphic id of the check-box.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">status</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The radio's initial state (pressed/unpressed).<br>
+                  0 - Unchecked<br>
+                  1 - Checked</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">btn_value</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The value the check box will return if checked.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Adds a
+                  check-box to the gump.<br>
+                  <br>
+                  Notes: Check boxes can be used in a script through two ways:<br>
+                  var input := GFSendGump(gump);<br>
+                  <br>
+                  <font color="GREEN">//Using input.keys</font><br>
+                  foreach key in (input.keys)<br>
+                  &nbsp;&nbsp;&nbsp;//Do stuff here<br>
+                  endforeach<br>
+                  <br>
+                  <font color="GREEN">//Using arbitrary values</font><br>
+                  input[btn_value]; <font color="GREEN">//1 if checked. 0 if
+                    not.</font> </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Return value is
+                  the check box btn_value.</font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">GFCheckBox</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">(byref gump, x,
+                  y, unc_id, che_id, status:=0, btn_value:=0)</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Reference to the gump that will be changed.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">x</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">X coordinate to place the button on.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">y</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Y coordinate to place the button on.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">unc_id</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The unchecked gump graphic id of the check-box.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">che_id</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The checked gump graphic id of the check-box.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">status</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The radio's initial state (pressed/unpressed).<br>
+                  0 - Unchecked<br>
+                  1 - Checked</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">btn_value</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The value the check box will return if checked.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Adds a
+                  check-box to the gump.<br>
+                  <br>
+                  Notes: Check boxes can be used in a script through two ways:<br>
+                  var input := GFSendGump(gump);<br>
+                  <br>
+                  <font color="GREEN">//Using input.keys</font><br>
+                  foreach key in (input.keys)<br>
+                  &nbsp;&nbsp;&nbsp;//Do stuff here<br>
+                  endforeach<br>
+                  <br>
+                  <font color="GREEN">//Using arbitrary values</font><br>
+                  input[btn_value]; <font color="GREEN">//1 if checked. 0 if
+                    not.</font> </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Return value is
+                  the check box btn_value.</font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <!---->
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">GFSetRadioGroup</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">(byref gump,
+                  group_id)</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Reference to the gump that will be changed.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">group_id</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The number representing the group (0-9).</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Adds a
+                  group-radio to the gump.<br>
+                  Notes: Only seems to work on page 1.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Returns 1.</font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <!---->
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">GFHTMLArea</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">(byref gump, x,
+                  y, width, height, text, background:=0, scrollbar:=0)</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Reference to the gump that will be changed.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">x</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">X position (upper left) where the html area begins.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">y</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Y position (upper left) where the HTML area begins.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">width</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Width in pixels from position X.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">height</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Height in pixels from position Y.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">text</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Text to display inside the area.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">background</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2"> 0 - Background diabled (default)<br>
+                  1 - Background image enabled </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">scrollbar</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2"> 0 - Scrollbar diabled (default)<br>
+                  1 - Scrollbar enabled</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Adds an HTML
+                  area to the gump.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Returns where
+                  in the data array the 'text' was placed.</font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <!---->
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">GFAddHTMLLocalized</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">(byref gump, x,
+                  y, width, height, cliloc, background:=0, scrollbar:=0)</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Reference to the gump that will be changed.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">x</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">X position (upper left) where the html area begins.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">y</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Y position (upper left) where the HTML area begins.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">width</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Width in pixels from position X.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">height</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Height in pixels from position Y.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">cliloc</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The cliloc-id that will call the appointed text.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">background</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2"> 0 - Background diabled (default)<br>
+                  1 - Background image enabled </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">scrollbar</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2"> 0 - Scrollbar diabled (default)<br>
+                  1 - Scrollbar enabled</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">hue</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The Decimal Color Value of the cliloc'd text
+                  displayed customstring: For clilocs that accept custom
+                  arguments.</font>font&gt;</td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Adds an HTML
+                  area to the gump that uses a cliloc ID.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Returns 1.</font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <!---->
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">GFGumpPic</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">(byref gump, x,
+                  y, gump_id, hue := 0)</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Reference to the gump that will be changed.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">x</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">X position to place the gump picture.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">y</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Y position to place the gump picture.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump_id</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Gump ID number to draw.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">hue</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Hue to use on the gump picture.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Adds a
+                  gump-image to the gump.<br>
+                  Notes: The hue parameter is only supported by 3.5x or newer
+                  clients. </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">RETURN VALUE</font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <!---->
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">GFTilePic</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">(byref gump, x,
+                  y, tile_id, hue := 0)</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Reference to the gump that will be changed.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">x</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">X position to place the tile picture.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">y</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Y position to place the tile picture.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump_id</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Tile ID number to draw.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">hue</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Hue to use on the tile picture.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Adds a
+                  tile-image (normal item artwork) to the gump.<br>
+                  Notes: The hue parameter is only supported by 3.5x or newer
+                  clients. </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">RETURN VALUE</font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <!---->
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">GFTextLine</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">(byref gump, x,
+                  y, hue:=0, text:="")</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Reference to the gump that will be changed.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">x</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">X position to draw the text.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">y</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Y position to draw the text.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">hue</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Hue number for the text color.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">text</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The line of text to display.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Adds a text
+                  label to the gump.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Returns where
+                  in the data array the 'text' was placed.</font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <!---->
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">GFTextCrop</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">(byref gump, x,
+                  y, width, height, hue:=0, text:="")</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Reference to the gump that will be changed.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">x</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">X position to draw the text.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">y</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Y position to draw the text.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">width</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Maximum width in pixels before the text is removed
+                  and turned into "...".</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">height<br>
+                </font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Maximum height in pixels for the text (seems to have
+                  no effect).</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">hue</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Hue number for the text color.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">text</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The line of text to display.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Adds a text
+                  cropped-label to the gump.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Returns where
+                  in the data array the 'text' was placed.</font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <!---->
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">GFTextEntry</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">(byref gump, x,
+                  y, width, height, txt_color, ini_text, lmt)</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Reference to the gump that will be changed.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">x</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">X position (upper left) where the text line begins.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">y</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Y position (upper left) where the text line begins.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">width</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Width in pixels from position X.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">height</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Height in pixels from position Y (usually 20).</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">hue</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Hue ID (color) of the text.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">ini_text</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Default text to show.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">txt_id</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The location of the text entry's input data in the
+                  data array. Default is the end of the array.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">lmt</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The total length of text allowed to be entered into
+                  the text entry element.( 0 is unlimited. )</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Adds a
+                  text-entry to the gump.<br>
+                  Notes: Use GFExtractData() in gumps_ex.inc to easily remove
+                  the leading "#: " </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Where in the
+                  data array the text is located at.</font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <!---->
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">GFSendGump</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">(who, byref
+                  gump)</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font size="2"><span style="font-family: Tahoma;">mobile</span></font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Mobile to send the gump to.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Reference to the gump that will be sent.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Sends the gump
+                  to the character specified.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">The data from
+                  uo.em :: SendDialogGump().</font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <!---->
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">GFTextLine</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">(byref gump, x,
+                  y, text_lines, txt_color:=2100)</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Reference to the gump that will be changed.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">x</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Integer - X position to start drawing the text.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">y</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Integer - Y position to start drawing the text.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">text_lines</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Array of text lines.<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">txt_color</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Integer - color to use for the text.<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Writes multiple
+                  lines of text to the gump.<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Returns 1.<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <!---->
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">GFAddImageTileButton</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">( byref gump,
+                  x, y, off_id, on_id, btn_type:=GF_PAGE_BTN, btn_value:=0,
+                  tilepic_id, hue:=0, width, height )<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Reference to the gump that will be changed.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">x</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Integer - X position (upper left) where the text line
+                  begins.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">y</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2"><font face="Tahoma" size="2">Integer - </font>Y
+                  position (upper left) where the text line begins.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">off_id</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2"><font face="Tahoma" size="2">Integer - </font>The
+                  release-id (graphic) of the button.<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">on_id</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2"><font face="Tahoma" size="2">Integer - </font>The
+                  pressed-id (graphic) of the button.<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">btn_type</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2"><font face="Tahoma" size="2">Integer - The type of
+                    button to use:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    GF_PAGE_BTN&nbsp;&nbsp;&nbsp; Will move the gump to another
+                    page.<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    GF_CLOSE_BTN&nbsp;&nbsp;&nbsp; Will close the gump and
+                    return the value of the button and other data.<br>
+                    &nbsp; &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+                    GF_DUMMY_BTN&nbsp;&nbsp;&nbsp; Seems to do nothing but
+                    change the graphic when you click.</font><br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font size="2"><span style="font-family: Tahoma;">btn_value</span></font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">If the button type if set to a page, it will go to
+                  the assigned page number. Otherwise, if clicked, it will
+                  return the value. If set to 0, it will assign the<br>
+                  next available usable number.<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font size="2"><span style="font-family: Tahoma;">tilepic_id</span></font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The graphic number of the item you wish to portray as
+                  an item.<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0">hue</td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Well fairly self explanatory I think but changes the
+                  color of the gump object.<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">width</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The width active area of the button.<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font size="2"><span style="font-family: Tahoma;">height</span></font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The height active area of the button.<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"><font size="2"><span style="font-family: Tahoma;">Adds
+                    a button(page/reply) in the form of an art tile to the gump</span></font><font
+                  face="Tahoma" size="2"> <br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Return value of
+                  the button.<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <!---->
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">GFPicTiled</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">(byref gump, x,
+                  y, width, height, gump_id)<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Reference to the gump that will be changed.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">x</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The top-left spot of the X axis.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">y</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The top-left spot of the Y axis.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">width</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The width (pixels) of the gump from position X.<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">height</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The height (pixels) of how far to scale the gump
+                  downwards from position Y.<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump_id</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The number representing the gump pic.<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Adds a pic
+                  tiled gump to the gump.<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">No return
+                  value.<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">GFTooltip</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">(byref gump,
+                  cliloc_id, customstring := "")<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Reference to the gump that will be changed.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">cliloc_id</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">The decimal number reference to the cliloc entry
+                  which will be used as the tooltip.<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">customstring</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Used for clilocs that accept custom arguments.<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Adds a tooltip
+                  to the previous layoutarray entry.<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">No return
+                  value.<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style:solid; border-width:1; " colspan="2" align="center"
+                width="1%" bgcolor="#C0C0C0">
+                <p align="center"><b><font face="Tahoma">GFItemProperty</font></b></p>
+              </td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:solid; border-right-width:1; border-bottom-style:solid; border-bottom-width:1"
+                colspan="2" width="1%" bgcolor="#808080"> <b><font face="Tahoma"
+                    size="2">Parameters</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">(byref gump,
+                  item_serial)<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Name</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:solid; border-top-width:1; border-bottom-style:solid; border-bottom-width:1"
+                height="17" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Type</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">gump</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">Reference to the gump that will be changed.</font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:solid; border-left-width:1; border-right-style:none; border-right-width:medium; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                width="25%" bgcolor="#C0C0C0"> <font face="Tahoma" size="2">item_serial</font></td>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-left-style:none; border-left-width:medium; border-right-style:solid; border-right-width:1; border-top-style:none; border-top-width:medium; border-bottom-style:none; border-bottom-width:medium"
+                height="18" width="102%" bgcolor="#C0C0C0"> <font face="Tahoma"
+                  size="2">item's serial id.<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Explanation</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">Adds a tooltip
+                  to the previous layoutarray entry which directly corresponds
+                  to the given item's serial tooltip properties<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#808080"> <b><font face="Tahoma" size="2">Return
+                    Values</font></b></td>
+            </tr>
+            <tr>
+              <td bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000"
+                style="border-style: solid; border-width: 1" colspan="2" width="1%"
+                bgcolor="#C0C0C0"> <font face="Tahoma" size="2">No return
+                  value.<br>
+                </font></td>
+            </tr>
+            <tr>
+              <td colspan="2" width="1%">&nbsp;</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="footer">
+        <p>Last Update: $Id: gumps.html 375 2020-07-31 23:33:32Z Yukiko $</p>
+      </div>
+    </div>
+  </body>
+</html>
