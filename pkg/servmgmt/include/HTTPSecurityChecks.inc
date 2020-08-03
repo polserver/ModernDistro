@@ -16,11 +16,14 @@
 
 function HTTPSecurity()
 
-	if (QueryIP() == "127.0.0.1")
-		return 1;
-	else
-		return 0;
-	endif
+	// Enable to only allow
+	// if (QueryIP() == "127.0.0.1")
+		// return 1;
+	// else
+		// return 0;
+	// endif
+
+	return 1;
 
 endfunction
 
