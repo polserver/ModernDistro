@@ -142,20 +142,23 @@ function SS_IsInBox( mobile, x1, x2, y1, y2, realm )
 endfunction
 
 function SS_IsInHouse( spawn_coords )
-	var IsLocInHouse;
 
 	// Are we trying to spawn in a static house?
-	IsLocInHouse := FindHouseForLocation (spawn_coords.x, spawn_coords.y, spawn_coords.z, spawn_coords.realm);
+	var hsign := GetHouseSign( spawn_coords );
+	var IsLocInHouse := hsign.IsLocationInsideHouse( spawn_coords );;
+
+	// Are we trying to spawn in a static house?
+	// IsLocInHouse := FindHouseForLocation (spawn_coords.x, spawn_coords.y, spawn_coords.z, spawn_coords.realm);
 
 	if(IsLocInHouse)
 		return 0;
 	endif
 
-  // Are we trying to spawn in a multi?
-	var sh := GetStandingHeight(spawn_coords.x, spawn_coords.y, spawn_coords.z, spawn_coords.realm);
-	if ( sh.multi )
-		return 0;
-	endif
+	// Are we trying to spawn in a multi?
+	// var sh := GetStandingHeight(spawn_coords.x, spawn_coords.y, spawn_coords.z, spawn_coords.realm);
+	// if ( sh.multi )
+	//	return 0;
+	// endif
 
   return 1;
 

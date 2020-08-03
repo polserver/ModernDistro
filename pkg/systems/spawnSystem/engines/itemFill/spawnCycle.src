@@ -71,7 +71,9 @@ program SpawnCycle( params )
 
 	var created := CreateItemAtLocation( spawn_coords.x, spawn_coords.y, spawn_coords.z, spawn_object, 1, realm_name );
 	if( created.errortext )
-		SysLog("Error: Unable to create " + spawn_object + " for group " + group_name + " in region " + region_name + ". ->" + created.errortext);
+		// The following line was probably left in for debugging. I am commenting it
+		// out but leaving it in just in case it is needed later.
+		// SysLog("Error: Unable to create " + spawn_object + " for group " + group_name + " in region " + region_name + ". ->" + created.errortext);
 		return 0;
 	endif
 
