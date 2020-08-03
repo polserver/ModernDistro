@@ -102,9 +102,9 @@ endfunction
 // Returns: 1 if true and 0 if false.
 ///////////////////////////////////////////////////////////
 exported function IsLocationInsideHouse(sign, byref loc)
-	var footage := GetObjProperty (sign, "footage");
+	var fotage := GetObjProperty (sign, "footage");
 	var chk := 0;
-	foreach thing in footage
+	foreach thing in fotage
 		if ( (loc.realm == sign.realm) &&
 			(loc.x >= thing[1] && loc.x <= thing[4]) &&
 			(loc.y >= thing[2] && loc.y <= thing[5]) &&
@@ -133,9 +133,9 @@ endfunction
 // Returns: 1 if true and 0 if false.
 ///////////////////////////////////////////////////////////
 exported function IsObjectInsideHouse(byref sign, byref object)
-	var footage := GetObjProperty (sign, "footage");
+	var fotage := GetObjProperty (sign, "footage");
 	var chk := 0;
-	foreach thing in footage
+	foreach thing in fotage
 		if ( (object.realm == sign.realm) &&
 			(object.x >= thing[1] && object.x <= thing[4]) &&
 			(object.y >= thing[2] && object.y <= thing[5]) &&

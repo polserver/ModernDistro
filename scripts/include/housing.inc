@@ -244,13 +244,13 @@ endfunction
 ///////////////////
 function GetHouseZoneBaseZLevel(targ, sign)
 	// var homeinfo := GetObjProperty (sign, "homeinfo");
-	var footage := GetObjProperty (sign, "footage");
-	if (!footage)
+	var fotage := GetObjProperty (sign, "footage");
+	if (!fotage)
 		return;
 	endif
 
 	var zlevel := 0;
-  	foreach thing in footage
+  	foreach thing in fotage
 		if ( (targ.realm == sign.realm) && (targ.x >= thing[1] && targ.x <= thing[4]) && (targ.y >= thing[2] && targ.y <= thing[5]) &&
 			(targ.z >= thing[3] && targ.z <= thing[6]) )
 			//zlevel := CInt(thing[3]);/
