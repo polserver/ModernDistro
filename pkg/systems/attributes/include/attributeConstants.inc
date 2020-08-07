@@ -4,7 +4,6 @@ const ATTRIBUTEID_DEXTERITY        := "Dexterity";
 const ATTRIBUTEID_INTELLIGENCE     := "Intelligence";
 const ATTRIBUTEID_STRENGTH         := "Strength";
 const VITALID_LIFE                 := "Life";
-const HITS                         := VITALID_LIFE;
 const VITALID_MANA                 := "Mana";
 const VITALID_STAMINA              := "Stamina";
 

@@ -547,7 +547,7 @@ function FindCraftingBag (who)
 	if (!craftingbagserial)
 		return who.backpack;
 	endif
-	
+
 	foreach item in EnumerateItemsInContainer (who.backpack)
 		if (item.serial == craftingbagserial)
 			if (item.isa (POLCLASS_CONTAINER))

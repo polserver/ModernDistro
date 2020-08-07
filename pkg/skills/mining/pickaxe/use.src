@@ -10,7 +10,6 @@ include ":mining:settings";
 include ":mining:mining";
 include ":itemutils:itemdesc";
 include "include/client";
-include "include/sounds";
 
 var settings := MSP_GetSettingsCfgElem("Settings");
 

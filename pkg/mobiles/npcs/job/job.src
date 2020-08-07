@@ -435,9 +435,9 @@ function GetWorkNoise( jobtype )
 
 	case (jobtype)
 	34: return 0x0249;//tailoring
-	37: return SFX_ANVIL;//tinkering
-	7: return SFX_ANVIL;//blacksmithy
-	11: return SFX_HAMMER;//carpentry
+	37: return SFX_ANVL;//tinkering
+	7: return SFX_ANVL;//blacksmithy
+	11: return SFX_HAMER;//carpentry
 	13: return 0x248;//cooking
 	23: return 0x50;//inscription
 	12: return 0x50;//cartography

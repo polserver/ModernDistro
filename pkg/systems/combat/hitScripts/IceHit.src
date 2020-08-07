@@ -3,7 +3,6 @@ use util;
 
 include ":damage:damage";
 include "include/client";
-include "include/sounds";
 
 program HitScript(params)
 	var attacker	:= params[1];
@@ -13,11 +12,11 @@ program HitScript(params)
 	//var basedamage	:= params[5];
 	//var rawdamage	:= params[6];
 	params := 0; // Not needed anymore.
-	
+
 	PlayObjectCenteredEffect(defender, FX_MARK_EFFECT, 7, 16);
 	PlaySoundEffect(defender, SFX_GLASSBREAK4);
-	
+
 	ApplyDamageEX(defender, (RandomInt(3)+1), DMG_COLD, attacker);
-	
+
 	return 1;
 endprogram

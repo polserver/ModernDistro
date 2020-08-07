@@ -7,7 +7,7 @@ use uo;
 use os;
 use util;
 
-include "include/sounds";
+include "include/client";
 include ":timedScripts:timedScripts";
 
 program controlScript(field)
@@ -31,7 +31,7 @@ program controlScript(field)
 
 		if ( ReadGameClock() % 5 == 0 )
 			// Play once every 5 seconds.
-			PlaySoundEffect(field, SFX_PARALYZED);
+			PlaySoundEffect(field, SFX_20C);
 		endif
 
 		var event := Wait_For_Event(1);

@@ -3,7 +3,6 @@ use util;
 
 include ":damage:damage";
 include "include/client";
-include "include/sounds";
 
 program HitScript(params)
 	var attacker	:= params[1];
@@ -13,15 +12,15 @@ program HitScript(params)
 	//var basedamage	:= params[5];
 	//var rawdamage	:= params[6];
 	params := 0; // Not needed anymore.
-	
+
 	// Makes the defender emit static-electricity.
 	PlayMovingEffectXYZ(defender.x, defender.y, defender.z+15, defender.x-1, defender.y, defender.z+15, FX_STATIC, 5, 25);
 	PlayMovingEffectXYZ(defender.x, defender.y, defender.z+15, defender.x+1, defender.y, defender.z+15, FX_STATIC, 5, 25);
 	PlayMovingEffectXYZ(defender.x, defender.y, defender.z+15, defender.x, defender.y+1, defender.z+15, FX_STATIC, 5, 25);
 	PlayMovingEffectXYZ(defender.x, defender.y, defender.z+15, defender.x, defender.y-1, defender.z+15, FX_STATIC, 5, 25);
 	PlaySoundEffect(defender, SFX_SPELL_LIGHTNING);
-	
+
 	ApplyDamageEX(defender, (RandomInt(3)+1), DMG_ENERGY, attacker);
-	
+
 	return 1;
 endprogram

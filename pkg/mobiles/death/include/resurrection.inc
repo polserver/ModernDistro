@@ -6,7 +6,6 @@ use uo;
 include ":gumps:gumps";
 include ":gumps:gumps_ex";
 include "include/client";
-include "include/sounds";
 
 function ResurrectionGump(mobile)
 	var gump := GFCreateGump();

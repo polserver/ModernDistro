@@ -6,7 +6,6 @@ include ":attributes:attributes";
 include ":timedScripts:timedScripts";
 include ":magery:spells";
 include "include/client";
-include "include/sounds";
 
 program cast_AGILITY( parms )
     var caster := parms[1];

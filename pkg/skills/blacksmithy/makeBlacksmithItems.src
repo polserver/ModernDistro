@@ -1,4 +1,4 @@
-// //$Id: makeBlacksmithItems.src 1473 2009-03-12 01:26:41Z muaddib_pol $
+ // //$Id: makeBlacksmithItems.src 1473 2009-03-12 01:26:41Z muaddib_pol $
 
 use cfgfile;
 use cliloc;
@@ -90,14 +90,14 @@ function makeBlacksmithItems(who, what, amt, tool)
 	endif
 	var forge_near := 0;
 	foreach item in ( ListStaticsNearLocation( who.x, who.y, who.z, 3, 02, who.realm ))
-		if( (item.objtype == 0xfb1) || item.objtype := 0x2DD8|| ((item.objtype >= 0x197a) && (item.objtype <= 0x19a9)) )
+		if( (item.objtype == 0xfb1) || item.objtype == 0x2DD8|| ((item.objtype >= 0x197a) && (item.objtype <= 0x19a9)) )
 			forge_near := 1;
 			break;
 		endif
 	endforeach
 	if( !forge_near )
 		foreach item in ( ListItemsNearLocation(who.x, who.y, who.z, 3, who.realm) )
-			if( (item.objtype == 0xfb1) || item.objtype := 0x2DD8|| ((item.objtype >= 0x197a) && (item.objtype <= 0x19a9)) )
+			if( (item.objtype == 0xfb1) || item.objtype == 0x2DD8|| ((item.objtype >= 0x197a) && (item.objtype <= 0x19a9)) )
 				forge_near := 1;
 				break;
 			endif

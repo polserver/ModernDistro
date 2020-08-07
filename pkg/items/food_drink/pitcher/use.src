@@ -7,7 +7,6 @@ use uo;
 include ":timedScripts:timedScripts";
 include ":itemutils:itemdesc";
 include "include/client";
-include "include/sounds";
 
 program usePitcher (who, pitcher)
 	if ( !ReserveItem(pitcher) )

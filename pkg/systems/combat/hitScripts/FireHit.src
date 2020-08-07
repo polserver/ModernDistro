@@ -3,7 +3,6 @@ use util;
 
 include ":damage:damage";
 include "include/client";
-include "include/sounds";
 
 program HitScript(params)
 	var attacker	:= params[1];

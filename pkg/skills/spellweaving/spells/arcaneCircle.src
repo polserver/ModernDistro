@@ -3,7 +3,6 @@ use cliloc;
 
 
 include ":attributes:attributes";
-include "include/sounds";
 
 CONST MIN_ARCANIST_REQ := 2;
 CONST MAX_ARCANIST_ALLOWED := 4;
@@ -82,8 +81,8 @@ endfunction
 function CreateArcaneFocus(mobile, number_of_arcanists)
 
   SendSysMessageCL(mobile, 1072740); // An arcane focus appears in your backpack.
-  
+
   SendSysMessageCL(mobile, 1072828);  // Your arcane focus is renewed.
-  
+
 
 endfunction

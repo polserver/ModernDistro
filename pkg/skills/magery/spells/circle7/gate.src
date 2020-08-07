@@ -5,7 +5,6 @@ use cliloc;
 include ":attributes:attributes";
 include ":magery:spells";
 include "include/client";
-include "include/sounds";
 include "include/objtype";
 include ":magery:isValidLoc";
 

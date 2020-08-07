@@ -57,7 +57,7 @@ function createcoins( cont, cointype, numcoins )
 	// We were suiccessful in creating the coins in the container. Yay!
 	return 1;
 endfunction
-	
+
 function Create60kStacksInContainer(what_container, type, numstacks)
 
   var quantity := 60000;
@@ -65,12 +65,13 @@ function Create60kStacksInContainer(what_container, type, numstacks)
   var success;
   var what;
   var  arrayindex := 1;
-  
+
   // Try to create all of the required stacks.
   for index := 1 to numstacks
+	index := index;
     success := 0;
     what := CreateItemInContainer( what_container, type, quantity );
-    
+
     // If we fail to create a stack set success to 0 and exit the 'for' loop.
     // else set success, add the created stack to the stack array for
     // possible clean-up later, increment the index and continue through
@@ -83,7 +84,7 @@ function Create60kStacksInContainer(what_container, type, numstacks)
       stackarray[arrayindex] := what;
       arrayindex := arrayindex + 1;
   endfor
-  
+
   // If all of the stacks were not created then clean-up the leftovers
   // and return with success == 0.
   if(success == 0)
@@ -92,7 +93,7 @@ function Create60kStacksInContainer(what_container, type, numstacks)
     endforeach
     return success;
   endif
-  
+
   // Yay!! We created all of the stacks!
   return success;
 

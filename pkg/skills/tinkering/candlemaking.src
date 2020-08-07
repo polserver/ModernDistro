@@ -40,7 +40,7 @@ program make_candles (character, item)
 		SendSysMessage(character, "You can't reach that!");
 		return;
 	endif
-/* Don't know if we want to specify that the kettle of wax should be the only locked down thing	
+/* Don't know if we want to specify that the kettle of wax should be the only locked down thing
         if( targetted.movable )
              return;
         endif
@@ -93,13 +93,13 @@ function MakeKettleOfWax(character, wax, empty_kettle)
              PrintTextAbovePrivate(character, "*Your backpack is full!*", character);
              return;
         endif
-        
+
 	SendSysMessage(character, "You place the pot of wax in your backpack.");
 	SubtractAmount(wax, WAX_PER_CANDLE);
- 
+
         newkettle.color := empty_kettle.color;
         SetObjProperty( newkettle, "OldDesc", Cstr(empty_kettle.desc) );
-        
+
 	DestroyItem(empty_kettle);
 	return;
 endfunction
@@ -127,7 +127,7 @@ function MakeCandles(character, dipper, kettle_of_wax)
 			 // CreateItemInBackpack(character, 0x1437, 1);	// "regular" candle or as close as we can get
 		endif
 	endfor
- 
+
         var kettle := CreateItemInBackpack(character, 0x09ed, 1);
         if(!kettle)
              PrintTextAbovePrivate(character, "*Your backpack is full!*", character);
@@ -137,7 +137,7 @@ function MakeCandles(character, dipper, kettle_of_wax)
 
         kettle.color := kettle_of_wax.color;
         kettle.name := GetObjProperty( kettle_of_wax, "OldDesc");
- 
+
         SubtractAmount(dipper, 1);
         SubtractAmount(kettle_of_wax, 1);
 endfunction
@@ -153,7 +153,7 @@ function MakeSkullOutOfHead(character, head)
 
 	PlaySoundEffect(character, 0x0021);
 	sleep(5);
-// This should reduce karma and/or virtue 
+// This should reduce karma and/or virtue
 	if (!SkillCheck(character, TINKERING, 30) )
 		SendSysMessage(character, "You destroy the head.");
 		SubtractAmount(head, 1);
@@ -179,7 +179,7 @@ function MakeSkullCandle(character, skull, targetted)
 		SendSysMessage(character, "You don't know how to use those items together!");
 		return;
 	endif
-// This should reduce karma and/or virtue 
+// This should reduce karma and/or virtue
 
 	PlaySoundEffect(character, 0x0248);
 	Sleep(2);

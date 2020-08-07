@@ -6,7 +6,6 @@ use cliloc;
 include ":attributes:attributes";
 include ":magery:spells";
 include "include/client";
-include "include/sounds";
 
 program cast_heal( parms )
     var caster := parms[1];
@@ -23,22 +22,22 @@ program cast_heal( parms )
     if ( !MS_MobileCheck(caster, cast_on) )
         return 0;
     endif
-    
+
 	// Amount healed: 40% Magery + (1 to 10)
 	var points := CInt(AP_GetSkill(caster, MAGERY) * 0.4) + ( RandomInt(10) + 1 );
-	
+
 	MS_PlaySpellSFX(info.spell_id, cast_on);
 	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
 
 	var healed := AP_GetVital(cast_on, HITS);
 	HealDamage(cast_on, points);
 	healed := AP_GetVital(cast_on, HITS) - healed;
-	
+
 	SendSysMessage(caster, "You healed "+healed+" hit points of damage.");
-	
+
 	if ( caster.serial != cast_on.serial )
 		SendSysMessage(cast_on, "You have had "+healed+" hit points of damage healed.");
 	endif
-	
+
 	return 1;
 endprogram

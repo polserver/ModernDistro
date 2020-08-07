@@ -111,28 +111,28 @@ function GetMonthOrdinal(month)
 
 	case(month)
 		"jan":
-		"january":		return 01;
+		"january":		return "01";
 		"feb":
-		"february":		return 02;
+		"february":		return "02";
 		"mar":
-		"march":		return 03;
+		"march":		return "03";
 		"apr":
-		"april":		return 04;
-		"may":			return 05;
+		"april":		return "04";
+		"may":			return "05";
 		"jun":
-		"june":			return 06;
+		"june":			return "06";
 		"jul":
-		"july":			return 07;
+		"july":			return "07";
 		"aug":
-		"august":		return 08;
+		"august":		return "08";
 		"sep":
-		"september":	return 09;
+		"september":	return "09";
 		"oct":
-		"october":		return 10;
+		"october":		return "10";
 		"nov":
-		"november":		return 11;
+		"november":		return "11";
 		"dec":
-		"december":		return 12;
+		"december":		return "12";
 		default:		return error{"errortext":="Invalid month name for 'month' parameter."};
 	endcase
 endfunction

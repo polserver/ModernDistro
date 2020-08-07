@@ -14,7 +14,6 @@ use cliloc;
 
 include "include/findCity";
 include "include/client";
-include "include/sounds";
 //include "include/myUtil";
 //include "util/bank";
 include ":currency:currency";

@@ -7,7 +7,6 @@ include ":timedScripts:timedScripts";
 include ":timedScripts:buffIcon";
 include ":magery:spells";
 include "include/client";
-include "include/sounds";
 
 program cast_curse( parms )
     var caster := parms[1];

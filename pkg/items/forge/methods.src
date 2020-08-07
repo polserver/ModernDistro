@@ -10,21 +10,20 @@ exported function IsForge( unused item )
 endfunction
 
 exported function Animate( item )
+	var junk := 0;
 	if( item.graphic == CInt( item.objtype+3 ) )
 		if( item.objtype == 0x198A || item.objtype == 0x197E )
 			item.facing := 1;
 		endif
 		PlaySoundEffect( item, 0x02C );
-
 		return item.graphic := item.objtype;
 	elseif( item.graphic == item.objtype )
 		if( item.objtype == 0x198A || item.objtype == 0x197E )
 			item.facing := 29;
 		endif
-
 		return item.graphic := CInt( item.objtype+3 );
 	endif
 
-// Just a simple fail safe.
+	// Just a simple fail safe.
 	return item.graphic := item.objtype;
 endfunction

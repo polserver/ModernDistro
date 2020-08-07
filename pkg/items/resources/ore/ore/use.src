@@ -50,7 +50,7 @@ function SmeltOre(who, ore, ingot, difficulty)
 	// If there was no item reference then we are still OK because if there was a static item at the location
 	// TargetCoordinates() gives the ObjType number of that static item.
 	// So we check to see if the ObjType of either the dynamic item or static item matches the ObjTypes of known forges.
-	if((forge.objtype == 0xfb1) || forge.objtype := 0x2DD8|| ((forge.objtype >= CInt(0x197a)) && (forge.objtype <= CInt(0x19a9))))
+	if((forge.objtype == 0xfb1) || forge.objtype == 0x2DD8|| ((forge.objtype >= CInt(0x197a)) && (forge.objtype <= CInt(0x19a9))))
 		// We have to check Line Of Sight (LOS) to the targetted location because TargetCoordinates() has no
 		// flags for LOS check as does Target().
 		if(!CheckLosBetween( who.x, who.y, who.z, forge.x, forge.y, forge.z, who.realm ))

@@ -184,7 +184,7 @@ function showGump(who, virtuedesc)
 	//Label 2
 	GFTextLine(virtue_gump, 45, 286, 62, "its description and status");
 
-	return result := GFSendGump(who, virtue_gump);
+	return GFSendGump(who, virtue_gump);
 
 endfunction
 

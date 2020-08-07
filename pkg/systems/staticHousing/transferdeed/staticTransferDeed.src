@@ -103,7 +103,7 @@ program ChangeHouseOwner(who, deed)
 				// Check for the presence of ban tiles at doors.
 				things := ListItemsAtLocation( exteriordoor.x, exteriordoor.y, exteriordoor.z, exteriordoor.realm );
 				foreach thing in things
-					if(thing.objtype := 0x260FC)
+					if(thing.objtype == 0x260FC)
 						btcheck := thing;					// There is one
 					else
 						btcheck := 0;

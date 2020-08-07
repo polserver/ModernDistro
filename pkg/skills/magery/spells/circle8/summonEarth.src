@@ -4,7 +4,6 @@ include ":magery:summon";
 include ":attributes:attributes";
 include ":magery:spells";
 include "include/client";
-include "include/sounds";
 
 program summon_earth( parms )
   var caster := parms[1];
