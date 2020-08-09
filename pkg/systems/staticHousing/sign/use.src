@@ -389,7 +389,7 @@ endfunction
 function SetPlaqueName( sign )
 	var sgnname := GetObjProperty(sign,"signname");
 	if(!sgnname)
-		sgnname := "";
+		sgnname := "A house";
 	endif
 	var split := SplitWords( sgnname );
 	var j;
@@ -468,14 +468,17 @@ function ChangeInteriorLocks( who, house )
 		SendSysMessage( who, "That is not a key!", 1, 33 );
 		return;
 	endif
-
+	Print(extdoors);
+	var doors := 0;
 	var LockID := AllocateLockId();
 	SetObjProperty( newkey, "LockID", LockID );
 	foreach box in footage
-		foreach item in box
-			if((item.isA(POLCLASS_DOOR)) && (Distance(house, item) >= 3) && !(item in extdoors))
-				item.locked := 1;
-				SetObjProperty(item, "LockID", LockID);
+		doors := ListObjectsInBoxOfClass( POLCLASS_DOOR, box[1], box[2], box[3], box[4], box[5], box[6], house.realm );
+		foreach door in doors
+			if(Distance(house, door) >= 3 && !(door in extdoors))
+			Print(Hex(door.objtype));
+				door.locked := 1;
+				SetObjProperty(door, "LockID", LockID);
 			endif
 		endforeach
 	endforeach
