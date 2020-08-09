@@ -468,7 +468,6 @@ function ChangeInteriorLocks( who, house )
 		SendSysMessage( who, "That is not a key!", 1, 33 );
 		return;
 	endif
-	Print(extdoors);
 	var doors := 0;
 	var LockID := AllocateLockId();
 	SetObjProperty( newkey, "LockID", LockID );
@@ -476,7 +475,6 @@ function ChangeInteriorLocks( who, house )
 		doors := ListObjectsInBoxOfClass( POLCLASS_DOOR, box[1], box[2], box[3], box[4], box[5], box[6], house.realm );
 		foreach door in doors
 			if(Distance(house, door) >= 3 && !(door in extdoors))
-			Print(Hex(door.objtype));
 				door.locked := 1;
 				SetObjProperty(door, "LockID", LockID);
 			endif
