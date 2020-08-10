@@ -39,7 +39,7 @@ var ownerlayout := array(
 "text    200  35    0    0       ",
 "text    200  50    0    1       ",
 "text     28 102    0    2       ",
-"text    190 102    0    3       ",
+"text    170 102    0    3       ",
 "text    370 102    0    4       ",
 "button  100 105 5209 5209 0 1  0",
 "button  260 105 5209 5209 0 2  0",
@@ -290,7 +290,7 @@ var data := array(
     "",                                                      //house name line 1
     "",                                                      //house name line 2
     "Info",                                                  //line 2
-    "Friends",                                               //line 3
+    "House Lists",                                           //line 3
     "Options",                                               //line 4
     "Owned By",                                              //line 5
     "Number of lockdowns remaining",                         //line 6
@@ -299,7 +299,7 @@ var data := array(
     "display a list of house co-owners",                     //line 9
     "display a list of house friends",                       //line 10
     "display a list of house enemies",                       //line 11
-    "change the front door locks.",                          //line 12
+    "change the exterior door locks.",                          //line 12
     "change interior door locks.",                           //line 13
     "Abandon this house ( give up ownership of this house)", //line 14
     "Are you sure?",                                         //line 15

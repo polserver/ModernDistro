@@ -119,9 +119,9 @@ program ChangeHouseOwner(who, deed)
 				tile.movable := 0;
 			endif
 	endforeach
-	EraseObjProperty(sign, "friends");
-	EraseObjProperty(sign, "coowners");
-	EraseObjProperty(sign, "enemies");
+	sign.WipeFriendList();
+	sign.WipeCoOwnerList();
+	sign.ClearBanList();
 	SetObjProperty(sign, "builtdeed", deed.serial);
 	SetObjProperty(sign, "owneraccount", (who.acctname));
 	SetObjProperty(sign, "LockID", LockID);

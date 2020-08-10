@@ -294,7 +294,8 @@ var data := array(
     "",                                           //house name line 1
     "",                                           //house name line 2
     "Info",                                       //line 2
-    "Friends",                                    //line 3
+//    "Friends",                                    //line 3
+    "House Lists",                                    //line 3
     "Options",                                    //line 4
     "Owned By",                                   //line 5
     "Number of lockdowns remaining",              //line 6
@@ -303,7 +304,7 @@ var data := array(
     "display a list of house co-owners",          //line 9
     "display a list of house friends",            //line 10
     "display a list of house enemies",            //line 11
-    "change the front door locks.",               //line 12
+    "change the exterior door locks.",               //line 12
     "change interior door locks.",                //line 13
     "demolish this house and get the deed back.", //line 14
     "Are you sure?",                              //line 15

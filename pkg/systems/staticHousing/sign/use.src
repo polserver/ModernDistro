@@ -468,6 +468,10 @@ function ChangeInteriorLocks( who, house )
 		SendSysMessage( who, "That is not a key!", 1, 33 );
 		return;
 	endif
+	if(newkey.GetLockId())
+		SendSysMessage(who, "That is not a blank key.", color := 33);
+		return 0;
+	endif
 	var doors := 0;
 	var LockID := AllocateLockId();
 	SetObjProperty( newkey, "LockID", LockID );
@@ -610,7 +614,7 @@ function addcoowner( sign, who )
 endfunction
 
 function removefriend(who, hsign, information )
-  var friendinfo := GetObjProperty(hsign,"friends");
+  var friendinfo := hsign.GetFriendList();
   var ind := returnindex(friendinfo, information);
   var friend := SystemFindObjectBySerial(information);
   if (ind == 0)

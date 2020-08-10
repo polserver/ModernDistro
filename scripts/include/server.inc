@@ -261,7 +261,7 @@ Const ALIGNMENT_EVIL := 1;
 Const PROP_HS_C_ACCOUNT := "owneracct";
 Const PROP_HS_C_OWNER := "ownerserial";
 Const PROP_HS_C_OWNERNAME := "lastownername";
-Const PROP_HS_C_FRIENDS := "friends";
+Const PROP_HS_C_FRIENDS := "friendlist";
 // moored
 Const PROP_HS_C_FIXED := "lockeddown";
 Const PROP_HS_C_FIX_NUM := "RemainingLockdowns";

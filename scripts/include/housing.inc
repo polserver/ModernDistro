@@ -58,9 +58,9 @@ endfunction
 //////////////////////////////////////////////////////
 function IsHouseAffiliate(byref who)
 
-	var ownrserial := GetObjProperty(sign, "ownerserial");
+	var ownrserial := (sign, "ownerserial");
 	var coownlist := GetObjProperty(sign, "coowners");
-	var friendlist := GetObjProperty(sign, "friends");
+	var friendlist := sign.GetFriendList();
 	if(who in coownlist)
 		return 2;
 	elseif(who in friendlist)
@@ -80,7 +80,7 @@ function StatusCheck(byref who, type)
 	var nfo := {};
 	case(type)
 		1: nfo := GetObjProperty(sign, "coowners");
-		2: nfo := GetObjProperty(sign, "friends");
+		2: nfo := sign.GetFriendList();
 		3: nfo := GetObjProperty(sign, "banlist");
 	endcase
 	if(who.serial in nfo)
