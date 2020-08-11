@@ -47,30 +47,6 @@ function FindHouseForLocation (x, y, z, map)
 	return 0;
 endfunction
 
-//////////////////////////////////////////////////////
-// IsHouseAffiliate(who)
-//
-// Checks to see if the provided 'who' is the owner,
-// co-owner or a friend of the house.
-// sign must be a global of the calling script.
-//
-// Will probably move this to the sign method script.
-//////////////////////////////////////////////////////
-function IsHouseAffiliate(byref who)
-
-	var ownrserial := (sign, "ownerserial");
-	var coownlist := GetObjProperty(sign, "coowners");
-	var friendlist := sign.GetFriendList();
-	if(who in coownlist)
-		return 2;
-	elseif(who in friendlist)
-		return 3;
-	else
-		return who.serial == ownrserial;      // Returns 1 if 'who' is the owner and 0 if not.
-	endif
-
-endfunction
-
 /////////////////////////////////////////////////////////////////////////////////////////
 // checks whether or not the supplied "who" is on any of the house lists as specified.  //
 // usage: statuscheck(who, 1) <- will tell you if "who" is a co-owner.                 //
