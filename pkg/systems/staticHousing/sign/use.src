@@ -422,6 +422,10 @@ function ChangeLocks(sign, byref who)
 		return 0;
 	endif
 	if(newkey.IsKey() && !newkey.IsKeyring())
+		if(newkey.GetLockId())
+			SendSysMessage(who, "That is not a blank key.", color := 33);
+			return 0;
+		endif
 		var LockID := AllocateLockId();
 		SetObjProperty(newkey, "LockID", LockID);
 		SetObjProperty(sign, "LockID", LockID);
