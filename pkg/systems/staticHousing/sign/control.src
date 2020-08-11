@@ -86,15 +86,15 @@ function handle_speech(sign, event)
 	elseif((text["i wish to secure this"]) && (sec >= 2) && (IsInHouse(who)))
 		secure(sign, event, text);
 	elseif((text["i wish to unsecure this"]) && (sec >= 2) && (IsInHouse(who)))
-		unsecure(event);
+		unsecure(sign, event);
 	elseif((text["remove thyself"]) && (sec >= 1) && (IsInHouse(who)))
-		remove(event);
+		remove(sign, event);
 	elseif((text["i ban thee"]) && (sec >= 2) && (IsInHouse(who)))
 		housebanning(sign, event);
 	elseif((text["i wish to place a trash barrel"]) && (sec >= 2) && (IsInHouse(who)))
 		trashbarrel(sign, event);
 	elseif((text["reveal thyself"]) && (IsInHouse(who)))
-		reveal(event);
+		reveal(sign, event);
 	elseif((text["am i in the house"]) && (IsInHouse(who)))
 		SendSysMessage(who, "Yep. You're in the house.", 1, 88);
 	else
@@ -102,7 +102,7 @@ function handle_speech(sign, event)
 	endif
 endfunction
 
-function remove(event)
+function remove(sign, event)
   var who := event.source;
   if(IsInHouse(who))
     SendSysMessage(who, "target the person you wish to remove");
@@ -398,7 +398,7 @@ function secure(sign, event, unused text)
 
 endfunction
 
-function unsecure(event)
+function unsecure(sign, event)
 	var who := event.source;
 	var seclevel := 0;
 	var securedlevel := 0;
@@ -408,8 +408,9 @@ function unsecure(event)
 		return 0;
 	endif
 	var canunsecure := 0;
+	Print("sign.serial " + sign.serial);
 	// Determine if the unsecuring person has the proper secure level to unsecure the item.
-	if(who.acctname == owneracct)						// Owner
+	if(who.serial == sign.GetOwnerSerial())						// Owner
 		seclevel := "O";
 	elseif(statuscheck(who, 1) == 1)					// Co-owner
 		seclevel := "C";
@@ -419,7 +420,7 @@ function unsecure(event)
 		canunsecure := 1;										// The owner can unsecure anything.
 	elseif(seclevel == "C" && (securedlevel == "C" || securedlevel == "F" || securedlevel == "A"))
 		canunsecure := 1;										// The co-owner(s) can unsecure anything at a secured level of 'co-owner', 'friend', and 'all'.
-	else
+	elseif(!seclevel)
 		canunsecure := 0;
 	endif
 
@@ -632,7 +633,8 @@ function demolish(sign)									// Decay timer has ran out. House will go up for
   return;
 endfunction
 
-function reveal(event)
+function reveal(sign, event)
+	sign := sign;
   var holder := 0;
   var who := event.source;
   foreach thing in (GetHouseMobiles())
