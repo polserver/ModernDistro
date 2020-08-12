@@ -36,7 +36,6 @@ program StaticSignListener(sign)
 	while(sign)
 		var ev := wait_for_event(120);
 		if(ev)
-			Print("Control " + footage);
 			handle_speech(sign, ev);
 		endif
 		var decaytime := GetObjProperty(sign, "decay");
@@ -71,11 +70,11 @@ function handle_speech(sign, event)
 	// owneracct := GetObjProperty(sign, "owneraccount");
 	ownerser := GetObjProperty(sign, "ownerserial");
 	var sec;
-	if(who.serial == ownerser)							// Owner
+	if(who.serial == ownerser)	// Owner
 		sec := 3;
-	elseif(statuscheck(who, 1) == 1)					// Co-owner
+	elseif(sign.IsACoowner(who))	// Co-owner
 		sec := 2;
-	elseif(statuscheck(who, 2) == 1)					// Friend
+	elseif(sign.IsAFriend(who))	// Friend
 		sec := 1;
 	endif
 	var text := lower(event.text);
@@ -412,7 +411,7 @@ function unsecure(sign, event)
 	// Determine if the unsecuring person has the proper secure level to unsecure the item.
 	if(who.serial == sign.GetOwnerSerial())						// Owner
 		seclevel := "O";
-	elseif(statuscheck(who, 1) == 1)					// Co-owner
+	elseif(sign.IsACoowner(who))					// Co-owner
 		seclevel := "C";
 	endif
 	securedlevel := GetObjProperty(item, "SecuredLevel");

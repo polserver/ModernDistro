@@ -3,18 +3,17 @@ use uo;
 
 program use_securecontainer(who, item)
 	var house := SystemFindObjectBySerial( GetObjProperty( item, "houseserial" ));
-//	var chestserial := item.serial;
 	var securitylevel := 0;					// The security level of the person trying to access the container.
 	var securedlevel := 0;					// The security level that is assigned to the container.
 	var seclevel := GetObjProperty(item, "SecuredLevel");
-	var coownerinfo := GetObjProperty(house, "coownlist");
+	var coownerinfo := GetObjProperty(house, "coowners");
 	var friendinfo := GetObjProperty(house,"friendlist");
 
 	// GMs and above have access to all secured things.
 	if(who.cmdlevel >= 3)
 		if(item.isA(POLCLASS_CONTAINER))
 			SendViewContainer( who, item );
-			SendSysMessage( who, "You open the secure container.", 1, 66 );
+			SendSysMessage( who, "You open the secure container.", color := 66 );
 			return 1;
 		endif
 	endif
