@@ -109,6 +109,7 @@ program HouseTeleporterKit(who, htelekit)
 		ReleaseItem(htele2);
 		htele1.invisible := 0;
 		htele2.invisible := 0;
+		SetObjProperty(htele1, "AccessLevel", "A");
 		SetObjProperty(htele1, "DestX", htele2.x);
 		SetObjProperty(htele1, "DestY", htele2.Y);
 		SetObjProperty(htele1, "DestZ", htele2.z);
@@ -116,6 +117,7 @@ program HouseTeleporterKit(who, htelekit)
 		SetObjProperty(htele1, "signserial", housesign1.serial);
 		SetObjProperty(htele1, "Othertele", htele2.serial);
 		SetObjProperty(htele1, "Primary", 1);
+		SetObjProperty(htele2, "AccessLevel", "A");
 		SetObjProperty(htele2, "DestX", htele1.x);
 		SetObjProperty(htele2, "DestY", htele1.y);
 		SetObjProperty(htele2, "DestZ", htele1.z);
