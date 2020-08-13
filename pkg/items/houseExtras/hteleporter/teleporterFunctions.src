@@ -74,7 +74,7 @@ function SetAccess(who, sign, tele)
 		1:	access_level := "O";
 		2:	access_level := "C";
 		3:	access_level := "F";
-		4:	access_level := "";
+		4:	access_level := "A";
 	endcase
 	SetObjProperty(tele,  "houseserial", sign.serial);
 	SetObjProperty(tele, "AccessLevel", access_level);
