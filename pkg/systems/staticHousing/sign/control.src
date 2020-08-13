@@ -409,9 +409,13 @@ function unsecure(sign, event)
 	var canunsecure := 0;
 	Print("sign.serial " + sign.serial);
 	// Determine if the unsecuring person has the proper secure level to unsecure the item.
-	if(who.serial == sign.GetOwnerSerial())						// Owner
+	if(who.serial == sign.GetOwnerSerial())	// Owner
 		seclevel := "O";
-	elseif(sign.IsACoowner(who))					// Co-owner
+	elseif(who.cmdlevel >= 3)				// Staff with "Testing" CProp can unsecure.
+		if(GetObjProperty(who, "Testing"))
+			seclevel := "O";
+		endif
+	elseif(sign.IsACoowner(who))			// Co-owner
 		seclevel := "C";
 	endif
 	securedlevel := GetObjProperty(item, "SecuredLevel");
@@ -644,7 +648,7 @@ function reveal(sign, event)
     endif
   endforeach
   if(!holder)
-    SendSysMessage(who, 1010081, 3, 40); // You carefully check the house and find no hidden people
+    SendSysMessageCL(who, 1010081, 3, 40); // You carefully check the house and find no hidden people
   elseif(holder == 1)
     PrintTextAbovePrivateCL(who, 1010082, who, color := 66); // You carefully check the house and reveal one other person.
   else
@@ -657,7 +661,7 @@ function VendorCommands(ev)
   if(!vlist)
     return;
   endif
-  var npclist := array;
+  var npclist := {};
   foreach thing in vlist
     var npc := SystemFindObjectBySerial(thing);
     var split := SplitWords(npc.name);

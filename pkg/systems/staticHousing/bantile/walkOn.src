@@ -9,7 +9,7 @@ program walk_on_bantile(who, tile)
 	var signserial := CInt(GetObjProperty(tile, "signserial"));
 	var sign := SystemFindObjectBySerial(signserial);
 	var banlist := GetObjProperty(sign, "banlist");
-	if(who.acctname)
+	if(sign.IsCoOwnerOrOwner(who))
 		sign.RefreshHouse();
 	endif
 	if(!banlist)
