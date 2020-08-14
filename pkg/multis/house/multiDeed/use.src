@@ -9,7 +9,6 @@ include "include/objtype";
 include "include/findCity";
 include "include/canAccess";
 include ":multihousing:isValidLoc";
-include "include/housing";
 include ":multihousing:multihouse_settings";
 
 const UOBJECT_TENT_CHEST:=0xe43;
@@ -71,8 +70,9 @@ function Buildhouse(who, deed)
   if(!created)
     return;
   endif
-  var lock := GetObjProperty(deed, "RemainingLockdowns");
-  var sec  := GetObjProperty(deed, "RemainingSecures");
+
+  var lock := GetObjProperty(deed, "numlockdowns");
+  var sec  := GetObjProperty(deed, "numsecure");
   if(DestroyItem(deed))
     var LockID := AllocateLockID();
 	// CProps for deed in bank box.
@@ -86,12 +86,11 @@ function Buildhouse(who, deed)
     SetObjProperty(created.house,			"RemainingSecures",    sec);
     SetObjProperty(created.house,			"footage",      created.footage);
     foreach item in(created.house.components)
-//		if(((item.objtype >= UOBJECT_DOORS_START) &&(item.objtype <= UOBJECT_DOORS_END)) || item.objtype == UOBJECT_TENT_CHEST || item.objtype == 0x6ad)
 		if(item.IsA(POLCLASS_DOOR))
 			item.locked := 1;
 			SetObjProperty(item,			"LockID", LockID);
 			SetObjProperty(item,			"houseserial", created.house.serial);
-		elseif(item.IsMultiHouseSign())
+		elseif((item.objtype == 0xBD0) || (item.objtype == 0xBD2))
 			SetObjProperty(item,			"LockID", LockID);
 			SetObjProperty(item,			"houseserial", created.house.serial);
 			SetObjProperty(item,			"signserial", item.serial);

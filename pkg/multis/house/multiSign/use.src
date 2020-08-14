@@ -32,7 +32,8 @@ var layout := array(
 "resizepic 115 100 5100 382 25",
 "text 125 102 0 1",
 "button 178 104 5209 5003 0 1 0",
-"text 245 102 0 2",
+//"text 245 102 0 2",
+"text 235 102 0 2",
 "button 330 104 5209 5003 0 2 0",
 "text 375 102 0 3",
 "button 460 104 5209 5003 0 3 0",
@@ -200,9 +201,10 @@ var layout := array(
 
 var data := array(
 "",
-"INFO",
-"FRIENDS",
-"OPTIONS",
+"Info",
+//"FRIENDS",
+"House Lists",
+"Options",
 "Owned by:",
 "<NAME>",
 "Number of locked down items:",
