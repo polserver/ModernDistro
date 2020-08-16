@@ -1,5 +1,6 @@
 use os;
 use uo;
+use cliloc;
 
 program use_securecont(who, item)
   var house := SystemFindObjectBySerial( GetObjProperty( item, "signserial" ));
@@ -8,7 +9,7 @@ program use_securecont(who, item)
   if ((GetObjProperty( house, "ownerserial" ) == who.serial) || (GetObjProperty( house, "owneracct" ) == who.acctname))
      secure := 1;
   else
-    var coownerinfo := GetObjProperty(house,"coownlist");
+    var coownerinfo := GetObjProperty(house,"coowners");
     if(who.serial in coownerinfo)
       secure := 1;
     else
@@ -22,7 +23,7 @@ program use_securecont(who, item)
     secure := 1;
   endif
   if(!secure)
-    SendSysMessage( who, "You can't use this." );
+    SendSysMessageCL( who, 500294 ); // You cannot use that.
     return;
   else
     SendViewContainer( who, item );

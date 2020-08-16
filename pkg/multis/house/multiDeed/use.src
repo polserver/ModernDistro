@@ -192,57 +192,6 @@ function CreatehouseKeysAndBuiltDeed2(character, housetype, where, deed)
 	return result;
 endfunction
 
-// function CreatehouseKeysAndBuiltDeed(who, housetype, where, deed)
-	// var bankbox	:= CP_GetStorageContainerForMobile( who, bank_region, CP_CREATE );
-  // var logdoor, x := where.x, y := where.y, z := where.z, map := where.realm;
-  // var packkey := CreateItemInBackpack(who, UOBJ_GOLD_KEY);
-  // if(!packkey)
-    // PrintTextAbovePrivate(who, "Your backpack is too full!", who);
-    // return 0;
-  // endif
-  // var bankkey := CreateItemInContainer(bankbox, UOBJ_GOLD_KEY);
-  // if(!bankkey)
-    // PrintTextAbovePrivate(who, "Your bankbox is too full!", who);
-    // DestroyItem(packkey);
-    // return 0;
-  // endif
-  // var builtdeed := CreateItemInContainer(bankbox, 0x14ef);
-  // SetName(builtdeed, deed.desc + " at " + x + ", " + y + ", " + z + ", " + map + "(built)");
-  // if(!builtdeed)
-    // PrintTextAbovePrivate(who, "Your bankbox is too full!", who);
-    // DestroyItem(packkey);
-    // DestroyItem(bankkey);
-    // return 0;
-  // endif
-  // var house := CreateMultiAtLocation(x, y, z, housetype, 0, where.realm);
-  // var footage := FindBoxArray(housetype, house);
-  // SetObjProperty(house,"RemainingLockdowns",GetObjProperty(deed,"RemainingLockdowns"));
-  // SetObjProperty(house,"RemainingSecures",GetObjProperty(deed,"RemainingSecures"));
-  // SetObjProperty(house,"ownerserial",who.serial);
-  // SetObjProperty(house,"owneracct",who.acctname);
-  // SetObjProperty(house,"builtdeed",builtdeed.serial);
-  // SetObjProperty(house,"decay", (ReadGameClock()+ 2592000));
-  // if(housetype==0x6bb8 || housetype==0x6070 || housetype==0x6072)
-  // house.movable:=0;
-  // house.visible:=1;
-  // endif
-  // if(!house)
-    // PrintTextAbovePrivate(who, "I can't place the house there.", who);
-    // print(house.errortext);
-    // DestroyItem(packkey);
-    // DestroyItem(bankkey);
-    // DestroyItem(builtdeed);
-    // return;
-  // endif
-  // var result array;
-  // result .+ packkey := packkey;
-  // result .+ bankkey := bankkey;
-  // result .+ builtdeed := builtdeed;
-  // result .+ house := house;
-  // result .+ footage := footage;
-  // return result;
-// endfunction
-
 function DeedAlreadyBuiltFrom(deed)
   if(GetObjProperty(deed, "builtserial"))
     return 1;
