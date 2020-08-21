@@ -93,7 +93,7 @@ function NavigateAway(targ)
     WalkToward(targ);
     WalkToward(targ);
     WalkToward(targ);
-    if(ABS(me.facing - myface) = 4)
+    if(ABS(me.facing - myface) == 4)
       runaway := runaway + 1;
     endif
   until ((Distance(me, targ) <= 1) or (runaway > 2) or (Distance(me, targ) > 20));

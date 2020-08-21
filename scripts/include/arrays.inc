@@ -150,7 +150,7 @@ function InsertInSortedArray( byref the_array, byref element )
 	if( the_array[1].IsA(POLCLASS_UOBJECT) )
 		while( min <= max )
 			ctr := Cint((min+max)/2);
-			if( the_array[ctr].serial = element.serial )
+			if( the_array[ctr].serial == element.serial )
 				var ret := error;
 				ret.+errortext := "Element " + element + " already exists in array";
 				return ret;
@@ -163,7 +163,7 @@ function InsertInSortedArray( byref the_array, byref element )
 	else
 		while( min <= max )
 			ctr := Cint((min+max)/2);
-			if( the_array[ctr] = element )
+			if( the_array[ctr] == element )
 				var ret := error;
 				ret.+errortext := "Element " + element + " already exists in array";
 				return ret;
