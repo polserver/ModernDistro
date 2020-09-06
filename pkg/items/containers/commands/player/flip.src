@@ -179,92 +179,50 @@ program flip (who)
 
 	 targetfurniture.graphic :=  0x09be;
 
-  0x0A2C:
+// DOES NOT MATCH 0xa97 -> 0xa9a
+//  0x0A97:
+//	//bookshelf
+//	 targetfurniture.graphic :=  0x0A98;
 
-	 targetfurniture.graphic :=  0x0A34;
+// DOES NOT MATCH 0xa98 -> 0xa99
+//  0x0A98:
+//	//bookshelf
+//	 targetfurniture.graphic :=  0x0A9B;
 
-  0x0A30:
+// DOES NOT MATCH 0xa9b -> 0xa9c
+//  0x0A9B:
+//	//bookshelf
+//	 targetfurniture.graphic :=  0x0A99;
 
-	 targetfurniture.graphic :=  0x0A38;
+// DOES NOT MATCH 0xa99 -> 0xa97
+//  0x0A99:
+//	//bookshelf
+//	 targetfurniture.graphic :=  0x0A9A;
 
-  0x0A34:
+// DOES NOT MATCH 0xa9a -> a97
+//  0x0A9A:
+//	//bookshelf
+//	 targetfurniture.graphic :=  0x0A9C;
 
-	 targetfurniture.graphic :=  0x0A2C;
+// DOES NOT MATCH 0xa9c -> 0xa9b
+//  0x0A9C:
+//	//bookshelf
+//	 targetfurniture.graphic :=  0x0A97;
 
-  0x0A38:
+// DOES NOT MATCH 0xb2f -> 0xb30
+//  0X0b2f:
+//	//wooden chair
+//	 targetfurniture.graphic :=  0X0b31;
 
-	 targetfurniture.graphic :=  0x0A30;
+// DOES NOT MATCH 0xb30 -> 0xb31
+//  0X0b30:
+//	//wooden chair
+//	 targetfurniture.graphic :=  0X0b2e;
 
-  0x0A4D:
-	 targetfurniture.graphic :=  0x0A51;
-
-  0x0A4F:
-	//armoire
-	 targetfurniture.graphic :=  0x0A53;
-
-  0x0A51:
-	//armoire
-	 targetfurniture.graphic :=  0x0A4D;
-
-  0x0A53:
-	//armoire
-	 targetfurniture.graphic :=  0x0A4F;
-
-  0x0A97:
-	//bookshelf
-	 targetfurniture.graphic :=  0x0A98;
-
-  0x0A98:
-	//bookshelf
-	 targetfurniture.graphic :=  0x0A9B;
-
-  0x0A9B:
-	//bookshelf
-	 targetfurniture.graphic :=  0x0A99;
-
-  0x0A99:
-	//bookshelf
-	 targetfurniture.graphic :=  0x0A9A;
-
-  0x0A9A:
-	//bookshelf
-	 targetfurniture.graphic :=  0x0A9C;
-
-  0x0A9C:
-	//bookshelf
-	 targetfurniture.graphic :=  0x0A97;
-
-  0x0B2C:
-	//wooden bench
-	 targetfurniture.graphic :=  0x0B2D;
-
-  0x0B2D:
-	//wooden bench
-	 targetfurniture.graphic :=  0x0B2C;
-
-  0X0b2e:
-	//wooden chair
-	 targetfurniture.graphic :=  0X0b2f;
-
-  0X0b2f:
-	//wooden chair
-	 targetfurniture.graphic :=  0X0b31;
-
-  0X0b30:
-	//wooden chair
-	 targetfurniture.graphic :=  0X0b2e;
-
-  0X0b31:
-	//wooden chair
-	 targetfurniture.graphic :=  0X0b30;
-
-  0x0B32:
-	//throne
-	 targetfurniture.graphic :=  0x0B33;
-
-  0x0B33:
-	//throne
-	 targetfurniture.graphic :=  0x0B32;
+// DOES NOT MATCH 0xb31 -> 0xb2e
+//  0X0b31:
+//	//wooden chair
+//	 targetfurniture.graphic :=  0X0b30;
 
   0X0b34:
 	//small table
@@ -305,21 +263,26 @@ program flip (who)
   0x0b4c:
 	//writing desk
 	 targetfurniture.graphic :=  0x0b4a;
-  0x0B4E:
-	//fancy chair
-	 targetfurniture.graphic :=  0x0B4F;
 
-  0x0B4F:
-	//fancy chair	 
-targetfurniture.graphic :=  0x0B51;
+// DOES NOT MATCH 0xb4e -> 0xb50
+//  0x0B4E:
+//	//fancy chair
+//	 targetfurniture.graphic :=  0x0B4F;
 
-  0x0B50:
-	//fancy chair
-	 targetfurniture.graphic :=  0x0B4E;
+// DOES NOT MATCH 0xb4f -> 0xb4e
+//  0x0B4F:
+//	//fancy chair
+//    targetfurniture.graphic :=  0x0B51;
 
-  0x0B51:
-	//fancy chair
-	 targetfurniture.graphic :=  0x0B50;
+// DOES NOT MATCH 0xb50 -> 0xb51
+//  0x0B50:
+//	//fancy chair
+//	 targetfurniture.graphic :=  0x0B4E;
+
+// DOES NOT MATCH 0xb51 -> 0x0xb4f
+//  0x0B51:
+//	//fancy chair
+//	 targetfurniture.graphic :=  0x0B50;
 
   0x0B52:
 	//cushioned chair
@@ -337,69 +300,40 @@ targetfurniture.graphic :=  0x0B51;
 	//cushioned chair
 	 targetfurniture.graphic :=  0x0B54;
 
-  0x0B56:
-	//plain wooden chair
-	 targetfurniture.graphic :=  0x0B57;
+// DOES NOT MATCH ABOVE 0xb56 -> 0xb58
+//  0x0B56:
+//	//plain wooden chair
+//	 targetfurniture.graphic :=  0x0B57;
 
-  0x0B57:
-	//plain wooden chair
-	 targetfurniture.graphic :=  0x0B58;
+// DOES NOT MATCH ABOVE 0xb57 -> 0xb56
+//  0x0B57:
+//	//plain wooden chair
+//	 targetfurniture.graphic :=  0x0B58;
 
-  0x0B58:
-	//plain wooden chair
-	 targetfurniture.graphic :=  0x0B59;
+// DOES NOT MATCH ABOVE 0xb59 -> 0xb57
+//  0x0B59:
+//	//plain wooden chair
+//	 targetfurniture.graphic :=  0x0B56;
 
-  0x0B59:
-	//plain wooden chair
-	 targetfurniture.graphic :=  0x0B56;
+// DOES NOT MATCH ABOVE 0xb5a -> 0xb5c
+//  0x0B5A:
+//	//simple chair
+//	 targetfurniture.graphic :=  0x0B5B;
 
-  0x0B5A:
-	//simple chair
-	 targetfurniture.graphic :=  0x0B5B;
+// DOES NOT MATCH ABOVE 0xB5B -> 0xB5A
+//  0x0B5B:
+//	//simple chair
+//	 targetfurniture.graphic :=  0x0B5D;
 
-  0x0B5B:
-	//simple chair
-	 targetfurniture.graphic :=  0x0B5D;
+// DOES NOT MATCH above ~line 96 0xb5c -> 0xb5d
+//  0x0B5C:
+//	//simple chair
+//	 targetfurniture.graphic :=  0x0B5A;
 
-  0x0B5C:
-	//simple chair
-	 targetfurniture.graphic :=  0x0B5A;
-
-  0x0B5D:
-	//simple chair
-	 targetfurniture.graphic :=  0x0B5C;
-
-  0x0B7D:
-	//table
-	 targetfurniture.graphic :=  0x0B90;
-
-  0x0B7C:
-	//table
-	 targetfurniture.graphic :=  0x0B8F;
-
-  0x0B8F:
-	//table
-	 targetfurniture.graphic :=  0x0B7C;
-
-  0x0B90:
-	//table
-	 targetfurniture.graphic :=  0x0B7D;
-
-  0x0E40:
-	//metal chest
-	 targetfurniture.graphic :=  0x0E41;
-
-  0x0E41:
-	//metal chest
-	 targetfurniture.graphic :=  0x0E40;
-
-  0x0E42:
-	//wooden chest
-	 targetfurniture.graphic :=  0x0E43;
-
-  0x0E43:
-	//wooden chest
-	 targetfurniture.graphic :=  0x0E42;
+// DOES NOT MATCH see above ~line 98  0xb5d -> 0xb5b
+//  0x0B5D:
+//	//simple chair
+//	 targetfurniture.graphic :=  0x0B5C;
 
   0x0EE3:
 	//spider web
