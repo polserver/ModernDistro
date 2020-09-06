@@ -586,7 +586,7 @@ function OpenMyPack()
 		0xC8:	mounttype := 0x3E9F;	// Horse2
 		0xE2:	mounttype := 0x3EA0;	// Horse3
 		0xE4:	mounttype := 0x3EA1;	// Horse4
-		0xC8:	mounttype := 0x3E9F;	// Horse5
+// Horse2?		0xC8:	mounttype := 0x3E9F;	// Horse5
 		0x580:	mounttype := 0x3ECD;	// horse6 palomino
 		0xDC:	mounttype := 0x3EA6;	// Llama
 		0xD5:	mounttype := 0x3ec5;	// Polar bear
@@ -602,7 +602,7 @@ function OpenMyPack()
 		0xBE:	mounttype := 0x3e9e;	// Fire Steed
 		0x73:	mounttype := 0x3EAA;	// Ethereal Horse
 		0xAA:	mounttype := 0x3EAB;	// Ethereal Llama
-		0xd2:	mounttype := 0x3EAC;	// Ethereal Ostard
+// See 0xD2 above		0xd2:	mounttype := 0x3EAC;	// Ethereal Ostard
 		0xC3:	mounttype := 0x3E97;	// Ethereal Giant Beetle
 		0xC2:	mounttype := 0x3E98;	// Ethereal Swamp Dragon
 		0xC1:	mounttype := 0x3E9A;	// Ethereal Ridgeback
