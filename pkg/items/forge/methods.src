@@ -10,7 +10,6 @@ exported function IsForge( unused item )
 endfunction
 
 exported function Animate( item )
-	var junk := 0;
 	if( item.graphic == CInt( item.objtype+3 ) )
 		if( item.objtype == 0x198A || item.objtype == 0x197E )
 			item.facing := 1;

@@ -634,6 +634,7 @@ function OpenMyPack()
 		0x582:	mounttype := 0x3ECC;	// Windrunner
 		0x59A:	mounttype := 0x3ECE;	// Serpentine Dragon
 		0x57F:	mounttype := 0x3ECB;	// Lasher - a rainbow highlighted unicorn.
+		0x5F7:	mounttype := 0x3ED3;	// capybara
 		0x5E6:	mounttype := 0x3ED1;	// coconut crab
     endcase
 
