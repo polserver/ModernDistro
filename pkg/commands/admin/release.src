@@ -32,7 +32,6 @@ program textcmd_release( who)
     0x16069: CreateItemInBackpack(who,0x16023,1); //tower
     0x16070: CreateItemInBackpack(who,0x16024,1); //keep
     0x16071: CreateItemInBackpack(who,0x16025,1); //castle
-    0x16072: CreateItemInBackpack(who,0x16026,1); //largepatiohousedeed
     0x16074: CreateItemInBackpack(who,0x1602D,1); //largemarblepatiohousedeed
     0x16075: CreateItemInBackpack(who,0x1602E,1); //smalltowerdeed
     0x16076: CreateItemInBackpack(who,0x1602F,1); //logcabindeed
