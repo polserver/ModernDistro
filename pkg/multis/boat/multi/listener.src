@@ -422,14 +422,15 @@ function DoEncounter( boat )
 
 	var creature := ( boat.tillerman ).GetSeafaringCreatures();
 	if( creature.errortext )
-		PrintTextAbove( boat.tillerman, "Error to get evil creature <"+creature+"> -->"+creature.errortext );
+		SysLog( "Error getting sea creature <"+creature+"> -->"+creature.errortext );
 		return 0;
 	endif
 
 	var z := GetMapInfo( x, y ).z;
 	var created := CreateNpcFromTemplate( creature, x, y, z, 0, boat.realm );
 	if( created.errortext )
-		PrintTextAbove( boat.tillerman, "Error creating creature <"+created+"> -->"+created.errortext );
+		// Leaving the following line in just in case it's needed for debugging.
+		// SysLog( "Error creating creature <"+created+"> -->"+created.errortext );
 		return 0;
 	endif
 
