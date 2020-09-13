@@ -129,7 +129,7 @@ function staff(ev)
   elseif(who.cmdlevel >= 3)
     gm.append(who);
   endif
-  SendSysMessage(Who, "Welcome, there are currently " + len(stff) + " staff online");
+  SendSysMessage(Who, "Welcome, there is currently " + len(stff) + " staff online");
   foreach thing in stff
     if(thing != who)
       var msg := "Staff Member";

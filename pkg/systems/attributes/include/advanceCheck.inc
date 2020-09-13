@@ -16,7 +16,7 @@ use util;
 use math;
 
 include ":attributes:attributes_ex";
-include ":skilllocks:common";
+include ":character:skillLocks";
 
 /*
  * CheckStatsForSkill(mobile, skill_name)
@@ -35,11 +35,11 @@ include ":skilllocks:common";
 function CheckStatsForSkill( mobile, skill_name )
 
 	 foreach stat_entry in ( AP_GetSkillStats( skill_name ))
-  
+
 		var stat_name := CStr( _stat_entry_iter ),
 		    check_chance := CInt( stat_entry[1] ),
                     stat_mult := RandomDiceRoll( CStr( stat_entry[2] ));
-      
+
                 var roll := RandomFloat( 100.0 );
 		if( roll <= check_chance )
 	 	 	 CheckStatAdvancement( mobile, stat_name, stat_mult );
@@ -79,9 +79,9 @@ function CheckStatAdvancement( mobile, stat_name, stat_mult )
         var level_diff := GetDifficultyStat( stat_value ),
 	    chance := CDbl(( stat_left * stat_mult ) / 100 ),
             random := RandomFloat( level_diff );
-        
+
 	if( random <= chance )
- 
+
 		var advance := CDbl( 0.1 );
 		if( advance >= stat_left )
 			advance := stat_left;
@@ -119,7 +119,7 @@ function CheckSkillAdvance( mobile, attrib_name, difficulty, award_diff )
         var true_skill := AP_GetTrueSkill( mobile, attrib_name ),
             skill_value := AP_GetTrueSkill( mobile, attrib_name ),
             skill_id := AP_AttributeNameToSkillId( attrib_name ),
-	    skill_lock_state := SLPH_GetLockState( mobile, skill_id );
+	    skill_lock_state := SL_GetLockState( mobile, skill_id );
 
 	if( skill_lock_state == 2 )
 		//Skill lock state is set to lock. Aborting.
@@ -128,23 +128,23 @@ function CheckSkillAdvance( mobile, attrib_name, difficulty, award_diff )
 
         var csa_settings := AP_GetSettingsCfgElem( "Skills" ),
             skill_cap := AP_GetSkillCap( mobile, attrib_name );
-     
+
         if( !DifficultyTooEasy( skill_value, difficulty ))
                 award_diff *= CDbl( csa_settings.GainSpeed );
         else
                 award_diff *= CDbl( 0.5 );
         endif
-        
+
         var level_diff := GetDifficultySkill( true_skill ),
             limit_left := CDbl( skill_cap - true_skill ),
             skills_left := CDbl( 150.0 - true_skill ),
             random := CDbl( RandomFloat( level_diff )),
 	    chance := CDbl(( skills_left * award_diff ) / 100 );
-     
+
         if( chance < 0.5 )
                 chance := 0.5;
         endif
-        
+
         if( true_skill < CDbl( csa_settings.FreeGainUntil ))
 		//Passed advance check.
 	elseif( random > chance )
@@ -153,7 +153,7 @@ function CheckSkillAdvance( mobile, attrib_name, difficulty, award_diff )
 	endif
 
 	var advance := CDbl( 0.1 );
-  if( csa_settings.EnableLowSkillBonus ) 
+  if( csa_settings.EnableLowSkillBonus )
     if( true_skill < CInt(csa_settings.LowSkillThreshold) )
       advance := CDbl((( 30 - true_skill ) / CInt(csa_settings.SkillBonusMod) ) * 0.1 );
     endif
@@ -164,7 +164,7 @@ function CheckSkillAdvance( mobile, attrib_name, difficulty, award_diff )
 	elseif( advance < 0.1 )
 		advance := 0.1;
 	endif
- 
+
   if( skill_lock_state == 1 ) //Skill lock state is set to raise.
           var temp := CDbl( true_skill - advance );
 
@@ -174,14 +174,14 @@ function CheckSkillAdvance( mobile, attrib_name, difficulty, award_diff )
 
           AP_SetTrueSkill( mobile, attrib_name, temp );
   endif
-  
+
   return 1;
 endfunction
 
 function GetDifficultySkill( true_skill )
 
         var level_diff;
-        
+
         if( true_skill < 70 )
                 level_diff := 20.0;
         elseif( true_skill < 90 )
@@ -201,7 +201,7 @@ function GetDifficultySkill( true_skill )
         else
                 level_diff := 20000.0;
         endif
-        
+
         return CDbl( level_diff );
 endfunction
 

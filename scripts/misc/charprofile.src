@@ -1,0 +1,15 @@
+use uo;
+use os;
+
+include ":character:profile";
+
+program CharProfile( towhom, forwhom, mode, uctext )
+
+	if( mode == 0 )
+		RequestProfile( forwhom, towhom );
+	else
+		UpdateProfile( forwhom, towhom, uctext );
+	endif
+
+	return 1;
+endprogram

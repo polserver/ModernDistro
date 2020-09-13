@@ -10,8 +10,7 @@ use os;
 use polsys;
 
 include "include/client";
-include ":skilllocks:common";
-//include ":attributes:attributes_ex";
+include ":character:skillLocks";
 include ":attributes:attributes";
 
 CONST MODE_FULL_LIST		:= 0;
@@ -42,18 +41,18 @@ exported function HandleSendSkillLock(character, byref packet)
 	var mode := packet.GetInt8(OFFSET_SEND_MODE);
 	var state := 0;
 
-	if ( DEBUG )
+	if( DEBUG )
 		Print("HandleSendSkillLock - character: "+character.name+" packet: "+packet);
 	endif
 
-	if ( num_skills == "" )
+	if( num_skills == "" )
 		num_skills := Len(AP_ListAttributesByType("Skill"));
 	endif
-		
-	if ( mode == MODE_FULL_LIST || mode == MODE_FULL_LIST_CAP )
+
+	if( mode == MODE_FULL_LIST || mode == MODE_FULL_LIST_CAP )
 		for i := 0 to (num_skills - 1)
-			state := SLPH_GetLockState(character, i);
-			
+			state := SL_GetLockState(character, i);
+
 			// If it is requested, include cap information
 			if ( mode == MODE_FULL_LIST_CAP )
 				// Use 9 here because byte[2] id + byte[2] skill value + byte[2] unmodified value + byte skillLock + byte[2] cap = 9
@@ -67,7 +66,7 @@ exported function HandleSendSkillLock(character, byref packet)
 		endfor
 	elseif ( mode == MODE_SINGLE_SKILL || mode == MODE_SINGLE_SKILL_CAP )
 		var skill_id := packet.GetInt16(OFFSET_SEND_SKILL_ID);
-		state := SLPH_GetLockState(character, skill_id);
+		state := SL_GetLockState(character, skill_id);
 		packet.SetInt8(OFFSET_SEND_SKILLLOCK, state);
 
 		// If it is requested, include skill cap information
@@ -92,8 +91,8 @@ exported function HandleReceiveSkillLock(character, byref packet)
 
 	var skill_id := packet.GetInt16(OFFSET_RECEIVE_SKILL);	// skill ID
 	var mode := packet.GetInt8(OFFSET_RECEIVE_MODE);	// lock state, 0=raise/1=lower/2=lock
-	SLPH_SaveLockState(character, skill_id, mode);
-	
+	SL_SaveLockState(character, skill_id, mode);
+
 	// POL skips this packet anyway
 	return 1;
 endfunction

@@ -1,0 +1,13 @@
+use uo;
+use os;
+
+include ":character:profile";
+
+program character_ondelete( mobile )
+
+	var datafile := CHARACTER_GetDatafile();
+
+	datafile.DeleteElement( mobile.serial );
+
+	return 1;
+endprogram
