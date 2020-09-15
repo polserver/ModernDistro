@@ -1,0 +1,6 @@
+use util;
+
+program Install()
+	Print( "Custom Party Class Methods Installed." );
+	return 1;
+endprogram

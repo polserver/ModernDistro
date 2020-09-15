@@ -1,0 +1,9 @@
+use uo;
+use os;
+use util;
+use polsys;
+
+program Install()
+	Print( "Custom Item Class Methods Installed." );
+	return 1;
+endprogram

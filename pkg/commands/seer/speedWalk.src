@@ -1,0 +1,36 @@
+use uo;
+use os;
+use polsys;
+
+program textcmd_speedwalk( mobile, text )
+
+	if( !text )
+		if( GetObjProperty( mobile, "SpeedWalk" ) )
+			text := 0;
+		else
+			text := CInt( 1 );
+		endif
+	else
+		text := CInt( text );
+		if( text.errortext )
+			SendSysMessage( mobile, "Invalid value, must be an integer between 0 - 4.", 0x3, 0x22 );
+			return 0;
+		endif
+	endif
+
+	if( CInt( text ) > 4 )
+		SendSysMessage( mobile, "Invalid value, must be an integer between 0 - 4.", 0x3, 0x22 );
+		return 0;
+	endif
+
+	mobile.SpeedWalk( text );
+	if( text )
+		SendSysMessage( mobile, "Run Speed Mod Toggled to "+text+"!", 0x3, 0x42 );
+		SetObjProperty( mobile, "SpeedWalk", text );
+	else
+		SendSysMessage( mobile, "Run Speed Mod Toggled off!", 0x3, 0x22 );
+		EraseObjProperty( mobile, "SpeedWalk" );
+	endif
+
+	return 1;
+endprogram

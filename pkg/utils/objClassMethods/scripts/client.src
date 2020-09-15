@@ -1,0 +1,6 @@
+use util;
+
+program Install()
+	Print( "Custom Client Class Methods Installed." );
+	return 1;
+endprogram

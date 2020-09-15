@@ -1,0 +1,59 @@
+use uo;
+use os;
+use polsys;
+use util;
+
+program Install()
+	Print( "Custom Character Class Methods Installed." );
+	return 1;
+endprogram
+
+exported function ClearCombatAbility( mobile )
+
+	var ability_reset := CreatePacket( 0xBF, 5 );
+		ability_reset.SetInt8( 2, 0x05 );
+		ability_reset.SetInt8( 4,0x21 );
+		ability_reset.SendPacket( mobile );
+
+	return 1;
+endfunction
+
+/*
+ *
+ * PlayerSpeedBoost( mobile, toggle )
+ *
+ * Parameters:
+ * mobile - player char_ref
+ * toggle - integer flag which denotes the following movement types:
+ *			Disable := 0 (Move as normal)
+ *			MountSpeed := 1 (Run at mounted speed even if on foot)
+ *			WalkSpeed := 2 (Force walk)
+ *			WalkSpeedFast := 3 (Force unmounted running speed)
+ *			TeleportSpeed := 4 (Unknown at this time, just teleported flag?)
+ *
+ * Purpose:
+ * To allow for the control of player's movement types
+ *
+ * Date: 2019-05-07	20:50:30
+ * Shard Name: Pangaea
+ *
+ * Author: Oden (ThisIsMe)
+ * Email: DavidJSGardner@Gmail.com
+ * ICQ: 625-658-845
+ * Skype: DavidJSGardner
+ * Discord: ThisIsMe#7491
+ *
+ * Return Values:
+ * N/A
+ *
+ */
+exported function SpeedWalk( mobile, toggle := 0 )
+
+	var packet := CreatePacket( 0xBF, 6 );
+		packet.SetInt16( 1, 6 );
+		packet.SetInt16( 3, 0x26 );
+		packet.SetInt8( 5, CInt( toggle ) );
+		packet.SendPacket( mobile );
+
+	return 1;
+endfunction

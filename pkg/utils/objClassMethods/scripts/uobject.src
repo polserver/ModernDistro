@@ -1,0 +1,4 @@
+program Install()
+	Print( "Custom UObject Class Methods Installed." );
+	return 1;
+endprogram

@@ -1,0 +1,8 @@
+use uo;
+use os;
+use polsys;
+
+program Install()
+	Print( "Custom Spellbook Class Methods Installed." );
+	return 1;
+endprogram

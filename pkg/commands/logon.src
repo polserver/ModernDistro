@@ -1,0 +1,14 @@
+use uo;
+use os;
+
+program cmds_logon( mobile )
+
+	var speed_walk := GetObjProperty( mobile, "SpeedWalk" );
+	if( mobile.cmdlevel >= 2 )
+		if( !speed_walk.errortext )
+			mobile.SpeedWalk( speed_walk );
+		endif
+	endif
+
+	return 1;
+endprogram

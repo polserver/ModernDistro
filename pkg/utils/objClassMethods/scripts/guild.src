@@ -1,0 +1,6 @@
+use util;
+
+program Install()
+	Print( "Custom Guild Class Methods Installed." );
+	return 1;
+endprogram

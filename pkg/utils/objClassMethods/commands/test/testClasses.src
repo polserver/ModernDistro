@@ -1,0 +1,137 @@
+use uo;
+use os;
+use guilds;
+use party;
+
+program textcmd_testclasses( mobile )
+	var classes := Array{ "UObject", "Mobile", "NPC", "Item", "Equipment", "Armor", "Weapon", "Lockable", "Door", "Container",
+						"Spellbook", "Corpse", "Map", "Multi", "Boat", "House" };
+
+	var offline_ref := SystemFindObjectBySerial( 0x1B4, SYSFIND_SEARCH_OFFLINE_MOBILES );
+	if( offline_ref.IsPlayer() )
+		SendSysMessage( mobile, "Everest is indeed a player", 0x3, 0x42 );
+	endif
+
+	SendSysMessage( mobile, "Select an item to test class methods on.", 0x3, 0x42 );
+	var targ := TargetCoordinates( mobile );
+
+	var i := 1;
+	for( i:=1; i<=classes; i+=1 )
+		case( classes[i] )
+			"UObject"	:
+							if( targ.multi.IsUObject() )
+								SendSysMessage( mobile, "This is a(n) "+classes[i]+" item.",0x3, 0x42 );
+							else
+								SendSysMessage( mobile, "This is not a(n) "+classes[i]+" item.",0x3, 0x22 );
+							endif
+			"Mobile"	:
+							if( targ.multi.IsPlayer() )
+								SendSysMessage( mobile, "This is a(n) "+classes[i]+" item.",0x3, 0x42 );
+							else
+								SendSysMessage( mobile, "This is not a(n) "+classes[i]+" item.",0x3, 0x22 );
+							endif
+
+							if( targ.multi.client.GetTime() )
+								SendSysMessage( mobile, "Client Time is "+targ.client.GetTime(),0x3, 0x42 );
+							else
+								SendSysMessage( mobile, "This is not a(n) "+classes[i]+" item.",0x3, 0x22 );
+							endif
+
+							if( targ.multi.guild )
+								var guild_ref := FindGuild( targ.guildid );
+								SendSysMessage( mobile, "Guild Color is: "+guild_ref.GetColor(), 0x3, 0x42 );
+							endif
+
+							if( targ.multi.party )
+								SendSysMessage( mobile, "Party is: "+targ.party.Mood(), 0x3, 0x42 );
+							endif
+			"NPC"		:
+							if( targ.multi.IsNPC() )
+								SendSysMessage( mobile, "This is a(n) "+classes[i]+" item.",0x3, 0x42 );
+							else
+								SendSysMessage( mobile, "This is not a(n) "+classes[i]+" item.",0x3, 0x22 );
+							endif
+			"Item"		:
+							if( targ.multi.IsItem() )
+								SendSysMessage( mobile, "This is a(n) "+classes[i]+" item.",0x3, 0x42 );
+							else
+								SendSysMessage( mobile, "This is not a(n) "+classes[i]+" item.",0x3, 0x22 );
+							endif
+			"Equipment"	:
+							if( targ.multi.IsEquipment() )
+								SendSysMessage( mobile, "This is a(n) "+classes[i]+" item.",0x3, 0x42 );
+							else
+								SendSysMessage( mobile, "This is not a(n) "+classes[i]+" item.",0x3, 0x22 );
+							endif
+			"Armor"		:
+							if( targ.multi.IsArmorItem() )
+								SendSysMessage( mobile, "This is a(n) "+classes[i]+" item.",0x3, 0x42 );
+							else
+								SendSysMessage( mobile, "This is not a(n) "+classes[i]+" item.",0x3, 0x22 );
+							endif
+			"Weapon"	:
+							if( targ.multi.IsWeaponItem() )
+								SendSysMessage( mobile, "This is a(n) "+classes[i]+" item.",0x3, 0x42 );
+							else
+								SendSysMessage( mobile, "This is not a(n) "+classes[i]+" item.",0x3, 0x22 );
+							endif
+			"Lockable"	:
+							if( targ.multi.IsLockableItem() )
+								SendSysMessage( mobile, "This is a(n) "+classes[i]+" item.",0x3, 0x42 );
+							else
+								SendSysMessage( mobile, "This is not a(n) "+classes[i]+" item.",0x3, 0x22 );
+							endif
+			"Door"		:
+							if( targ.multi.IsDoorItem() )
+								SendSysMessage( mobile, "This is a(n) "+classes[i]+" item.",0x3, 0x42 );
+							else
+								SendSysMessage( mobile, "This is not a(n) "+classes[i]+" item.",0x3, 0x22 );
+							endif
+			"Container"	:
+							if( targ.multi.IsContainerItem() )
+								SendSysMessage( mobile, "This is a(n) "+classes[i]+" item.",0x3, 0x42 );
+							else
+								SendSysMessage( mobile, "This is not a(n) "+classes[i]+" item.",0x3, 0x22 );
+							endif
+			"Spellbook"	:
+							if( targ.multi.IsSpellbookItem() )
+								SendSysMessage( mobile, "This is a(n) "+classes[i]+" item.",0x3, 0x42 );
+							else
+								SendSysMessage( mobile, "This is not a(n) "+classes[i]+" item.",0x3, 0x22 );
+							endif
+			"Corpse"	:
+							if( targ.multi.IsCorpseItem() )
+								SendSysMessage( mobile, "This is a(n) "+classes[i]+" item.",0x3, 0x42 );
+							else
+								SendSysMessage( mobile, "This is not a(n) "+classes[i]+" item.",0x3, 0x22 );
+							endif
+			"Map"		:
+							if( targ.multi.IsMapItem() )
+								SendSysMessage( mobile, "This is a(n) "+classes[i]+" item.",0x3, 0x42 );
+							else
+								SendSysMessage( mobile, "This is not a(n) "+classes[i]+" item.",0x3, 0x22 );
+							endif
+			"Multi"		:
+							if( targ.multi.IsMulti() )
+								SendSysMessage( mobile, "This is a(n) "+classes[i]+" item.",0x3, 0x42 );
+							else
+								SendSysMessage( mobile, "This is not a(n) "+classes[i]+" item.",0x3, 0x22 );
+							endif
+			"Boat"		:
+							if( targ.multi.IsBoat() )
+								SendSysMessage( mobile, "This is a(n) "+classes[i]+" item.",0x3, 0x42 );
+							else
+								SendSysMessage( mobile, "This is not a(n) "+classes[i]+" item.",0x3, 0x22 );
+							endif
+			"House"		:
+							if( targ.multi.IsHouse() )
+								SendSysMessage( mobile, "This is a(m) "+classes[i]+" item.",0x3, 0x42 );
+							else
+								SendSysMessage( mobile, "This is not a(n) "+classes[i]+" item.",0x3, 0x22 );
+							endif
+		endcase
+		Sleep( 1 );
+	endfor
+
+	return 1;
+endprogram
