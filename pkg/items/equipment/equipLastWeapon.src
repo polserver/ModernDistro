@@ -1,0 +1,37 @@
+use uo;
+use os;
+
+include ":equipment:equip";
+
+program equiplastweapon_macro_packethook()
+
+	Print( "Installing Macro packethook - EquipLastWeapon" );
+	return 1;
+endprogram
+
+exported function LastWeapon( byref mobile, byref unused packet )
+
+	var last_equipped_serial := GetObjProperty( mobile, "#LastWeapon" ),
+		last_equipped := 0;
+
+	if( last_equipped_serial.errortext )
+		SendSysMessage( mobile, "Your last equipped weapon could not be found.", 0x3, 0x32 );
+		return 0;
+	endif
+
+	last_equipped := SystemFindObjectBySerial( last_equipped_serial );
+	if( last_equipped.errortext )
+		SendSysMessage( mobile, "Your last equipped weapon could not be found.", 0x3, 0x32 );
+		return 0;
+	elseif( last_equipped == GetEquipmentByLayer( mobile, last_equipped.tile_layer ) )
+		SendSysMessage( mobile, "That is already equipped!", 0x3, 0x42 );
+		return 1;
+	elseif( !( last_equipped in EnumerateItemsInContainer( mobile.backpack ) )  )
+		SendSysMessage( mobile, "That must be in your inventory to equip it!", 0x3, 0x22 );
+		return 0;
+	endif
+
+	EquipWeapon( mobile, last_equipped );
+
+	return 1;
+endfunction

@@ -1,21 +1,43 @@
-/*
-        Created by *Edwards
-
-        2010-03-15
-*/
 use uo;
 
+include ":equipment:equip";
 include ":itemutils:itemUtil";
+include ":itemutils:itemtypes";
 
-program clothing_UseItem( mobile, armor )
+program use_equipment( mobile, item )
 
-        if( useItem_check( mobile, armor, ITEM_INCONTAINER ))
-                var equip := EquipItem( mobile, armor );
-                if( equip.errortext )
-                        SendSysMessage( mobile, "You can't think of a way to use that!" );
-                        return 0;
-                endif
-        endif
+	var equipped := 0;
 
-        return 1;
+	if( TypeOfInt( mobile ) == OT_ARRAY )
+		item := mobile[2];
+		mobile := mobile[1];
+	endif
+
+	if( item.IsA( POLCLASS_WEAPON ) || IsShield( item ) )
+		// If the item in question has additional usages when double clicked,
+		// this check allows you to bypass the in inventory check later on.
+		// A bit of a kludge it, as the example below shows, allows for in this
+		// instance, the player to select ammo if the item is equipped and is a bow.
+		if( item == GetEquipmentByLayer( mobile, item.tile_layer ) )
+			if( IsBow( item ) )
+				Start_Script( ":weapons:useScripts/selectAmmo", { mobile, item } );
+				return 1;
+			else
+				return 1;
+			endif
+		endif
+
+		if( useItem_check( mobile, item, ITEM_INCONTAINER ) )
+			equipped := EquipWeapon( mobile, item );
+			if( equipped && IsBow( item ) )
+				Start_Script( ":weapons:useScripts/selectAmmo", { mobile, item } );
+			endif
+		endif
+	elseif( item.IsA( POLCLASS_ARMOR ) || item.IsJewelry() )
+		if( useItem_check( mobile, item, ITEM_INCONTAINER ) )
+			EquipArmor( mobile, item );
+		endif
+	endif
+
+	return 1;
 endprogram

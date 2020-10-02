@@ -5,6 +5,11 @@ var cWeapon := ReadConfigFile(":weapons:itemdesc");
 
 program selectammo(who, weapon)
 
+	if( TypeOfInt( who ) == OT_ARRAY )
+		weapon := who[2];
+		who := who[1];
+	endif
+
 	var weaponElement;
 	var arrowElement;
 	var valid_ammo := 0;
