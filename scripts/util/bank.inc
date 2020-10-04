@@ -12,7 +12,7 @@ use storage;
 
 include ":containers:storageAreas";
 include "include/objtype";
-include "include/myUtil";
+include "include/utility";
 
 function FindBankBox( character,  bank_obj_name_prefix := "Bankbox of " )
 	bank_obj_name_prefix := bank_obj_name_prefix; // Avoid compiler warnings

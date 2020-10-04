@@ -14,7 +14,7 @@ use cliloc;
 
 include "include/findCity";
 include "include/client";
-//include "include/myUtil";
+//include "include/utility";
 //include "util/bank";
 include ":currency:currency";
 include "include/string";
@@ -30,6 +30,10 @@ include ":timedScripts:poisonUtil";
 include ":gumps:requestGump";
 
 program test_cmd(who, unused text)
+	SendSysMessage(who, "Target a static item:", color := 88);
+	var loc := TargetCoordinates(who);
+	SendSysMessage(who, "Static ObjType is " + CStr(Hex(loc.objtype)));
+	return;
 	var trgt := Target(who);
 	SendSysMessage(who, cstr(trgt.Tactics));
 	trgt := Target(who);

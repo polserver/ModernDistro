@@ -28,8 +28,10 @@ endfunction
 function create_node_merc(merchanttype, name)
 	var inv_rs := find_or_create_item(storage, name + " RS");
 	var inv_fs := find_or_create_item(storage, name + " FS");
-	//var inv_pb := find_or_create_item(storage, name + " PB");
-	//var inv_1c := find_or_create_item(storage, name + " 1C");
+	var inv_pb := find_or_create_item(storage, name + " PB");
+	var inv_1c := find_or_create_item(storage, name + " 1C");
+	inv_1c := inv_1c;
+	inv_pb := inv_pb;
 	SetObjProperty(inv_rs, "MerchantType", merchanttype);
 	SetObjProperty(inv_rs, "MyGold", 5000);
 	StockInventory(merchanttype, inv_rs);
@@ -59,7 +61,7 @@ endfunction
 function SpawnItem(inventory, itemstr)
 	var split := SplitWords(itemstr);
 	var objtype := split[1];
-	var item_amt := Cint(split[2]);
+	var amount_of_stuff := Cint(split[2]);
 	var buyprice	:= itemconfig[objtype].VendorBuysFor;
 	var sellprice := itemconfig[objtype].VendorSellsFor;
 	if(Cint(objtype))
@@ -72,9 +74,9 @@ function SpawnItem(inventory, itemstr)
 		return;
 	endif
 	var res;
-	if(item_amt > 0)
+	if(amount_of_stuff > 0)
 		var i;
-		for( i := 1; i <= item_amt; i := i + 1 )
+		for( i := 1; i <= amount_of_stuff; i := i + 1 )
 			res := CreateItemInInventory(inventory, objtype, 1);
 			res.buyprice	:= buyprice;
 			res.sellprice := sellprice;
@@ -104,23 +106,24 @@ function checkstock(rs, pak)
 endfunction
 
 function RestockInitialInventory(source, destination)
-	// When vendors start up, they need a slightly different script.
-	//var merchanttype := GetObjProperty(source, "MerchantType");
-	var multiplier, item_amt, mlt, things;
+// When vendors start up, they need a slightly different script.
+	var merchanttype := GetObjProperty(source, "MerchantType");
+	merchanttype := merchanttype;
+	var multiplier, amount_of_things, mlt, things;
 	var newarray := {};
 	foreach thing in EnumerateItemsInContainer(source)
 		newarray.append(thing.objtype);
-		item_amt := 0;
+		amount_of_things := 0;
 		multiplier := CInt(GetObjProperty(thing, "Multiplier"));
-		var count_existing := CountExisting(destination, thing.objtype);
-		things := count_existing[2];
-		item_amt := count_existing[1];
-		if(item_amt >= (thing.amount * multiplier))
+		var check := CountExisting(destination, thing.objtype);
+		things := check[2];
+		amount_of_things := check[1];
+		if(amount_of_things >= (thing.amount * multiplier))
 			multiplier := multiplier - 1;
 			if(multiplier < 1)
 				multiplier := 1;
 			endif
-		elseif(item_amt == 0)
+		elseif(amount_of_things == 0)
 			multiplier := multiplier + 1;
 			if(multiplier > 20)
 				multiplier := 20;
@@ -131,17 +134,17 @@ function RestockInitialInventory(source, destination)
 		var buyprice := Cint(thing.buyprice);
 		var sellprice := Cint(thing.sellprice);
 		var res;
-		if(item_amt != mlt)
+		if(amount_of_things != mlt)
 			foreach widget in things
 				DestroyItem(widget);
 			endforeach
-			if(item_amt > mlt)
+			if(amount_of_things > mlt)
 				res := CreateItemInInventory(destination, thing.objtype, mlt);
 				if(res)
 					res.sellprice := sellprice;
 					res.buyprice := buyprice;
 				endif
-			elseif(item_amt < mlt)
+			elseif(amount_of_things < mlt)
 				var i;
 				for(i:=1; i<= mlt; i := i+1)
 					var res := CreateItemInInventory(destination, thing.objtype, 1);
@@ -162,25 +165,25 @@ endfunction
 
 function RestockMyInventory(source, destination)
 	var merchanttype := GetObjProperty(source, "MerchantType");
-	var multiplier, item_amt, mlt, items, mygold;
+	var multiplier, amount_of_things, mlt, items, mygold;
 	var newarray := {}; // Array of what's for sale
 	// cycle through everything that's for sale
 	foreach thing in EnumerateItemsInContainer(source)// this is the "ideal" stock.
 		newarray.append(thing.objtype);
-		item_amt := 0;
+		amount_of_things := 0;
 		mygold := GetObjProperty(source, "MyGold");
 		multiplier := CInt(GetObjProperty(thing, "Multiplier")); // multiplier of increments.
-		var count_existing := CountExisting(destination, thing.objtype); // to see what we got *really* for sale
-		items := count_existing[2];// returns all of a particular item, stacked or unstacked. (array)
-		item_amt := count_existing[1];
+		var check := CountExisting(destination, thing.objtype); // to see what we got *really* for sale
+		items := check[2];// returns all of a particular item, stacked or unstacked. (array)
+		amount_of_things := check[1];
 
 		// determine whether to increase or decrease stock.
-		if(item_amt >= (thing.amount * multiplier))
+		if(amount_of_things >= (thing.amount * multiplier))
 			multiplier := multiplier - 1;
 			if(multiplier < 1)
 				multiplier := 1;
 			endif
-		elseif(item_amt == 0)
+		elseif(amount_of_things == 0)
 			multiplier := multiplier + 1;
 			if(multiplier > 20)
 				multiplier := 20;
@@ -190,10 +193,11 @@ function RestockMyInventory(source, destination)
 
 		mlt := Cint(thing.amount * multiplier); // mlt is the amount that should be in stock
 
-		if(item_amt != mlt)
+		if(amount_of_things != mlt)
 			// define characteristics of the items
 			var buyprice := Cint(thing.buyprice);
 			var sellprice := Cint(thing.sellprice);
+			// var res;
 
 			// remove what remains
 			foreach widget in items
@@ -229,16 +233,16 @@ function RestockMyInventory(source, destination)
 endfunction
 
 function CountExisting(container, objtype)
-	var item_amt := 0;
+	var amount_of_things := 0;
 	var things := {};
 	foreach thing in EnumerateItemsInContainer(container)
 		if((thing.objtype == objtype) and (Cint(GetObjProperty(thing, "ClearRestock")) == 0))
 			things.append(thing);
-			item_amt := item_amt + thing.amount;
+			amount_of_things := amount_of_things + thing.amount;
 		endif
 	endforeach
 	var ary := {};
-	ary.append(item_amt);
+	ary.append(amount_of_things);
 	ary.append(things);
 	return ary;
 endfunction

@@ -6,7 +6,7 @@ use cfgfile;
 use file;
 
 include "include/eventID";
-include "include/myUtil";
+include "include/utility";
 include "include/packets";
 include ":attributes:attributes";
 include "include/clock";

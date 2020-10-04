@@ -3,7 +3,7 @@ use os;
 use cfgfile;
 
 include "include/eventID";
-include "include/myUtil";
+include "include/utility";
 // include "../pkg/items/housing/house";
 
 var plant_cfg_file := ReadConfigFile("itemdesc");
@@ -56,7 +56,7 @@ program plant_seed(character, seed)
                 SendSysMessage(character, "Uh oh! The seed tried to be planted at a Z lower than you!", color := 33);
                 return;
         endif
-        
+
 	if (CountPlantsInArea(location_x, location_y, location_z, 1, character.realm) > 4)
 		SendSysMessage(character, "There's too many other plants in the area!");
 		return;

@@ -11,7 +11,7 @@ use basic;
 use cliloc;
 
 include "include/findCity";
-//include "include/myUtil";
+//include "include/utility";
 //include "util/bank";
 include ":currency:currency";
 include "include/string";

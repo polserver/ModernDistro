@@ -21,7 +21,7 @@ include ":attributes:attributes";
 //include "include/objtype";
 //include "include/string";
 //include "include/magicitems";
-//include "include/myutil";
+//include "include/utility";
 
 program use_manastone (who, stone)
 

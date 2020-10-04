@@ -1,6 +1,6 @@
 use uo;
 
-include "include/myUtil";
+include "include/utility";
 
 var layout := {
 	"nodispose",
