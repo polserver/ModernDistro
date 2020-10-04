@@ -12,9 +12,19 @@ include "include/toolWear";
 include ":virtue:noto";
 include ":crafting:crafting";
 include ":gumps:requestGump";
-
+include ":equipment:equip";
+include ":itemutils:itemUtil";
 
 program use_blade(who, blade)
+
+  if( blade.IsA( POLCLASS_WEAPON ) )
+    if( blade != GetEquipmentByLayer( who, blade.tile_layer ) )
+      if( !useItem_check( who, blade, ITEM_INCONTAINER ) )
+        return 0;
+      endif
+    endif
+  endif
+
   var craftingbag := FindCraftingbag (who);
 
   EraseObjProperty(who, "IsMeditating");
@@ -22,9 +32,11 @@ program use_blade(who, blade)
   if(!can_access(who, blade))
     return;
   endif
-  if(!ReserveItem(blade))
-    return;
+
+  if( blade.IsA( POLCLASS_WEAPON ) )
+    EquipWeapon( who, blade );
   endif
+
   SendSysMessage(who, "What would you like to use that on, " + who.name + "?");
   var use_on := TargetCoordinates(who);
   if(!use_on)
