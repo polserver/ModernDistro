@@ -1,3 +1,29 @@
+///////////////////////////////////////////////////////////////////////
+// This is a description of how these variables are used.
+//
+// inv_fs = vendor inventory.
+// inv_fs also sent when staff asks "showinventory".
+//
+// inv_rs = restock. sent when staff asks "showrestock".
+// inv_rs also has a CProp, "MyGold".
+// SendOpenSpecialContainer(ev.source, inv_rs);
+//
+// inv_pb = sent with "buy" window.
+// function prototype:
+// SendBuyWindow( character, container, vendor, items, flags := 0 )
+// SendBuyWindow(ev.source, inv_fs, me, inv_pb);
+//
+// inv_1c = sent with "sell" window.
+// function prototype:
+// SendSellWindow( character, vendor, i1, i2, i3, flags := 0 )
+// i1 = "for sale" item container.
+// i2 = vendor's "Bought from player" item container.
+// i3 = vendor's "Buyable" item container.
+// SendSellWindow(ev.source, me, inv_fs, inv_pb, inv_1c);
+///////////////////////////////////////////////////////////////////////
+
+
+
 use npc;
 use os;
 use uo;

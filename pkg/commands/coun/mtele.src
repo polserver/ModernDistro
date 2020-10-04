@@ -44,46 +44,46 @@ endprogram
 function DoWrapCheck(who, coords)
 
     var max_x, max_y, cur_x, cur_y, correction;
-    
+
     cur_x := Abs(coords[1]);
     cur_y := Abs(coords[2]);
 
     case (who.realm)
-	"britannia"	:
-	"britannia_alt"	: max_x := BRIT_MAX_X;
-	"ilshenar"	: max_x := ILSH_MAX_X;
-	"malas"		: max_x := MALA_MAX_X;
-	"tokuno"	: max_x := TOKU_MAX_X;
+		"britannia"	:
+		"britannia_alt"	: max_x := BRIT_MAX_X;
+		"ilshenar"	: max_x := ILSH_MAX_X;
+		"malas"		: max_x := MALA_MAX_X;
+		"tokuno"	: max_x := TOKU_MAX_X;
     endcase
-    
+
     case (who.realm)
-	"britannia"	:
-	"britannia_alt"	: max_y := BRIT_MAX_Y;
-	"ilshenar"	: max_y := ILSH_MAX_Y;
-	"malas"		: max_y := MALA_MAX_Y;
-	"tokuno"	: max_y := TOKU_MAX_Y;
+		"britannia"	:
+		"britannia_alt"	: max_y := BRIT_MAX_Y;
+		"ilshenar"	: max_y := ILSH_MAX_Y;
+		"malas"		: max_y := MALA_MAX_Y;
+		"tokuno"	: max_y := TOKU_MAX_Y;
     endcase
-  
-    
+
+
     if(coords[1] > max_x)
-	coords[1] := coords[1] - max_x;
+		coords[1] := coords[1] - max_x;
     endif
-    
+
     if(coords[2] > max_y)
-	coords[2] := coords[2] - max_y;
+		coords[2] := coords[2] - max_y;
     endif
-    
+
     if(cur_x > 65523)
-	correction := 65534 - cur_x;
-	coords[1] := max_x - correction;
+		correction := 65534 - cur_x;
+		coords[1] := max_x - correction;
     endif
+
     if(cur_y >= 65523)
-	correction := 65534 - cur_y;
-	coords[2] := max_y - correction;
+		correction := 65534 - cur_y;
+		coords[2] := max_y - correction;
     endif
 
     return coords;
 
 endfunction
-    
-    
+
