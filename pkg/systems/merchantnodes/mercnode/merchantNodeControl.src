@@ -163,13 +163,13 @@ program merchantnode(itm)
 endprogram
 
 function SetNodeName(txt)
-	var item_template := GetObjProperty(item, "Template");
-	if((!item_template) || (item_template == "merchant"))								 // setting to merchant mode
+	var template := GetObjProperty(item, "Template");
+	if((!template) || (template == "merchant"))								 // setting to merchant mode
 		SetObjProperty(item, "Template", 1);
-	elseif(item_template == "banker")																// setting to banker mode
+	elseif(template == "banker")																// setting to banker mode
 		SetObjProperty(item, "Template", 2);
 	endif
-	if(item_template == 1)
+	if(template == 1)
 		item.name := "a merchant node [" + txt + "]";
 	else
 		item.name := "a banker node [" + txt + "]";
@@ -217,6 +217,8 @@ function ValidateSpawns()
 endfunction
 
 function DespawnAll()
+	var chk := array;
+	chk := chk;
 	foreach thing in npclist
 		var hp := AP_GetVital(thing, VITALID_LIFE);
 		if(hp)
@@ -234,7 +236,7 @@ function SpawnAll(map)
 	foreach thing in spawn
 		var type	 := thing[1];
 		var root1	 := thing[2];
-		var current_status := thing[3];
+		var status1 := thing[3];
 		var chest	:= thing[4];
 		var chk := 0;
 		foreach npc in npclist
@@ -242,7 +244,7 @@ function SpawnAll(map)
 				chk := 1;
 			endif
 		endforeach
-		if((chk == 0) && (current_status == 1))
+		if((chk == 0) && (status1 == 1))
 			var new := 0;
 			while((!new) && item)
 				new := CreateNpcFromTemplate(type, root1[1], root1[2], root1[3], 0, map);

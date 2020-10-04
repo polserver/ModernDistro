@@ -1,7 +1,7 @@
 use uo;
 use os;
 
-include ":gumps:gumps";
+include ":gumps:old-gumps";
 include "include/client";
 include "include/gumpUtil";
 include "include/mrcSpawn";
@@ -17,23 +17,23 @@ program MerchantNodeManager(who, itm)
     SendSysMessage(who, "That merchant node is not responding");
     return;
   endif
-  var m_gump := GFCreateGump(0, 0);
-  GFPage( m_gump, page );
+  GFInitGump(0, 0);
+  GFPage(page);
   page := page + 1;
-  GFPage( m_gump, page );
-  GFResizePic( m_gump, 0, 0, 5120, 540, 400 );
-  GFResizePic( m_gump, 10, 10, 5054, 520, 350 );
+  GFPage(page);
+  GFResizePic(  0,   0, 5120, 540, 400);
+  GFResizePic( 10,  10, 5054, 520, 350);
   var template := GetObjProperty(item, "Template");
   if(!template)
     template := 1;
     SetObjProperty(item, "Template", 1);
   endif
   if(template == 1)
-    GFTextLine( m_gump, 232, 17, 0, "Merchant Node Interface" );
-    GFTextLine( m_gump, 230, 15, COLOR_YELLOW, "Merchant Node Interface" );
+    GFTextLine(232, 17, 0, "Merchant Node Interface");
+    GFTextLine(230, 15, COLOR_YELLOW, "Merchant Node Interface");
   else
-    GFTextLine( m_gump, 232, 17, 0, "Banker Node Interface" );
-    GFTextLine( m_gump, 230, 15, COLOR_YELLOW, "Banker Node Interface" );
+    GFTextLine(232, 17, 0, "Banker Node Interface");
+    GFTextLine(230, 15, COLOR_YELLOW, "Banker Node Interface");
   endif
   type := GetObjProperty(item, "Type");
   if(!type)
@@ -41,19 +41,19 @@ program MerchantNodeManager(who, itm)
     SetObjProperty(item, "Type", type);
   endif
   var amt := len(type);
-  GFTextLine( m_gump, 20, 40, COLOR_BLUE, "Type" );
-  GFTextLine( m_gump, 150, 40, COLOR_BLUE, "X" );
-  GFTextLine( m_gump, 210, 40, COLOR_BLUE, "Y" );
-  GFTextLine( m_gump, 270, 40, COLOR_BLUE, "Z" );
-  GFTextLine( m_gump, 308, 40, COLOR_BLUE, "Enabled" );
-  GFTextLine( m_gump, 360, 40, COLOR_BLUE, "Delete" );
-  GFTextLine( m_gump, 420, 40, COLOR_BLUE, "Rebuild Stock" );
-  FillInPageData(m_gump);
+  GFTextLine( 20, 40, COLOR_BLUE, "Type");
+  GFTextLine(150, 40, COLOR_BLUE, "X");
+  GFTextLine(210, 40, COLOR_BLUE, "Y");
+  GFTextLine(270, 40, COLOR_BLUE, "Z");
+  GFTextLine(308, 40, COLOR_BLUE, "Enabled");
+  GFTextLine(360, 40, COLOR_BLUE, "Delete");
+  GFTextLine(420, 40, COLOR_BLUE, "Rebuild Stock");
+  FillInPageData();
   if(len(type) < 10)
-    GFTextLine( m_gump, 40, sy, COLOR_YELLOW, "Create a new merchant here?   (negates all other choices )");
-    GFAddButton( m_gump, 20, sy, 210, 211, GF_CLOSE_BTN, 0 );
+    GFTextLine(40, sy, COLOR_YELLOW, "Create a new merchant here?   (negates all other choices)");
+    GFButtonID(20, sy, 210, 211, 1, sy);
   endif
-  GFTextLine( m_gump, 20, 20, COLOR_GREEN, "Current:" );
+  GFTextLine( 20, 20, COLOR_GREEN, "Current:");
   var npclist := GetObjProperty(item, "NpcList");
   var current := 0;
   var holder := array;
@@ -65,16 +65,16 @@ program MerchantNodeManager(who, itm)
   endforeach
   SetObjProperty(item, "NpcList", holder);
   if(current == amt)
-    GFTextLine( m_gump, 90, 20, COLOR_BLUE, current+"/"+amt );
+    GFTextLine(90, 20, COLOR_BLUE,   current+"/"+amt);
   elseif(current == 0)
-    GFTextLine( m_gump, 90, 20, COLOR_RED, current+"/"+amt );
+    GFTextLine(90, 20, COLOR_RED,    current+"/"+amt);
   else
-    GFTextLine( m_gump, 90, 20, COLOR_YELLOW, current+"/"+amt );
+    GFTextLine(90, 20, COLOR_YELLOW, current+"/"+amt);
   endif
-  apply   := GFAddButton( m_gump, 20, 370, G_YELLOW_OVAL_APPLY_0, G_YELLOW_OVAL_APPLY_1, GF_CLOSE_BTN, 0 );
-  cancel  := GFAddButton( m_gump, 100, 370, G_RED_OVAL_CANCEL_0, G_RED_OVAL_CANCEL_1, GF_CLOSE_BTN, 0 );
-  GetStatus(item, m_gump);
-  var retkey  := GFSendGump( who, m_gump );
+  apply   := GFButtonID( 20, 370, G_YELLOW_OVAL_APPLY_0, G_YELLOW_OVAL_APPLY_1, 1);
+  cancel  := GFButtonID(100, 370, G_RED_OVAL_CANCEL_0, G_RED_OVAL_CANCEL_1, 1, 0);
+  GetStatus(item);
+  var retkey  := GFSendGump(who);
   if((retkey[cancel.keyid]) || (retkey[0] == 1))
     SendSysMessage(who, "Cancelled", 3, 40);
   elseif(retkey[apply.keyid])
@@ -130,7 +130,7 @@ program MerchantNodeManager(who, itm)
   endif
 endprogram
 
-function FillInPageData(m_gump)
+function FillInPageData()
   var i := 1;
   foreach current in type
     var template := current[1];
@@ -142,10 +142,10 @@ function FillInPageData(m_gump)
     if(!status)
       color := COLOR_RED;
     endif
-    GFTextLine( m_gump, 20, sy, color, template );
-    GFTextLine( m_gump, 150, sy, color, x );
-    GFTextLine( m_gump, 210, sy, color, y );
-    GFTextLine( m_gump, 270, sy, color, z );
+    GFTextLine( 20, sy, color, template);
+    GFTextLine(150, sy, color, x);
+    GFTextLine(210, sy, color, y);
+    GFTextLine(270, sy, color, z);
 //    GFCheckBox(320, sy, 208, 209, 0, 5000+i);
 //    GFCheckBox(370, sy, 208, 209, 0, 6000+i);
 //    GFCheckBox(460, sy, 208, 209, 0, 7000+i);
@@ -161,23 +161,23 @@ function FillInPageData(m_gump)
   endforeach
 endfunction
 
-function GetStatus(item, m_gump)
+function GetStatus(item)
   var status := GetObjProperty(item, "Status");
   var color, txt;
     case(status)
       "on":      color := COLOR_GREEN; txt := "Merchant Node Enabled";
-                 GFSetRadioGroup( m_gump, 1 );
-                 GFRadioButton( m_gump, 20, 308, 208, 209, 1, 200 );
-                 GFRadioButton( m_gump, 20, 330, 208, 209, 0, 201 );
+                 GFSetRadioGroup(1);
+                 GFRadioButton(20, 308, 208, 209, 1, 200);
+                 GFRadioButton(20, 330, 208, 209, 0, 201);
       "off":     color := COLOR_RED; txt := "Merchant Node Disabled";
-                 GFSetRadioGroup( m_gump, 1 );
-                 GFRadioButton( m_gump, 20, 308, 208, 209, 0, 200 );
-                 GFRadioButton( m_gump, 20, 330, 208, 209, 1, 201 );
+                 GFSetRadioGroup(1);
+                 GFRadioButton(20, 308, 208, 209, 0, 200);
+                 GFRadioButton(20, 330, 208, 209, 1, 201);
       default:   color := COLOR_GREEN; txt := "Merchant Node Enabled";
                  SetObjProperty(item, "Status", "on");
-                 GFSetRadioGroup( m_gump, 1 );
-                 GFRadioButton( m_gump, 20, 308, 208, 209, 1, 200 );
-                 GFRadioButton( m_gump, 20, 330, 208, 209, 0, 201 );
+                 GFSetRadioGroup(1);
+                 GFRadioButton(20, 308, 208, 209, 1, 200);
+                 GFRadioButton(20, 330, 208, 209, 0, 201);
     endcase
   var cs := GetObjProperty(item, "#wait");
   if(cs == 1)
@@ -189,12 +189,12 @@ function GetStatus(item, m_gump)
   elseif(status != "off")
     restock := GFCheckBox(340, 308, 210, 211, 0, 400);
     respawn := GFCheckBox(340, 330, 210, 211, 0, 300);
-    GFTextLine( m_gump, 370, 308, COLOR_GREEN, "Restock Merchants" );
-    GFTextLine( m_gump, 370, 330, COLOR_GREEN, "Respawn Merchants" );
+    GFTextLine(370, 308, COLOR_GREEN, "Restock Merchants");
+    GFTextLine(370, 330, COLOR_GREEN, "Respawn Merchants");
   endif
-  GFTextMid(m_gump, 150, 370, 300, color, txt);
-  GFTextLine( m_gump, 50, 308, COLOR_GREEN, "Enable Node" );
-  GFTextLine( m_gump, 50, 330, COLOR_GREEN, "Disable Node" );
+  GFTextMid(150, 370, 300, color, txt);
+  GFTextLine(50, 308, COLOR_GREEN, "Enable Node");
+  GFTextLine(50, 330, COLOR_GREEN, "Disable Node");
 endfunction
 
 function ResetMerchantNode(who, ret)

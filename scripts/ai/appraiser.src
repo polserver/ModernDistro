@@ -96,9 +96,9 @@ function appraise(who)
     PrintTextAbove(me, "I cannot seem to find your bankbox!", who);
     return;
   endif
-  var cnfg := ReadConfigFile(":housing:itemdesc");
+  var cnfg := ReadConfigFile(":multihousing:itemdesc");
   var amt := cnfg[trg.objtype].VendorSellsFor;
-  PrintTextAbovePrivate(me,"I will give you " + amt + " gold coins for that deed.", who);
+  PrintTextAbovePrivate(me,"I will give you " + CStr(amt) + " gold coins for that deed.", who);
 endfunction
 
 function processdeedsale(who, trg)
@@ -118,7 +118,7 @@ function processdeedsale(who, trg)
     MoveItemToContainer(trg, who.backpack);
     return;
   endif
-  var cnfg := ReadConfigFile(":housing:itemdesc");
+  var cnfg := ReadConfigFile(":multihousing:itemdesc");
   var amt := cnfg[trg.objtype].VendorSellsFor;
   var holder;
   var goldarray := {};

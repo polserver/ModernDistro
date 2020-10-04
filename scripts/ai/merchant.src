@@ -73,13 +73,15 @@ program merchant()
                                   else
                                     if(txt["buy"])
                                       TurnToward(ev.source);
-                                      SendBuyWindow(ev.source, inv_fs, me, inv_pb);
+                                      var res := SendBuyWindow(ev.source, inv_fs, me, inv_pb);
+									  res := res;
                                     elseif(txt["sell"])
                                       if(GetObjProperty(inv_rs, "MyGold") >= 1000)
                                         TurnToward(ev.source);
                                         var count := ModifyPCSellList(merchant_type, (ev.source));
                                         if(count >= 1)
-                                          SendSellWindow(ev.source, me, inv_fs, inv_pb, inv_1c);
+                                          var res := SendSellWindow(ev.source, me, inv_fs, inv_pb, inv_1c);
+										  res := res;
                                         else
                                           PrintTextAbovePrivate(me, "You dont have anything I would be interested in.", ev.source);
                                         endif

@@ -50,7 +50,7 @@ program storagewipe()
 			if (DestroyRootItemInStorageArea( merchantstorage, inv_fs))
 				DestroyRootItemInStorageArea( merchantstorage, inv_pb);
 				DestroyRootItemInStorageArea( merchantstorage, inv_fs);
-				print("Merchant Storage destroyed for "+i);
+				print("Merchant_Storage destroyed for "+i);
 				mercs := mercs +1;
 			endif
 		endif
