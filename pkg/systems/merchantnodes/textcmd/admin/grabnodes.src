@@ -2,70 +2,123 @@ use uo;
 use os;
 use cfgfile;
 
+include ":gumps:selectionGump";
+
 program textcmd_grabnodes(who, text)
-  var x := 0;
-  var y := 0;
-  if(!text)
-	text := ":spawnSystem:packedNodes-" + who.realm;
-  else
-	text := ":spawnSystem:" + text + "-" + who.realm;
-  endif
-  foreach thing in ListObjectsInBox(0, 0, -100, 6143, 4095, 100, who.realm)
-    if(thing.objtype == 0x1887a)
-      var data := array;
-      var holder := array;
-      holder.+pname  := "x";
-      holder.+pvalue := thing.x;
-      data.append(holder);
-      holder.pname  := "y";
-      holder.pvalue := thing.y;
-      data.append(holder);
-      holder.pname  := "z";
-      holder.pvalue := thing.z;
-      data.append(holder);
-      var tmp := array;
-      foreach entry in (thing.PropNames())
-        if(!entry["#"])
-          var t := array;
-          t.append(entry);
-          t.append(GetObjProperty(thing, entry));
-          tmp.append(t);
-        endif
-      endforeach
-      holder.pname  := "data";
-      holder.pvalue := pack(tmp);
-      data.append(holder);
-      AppendConfigFileElem(text, "MERCHANT", "merchant" + x, data);
-      x := x + 1;
-      DestroyItem(thing);
-    elseif(thing.objtype == 0x1887b)
-      var data := array;
-      var holder := array;
-      holder.+pname  := "x";
-      holder.+pvalue := thing.x;
-      data.append(holder);
-      holder.pname  := "y";
-      holder.pvalue := thing.y;
-      data.append(holder);
-      holder.pname  := "z";
-      holder.pvalue := thing.z;
-      data.append(holder);
-      var tmp := array;
-      foreach entry in (thing.PropNames())
-        if((!entry["#"]) and (entry != "Children"))
-          var t := array;
-          t.append(entry);
-          t.append(GetObjProperty(thing, entry));
-          tmp.append(t);
-        endif
-      endforeach
-      holder.pname  := "data";
-      holder.pvalue := pack(tmp);
-      data.append(holder);
-      AppendConfigFileElem( text, "GUARD", "guard" + y, data);
-      y := y + 1;
-      DestroyItem(thing);
-    endif
-  endforeach
-  SendSysMessage(who, "Finished Packing Nodes to Config file.");
+	var map := "";
+	var file_name := "";
+	var dimensions := {};
+	var facets := {"Felucca", "Trammel", "Ilshenar", "Malas", "Tokuno", "Termur"};
+	var facet := SelectionGump2( who, "Grab the ndes from which facet?", facets , btn_type:=BTN_TYPE_RADIO );
+
+	case(facet)
+		"Felucca":	map := "britannia";
+					dimensions := {0, 0, -127, 7168, 4095, 127};
+		"Trammel":	map := "britannia_alt";
+					dimensions := {0, 0, -127, 7168, 4095, 127};
+		"Ilshenar":	map := Lower(facet);
+					dimensions := {0, 0, -127, 2304, 1600, 127};
+		"Malas":	map := Lower(facet);
+					dimensions := {0, 0, -127, 2560, 2048, 127};
+		"tokuno":	map := Lower(facet);
+					dimensions := {0, 0, -127, 1448, 1448, 127};
+		"Termur":	map := Lower(facet);
+					dimensions := {0, 0, -127, 1280, 4095, 127};
+	endcase
+
+	file_name := ":merchantnodes:packedNodes-for-" + facet;
+	// map := ConvertFacetToRealm(facet);
+	GrabTheNodes(file_name, map, dimensions, text);
+	SendSysMessage(who, "Finished Packing Nodes to Config file.");
 endprogram
+
+function GrabTheNodes(text, map, dim, wipe)
+	var x := 0;
+	var y := 0;
+
+	foreach thing in ListObjectsInBox(dim[1], dim[2], dim[3], dim[4], dim[5], dim[6], map)
+		if(thing.objtype == 0x1887a) // Merchant Node
+			var data := array;
+			var holder := array;
+			holder.+pname  := "x";
+			holder.+pvalue := thing.x;
+			data.append(holder);
+			holder.pname  := "y";
+			holder.pvalue := thing.y;
+			data.append(holder);
+			holder.pname  := "z";
+			holder.pvalue := thing.z;
+			data.append(holder);
+			// Hopefully I got this right :)
+			holder.pname  := "realm";
+			holder.pvalue := thing.realm;
+			data.append(holder);
+			var tmp := array;
+			foreach entry in (thing.PropNames())
+				if(!entry["#"])
+					var t := array;
+					t.append(entry);
+					t.append(GetObjProperty(thing, entry));
+					tmp.append(t);
+				endif
+			endforeach
+			holder.pname  := "data";
+			holder.pvalue := pack(tmp);
+			data.append(holder);
+			AppendConfigFileElem(text, "MERCHANT", "merchant" + x, data);
+			x := x + 1;
+			if(wipe == "DESTROY")
+				DestroyItem(thing);
+			endif
+		elseif(thing.objtype == 0x1887b) // Guard Node
+			var data := array;
+			var holder := array;
+			holder.+pname  := "x";
+			holder.+pvalue := thing.x;
+			data.append(holder);
+			holder.pname  := "y";
+			holder.pvalue := thing.y;
+			data.append(holder);
+			holder.pname  := "z";
+			holder.pvalue := thing.z;
+			data.append(holder);
+			// Hopefully I got this right :)
+			holder.pname  := "realm";
+			holder.pvalue := thing.realm;
+			data.append(holder);
+			var tmp := array;
+			foreach entry in (thing.PropNames())
+				if((!entry["#"]) and (entry != "Children"))
+					var t := array;
+					t.append(entry);
+					t.append(GetObjProperty(thing, entry));
+					tmp.append(t);
+				endif
+			endforeach
+			holder.pname  := "data";
+			holder.pvalue := pack(tmp);
+			data.append(holder);
+			AppendConfigFileElem( text, "GUARD", "guard" + y, data);
+			y := y + 1;
+			if(wipe == "DESTROY")
+				DestroyItem(thing);
+			endif
+		endif
+	endforeach
+
+endfunction
+
+// function ConvertFacetToRealm(facet)
+	// var relm := "";
+	// case(facet)
+		// "Felucca":	relm := "britannia";
+		// "Trammel":	relm := "britannia_alt";
+		// "Ilshenar":
+		// "Malas":
+		// "tokuno":
+		// "Termur":	relm := Lower(facet);
+	// endcase
+	// return relm;
+
+// endfunction
+

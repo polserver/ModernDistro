@@ -3,40 +3,51 @@ use os;
 use cfgfile;
 
 include "include/mrcSpawn";
+include ":gumps:selectionGump";
 
-program textcmd_seednode(who, text)
-  if(!text)
-	text := ":spawnSystem:packedNodes-" + who.realm;
-  else
-	text := ":spawnSystem:" + text + "-" + who.realm;
-  endif
-  var cfg := ReadConfigFile(text);
-  if(cfg.errortext)
-    SendSysMessage(who, cfg.errortext, color := 33);
-  endif
-  foreach thing in GetConfigStringKeys(cfg)
-    if(thing["guard"])
-      var node := CreateItemAtLocation(cfg[thing].x, cfg[thing].y, cfg[thing].z, 0x1887b, 1, who.realm);
-      var data := unpack(cfg[thing].data);
-      foreach entry in data
-        var key := entry[1];
-        var val := entry[2];
-        SetObjProperty(node, key, val);
-      endforeach
-    else
-      var node := CreateItemAtLocation(cfg[thing].x, cfg[thing].y, cfg[thing].z, 0x1887a, 1, who.realm);
-      var data := unpack(cfg[thing].data);
-      foreach entry in data
-        var key := entry[1];
-        var val := entry[2];
-        SetObjProperty(node, key, val);
-        if(key == "Type")
-          foreach type in val
-            create_node_merc(type[1], type[1] + " " + type[2][1] + " " + type[2][2] + " " + type[2][3]);
-          endforeach
-        endif
-      endforeach
-    endif
-  endforeach
-  SendSysMessage(who, "Finished seeding nodes");
+program textcmd_seednode(who)
+	var facets := {"Felucca", "Trammel", "Ilshenar", "Malas", "Tokuno", "Termur"};
+	var facet := SelectionGump2( who, "Grab the ndes from which facet?", facets , btn_type:=BTN_TYPE_RADIO );
+	var file_name := "";
+	var map := "";
+	case(facet)
+		"Felucca":	map := "britannia";
+		"Trammel":	map := "britannia_alt";
+		"Ilshenar":	map := Lower(facet);
+		"Malas":	map := Lower(facet);
+		"tokuno":	map := Lower(facet);
+		"Termur":	map := Lower(facet);
+	endcase
+
+	file_name := ":merchantnodes:packedNodes-for-" + facet;
+
+	var cfg := ReadConfigFile(file_name);
+	if(cfg.errortext)
+		SendSysMessage(who, cfg.errortext, color := 33);
+	endif
+	foreach thing in GetConfigStringKeys(cfg)
+		if(thing["guard"])
+			var node := CreateItemAtLocation(cfg[thing].x, cfg[thing].y, cfg[thing].z, 0x1887b, 1, map);
+			var data := unpack(cfg[thing].data);
+			foreach entry in data
+				var key := entry[1];
+				var val := entry[2];
+				SetObjProperty(node, key, val);
+			endforeach
+		else
+			var node := CreateItemAtLocation(cfg[thing].x, cfg[thing].y, cfg[thing].z, 0x1887a, 1, map);
+			var data := unpack(cfg[thing].data);
+			foreach entry in data
+				var key := entry[1];
+				var val := entry[2];
+				SetObjProperty(node, key, val);
+				if(key == "Type")
+					foreach type in val
+						create_node_merc(type[1], type[1] + " " + type[2][1] + " " + type[2][2] + " " + type[2][3]);
+					endforeach
+				endif
+			endforeach
+		endif
+	endforeach
+	SendSysMessage(who, "Finished seeding nodes");
 endprogram
