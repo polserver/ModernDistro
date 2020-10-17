@@ -1,112 +1,36 @@
-//////////////////////////////////////
-// summon.src -- move an online player
-//               to you
-//
-// Usage: .summon [playername]
-//        if playername is not given,
-//        a menu will open and prompt
-//        you to choose one.
-//
-// Author: Racalac
-//////////////////////////////////////
-
 use uo;
+use basic;
 
-var playercount := 0;
-var pagecount := 1;
+include ":gumps:selectionGump";
 
-var layout := array(
+program summon_player(who, whom)
 
-"page 0",
-"nodispose",
-"gumppic 0 50 2620",
-"gumppic 20 50 2621",
-"gumppic 290 50 2622",
-"gumppic 0 68 2623",
-"gumppic 22 68 2624",
-"gumppic 288 68 2625",
-"gumppic 0 272 2623",
-"gumppic 22 272 2624",
-"gumppic 288 272 2625",
-"gumppic 0 476 2626",
-"gumppic 20 476 2627",
-"gumppic 290 476 2628",
-"gumppic 20 80 2621",
+	var online_players := EnumerateOnlineCharacters();
+	var online_players_names := {};
+	var char;
+	foreach person in online_players
+		online_players_names.append(person.name);
+	endforeach
+	if(!whom)
+		var selection := SelectionGump( who, "Select the player:", online_players_names, BTN_TYPE_RADIO );
+		foreach thing in online_players_names
+			if(thing == selection)
+				char := online_players[_thing_iter];
+				break;
+			endif
+		endforeach
+		MoveObjectToLocation(char, who.x, who.y, who.z, who.realm);
+		return;
+	else
+		foreach person in online_players
+			if(Lower(person.name) == Lower(whom))
+				MoveObjectToLocation(person, who.x, who.y, who.z, who.realm);
+				return;
+			endif
+		endforeach
+	endif
 
-"text 20 59 40 0",
-"text 240 59 40 1"
-);
+	SendSysMessage(who, "The player could not be summoned.", color := 33);
+	SendSysMessage(who, "The player name might be misspelled.", color := 33);
 
-var data := array(
-       "Player Name",         //0
-       "Summon"
-);
-
-program textcmd_summon( character, whom )
-
-  if(!whom)
-
-    FillInArrays(whom);
-    var result := SendDialogGump( character, layout, data );
-    var name := data[result[0]+2];
-    foreach onlinechr in EnumerateOnlineCharacters()
-        if (onlinechr.name == name)
-            MoveObjectToLocation(onlinechr, character.x, character.y, character.z, character.realm);
-            break;
-        endif
-    endforeach
-  else
-    whom := upper(whom);
-    foreach onlinechr in EnumerateOnlineCharacters()
-        if (upper(onlinechr.name) == whom)
-            MoveObjectToLocation(onlinechr, character.x, character.y, character.z, character.realm);
-            break;
-        endif
-    endforeach
-  endif
 endprogram
-
-function FillInArrays(whom)
-    var players := EnumerateOnlineCharacters();
-    var datalen;
-    var layoutlen;
-    var prev_y := CInt(80);
-    var datindx;
-    var buttonret := 1;
-    layout[GetLayoutLength()+1] := "page " + pagecount;
-    if( len(EnumerateOnlineCharacters()) > 19)
-        layout[GetLayoutLength()+1] := "button 285 465 2648 2647 0 " + (pagecount + 1);
-    endif
-    foreach player in players
-        playercount := playercount + 1;
-        datalen := GetDataLength();
-        layoutlen := GetLayoutLength();
-        if (GetObjProperty(player, "HideDev") && (whom != "h+"))
-            // dummy line
-        else
-            datindx := datalen+1;
-            data[datindx] := player.name;
-            if( playercount == 20 || playercount == 39 || playercount == 58 || playercount == 77 || playercount == 96)
-                pagecount := pagecount + 1;
-                layout[GetLayoutLength()+1] := "page " + pagecount;
-                prev_y := 80;
-                layout[GetLayoutLength()+1] := "button 285 85 2650 2651 0 " + (pagecount - 1);
-                if( len(EnumerateOnlineCharacters()) > playercount + 19)
-                    layout[GetLayoutLength()+1] := "button 285 465 2648 2647 0 " + (pagecount + 1);
-                endif
-            endif
-            layout[GetLayoutLength()+1] := ("text 20 " + CStr(prev_y + 20) + " 40 " + datalen);
-            layout[GetLayoutLength()+1] := ("button 260 " + CStr(prev_y + 20) + " 2640 2641 1 0 " + buttonret);
-            prev_y := prev_y + 20;
-            buttonret := buttonret + 1;
-        endif
-    endforeach
-endfunction
-
-function GetLayoutLength();
-    return (len(layout));
-endfunction
-
-function GetDataLength();
-    return (len(data));
-endfunction
