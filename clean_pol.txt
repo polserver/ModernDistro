@@ -1,15 +1,14 @@
 #
-#  Created by Version: 99.0.1 Break Everything Even Rudder
+#  Created by Version: 100.0.0 Never Gonna Give You Up
 #  Mobiles:		 696
 #  Top-level Items: 291
 #
 
 System
 {
-	CoreVersion	99
-	CoreVersionString	99.0.1 Break Everything Even Rudder
-	CompileDate	Jan  8 2018
-	CompileTime	00:43:19
+	CoreVersion	100.0.0
+	CoreVersionString	100.0.0 Never Gonna Give You Up
+	CompileDateTime	Oct 17 2020 17:19:17
 	LastItemSerialNumber	1073741824
 	LastCharSerialNumber	1
 }
