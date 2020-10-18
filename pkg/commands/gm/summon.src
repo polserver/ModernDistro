@@ -6,6 +6,8 @@ include ":gumps:selectionGump";
 program summon_player(who, whom)
 
 	var online_players := EnumerateOnlineCharacters();
+	// online_players are "byref'ed" so no need for a return value.
+	RemoveCharacter(who, online_players);
 	var online_players_names := {};
 	var char;
 	foreach person in online_players
@@ -34,3 +36,18 @@ program summon_player(who, whom)
 	SendSysMessage(who, "The player name might be misspelled.", color := 33);
 
 endprogram
+
+// Removes a character from the array of online characters.
+// Used primaarily to remove the user from the array.
+function RemoveCharacter(byref user, byref online_chars)
+
+	foreach player in online_chars
+		if(user == player)
+			online_chars.erase(_player_iter);
+			break;
+		endif
+	endforeach
+	return;
+
+endfunction
+
