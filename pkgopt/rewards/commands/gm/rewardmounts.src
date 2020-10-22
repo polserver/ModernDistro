@@ -1,0 +1,35 @@
+use uo;
+use cliloc;
+use cfgfile;
+
+include ":gumps:selectionGump";
+include ":itemUtils:itemdesc";
+
+program RewardCreation(who)
+
+	var rconfig := ReadConfigFile(":rewards:itemdesc");
+	var rkeys := GetConfigIntKeys(rconfig);
+	var reward_mounts := {};
+	var robjtype := {};
+	var mindex := 0;
+	var reward;
+	var choice := "";
+	var rdesc := "";
+	foreach thing in rkeys
+		reward := FindConfigElem(rconfig, thing);
+		rdesc := GetConfigString(reward, "Desc");
+		Print(rdesc);
+		if(rdesc["Mount"])
+			reward_mounts.append(rdesc);
+			robjtype.append(thing);
+		endif
+	endforeach
+	choice := SelectionGump( who, "Select a reward mount:", reward_mounts, BTN_TYPE_RADIO );
+	if(!choice)
+		SendSysMessage(who, "Cancelled", color := 33);
+		return;
+	endif
+	mindex := choice in reward_mounts;
+	CreateItemInBackpack(who, robjtype[mindex]);
+
+endprogram

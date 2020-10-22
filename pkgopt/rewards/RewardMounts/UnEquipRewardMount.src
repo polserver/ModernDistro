@@ -1,0 +1,39 @@
+	// Reward mount unequip script.
+
+
+use uo;
+
+program UnEquipRewardMount(who)
+	var mount_piece := GetEquipmentByLayer( who, 25 );
+	var RMInfo := GetObjProperty(mount_piece, "RewardMount");
+	var SFX := CInt(RMInfo.SFX);
+	var GFX := CInt(RMInfo.GFX);
+	var Frames := CInt(RMInfo.Frames);
+	var Hue := CInt(RMInfo.Hue);
+	if(!SFX)
+		SFX := 0;
+	endif
+	if(!GFX)
+		GFX := 0;
+	endif
+	if(!Frames)
+		Frames := 0;
+	endif
+	if(!Hue)
+		Hue := 0;
+	endif
+	if(SFX)
+		PlaySoundEffect( who, SFX );
+	endif
+	if(GFX)
+		PlayObjectCenteredEffectEx( who, GFX, 1, Frames, Hue, 7 );
+	endif
+	var statue := CreateItemInBackpack(who, CInt(GetObjProperty(mount_piece, "RewardObjType")), 1);
+	if(!statue)
+		SendSysMessage(who, "Could not recreate the reward statue!", color := 33);
+	endif
+	MoveItemToContainer(mount_piece, who.backpack);
+	DestroyItem(mount_piece);
+	return;
+
+endprogram
