@@ -1,0 +1,137 @@
+use uo;
+use os;
+
+
+include ":envirohazards:settings";
+include "include/sysEvent";
+include "include/eventID";
+include ":damage:damage";
+
+const SOUND_EFFECT_FIRE := 0x15F;
+const SOUND_EFFECT_STEAM := 0x231;
+const SOUND_EFFECT_THUNDER := 0x002A;
+const SOUND_EFFECT_ROCKS := 0x221;
+var settings := EH_GetSettingsCfgElem("Settings");
+
+program EffectControl(tile)
+	Print("EffectControl script running.");
+	var range := GetObjProperty(tile, "Range");
+	EnableEvents( EVID_ENTEREDAREA, range );
+	EnableEvents( EVID_LEFTAREA );
+	while(1)
+		var ev := os::wait_for_event(3);
+		case(ev.type)
+			EVID_ENTEREDAREA:	while(ListMobilesNearLocation(tile.x, tile.y, tile.z, range, tile.realm).size())
+									DoEffects(tile);
+								endwhile
+
+			EVID_LEFTAREA:		Sleepms(500);
+		endcase
+	endwhile
+
+endprogram
+
+function DoEffects(tile)
+
+	// Reads the animation to be played.
+	var effect := GetObjProperty(tile, "Effect");
+	// Pretty obvious what this is.
+	var damage := GetObjProperty(tile, "Damage");
+	// Again, obvious.
+	var range := GetObjProperty(tile, "Range");
+	if(damage > 99999)
+		damage := 99999;
+	endif
+	if(range > 9)
+		range := 9;
+	endif
+	// An array that will hold all mobiles in range.
+	var victims := {};
+	// This will hold the damage to be done to a particular mobile.
+	var dmg := 0;
+	// The unit of damage that will be multiplied by the proximity of the mobile.
+	var dmg_unit := 0;
+	// The distance of the mobile from the tile.
+	var proximity := 0;
+	var thing;
+	var random_number := RandomInt(CInt(settings.ChanceRange)) + 1;
+	if(random_number != 42)
+		Sleepms(1000);
+		return;;
+	endif
+	victims := ListMobilesNearLocation( tile.x, tile.y, tile.z, range, tile.realm );
+	foreach one in victims
+		// We add 1 to proximity to adjust for damage dealt.
+		// eg. if mobile is standing on the tile Distance (one, tile) == 0.
+		// eg. if Distance (one, tile) == 1 would apply full damage to the mobile
+		// next to the tile, which is not what we want.
+		proximity := Distance (one, tile) + 1;
+		// Determine the damage per square.
+		dmg_unit := CInt(damage / range);
+
+		if(dmg_unit < 1)
+			dmg_unit := 1;
+		endif
+		// Determine the damage based on distance from the tile.
+		dmg := proximity * dmg_unit;
+		if(dmg < 1)
+			dmg := 1;
+		endif
+
+		case(effect)
+			"Fire":		DoFire(tile, one, dmg);
+			"Swamp":	DoGas(tile, one, dmg);
+			"Steam":	DoSteam(tile, one, dmg);
+			"Lighting":	DoLightning(tile, one, damage);
+			"Rocks":	DoRocks(tile,one, damage);
+		endcase
+	endforeach
+
+	sleepms (1000);
+
+
+endfunction
+
+function DoFire(tile, victim, dmg)
+
+	PlaySoundEffect(tile, SOUND_EFFECT_FIRE);
+	PlayStationaryEffectEx( tile.x, tile.y, tile.z, tile.realm, 0x3709, 0x0a, 0x1e, 0, 2);
+	ApplyDamageEX(victim, dmg, DMG_FIRE, 0);
+
+endfunction
+
+function DoGas(tile, victim, dmg)
+
+	PlaySoundEffect(tile, SOUND_EFFECT_STEAM);
+	PlayStationaryEffectEx( tile.x, tile.y, tile.z, tile.realm, 0x3709, 0x0a, 0x1e, 56, 4 );
+	ApplyDamageEX(victim, dmg, DMG_FIRE, 0);
+
+endfunction
+
+function DoSteam(tile, victim, dmg)
+
+	PlaySoundEffect(tile, SOUND_EFFECT_STEAM);
+	PlayStationaryEffectEx( tile.x, tile.y, tile.z, tile.realm, 0x3709, 0x0A, 0x1E, 101, 2 );
+	ApplyDamageEX(victim, dmg, DMG_FIRE, 0);
+
+endfunction
+
+function DoLightning(tile, victim, dmg)
+
+	PlaySoundEffect(tile, SOUND_EFFECT_FIRE);
+	PlayLightningBoltEffect(tile);
+	ApplyDamageEX(victim, dmg, DMG_ENERGY, 0);
+
+endfunction
+
+function DoRocks(tile, victim, dmg)
+
+	var rock_types := {0x1364, 0x1365, 0x1366, 0x1368, 0x1369, 0x136B, 0x136C};
+	var the_rock := rock_types.randomentry();
+	PlaySoundEffect(tile, SOUND_EFFECT_ROCKS);
+	PlayMovingEffectXYZ( victim.x, victim.y, victim.z + 30, victim.x, victim.y, victim.z, the_rock, 0, 0x1E, 0, victim.realm );
+	Sleepms(400);
+	Start_Script(":envirohazards:createRock", {victim.x, victim.y, victim.z, victim.realm, the_rock});
+	ApplyRawDamageEX(victim, dmg, DMG_PHYSICAL, 0);
+
+endfunction

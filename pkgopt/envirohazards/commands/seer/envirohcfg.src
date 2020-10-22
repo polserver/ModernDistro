@@ -1,0 +1,122 @@
+// Created 10/10/2020 1:46:36 AM, with Gump Studio.
+// Exported with POLGumpExporter ver 1.1 for gump pkg
+
+use uo;
+use os;
+use cliloc;
+
+include ":gumps:gumps";
+include ":envirohazards:settings";
+
+// 0x3709 - Fire Plume
+// 0x3709 - color := 168 - Swamp Gas Plume
+// 0x3709 - Color := 1153 - Steam Plume
+var settings := EH_GetSettingsCfgElem("Settings");
+
+program cfg_effects( who )
+	var result := CfgGump( who );
+	var damage := 0;
+	var range := 0;
+		if((result[0] == 666) || (result[0] == 1))
+		SendSysMessage(who, "Canceled", color := 33);
+		return 0;
+	endif
+	damage := GFExtractData(result, 100);
+	range := GFExtractData(result, 200);
+
+	if(result[10])
+		SetEffect(who, "Fire", damage, range);
+	elseif(result[20])
+		SetEffect(who, "Swamp", damage, range);
+	elseif(result[30])
+		SetEffect(who, "Steam", damage, range);
+	elseif(result[40])
+		SetEffect(who, "Energy", damage, range);
+	elseif(result[50])
+		SetEffect(who, "Rocks", damage, range);
+	else
+		SendSysMessage(who, "No effect selected.", color := 33);
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return 0;
+	endif
+	return 1;
+
+endprogram
+
+function SetEffect(who, effect, damage, range)
+
+	SendSysMessage(who, "Where do you want to place the hazard?", color := 88);
+	var place := TargetCoordinates(who);
+	if(!place)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return 0;
+	endif
+	var tile := CreateItemAtLocation(place.x, place.y, place.z, "hazardtile", 1, place.realm);
+	SetObjProperty(tile, "Damage", CInt(damage));
+	SetObjProperty(tile, "Effect", effect);
+	SetObjProperty(tile, "Range", CInt(range));
+	SendSysMessage(who, "The environmental hazard has been placed successfully", color := 66);
+	return 1;
+
+endfunction
+
+function CfgGump(who)
+
+	var cfg_effects_gump := GFCreateGump( 0, 0 );
+	GFPage( cfg_effects_gump, 0 );
+	// Background
+	GFResizePic( cfg_effects_gump, 0, 0, 9250, 300, 300 );
+	// Foreground
+	GFPicTiled( cfg_effects_gump, 13, 13, 273, 273, 3004 );
+	// FirePlumeLabel: Fire Plume C-33
+	GFTextLine( cfg_effects_gump, 84, 49, 33, "Fire Plume" );
+	// TitleLabel: Title Label
+	GFTextLine( cfg_effects_gump, 50, 18, 194, "Configure Environmental Effect" );
+	// SwampGasLabel: Swamp Gas C-171
+	GFTextLine( cfg_effects_gump, 84, 78, 171, "Swamp Gas" );
+	// DamageBackground
+	GFResizePic( cfg_effects_gump, 131, 198, 9350, 46, 20 );
+	// SteamPlumeLabel: Steam Plume C-1071
+	GFTextLine( cfg_effects_gump, 84, 108, 1071, "Steam Plume" );
+	// SteamCheckbox
+	// GFCheckBox( cfg_effects_gump, 53, 105, 9792, 9793, 0, 0 );
+	// DamageLabel: Damage Label C-919
+	GFTextLine( cfg_effects_gump, 50, 197, 919, "Damage:" );
+	// RangeBackground
+	GFResizePic( cfg_effects_gump, 131, 224, 9350, 46, 20 );
+	// RangeLabel: Range Label C-919
+	GFTextLine( cfg_effects_gump, 53, 223, 919, "Range:" );
+	// EnergyLabel: Lightning C-105
+	GFTextLine( cfg_effects_gump, 84, 137, 105, "Lightning" );
+	// ColdLabel: Steam Plume C-89
+	GFTextLine( cfg_effects_gump, 84, 167, 89, "Falling Rocks" );
+	// DamageTextEntry: Damage Text Entry C-0
+	// GFTextEntry( cfg_effects_gump, 131, 198, 46, 20, 0, "5", 100, 5 );
+	GFTextEntry( cfg_effects_gump, 131, 198, 46, 20, 0, settings.DefaultDamage, 100, 5 );
+	// RangeTextEntry: Range Text Entry C-0
+	// GFTextEntry( cfg_effects_gump, 131, 224, 46, 20, 0, "3", 200, 1 );
+	GFTextEntry( cfg_effects_gump, 131, 224, 46, 20, 0, settings.DefaultRange, 200, 1 );
+
+	// FireRadioButton
+	GFSetRadioGroup( cfg_effects_gump, 1 );
+	GFRadioButton( cfg_effects_gump, 53, 46, 9792, 9793, 0, 10 );
+	// SwampGasRadioButton
+	GFRadioButton( cfg_effects_gump, 53, 75, 9792, 9793, 0, 20 );
+	// SteamRadioButton
+	GFRadioButton( cfg_effects_gump, 53, 105, 9792, 9793, 0, 30 );
+	// LightningRadioButton
+	GFRadioButton( cfg_effects_gump, 53, 134, 9792, 9793, 0, 40 );
+	// Unassigned RadioButton
+	GFRadioButton( cfg_effects_gump, 53, 164, 9792, 9793, 0, 50 );
+
+	// OkayButton: Okay
+	GFAddButton( cfg_effects_gump, 53, 257, 247, 248, GF_CLOSE_BTN, 777 );
+
+	// CancelButton: Cancel
+	GFAddButton( cfg_effects_gump, 185, 256, 241, 242, GF_CLOSE_BTN, 666 );
+
+	return GFSendGump( who, cfg_effects_gump );
+
+endfunction
+
+

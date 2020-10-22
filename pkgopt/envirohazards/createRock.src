@@ -1,0 +1,17 @@
+use uo;
+use os;
+use util;
+
+program CreateRock(params)
+
+	var place_x := params[1];
+	var place_y := params[2];
+	var place_z := params[3];
+	var place_realm := params[4];
+	var the_type := params[5];
+
+	var the_rock := CreateItemAtLocation(place_x, place_y, place_z, the_type, 1, place_realm);
+	Sleep(RandomDiceRoll("1d7") + 2);
+	DestroyItem(the_rock);
+
+endprogram
