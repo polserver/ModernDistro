@@ -17,8 +17,11 @@ program textcmd_create( who, text )
     endif
     SendSysMessage(who, "Objtype: " + CInt(objtype));
     var i, item;
+	var targ := TargetCoordinates(who);
     for( i := 1; i <= amount; i := i + 1 )
-      item := CreateItemInBackpack(who, objtype, 1);
+      // item := CreateItemInBackpack(who, objtype, 1);
+	  item := CreateItemAtLocation(targ.x, targ.y, targ.z, objtype, 1, who.realm);
+	  item.z := 30;
       if(item)
         SetObjProperty(item, "Created", who.name);
 //        item.decayAt := 0;

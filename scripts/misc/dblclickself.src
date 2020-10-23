@@ -7,7 +7,6 @@ include ":itemUtils:itemdesc";
 
 program dblclickself( who )
 	var mount := GetEquipmentByLayer( who, 25 );
-//	var cfg_elem := GetItemDescInfo(item.objtype);
 	if (!mount)
 		OpenPaperdoll( who, who );
 		return;
@@ -17,15 +16,14 @@ program dblclickself( who )
 		return;
 	endif
 
-	var un_equip_script := mount.UnEquipScript;
+	// Added to support Reward Mounts.
+	///////////////////////////////////////////////////////////////
+	var un_equip_script := GetObjProperty(mount, "RewardUnequip");
 	if(un_equip_script)
-		if(GetObjProperty(mount, "RewardMount"))
-			Run_Script_To_Completion(un_equip_script, who);
-			Sleepms(800);
-			DestroyItem(mount);
-			return 1;
-		endif
+		Run_Script(un_equip_script, who);
+			return;
 	endif
+	///////////////////////////////////////////////////////////////
 
     var serial := GetObjProperty(mount, "serial");
 	var animal := SystemFindObjectBySerial(CInt(serial));
@@ -41,5 +39,6 @@ program dblclickself( who )
     SendEvent(animal, ev);
     MoveObjectToLocation(animal, who.x, who.y, who.z, who.realm, MOVEOBJECT_FORCELOCATION);
     RestartScript(animal);
+	MoveItemToContainer(mount, who.backpack);
 	DestroyItem( mount );
 endprogram

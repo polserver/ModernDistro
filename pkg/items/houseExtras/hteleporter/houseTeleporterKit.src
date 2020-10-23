@@ -178,9 +178,8 @@ function SendGump(me, housesign)
 		"<big>Decide where you want the first teleporter and click the 'This will place the primary teleporter'" +
 		" button. Target the spot inside your house that you want the teleporter. Now go to the location where" +
 		" you want the secondary teleporter and click the 'This will place the secondary teleporter' button." +
-		" Target the spot inside your house that you want the teleporter.
-
-		Only the owner of a house may place a teleporter. Owners can set the acces level to the teleporter. You can choose the" +
+		" Target the spot inside your house that you want the teleporter.<br><br>" +
+		"Only the owner of a house may place a teleporter. Owners can set the acces level to the teleporter. You can choose the" +
 		" level of access by double-clicking the teleporter. This will set the same level of access on both of the teleporters." +
 		" If you do not set the access level, anyone may use them." +
 		" You may place the primary in one house and the secondary in another house. You may cancel the" +

@@ -1,5 +1,5 @@
 /*
-        Maintened by The POL Distro Team
+        Maintained by The POL Distro Team
 
         2009-05-30
 */
@@ -30,8 +30,8 @@ program Guild_Create( mobile )
 	GFResizePic( gump, 25, 20, GFGetCfgConst( "Defaults", "ForeGround" ), 450, 25 );
 	GFTextLine( gump, 200, 20, 1720, "Guild Creation" );
 
-        var text := "As you are not a member of any guild you can create your own by providing
-	            a unique guild name and paying the standard guild registration fee.";
+        var text := "As you are not a member of any guild you can create your own by providing " +
+					"a unique guild name and paying the standard guild registration fee.";
 
         GFDrawWrappedText( gump, 70, 60, GFWordWrap( text, 420 ));
 
