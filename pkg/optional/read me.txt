@@ -1,6 +1,5 @@
 This directory will contain optional packages that a shard developer can use. These packages are probably not standard to OSI. Most of them will bring added features to the game for players to take advantage of. However, that may not always be true. Some tools for admins and staff might fall into the category of an optional package.
 
-The packages contained herein will be disabled by default. This will allow shard developers to "opt-in" to their use. I recommend testing them before using them on a live shard.
 
 Admin Yukiko
 POL Distro Team Leader
