@@ -15,16 +15,6 @@ program dblclickself( who )
 		OpenPaperdoll( who, who );
 		return;
 	endif
-
-	// Added to support Reward Mounts.
-	///////////////////////////////////////////////////////////////
-	var un_equip_script := GetObjProperty(mount, "RewardUnequip");
-	if(un_equip_script)
-		Run_Script(un_equip_script, who);
-			return;
-	endif
-	///////////////////////////////////////////////////////////////
-
     var serial := GetObjProperty(mount, "serial");
 	var animal := SystemFindObjectBySerial(CInt(serial));
     EraseObjProperty(animal,"serial");

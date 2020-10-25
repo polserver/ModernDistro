@@ -48,7 +48,8 @@ program UseMountRewards(who, item)
 	Sleepms(800);
     var MountPiece := CreateEtherealMountPiece(cfg_elem, item);
     MountPiece := CreateItemAtLocation( 7158, 43, 0, MountPiece, 1, "britannia" );
-	SetObjProperty(MountPiece, "RewardUnequip", ":rewards:RewardMounts/UnEquipRewardMount");
+	// SetObjProperty(MountPiece, "RewardUnequip", ":rewards:RewardMounts/UnEquipRewardMount");
+	MountPiece.UnEquipScript := ":rewards:RewardMounts/UnEquipRewardMount";
 	SetObjProperty(MountPiece, "RewardObjType", item.objtype);
     EquipItem(who, MountPiece);
 	DestroyItem(item);

@@ -5,6 +5,10 @@ use uo;
 
 program UnEquipRewardMount(who)
 	var mount_piece := GetEquipmentByLayer( who, 25 );
+	// This prevents a double call to this script.
+	if(mount_piece.UnEquipScript)
+		mount_piece.UnEquipScript := "";
+	endif
 	var RMInfo := GetObjProperty(mount_piece, "RewardMount");
 	var SFX := CInt(RMInfo.SFX);
 	var GFX := CInt(RMInfo.GFX);
@@ -32,8 +36,6 @@ program UnEquipRewardMount(who)
 	if(!statue)
 		SendSysMessage(who, "Could not recreate the reward statue!", color := 33);
 	endif
-	MoveItemToContainer(mount_piece, who.backpack);
-	DestroyItem(mount_piece);
 	return;
 
 endprogram
