@@ -1,0 +1,52 @@
+use uo;
+use polsys;
+
+program makegold(mobile, amount)
+
+	if(!amount)
+		SendSysMessage(mobile, "Useage: .makegold [amount]");
+		return;
+	endif
+
+	amount := CInt(amount);
+
+	SendSysMessage(mobile, "Target the container to hold the gold");
+	var cont := Target(mobile);
+
+	if(!cont)
+		SendSysMessage(mobile, "Cancelled");
+		return;
+	endif
+
+	if(!cont.IsContainer())
+		SendSysMessage(mobile, "That is not a container");
+		return;
+	endif
+
+	var orgamount := amount;
+	var created := 0;
+	var stacks := 0;
+	while(amount > 60000)
+		if(CreateItemInContainer(cont, "GoldCoin", 60000))
+			amount := amount - 60000;
+			created := created + 60000;
+			stacks := stacks + 1;
+		else
+			SendSysMessage(mobile, "The container is full!");
+			SendSysMessage(mobile, "Created "+CStr(created)+", remaining: "+CStr(orgamount-created));
+			return;
+		endif
+	endwhile
+
+	if(amount > 0)
+		if(CreateItemInContainer(cont, "GoldCoin", amount))
+			created := created + amount;
+		else
+			SendSysMessage(mobile, "The container is full!");
+			SendSysMessage(mobile, "Created "+CStr(created)+", remaining: "+CStr(orgamount-created));
+		endif
+	endif
+
+	SendSysMessage(mobile, "Done. Made "+CStr(stacks)+" stacks");
+
+endprogram

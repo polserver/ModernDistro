@@ -15,6 +15,12 @@ program dblclickself( who )
 		OpenPaperdoll( who, who );
 		return;
 	endif
+	// This allows a script to run prior to unequipping
+	// a mount for any efects or mods to the player.
+	var unequip := GetObjProperty(mount, "Unequip");
+	if(unequip)
+		Run_Script(unequip, {who});
+	endif
     var serial := GetObjProperty(mount, "serial");
 	var animal := SystemFindObjectBySerial(CInt(serial));
     EraseObjProperty(animal,"serial");

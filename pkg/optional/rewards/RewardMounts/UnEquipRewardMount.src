@@ -2,8 +2,10 @@
 
 
 use uo;
+use os;
 
-program UnEquipRewardMount(who)
+program UnEquipRewardMount(params)
+var who := params[1];
 	var mount_piece := GetEquipmentByLayer( who, 25 );
 	// This prevents a double call to this script.
 	if(mount_piece.UnEquipScript)
@@ -36,6 +38,7 @@ program UnEquipRewardMount(who)
 	if(!statue)
 		SendSysMessage(who, "Could not recreate the reward statue!", color := 33);
 	endif
+	Sleep(1);
 	return;
 
 endprogram
