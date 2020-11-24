@@ -489,7 +489,7 @@ endfunction
 ///////////////////////////////////////////////////////////
 exported function IsAffiliated( sign, byref mobile )
 
-	if( IsOwner( mobile ))
+	if( IsOwner( sign, mobile ))
 		return 4;
 	elseif( IsACoowner( sign, mobile ))
 		return 3;
