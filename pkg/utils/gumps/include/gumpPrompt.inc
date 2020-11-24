@@ -53,7 +53,7 @@ function GumpPrompt(mobile, text, movable:=0, hue:=1153)
 endfunction
 
 /*
- * GumpPrompt2(mobile, text, movable:=0, hue:=1153)
+ * GumpPromptEx(mobile, text, movable:=0, hue:=1153)
  *
  * Purpose
  * Template to create a simple prompt window with a message and an "OKAY" button.
@@ -70,7 +70,7 @@ endfunction
  * Returns 1 when the okay button has been clicked.
  *
  */
-function GumpPrompt2(mobile, text, movable:=0, hue:=1153)
+function GumpPromptEx(mobile, text, movable:=0, hue:=1153)
 	var gump_prompt := GFCreateGump(180, 100);
 	if ( !movable )
 		GFClosable(gump_prompt, 0);

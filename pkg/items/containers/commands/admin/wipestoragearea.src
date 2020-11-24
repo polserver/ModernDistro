@@ -1,0 +1,76 @@
+use uo;
+use os;
+use file;
+use storage;
+
+include ":gumps:gumps";
+include ":gumps:yesNo";
+
+program wipe_storage_area( mobile )
+
+	var storage_areas := StorageAreas(),
+		names := Array,
+		gump := GFCreateGump( 50, 50 ),
+		result := 0,
+		y := 49,
+		i := 1;
+
+	GFPage( gump, 0 );
+	GFResizePic( gump, 0, 0, 9250, 226, 370 );
+	GFPicTiled( gump, 13, 13, 200, 344, 3004 );
+	GFPicTiled( gump, 15, 324, 196, 1, 2624 );
+	GFResizePic( gump, 18, 18, 3000, 190, 26 );
+	GFHTMLArea( gump, 18, 18, 190, 36, "<center>Wipe Storange Area</center>", 0, 0 );
+
+	GFPage( gump, 1 );
+	foreach area in ( storage_areas )
+		names.Append( area );
+		GFAddButton( gump, 18, y, 4017, 4019, GF_CLOSE_BTN, i );
+		GFHTMLArea( gump, 53, y, 155, 26, CStr( area ), 0, 0 );
+
+		i+=1;
+		y+=27;
+
+		if( !( _area_iter%10 ) && storage_areas.Size() > _area_iter )
+			GFAddButton( gump, 178, 330, 4005, 4007, GF_PAGE_BTN, gump.cur_page+1 ); // Next Page button
+			GFTooltip( gump, 1011066 ); // Next Page
+			GFPage( gump,  gump.cur_page+1 );
+			GFAddButton( gump, 18, 330, 4014, 4016, GF_PAGE_BTN, gump.cur_page-1 ); // Previous Page button
+			GFTooltip( gump, 1011067 ); // Previous Page
+			y := 49;
+		endif
+	endforeach
+
+	result := GFSendGump( mobile, gump );
+	if( !result )
+		SendSysMessage( mobile, "Cancelled action.", 0x3, 0x32 );
+		return 0;
+	endif
+
+	if( result[0] >= 1 && result[0] <= names.Size() )
+		if( !YesNo( mobile, "Are you sure you would like to wipe "+names[result[0]]+".\n\nThis is a permanent and irreversible action.", 30 ) )
+			SendSysMessage( mobile, "Cancelled action.", 0x3, 0x32 );
+			return 0;
+		endif
+
+		WipeStorageArea( mobile, names[result[0]] );
+	endif
+
+	return 1;
+endprogram
+
+function WipeStorageArea( byref mobile, byref storage_area_name )
+
+	var area_obj := FindStorageArea( CStr( storage_area_name ) );
+	foreach box in ( storage_area_name )
+		SleepMS( 5 );
+		foreach item in ( EnumerateItemsInContainer( box, ENUMERATE_ROOT_ONLY ) )
+			SleepMS( 5 );
+			DestroyItem( item );
+		endforeach
+		DestroyRootItemInStorageArea( area_obj, CStr( box.name ) );
+	endforeach
+
+	LogToFile( ":containers:wipedStorageArea", mobile.name+" wiped "+storage_area_name, LOG_DATETIME );
+	Broadcast( mobile.name+" has wiped "+storage_area_name, 0x3, 0x22, 3 );
+endfunction

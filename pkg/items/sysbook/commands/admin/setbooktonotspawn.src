@@ -41,7 +41,7 @@ program setbooknottospawn(who)
 		endif
 	endforeach
 	book_titles.Sort();
-	selected_books := SelectionGump2(who, CStr(book_titles.size()) + " books spawning in the library:", book_titles, BTN_TYPE_CHECKBOX);
+	selected_books := SelectionGumpEx(who, CStr(book_titles.size()) + " books spawning in the library:", book_titles, BTN_TYPE_CHECKBOX);
 
 	if(selected_books.errortext == "No option was selected.")
 		SendSysMessage(who, "No books were selected.", color := 33);

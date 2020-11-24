@@ -16,20 +16,20 @@ program textcmd_blooper( who )
 
     SendSysMessage (who, "Target a location near or at the problem area.", color := 66);
     w1 := TargetCoordinates(who);
-    
+
         if (!w1)
             SendSysMessage (who, "Cancelled.", color := 33);
             return;
         endif
-        
+
     SendSysMessage( who, "X=" + w1.x + ", Y=" + w1.y + ", Z=" + w1.z + ", Realm: " +  w1.realm, color := 88 );
-    description := RequestGump2(who, "Enter a description of the problem:", "", "", 1);
+    description := RequestGumpEx(who, "Enter a description of the problem:", "", "", 1);
 
 	if(description == error)
 		SendSysMessage(who, "Cancelled.", color := 33);
 		return 0;
 	endif
-	
+
     prop1 .+ pname := "Date and time: " + time + " - " + w1.x + " " + w1.y + " " + w1.z;
         prop1 .+ pvalue := w1.realm + " - Player Account: " + who.acctname;
 

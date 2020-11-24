@@ -126,7 +126,7 @@ endfunction
 
 
 /*
-* SelectionGump2( mobile, title, options, btn_type:=BTN_TYPE_NORMAL, transparent := 0, tooltips :={} )
+* SelectionGumpEx( mobile, title, options, btn_type:=BTN_TYPE_NORMAL, transparent := 0, tooltips :={} )
 *
 * Purpose: Displays a vertical rectangle that lists items that can be selected.
 * The button type (btn_type) determines whether multiple items or only one item
@@ -153,7 +153,7 @@ endfunction
 *				 buttons are used. An array of strings selected if BTN_TYPE_CHECKBOX is used.
 *				 Error if no selection is made and the gump is closed by right-clicking it.
 */
-function SelectionGump2( mobile, title, options, btn_type:=BTN_TYPE_NORMAL, transparent := 0, tooltips :={} )
+function SelectionGumpEx( mobile, title, options, btn_type:=BTN_TYPE_NORMAL, transparent := 0, tooltips :={} )
 
 	if( Lower( TypeOf( options )) != "array" )
 		return error{"errortext":="Options list must be an array."};
