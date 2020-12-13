@@ -6,28 +6,24 @@
 //
 // Date Created:
 //
-// Description: This program sends a "Yes/No" gump to the mobile
-// with a message provided by the calling program. The Yes and
-// No text is localized, meaning it is derived from a cliloc.
-// This script MUST be called from another script using
+// Description: This program sends a gump to the mobile with
+// a message provided by the calling program. It provides two (2)
+// possible options for the mobile to choose as a response.
+// This program MUST be called from another program using
 // the Core Run_Script() function, as the parameters are
 // passed in an array.
 //
 // Parameters:	Array containing:
 // mobile::String		params[1] - The mobile to send the gump to
 // prompt::String		params[2] - Prompt to display
-// yes_text::String		params[3] - "Yes"
-// no_text::String		params[4] - "No"
+// yes_text::String		params[3] - Option one (lower left side)
+// no_text::String		params[4] - Option two (lower right side)
 // delay::Integer		params[5] - Seconds before the gump
 // 									closes. 0 keeps the gump
 // 									open until the mobile responds
-// Note: The Yes and No text, parameters 3 and 4 are irrelevant
-// but must be included, at least until it is the code is changed
-// because the actual Yes and No text are derived from a cliloc.
-// Don't ask me. I did not write this script.
 //
 //
-// Return Value: Integer, 1 for yes or 0 for no.
+// Return Value: Integer, 1 for option one or 0 for option two.
 //
 /////////////////////////////////////////////////////////////////////
 
@@ -36,13 +32,13 @@ use os;
 
 include ":gumps:gumps";
 
-program Gump_YesNo( params )
+program BinaryChoice( params )
 
-        var mobile := params[1],
-            prompt := params[2],
-            yes_text := params[3],
-            no_text := params[4],
-            delay := params[5];
+        var mobile := params[1];
+		var prompt := params[2];
+		var yes_text := params[3];
+		var no_text := params[4];
+		var delay := params[5];
 
 	SetObjProperty( mobile, "#CloseYesNoGumpPID", GetPid() );
 
@@ -64,7 +60,7 @@ program Gump_YesNo( params )
 	GFAddButton( yn_gump, ( x_pos+3 ), 160, 4005, 4007, GF_CLOSE_BTN, 0xA1 );
 	foreach line in ( GFWordWrap( yes_text, 355 ))
 		line := line; // Avoid Compiler Warnings
-		GFAddHTMLLocalized( yn_gump, ( x_pos + 40 ), 162, 160, 18, 1074976 );
+		GFTextLine( yn_gump, ( x_pos + 40 ), 162, 66, yes_text );
 		x_pos += 30;
 		SleepMS(2);
 	endforeach
@@ -73,7 +69,7 @@ program Gump_YesNo( params )
 	GFAddButton( yn_gump, ( x_pos+3 ), 160, 4005, 4007, GF_CLOSE_BTN, 0xA2 );
 	foreach line in ( GFWordWrap( no_text, 355 ))
 		line := line; // Avoid Compiler Warnings
-		GFAddHTMLLocalized( yn_gump, ( x_pos + 40 ), 162, 160, 18, 1074977 );
+		GFTextLine( yn_gump, ( x_pos + 40 ), 162, 33, no_text );
 		x_pos += 20;
 		SleepMS(2);
 	endforeach
@@ -90,3 +86,4 @@ program Gump_YesNo( params )
 
         return 0;
 endprogram
+

@@ -21,17 +21,15 @@ var opposing  := 0;
 program Place_Deeded_Item ( who, deed )
 
 	var hsign := GetHouseSign(who);
-	if(who.cmdlevel <= 2)
-		//Sign stuff
-		if ( !hsign )
-			SendSysMessageCL(who, 500275, color := 33); // You can only build this in a house.
+	//Sign stuff
+	if ( !hsign )
+		SendSysMessageCL(who, 500275, color := 33); // You can only build this in a house.
 		return 0;
-		endif
+	endif
 
-		if ( !hsign.IsACoOwnerOrOwner( who ) )
-			SendSysMessageCL(who, 1152907, color := 33); // You must be owner or co-owner of a house to place addons in it.
+	if ( !hsign.IsCoOwnerOrOwner( who ) )
+		SendSysMessageCL(who, 1152907, color := 33); // You must be owner or co-owner of a house to place addons in it.
 		return 0;
-		endif
 	endif
 
 	var InBackpack := useItem_check ( who, deed, ITEM_INCONTAINER );
@@ -56,11 +54,10 @@ program Place_Deeded_Item ( who, deed )
 	if( !start )
 		SendSysMessageCL( who, 1042021, color := 33 ); // Cancelled
 		return 0;
-	elseif( !CheckLosAt( who, CInt( start.x ), CInt( start.y ), CInt( start.z )))
+	elseif( !CheckLosAt( who, CInt( start.x ), CInt( start.y ), CInt( start.z )) )
 		SendSysMessageCL( who, 500950, color := 33 ); // You cannot see that.
 		return 0;
-	//elseif( !IsInMultiHouse(who) )
-	elseif( !hsign.IsLocationInsideHouse(start))
+	elseif( !hsign.IsLocationInsideHouse(start) )
 		SendSysMessageCL( who, 500275, color := 33); // You can only build this in a house.
 		return 0;
 	endif
@@ -174,7 +171,7 @@ function BuildItem ( who, deed, sign, targ, buildCFG, RetainColor, direction )
 	if (outside == 0 && founddoor == 0 && founditem == 0 )
 		foreach item in ( component )
 			broken := SplitWords ( item );
-			the_item := CreateItemAtLocation ( targ.x + CInt(broken[2]), targ.y + CInt(broken[3]), CInt(zed), CInt(broken[1]), 1, targ.realm );
+			the_item := CreateItemAtLocation( targ.x + CInt(broken[2]), targ.y + CInt(broken[3]), CInt(zed), CInt(broken[1]), 1, targ.realm );
 			the_item.movable := 0;
 			if ( RetainColor )
 				the_item.color := deed.color;

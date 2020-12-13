@@ -1,0 +1,140 @@
+use uo;
+use os;
+use polsys;
+
+include ":attributes:attributes";
+include ":itemutils:itemUtil";
+include ":resourcecore:resourceCore";
+include ":resourcecore:clay";
+include ":resourcecore:sand";
+
+// Need to damage the tool in the main gathering loop
+// Need to figure out why the tracking script is not doing what it should be doing
+// and stopping the process of gathering when the player moves.
+program use_shovel( mobile, shovel )
+
+	var dirt_amt := 0,
+		harvested_amt := 0,
+		use_on := 0;
+
+	if( !useItem_check( mobile, shovel, ITEM_INCONTAINER ) )
+		return 0;
+	elseif( GetEquipmentByLayer( mobile, 25 ) )
+		SendSysMessage( mobile, "You cannot dig while mounted.", 0x3, 0x22 );
+		return 0;
+	endif
+
+	SendSysMessage( mobile, "Where do you wish to dig?", 0x3, 0x42 );
+
+	use_on := TargetCoordinates( mobile );
+	if( !use_on )
+		SendSysMessage( mobile, "Cancelled.", 0x3, 0x32 );
+		return 0;
+	endif
+
+	if( !RC_IsSandPatch( use_on ) && !RC_IsSwampPatch( use_on ) )
+		SendSysMessage( mobile, "You can only use a shovel to dig for sand or clay.", 0x3, 0x22 );
+		return 0;
+	endif
+	SHOVEL_HarvestResource( mobile, use_on );
+
+	return 1;
+endprogram
+
+function SHOVEL_HarvestResource( byref mobile, byref use_on )
+
+	var data_elem := 0,
+		last_harvest := 0,
+		quantity :=  0,
+		settings := 0,
+		resource_name := "",
+		sounds := 0,
+		amount := 0;
+
+	if( RC_IsSandPatch( use_on ) )
+		data_elem := RC_FindSandDataElem( Cstr( use_on.x+"_"+use_on.y+"_"+use_on.z+"_"+use_on.realm ) );
+		last_harvest := RC_GetSandProps( data_elem, "Harvest" );
+		quantity := RC_GetSandProps( data_elem, "Quantity" );
+		settings := RC_GetSettingsCfgElem( "SandSettings" );
+		resource_name := "sand";
+	elseif( RC_IsSwampPatch( use_on ) )
+		data_elem := RC_FindClayDataElem( Cstr( use_on.x+"_"+use_on.y+"_"+use_on.z+"_"+use_on.realm ) );
+		last_harvest := RC_GetClayProps( data_elem, "Harvest" );
+		quantity := RC_GetClayProps( data_elem, "Quantity" );
+		settings := RC_GetSettingsCfgElem( "ClaySettings" );
+		resource_name := "clay";
+	endif
+
+	quantity += Floor( Cint( ReadGameClock() - last_harvest ) / CInt( settings.SecondsPerRegrow ) );
+	if( quantity > CInt( settings.MaxYield ) )
+		quantity := CInt( settings.MaxYield );
+	endif
+
+	if( quantity < 1 )
+		SendSysMessage( mobile, "There's not enough "+resource_name+" here to harvest.", 0x3, 0x22 );
+		return 0;
+	elseif( CoordinateDistance( mobile.x, mobile.y, use_on.x, use_on.y ) > 2 )
+		SendSysMessage( mobile, "You must be nearer to harvest any "+resource_name+"!", 0x3, 0x22 );
+		return 0;
+	endif
+
+	RC_StartCharacterTracker( mobile, mobile.x, mobile.y, mobile.realm, GetPid() );
+
+	EnableEvents(EVID_OPPONENT_MOVED);
+
+	while( quantity > 0 )
+		sounds := CInt( SplitWords( settings.EffectSounds ).RandomEntry() );
+
+		amount := CInt( CDbl( GetAttributeBaseValue( mobile, MINING ) / 10.0 ) / 20.0 );
+		if( amount < 1 )
+			amount := 1;
+		elseif( amount > 6 )
+			amount := 6;
+		endif
+
+		if( quantity < amount )
+			amount := quantity;
+		endif
+
+		if( amount < 1 )
+			SendSysMessage( mobile, "There's not enough "+resource_name+" here to harvest.", 0x3, 0x22 );
+			return 0;
+		endif
+
+		PerformAction( mobile, CInt( settings.EffectAction ) );
+		PlaySoundEffectXYZ( use_on.x, use_on.y, use_on.z, sounds, use_on.realm );
+
+		if( !CheckSkill( mobile, MINING, CInt( settings.Difficulty ), 100 ) )
+			amount /= 2;
+		endif
+		SleepMS( 1900 );
+
+		if( resource_name == "sand" )
+			RC_FindShell( mobile );
+		endif
+
+		var create_item := CreateItemInBackpack( mobile, settings.ResourceType, amount );
+		if( create_item )
+			if( resource_name == "sand" )
+				SendSysMessage( mobile, "You place "+FormatItemDescription( "grain%s% of "+resource_name, amount )+" in your backpack.", 0x3, 0x42 );
+			elseif( resource_name == "clay" )
+				SendSysMessage( mobile, "You place "+FormatItemDescription( "brick%s% of "+resource_name, amount )+" in your backpack.", 0x3, 0x42 );
+			endif
+		else
+			create_item := CreateItemAtLocation( mobile.x, mobile.y, mobile.z, settings.ResourceType, amount, mobile.realm );
+			SendSysMessage( mobile, "Your backpack is full and the "+resource_name+" is placed at your feet.", 0x3, 0x32 );
+		endif
+
+		quantity -= amount;
+		if( quantity < 0 )
+			quantity := 0;
+		endif
+
+		if( quantity == 0 )
+			SendSysMessage( mobile, "You have dug up all the "+resource_name+".", 0x3, 0x32 );
+		endif
+
+		data_elem.SetProp( "Harvest", ReadGameClock() );
+		data_elem.SetProp( "Quantity", quantity );
+	endwhile
+endfunction

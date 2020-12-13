@@ -68,28 +68,24 @@ program gump_gump( who, gate )
 	GFAddButton( gump, 54, 330, 208, 209, GF_CLOSE_BTN , 8000 );
 	// Button 1
 	GFAddButton( gump, 200, 364, 241, 242, GF_CLOSE_BTN, 666 );
-	// Button 2
-	// GFAddButton( gump, 36, 364, 247, 248, GF_CLOSE_BTN, 777 );
 	GFCloseGumpOnMovedCoordinateDistance(who, GetPid(), 1, 666);
 	var result := GFSendGump( who, gump );
 	if(!result[0] || (result[0] == 666))
 		SendSysMessage(who, "No gate selected.", color := 33);
 		return;
 	endif
-//	if(result[0] == 777)
-		foreach key in ( result.keys )
-			if ( key >= 1000 && key <= 8000 )
-				SendSysMessage(who, Cstr(key), color := 88);
-				key := key / 1000;
-				var loc := moongates[key];
-				SetObjProperty(who, "#justgated", 1);
-				MoveObjectToLocation(who, loc[1], loc[2], loc[3], loc[4], MOVEOBJECT_FORCELOCATION);
-				Sleepms(200);
-				EraseObjProperty(who, "#justgated");
-				return;
-			endif
-			SleepMS(2);
-		endforeach
-//	endif
+	foreach key in ( result.keys )
+		if ( key >= 1000 && key <= 8000 )
+			SendSysMessage(who, Cstr(key), color := 88);
+			key := key / 1000;
+			var loc := moongates[key];
+			SetObjProperty(who, "#justgated", 1);
+			MoveObjectToLocation(who, loc[1], loc[2], loc[3], loc[4], MOVEOBJECT_FORCELOCATION);
+			Sleepms(200);
+			EraseObjProperty(who, "#justgated");
+			return;
+		endif
+		SleepMS(2);
+	endforeach
 
 endprogram

@@ -44,3 +44,4 @@ function YesNo( mobile, prompt:="", yes_text:="Yes", no_text:="No", delay:=0 )
 
 	return script;
 endfunction
+
