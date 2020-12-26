@@ -1,0 +1,35 @@
+use uo;
+use os;
+
+include ":cleric:cleric";
+include "include/dist";
+
+program symbolofpain(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	var targ := ClericalTargetCoordinates(who, info.npctarget);
+
+	ClericReleaseScript(info.pid);
+
+	if (coordist(targ.x, targ.y, who.x, who.y) > piety+5)
+		SendSysMessage(who, "Cancelled - too far away", color := 33);
+		return;
+	endif
+
+	var duration := 60*2;
+	duration := duration + (piety * 60);
+
+	var symbol := CreateItemAtLocation(targ.x,targ.y,targ.z, "symbolofpain", 1, targ.realm);
+	SetObjProperty(symbol, "BasePiety", GetObjProperty(who, "Piety"));
+	symbol.facing := 1;
+	sleep(duration);
+	DestroyItem(symbol);
+endprogram

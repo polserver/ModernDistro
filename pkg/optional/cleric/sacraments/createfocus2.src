@@ -1,0 +1,96 @@
+use uo;
+use util;
+use cliloc;
+
+include ":cleric:cleric";
+include ":cleric:faiths";
+
+// Materials needed for various foci are as follows :
+//	earth focus		- Bars of Clay	clay
+//	power focus		- Iron Ingots	ironingot
+//	arcane focus	- Glass Ingots	glassingot
+//	life focus		- logs			log
+//	spirit focus	- Cloth Pieces	cutclothpiece
+//	time focus		- Sand			sand
+var materiallist :=
+{
+	//Material, "focus type",
+	0x2EE19, "earth focus",
+	0x16309, "power focus",
+	0x2EE1A, "arcane focus",
+	0x1BDD, "life focus",
+	0x175D, "spirit focus",
+	0x175E, "spirit focus",
+	0x175F, "spirit focus",
+	0x1760, "spirit focus",
+	0x1761, "spirit focus",
+	0x1762, "spirit focus",
+	0x1763, "spirit focus",
+	0x1764, "spirit focus",
+	0x1765, "spirit focus",
+	0x1766, "spirit focus",
+	0x1767, "spirit focus",
+	0x2EE18, "time focus"
+};
+
+program createfocus(params)
+	var who := params[1];
+	var fname := "focus";
+	if (!checkmana(who, 25))
+		SendSysMessage(who, "Your mind is too tired to cast.", color := 33);
+		FailCast(who);
+		return;
+	endif
+	SendSysMessage(who, "Select the material:", color := 88);
+	var targ := Target(who);
+
+	if (!targ)
+		SendSysMessage(who, 1042023, color := 33); // Cancelled.
+		return;
+	elseif (!FindObjtypeInContainer(who.backpack.serial, targ.objtype))
+		SendSysMessage (who, "You need to have the material in your backpack.", color := 33);
+		return;
+	endif
+	// Read the foci data from clerics datafile.
+	var	foci_data := Faiths_FindFaith( "Foci" );
+	var foci_propnames := foci_data.PropNames();
+	var foci_info := {};
+	var valid_material := 0;
+	// foreach focus_name in foci_data.PropNames()
+	foreach focus_name in foci_propnames
+		foci_info := SplitWords(foci_data.GetProp(focus_name));
+		if(targ.objtype == CInt(foci_info[1]))
+			valid_material := 1;
+			break;
+		endif
+	endforeach
+	// var i;
+	// var focci:=0;
+
+	// for (i:=1;i<=len(materiallist);i:=i+1)
+		// if (targ.objtype == materiallist[i])
+			// focci := FocusType(materiallist[i+1]);
+			// fname := materiallist[i+1];
+		// endif
+	// endfor
+
+	if (!valid_material)
+		SendSysMessage(who, "You can't make anything with this material.", color := 33);
+		return;
+	endif
+
+	var piety := DevotionPiety(GetObjProperty(who, "Devotion"));
+	var created;
+	CheckMana(who, CInt(10/piety));
+	ConsumeSubstance(who.backpack, targ.objtype, CInt(foci_info[2]));
+    if (SkillCheck(who, CLERIC_SKILL, 40, 80))
+		SkillCheck(who, CLERIC_SKILL, 40, 80);
+		created := CreateItemInBackpack( who, foci_info[4], 1 );
+		SendSysMessage(who, "You created a " + foci_info[3] + " focus.", color := 66);
+		PlaySoundEffect(who, 508);
+	endif
+endprogram
+
+function FailCast(who)
+	EraseObjProperty(who, "#medding");
+endfunction

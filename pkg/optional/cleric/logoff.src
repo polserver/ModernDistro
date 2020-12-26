@@ -1,0 +1,12 @@
+use uo;
+
+program logoff(who)
+
+	var piety_timer := GetObjProperty(who, "PietyRewardTimer");
+	if(!piety_timer)
+		piety_timer := 0;
+	endif
+	piety_timer := piety_timer + (ReadGameClock() - GetObjProperty(who, "LastLog"));
+	SetObjProperty(who, "PietyRewardTimer", piety_timer);
+
+endprogram

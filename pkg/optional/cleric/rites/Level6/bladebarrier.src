@@ -1,0 +1,79 @@
+use uo;
+use os;
+use util;
+use cliloc;
+
+include ":cleric:cleric";
+
+program bladebarrier(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	var targ := clericaltargetcoordinates(who, info.npctarget);
+	if (!targ || !CheckLosAt(who, targ.x, targ.y, targ.z))
+		SendSysMessage(who, 1042023, color := 33); // Cancelled.
+		return;
+	endif
+
+	var blades := { };
+	case (ClericalGetFacing(who, targ.x, targ.y, targ.z))
+		"north" : blades:= CreateNorthSouthField(who, targ.x, targ.y, targ.z, piety);
+		"south" : blades:= CreateNorthSouthField(who, targ.x, targ.y, targ.z, piety);
+		"east"  : blades:= CreateEastWestField(who, targ.x, targ.y, targ.z, piety);
+		"west"  : blades:= CreateEastWestField(who, targ.x, targ.y, targ.z, piety);
+		default:
+			case (RandomInt(2))
+				0: blades:= CreateNorthSouthField(who, targ.x, targ.y, targ.z, piety);
+				1: blades:= CreateEastWestField(who, targ.x, targ.y, targ.z, piety);
+			endcase
+	endcase
+
+	ClericReleaseScript(info.pid);
+
+	//AI will handle their destruction
+endprogram
+
+function CreateNorthSouthField(who,xcoord,ycoord,zcoord,length := 5)
+	var i;
+	var slave;
+	var blades := { };
+	for ( i := xcoord - 2; i <= xcoord - 2 + length; i := i + 1)
+		slave := CreateNpcFromTemplate(":cleric:bladewall", i, ycoord, zcoord, 0, who.realm);
+		if(slave)
+			Print(slave.objtype);
+		else
+			Print("No blade");
+		endif
+		SetObjProperty(slave, "guardkill", 1);
+		if(!start_script(":cleric:bladebarrier/bladebarriercontrol", {slave}))
+			slave.frozen := 1;
+			PrintTextAbove(slave, "Error: Cant start blade control");
+		endif
+		blades.append(slave);
+	endfor
+
+	return blades;
+endfunction
+
+function CreateEastWestField(who,xcoord,ycoord,zcoord,length := 5)
+	var i;
+	var slave;
+	var blades := { };
+	for ( i := ycoord - 2; i <= ycoord - 2 + length; i := i + 1)
+		slave := CreateNpcFromTemplate("bladewall",xcoord,i,zcoord, 0, who.realm);
+		SetObjProperty(slave, "guardkill", 1);
+		if(!start_script("controlscripts/bladebarriercontrol", slave))
+			slave.frozen := 1;
+			PrintTextAbove(slave, "Error: Cant start blade control");
+		endif
+		blades.append(slave);
+	endfor
+	return blades;
+endfunction

@@ -1,0 +1,67 @@
+use uo;
+use util;
+
+include ":cleric:cleric";
+
+program distract(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	ClericReleaseScript(info.pid);
+
+	who.hidden := 1;
+
+	//var fake := CreateNpcFromTemplate("peasant1", 7100, 4030, 0, 0, who.realm);
+	//var fake := CreateNpcFromTemplate("peasant1", who.x, who.y, -100, 0, who.realm);
+	var fake := CreateNpcFromTemplate("peasant1", who.x, who.y, who.z, 0, who.realm);
+	MoveObjectToLocation(fake, 7100, 4030, 0, "britannia", MOVEOBJECT_FORCELOCATION);
+	Sleepms(100);
+	if(!fake)
+		SysLog("Could not create NPC 'clone'.");
+	endif
+	set_critical(1);
+	var remove := ListEquippedItems(fake);
+	Print(remove.name);
+	foreach thing in remove
+		MoveObjectToLocation(thing, 1, 1, 1, "britannia", MOVEOBJECT_FORCELOCATION);
+		DestroyItem(thing);
+	endforeach
+	SetObjProperty(fake, "Duration", piety * 60);
+	var hair := GetEquipmentByLayer( who, 11 );
+	var fake_hair := CreateItemAtLocation(1, 1, 1, hair.objtype, 1, "britannia");
+	fake_hair.color := hair.color;
+	EquipItem(fake, fake_hair);
+	var facial_hair := GetEquipmentByLayer( who, 11 );
+	fake_hair := CreateItemAtLocation(1, 1, 1, facial_hair.objtype, 1, "britannia");
+	fake_hair.color := facial_hair.color;
+	EquipItem(fake, fake_hair);
+	fake.graphic := who.graphic;
+	fake.color := who.color;
+	fake.truecolor := who.truecolor;
+	fake.name := who.name;
+	fake.facing := who.facing;
+	SetObjProperty(fake, "Devotion", GetObjProperty(who, "Devotion"));
+	var priest_equip := ListEquippedItems( who );
+	var dupe_item;
+	foreach thing in priest_equip
+		dupe_item := CreateItemAtLocation(0, 0, 0, thing.objtype, 1, "britannia");
+		dupe_item.color := thing.color;
+		SetName(dupe_item, thing.desc);
+		dupe_item.graphic := thing.graphic;
+		EquipItem(fake, dupe_item);
+	endforeach
+	SetObjProperty(fake, "master", who.serial);
+	SetObjProperty( fake, "duration", (piety*2)+15 );
+	MoveObjectToLocation(fake, who.x, who.y, who.z, who.realm, MOVEOBJECT_FORCELOCATION);
+	set_critical(0);
+
+	who.stealthsteps := (piety*2) + 5;
+
+endprogram

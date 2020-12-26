@@ -1,0 +1,27 @@
+use uo;
+use os;
+use util;
+
+include ":cleric:destroyequip";
+include ":damage:damage";
+
+program bladebarrier(blades)
+	blades.frozen := 1;
+	var temp;
+	while(1)
+		foreach person in ListMobilesInLineOfSight(blades, 1)
+			if (person.npctemplate != blades.npctemplate)
+				PerformAction(person, 0x14);
+				ApplyDamageEx(person, 1, DMG_PHYSICAL);
+				if (RandomInt(15) == 8)
+					temp := destroyequip(person);
+					if (temp)
+						SendSysMessage(person, "The blades destroy " + temp.desc);
+						DestroyItem(temp);
+					endif
+				endif
+			endif
+		endforeach
+		sleepms(200);
+	endwhile
+endprogram

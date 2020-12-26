@@ -1,0 +1,52 @@
+/////////////////////////////////////////////////////////////////
+// Used to update the faiths datafile after any changes are
+// made to clerics.cfg.
+/////////////////////////////////////////////////////////////////
+
+
+use uo;
+use cfgfile;
+use datafile;
+
+include ":cleric:cleric";
+include ":cleric:faiths";
+
+program initialize_faiths_datafile()
+
+	if(GetGlobalProperty("ClericsInitialized"))
+		return;
+	endif
+	UnloadConfigFile(":cleric:clerics");
+	var file_name := ":cleric:clerics";
+	var clerics_cfg := ReadConfigFile(file_name);
+	if(!clerics_cfg)
+		Syslog("Error reading clerics.cfg");
+		return 0;
+	endif
+	var faiths_datafile := Faiths_OpenDatafile();
+	Print("Updating faiths datafile.");
+	// Clear any existing data from the faiths datafile.
+	// Normally there won't be a datafile since this
+	// will run the first time this package is added.
+	if(faiths_datafile)
+		foreach key in ( faiths_datafile.Keys() )
+			faiths_datafile.DeleteElement( key );
+		endforeach
+	endif
+	var cfg_faith_keys := GetConfigStringKeys(clerics_cfg);
+	var cfg_props := {};
+	var cfg_elem;
+	var df_elem;
+	foreach f_key in cfg_faith_keys
+		df_elem := faiths_datafile.CreateElement(f_key);
+		cfg_elem := FindConfigElem(clerics_cfg, f_key);
+		cfg_props := ListConfigElemProps(cfg_elem);
+		foreach cfg_prop in cfg_props
+			df_elem.SetProp(cfg_prop, GetConfigString( cfg_elem, cfg_prop ));
+		endforeach
+	endforeach
+	SetGlobalProperty("ClericsInitialized", 1);
+	Print("Finished updating faiths datafile.");
+
+endprogram
+

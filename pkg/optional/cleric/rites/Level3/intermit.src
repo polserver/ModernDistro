@@ -1,0 +1,35 @@
+// Another encumberance rite???
+use uo;
+use os;
+use cliloc;
+
+include ":cleric:cleric";
+
+program intermit(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	var targ := ClericalTarget(who, info.npctarget);
+
+	if (!targ.ip && !targ.npctemplate)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return;
+	elseif (!distancecheck(who, targ, piety+3))
+		SendSysMessageCL(who, 501043, color := 33); // Target is not close enough.
+		return;
+	endif
+
+	ClericReleaseScript(info.pid);
+	PlaySoundEffect(targ, 517);
+
+	targ.paralyzed := 1;
+	sleep(piety*45);
+	targ.paralyzed := 0;
+endprogram

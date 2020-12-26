@@ -1,0 +1,16 @@
+use uo;
+use os;
+
+include "include/client";
+
+
+program GetPiety(who)
+        var targ, Piety;
+		SendSysMessage(who, "Select a character:", color := 88);
+        targ := target(who);
+        Piety := GetObjProperty (targ, "Piety");
+        if (GetObjProperty (targ, "Piety"))
+          SendSysMessage ( who, "That person's Piety is " + Piety );
+          else SendSysMessage ( who, "That person is faithless.");
+          endif
+endprogram

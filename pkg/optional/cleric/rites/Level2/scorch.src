@@ -1,0 +1,35 @@
+// Apparently a religious fireball rite
+use uo;
+use util;
+use cliloc;
+
+include ":cleric:cleric";
+include ":damage:damage";
+
+program scorch(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	var targ := ClericalTarget(who, info.npctarget, "Select a target", TGTOPT_CHECK_LOS + TGTOPT_HARMFUL);
+
+	if (!targ.ip && !targ.npctemplate)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return;
+	elseif (!distancecheck(who, targ, piety+3))
+		SendSysMessageCL(who, 500643, color := 33); // Target is too far away.
+		return;
+	endif
+
+	PlaySoundEffect(who, 0x202);
+	PlayMovingEffect(who, targ, 0x36E4, 5, 1, 1);
+
+	var thepain := RandomDiceRoll("1d10") + 19; // 20-30 damage
+	ApplyDamageEx(targ, thepain, DMG_FIRE);
+endprogram

@@ -1,0 +1,26 @@
+use uo;
+
+include ":cleric:cleric";
+
+program glowingeyes(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	var targ := ClericalTarget(who, info.npctemplate);
+
+	if (!targ.ip && !targ.npctemplate)
+		SendSysMessage(who, "Cancelled");
+		return;
+	endif
+
+	targ.SetLightLevel(6, 1000*piety);
+	PlayObjectCenteredEffect(targ, 14138, 10, 10);
+	PlaySoundEffect(targ, 484);
+endprogram

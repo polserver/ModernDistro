@@ -1,0 +1,38 @@
+	// Reward mount unequip script.
+
+
+use os;
+use uo;
+use datafile;
+
+include ":cleric:faiths";
+
+var faithsdb := Faiths_OpenDatafile();
+if(!faithsdb)
+	SysLog("Could not read faiths datafile.");
+endif
+
+program DismountCleric(params)
+	var who := params[1];
+	var mount_piece := GetEquipmentByLayer( who, 25 );
+	// This prevents a double call to this script.
+	if(mount_piece.UnEquipScript)
+		mount_piece.UnEquipScript := "";
+	endif
+	var devotion := GetObjProperty(who, "Devotion" );
+	var faith := faithsdb.FindElement(devotion);
+	var mount_info := SplitWords(faith.GetProp("Mounts"));
+	if(!mount_info)
+		SysLog("createClericMount --> Cannot find mount_info.");
+	endif
+	// var cleric_mount_piece := CInt(mount_info[1]);
+	var GFX := CInt(mount_info[2]);
+	var frames := CInt(mount_info[3]);
+	var hue := CInt(mount_info[4]);
+	var SFX := CInt(mount_info[5]);
+	PlaySoundEffect( who, SFX );
+	PlayObjectCenteredEffectEx( who, GFX, 1, frames, hue, 7 );
+	Sleep(1);
+	return;
+
+endprogram

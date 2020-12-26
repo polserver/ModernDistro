@@ -1,0 +1,42 @@
+use uo;
+
+include ":gumps:gumps";
+include ":cleric:faiths";
+
+program setsymbol(who, symbol)
+	if (GetObjProperty(symbol, "Owner"))
+		SendSysMessage(who, "This symbol has already been set.", color := 33);
+		return;
+	endif
+	var user_devotion := GetObjProperty(who, "Devotion");
+	SetObjProperty(symbol, "Devotion", user_devotion);
+	SetObjProperty(symbol, "Owner", who.serial);
+	// Save the location of this altar.
+	var faith := Faiths_FindFaith( user_devotion );
+	if(!faith)
+		faith := Faiths_AddFaith( user_devotion );
+	endif
+	if(!faith)
+		SendSysMessage(who, "There was a problem finding or adding this faith to the datafile.", color := 33);
+		SendSysMessage(who, "Report the following error to a staff member:", color := 33);
+		SendSysMessage(who, faith.errortext, color := 33);
+		return;
+	endif
+	faith.setprop("HighPriest", who.serial);
+
+	// SetObjProperty(who, user_devotion + "HighPriest", 1);
+	SetName(symbol, "High priest's symbol of the " + user_devotion + "faith");
+	if(!faith.getprop("AltarLoc"))
+		CreateItemInBackpack(who, "clericaltardeed", 1);
+	endif
+	var title := "Information About The High Priest's Symbol";
+	var text := "This symbol is now linked to you. It will not have any effect if someone else uses it. " +
+				"Keep it equipped for piety boost and as a symbol of your faith." + CChr(0x0A) + CChr(0x0D) + CChr(0x0A) + CChr(0x0D) +
+				"You have been given a deed for an altar. You will find it in your backpack. You may place " +
+				"the altar only in a building that you own." + CChr(0x0A) + CChr(0x0D) + CChr(0x0A) + CChr(0x0D) +
+				"You must have this symbol in your hand to access the high priest functions of the altar.";
+
+	SendHTMLGump(who, title, text);
+
+endprogram
+

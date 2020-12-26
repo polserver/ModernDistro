@@ -1,0 +1,83 @@
+use uo;
+use os;
+use cliloc;
+
+include ":cleric:cleric";
+include ":attributes:attributes";
+include ":damage:damage";
+
+program LinkAura(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	var player1, player2;
+
+	player1 := ClericalTarget(who, info.npctarget, "Select the first target:");
+	player2 := ClericalTarget(who, info.npctarget, "Select the second target:");
+
+	if (!player1.ip || player1.ghost)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return;
+	elseif (!player2.ip || player2.ghost)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return;
+	elseif (player1 == player2)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return;
+	endif
+
+	ClericReleaseScript(info.pid);
+
+	var duration := (5*60);
+	duration := duration + (60*piety);
+	duration := duration * 3;
+
+	var i, hpavg, stamavg, manaavg;
+	for (i:=1;i<=duration;i:=i+1)
+		if (player1.dead)
+			ApplyRawDamageEx(player2, CInt(GetMaxHp(player2)), DMG_PHYSICAL, who);
+			break;
+		elseif (player2.dead)
+			ApplyRawDamageEx(player1, CInt(GetMaxHp(player2)), DMG_PHYSICAL, who);
+			break;
+		endif
+
+		hpavg := CInt((GetHp(player1) + GetHp(player2)) / 2);
+		if ( (hpavg != GetHp(player1)) || (hpavg != GetHp(player2)) )
+			PlayObjectCenteredEffect(player1, 0x376a, 10, 30);
+			PlayObjectCenteredEffect(player2, 0x376a, 10, 30);
+		endif
+
+		SetHp(player1, hpavg);
+		SetHp(player2, hpavg);
+
+		stamavg := CInt((GetStamina(player1) + GetStamina(player2)) / 2);
+		if ( (stamavg != GetStamina(player1)) || (stamavg != GetStamina(player2)) )
+			PlayObjectCenteredEffect(player1, 0x376a, 10, 30);
+			PlayObjectCenteredEffect(player2, 0x376a, 10, 30);
+		endif
+
+		SetStamina(player1, stamavg+20);
+		SetStamina(player2, stamavg+20);
+
+		manaavg := CInt( (GetMana(player1) + GetMana(player2)) / 2);
+		if ( (manaavg != GetMana(player1)) || (manaavg != GetMana(player2)) )
+			PlayObjectCenteredEffect(player1, 0x376a, 10, 30);
+			PlayObjectCenteredEffect(player2, 0x376a, 10, 30);
+		endif
+
+		SetMana(player1, manaavg);
+		SetMana(player2, manaavg);
+
+		sleepms(500);
+	endfor
+
+	SendSysMessage(who, "The link is broken...");
+endprogram

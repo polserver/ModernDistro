@@ -1,0 +1,69 @@
+use uo;
+
+include ":gumps:yesNo";
+include ":cleric:cleric";
+
+const AMOUNT := 10;
+const AMOUNTSCROLLS := 100;
+const BLANKSCROLL := 0x0E34;
+var focci :=
+{
+	POWER_FOCUS,
+	SPIRIT_FOCUS,
+	ARCANE_FOCUS,
+	TIME_FOCUS,
+	EARTH_FOCUS,
+	LIFE_FOCUS
+};
+
+program makecanon(params)
+	var who := params[1];
+	var temp;
+	var itemlist := { };
+	if (!checkmana(who, 65))
+		SendSysMessage(who, "You are too tired to cast.");
+		FailCast(who);
+		return;
+	endif
+	foreach thing in focci
+		temp := HasItem(who, thing);
+		if (temp < AMOUNT)
+			SendSysMessage(who, "You do not have enough foci.");
+			return;
+		else
+			itemlist.append(temp);
+		endif
+	endforeach
+	temp := HasItem(who, BLANKSCROLL);
+	if (temp < AMOUNTSCROLLS)
+		SendSysMessage(who, "You do not have enough blank scrolls.");
+		return;
+		endif
+  var practice := YesNo(who,"Practice Tome?");
+
+	// Once were sure we have AMOUNT of each focci, destroy them.
+	foreach thing in focci
+		ConsumeSubstance(who.backpack, thing, AMOUNT);
+	endforeach
+		ConsumeSubstance(who.backpack, BLANKSCROLL, 100);
+	var newbook := CreateItemInBackpack(who, CLERIC_BOOK, 1);
+	SetObjProperty(newbook, "Devotion", GetObjProperty(who,"Devotion"));
+	if (practice)
+		SetObjProperty (newbook, "Owner", "Practice");
+		SetName(newbook, "Practice Tome");
+	endif
+endprogram
+
+function HasItem(who, objtype)
+	var total := 0;
+	foreach item in EnumerateItemsInContainer(who.backpack.serial)
+		if (item.objtype == objtype)
+			total := total + item.amount;
+		endif
+	endforeach
+	return total;
+endfunction
+
+function FailCast(who)
+	EraseObjProperty(who, "#medding");
+endfunction

@@ -1,0 +1,29 @@
+use uo;
+use util;
+
+include ":cleric:cleric";
+include ":timedScripts:timedScripts";
+include ":timedScripts:poisonUtil";
+include ":virtue:noto";
+
+program slowpoison(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	foreach mobile in ListMobilesNearLocation(who.x, who.y, who.z, piety+1, who.realm)
+		if (CheckLineOfSight(who, mobile))
+			TS_CurePoison(mobile, RandomDiceRoll("3d" + CStr(piety)), "P", RandomDiceRoll("8d" + CStr(piety)));
+			if(mobile != who)
+				VS_AdjustVirtue(who, "compassion", 1, 17);
+			endif
+			PlayObjectCenteredEffect(mobile, 0x376a, 10, 30);
+		endif
+	endforeach
+endprogram

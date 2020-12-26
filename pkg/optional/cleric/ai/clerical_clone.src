@@ -1,0 +1,47 @@
+use uo;
+use os;
+use npc;
+use vitals;
+
+var me := self();
+
+program clerical_clone()
+	//Give it time to set the cprop "master"
+	sleepms(200);
+
+	var master := GetProperty("master");
+	master := SystemFindObjectBySerial(master);
+
+	//Make the clone more convincing by making it
+	//have the same criminal flag as the person who
+	//made it.
+	//Follow it by facing, color name and equipment.
+
+	me.SetMaster(master);
+
+	me.facing := master.facing;
+	me.color := master.color;
+
+	SetName(me, master.name);
+
+	// foreach item in ListEquippedItems(master)
+		// var temp := CreateItemAtLocation(me.x, me.y, me.z, item.objtype, 1, me.realm);
+		// SetName(temp, item.desc);
+		// temp.color := item.color;
+		// EquipItem(me, temp);
+	// endforeach
+
+	var life_span := GetProperty("Duration");
+	sleep(life_span);
+
+	//Make it fun, change its color so everyone goes
+	//"A CLONE!"
+	me.color := me.truecolor;
+
+	foreach item in ListEquippedItems(me)
+		MoveObjectToLocation(item, 0, 0, 0, "britannia", MOVEOBJECT_FORCELOCATION);
+		DestroyItem(item);
+	endforeach
+
+	me.kill();
+endprogram

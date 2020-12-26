@@ -1,0 +1,24 @@
+use uo;
+
+include ":cleric:cleric";
+include ":attributes:attributes";
+
+program senseaura(params)
+	var who := params[1];
+
+	if (!checkmana(who, 25))
+		SendSysMessage(who, "You are too tired to cast.");
+		FailCast(who);
+		return;
+	endif
+	SkillCheck(who, CLERIC_SKILL, 40, 80);
+	foreach person in ListMobilesInLineOfSight(who, 15)
+		if (GetObjProperty(person, "Devotion"))
+			PrintTextAbovePrivate(person, GetObjProperty(person, "Devotion"), who);
+		endif
+	endforeach
+endprogram
+
+function FailCast(who)
+	EraseObjProperty(who, "#medding");
+endfunction

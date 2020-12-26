@@ -1,0 +1,187 @@
+use uo;
+use cfgfile;
+use os;
+
+include ":cleric:cleric";
+include ":damage:damage";
+
+var layout :=
+{
+	"page 0",
+	"gumppic 5 5 500",
+	"page 1"
+};
+var data :={};
+
+program canon(who, book)
+	var script;
+	if (!canopen(who,book))
+		return;
+	endif
+	var midden := sacraments();
+	if (!(GetObjProperty(book, "Owner") == "Practice"))
+		rites(book, midden);
+	endif
+
+	var input := SendDialogGump(who, layout, data);
+
+	Detach();
+	if (!input[0])
+		return;
+	elseif (input[0] < 1000)
+		script := start_script("sacramentstarter", {who, input[0]});
+	else
+		script := start_script("ritestarter", {who, input[0]-1000});
+	endif
+
+	if (!script)
+		SendSysMessage(who, "" + script.errortext);
+	endif
+endprogram
+
+function sacraments()
+	data.append("Sacraments");
+	layout.append("text 80 15 1168 " + (len(data)-1));
+	layout.append("gumppic 35 35 96");
+	var config := ReadConfigFile("sacraments");
+	var total := GetConfigMaxIntKey(config);
+	var i := 1;
+	var ypos := 40;
+	var pagenum := 1;
+	var leftright := "left";
+	for (i;i<=total;i:=i+1)
+		if (leftright == "left")
+			data.append(sacramentinfo(i).Name);
+			layout.append("text 60 " + ypos + " 2224 " + (len(data)-1));
+			layout.append("button 40 " + (ypos+5) + " 2103 2104 1 0 " + i);
+			ypos := ypos+20;
+		elseif (leftright == "right")
+			data.append(sacramentinfo(i).Name);
+			layout.append("text 245 " + ypos + " 2224 " + (len(data)-1));
+			layout.append("button 225 " + (ypos+5) + " 2103 2104 1 0 " + i);
+			ypos := ypos+20;
+		endif
+		if (i % 9 == 0 && total-i != 0)
+			if (leftright == "left")
+				leftright := "right";
+				data.append("Sacraments");
+				layout.append("text 265 15 1168 " + (len(data)-1));
+				layout.append("gumppic 220 35 96");
+				ypos := 40;
+			else
+				pagenum := pagenum+1;
+				layout.append("button 361 5 502 502 0 " + pagenum);
+				layout.append("gumppic 220 35 96");
+				layout.append("page " + pagenum);
+				layout.append("button 5 5 501 501 0 " + (pagenum-1));
+				leftright := "left";
+				data.append("Sacraments");
+				layout.append("text 80 15 1168 " + (len(data)-1));
+				layout.append("gumppic 35 35 96");
+				ypos := 40;
+			endif
+		endif
+	endfor
+	return {pagenum, leftright};
+endfunction
+
+function rites(book, midden)
+	var pagenum := midden[1];
+	var leftright := midden[2];
+	if (leftright == "right")
+		pagenum := pagenum+1;
+		layout.append("button 361 5 502 502 0 " + pagenum);
+		layout.append("gumppic 220 35 96");
+		layout.append("page " + pagenum);
+		layout.append("button 5 5 501 501 0 " + (pagenum-1));
+		leftright := "left";
+		data.append("Rites");
+		layout.append("text 100 15 1168 " + (len(data)-1));
+		layout.append("gumppic 35 35 96");
+	else
+		leftright := "right";
+		data.append("Rites");
+		layout.append("text 285 15 1168 " + (len(data)-1));
+		layout.append("gumppic 220 35 96");
+	endif
+	var flipcount := 1;
+	var ypos := 40;
+
+	var ritelist := sortrites(GetObjProperty(book, "Rites"));
+	foreach rite in ritelist
+		if (leftright == "left")
+			data.append(riteinfo(rite).Name);
+			layout.append("text 60 " + ypos + " 2224 " + (len(data)-1));
+			layout.append("button 40 " + (ypos+5) + " 2103 2104 1 0 " + (rite+1000));
+			ypos := ypos+20;
+		elseif (leftright == "right")
+			data.append(riteinfo(rite).Name);
+			layout.append("text 245 " + ypos + " 2224 " + (len(data)-1));
+			layout.append("button 225 " + (ypos+5) + " 2103 2104 1 0 " + (rite+1000));
+			ypos := ypos+20;
+		endif
+		if (flipcount % 9 == 0 && len(ritelist)-flipcount != 0)
+			if (leftright == "left")
+				leftright := "right";
+				data.append("Rites");
+				layout.append("text 285 15 1168 " + (len(data)-1));
+				layout.append("gumppic 220 35 96");
+				ypos := 40;
+			else
+				pagenum := pagenum+1;
+				layout.append("button 361 5 502 502 0 " + pagenum);
+				layout.append("gumppic 220 35 96");
+				layout.append("page " + pagenum);
+				layout.append("button 5 5 501 501 0 " + (pagenum-1));
+				leftright := "left";
+				data.append("Rites");
+				layout.append("text 100 15 1168 " + (len(data)-1));
+				layout.append("gumppic 35 35 96");
+				ypos := 40;
+			endif
+		endif
+		flipcount := flipcount+1;
+	endforeach
+endfunction
+
+function canopen(who, book)
+
+	if (!IsCleric(who) || GetObjProperty(who, "Devotion") != GetObjProperty(book, "Devotion"))
+		SendSysMessage(who, "This book is painful to read!");
+		PerformAction(who, 0x14);
+		ApplyRawDamageEX(who, 5);
+		return 0;
+	endif
+
+	if (GetObjProperty(book, "Owner") == "Practice")
+		SendSysMessage (who, "This is a practice tome.");
+		return 1;
+	elseif (!GetObjProperty(book, "Owner"))
+		SetObjProperty(book, "Owner", who.serial);
+		SetName(book, SendTextEntryGump( who, "From this point on, only you will be able to open this book.", cancel := TE_CANCEL_DISABLE, style := TE_STYLE_NORMAL, maximum := 30, line2 := "Book Name:" ));
+	elseif (who.serial != GetObjProperty(book, "Owner"))
+		SendSysMessage(who, "That is not your book.");
+		return 0;
+	endif
+
+	return 1;
+endfunction
+
+function sortrites(list)
+	var leveldict := dictionary;
+	foreach ritenum in list // Sort rites by level
+		var level := riteinfo(ritenum).Level;
+		if (!leveldict.exists(level))
+			leveldict[level] := {};
+		endif
+		leveldict[level].append(ritenum);
+	endforeach
+
+	list := {};
+	foreach level in (leveldict.keys())
+		foreach ritenum in (leveldict[level])
+			list.append(ritenum);
+		endforeach
+	endforeach
+	return list;
+endfunction

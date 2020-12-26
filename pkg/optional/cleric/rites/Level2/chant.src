@@ -1,0 +1,69 @@
+// Gives resistance boosts to all mobiles within
+// piety * 4 range of the priest. LOS is checked.
+//
+// The resistance mod is piety * 3 in all
+// resistances.
+
+use uo;
+use os;
+
+include ":cleric:cleric";
+
+program chant(params)
+	var who := params[1];
+	var info := params[2];
+	var timeout;
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	var mobilelist := {};
+	var arboost := CInt(piety*3);
+	var temp;
+	if (arboost < 1)
+		arboost := 1;
+	endif
+
+	while (CheckMana(who, CInt(10/piety)))
+		foreach person in ListMobilesNearLocation(who.x, who.y, who.z, piety*4, who.realm)
+			temp := GetObjProperty(person, "#chant");
+			if (!temp)
+				temp := 1;
+			else
+				temp := temp+1;
+			endif
+			if (temp <= 5 && GetObjProperty(person, "Devotion") == devotion && CheckLineOfSight(person, who))
+				mobilelist.append(person);
+				person.resist_cold_mod := person.resist_cold_mod + arboost;
+				person.resist_energy_mod := person.resist_energy_mod + arboost;
+				person.resist_fire_mod := person.resist_fire_mod + arboost;
+				person.resist_physical_mod := person.resist_physical_mod + arboost;
+				person.resist_poison_mod := person.resist_poison_mod + arboost;
+				PlayObjectCenteredEffect(person, 0x375a, 10, 10);
+				SetObjProperty(person, "#chant", temp);
+			endif
+		endforeach
+		sleep(2);
+	endwhile
+
+	ClericReleaseScript(info.pid);
+	timeout := piety * 60;
+	if (piety > 1)
+	   timeout := timeout * 0.75;
+	   sleep(timeout);
+        endif
+	foreach person in mobilelist
+		person.resist_cold_mod := person.resist_cold_mod - arboost;
+		person.resist_energy_mod := person.resist_energy_mod - arboost;
+		person.resist_fire_mod := person.resist_fire_mod - arboost;
+		person.resist_physical_mod := person.resist_physical_mod - arboost;
+		person.resist_poison_mod := person.resist_poison_mod - arboost;
+		PlayObjectCenteredEffect(who, 0x374a, 10, 10);
+		EraseObjProperty(person, "#chant");
+	endforeach
+
+	EraseObjProperty(who, "#medding");
+endprogram

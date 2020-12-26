@@ -1,0 +1,26 @@
+use uo;
+use os;
+use util;
+use vitals;
+
+include ":cleric:cleric";
+
+program SummonMount(params)
+	var who := params[1];
+	// var info := params[2];
+
+    if(GetEquipmentByLayer(who, 25))
+        SendSysMessage(who, "You cannot summon a cleric mount", color := 33);
+        SendSysMessage(who, "while you are on a mount.", color := 33);
+        return;
+    endif
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+	Run_Script(":cleric:ClericMounts/createClericMount", {who});
+
+endprogram
+

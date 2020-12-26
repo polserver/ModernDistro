@@ -1,0 +1,91 @@
+use uo;
+use os;
+use util;
+use vitals;
+
+include ":cleric:cleric";
+
+program conjureanimals(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	var i, npclist := {}, slave;
+	for (i:=0;i<piety;i:=i+1)
+		slave := CreateNpcFromTemplate("clericguard", (who.x + RandomInt(3)), (who.y + RandomInt(3)), who.z, 0, who.realm);
+		PlaySoundEffect( slave, 0x1FF );
+		PlayObjectCenteredEffectEx( slave, 0x3728, 1, 16, 0, 7 );
+		npclist.append(slave);
+		SetObjProperty(slave, "master", who.serial);
+		SetObjProperty(slave, "summoned", 1);
+		slave.setmaster(who);
+		slave.SaveOnExit := 0;
+		RestartScript(slave);
+	endfor
+
+	ClericReleaseScript(info.pid);
+	sleep(piety*60);
+
+	foreach slave in npclist
+		PlaySoundEffect( slave, 0x1FF );
+		PlayObjectCenteredEffectEx( slave, 0x3728, 1, 16, 0, 7 );
+		MoveObjectToLocation(slave, 6100, 1516, 0, "britannia", MOVEOBJECT_FORCELOCATION);
+		slave.Kill();
+	endforeach
+endprogram
+
+function picknpc(piety)
+	var critter := RandomInt(8);
+	if(piety <= 3)
+		case (critter)
+			0: return "chicken";
+			1: return "cat";
+			2: return "slime";
+			3: return "sheep";
+			4: return "pig";
+			5: return "dog";
+			6: return "grat";
+			7: return "mongbat";
+		endcase
+	elseif(piety <= 6)
+		case (critter)
+			0: return "eagle";
+			1: return "horse";
+			2: return "headless";
+			3: return "cow";
+			4: return "gorilla";
+			5: return "panther";
+			6: return "gremlin";
+			7: return "deer";
+		endcase
+	elseif(piety <= 9)
+		case (critter)
+			0: return "bull";
+			1: return "bear";
+			2: return "frostwolf";
+			3: return "gheart";
+			4: return "hildisvini";
+			5: return "blackbear";
+			6: return "alligator";
+			7: return "spider";
+		endcase
+	else
+		case (critter)
+			0: return "imp";
+			1: return "alligator";
+			2: return "spider";
+			3: return "harpy";
+			4: return "grizzly";
+			5: return "giant_serpent";
+			6: return "direwolf";
+			7: return "polar";
+		endcase
+	endif
+
+endfunction

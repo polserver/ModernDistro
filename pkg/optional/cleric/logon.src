@@ -1,0 +1,35 @@
+use uo;
+
+include ":cleric:faiths";
+include ":cleric:settings";
+
+program Logon(who)
+
+	var devotion := GetObjProperty(who, "Devotion");
+	// If the player is faithless then we set the CProp
+	// and don't need to process them.
+	if (!devotion)
+		SetObjProperty(who, "Devotion", "Faithless");
+		return 0;
+	elseif(devotion == "Faithless")
+		return 0;
+	endif
+	var piety_settings := Cleric_GetSettingsCfgElem( "Piety" );
+	// Award some piety each time a player has an accumulated
+	// 'online time' = reward_time.
+	var reward_time := CInt(piety_settings.RewardTime);
+	var piety_reward := CInt(piety_settings.PietyReward);
+	var piety := GetObjProperty(who, "Piety");
+	var piety_timer := GetObjProperty(who, "PietyRewardTimer");
+	var total_reward := 0;
+	if(CInt(piety_timer / reward_time) - piety)
+		total_reward := CInt(piety_timer / reward_time) - piety;
+		piety := piety + total_reward;
+		SendSysMessage(who, "Your piety has been increased by " + CStr(total_reward) + ".", 3, 88);
+		SendSysMessage(who, "Your piety is now " + CStr(piety) + ".", 3, 88);
+		SetObjProperty(who, "Piety", piety);
+		SetObjProperty(who, "PietyRewardTimer", piety_timer);
+	endif
+
+endprogram
+

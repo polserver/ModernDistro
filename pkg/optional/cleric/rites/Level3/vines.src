@@ -1,0 +1,72 @@
+// Apparently creates vines around the targeted person.
+use uo;
+use os;
+use cliloc;
+
+include ":cleric:cleric";
+
+program vines(params)
+	var who := params[1];
+	var info := params[2];
+
+	var piety := DevotionPiety(GetObjProperty(who, "Devotion"));
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	var targ :=ClericalTarget(who, info.npctemplate, "Select a target", TGTOPT_CHECK_LOS + TGTOPT_HARMFUL);
+
+	ClericReleaseScript(info.pid);
+
+	if (!targ.ip && !targ.npctemplate)
+		SendSysMessage(who, 1042023, color := 33); // Cancelled.
+		return;
+	endif
+
+	var vines := { };
+	var groundlevel := targ.z-10;
+
+	vines[1] := CreateItemAtLocation(targ.x, targ.y, groundlevel, 0xCEF, 1, targ.realm);
+	vines[2] := CreateItemAtLocation(targ.x, targ.y, groundlevel, 0xCEC, 1, targ.realm);
+	vines[3] := CreateItemAtLocation(targ.x+1, targ.y, groundlevel, 0xCEF, 1, targ.realm);
+	vines[4] := CreateItemAtLocation(targ.x, targ.y+1, groundlevel, 0xCEC, 1, targ.realm);
+
+	for(groundlevel;groundlevel < who.z; groundlevel:=groundlevel+1)
+		PlaySoundEffect( targ, 444 );
+		foreach vine in vines
+			vine.movable := 1;
+			MoveObjectToLocation( vine, vine.x, vine.y, groundlevel, vine.realm, MOVEOBJECT_FORCELOCATION );
+			vine.movable := 0;
+
+			targ.paralyzed := 1;
+		endforeach;
+		sleepms(600);
+	endfor
+
+	var delay := piety * 60;
+
+	for (delay; delay > 0; delay:=delay-1)
+		targ.paralyzed := 1;
+		sleepms(500);
+	endfor
+
+	for(groundlevel;groundlevel > (who.z-15); groundlevel:=groundlevel-1)
+		PlaySoundEffect( targ, 444 );
+		foreach vine in vines
+			vine.color := 1110;
+			vine.movable := 1;
+			MoveObjectToLocation( vine, vine.x, vine.y, groundlevel, vine.realm, MOVEOBJECT_FORCELOCATION );
+			vine.movable := 0;
+
+			targ.paralyzed := 1;
+		endforeach;
+		sleepms(600);
+	endfor
+
+	foreach vine in vines
+		DestroyItem(vine);
+	endforeach
+
+	targ.paralyzed := 0;
+endprogram

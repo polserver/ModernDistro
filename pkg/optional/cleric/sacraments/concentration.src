@@ -1,0 +1,36 @@
+use uo;
+use cliloc;
+
+include ":cleric:cleric";
+
+program concentration(params)
+	var who := params[1];
+
+	var maxchant := 0;
+	SendSysMessage(who, "Select who to concentrate on.");
+
+	var targ := Target(who);
+	if (!targ.ip)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return;
+	endif
+	var x := who.x, y := who.y;
+
+	SetObjProperty(who, "#concentrating", targ.serial);
+	while (checkmana(who, 10) && maxchant < 6 && !moved(who, x, y))
+		PerformAction(who, CAST_ANIM);
+		PlaySoundEffect(who, CHANT_SOUND);
+		sleep(4);
+		maxchant := maxchant+1;
+	endwhile
+	EraseObjProperty(who,"#concentrating");
+endprogram
+
+function moved(who, x, y)
+	if (who.x != x || who.y != y)
+		SendSysMessageCL(who, 501850, color := 33 ); // You cannot focus your concentration.
+		return 1;
+	else
+		return 0;
+	endif
+endfunction

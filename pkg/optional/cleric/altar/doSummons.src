@@ -1,0 +1,16 @@
+use uo;
+
+include ":gumps:gumps";
+
+program DoSummons(params)
+
+	var high_priest := params[1];
+	var summoned := params[2];
+	var to_be_summoned := SystemFindObjectBySerial(summoned);
+	if(YesNo(to_be_summoned, "Your high priest is summoning you.", "Allow the summons.", "I cannot be summoned.", 30))
+		var result := MoveObjectToLocation(to_be_summoned, high_priest.x, high_priest.y, high_priest.z, high_priest.realm, MOVEOBJECT_FORCELOCATION);
+		Print(result.errortext);
+	endif
+
+endprogram
+

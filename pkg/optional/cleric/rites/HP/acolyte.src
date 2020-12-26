@@ -1,0 +1,58 @@
+use uo;
+use cliloc;
+
+include ":cleric:adjustSkills";
+include ":cleric:cleric";
+include ":gumps:yesNo";
+
+program setacolyte(params)
+	var who := params[1];
+	var info := params[2];
+
+	var targ := target(who);
+
+	if (!targ.ip)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return 0;
+
+	elseif (GetObjProperty(who, "Devotion") != GetObjProperty(targ, "Devotion"))
+		SendSysMessage(who, targ.name + " is not of your faith.", color := 33);
+		SendSysMessage(who, "You must indoctrinate this person first.", color := 33);
+		return 0;
+
+	elseif (IsCleric(targ))
+		SendSysMessage(who, targ.name + " is already a cleric.", color := 33);
+		return;
+	elseif (!HPBoost(who) && !who.cmdlevel)
+		SendSysMessage(who, "You do not wield the symbol of your faith.", color := 33);
+		return 0;
+	endif
+
+	makecleric(who, targ);
+endprogram
+
+function makecleric(who, targ)
+	var devotion := GetObjProperty(who, "Devotion");
+	var response := YesNo(targ, "Become a cleric of " + devotion + "?", "Yes, I shall become annointed!", "No, I do not wish this.");
+
+
+	if (response)
+		SetObjProperty(targ, "Cleric", GetObjProperty(who, "Cleric"));
+		SetObjProperty(targ, "Piety", 1);
+		SendSysMessage(who, targ.name + " is now a cleric of " + devotion);
+		SendSysMessage(targ, "You are now a cleric of " + devotion);
+		// Add this new cleric to the devotion's cleric list.
+		var faith := Faiths_FindFaith(devotion);
+		var cleric_list := faith.getprop("ClericList");
+		if(!cleric_list)
+			cleric_list := {};
+		endif
+		cleric_list.append(targ.serial);
+		faith.setprop("ClericList", cleric_list);
+		SetSkills (targ);
+	else
+		SendSysMessage(who, targ.name + " does not wish to be a cleric of " + devotion);
+		SendSysMessage(targ, "You have declined being a cleric of " + devotion);
+	endif
+endfunction
+

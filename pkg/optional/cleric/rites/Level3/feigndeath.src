@@ -1,0 +1,58 @@
+// Not sure what this does yet.
+use uo;
+use os;
+use vitals;
+
+include ":cleric:cleric";
+
+program FeignDeath(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	var slave, hair;
+	var hair2;
+	var temp;
+	Set_Critical(1);
+	foreach person in ListMobilesNearLocation(who.x, who.y, who.z, piety+2, who.realm)
+		if (GetObjProperty(person, "Devotion") == devotion && CheckLineOfSight(person,who))
+			person.frozen := 1;
+			person.hidden := 1;
+			slave := CreateNpcFromTemplate("clone", person.x, person.y, person.z, 0, person.realm);
+			SetObjProperty(slave, "Duration", piety * 30);
+			slave.color := person.color;
+			slave.truecolor := person.color;
+			slave.name := person.name;
+			slave.graphic := person.graphic;
+			slave.facing := person.facing;
+			SetObjProperty(slave, "Devotion", GetObjProperty(person, "Devotion"));
+			foreach item in ListEquippedItems(slave)
+				DestroyItem(item);
+			endforeach
+			foreach item in ListEquippedItems(person)
+				temp := CreateItemInContainer(person.backpack.serial, item.objtype, 1);
+				SetName(temp, item.desc);
+				temp.color := item.color;
+				temp.graphic := item.graphic;
+				if (!EquipItem(slave, temp))
+					DestroyItem(temp);
+				endif
+				temp.movable := 0;
+			endforeach
+			PlayObjectCenteredEffect(person, 0x36bd, 10, 10);
+			EraseObjProperty(slave, "guardkill");
+			slave.Kill();
+			// If this script needs the SleepMS() then delete the
+			// Set_Critical() function calls and uncomment the SleepMS line below.
+			// SleepMS(900);
+			person.frozen := 0;
+		endif
+	endforeach
+	Set_Critical(0);
+endprogram

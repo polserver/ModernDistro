@@ -1,0 +1,58 @@
+use uo;
+use os;
+use util;
+
+include ":cleric:cleric";
+include ":damage:damage";
+include "include/std";
+
+program earthquake(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := cint(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	ClericReleaseScript(info.pid);
+
+	var i;
+	for (i:=0;i<=piety+3;i:=i+1)
+		PlaySoundEffect(who, 544);
+		foreach mobile in ListMobilesNearLocationEX(who.x, who.y, who.z, piety*2, LISTEX_FLAG_NORMAL + LISTEX_FLAG_HIDDEN, who.realm)
+			if (mobile != who)
+				PlaySoundEffect(mobile, 0x20E);
+				PerformAction(mobile, 0x20);
+				mobile.facing := RandomDiceRoll("1d8");
+				PlayObjectCenteredEffect(mobile, 0x3728, 7, 7);
+				var hand1 := GetEquipmentByLayer(who, 1);
+				var hand2 := GetEquipmentByLayer(who, 2);
+				if (hand1 && mobile.ip)
+					MoveObjectToLocation(hand1, who.x, who.y, who.z, who.realm, MOVEOBJECT_NORMAL);
+					SendSysMessage(who, "You drop " + hand1.desc);
+				endif
+				if (hand2 && mobile.ip)
+					MoveObjectToLocation(hand2, mobile.x, mobile.y, mobile.z, mobile.realm, MOVEOBJECT_NORMAL);
+					SendSysMessage(mobile, "You drop " + hand2.desc);
+				endif
+				// Dismount the player.
+				var mount := GetEquipmentByLayer(who, 25);
+				if(mount)
+					var me := SystemFindObjectBySerial(GetObjProperty(mount, "serial"));
+					me.facing := who.facing;
+					MoveObjectToLocation(me, who.x, who.y, who.z, who.realm, MOVEOBJECT_FORCELOCATION);
+					EraseObjProperty(me, "mounted");
+					EraseObjProperty(me, "mounted_on");
+					MoveObjectToLocation(mount, 5228, 1182, 0, "britannia", MOVEOBJECT_FORCELOCATION);
+					DestroyItem(mount);
+				endif
+				ApplyRawDamageEx(mobile, piety+3, DMG_PHYSICAL, who);
+			endif
+		endforeach
+		Sleepms(900);
+		PlaySoundEffect(who,0x223);
+	endfor
+endprogram

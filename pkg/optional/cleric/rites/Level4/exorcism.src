@@ -1,0 +1,139 @@
+use uo;
+use os;
+use cliloc;
+use cfgfile;
+
+include ":cleric:cleric";
+include ":attributes:attributes";
+
+program dispelmagic(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	var targ := ClericalTarget(who, info.npctarget);
+
+	if (!targ.ip && !targ.npctemplate)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return;
+	elseif (Distance(who, targ) > piety)
+		SendSysMessageCL(who, 500643, color := 33); // Target is too far away.
+		return;
+	endif
+
+	foreach item in ListEquippedItems(targ)
+		checkitem(targ, item);
+	endforeach
+
+	// foreach item in EnumerateItemsInContainer(targ.backpack.serial)
+		// checkitem(targ, item);
+	// endforeach
+// This next loop will need to be rewritten for curses
+// as the Distro does not currently support them.
+/*	foreach curse in ListPoisonsByType(targ, "C")
+		curespecific(targ, curse, -1);
+	endforeach
+*/
+	PlayObjectCenteredEffect(targ, 0x376a, 10, 30);
+endprogram
+
+function checkitem(who, item)
+	var show := 0;
+	if (CDbl(item.quality) > 1.2 && !GetObjProperty(item, "exceptional"))
+		item.quality := 1.2;
+		show := 1;
+	endif
+	if (hitscripts(item))
+		show := 1;
+	endif
+	if (GetObjProperty(item, "charges"))
+		SetObjProperty(item, "charges", 0);
+		show := 1;
+	endif
+	if (item.hp > item.maxhp)
+		item.hp := item.maxhp;
+		show := 1;
+	endif
+	if (item.maxhp_mod)
+		item.maxhp_mod := 0;
+		show := 1;
+	endif
+	// Remove resist mods.
+	if(item.resist_cold_mod)
+		item.resist_cold_mod := 0;
+		show := 1;
+	endif
+	if(item.resist_energy_mod)
+		item.resist_energy_mod := 0;
+		show := 1;
+	endif
+	if(item.resist_fire_mod)
+		item.resist_fire_mod := 0;
+		show := 1;
+	endif
+	if(item.resist_physical_mod)
+		item.resist_physical_mod := 0;
+		show := 1;
+	endif
+	if(item.resist_poison_mod)
+		item.resist_poison_mod := 0;
+		show := 1;
+	endif
+	// Remove damage mods.
+	if (item.damage_cold_mod)
+		item.damage_cold_mod := 0;
+		show := 1;
+	endif
+	if (item.damage_energy_mod)
+		item.damage_energy_mod := 0;
+		show := 1;
+	endif
+	if (item.damage_fire_mod)
+		item.damage_fire_mod := 0;
+		show := 1;
+	endif
+	if (item.damage_physical_mod)
+		item.damage_physical_mod := 0;
+		show := 1;
+	endif
+	if (item.damage_poison_mod)
+		item.damage_poison_mod := 0;
+		show := 1;
+	endif
+	if (show)
+		SendSysMessage(who, "The magical properties of " + item.desc + " fade.");
+		PlayObjectCenteredEffect(who, 0x374a, 20, 20);
+	endif
+
+	if (GetObjProperty(item, "cursed"))
+		SendSysMessage(who, item.desc + " is destroyed in the process of lifting the curse.");
+		DestroyItem(item);
+	endif
+endfunction
+
+function hitscripts(item)
+	var show := 0;
+	if (!GetObjProperty(item, "OnHit"))
+		return 0;
+	endif
+	var hitscript := {};
+	foreach effect in GetObjProperty(item, "OnHit");
+		if (effect["silver"] || effect["poison"])
+			hitscript.append(effect);
+		else
+			show := 1;
+		endif
+	endforeach
+	SetObjProperty(item, "OnHit", hitscript);
+	if (show)
+		return 1;
+	else
+		return 0;
+	endif
+endfunction

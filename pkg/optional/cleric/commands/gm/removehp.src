@@ -1,0 +1,60 @@
+use uo;
+use datafile;
+
+include ":cleric:adjustSkills";
+include ":cleric:cleric";
+include ":cleric:faiths";
+include ":gumps:requestGump";
+include ":gumps:yesNo";
+
+var faiths_datafile := Faiths_OpenDatafile();
+
+program make_high_priest(who)
+
+	SendSysMessage(who, "Target the player or <ESC> if player is offline:", color := 88);
+	var victim := Target(who);
+	// In the event the HP is offline.
+	if(!victim)
+		var devotion := RequestGump(who, "Enter the devotion:", "", "", CANCEL_BTN_ON);
+		if(devotion == error)
+			SendSysMessage(who, "Cancelled", color := 33);
+			return 0;
+		endif
+		var faith := Faiths_FindFaith( devotion );
+		if(faith.errortext)
+			SendSysMessage(who, "Could not find the devotion " + devotion + " in the faiths datafile.", color := 33);
+			SendSysMessage(who, "Check the spelling. If this problem persists contact", color := 33);
+			SendSysMessage(who, "a staff member and report the following error.", color := 33);
+			SendSysMessage(who, devotion.errortext, color := 33);
+			return 0;
+		endif
+		var cur_hp := faith.getprop("HighPriest");
+		victim := SystemFindObjectBySerial(cur_hp, SYSFIND_SEARCH_OFFLINE_MOBILES);
+	endif
+	var devotion := GetObjProperty(victim, "Devotion");
+	if(!devotion || devotion == "Faithless")
+		SendSysMessage(who, "This person does not appear to be in a religion.", color := 33);
+		return 0;
+	endif
+	var faith := Faiths_FindFaith( devotion );
+	if(faith.errortext)
+		SendSysMessage(who, "There was a problem finding the devotion " + devotion + " in the faiths datafile.", color := 33);
+		SendSysMessage(who, "Contact a staff member and report the following error.", color := 33);
+		SendSysMessage(who, devotion.errortext, color := 33);
+		return 0;
+	endif
+	var cur_hp := faith.getprop("HighPriest");
+	if(victim.serial == cur_hp)
+		PlaySoundEffect(victim, 519);
+		SetObjProperty(victim, "Devotion", "Faithless");
+		EraseObjProperty ( victim, "Cleric");
+		EraseObjProperty (victim, "Piety");
+		cur_hp := faith.eraseprop("HighPriest");
+		// Restore previous skills
+		ResetSkills(victim);
+	else
+		SendSysMessage(who, "This person is not the high priest of the " + devotion + " faith.", color := 33);
+	endif
+
+endprogram
+

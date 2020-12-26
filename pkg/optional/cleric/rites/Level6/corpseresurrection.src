@@ -1,0 +1,42 @@
+use uo;
+
+include ":cleric:cleric";
+
+program ressurection(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	var targ := ClericalTarget(who, info.npctemplate, "Target the corpse to resurrect.");
+
+	if (targ.objtype == 0x2006) // Clicked a corpse
+		var player := SystemFindObjectBySerial(GetObjProperty(targ, "serial"));
+		if (player.dead && Distance(targ, player) < 20)
+			MoveObjectToLocation(player, targ.x, targ.y, targ.z, targ.realm);
+			Resurrect(player);
+			if (lower(GetObjProperty(targ, "racename")) == "orc")
+				targ.graphic := 0x29;
+			endif
+			PlayObjectCenteredEffect(player, 0x373a, 10, 10);
+			PlaySoundEffect(player, 0x215);
+			equipt(player, targ);
+		else
+			SendSysMessage(who, "Alas, this corpse is too far gone.");
+		endif
+	endif
+endprogram
+
+function equipt(player, corpse)
+	foreach item in EnumerateItemsInContainer(corpse.serial)
+		if (item.container == corpse)
+			MoveItemToContainer(item, player.backpack.serial);
+		endif
+	endforeach
+	DestroyItem(corpse);
+endfunction

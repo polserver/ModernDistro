@@ -1,0 +1,90 @@
+use uo;
+use util;
+
+include "include/client";
+include ":attributes:attributes";
+include ":cleric:cleric";
+
+
+program argentinesigils(params)
+
+	var who := params[1];
+	SendSysMessage(who, "Select the object to meld into a sigil:");
+	var targ := Target(who);
+	if (!Accessible(who, targ) )
+		SendSysMessage(who, "You cannot reach that.");
+		return 0;
+	endif
+
+	if ( !ReserveItem(targ) )
+		SendSysMessage(who, "That item is in use.");
+		return 0;
+	endif
+
+	// Case statement is here for future expansion.
+	case (targ.objtype)
+		0x262F1:
+			CraftMoonSigil(who, targ);
+		default:
+			SendSysMessage(who, "Invalid target.");
+			return 0;
+	endcase
+
+endprogram
+
+
+function CraftMoonSigil(who, stone)
+
+	var piety := CInt( GetObjProperty(who, "Piety") );
+	var devotion := GetObjProperty(who, "Devotion");
+	var gate_loc_x;
+	var dest := struct{"xcoord", "ycoord", "zcoord", "facet"};
+	// Looking for a moongate.
+	foreach item in ListItemsNearLocationOfType(who.x, who.y, who.z, 4, 0x262F0)
+		// We need to preserve the x location of the moongate for
+		// proper naming of the empyrean sigil later.
+		gate_loc_x := item.x;
+		// We don't want the cleric materializing on top of a moongate.
+		// So set destination x+1.
+
+		dest.xcoord := item.x + 1;
+		dest.ycoord := item.y;
+		dest.zcoord := item.z;
+		dest.facet := item.realm;
+	endforeach
+
+	if ( !SubtractAmount(stone, 1) )
+		SendSysMessage(who, "Nothing happens.");
+		return 0;
+	endif
+
+	PlaySoundEffect(who, 0x216);
+	PlayObjectCenteredEffect(who, 0x376a, 10, 10);
+
+	var sigil := CreateItemInBackpack(who, "argentinesigil", 1);
+	if(!sigil)
+		SysLog("Could not create Argentine Sigil.");
+	endif
+
+	SetObjProperty(sigil, "Type", "Travel");
+	SetObjProperty(sigil, "Destination", dest);
+
+	var signame := "Empty";
+	case (gate_loc_x)
+		4467:	signame := "Honest";
+		1336:	signame := "Loving";
+		1499:	signame := "Blood-Handed";
+		771:	signame := "Just";
+		2701:	signame := "Tearful";
+		1828:	signame := "Glorious";
+		643:	signame := "Tranquil";
+		3564:	signame := "Humble";
+	endcase
+
+	SetName(sigil, "a Sigil of the " + signame + " Moon");
+	SetObjProperty(sigil, "Devotion", devotion);
+	DestroyItem(stone);
+	return 1;
+
+endfunction
+

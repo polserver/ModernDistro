@@ -1,0 +1,52 @@
+// Apparently animates an NPC that has died by creating a random undead NPC
+use uo;
+use os;
+use util;
+
+include ":cleric:cleric";
+
+program animateundead(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+//	var config := ReadConfigFile("::corpses");
+	var slave;
+
+	ClericReleaseScript(info.pid);
+
+	foreach corpse in ListItemsNearLocationOfType(who.x, who.y, who.z, piety+1, 0x2006, who.realm)
+//		if (config[corpse.corpseType].NoAminate);
+//		elseif (!GetObjProperty(corpse,"risen") && CheckLineOfSight(corpse, who))
+		if (!GetObjProperty(corpse,"risen") && CheckLineOfSight(corpse, who))
+			SetObjProperty(corpse, "risen", 1);
+			PrintTextAbove(corpse, "*twitches*");
+			sleepms(800);
+			slave := CreateNpcFromTemplate(randtype(), corpse.x, corpse.y, corpse.z, 0, corpse.realm);
+			PrintTextAbove(slave, slave.name + " rises from " + corpse.desc);
+			SetObjProperty(slave, "master", who.serial);
+			SetObjProperty(slave, "summoned", 1);
+			slave.SetMaster(who);
+			slave.script := "tamed";
+			RestartScript(slave);
+			sleepms(1200);
+		endif
+	endforeach
+
+endprogram
+
+function randtype()
+	var dice := RandomInt(3);
+	case(dice)
+		0: return "ghoul";
+		1: return "skeleton";
+		2: return "zombie";
+		3: return "shade";
+	endcase
+endfunction

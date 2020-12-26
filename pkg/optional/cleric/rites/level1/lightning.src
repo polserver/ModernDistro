@@ -1,0 +1,36 @@
+use uo;
+use util;
+use cliloc;
+
+include ":cleric:cleric";
+include ":damage:damage";
+
+const SOUND_EFFECT_THUNDER := 0x002A;
+
+program lightning(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost > 5)
+		pietyboost := 5;
+	endif
+
+	var targ := ClericalTarget(who, info.npctarget, "Select a target", TGTOPT_CHECK_LOS + TGTOPT_HARMFUL);
+
+	if (!targ.ip && !targ.npctemplate)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return;
+	elseif (!distancecheck(who, targ, piety+3))
+		SendSysMessageCL(who, 500643, color := 33); // Target is too far away.
+		return;
+	endif
+
+	PlaySoundEffect(who, SOUND_EFFECT_THUNDER);
+	PlayLightningBoltEffect(targ);
+	var thepain := RandomDiceRoll("1d10")+10; // 10-20 damage
+	ApplyDamageEX(targ, thepain, DMG_ENERGY, 0);
+
+endprogram
