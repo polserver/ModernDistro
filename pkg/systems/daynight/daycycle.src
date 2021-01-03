@@ -15,7 +15,7 @@ use cfgfile;
 	var duskmsgs := { };
 	var season := "Spring";
 	var d, n, t, time, i;
-	
+
 	if (!sharddate)
 		sharddate := 91;
 	endif
@@ -36,9 +36,10 @@ program daycycle()
 
 // Midnight
 		SetGlobalProperty("NewDay", ReadGameClock() );
-//		Old nights were VERY dark. That's the reason the following line is commented.
-//		SetRegionLightLevel("Background", 30);
-		SetRegionLightLevel("Background", 25);
+//		If you want less dark nights, comment out the "Dark nights" 'SetRegionLightLevel'
+//		uncomment the "Not so dark nights" 'SetRegionLightLevel'.
+		SetRegionLightLevel("Background", 30); // Dark nights.
+//		SetRegionLightLevel("Background", 25); // Not so dark nights.
 		Broadcast("It is midnight.");
 		time := CInt(n / 2);
 		sleep(time);
@@ -47,9 +48,10 @@ program daycycle()
 		SetGlobalProperty("DayPhase", "Dawn");
 		Broadcast( CStr(dawnmsgs[ (RandomInt(len(dawnmsgs)) + 1) ]) );
 		time := CInt(t / 28);
-//		Old nights were VERY dark. That's the reason the following line is commented.
-//		for (i := 29; i >= 3; i := i - 1)
-		for (i := 24; i >= 3; i := i - 1)
+//		If you want less dark nights, comment out the "Dark nights" 'for'
+//		uncomment the "Not so dark nights" 'for'.
+		for (i := 29; i >= 3; i := i - 1)
+//		for (i := 24; i >= 3; i := i - 1) // temp change
 			SetRegionLightLevel("Background", i);
 			sleep(time);
 		endfor
@@ -62,7 +64,7 @@ program daycycle()
 			EraseGlobalProperty("StopDayNightCycle");
 			print("Stopping Day/Night Cycle...");
 			return 0;
-		endif	
+		endif
 
 		SetGlobalProperty("DayPhase", "Day");
 		SetRegionLightLevel("Background", 1);
@@ -75,7 +77,7 @@ program daycycle()
 			EraseGlobalProperty("StopDayNightCycle");
 			print("Stopping Day/Night Cycle...");
 			return 0;
-		endif	
+		endif
 
 		Broadcast("It is mid-day.");
 		time := d - CInt(d / 2);
@@ -85,15 +87,17 @@ program daycycle()
 		SetGlobalProperty("DayPhase", "Dusk");
 		Broadcast( CStr(duskmsgs[ (RandomInt(len(duskmsgs)) + 1) ]) );
 		time := CInt(t / 28);
-//		Old nights were VERY dark. That's the reason the following line is commented.
-//		for (i := 2; i <= 28; i := i + 1)
-		for (i := 2; i <= 24; i := i + 1)
+//		If you want less dark nights, comment out the "Dark nights" 'for'
+//		uncomment the "Not so dark nights" 'for'.
+		for (i := 2; i <= 28; i := i + 1) // Dark nights
+//		for (i := 2; i <= 24; i := i + 1) // Not so dark nights
 			SetRegionLightLevel("Background", CInt(i));
 			sleep(time);
 		endfor
-//		Old nights were VERY dark. That's the reason the following line is commented.
-		SetRegionLightLevel("Background", 29);
-		SetRegionLightLevel("Background", 25);
+//		If you want less dark nights, comment out the "Dark nights" 'SetRegionLightLevel'
+//		uncomment the "Not so dark nights" 'SetRegionLightLevel'.
+		SetRegionLightLevel("Background", 29); // Dark nights.
+//		SetRegionLightLevel("Background", 25); // Not so dark nights.
 		time := t - (CInt(t / 28) * 27);
 		sleep(time);
 
@@ -105,9 +109,10 @@ program daycycle()
 
 // Night
 		SetGlobalProperty("DayPhase", "Night");
-//		Old nights were VERY dark. That's the reason the following line is commented.
-//		SetRegionLightLevel("Background", 30);
-		SetRegionLightLevel("Background", 25);
+//		If you want less dark nights, comment out the "Dark nights" 'SetRegionLightLevel'
+//		uncomment the "Not so dark nights" 'SetRegionLightLevel'.
+		SetRegionLightLevel("Background", 30); // Dark nights.
+//		SetRegionLightLevel("Background", 25); // Not so dark nights.
 		Broadcast("It is evening.");
 		time := n - CInt(n / 2);
 		sleep(time);
@@ -129,10 +134,10 @@ program daycycle()
 			EraseGlobalProperty("StopDayNightCycle");
 			print("Stopping Day/Night Cycle...");
 			return 0;
-		endif	
+		endif
 
 	endwhile
-	
+
 endprogram
 
 
