@@ -1,0 +1,29 @@
+use uo;
+use os;
+use util;
+
+include ":cleric:cleric";
+
+program greaterheal(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	var numpeople := len(ListMobilesNearLocation(who.x, who.y, who.z, piety+5, who.realm));
+	var healamount := RandomDiceRoll(CStr(piety*5)+"d18");
+	healamount := CInt(healamount/numpeople);
+
+	foreach mobile in ListMobilesNearLocation(who.x, who.y, who.z, piety+5, who.realm)
+		if (!mobile.npctemplate && CheckLineOfSight(who, mobile))
+			HealDamage(mobile, healamount);
+			PlayObjectCenteredEffect(mobile, 0x376a, 10, 30);
+		endif
+	endforeach
+
+endprogram

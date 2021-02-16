@@ -1,0 +1,7 @@
+use uo;
+
+program glyphwalkon(who, rune, lastx, lasty, lastz)
+
+	MoveObjectToLocation(who, lastx, lasty, lastz, who.realm);
+
+endprogram

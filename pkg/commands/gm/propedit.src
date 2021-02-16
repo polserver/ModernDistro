@@ -263,7 +263,7 @@ program CPropEditor(parms1, parms2)
 	Else
 		// called as a textcmd
 		who := parms1;
-	
+
 		var options := GetOptions(Lower(parms2));
 		If (options["multi"])
 			If (!who.multi)
@@ -272,17 +272,17 @@ program CPropEditor(parms1, parms2)
 			Else
 				thing := who.multi;
 			EndIf
-	
+
 		ElseIf (options["account"])
 			SendSysMessage(who, "Edit whose account CProps?");
-			thing := Target(who);
+			thing := Target(who,  TGTOPT_NOCHECK_LOS + TGTOPT_NEUTRAL);
 			If (thing.acct)
 				thing := thing.acct;
 			ElseIf (thing)
 				SendSysMessage(who, "That doesn't have an account!");
 				Return;
 			EndIf
-	
+
 		ElseIf (options["serial"])
 			thing := SystemFindObjectBySerial(
 			CInt(options["serial"]), SYSFIND_SEARCH_OFFLINE_MOBILES);
@@ -293,7 +293,7 @@ program CPropEditor(parms1, parms2)
 
 		Else
 			SendSysMessage(who, "Edit CProps on what?");
-			thing := TargetCoordinates(who);
+			thing := Target(who, TGTOPT_NOCHECK_LOS + TGTOPT_NEUTRAL);
 		EndIf
 	EndIf
 
@@ -380,15 +380,15 @@ Function DoCPropGump(who, thing)
 		// build page i
 		this_layout.append("page " + i);
 		this_layout.append("button 200 292 239 240 1 0 " + APPLY_BUTTON);
-	
+
 		If (i > 1)
 			this_layout.append("button "+(width-60)+" 65 250 251 0 "+(i-1));
 		EndIf
-	
+
 		If (i < (add_page - 1))
 			this_layout.append("button "+(width-60)+" 290 252 253 0 "+(i+1));
 		EndIf
-	
+
 		If (add_page > 2)
 			this_layout.append("text "+(width-105)+" 291 0 "+len(this_data));
 			this_data.append(i);
@@ -397,13 +397,13 @@ Function DoCPropGump(who, thing)
 		this_layout.append("text 360 60 34 2");
 		this_layout.append("button 40 63 2224 2224 0 " + del_page);
 		this_layout.append("text 60 60 34 3");
-	
+
 		var start_j := ((i - 1) * TEXT_LINES) + 1;
 		var end_j := i * TEXT_LINES;
 		If (end_j > propname_len)
 			end_j := propname_len;
 		EndIf
-	
+
 		// add details For propnames in the range start_j to end_j
 		For (j := start_j; j<= end_j; j += 1)
 			SleepMS(2);
@@ -411,7 +411,7 @@ Function DoCPropGump(who, thing)
 				this_prop := GetCProp(thing, propnames[j]);
 				this_type := TypeOf(this_prop);
 				this_prop := Cstr(this_prop);
-	
+
 				var can_edit := 1;
 				If (len(this_prop) > MAX_CHARS)
 					this_prop := this_prop[1, MAX_CHARS];
@@ -420,10 +420,10 @@ Function DoCPropGump(who, thing)
 				y := (j - start_j) * 20 + 85;
 				this_layout.append("croppedtext 50 "+y+" 130 20 0 "+len(this_data));
 				this_data.append(propnames[j]);
-	
+
 				this_layout.append("croppedtext 200 "+y+" 60 20 0 "+len(this_data));
 				this_data.append(this_type);
-	
+
 				If (this_prop.errortext)
 					this_layout.append("croppedtext 280 "+y+" "+(width-310)+" 20 34 "+len(this_data));
 					this_data.append(this_prop.errortext);
@@ -487,7 +487,7 @@ Function DoCPropGump(who, thing)
 			SendSysMessage(who, "There is already a CProp with that name!");
 			Return 1;
 		EndIf
-	
+
 		var add_prop_val;
 		If (retval[ADD_INTEGER_RADIO])
 			add_prop_val := 0;
@@ -536,7 +536,7 @@ Function DoCPropGump(who, thing)
 			Return 1;
 			EndIf
 		EndFor
-	
+
 		// Check For dictionary editing
 		For (i := 1; i <= propname_len; i += 1)
 			If (retval[DICT_EDIT_OFFSET+i])
@@ -547,7 +547,7 @@ Function DoCPropGump(who, thing)
 				Return 1;
 			EndIf
 		EndFor
-	
+
 		// Check For dictionary editing
 		For (i := 1; i <= propname_len; i += 1)
 			If (retval[STRUCT_EDIT_OFFSET+i])
@@ -634,7 +634,7 @@ Function DoArrayGump(who, thing, array_propname)
 		this_layout.append("text 360 60 34 2");
 		this_layout.append("button 40 63 2224 2224 0 "+resize_page);
 		this_layout.append("text 60 60 34 3");
-	
+
 		var start_j := ((i - 1) * TEXT_LINES) + 1;
 		var end_j := i * TEXT_LINES;
 		If (end_j > array_len)
@@ -647,7 +647,7 @@ Function DoArrayGump(who, thing, array_propname)
 			this_prop := array_val[j];
 			this_type := TypeOf(this_prop);
 			this_prop := Cstr(this_prop);
-	
+
 			var can_edit := 1;
 			If (len(this_prop) > MAX_CHARS)
 				this_prop := this_prop[1, MAX_CHARS];
@@ -656,10 +656,10 @@ Function DoArrayGump(who, thing, array_propname)
 			y := (j - start_j) * 20 + 85;
 			this_layout.append("croppedtext 50 "+y+" 130 20 0 "+len(this_data));
 			this_data.append(j);
-	
+
 			this_layout.append("croppedtext 100 "+y+" 60 20 0 "+len(this_data));
 			this_data.append(this_type);
-	
+
 			If (this_prop.errortext)
 				this_layout.append("croppedtext 180 "+y+" "+(width-310)+" 20 34 "+len(this_data));
 				this_data.append(this_prop.errortext);
@@ -701,14 +701,14 @@ Function DoArrayGump(who, thing, array_propname)
 	If (retval[TOGGLE_HEX_BUTTON])
 		show_in_hex := !show_in_hex;
 		Return 1;
-	
+
 	ElseIf (retval[TOGGLE_WIDTH_BUTTON])
 		gump_width += 1;
 		If (!GetGumpWidth())
 			gump_width := 1;
 		EndIf
 		Return 1;
-	
+
 	ElseIf (retval[ADD_BUTTON])
 		var add_prop_val;
 		If (retval[ADD_INTEGER_RADIO])
@@ -721,14 +721,14 @@ Function DoArrayGump(who, thing, array_propname)
 		array_val.append(add_prop_val);
 		SetCProp(thing, array_propname, array_val);
 		Return 1;
-	
+
 	ElseIf (retval[CONFIRM_RESIZE_BUTTON])
 		var from_idx := CInt(GetGumpText(retval[RESIZE_TEXTENTRY_FROM]));
 		var to_idx := CInt(GetGumpText(retval[RESIZE_TEXTENTRY_TO]));
 		var size := (to_idx - from_idx) + 1;
 		var new_array := array{};
 		var last_item_type := TypeOf(array_val[from_idx]);
-	
+
 		If ((from_idx > 0) && (size > 0))
 			For (i := 0; i < size; i += 1)
 				var new_val := array_val[from_idx + i];
@@ -744,7 +744,7 @@ Function DoArrayGump(who, thing, array_propname)
 			SetCProp(thing, array_propname, new_array);
 		EndIf
 		Return 1;
-	
+
 	ElseIf (retval[APPLY_BUTTON])
 		For (i := 1; i <= array_len; i += 1)
 			var this_val := array_val[i];
@@ -756,7 +756,7 @@ Function DoArrayGump(who, thing, array_propname)
 		EndFor
 		SetCProp(thing, array_propname, array_val);
 		Return 1;
-	
+
 	ElseIf (retval[PREVIOUS_BUTTON])
 		Return 0;
 	EndIf
@@ -819,15 +819,15 @@ Function DoDictGump(who, thing, dict_propname)
 		this_layout.append("page " + i);
 		this_layout.append("button 380 292 2322 2323 1 0 " + PREVIOUS_BUTTON);
 		this_layout.append("button 200 292 239 240 1 0 " + APPLY_BUTTON);
-	
+
 		If (i > 1)
 			this_layout.append("button "+(width-60)+" 65 250 251 0 "+(i-1));
 		EndIf
-	
+
 		If (i < (add_page - 1))
 			this_layout.append("button "+(width-60)+" 290 252 253 0 "+(i+1));
 		EndIf
-	
+
 		If (add_page > 2)
 			this_layout.append("text "+(width-105)+" 291 0 "+len(this_data));
 			this_data.append(i);
@@ -836,13 +836,13 @@ Function DoDictGump(who, thing, dict_propname)
 		this_layout.append("text 360 60 34 2");
 		this_layout.append("button 40 63 2224 2224 0 "+del_page);
 		this_layout.append("text 60 60 34 3");
-	
+
 		var start_j := ((i - 1) * TEXT_LINES) + 1;
 		var end_j := i * TEXT_LINES;
 		If (end_j > dict_size)
 			end_j := dict_size ;
 		EndIf
-	
+
 		// add details For propnames in the range start_j to end_j
 		For (j := start_j; j <= end_j; j += 1)
 			SleepMS(2);
@@ -857,10 +857,10 @@ Function DoDictGump(who, thing, dict_propname)
 			y := (j - start_j) * 20 + 85;
 			this_layout.append("croppedtext 50 "+y+" 130 20 0 "+len(this_data));
 			this_data.append(dict_keys[j]);
-	
+
 			this_layout.append("croppedtext 200 "+y+" 60 20 0 "+len(this_data));
 			this_data.append(this_type);
-	
+
 			If (this_prop.errortext)
 				this_layout.append("croppedtext 280 "+y+" "+(width-310)+" 20 34 "+len(this_data));
 				this_data.append(this_prop.errortext);
@@ -1016,15 +1016,15 @@ Function DoStructGump(who, thing, struct_propname)
 		this_layout.append("page " + i);
 		this_layout.append("button 380 292 2322 2323 1 0 " + PREVIOUS_BUTTON);
 		this_layout.append("button 200 292 239 240 1 0 " + APPLY_BUTTON);
-	
+
 		If (i > 1)
 			this_layout.append("button "+(width-60)+" 65 250 251 0 "+(i-1));
 		EndIf
-	
+
 		If (i < (add_page - 1))
 			this_layout.append("button "+(width-60)+" 290 252 253 0 "+(i+1));
 		EndIf
-	
+
 		If (add_page > 2)
 			this_layout.append("text "+(width-105)+" 291 0 "+len(this_data));
 			this_data.append(i);
@@ -1033,13 +1033,13 @@ Function DoStructGump(who, thing, struct_propname)
 		this_layout.append("text 360 60 34 2");
 		//this_layout.append("button 40 63 2224 2224 0 "+del_page);
 		//this_layout.append("text 60 60 34 3");
-	
+
 		var start_j := ((i - 1) * TEXT_LINES) + 1;
 		var end_j := i * TEXT_LINES;
 		If (end_j > struct_size)
 			end_j := struct_size ;
 		EndIf
-	
+
 		// add details For propnames in the range start_j to end_j
 		For (j := start_j; j <= end_j; j += 1)
 			SleepMS(2);
@@ -1054,10 +1054,10 @@ Function DoStructGump(who, thing, struct_propname)
 			y := (j - start_j) * 20 + 85;
 			this_layout.append("croppedtext 50 "+y+" 130 20 0 "+len(this_data));
 			this_data.append(struct_keys[j]);
-	
+
 			this_layout.append("croppedtext 200 "+y+" 60 20 0 "+len(this_data));
 			this_data.append(this_type);
-	
+
 			If (this_prop.errortext)
 				this_layout.append("croppedtext 280 "+y+" "+(width-310)+" 20 34 "+len(this_data));
 				this_data.append(this_prop.errortext);
@@ -1244,7 +1244,7 @@ Function SetPropType(text, type)
 	Case (type)
 		"Integer":
 			Return CInt(text);
-		"Double": 
+		"Double":
 			Return CDbl(text);
 	EndCase
 	Return text;

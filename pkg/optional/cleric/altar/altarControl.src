@@ -1,0 +1,80 @@
+use uo;
+use os;
+use util;
+use datafile;
+
+include ":damage:damage";
+include ":cleric:cleric";
+include ":cleric:faiths";
+include ":npcs:NPCUtilities";
+include ":attributes:attributes";
+
+var faithsdb := Faiths_OpenDatafile();
+
+program altar(altar)
+
+	var devotion := GetObjProperty(altar, "Devotion");
+	var	elem := faithsdb.FindElement(devotion);
+	var heretics := SplitWords(elem.GetProp("Opposition"));
+	var ev;
+	elem := faithsdb.FindElement("Altar");
+	var range := elem.GetProp("Range");
+	elem := faithsdb.FindElement(devotion);
+	var alignment := elem.GetProp("Alignment");
+	if (!range)
+		range := 3;
+	endif
+	EnableEvents( EVID_ENTEREDAREA + EVID_LEFTAREA, range);
+
+	while (altar)
+		ev := os::wait_for_event(3);
+		case(ev.type)
+			EVID_ENTEREDAREA: 	if (ev.source.ip)
+									SendSysMessage(ev.source, "You feel peace and unity with your surroundings.", color := 56);
+								endif
+			EVID_LEFTAREA:	 	if (ev.source.ip)
+									SendSysMessage(ev.source, "The peace you feel begins to fade.", color := 56);
+								endif
+			default:
+		endcase
+
+		var characters := ListMobilesNearLocation(altar.x, altar.y, altar.z, range);
+		foreach character in characters
+			// If the character is of the same devotion as the religion then regenerate their mana.
+			if ( (GetObjProperty(character, "Devotion") == devotion) && !character.warmode)
+				// if (character.ip)
+					// SendSysMessage(character, "You feel peace and unity with your surroundings.", color := 56);
+				// endif
+
+				AP_SetVital(character, MANA, AP_GetVital(character, MANA) + RandomDiceRoll("2d4"));
+				if (AP_GetVital(character, MANA) > AP_GetStat(character, INTELLIGENCE))
+					AP_SetVital(character, character, AP_GetStat(character, INTELLIGENCE));
+				endif
+			endif
+			// If the devotion of the character is an opposing devotion deal damage.
+			if ( GetObjProperty(character, "Devotion") in heretics )
+				PlayLightningBoltEffect(character);
+				PrintTextAbove(character, "* Heretic! *");
+				ApplyRawDamageEx(character, RandomDiceRoll("3d6"), DMG_ENERGY);
+			endif
+			// If the religion's alignment is good then kill criminals and murderers.
+			if ( alignment == "Good" && (character.criminal || character.murderer) )
+				PrintTextAbove(character, character.name + " is slain!");
+				character.kill();
+			endif
+			// If the religion alignment is good or neutral kill undead NPCs.
+			if ( (alignment == "Good" || alignment == "Neutral") && IsUndead(character) )
+				PlaySoundEffect(character, 0x202);
+				PlayLightningBoltEffect(character);
+				Sleepms(300);
+				SetObjProperty(character, "guardkill", 1);
+				character.kill();
+			endif
+
+		endforeach
+
+		sleep(30);
+
+	endwhile
+
+endprogram

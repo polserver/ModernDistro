@@ -1,0 +1,424 @@
+use uo;
+
+include ":gumps:gumps";
+include ":cleric:cleric";
+include ":cleric:faiths";
+include ":damage:damage";
+include "include/housing";
+include ":attributes:attributes";
+
+var faiths_datafile := Faiths_OpenDatafile();
+
+program UseAltar(who, altar)
+	var altar_devotion := GetObjProperty(altar, "Devotion");
+	var user_devotion := GetObjProperty(who, "Devotion");
+
+	// Do something special for members who "use" the altar.
+	if(user_devotion == altar_devotion)
+		PlaySoundEffect(who, 0x203);
+		PlayObjectCenteredEffect(who, 0x373A, 7, 14);
+		AP_SetVital(who, HITS, CInt(AP_GetStat(who, STRENGTH)));
+	else
+		SendSysMessage(who, "This is the " + altar_devotion + " altar.", color := 88);
+		return;
+
+	endif
+	var status := hpboost(who);
+	case(status)
+		0:	ServiceCleric(who);
+		1:	ServiceHighPriest(who, altar);
+	endcase
+	// Gms and above can access HP functions.
+	if(who.cmdlevel > 2)
+		ServiceHighPriest(who, altar);
+	endif
+
+endprogram
+
+function ServiceHighPriest(who, altar)
+
+	var result := HPGump_gump( who );
+	if((result[0] == 666) || (result[0] == 1))
+		SendSysMessage(who, "Canceled", color := 33);
+		return 0;
+	endif
+
+	if(result[100])
+		EditStatementOfFaith(who);
+	elseif(result[200])
+		SummonClerics(who);
+	elseif(result[300])
+		SummonMembers(who);
+	elseif(result[400])
+		EditAllies(who);
+	elseif(result[500])
+		EditOpposition(who);
+	elseif(result[600])
+		MoveAltar(who, altar);
+	endif
+
+endfunction
+
+function ServiceCleric(who)
+
+	var result := HPGump_gump( who );
+	if((result[0] == 666) || (result[0] == 1))
+		SendSysMessage(who, "Canceled", color := 33);
+		return 0;
+	endif
+
+	if(result[100])
+		DisplayStatementOfFaith(who);
+	elseif(result[200])
+		ListClerics(who);
+	elseif(result[300])
+		ListMembers(who);
+	elseif(result[400])
+		ListAllies(who);
+	elseif(result[500])
+		ListOpposition(who);
+	endif
+
+endfunction
+
+// Cleric functions
+function DisplayStatementOfFaith(who)
+
+	var gump := GFCreateGump( 0, 0 );
+	GFPage( gump, 0 );
+	// Background 1
+	GFResizePic( gump, 0, 0, 9200, 438, 324 );
+	// Background 2
+	GFResizePic( gump, 54, 72, 9270, 330, 180 );
+	// Label 1
+	GFTextLine( gump, 157, 24, 2416, "Statement of Faith" );
+	// Button 1
+	GFAddButton( gump, 194, 268, 247, 248, GF_CLOSE_BTN, 0 );
+	// HTML 1
+	var faith := Faiths_FindFaith(GetObjProperty(who, "Devotion"));
+	var statement := faith.getprop("FaithStatement");
+	GFHTMLArea( gump, 69, 87, 300, 150, "<BaseFont Color=#E67300>" + statement + "</FONT>", 0, 0 );
+	GFSendGump( who, gump );
+
+endfunction
+
+function ListClerics(who)
+
+	var user_devotion := GetObjProperty(who, "Devotion");
+	var players := EnumerateOnlineCharacters();
+	var cleric_list := {};
+	foreach player in players
+		if( (GetObjProperty(player, "Devotion") == user_devotion) && GetObjProperty(player, "Cleric"))
+			cleric_list.append(player.name);
+		endif
+	endforeach
+	SelectionGump(who, "Cleric List", cleric_list, BTN_NOTYPE);
+
+endfunction
+
+function ListMembers(who)
+
+	var user_devotion := GetObjProperty(who, "Devotion");
+	var players := EnumerateOnlineCharacters();
+	var member_list := {};
+	foreach player in players
+		if( (GetObjProperty(player, "Devotion") == user_devotion) && !GetObjProperty(player, "Cleric"))
+			member_list.append(player.name);
+		endif
+	endforeach
+	SelectionGump(who, "Member List", member_list, BTN_NOTYPE);
+
+endfunction
+
+function ListAllies(who)
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var faith := faiths_datafile.FindElement(devotion);
+	var alliances := faith.getprop("Alliance");
+	if(!alliances)
+		SendSysMessage(who, "Your faith does not have an alliance with any other faith.", color := 88);
+		return;
+	endif
+	SelectionGump(who, "Allied Faiths", alliances, BTN_NOTYPE);
+
+endfunction
+
+function ListOpposition(who)
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var faith := faiths_datafile.FindElement(devotion);
+	var opposition := faith.getprop("Opposition");
+	if(!opposition)
+		SendSysMessage(who, "Your faith is not opposed to any other faith.", color := 88);
+		return;
+	endif
+	SelectionGump(who, "Opposing Faiths", opposition, BTN_NOTYPE);
+
+endfunction
+
+// High priest functions
+function EditStatementOfFaith(who)
+
+	var faith := Faiths_FindFaith(GetObjProperty(who, "Devotion"));
+	var statement := faith.getprop("FaithStatement");
+	if(statement.errortext)
+		statement := "";
+	endif
+	var gump := GFCreateGump( 0, 0 );
+	GFPage( gump, 0 );
+	GFResizePic( gump, 0, 0, 9200, 438, 324 );
+	GFResizePic( gump, 54, 72, 9270, 330, 180 );
+	GFTextEntry( gump, 69, 87, 300, 150, 2101, statement, 1 );
+	GFTextLine( gump, 72, 24, 0, "Edit Statement of Faith (Max 239 characters)" );
+	GFAddButton( gump, 70, 268, 247, 248, GF_CLOSE_BTN, 777 );
+	GFAddButton( gump, 305, 268, 241, 248, GF_CLOSE_BTN, 666 );
+
+	var result := GFSendGump( who, gump );
+
+	if(result[0] == 666 || (result[0] == 1))
+		SendSysMessage(who, "Cancelled.", color := 33);
+		return 0;
+	endif
+
+	var text := GFExtractData(result, 1);
+	faith.setprop("FaithStatement", text);
+	SendSysMessage(who, "The Statement of Faith has been saved.", color := 66);
+
+endfunction
+
+function SummonClerics(who)
+
+	var user_devotion := GetObjProperty(who, "Devotion");
+	var faith := Faiths_FindFaith(user_devotion);
+	// cleric_list contains a list of the cleric's serials.
+	var cleric_list := faith.getprop("ClericList");
+	var cleric_names := {};
+	var players := EnumerateOnlineCharacters();
+	foreach player in players
+		if( (GetObjProperty(player, "Devotion") == user_devotion) && GetObjProperty(player, "Cleric"))
+			cleric_names.append(player.name);
+		endif
+	endforeach
+	var selections := SelectionGump(who, "Summon Online Clerics List", cleric_names, BTN_TYPE_CHECKBOX);
+	var to_be_summoned := {};
+	foreach person in selections
+		foreach cleric in cleric_list
+			if(cleric.name == person)
+				Start_Script(":cleric:altar/doSummons", {who, cleric});
+			endif
+		endforeach
+	endforeach
+
+endfunction
+
+function SummonMembers(who)
+
+	var user_devotion := GetObjProperty(who, "Devotion");
+	var faith := Faiths_FindFaith(user_devotion);
+	// member_list contains a list of the cleric's serials.
+	var member_list := faith.getprop("MemberList");
+	var member_names := {};
+	var players := EnumerateOnlineCharacters();
+	foreach player in players
+		if( GetObjProperty(player, "Devotion") == user_devotion && !GetObjProperty(player, "Cleric"))
+			member_names.append(player.name);
+		endif
+	endforeach
+	var selections := SelectionGump(who, "Summon Online Members List", member_names, BTN_TYPE_CHECKBOX);
+	var to_be_summoned := {};
+	var temp;
+	foreach member in member_list
+		foreach person in selections
+			temp := SystemFindObjectBySerial(member);
+			if(temp.name == person)
+				temp := Start_Script(":cleric:altar/doSummons", {who, member});
+			endif
+		endforeach
+	endforeach
+
+endfunction
+
+function EditAllies(who)
+
+	var user_devotion := GetObjProperty(who, "Devotion");
+	var altar_faith := Faiths_FindFaith(user_devotion);
+	var faithdatafile := Faiths_OpenDatafile();
+	// member_list contains a list of the cleric's serials.
+	var current_allies_list := altar_faith.getprop("Alliance");
+	var current_enemies_list := altar_faith.getprop("Opposition");
+	var params := {who, "Do you want to add or remove an allied faith?", "Add", "Remove", 60};
+	var choice := Run_Script( ":gumps:scripts/yesNo/binaryChoice", params );
+	if(choice)
+		// Get all current faiths.
+		var elem := faithdatafile.findelement("Faiths");
+		var potential_allies := elem.getprop("FaithNames");
+		// Remove current allies from potential new allies
+		foreach ally in current_allies_list
+			potential_allies.erase(ally in potential_allies);
+		endforeach
+		// Remove current opposition from potential allies
+		foreach opposed in current_enemies_list
+			potential_allies.erase(opposed in potential_allies);
+		endforeach
+		// Remove high priest's faith from potential allies list.
+		potential_allies.erase(user_devotion in potential_allies);
+		var new_allies := SelectionGump(who, "Add Allies:", potential_allies, BTN_TYPE_CHECKBOX);
+		// Append new allies to current allies and set the property in the datafile.
+		foreach ally in new_allies
+			current_allies_list.append(ally);
+		endforeach
+		altar_faith.setprop("Alliance", current_allies_list);
+		// var ally_choices;
+		// var additions := SelectionGump(who, "Select the Faiths you want to add:", ally_choices, BTN_TYPE_CHECKBOX);
+	else
+		var remove_ally_list := SelectionGump(who, "Remove Allies:", current_allies_list, BTN_TYPE_CHECKBOX);
+		foreach ally in remove_ally_list
+			current_allies_list.erase(ally in current_allies_list);
+		endforeach
+		altar_faith.setprop("Alliance", current_allies_list);
+	endif
+endfunction
+
+function EditOpposition(who)
+
+	var user_devotion := GetObjProperty(who, "Devotion");
+	var altar_faith := Faiths_FindFaith(user_devotion);
+	var faithdatafile := Faiths_OpenDatafile();
+	// member_list contains a list of the cleric's serials.
+	var current_allies_list := altar_faith.getprop("Alliance");
+	var current_enemies_list := altar_faith.getprop("Opposition");
+	var params := {who, "Do you want to add or remove an enemy faith?", "Add", "Remove", 60};
+	var choice := Run_Script( ":gumps:scripts/yesNo/binaryChoice", params );
+	if(choice)
+		// Get all current faiths.
+		var elem := faithdatafile.findelement("Faiths");
+		var potential_enemies := elem.getprop("FaithNames");
+		// Remove current allies from potential new enemies
+		foreach ally in current_allies_list
+			potential_enemies.erase(ally in potential_enemies);
+		endforeach
+		// Remove current opposition from potential enemies
+		foreach enemy in current_enemies_list
+			potential_enemies.erase(enemy in potential_enemies);
+		endforeach
+		// Remove high priest's faith from potential enemies list.
+		potential_enemies.erase(user_devotion in potential_enemies);
+		var new_enemies := SelectionGump(who, "Add Enemies:", potential_enemies, BTN_TYPE_CHECKBOX);
+		// Append new enemies to current enemies and set the property in the datafile.
+		foreach enemy in new_enemies
+			current_enemies_list.append(enemy);
+		endforeach
+		altar_faith.setprop("Opposition", current_enemies_list);
+	else
+		var remove_enemy_list := SelectionGump(who, "Remove Allies:", current_enemies_list, BTN_TYPE_CHECKBOX);
+		foreach enemy in remove_enemy_list
+			current_enemies_list.erase(enemy in current_enemies_list);
+		endforeach
+		altar_faith.setprop("Opposition", current_enemies_list);
+	endif
+endfunction
+
+function MoveAltar(who, altar)
+
+	if(!YesNo(who, "Are you sure you want to move the altar?", "Yes", "No", 60))
+		SendSysMessage(who, "Cancelled.", color := 33);
+		return;
+	endif
+	var faith := Faiths_FindFaith(GetObjProperty(who, "Devotion"));
+	faith.eraseprop("AltarLoc");
+	faith.eraseprop("UntroddenHome");
+	DestroyItem(altar);
+	CreateItemInContainer(who.backpack, "clericaltardeed", 1);
+endfunction
+
+// Altar use gump functions
+function Cleric_gump( who )
+
+	var gump := GFCreateGump( 0, 0 );
+	GFPage( gump, 0 );
+	// Background
+	GFResizePic( gump, 0, 0, 9250, 300, 335 );
+	// Foreground
+	GFPicTiled( gump, 13, 13, 273, 308, 3004 );
+
+	// Cleric Altar Functions: Cleric Altar Functions
+	GFTextLine( gump, 50, 24, 2224, "Cleric Altar Functions" );
+	// Display Doctrine: Display Doctrine
+	GFTextLine( gump, 84, 72, 2224, "Display Doctrine" );
+	// List Clerics: List Clerics
+	GFTextLine( gump, 84, 101, 2224, "List Clerics" );
+	// List Members: List Members
+	GFTextLine( gump, 84, 131, 2224, "List Members" );
+	// List Allied Faiths: List Allied Faiths
+	GFTextLine( gump, 84, 160, 2224, "List Allied Faiths" );
+	// List Opposing Faiths: List Opposing Faiths
+	GFTextLine( gump, 84, 190, 2224, "List Opposing Faiths" );
+
+	GFSetRadioGroup( gump, 1 );
+	// DisplayDoctrineRadioButton: DisplayDoctrineRadioButton
+	GFRadioButton( gump, 53, 69, 9792, 9793, 0, 100 );
+	// ListClericsRadioButton: ListClericsRadioButton
+	GFRadioButton( gump, 53, 98, 9792, 9793, 0, 200 );
+	// ListMembersRadioButton: ListMembersRadioButton
+	GFRadioButton( gump, 53, 128, 9792, 9793, 0, 300 );
+	// ListAlliedFaithsRadioButton: ListAlliedFaithsRadioButton
+	GFRadioButton( gump, 53, 157, 9792, 9793, 0, 400 );
+	// ListOpposingFaithsRadioButton: ListOpposingFaithsRadioButton
+	GFRadioButton( gump, 53, 187, 9792, 9793, 0, 500 );
+
+	// OkayButton: Okay
+	GFAddButton( gump, 53, 278, 247, 248, GF_CLOSE_BTN, 777 );
+	// CancelButton: Cancel
+	GFAddButton( gump, 185, 278, 241, 242, GF_CLOSE_BTN, 666 );
+
+	return GFSendGump( who, gump );
+
+endfunction
+
+function HPGump_gump( who )
+
+	var gump := GFCreateGump( 0, 0 );
+	GFPage( gump, 0 );
+	// Background
+	GFResizePic( gump, 0, 0, 9250, 300, 335 );
+	// Foreground
+	GFPicTiled( gump, 13, 13, 273, 308, 3004 );
+	// High Priest Altar Functions: High Priest Altar Functions
+	GFTextLine( gump, 50, 24, 2224, "High Priest Altar Functions" );
+
+	// Edit Doctrine: Edit Doctrine
+	GFTextLine( gump, 84, 72, 2224, "Edit Statement of Faith" );
+	// Summon Clerics: Summon Clerics
+	GFTextLine( gump, 84, 101, 2224, "Summon Clerics" );
+	// Summon Members: Summon Members
+	GFTextLine( gump, 84, 131, 2224, "Summon Members" );
+	// Edit Allied Faiths: Edit Allied Faiths
+	GFTextLine( gump, 84, 160, 2224, "Edit Allied Faiths" );
+	// Edit Opposing Faiths: Edit Opposing Faiths
+	GFTextLine( gump, 84, 190, 2224, "Edit Opposing Faiths" );
+	// Move Altar: Move Altar
+	GFTextLine( gump, 84, 220, 2224, "Move Altar" );
+
+	GFSetRadioGroup( gump, 1 );
+	// EditDoctrineRadioButton: EditDoctrineRadioButton
+	GFRadioButton( gump, 53, 69, 9792, 9793, 0, 100 );
+	// SummonClericsRadioButton: SummonClericsRadioButton
+	GFRadioButton( gump, 53, 98, 9792, 9793, 0, 200 );
+	// SummonMembersRadioButton: SummonMembersRadioButton
+	GFRadioButton( gump, 53, 128, 9792, 9793, 0, 300 );
+	// EditAlliedFaithsRadioButton: EditAlliedFaithsRadioButton
+	GFRadioButton( gump, 53, 157, 9792, 9793, 0, 400 );
+	// EditOpposingFaithsRadioButton: EditOpposingFaithsRadioButton
+	GFRadioButton( gump, 53, 187, 9792, 9793, 0, 500 );
+	// MoveAltarRadioButton: MoveAltarRadioButton
+	GFRadioButton( gump, 53, 217, 9792, 9793, 0, 600 );
+
+	// OkayButton: Okay
+	GFAddButton( gump, 53, 278, 247, 248, GF_CLOSE_BTN, 777 );
+	// CancelButton: Cancel
+	GFAddButton( gump, 185, 278, 241, 242, GF_CLOSE_BTN, 666 );
+
+	return GFSendGump( who, gump );
+
+endfunction
+

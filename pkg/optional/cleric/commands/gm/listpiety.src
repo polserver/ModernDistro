@@ -1,0 +1,80 @@
+use uo;
+//use cfgfile;
+
+include ":cleric:cleric";
+include ":cleric:faiths";
+
+program testpiety(who)
+	var faithsdb := Faiths_OpenDatafile();
+	var y := 70;
+	var faiths := faithsdb.Keys();
+	var layout :=
+	{
+		"page 0",
+		"resizepic 10 10 3600 500 400",
+		"text 30 30 1153 0",
+		"text 30 50 1153 1",
+		"text 160 50 1153 2",
+		//"text 260 50 1153 3",
+		"text 360 50 1153 3"
+	};
+	var data :=
+	{
+		"Online players -> " + numonline(),
+		"Religion",
+		"Piety",
+		"Online"
+	};
+	// Remove non-religions from the list of faiths.
+	// I cheated with the faiths datafile. I keep foci info,
+	// and untrodden paths info there as well to avoid the
+	// need for multiple datafiles. Faithless is a placeholder
+	// for players of no faith. So it is irrelevant to list it.
+	foreach faith in faiths
+		case(faith)
+			"Foci":				faiths.Erase(faith in faiths);
+								continue;
+			"Faithless":			faiths.Erase(faith in faiths);
+								continue;
+			"UntroddenPaths":	faiths.Erase(faith in faiths);
+								continue;
+		endcase
+	endforeach
+
+	foreach faith in faiths
+		data.append(faith);
+		layout.append("text 30 " + y + " 1153 " + (len(data)-1));
+
+		data.append(devotionpiety(faith));
+		layout.append("text 175 " + y + " 1153 " + (len(data)-1));
+
+		data.append(totalmembers(faith));
+		layout.append("text 375 " + y + " 1153 " + (len(data)-1));
+
+		y:=y+20;
+	endforeach
+	SendDialogGump(who, layout, data);
+
+endprogram
+
+function numonline()
+	var online := 0;
+	foreach person in EnumerateOnlineCharacters()
+		if (person.cmdlevel < 2)
+			online := online+1;
+		endif
+	endforeach
+	return online;
+endfunction
+
+function totalmembers(faithname)
+	var count := 0;
+	foreach person in EnumerateOnlineCharacters()
+		if (person.cmdlevel < 2)
+			if (GetObjProperty(person, "Devotion") == faithname)
+				count := count+1;
+			endif
+		endif
+	endforeach
+	return count;
+endfunction

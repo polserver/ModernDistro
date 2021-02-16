@@ -1,3 +1,36 @@
+/////////////////////////////////////////////////////////////////////
+//
+// Program Name: Gump_YesNo( params )
+//
+// Author:
+//
+// Date Created:
+//
+// Description: This program sends a "Yes/No" gump to the mobile
+// with a message provided by the calling program. The Yes and
+// No text is localized, meaning it is derived from a cliloc.
+// This script MUST be called from another script using
+// the Core Run_Script() function, as the parameters are
+// passed in an array.
+//
+// Parameters:	Array containing:
+// mobile::String		params[1] - The mobile to send the gump to
+// prompt::String		params[2] - Prompt to display
+// yes_text::String		params[3] - "Yes"
+// no_text::String		params[4] - "No"
+// delay::Integer		params[5] - Seconds before the gump
+// 									closes. 0 keeps the gump
+// 									open until the mobile responds
+// Note: The Yes and No text, parameters 3 and 4 are irrelevant
+// but must be included, at least until it is the code is changed
+// because the actual Yes and No text are derived from a cliloc.
+// Don't ask me. I did not write this script.
+//
+//
+// Return Value: Integer, 1 for yes or 0 for no.
+//
+/////////////////////////////////////////////////////////////////////
+
 use uo;
 use os;
 
@@ -18,7 +51,7 @@ program Gump_YesNo( params )
 
 	GFResizePic( yn_gump, 0, 0, GFGetCfgConst( "Defaults", "BackGround" ), 400, 205 );
 	GFResizePic( yn_gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 370, 175 );
- 
+
 
 	var y_pos := 20;
 	foreach line in ( GFWordWrap( prompt, 420 ))

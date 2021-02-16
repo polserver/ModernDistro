@@ -1,0 +1,45 @@
+// Frees a tamed creature
+use uo;
+
+include ":cleric:cleric";
+
+program dispelmagic(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+
+	var targ := ClericalTarget(who, info.npctemplate, "Select the tamed creature to release.", TGTOPT_CHECK_LOS + TGTOPT_HARMFUL);
+
+	if (GetObjProperty(targ, "summoned"))
+		SendSysMessage(who, "You can not release summoned creatures with this rite.");
+		return;
+	elseif ( (!targ.script["tame"]) && (!targ.script["hitch"]) )
+		SendSysMessage(who, "You can not free this creature.");
+		return;
+	elseif(SystemFindObjectBySerial(GetObjProperty(targ,"master")).cmdlevel > who.cmdlevel)
+		SendSysMessage(who, "Error: Cant release GM owned creatures.");
+		return;
+	endif
+
+	if (targ.script["hitch"])
+		targ.frozen := 0;
+	endif
+	targ.SetMaster(0);
+
+	var originalscript := GetObjProperty(targ, "script");
+	targ.script := originalscript;
+
+	EraseObjProperty(targ, "master");
+	EraseObjProperty(targ, "script");
+	RestartScript(targ);
+
+	PrintTextAbove(targ, targ.name + " can roam free again");
+
+endprogram

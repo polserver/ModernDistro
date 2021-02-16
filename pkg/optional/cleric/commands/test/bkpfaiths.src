@@ -1,0 +1,46 @@
+use uo;
+use cfgfile;
+use datafile;
+
+include ":cleric:cleric";
+include ":cleric:faiths";
+include ":timeutils:time";
+include ":gumps:requestGump";
+
+program start_init_faiths(who)
+
+	var unix_time := GetTime();
+	var time_stamp := FormatTime(GetTimeStruct(GetTime()), "<YY>-<MON>-<DAY>-<HH>-<MM>-<SS>");
+	var faiths_datafile := Faiths_OpenDatafile();
+	var faith_names := faiths_datafile.Keys();
+	var faith_elem;
+	var fprop_names := {};
+	var property_value;
+	var bkp_props := {};
+	var junk := {};
+	var fname := RequestGump(who, "Enter a file name:", "The file name will be time stamped.", "", 1);
+	if(fname == error)
+		SendSysMessage(who, "Cancelled", color := 33);
+		return 0;
+	endif
+	fname := ":cleric:" + fname;
+
+	foreach faith_name in faith_names
+		bkp_props:={};
+		faith_elem := faiths_datafile.FindElement(faith_name);
+		fprop_names := faith_elem.PropNames();
+		foreach prop_name in fprop_names
+			property_value := faith_elem.GetProp(prop_name);
+			junk := {};
+			junk.Append(prop_name);
+			junk.Append(property_value);
+			bkp_props.append(junk);
+		endforeach
+		var junk1 := AppendConfigFileElem( CStr(fname + "-" + time_stamp), "Element", faith_name, bkp_props );
+		if(junk1.errortext)
+			SysLog(junk1.errortext);
+		endif
+	endforeach
+	SendSysMessage(who, "Finished backing up the faiths datafile.", color := 66);
+endprogram
+

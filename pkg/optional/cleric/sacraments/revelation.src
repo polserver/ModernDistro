@@ -1,0 +1,130 @@
+// Teach rites to others
+use os;
+use uo;
+use cfgfile;
+use cliloc;
+
+include ":cleric:cleric";
+
+program setcanon(params)
+	var who := params[1];
+	var devotion := GetObjProperty(who, "Devotion");
+
+	SendSysMessage(who, "Select your canon.");
+	var mybook := Target(who);
+	if (GetObjProperty(mybook, "Owner") != who.serial)
+		SendSysMessage(who, "That is not your book.");
+		return;
+	endif
+
+	var input := rites(who, mybook);
+	if (!input)
+		SendSysMessage(who, 1042023, color := 33); // Cancelled.
+		return;
+	elseif (RiteInfo(input).Level == "*")
+		SendSysMessage(who, "You can not copy " + RiteInfo(input).Name);
+		return;
+	endif
+
+	SendSysMessage(who, "Select the book to copy " + RiteInfo(input).Name + " to.");
+
+	var hisbook := Target(who);
+
+	if (hisbook.objtype != CLERIC_BOOK)
+		SendSysMessage(who, "That is not a clerical book.");
+		return;
+
+	elseif (GetObjProperty(hisbook, "Devotion") != GetObjProperty(mybook, "Devotion"))
+		SendSysMessage(who, "You can only teach people of of your religion.");
+		return;
+	elseif (GetObjProperty(hisbook, "Owner") == "Practice")
+			SendSysMessage (who, "That is a practice Tome and cannot hold rites.");
+			return;
+	elseif (HasRite(hisbook, input))
+		SendSysMessage(who, "This book already has that rite");
+		return;
+
+    elseif (SkillCheck(who, CLERIC_SKILL, RiteInfo(input).difficulty, 40) > 0)
+		var ritelist := GetObjProperty(hisbook, "Rites");
+		if (!ritelist)
+			ritelist := { };
+		endif
+		ritelist.append(input);
+		ritelist.sort();
+		SetObjProperty(hisbook, "Rites", ritelist);
+		SendSysMessage(who, "You copy the rite");
+	else
+		SendSysMessage(who, "You are unable to copy the rite.");
+	endif
+
+endprogram
+
+function rites(who, book)
+	var layout :=
+	{
+		"page 0",
+		"noclose",
+		"gumppic 5 5 500",
+		"page 1",
+		"button 195 245 2121 2120 1 0 0"
+	};
+	var data :={};
+
+	data.append("Rites");
+	layout.append("text 100 15 1893 " + (len(data)-1));
+	layout.append("gumppic 35 35 96");
+
+	var pagenum := 1;
+	var ypos := 40;
+	var leftright := "left";
+	var counter := 1;
+
+	var myrites := GetObjProperty(book, "Rites");
+	foreach i in myrites
+		if (devotiontype(book, RiteInfo(i)))
+			if (leftright == "left")
+				data.append(RiteInfo(i).Name);
+				layout.append("text 60 " + ypos + " 1893 " + (len(data)-1));
+				layout.append("button 40 " + (ypos+5) + " 2103 2104 1 0 " + i);
+				ypos := ypos+20;
+			elseif (leftright == "right")
+				data.append(RiteInfo(i).Name);
+				layout.append("text 245 " + ypos + " 1893 " + (len(data)-1));
+				layout.append("button 225 " + (ypos+5) + " 2103 2104 1 0 " + i);
+				ypos := ypos+20;
+			endif
+			if (counter % 9 == 0 && len(myrites)-counter != 0)
+				if (leftright == "left")
+					leftright := "right";
+					data.append("Rites");
+					layout.append("text 285 15 1893 " + (len(data)-1));
+					layout.append("gumppic 220 35 96");
+					ypos := 40;
+				else
+					pagenum := pagenum+1;
+					layout.append("button 361 5 502 502 0 " + pagenum);
+					layout.append("gumppic 220 35 96");
+					layout.append("page " + pagenum);
+					layout.append("button 5 5 501 501 0 " + (pagenum-1));
+					leftright := "left";
+					data.append("Rites");
+					layout.append("text 100 15 1893 " + (len(data)-1));
+					layout.append("gumppic 35 35 96");
+					ypos := 40;
+				endif
+			endif
+			counter := counter+1;
+		endif
+	endforeach
+	var stuff := SendDialogGump(who, layout, data);
+	return stuff[0];
+endfunction
+
+function HasRite(book, num)
+	foreach rite in GetObjProperty(book, "Rites")
+		if (num == rite)
+			return 1;
+		endif
+	endforeach
+	return 0;
+endfunction

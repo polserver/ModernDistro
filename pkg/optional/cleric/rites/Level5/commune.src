@@ -1,0 +1,22 @@
+use uo;
+use cliloc;
+
+include ":cleric:cleric";
+
+program proclamation(params)
+	var who := params[1];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var message := SendTextEntryGump( who, "Message to followers of " + devotion, cancel := TE_CANCEL_DISABLE, style := TE_STYLE_NORMAL, maximum := 120);
+	if (!message)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return;
+	endif
+	foreach person in EnumerateOnlineCharacters()
+		if (GetObjProperty(person, "Devotion") == devotion || person.cmdlevel > 1)
+			PlaySoundEffectPrivate(person, 534, person);
+			SendSysMessage(person, "You hear a message from " + who.name + ".");
+			SendSysMessage(person, "To everyone of " + devotion + ":" + message);
+		endif
+	endforeach
+endprogram

@@ -1,0 +1,34 @@
+use uo;
+
+include ":cleric:cleric";
+
+program holdperson(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	var mobiles := { };
+	foreach mobile in ListMobilesNearLocationEx(who.x,who.y,who.z, piety*5, LISTEX_FLAG_GHOST, who.realm)
+		if (CheckLineOfSight(who, mobile) && mobile != who)
+			PlaySoundEffect(mobile, 0x205);
+			mobile.paralyzed := 1;
+			mobiles.append(mobile);
+			mobile.hidden := 0;
+		endif
+	endforeach
+
+	ClericReleaseScript(info.pid);
+
+	sleep(piety*60);
+
+	foreach mobile in mobiles
+		mobile.paralyzed := 0;
+	endforeach
+
+endprogram

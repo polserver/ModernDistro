@@ -307,7 +307,7 @@ endfunction
 exported function AddLockdown( sign )
 	var temp := GetLockdowns(sign);
 	temp := temp + 1;
-	if(temp > sign.GetMaxLockdowns(sign))
+	if(temp > GetMaxLockdowns(sign))
 		temp := GetMaxLockdowns(sign);
 	endif
 	SetObjProperty(sign, "RemainingLockdowns", temp);
@@ -489,7 +489,7 @@ endfunction
 ///////////////////////////////////////////////////////////
 exported function IsAffiliated( sign, byref mobile )
 
-	if( sign.IsOwner( mobile ))
+	if( IsOwner( sign, mobile ))
 		return 4;
 	elseif( IsACoowner( sign, mobile ))
 		return 3;

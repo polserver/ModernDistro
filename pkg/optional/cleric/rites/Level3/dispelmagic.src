@@ -1,0 +1,82 @@
+// Apparently dispels summoned creatures, destroys potions and destroys certain magical items
+// close to the caster
+use uo;
+use os;
+use vitals;
+
+include ":cleric:cleric";
+
+var glyphs := {GLYPH_OF_WARDING, SYMBOL_OF_PAIN};
+
+program dispelmagic(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	killsummoned(who, piety);
+	potions(who, piety);
+	breakglyphs(who, piety);
+endprogram
+
+function killsummoned(who, piety)
+	foreach mobile in ListMobilesNearLocationEx(who.x, who.y, who.z, piety*2, LISTEX_FLAG_NORMAL + LISTEX_FLAG_HIDDEN, who.realm)
+		if (CheckLineOfSight(who, mobile))
+			if(GetObjProperty(mobile, "summoned") && mobile.npctemplate)
+				PlaySoundEffect(mobile, 531);
+				PrintTextAbove(mobile, "*" + mobile.name + "'s magic essence fades*");
+				sleepms(800);
+				mobile.Kill();
+			endif
+		endif
+	endforeach
+endfunction
+
+function potions(who, piety)
+	var config := ReadConfigFile(":alchemy:itemdesc");
+	foreach mobile in ListMobilesNearLocationEx(who.x, who.y, who.z, piety*2, LISTEX_FLAG_NORMAL + LISTEX_FLAG_HIDDEN, who.realm)
+		if (CheckLineOfSight(who, mobile))
+			foreach item in EnumerateItemsInContainer(mobile.backpack.serial)
+				if (config[item.objtype].idname)
+					PrintTextAbove(mobile, "*potions shatter in " + mobile.name + "'s backpack*");
+					PlaySoundEffect(mobile, 63);
+					DestroyItem(item);
+				endif
+			endforeach
+		endif
+	endforeach
+
+	foreach item in ListItemsNearLocation(who.x, who.y, who.z, piety*2, who.realm)
+		if (config[item.objtype].idname)
+			if (item.amount > 1)
+				PrintTextAbove(item, item.desc + " shatter");
+			else
+				PrintTextAbove(item, item.desc + " shatters");
+			endif
+			PlaySoundEffect(item, 63);
+			sleepms(500);
+			DestroyItem(item);
+		endif
+	endforeach
+endfunction
+
+function breakglyphs(who, piety)
+	foreach item in ListItemsNearLocation(who.x, who.y, who.z, piety, who.realm)
+		if (item.objtype in glyphs)
+			var power := CInt(GetObjProperty(item, "power"));
+                        if (SkillCheck(who, CLERIC_SKILL, (power*10), (power*2)) > 0)
+				PrintTextAbove(item, "*" + item.desc + " crumbles*");
+				PlaySoundEffect(item, 531);
+				sleepms(600);
+				DestroyItem(item);
+			else
+				SendSysMessage(who, "You are unable to crack the power of " + item.desc);
+			endif
+		endif
+	endforeach
+endfunction

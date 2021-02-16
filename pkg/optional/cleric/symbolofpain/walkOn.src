@@ -1,0 +1,14 @@
+use uo;
+
+include ":damage:damage";
+
+program glyphwalkon(who, rune, lastx, lasty, lastz)
+
+	var piety := GetObjProperty(rune, "BasePiety");
+	var dmg := RandomDiceRoll(CStr(piety) + "d4");
+	lastz := lastz;
+	MoveObjectToLocation(who, lastx, lasty, who.z, who.realm);
+	PlayObjectCenteredEffect(who, 0x3728, 7, 7);
+	ApplyRawDamageEx(who, 1, DMG_PHYSICAL);
+
+endprogram

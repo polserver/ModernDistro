@@ -1,0 +1,41 @@
+use uo;
+
+include ":cleric:cleric";
+include ":cleric:faiths";
+
+program UntroddenPaths(params)
+
+	var who := params[1];
+	var info := params[2];
+	var sigil, type;
+	var dest := {};
+	var faithsdb := Faiths_OpenDatafile();
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var conc_clerics := GetConcentratingClerics(who, 5, "characters");
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	SendSysMessage(who, "Select the sigil you wish to use or target yourself to go to your untrodden home:", color := 88);
+	sigil := Target(who);
+	if(sigil == who)
+		var faith := faithsdb.FindElement(devotion);
+		var home := faith.GetProp("UntroddenHome");
+		if(!home)
+			SendSysMessage(who, "I couldn't find your untrodden home location.", color := 33);
+			SendSysMessage(who, "You are being sent to your altar.", color := 33);
+			home := faith.getprop("AltarLoc");
+		endif
+		MoveObjectToLocation(who, home.x, home.y, home.z, home.realm, MOVEOBJECT_FORCELOCATION);
+	endif
+	type := GetObjProperty(sigil, "Type");
+	if(type != "Travel")
+		SendSysMessage(who, "Nothing happens.", color := 33);
+		return 0;
+	endif
+	dest := GetObjProperty(sigil, "Destination");
+	MoveObjectToLocation(who, dest.xcoord, dest.ycoord, dest.zcoord, dest.facet, MOVEOBJECT_FORCELOCATION);
+
+endprogram

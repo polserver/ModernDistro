@@ -1,0 +1,56 @@
+// Seems to provide a temporary shield to the caster
+use uo;
+use util;
+
+include ":cleric:cleric";
+include ":cleric:faiths";
+
+program holyarmor(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	ClericReleaseScript(info.pid);
+
+	var hand2 := GetEquipmentByLayer(who, 2);
+	var holyshield := CreateItemInBackpack(who, 0x2F906, 1);
+	holyshield.movable := 1;
+	MoveItemToContainer(hand2, who.backpack);
+
+	holyshield.graphic := ShieldGraphic(devotion);
+	EquipItem(who, holyshield);
+	holyshield.movable := 0;
+	PlaySoundEffect(who, 489);
+	Sleep(piety*60);
+
+	DestroyItem(holyshield);
+	EquipItem(who, hand2);
+endprogram
+
+function ShieldGraphic(devotion)
+	//var cfg_file := ReadConfigFile(":cleric:clerics");
+	var faithsdb := Faiths_OpenDatafile();
+	if(!faithsdb)
+		SysLog("cannot read faiths datafile.");
+	endif
+	//var holy_armor_elem := FindConfigElem(cfg_file, "HolyArmor");
+	var holy_armor_elem := faithsdb.FindElement(devotion);
+	//var shield_type := GetConfigInt(holy_armor_elem, devotion);
+	var shield_type := holy_armor_elem.GetProp("HolyArmor");
+	return shield_type;
+
+	// case (devotion)
+		// "JusticeGod": return 0x1BC4;
+		// "ChaosGod": return 0x1BC3;
+		// "ThiefGod": return 0x1B7B;
+		// "NatureGod": return 0x1B78;
+		// "Wargod": return 0x1B72;
+		// default: return 0x1B76;
+	// endcase
+endfunction

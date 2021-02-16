@@ -109,7 +109,7 @@ endfunction
  * Returns 0 or the text that was entered.
  *
  */
-function RequestGump2 (mobile, question, option := "", pre_val := "", cancel_btn:=CANCEL_BTN_OFF)
+function RequestGumpEx (mobile, question, option := "", pre_val := "", cancel_btn:=CANCEL_BTN_OFF)
 
 	if ( !pre_val || pre_val == error )
 		pre_val := "";

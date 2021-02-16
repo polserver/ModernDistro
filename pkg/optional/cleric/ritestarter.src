@@ -1,0 +1,189 @@
+use uo;
+use os;
+use util;
+
+include ":cleric:cleric";
+include ":attributes:attributes";
+
+program start_rite(params, scroll)
+
+	var who := params[1];
+	var ritenum := params[2];
+	var npctarget := params[3];
+
+	if (scroll)
+		if (!IsCleric(who))
+			return;
+		else
+			ritenum := CInt(GetObjProperty(scroll, "RiteNum"));
+		endif
+	endif
+
+	var difficulty := RiteInfo(ritenum).Difficulty;
+	if (!difficulty)
+		SysLog(":cleric:ritestarter - Could not find difficulty for rite #" + CStr(ritenum) + ". Setting it to 40");
+		difficulty := 40;
+	endif
+
+	if (GetObjProperty(who, "#medding"))
+		SendSysMessage(who, "You cannot cast right now.");
+		return;
+	else
+		SetObjProperty(who, "#medding", 1);
+	endif
+
+
+	if (who.squelched)
+		SendSysMessage(who, "Something is preventing you from casting.");
+		FailRite(who);
+		return;
+
+	/*
+	elseif (!EquipmentCheck(who))
+		SendSysMessage(who, "Your hands are not free.");
+		FailRite(who);
+		return;
+	*/
+
+	elseif (!ClericChant(who, ritenum, difficulty))
+		SendSysMessage(who, "You break your concentration");
+		FailRite(who);
+		return;
+
+	elseif (!checkmana(who, RiteInfo(ritenum).BaseMana))
+		SendSysMessage(who, "You are too tired to cast.");
+		FailRite(who);
+		return;
+
+	elseif (!scroll)
+		if (!CheckFocci(who, ritenum))
+			FailRite(who);
+			return;
+		endif
+	elseif (scroll)
+		SubtractAmount(scroll, 1);
+	endif
+
+        if (SkillCheck(who, CLERIC_SKILL, difficulty, 20) > 0)
+		var info := struct;
+		info .+ ritenum;
+		info .+ npctarget;
+		info .+ pid;
+
+		// Rite number
+		info.ritenum := ritenum;
+		// If an npc cast this is needed
+		info.npctarget := npctarget;
+		// Tell this script when it can allow a new rite to be cast.
+		info.pid := getpid();
+
+		var script := start_script(RiteInfo(ritenum).script, {who, info});
+
+		if (script.errortext)
+			SendSysMessage(who, script.errortext);
+		endif
+
+		var ev;
+		while(script.pid && !ev)
+			ev := wait_for_event(1);
+		endwhile
+	else
+		SendSysMessage(who, "You lose concentration.");
+	endif
+
+	EraseObjProperty(who, "#medding");
+
+endprogram
+
+function ClericChant(who, ritenum, difficulty)
+	var chant := RiteInfo(ritenum).Chant;
+	if (!chant)
+		chant := "*begins to concentrate*";
+	endif
+
+	var x := who.x;
+	var y := who.y;
+	var playerskill := AP_GetSkill(who, CLERIC_SKILL);
+
+	var basedelay := RiteInfo(ritenum).BaseDelay;
+	if (!basedelay)
+		basedelay := 4000;
+	endif
+
+	var delay := CDbl(difficulty) / CDbl(playerskill);
+	delay := CInt(CDbl(basedelay) * CDbl(delay));
+
+	//PrintTextAbove(who, chant, 8, 1);
+	PrintTextAbove(who, chant);
+	PerformAction(who, CAST_ANIM);
+	PlaySoundEffect(who, CHANT_SOUND);
+	sleepms(delay);
+
+	if (who.x != x || who.y != y)
+		return 0;
+	else
+		return 1;
+	endif
+endfunction
+
+function CheckFocci(who, ritenum)
+	if (who.isA(POLCLASS_NPC))
+		return 1;
+	endif
+
+	var consumelist := { };
+	foreach focus in GetConfigStringArray(RiteInfo(ritenum), "Focus")
+		focus := SplitWords(focus);
+		var amount := CInt(focus[2]);
+		focus := GetObjtypeByName(focus[1]);
+		if (HasInPack(who, focus) >= amount)
+			consumelist.append(focus + " " + amount);
+		else
+			SendSysMessage(who, "You need a " + focusname(focus));
+			return 0;
+		endif
+	endforeach
+
+	var piety := DevotionPiety(GetObjProperty(who, "Devotion"), who);
+//	var percent := (piety+(7*(7+piety))+1);
+    var chance := RandomInt(GetAttribute (who, CLERIC_SKILL));
+	foreach focus in consumelist
+		focus := SplitWords(focus);
+		var amount := CInt(focus[2]);
+		focus := CInt(focus[1]);
+
+		var i;
+		for (i:=1; i<=amount; i:=i+1)
+			if (chance > (GetAttribute (who, CLERIC_SKILL) - 10))
+				ConsumeSubstance(who.backpack, focus, 1);
+				SendSysMessage(who, "You break a " + focusname(focus));
+			endif
+		endfor
+	endforeach
+
+	return 1;
+endfunction
+
+function HasInPack(who, objtype)
+	var amount := 0;
+
+	foreach item in EnumerateItemsInContainer(who.backpack)
+		if (item.objtype == CInt(objtype))
+			amount := amount + item.amount;
+		endif
+	endforeach
+
+	return amount;
+endfunction
+
+function FailRite(who)
+	EraseObjProperty(who, "#medding");
+endfunction
+
+function EquipmentCheck(who)
+	if (GetEquipmentByLayer(who, 1) || GetEquipmentByLayer(who, 2))
+		return 0;
+	else
+		return 1;
+	endif
+endfunction

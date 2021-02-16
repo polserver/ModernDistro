@@ -1,0 +1,42 @@
+use uo;
+use cliloc;
+
+include ":cleric:cleric";
+include ":cleric:faiths";
+include ":gumps:yesNo";
+
+program Indoctrination(params)
+	var who := params[1];
+	var devotion:= GetObjProperty(who, "Devotion");
+
+	SendSysMessage(who, "Who do you wish to indoctrinate?", color := 88);
+	var targ := target(who);
+
+	if (!targ.ip || targ==who)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return;
+	elseif (GetObjProperty(targ, "Devotion") == devotion)
+		SendSysMessage(who, targ.name + " is already a member of " + devotion + ".", color := 33);
+		return;
+	endif
+
+	if (!yesno(targ, "Do you wish to join " + devotion + "?", "Yes I am devout.", "No, I follow another."))
+		SendSysMessage(who, "The aspirant has declined.", color := 33);
+		return;
+	else
+		SetObjProperty(targ, "Devotion", devotion);
+		SetObjProperty(targ, "FaithMod", 1);
+		SetObjProperty(targ, "Piety", 0);
+		Print(targ.serial);
+		// Add this new cleric to the devotion's cleric list.
+		var faith := Faiths_FindFaith(devotion);
+		var member_list := faith.getprop("MemberList");
+		if(member_list.errortext)
+			member_list := {};
+		endif
+		member_list.append(targ.serial);
+		faith.setprop("MemberList", member_list);
+		SendSysMessage(who, targ.name + " is now a member of " + devotion + ".", color := 66);
+		SendSysMessage(targ, "You are now a member of " + devotion + ".", color := 66);
+	endif
+endprogram

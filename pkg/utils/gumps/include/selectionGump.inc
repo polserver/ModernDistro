@@ -19,7 +19,7 @@ include ":gumps:gumps";
 
 CONST BTN_TYPE_RADIO	:= 0x1;	// Allows selecting one item in the list. "OKAY" must be clicked to return selections.
 CONST BTN_TYPE_CHECKBOX	:= 0x2;	// Allows multiple selections in the list. "OKAY" must be clicked to return the selections.
-CONST BTN_TYPE_NORMAL	:= 0x4;	// Allows selecting on item in the list. Gump returns choice when selection is made.
+CONST BTN_TYPE_NORMAL	:= 0x4;	// Allows selecting an item in the list. Gump returns choice when selection is made.
 CONST BTN_NOTYPE		:= 0x8; // Displays a list of strings contained in options with no selection button.
 
 CONST OKAY_BTN		:= 0xA00;
@@ -44,7 +44,6 @@ CONST OKAY_BTN		:= 0xA00;
  *
  */
 function SelectionGump( mobile, title, options, btn_type:=BTN_TYPE_NORMAL )
-
 	if( Lower( TypeOf( options )) != "array" )
 		return error{"errortext":="Options list must be an array."};
 	endif
@@ -126,7 +125,7 @@ endfunction
 
 
 /*
-* SelectionGump2( mobile, title, options, btn_type:=BTN_TYPE_NORMAL, transparent := 0, tooltips :={} )
+* SelectionGumpEx( mobile, title, options, btn_type:=BTN_TYPE_NORMAL, transparent := 0, tooltips :={} )
 *
 * Purpose: Displays a vertical rectangle that lists items that can be selected.
 * The button type (btn_type) determines whether multiple items or only one item
@@ -153,7 +152,7 @@ endfunction
 *				 buttons are used. An array of strings selected if BTN_TYPE_CHECKBOX is used.
 *				 Error if no selection is made and the gump is closed by right-clicking it.
 */
-function SelectionGump2( mobile, title, options, btn_type:=BTN_TYPE_NORMAL, transparent := 0, tooltips :={} )
+function SelectionGumpEx( mobile, title, options, btn_type:=BTN_TYPE_NORMAL, transparent := 0, tooltips :={} )
 
 	if( Lower( TypeOf( options )) != "array" )
 		return error{"errortext":="Options list must be an array."};

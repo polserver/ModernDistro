@@ -1,0 +1,25 @@
+use uo;
+
+var foccilist :=
+{
+	"powerfocus",
+	"spiritfocus",
+	"lifefocus",
+	"arcanefocus",
+	"timefocus",
+	"earthfocus"
+};
+
+program makefocci(who, type)
+  var bag := CreateItemInBackpack(who, "bag", 1);
+  bag.color := 0x58;
+  bag.name := "focci bag";
+	if (!type || type == "all")
+		foreach focci in foccilist
+			CreateItemInContainer(bag,  GetObjtypeByName(focci), 20);
+		endforeach
+	else
+		CreateItemInContainer(bag, GetObjtypeByName(type), 20);
+	endif
+	SendSysMessage(who, "Created the bag of foci and placed it in your backpack.", color := 66);
+endprogram

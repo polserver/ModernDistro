@@ -44,7 +44,7 @@ program removefromshardlibrary(who)
 	endforeach
 
 	book_titles.Sort();
-	selected_books := SelectionGump2(who, "List of " + CStr(book_keys.size()) + " books in the library:", book_titles, BTN_TYPE_CHECKBOX);
+	selected_books := SelectionGumpEx(who, "List of " + CStr(book_keys.size()) + " books in the library:", book_titles, BTN_TYPE_CHECKBOX);
 
 	if(selected_books.errortext == "No option was selected.")
 		SendSysMessage(who, "No books were selected.", color := 33);

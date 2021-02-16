@@ -1,0 +1,48 @@
+use uo;
+
+include ":cleric:cleric";
+
+const AMOUNT := 5;
+
+var focci :=
+{
+	POWER_FOCUS,
+	SPIRIT_FOCUS,
+	ARCANE_FOCUS,
+	TIME_FOCUS,
+	EARTH_FOCUS,
+	LIFE_FOCUS
+};
+
+program MakeCanon(params)
+	var who := params[1];
+	var temp;
+	var itemlist := { };
+	foreach thing in focci
+		temp := HasItem(who, thing);
+		if (temp < AMOUNT)
+			SendSysMessage(who, "You do not have enough material.");
+			return;
+		else
+			itemlist.append(temp);
+		endif
+	endforeach
+
+	// Once were sure we have AMOUNT of each focci, destroy them.
+	foreach thing in focci
+		ConsumeSubstance(who.backpack, thing, AMOUNT);
+	endforeach
+
+	var newbook := CreateItemInBackpack(who, CLERIC_BOOK, 1);
+	SetObjProperty(newbook, "Devotion", GetObjProperty(who,"Devotion"));
+endprogram
+
+function HasItem(who, objtype)
+	var total := 0;
+	foreach item in EnumerateItemsInContainer(who.backpack.serial)
+		if (item.objtype == objtype)
+			total := total + item.amount;
+		endif
+	endforeach
+	return total;
+endfunction

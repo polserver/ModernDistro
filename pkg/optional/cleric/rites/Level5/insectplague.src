@@ -1,0 +1,38 @@
+use uo;
+use os;
+use util;
+
+include ":cleric:cleric";
+
+program InsectPlague(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	who.frozen := 1;
+	var x;
+	for (x:=0;x<piety;x:=x+1)
+		var slave := CreateNpcFromTemplate(randnpc(), who.x+x, who.y, who.z, 0, who.realm);
+		SetObjProperty(slave, "master", who.serial);
+		SetObjProperty(slave, "summoned", 1);
+		slave.SetMaster(who);
+		slave.script := "tamed";
+		RestartScript(slave);
+	endfor
+	who.frozen := 0;
+endprogram
+
+function randnpc()
+	var rand_num := RandomInt(2) + 1;
+	case(rand_num)
+		1: return "giantspider";
+		2: return "giantblackwidowspider";
+		3: return "giantscorp";
+	endcase
+endfunction

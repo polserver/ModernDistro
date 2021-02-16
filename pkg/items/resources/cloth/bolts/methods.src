@@ -1,0 +1,13 @@
+use uo;
+
+include ":itemutils:itemdesc";
+
+program Install()
+	return 1;
+endprogram
+
+exported function IsBoltOfCloth(unused bolt)
+
+	return 1;
+
+endfunction

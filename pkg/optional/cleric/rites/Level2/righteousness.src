@@ -1,0 +1,41 @@
+use uo;
+use cliloc;
+
+include ":cleric:cleric";
+include ":gumps:yesNo";
+
+program righteousness(params)
+	var who := params[1];
+	var info := params[2];
+
+	var targ := ClericalTarget(who, info.npctarget);
+
+	if (!targ.ip || targ == who)
+		SendSysMessage(who, "Cancelled");
+		return;
+	endif
+
+	var title := "Change criminal status.";
+
+	if (!targ.murderer)
+		if (yesno(who, title, "Yes, condemn this person.", "No, this person has done nothing."))
+			SendSysMessage(who, targ.name + " is now a criminal");
+			SendSysMessage(targ, "You have been marked as a criminal.");
+			targ.murderer := 1;
+			PlayObjectCenteredEffect(targ, 0x374a, 20, 20);
+			PlaySoundEffect(targ, 482);
+		else
+			SendSysMessage(who, 1042023, color := 33); // Cancelled.
+		endif
+	else
+		if (yesno(who, title, "This person has repented.", "This person is still a criminal."))
+			SendSysMessage(who, targ.name + " is no longer a criminal.");
+			SendSysMessage(targ, "You are no longer marked as a criminal.");
+			targ.murderer := 0;
+			PlayObjectCenteredEffect(targ, 14138, 10, 10);
+			PlaySoundEffect(targ, 491);
+		else
+			SendSysMessage(who, 1042023, color := 33); // Cancelled.
+		endif
+	endif
+endprogram

@@ -1,0 +1,31 @@
+use uo;
+use util;
+use cliloc;
+
+include ":cleric:cleric";
+
+program minorheal(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	var targ := ClericalTarget(who, info.npctarget, "Select a target", TGTOPT_CHECK_LOS + TGTOPT_HELPFUL);
+
+	if (!targ.ip && ! targ.npctemplate)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return;
+	elseif (!DistanceCheck(who, targ, piety+3)) // target has to be within piety + 3 squares
+		SendSysMessageCL(who, 500643, color := 33); // Target is too far away.
+		return;
+	endif
+
+	var healing := RandomDiceRoll("1d10")+10; // 10-20 healing
+	HealDamage(targ, healing);
+	PlayObjectCenteredEffect(targ, 0x376a, 10, 30);
+endprogram

@@ -1,0 +1,44 @@
+// Creates an item called "Spiritual Hammer" at casters location
+use uo;
+use os;
+use vitals;
+
+include ":cleric:cleric";
+include ":damage:damage";
+
+program spiritualhammer(params)
+	var who := params[1];
+	var info := params[2];
+
+	ClericReleaseScript(info.pid);
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	var i, success;
+	SendSysMessage(who, "Select victim:", color := 88);
+	var victim := Target(who);
+	if (!victim.isA(POLCLASS_MOBILE))
+		SendSysMessage(who, "Invalid target.");
+		return;
+	endif
+
+
+	PlayMovingEffect(who, victim, 0x1438, 8, 1, 0);
+	PlaySoundEffect(who, 0x201);
+
+	if (piety > 3)
+		piety := 3;
+	endif
+
+	success := CStr(piety * 2) + "d6+" + CStr(piety);
+	i := RandomDiceRoll(success);
+	SetObjProperty(victim, "LastHit", {who.name, who.serial, "Cleric" });
+	ApplyRawDamageEx(victim, i);
+
+
+endprogram

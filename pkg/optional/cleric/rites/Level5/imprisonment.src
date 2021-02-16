@@ -1,0 +1,67 @@
+use uo;
+use util;
+use cliloc;
+
+include ":cleric:cleric";
+
+const prison := 0x2F908;
+
+program Imprisonment(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := GetConcentratingClerics(who, 5, "list");
+
+	if (len(pietyboost) < 1)
+		SendSysMessage(who, "More clerics are required for this rite.");
+		return;
+	endif
+
+	var targ :=ClericalTarget(who, info.npctarget, "Select a target", TGTOPT_CHECK_LOS + TGTOPT_HARMFUL);
+
+	if (!targ.ip && !targ.npctemplate)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return;
+	endif
+
+	piety := piety + len(pietyboost);
+
+	var dieroll := CStr((piety * 6) + "d20");
+	var success := RandomDiceRoll(dieroll);
+	if (success < 100)
+		SendSysMessage(who, "You fail to imprison the heretic.");
+		return;
+	endif
+
+	PlaySoundEffect(targ, 0x0207);
+	targ.frozen := 1;
+
+	var newz := targ.z - 100;
+	if (newz < -250)
+		newz := -250;
+	endif
+
+	var stone := CreateItemAtLocation(targ.x, targ.y, targ.z, prison, 1, targ.realm);
+	MoveObjectToLocation(targ, targ.x, targ.y, newz, targ.realm, MOVEOBJECT_FORCELOCATION);
+
+	info := struct;
+	info .+ name;
+	info .+ serial;
+
+	SetObjProperty(stone, "Power", piety);
+
+	info.name := who.name;
+	info.serial := who.serial;
+	SetObjProperty(stone, "Jailor", info);
+
+	info.name := targ.serial;
+	info.serial := targ.serial;
+	SetObjProperty(stone, "Victim", info);
+
+	SetName(stone, "A magic prison containing " + targ.name);
+
+	targ.grozen := 1;
+	targ.squelched := -1;
+endprogram

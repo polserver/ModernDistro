@@ -118,7 +118,7 @@ endfunction
 
 function DoLightning(tile, victim, dmg)
 
-	PlaySoundEffect(tile, SOUND_EFFECT_FIRE);
+	PlaySoundEffect(tile, SOUND_EFFECT_THUNDER);
 	PlayLightningBoltEffect(tile);
 	ApplyDamageEX(victim, dmg, DMG_ENERGY, 0);
 

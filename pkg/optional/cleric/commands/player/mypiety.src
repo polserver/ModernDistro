@@ -1,0 +1,15 @@
+use uo;
+use os;
+
+include ":cleric:cleric";
+
+program mypiety(who, text)
+	if (!IsCleric(who))
+		SendSysMessage(who, "Your not a cleric.");
+		return;
+	endif
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := GetObjProperty(who, "Piety");
+	SendSysMessage(who, "Your piety is " + piety);
+endprogram

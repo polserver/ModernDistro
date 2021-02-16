@@ -1,0 +1,11 @@
+use uo;
+
+include ":cleric:cleric";
+
+program showpiety(who)
+	var temp;
+	foreach person in ListMobilesNearLocation(who.x,who.y,who.z, 15, who.realm)
+		temp := DevotionPiety(GetObjProperty(person, "Piety"), person);
+		PrintTextAbovePrivate(person, "Piety:" + temp, who);
+	endforeach
+endprogram

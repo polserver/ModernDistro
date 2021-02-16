@@ -1,0 +1,42 @@
+//////////////////////////////
+// Create Cleric Mount
+//////////////////////////////
+use uo;
+use cliloc;
+use datafile;
+
+include ":cleric:faiths";
+include ":itemUtils:itemdesc";
+
+program CreateClericMount(params)
+	var who := params[1];
+	var devotion := GetObjProperty(who, "Devotion" );
+	var faith := Faiths_FindFaith( devotion );
+	var mount_info := SplitWords(faith.getprop("Mounts"));
+	if(!mount_info)
+		SysLog("createClericMount --> Cannot find mount_info.");
+	endif
+	var cleric_mount_piece := CInt(mount_info[1]);
+	var GFX := CInt(mount_info[2]);
+	var frames := CInt(mount_info[3]);
+	var hue := CInt(mount_info[4]);
+	var SFX := CInt(mount_info[5]);
+	PlaySoundEffect( who, SFX );
+ 	PlayObjectCenteredEffectEx( who, GFX, 1, Frames, Hue, 7 );
+	var MountPiece := CreateClericMountPiece(cleric_mount_piece);
+    MountPiece := CreateItemAtLocation( 7158, 43, 0, MountPiece, 1, "britannia" );
+	SetObjProperty(MountPiece, "Unequip", ":cleric:ClericMounts/UnEquipClericMount");
+    EquipItem(who, MountPiece);
+    return;
+
+endprogram
+
+function CreateClericMountPiece(MountPieceGraphic)
+
+    var mount_piece := GetItemDescriptor( 0x1F021 );
+    mount_piece.Graphic := MountPieceGraphic;
+    mount_piece.Invisible := 1;
+    mount_piece.Movable := 1;
+    return mount_piece;
+
+endfunction

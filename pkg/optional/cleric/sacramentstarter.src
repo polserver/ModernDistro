@@ -1,0 +1,85 @@
+use uo;
+use os;
+
+include ":cleric:cleric";
+
+program start_rite(params, sacnum)
+
+	var who, sacramentnum;
+
+	if (sacnum)
+		who := params;
+		sacramentnum := sacnum.objtype;
+	else
+		who := params[1];
+		sacramentnum := params[2];
+	endif
+
+	if (GetObjProperty(who, "#medding"))
+		SendSysMessage(who, "You cannot cast right now.");
+		return;
+	else
+		SetObjProperty(who, "#medding", 1);
+	endif
+
+	if (who.squelched)
+		SendSysMessage(who, "Something prevents you from performing the sacrament.", color := 33);
+		FailCast(who);
+		return;
+
+	elseif (!ClericChant(who, sacramentnum))
+		SendSysMessage(who, "You break your concentration", color := 33);
+		FailCast(who);
+		return;
+	endif
+
+	var info := struct;
+	info .+ sacramentnum;
+	info .+ pid;
+
+	info.sacramentnum := sacramentnum; // Rite number
+	info.pid := getpid(); // Tell this script when it can allow a new rite to be performed.
+
+	var script := start_script(SacramentInfo(sacramentnum).script, {who, info});
+
+	if (script.errortext)
+		SendSysMessage(who, script.errortext);
+	endif
+
+	var ev;
+	while(script.pid && !ev)
+		ev := wait_for_event(1);
+	endwhile
+
+	EraseObjProperty(who, "#medding");
+
+endprogram
+
+function ClericChant(who, sacramentnum)
+	var chant := SacramentInfo(sacramentnum).Chant;
+	if (!chant)
+		chant := "*begins to concentrate*";
+	endif
+
+	var x := who.x;
+	var y := who.y;
+
+	PrintTextAbove(who, chant);
+
+	var i := SacramentInfo(sacramentnum).NumChants;
+	for (i; i > 0; i := i-1)
+		PerformAction(who, CAST_ANIM);
+		PlaySoundEffect(who, CHANT_SOUND);
+		sleepms(2500);
+	endfor
+
+	if (who.x != x || who.y != y)
+		return 0;
+	else
+		return 1;
+	endif
+endfunction
+
+function FailCast(who)
+	EraseObjProperty(who, "#medding");
+endfunction

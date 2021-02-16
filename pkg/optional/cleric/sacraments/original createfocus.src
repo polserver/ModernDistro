@@ -1,0 +1,76 @@
+use uo;
+use util;
+
+include ":cleric:cleric";
+// Materials needed for various foci are as follows :
+//	earth focus - apple
+//	power focus - gold coins
+//	arcane focus - iron ingots
+//	life focus - logs
+//	spirit focus - cloth pieces
+//	time focus -  feather
+var materiallist :=
+{
+	//Material, "focus type",
+	0x09d0, "earth focus",
+	0x0eed, "power focus",
+	0x6309, "arcane focus",
+	0x1bdd, "life focus",
+	0x7010, "life focus",
+	0x7013, "life focus",
+	0x7014, "life focus",
+	0x7016, "life focus",
+	0x7017, "life focus",
+	0x7018, "life focus",
+	0x7019, "life focus",
+	0xffcb, "life focus",
+	0xffcc, "life focus",
+	0xffcd, "life focus",
+	0xffce, "life focus",
+	0x1766, "spirit focus",
+	0x1bd1, "time focus"
+};
+
+program CreateFocus(params)
+	var who := params[1];
+
+	SendSysMessage(who, "Select the material");
+	var targ := Target(who);
+
+	if (!targ)
+		SendSysMessage(who, 1042023, color := 33); // Cancelled.
+		return;
+	endif
+
+	var i;
+	var focci:=0;
+
+	for (i:=1;i<=len(materiallist);i:=i+1)
+		if (targ.objtype == materiallist[i])
+			focci := FocusType(materiallist[i+1]);
+		endif
+	endfor
+
+	if (!focci)
+		SendSysMessage(who, "You cant make anything with this material.");
+		return;
+	endif
+
+	var piety := DevotionPiety(GetObjProperty(who, "Devotion"));
+	var created;
+	while(1)
+		if (CheckMana(who, CInt(10/piety)))
+			if(ConsumeSubstance(who.backpack, targ.objtype, 1))
+				created := CreateItemInBackpack( who, focci, 1 );
+				SendSysMessage(who, "You created a " + focci.desc +".");
+			else
+				break;
+			endif
+		else
+			break;
+		endif
+	endwhile
+	if (created)
+		PlaySoundEffect(who, 508);
+	endif
+endprogram

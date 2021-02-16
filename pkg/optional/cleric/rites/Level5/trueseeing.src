@@ -1,0 +1,59 @@
+use uo;
+use os;
+use cfgfile;
+
+include ":cleric:cleric";
+// include "include/poisons";
+
+program trueseeing(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+
+	PlayObjectCenteredEffect(who, 0x376a, 10, 30);
+	var doorinfo := {};
+	doorinfo .+ graphic;
+	doorinfo .+ itemref;
+	var doorlist := {};
+	foreach item in ListItemsNearLocation(who.x, who.y, who.z, piety*5, who.realm)
+		if (secretdoor(item))
+			PlaySoundEffect(item, 516);
+			doorinfo.graphic := item.graphic;
+			item.graphic := 1;
+			doorinfo.itemref := item;
+			doorlist.append(doorinfo);
+			SendSysMessage(who, "Your mind removes the presence of a secret passage way.");
+		endif
+	endforeach
+
+	ClericReleaseScript(info.pid);
+
+	sleep(piety*10);
+	SendSysMessage(who, "Your ability to see that which would be hidden fades. ", color := 66);
+	foreach item in doorlist
+		item.itemref.graphic := item.graphic;
+	endforeach
+
+endprogram
+
+function secretdoor(item)
+	var config := ReadConfigFile("::secretdoors");
+	config := config["secretlist"];
+	if (!config)
+		PrintTextAbove(item, "Error: cant open secretdoors.cfg");
+		return 0;
+	endif
+
+	if (CStr(item.graphic) in GetConfigStringArray(config, "ObjType"))
+		return 1;
+	else
+		return 0;
+	endif
+endfunction

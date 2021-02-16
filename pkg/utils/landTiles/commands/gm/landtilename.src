@@ -1,0 +1,20 @@
+use uo;
+use os;
+
+include ":landtiles:landTiles";
+
+program landtilename_textcmd( mobile )
+
+	SendSysMessage( mobile, "Target the location to fetch the land tile's name.", 0x3, 0x42 );
+	var targ := TargetCoordinates( mobile );
+
+	var landtile_info := FindLandTileInfo( Hex( GetMapInfo( targ.x, targ.y, targ.realm ).landtile ) );
+	if( landtile_info.errortext )
+		SendSysMessage( mobile, landtile_info, 0x3, 0x22 );
+		return 0;
+	endif
+
+	SendSysMessage( mobile, "The name of the land tile is: "+landtile_info.Name, 0x3, 0x42 );
+
+	return 1;
+endprogram

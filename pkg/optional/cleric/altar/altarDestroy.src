@@ -1,0 +1,15 @@
+use uo;
+
+include "include/housing";
+include ":cleric:faiths";
+
+program DestroyAltarScript(altar)
+
+	var altar_devotion := GetObjProperty(altar, "Devotion");
+	var elem := Faiths_FindFaith( altar_devotion );
+	elem.eraseprop("AltarLoc");
+	var hsign := GetHouseSign(altar);
+	EraseObjProperty(hsign, "Devotion");
+
+endprogram
+

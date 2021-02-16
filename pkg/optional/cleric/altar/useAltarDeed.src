@@ -1,0 +1,100 @@
+use uo;
+use cliloc;
+
+include ":gumps:yesNo";
+include ":cleric:cleric";
+include ":cleric:faiths";
+include ":damage:damage";
+include "include/housing";
+include ":attributes:attributes";
+
+var faithsdb := Faiths_OpenDatafile();
+
+program UseAltar(who, altar_deed)
+	var altar_devotion := GetObjProperty(altar_deed, "Devotion");
+	var user_devotion := GetObjProperty(who, "Devotion");
+
+	if(!altar_deed in EnumerateItemsInContainer(who.backpack))
+		SendSysMessage(who, "This deed must be in your backpack to use it.", color := 33);
+		return;
+	endif
+
+	if(!hpboost(who))
+		SendSysMessage(who, "You must be a high priest and have your holy symbol", color := 33);
+		SendSysMessage(who, "in your hand when establishing an altar.", color := 33);
+		return;
+	endif
+
+	if(GetGlobalProperty(user_devotion + "Altar"))
+		SendSysMessage(who, "An altar of the " + user_devotion + " faith is already present in the world.", color := 33);
+		return;
+	endif
+	// Is this deed's devotion already set?.
+	if (altar_devotion != "NONE")
+		SendSysMessage(who, "This altar has already been set to the " + altar_devotion + " devotion.", color := 33);
+		return;
+	endif
+
+	var hsign := GetHouseSign(who);
+	if(!hsign.IsObjectInsideHouse(who))
+		SendSysMessage(who, "You must be in a house to place an altar.", color := 33);
+		return;
+	endif
+	if(GetObjProperty(hsign, "Devotion"))
+		SendSysMessage(who, "This building is already consecrated unto another faith.", color := 33);
+		SendSysMessage(who, "You are prevented from placing the " + user_devotion + " altar in this unholy place!", color := 33);
+		PlayLightningBoltEffect(who);
+		ApplyRawDamageEx(who, 10, DMG_ENERGY);
+		return;
+	endif
+	SendSysMessage(who, "Where do you wish to place this altar?", color := 88);
+	var loc := TargetCoordinates(who);
+	if(!loc)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return;
+	endif
+	if(!hsign.IsLocationInsideHouse(loc))
+		SendSysMessage(who, "Altars must be placed inside a house.", color := 33);
+		return;
+	endif
+
+	if(!hsign.IsOwner(who))
+		SendSysMessage(who, "Only house owners can place an altar in a house.", color := 33);
+		return;
+	endif
+
+	var altar := CreateItemAtLocation(loc.x, loc.y, loc.z, "clericaltar", 1, loc.realm);
+	if(!altar)
+		SendSysMessage(who, "You cannot place the altar there.", color := 33);
+		SendSysMessage(who, "Use the deed again and try a different location.", color := 33);
+		return;
+	endif
+	var elem := faithsdb.FindElement(user_devotion);
+	var faith_colour := elem.getprop("Color");
+	altar.color := faith_colour;
+	SetObjProperty(altar, "Devotion", user_devotion);
+	SendSysMessage(who, "The altar has been set for the " + user_devotion + " faith", color := 66);
+	SendSysMessage(who, "and the building has been consecrated.", color := 66);
+	SetName(altar, "The " + user_devotion + " altar.");
+
+	// Save the location of this altar.
+	var faith := Faiths_FindFaith( user_devotion );
+	if(!faith)
+		faith := Faiths_AddFaith( user_devotion );
+	endif
+	if(!faith)
+		SendSysMessage(who, "There was a problem finding or adding this faith to the datafile.", color := 33);
+		SendSysMessage(who, "Report the following error to a staff member:", color := 33);
+		SendSysMessage(who, faith.errortext, color := 33);
+		return;
+	endif
+	faith.setprop("AltarLoc", loc);
+	// Set the house Devotion.
+	SetObjProperty(hsign, "Devotion", user_devotion);
+	SendSysMessage(who, "Where would you like the untrodden home to be?", color := 88);
+	var untrodden_home := TargetCoordinates(who);
+	faith.setprop("UntroddenHome", untrodden_home);
+	DestroyItem(altar_deed);
+
+endprogram
+

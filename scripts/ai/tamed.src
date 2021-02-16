@@ -633,7 +633,10 @@ function OpenMyPack()
 		0x580:	mounttype := 0x3ECD;	// horse6 palomino
 		0x582:	mounttype := 0x3ECC;	// Windrunner
 		0x59A:	mounttype := 0x3ECE;	// Serpentine Dragon
+		0x5A0:	mounttype := 0x3ECF;	// peacock
+		0x5A1:	mounttype := 0x3ED0;	// skeletal hound
 		0x5E6:	mounttype := 0x3ED1;	// coconut crab
+		0x5F6:	mounttype := 0x3ED2;	// war boar
 		0x5F7:	mounttype := 0x3ED3;	// capybara
     endcase
 

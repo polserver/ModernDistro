@@ -1,0 +1,29 @@
+use uo;
+use os;
+
+include ":cleric:cleric";
+
+program spiritbind(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	var targ := ClericalTarget(who, info.npctemplate, "Select the ghost to resurrect.");
+
+	if (!targ.ip && ! targ.npctemplate)
+		SendSysMessage(who, 1042023, color := 33); // Cancelled.
+		return;
+	endif
+
+	Resurrect(targ);
+
+	sleepms(300);
+	PlayObjectCenteredEffect(targ, 14138, 10, 10);
+	PlaySoundEffect(targ, 491);
+endprogram

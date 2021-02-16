@@ -1,0 +1,52 @@
+/////////////////////////////////////////////////////////////////
+// Used to update the faiths datafile after any changes are
+// made to clerics.cfg.
+/////////////////////////////////////////////////////////////////
+
+
+use uo;
+use cfgfile;
+use datafile;
+
+include ":cleric:cleric";
+include ":cleric:faiths";
+include ":gumps:requestGump";
+
+program update_faiths_datafile(who)
+
+	UnloadConfigFile(":cleric:clerics");
+	var text := RequestGump(who, "Enter the file name:", "To restore the original clerics.cfg, enter 'clerics'.", "", 1);
+	if(text == error)
+		SendSysMessage(who, "Cancelled.", color := 33);
+		return 0;
+	endif
+	return;
+	var file_name := ":cleric:" + text;
+	var clerics_cfg := ReadConfigFile(file_name);
+	if(!clerics_cfg)
+		SendSysMessage(who, "Error reading the source file. Make sure you entered", color := 33);
+		SendSysMessage(who, "the name correctly, including the timestamp.", color := 33);
+		return 0;
+	endif
+	var faiths_datafile := Faiths_OpenDatafile();
+	SendSysMessage(who, "Updating faiths datafile.", color := 88);
+	// Clear any existing data from the faiths datafile.
+	foreach key in ( faiths_datafile.Keys() )
+		faiths_datafile.DeleteElement( key );
+	endforeach
+	var cfg_faith_keys := GetConfigStringKeys(clerics_cfg);
+	var cfg_props := {};
+	var cfg_elem;
+	var df_elem;
+	foreach f_key in cfg_faith_keys
+		df_elem := faiths_datafile.CreateElement(f_key);
+		cfg_elem := FindConfigElem(clerics_cfg, f_key);
+		cfg_props := ListConfigElemProps(cfg_elem);
+		foreach cfg_prop in cfg_props
+			df_elem.SetProp(cfg_prop, GetConfigString( cfg_elem, cfg_prop ));
+		endforeach
+	endforeach
+	SendSysMessage(who, "Finished updating faiths datafile.", color := 66);
+
+endprogram
+

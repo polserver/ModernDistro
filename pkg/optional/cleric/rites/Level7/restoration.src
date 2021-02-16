@@ -1,0 +1,56 @@
+use uo;
+use os;
+use util;
+use cliloc;
+
+include ":cleric:cleric";
+include ":attributes:attributes";
+include ":timedScripts:timedScripts";
+include ":timedScripts:poisonUtil";
+include ":virtue:noto";
+
+program restoration(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	var targ := ClericalTarget(who, info.npctarget, "Select a target", TGTOPT_CHECK_LOS + TGTOPT_HELPFUL);
+
+	if (!targ.ip && !targ.npctemplate)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return;
+	elseif (!distancecheck(who, targ, piety+3))
+		SendSysMessageCL(who, 501043, color := 33); // Target is not close enough.
+		return;
+	endif
+	// Get poison level
+	var poison_names := TS_GetTimerNames(targ, "P");
+	var poison_level := 1;
+
+	foreach timer_name in ( poison_names )
+		var timer_info := TS_GetTimerInfo(targ, timer_name);
+		if ( timer_info.level > poison_level )
+				poison_level := timer_info.level;
+		endif
+	endforeach
+	TS_CurePoison(targ, 10000, "P", poison_level);
+	if(targ != who)
+		VS_AdjustVirtue(who, "compassion", 1, 100);
+	endif
+	if(targ != who)
+		VS_AdjustVirtue(who, "compassion", 1, 35);
+	endif
+
+	AP_SetVital(targ, HITS, AP_GetVitalMaximumValue(targ, HITS));
+
+	PlayObjectCenteredEffect(targ, 0x376a, 10, 30);
+	SendSysMessage(targ, "You have been fully restored.");
+	SendSysMessage(who, targ.name + " has been fully restored.");
+
+endprogram

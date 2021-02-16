@@ -1,0 +1,8 @@
+use uo;
+use os;
+
+program StartMoongates()
+
+Start_Script(":moongates:moongate/initMoongates");
+
+endprogram

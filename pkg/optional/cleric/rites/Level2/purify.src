@@ -1,0 +1,46 @@
+use uo;
+use os;
+
+include "include/client";
+include ":cleric:cleric";
+include ":attributes:attributes";
+include ":timedScripts:timedScripts";
+include ":timedScripts:poisonUtil";
+include ":virtue:noto";
+
+program purify(params)
+	var who := params[1];
+	var info := params[2];
+	var timeout;
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+	var targ := ClericalTarget(who, info.npctarget, "Select a target", TGTOPT_CHECK_LOS + TGTOPT_HELPFUL);
+
+	// Get poison level
+	var poison_names := TS_GetTimerNames(targ, "P");
+	var poison_level := 1;
+	// If target self cure mobiles in range, else cure specific mobile.
+	if (targ == who)
+		foreach person in ListMobilesNearLocation(who.x, who.y, who.z, piety*2, who.realm)
+			foreach timer_name in ( poison_names )
+				var timer_info := TS_GetTimerInfo(person, timer_name);
+				if ( timer_info.level > poison_level )
+						poison_level := timer_info.level;
+				endif
+			endforeach
+			PlaySoundEffect(who, SFX_SPELL_CURE);
+			PlayObjectCenteredEffect( person, FX_BLESS_EFFECT, 10,10);
+			TS_CurePoison(person, 10000, "P", poison_level);
+		endforeach
+	else
+		PlaySoundEffect(targ, SFX_SPELL_CURE);
+		PlayObjectCenteredEffect( targ, FX_BLESS_EFFECT, 10,10);
+		TS_CurePoison(targ, 10000, "P", poison_level);
+	endif
+	VS_AdjustVirtue(who, "compassion", 1, 100);
+
+endprogram

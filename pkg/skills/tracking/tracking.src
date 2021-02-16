@@ -50,7 +50,7 @@ program track(who)
     endif
     var thetarget := SelectMenuItem2(who, track_list);
     var listtype := {};
-    case(thetarget[1])
+    case(thetarget.objtype)
       8454: listtype := "Person";
       8399: listtype := "Animal";
       8409: listtype := "Monster";

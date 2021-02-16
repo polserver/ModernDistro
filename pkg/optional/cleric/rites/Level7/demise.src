@@ -1,0 +1,39 @@
+use uo;
+use os;
+use util;
+use cliloc;
+
+include ":cleric:cleric";
+include ":damage:damage";
+
+program demise(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	var targ :=ClericalTarget(who, info.npctarget, "Select a target", TGTOPT_CHECK_LOS + TGTOPT_HARMFUL);
+
+	if (!targ.ip && !targ.npctemplate)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return;
+	elseif (!distancecheck(who, targ, piety+3))
+		SendSysMessageCL(who, 500643, color := 33); // Target is too far away.
+		return;
+	endif
+
+	var i;
+	for (i:=1;i<=2;i:=i+1)
+		PlayMovingEffect(who, targ,0x36F4,10,30);
+		PlaySoundEffect(targ, 0x228);
+	endfor
+
+	var thepain := (RandomInt(10)+1)+70; // 70-80 damage
+	ApplyDamageEx(targ, thepain, DMG_PHYSICAL, who);
+
+endprogram

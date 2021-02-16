@@ -1,0 +1,31 @@
+use uo;
+use cfgfile;
+
+include ":cleric:cleric";
+
+program divination(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	var hostilecount := 0;
+	var config := ReadConfigFile("::npcdesc");
+	var range := piety*25;
+	if (range > 50)
+		range := 50;
+	endif
+	foreach mobile in ListMobilesNearLocation(who.x, who.y, who.z, piety*25, who.realm)
+		if (Lower(config[mobile.npctemplate].MyDevotion) != devotion)
+			hostilecount := hostilecount+1;
+		endif
+	endforeach
+	sleep(1);
+
+	SendSysMessage(who, "You sense " + hostilecount + " hostiles " + range + " spaces around you.");
+endprogram

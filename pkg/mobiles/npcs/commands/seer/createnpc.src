@@ -127,13 +127,13 @@ function DisplayNPCSelectionMenu(who)
 	foreach Tax_prop in Taxonomy_props
 		Tax_desc[_Tax_prop_iter] := Tax_prop + " - " + GetConfigString( tax_elem, Tax_prop );
 	endforeach
-	Taxonomy_Selection := SelectionGump2( who, "Taxonomy - Select one:", Taxonomy_props, BTN_TYPE_NORMAL, 0, tax_desc);
+	Taxonomy_Selection := SelectionGumpEx( who, "Taxonomy - Select one:", Taxonomy_props, BTN_TYPE_NORMAL, 0, tax_desc);
 	if(Taxonomy_Selection.errortext)
 		SendSysMessageCl(who, 1042023, color := 33); // Cancelled.
 		exit;
 	endif
 	NPC_List := TKey.GetProp(Taxonomy_Selection);
-	NPC_Selection := SelectionGump2( who, "NPCs - Select one:", NPC_List, BTN_TYPE_NORMAL);
+	NPC_Selection := SelectionGumpEx( who, "NPCs - Select one:", NPC_List, BTN_TYPE_NORMAL);
 	if(NPC_Selection.errortext)
 		SendSysMessageCl(who, 1042023, color := 33); // Cancelled.
 		exit;

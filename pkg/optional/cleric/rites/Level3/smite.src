@@ -1,0 +1,38 @@
+// does 1d10 + 30 damage to target
+use uo;
+use util;
+use cliloc;
+
+include ":cleric:cleric";
+
+program smite(params)
+	var who := params[1];
+	var info := params[2];
+
+	var devotion := GetObjProperty(who, "Devotion");
+	var piety := DevotionPiety(devotion, who);
+	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
+	if (pietyboost + piety <= 7)
+		piety := piety + pietyboost;
+	endif
+
+	var targ := ClericalTarget(who, info.npctemplate, "Select a target", TGTOPT_CHECK_LOS + TGTOPT_HARMFUL);
+
+	if (!targ.ip && !targ.npctemplate)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return;
+	elseif (!distancecheck(who, targ, piety+3))
+		SendSysMessageCL(who, 500643, color := 33); // Target is too far away.
+		return;
+	endif
+
+	var i;
+	for (i:=1;i<=2;i:=i+1)
+		PlaySoundEffect(who, 514);
+     		PlayMovingEffect(who, targ, 14052, 5, 1, 1);
+     		sleepms(400);
+	endfor
+
+	var thepain := RandomDiceRoll("1d10")+30; // 30-40 damage
+	ApplyDamage(targ, thepain);
+endprogram

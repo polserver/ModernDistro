@@ -8,7 +8,7 @@ include ":gumps:selectionGump";
 
 program textcmd_seednode(who)
 	var facets := {"Felucca", "Trammel", "Ilshenar", "Malas", "Tokuno", "Termur"};
-	var facet := SelectionGump2( who, "Grab the ndes from which facet?", facets , btn_type:=BTN_TYPE_RADIO );
+	var facet := SelectionGumpEx( who, "Grab the ndes from which facet?", facets , btn_type:=BTN_TYPE_RADIO );
 	if(!facet)
 		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
 		return 0;

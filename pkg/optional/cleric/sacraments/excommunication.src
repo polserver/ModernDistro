@@ -1,0 +1,67 @@
+use uo;
+use cliloc;
+
+include ":cleric:adjustSkills";
+include ":cleric:cleric";
+include ":cleric:faiths";
+include ":attributes:attributes";
+
+program excommunication(params)
+	var who := params[1];
+	var ritenum := params[2];
+
+	var hp_devotion := GetObjProperty(who, "Devotion");
+	SendSysMessage(who, "Select who you wish to excommunicate");
+	var targ := Target(who);
+	if(!targ)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return 0;
+	endif
+	var victim_devotion := GetObjProperty(targ, "Devotion");
+	if (GetObjProperty(targ, "Devotion") == hp_devotion)
+		if (IsCleric(targ) && !hpboost(who))
+			SendSysMessage(who, "Only the high priest can cast out members or clerics.", color := 33);
+			return 0;
+		else
+
+			// A high priest cannot excom someone from another faith.
+			if(victim_devotion != hp_devotion)
+				SendSysMessage(who, "That person is not in your faith.", color := 33);
+				return 0;
+			endif
+			// A high priest cannot excom himself.
+			if(targ.serial == who.serial)
+				SendSysMessage(who, "You cannot excommunicate yourself!", color := 33);
+				return 0;
+			endif
+			// Get the info from the faiths datafile.
+			var faith := Faiths_FindFaith(hp_devotion);
+			var member_list := faith.getprop("MemberList");
+			var cleric_list := faith.getprop("ClericList");
+			if(targ.serial in member_list)
+				member_list.erase(targ.serial in member_list);
+				faith.setprop("MemberList", member_list);
+				PlaySoundEffect(targ, 519);
+				EraseObjProperty(targ, "Devotion");
+				EraseObjProperty (targ, "Piety");
+			elseif(targ.serial in cleric_list)
+				cleric_list.erase(targ.serial in cleric_list);
+				faith.setprop("ClericList", cleric_list);
+				PlaySoundEffect(targ, 519);
+				SetObjProperty(targ, "Devotion", "Faithless");
+				EraseObjProperty ( targ, "Cleric");
+				EraseObjProperty (targ, "Piety");
+				// Restore previous skills
+				ResetSkills(targ);
+			else
+				SendSysMessage(who, "This is odd. This person does not appear to be", color := 33);
+				SendSysMessage(who, "a member or a cleric of your faith.", color := 33);
+				SendSysMessage(who, "This appears to be a bug. Please report it to a staff member.", color := 33);
+				return 0;
+			endif
+            SetBaseSkillBaseValue(targ, AP_AttributeNameToSkillId(MEDITATION), 40);
+			SendSysMessage(targ, "You have been cast out of " + hp_devotion);
+			SendSysMessage(who, targ.name + " has been cast out of " + hp_devotion);
+		endif
+	endif
+endprogram

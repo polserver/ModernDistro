@@ -1,0 +1,46 @@
+use uo;
+use os;
+
+program RC_TrackCharacter( parameters )
+
+	var mobile := parameters.Mobile,
+		x := parameters.X,
+		y := parameters.Y,
+		realm := parameters.Realm,
+		script_pid := parameters.PID,
+		rc_tracker_pid := 0;
+
+		SetObjProperty(mobile, "#RCGathererPid", script_pid); // Added to fix continuous gathering.
+	if( GetProcess( GetObjProperty( mobile, "#RCTrackerPid" ) ) )
+		return 0;
+	endif
+	SetObjProperty( mobile, "#RCTrackerPid", GetPID() );
+
+	while( mobile.connected )
+		SleepMS( 500 );
+		rc_tracker_pid := GetObjProperty( mobile, "#RCGathererPid" );
+		if( !rc_tracker_pid )
+			break;
+		elseif( mobile.dead )
+			SendSysMessage( mobile, "You have died.", 0x3, 0x22 );
+			GetProcess( script_pid ).Kill();
+			GetProcess( rc_tracker_pid ).Kill();
+			break;
+		elseif( CoordinateDistance( mobile.x, mobile.y, x, y ) > 2 )
+			SendSysMessage( mobile, "You have moved too far away.", 0x3, 0x22 );
+			GetProcess( script_pid ).Kill();
+			GetProcess( rc_tracker_pid ).Kill();
+			break;
+		elseif( mobile.realm != realm )
+			SendSysMessage( mobile, "You have moved too far away.", 0x3, 0x22 );
+			GetProcess( script_pid ).Kill();
+			GetProcess( rc_tracker_pid ).Kill();
+			break;
+		endif
+	endwhile
+
+	EraseObjProperty( mobile, "#RCTrackerPid" );
+	EraseObjProperty( mobile, "#RCGathererPid" );
+
+	return 1;
+endprogram

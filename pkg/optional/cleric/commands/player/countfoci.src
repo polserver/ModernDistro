@@ -1,0 +1,28 @@
+use cfgfile;
+use uo;
+
+include ":cleric:cleric";
+
+program countfocci(who)
+
+	var power:=0, spirit:=0, arcane:=0, time:=0, earth:=0, life:=0;
+
+	foreach item in EnumerateItemsInContainer(who.backpack.serial)
+		case (item.objtype)
+			POWER_FOCUS: power := power + item.amount;
+			SPIRIT_FOCUS: spirit := spirit + item.amount;
+			ARCANE_FOCUS: arcane := arcane + item.amount;
+			TIME_FOCUS: time := time + item.amount;
+			EARTH_FOCUS: earth := earth + item.amount;
+			LIFE_FOCUS: life := life + item.amount;
+		endcase
+
+	endforeach
+
+	SendSysMessage(who, " Power Focci " + power);
+	SendSysMessage(who, " Spirit Focci " + spirit);
+	SendSysMessage(who, " Arcane Focci " + arcane);
+	SendSysMessage(who, " Time Focci " + time);
+	SendSysMessage(who, " Earth Focci " + earth);
+	SendSysMessage(who, " Life Focci " + life);
+endprogram
