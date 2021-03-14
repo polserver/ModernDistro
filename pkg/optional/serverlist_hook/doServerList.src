@@ -1,0 +1,89 @@
+// $Id: doServerList.src 1045 2007-04-20 13:17:45Z tekproxy $
+// 2021-03-13 - Updated to modern standards by Nando
+
+use uo;
+use os;
+use polsys;
+
+include ":serverlist:settings";
+
+program doServerList()
+	Print("INSTALLING: ServerList PH...");
+
+	return 1;
+endprogram
+
+exported function handleSendStatusRequest(connection, byref packet)
+	return 0;
+endfunction
+
+// 0xF1 subcommands that we know
+const SERVERLIST_TXTSTATUS := 0xFF;
+
+exported function handleRecvStatusRequest(connection, byref request_packet)
+    print("[0xF1 status info] Request received from {}".format(connection.ip));
+    var settings := SL_GetSettingsCfgElem("Settings");
+    
+    if (!settings.Enabled)
+        return 0;
+    endif
+    
+    var subcmd := request_packet.GetInt8(3);
+    case (subcmd)
+        SERVERLIST_TXTSTATUS:
+            var status := GetTextStatus(settings);
+            SendTextReply(connection, status);
+    endcase
+
+    DisconnectClient(connection);
+    return 1;
+endfunction
+
+function online_count() 
+    return Len(EnumerateOnlineCharacters());
+endfunction
+
+function GetTextStatus(byref settings)
+    case (settings.TextReplyFormat)
+        "UOGateway": return GetUOGatewayStatus();
+        "ConnectUO":
+            default: return GetConnectUOStatus();
+    endcase
+endfunction
+
+function SendTextReply(byref connection, status)
+    var len_status := Len(status);
+
+    var packet_status := CreatePacket(CInt(status[1]), len_status);
+    packet_status.SetString(0, status, 0);
+    return packet_status.SendPacket(connection);
+endfunction
+
+
+
+// ConnectUO expects: Name Age Clients Items Chars Mem
+function GetConnectUOStatus()
+	var settings := SL_GetSettingsCfgElem("Settings");
+	var memory := CInt(GetConfigInt(settings, "PhysicalMemory") / 1024);
+	
+    var status_string := "POL, Name={}, Age={}, Clients={}, Items={}, Chars={}, Mem={}K";
+    var item_count := 0;
+    if (settings.ShowItems)
+        item_count := PolCore().itemcount;
+    endif
+    
+    var mob_count := 0;
+    if (settings.ShowMobiles)
+        mob_count := PolCore().mobilecount;
+    endif
+    
+    return status_string.format(settings.ServerName, PolCore().uptime, online_count(), item_count, mob_count, memory);
+endfunction
+
+// UOGateway expects: Name Age Ver TZ EMail URL Clients
+function GetUOGatewayStatus()
+	var settings := SL_GetSettingsCfgElem("Settings");
+    var status_string := "POL, Name={}, Age={}, Ver={}, TZ={}, EMail={}, URL={}, Clients={}";
+    
+    return status_string.format(settings.ServerName, CInt(ReadGameClock()/86400), PolCore().verstr, 1, settings.ServerEmail, settings.ServerURL, online_count());
+endfunction
