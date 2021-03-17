@@ -14,7 +14,7 @@ jobs:
           unzip Nightly-Linux-clang.zip
           rm -f *_dbg.zip
           rm -f Nightly-Linux-clang.zip
-          unzip -j -o polserver*.zip"
+          unzip -j -o polserver*.zip
           cp ecompile scripts/
           cp *.em scripts/
           echo "ModuleDirectory=scripts" >>scripts/ecompile.cfg
