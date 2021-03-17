@@ -7,14 +7,14 @@ jobs:
     runs-on: "ubuntu-latest"
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Install latest ecompile
         run: |
           wget -q https://github.com/polserver/polserver/releases/download/NightlyRelease/Nightly-Linux-clang.zip
           unzip Nightly-Linux-clang.zip
           rm -f *_dbg.zip
           rm -f Nightly-Linux-clang.zip
-          unzip -j -o *.zip
+          unzip -j -o polserver*.zip"
           cp ecompile scripts/
           cp *.em scripts/
           echo "ModuleDirectory=scripts" >>scripts/ecompile.cfg
