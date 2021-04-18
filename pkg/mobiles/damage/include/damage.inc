@@ -110,7 +110,7 @@ function ApplyRawDamageEX(mobile, amount, type:=DMG_FORCED, source:=0)
 			SetLastDamageInfo(mobile, amount, type, source);
 			SetScriptController(source);
 		endif
-		
+
 		// Added for necro wraith form
 		if(source and GetObjProperty(source, "wraith"))
 			DoManaSuck(mobile, source, amount);
@@ -208,7 +208,7 @@ function ApplyRawSpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circ
 	endif
 
 	settings := DMG_GetSettingsCfgElem("Settings");
-	if ( settings.UseDamageMembers )
+	if ( settings.UseDamageTypes )
     amount := CalcDamageAmount(mobile, amount, type);
 	endif
 
