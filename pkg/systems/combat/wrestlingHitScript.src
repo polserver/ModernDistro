@@ -1,0 +1,117 @@
+use uo;
+use os;
+use cfgfile;
+
+include ":combat:hitScripts";
+include ":damage:damage";
+
+var npccfgfile := ReadConfigFile( "::npcdesc" );
+
+
+program WrestlingHitScript(attacker, defender, weapon, armor, basedamage, rawdamage)
+	if(defender == attacker)
+		SendSysMessage(attacker, "No Cheating");
+		ApplyRawDamage(attacker, 1000);
+		return;
+	endif
+	if((attacker.npctemplate == "townguard") or (attacker.npctemplate == "playervendor"))
+		ApplyRawDamage(defender, 1000);
+		return;
+	endif
+	if(defender.isA(POLCLASS_NPC))
+		var damagedsound := CInt(npccfgfile[defender.npctemplate].damagedsound);
+		if(damagedsound)
+			PlaySoundEffect(defender, damagedsound);
+		endif
+		PerformAction(defender, 0xa);
+		basedamage := basedamage * 2;
+		rawdamage := rawdamage * 2;
+	else
+		if(attacker.acctname && defender.acctname)
+			basedamage := basedamage / 2;
+			rawdamage := rawdamage / 2;
+		endif
+	endif
+	var shield := GetEquipmentByLayer(defender, 2);
+	if(shield)
+		var bd;
+		if(basedamage > 100)
+			bd := 100;
+		else
+			bd := basedamage;
+		endif
+		if(RandomInt(Cint(AP_GetSkill(defender, PARRYING) / 2)) >= bd)
+			armor := shield;
+		endif
+	endif
+	var weaponhit := GetObjProperty(attacker, "OnHit");
+	var armorhit;
+	if (armor == 0)
+		armorhit := GetObjProperty(defender, "ArmorHit");
+	else
+		armorhit := GetObjProperty(armor, "ArmorHit");
+	endif
+	var x;
+	var anat;
+	if (!weaponhit)
+		if (!armorhit)
+			run_script_to_completion("reactiveArmorHit", { attacker, defender, weapon, armor, basedamage, rawdamage } );
+			rawdamage := GetObjProperty(defender, "TempDamage");
+			if(rawdamage < 1)
+				rawdamage := 1;
+			endif
+			anat := Cint(AP_GetSkill(attacker, ANATOMY) / 20);
+			rawdamage := Cint(rawdamage + anat);
+			// This next line appears to increase that damage too high.
+			rawdamage := rawdamage + RandomInt( CInt((AP_GetSkill(attacker, ANATOMY) ) / 20));
+			ApplyRawDamageEX(defender, rawdamage);
+			SetObjProperty(defender, "LastHit", {attacker.name, attacker.serial, weapon });
+			return;
+		else
+			SetObjProperty(defender, "TempDamage", rawdamage);
+			foreach x in armorhit
+				Detach();
+				set_critical(0);
+				run_script_to_completion(x, { attacker, defender, weapon, armor, basedamage, rawdamage } );
+				rawdamage := CInt(GetObjProperty(defender, "TempDamage") );
+			endforeach
+			EraseObjProperty(defender, "TempDamage");
+			run_script_to_completion("reactiveArmorHit", { attacker, defender, weapon, armor, basedamage, rawdamage } );
+			rawdamage := GetObjProperty(defender, "TempDamage");
+			if(rawdamage < 1)
+				rawdamage := 1;
+			endif
+			anat := Cint(AP_GetSkill(attacker, ANATOMY) / 20);
+			rawdamage := Cint(rawdamage + anat);
+			// This next line appears to increase that damage too high.
+			rawdamage := rawdamage + RandomInt( CInt((AP_GetSkill(attacker, ANATOMY) ) / 20));
+			ApplyRawDamageEX(defender, rawdamage);
+			SetObjProperty(defender, "LastHit", {attacker.name, attacker.serial, weapon });
+			return;
+		endif
+	else
+		SetObjProperty(defender, "TempDamage", rawdamage);
+		foreach x in weaponhit
+			Detach();
+			set_critical(0);
+			run_script_to_completion(CStr(x), { attacker, defender, weapon, armor, basedamage, rawdamage } );
+			rawdamage := GetObjProperty(defender, "TempDamage");
+			endforeach
+		EraseObjProperty(defender, "TempDamage");
+		if (rawdamage < 1)
+			rawdamage := 1;
+		endif
+		run_script_to_completion("reactiveArmorHit", { attacker, defender, weapon, armor, basedamage, rawdamage } );
+		rawdamage := GetObjProperty(defender, "TempDamage");
+		if(rawdamage < 1)
+			rawdamage := 1;
+		endif
+		anat := Cint(GetEffectiveSkill(attacker, SKILLID_ANATOMY) / 20);
+		rawdamage := Cint(rawdamage + anat);
+		// This next line appears to increase that damage too high.
+		rawdamage := rawdamage + RandomInt( CInt((AP_GetSkill(attacker, ANATOMY) ) / 20));
+		ApplyRawDamageEX(defender, rawdamage);
+		SetObjProperty(defender, "LastHit", {attacker.name, attacker.serial, weapon});
+		return;
+	endif
+endprogram
