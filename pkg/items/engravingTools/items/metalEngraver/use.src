@@ -1,0 +1,60 @@
+use uo;
+use os;
+use attributes;
+
+include ":attributes:attributeConstants";
+include ":engravingtools:engravingTools";
+include ":itemutils:itemUtil";
+
+program leather_container_engraving_tool( mobile, item )
+
+	if( !useItem_check( mobile, item, ITEM_INCONTAINER, 0 ) )
+		return 0;
+	elseif( ( GetAttributeBaseValue( mobile, TINKERING ) < 800 ) && mobile.cmdlevel < 2 )
+		SendSysMessage( mobile, "Your tinkering skill is too low to use this.", 0x3, 0x22 );
+		return 0;
+	endif
+
+	SendSysMessage( mobile, "Select an object to engrave.", 0x3, 0x42 );
+	var use_on := Target( mobile );
+	if( !use_on )
+		SendSysMessage( mobile, "Cancelled action.", 0x3, 0x32 );
+		return 0;
+	elseif( use_on.IsA( POLCLASS_CORPSE ) )
+		SendSysMessage( mobile, "The selected item cannot be engraved by this engraving tool.", 0x3, 0x22 );
+		return 0;
+	elseif( !use_on.IsContainer() )
+		SendSysMessage( mobile, "The selected item cannot be engraved by this engraving tool.", 0x3, 0x22 );
+		return 0;
+	elseif( !use_on.IsMetalContainer() )
+		SendSysMessage( mobile, "The selected item cannot be engraved by this engraving tool.", 0x3, 0x22 );
+		return 0;
+	elseif( !useItem_check( mobile, use_on, ITEM_INCONTAINER, 0 ) )
+		return 0;
+	endif
+
+	var engraving := EngravingGump( mobile, "<center>Metal Container Engraving Tool</center>" );
+	if( !engraving )
+		SendSysMessage( mobile, "The object was not engraved.", 0x3, 0x32 );
+		return 0;
+	endif
+
+	if( engraving == "!" )
+		if( !use_on.IsEngraved() )
+			return 0;
+		endif
+
+		SendSysMessage( mobile, "You remove the engraving from the object.", 0x3, 0x42 );
+		use_on.RemoveEngraving();
+	else
+		SendSysMessage( mobile, "You engraved the object.", 0x3, 0x42 );
+		use_on.SetEngraving( engraving );
+	endif
+
+	if( !item.ConsumeUses() )
+		SendSysMessage( mobile, "You have worn out your tool!", 0x3, 0x22 );
+		DestroyItem( item );
+	endif
+
+	return 1;
+endprogram

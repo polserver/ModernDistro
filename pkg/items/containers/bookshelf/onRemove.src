@@ -15,18 +15,16 @@ program OnRemove( unused character, container, unused item, unused item_amount, 
 
 	shelf_cfg := shelf_cfg[container.graphic];
 
-	if(container.IsBookshelf())
-		var num_items := EnumerateItemsInContainer( container ).Size();
-		if( num_items > 0 )
-			// There are still other books left in the shelf.
-			// Change the book shelf to a random compatable filled graphic.
-			// Ooo special effects.
-			var graphics := GetConfigIntArray( shelf_cfg, "FilledGraphic" );
-			container.graphic := graphics.RandomEntry();
-		else
-			// No more books left - set to an empty shelf graphic.
-			container.graphic := shelf_cfg.EmptyGraphic;
-		endif
+	var num_items := EnumerateItemsInContainer( container ).Size();
+	if( num_items > 0 )
+		// There are still other books left in the shelf.
+		// Change the book shelf to a random compatable filled graphic.
+		// Ooo special effects.
+		var graphics := GetConfigStringArray( shelf_cfg, "FilledGraphic" );
+		container.graphic := graphics.RandomEntry();
+	else
+		// No more books left - set to an empty shelf graphic.
+		container.graphic := shelf_cfg.EmptyGraphic;
 	endif
 
 	return 1;

@@ -21,7 +21,7 @@ program itemdata(xObject)
 	var prop := struct;
 	prop.+ clilocid := 0;
 	prop.+ values := array;
-	
+
 	var owner := GetObjProperty(xObject, "ownername");
 	if (owner)
 		prop.clilocid := 1072304; // Owned by ~1_name~
@@ -39,10 +39,17 @@ program itemdata(xObject)
 		prop.values := array {};
 		allprops.append (prop);
 	endif
+
+	if( xObject.IsEngraved() )
+		prop.clilocid := 1072305; // Engraved: ~1_INSCRIPTION~
+		prop.values := { xObject.IsEngraved() };
+		allprops.append( prop );
+	endif
+
 	if (xObject.isa(POLCLASS_CONTAINER) and !xObject.isa(POLCLASS_CORPSE) and !(GetObjProperty (xObject, "lockpicking") and xObject.locked))
 		if (xObject.IsRunebook())
 			// 1049116, 1061837, 1075217, 1076207,
-			// 1112590, 
+			// 1112590,
 			var charges := GetObjProperty (xObject, "%Charges%");
 			prop.clilocid := 1061837; // arcane charges: ~1_val~ / ~2_val~
 			prop.values := array {charges.charges, charges.max_charges};
@@ -70,7 +77,7 @@ program itemdata(xObject)
 		prop.clilocid := 1070722; // ~1_NOTHING~
 		prop.values := array {"For Any Race"};
 		allprops.append(prop);
-	endif 
+	endif
 	if (GetObjProperty(xObject, "unidentified"))
 		prop.clilocid := 1038000; // Unidentified
 		prop.values := array {};
@@ -133,7 +140,7 @@ program itemdata(xObject)
 					prop.clilocid := 1061824; // one-handed weapon
 				endif
 				prop.values := array {};
-				allprops.append (prop);	
+				allprops.append (prop);
 				//Mage weapon
 				if (weapondesc.BlocksCastingIfInHand == 0)
 					prop.clilocid := 1062755; // mage weapon
@@ -151,7 +158,7 @@ program itemdata(xObject)
 				endcase
 				prop.values := array {};
 				allprops.append(prop);
-			
+
 			endif
 			var skillid := GetObjProperty(xObject, "skilladv");
 			if (GetObjProperty (xObject, "skill"+skillid))
@@ -189,7 +196,7 @@ program itemdata(xObject)
 				if (spell == "")
 					// 1017324-1017371, 1049116, 1060487-1060492, 1061837,
 					// 1062412-1062416, 1072852-1072853, 1075217, 1076207,
-					// 1112590, 
+					// 1112590,
 					spell := GetObjProperty(xObject, "itemspellname");
 					if (!spell)
 						prop.clilocid := 1075217;
@@ -233,6 +240,10 @@ program itemdata(xObject)
 			prop.clilocid := 1060639; // durability ~1_val~ / ~2_val~
 			prop.values := array {xObject.hp, xObject.maxhp};
 			allprops.append (prop);
+		elseif( xObject.IsEngravingTool() )
+			prop.clilocid := 1060584; // uses remaining: ~1_val~
+			prop.values := { xObject.GetUsesRemaining() };
+			allprops.Append( prop );
 		elseif (IsMusicalInstrument(xObject))
 			var skillbonus := GetObjProperty(xObject, "skillbonus");
 			if (skillbonus)
