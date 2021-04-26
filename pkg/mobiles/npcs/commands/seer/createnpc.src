@@ -20,7 +20,6 @@ use datafile;
 
 include ":gumps:selectionGump";
 include ":gumps:gumpPrompt";
-include ":gumps:yesNo";
 
 program	text_command_createnpc(who, template)
 

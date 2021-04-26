@@ -15,12 +15,13 @@ program righteousness(params)
 		return;
 	endif
 
-	var title := "Change criminal status.";
+	var title := "";
 
 	if (!targ.murderer)
-		if (yesno(who, title, "Yes, condemn this person.", "No, this person has done nothing."))
+		title := "Mark this person as a murderer?";
+		if (yesno(who, title))
 			SendSysMessage(who, targ.name + " is now a criminal");
-			SendSysMessage(targ, "You have been marked as a criminal.");
+			SendSysMessage(targ, "You have been marked as a murderer.");
 			targ.murderer := 1;
 			PlayObjectCenteredEffect(targ, 0x374a, 20, 20);
 			PlaySoundEffect(targ, 482);
@@ -28,7 +29,8 @@ program righteousness(params)
 			SendSysMessage(who, 1042023, color := 33); // Cancelled.
 		endif
 	else
-		if (yesno(who, title, "This person has repented.", "This person is still a criminal."))
+		title := "Remove the murderer mark from this person?";
+		if (yesno(who, title))
 			SendSysMessage(who, targ.name + " is no longer a criminal.");
 			SendSysMessage(targ, "You are no longer marked as a criminal.");
 			targ.murderer := 0;

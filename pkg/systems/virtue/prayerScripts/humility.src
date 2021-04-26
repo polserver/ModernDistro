@@ -3,7 +3,6 @@ use os;
 use basic;
 
 include ":gumps:confirmationSizable";
-include ":gumps:yesNo";
 include ":timedScripts:poisonUtil";
 include ":attributes:attributes";
 include "include/client";

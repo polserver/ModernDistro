@@ -2,8 +2,6 @@ use uo;
 use cfgfile;
 
 include ":gumps:gumpPrompt";
-include ":gumps:yesNo";
-
 
 program textcmd_createnpc( who, template )
 

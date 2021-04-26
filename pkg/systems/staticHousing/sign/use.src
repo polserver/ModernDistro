@@ -6,7 +6,7 @@ use cfgfile;
 
 include ":keys:key";
 include "util/bank";
-include ":gumps:yesNo";
+include ":gumps:gumps";
 include "include/findCity";
 include "include/housing";
 include ":staticHousing:settings";

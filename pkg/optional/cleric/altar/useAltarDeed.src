@@ -1,7 +1,6 @@
 use uo;
 use cliloc;
 
-include ":gumps:yesNo";
 include ":cleric:cleric";
 include ":cleric:faiths";
 include ":damage:damage";

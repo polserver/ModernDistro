@@ -33,7 +33,7 @@ endprogram
 
 function makecleric(who, targ)
 	var devotion := GetObjProperty(who, "Devotion");
-	var response := YesNo(targ, "Become a cleric of " + devotion + "?", "Yes, I shall become annointed!", "No, I do not wish this.");
+	var response := YesNo(targ, "Become a cleric of " + devotion + "?", "Yes", "No.");
 
 
 	if (response)

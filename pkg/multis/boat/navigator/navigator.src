@@ -1,7 +1,6 @@
 use uo;
 
 include ":gumps:gumps";
-include ":gumps:yesNo";
 
 program UseScript( parms )
 

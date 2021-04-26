@@ -20,7 +20,7 @@ program Indoctrination(params)
 		return;
 	endif
 
-	if (!yesno(targ, "Do you wish to join " + devotion + "?", "Yes I am devout.", "No, I follow another."))
+	if (!yesno(targ, "Do you wish to join " + devotion + "?"))
 		SendSysMessage(who, "The aspirant has declined.", color := 33);
 		return;
 	else

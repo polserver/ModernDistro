@@ -5,7 +5,6 @@ include ":cleric:adjustSkills";
 include ":cleric:cleric";
 include ":cleric:faiths";
 include ":gumps:requestGump";
-include ":gumps:yesNo";
 
 var faiths_datafile := Faiths_OpenDatafile();
 

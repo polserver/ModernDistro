@@ -38,11 +38,12 @@ include ":gumps:gumps";
 
 program Gump_YesNo( params )
 
-        var mobile := params[1],
-            prompt := params[2],
-            yes_text := params[3],
-            no_text := params[4],
-            delay := params[5];
+	var mobile := params[1],
+		prompt := params[2],
+		yes_text := params[3],
+		no_text := params[4],
+		delay := params[5],
+		yn_localized := params[6];
 
 	SetObjProperty( mobile, "#CloseYesNoGumpPID", GetPid() );
 
@@ -64,7 +65,11 @@ program Gump_YesNo( params )
 	GFAddButton( yn_gump, ( x_pos+3 ), 160, 4005, 4007, GF_CLOSE_BTN, 0xA1 );
 	foreach line in ( GFWordWrap( yes_text, 355 ))
 		line := line; // Avoid Compiler Warnings
-		GFAddHTMLLocalized( yn_gump, ( x_pos + 40 ), 162, 160, 18, 1074976 );
+		if(yn_localized)
+			GFAddHTMLLocalized( yn_gump, ( x_pos + 40 ), 162, 160, 18, 1074976 );
+		else
+			GFTextLine(yn_gump, ( x_pos + 40 ), 162, 160, yes_text);
+		endif
 		x_pos += 30;
 		SleepMS(2);
 	endforeach
@@ -73,7 +78,11 @@ program Gump_YesNo( params )
 	GFAddButton( yn_gump, ( x_pos+3 ), 160, 4005, 4007, GF_CLOSE_BTN, 0xA2 );
 	foreach line in ( GFWordWrap( no_text, 355 ))
 		line := line; // Avoid Compiler Warnings
-		GFAddHTMLLocalized( yn_gump, ( x_pos + 40 ), 162, 160, 18, 1074977 );
+		if(yn_localized)
+			GFAddHTMLLocalized(yn_gump, ( x_pos + 40 ), 162, 160, 18, 1074977 );
+		else
+			GFTextLine(yn_gump, ( x_pos + 40 ), 162, 160, no_text);
+		endif
 		x_pos += 20;
 		SleepMS(2);
 	endforeach

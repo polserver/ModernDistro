@@ -14,8 +14,11 @@ use os;
 include ":gumps:gumps";
 include ":gumps:gumps_ex";
 
+const LOCALIZED := 1;
+const NOT_LOCALIZED := 0;
+
 /*
- * YesNo(mobile, prompt, yes_text, no_text, delay)
+ * YesNo( mobile, prompt:="", yes_text:="Yes", no_text:="No", delay:=0 )
  *
  * Purpose
  * Template to create a yes / no gump.
@@ -32,9 +35,9 @@ include ":gumps:gumps_ex";
  * Returns '1' if yes is selected.
  *
  */
-function YesNo( mobile, prompt:="", yes_text:="Yes", no_text:="No", delay:=0 )
+function YesNo( mobile, prompt:="", yes_text:="Yes", no_text:="No", delay:=0, yn_localized := NOT_LOCALIZED )
 
-        var params := array{mobile, prompt, yes_text, no_text, delay};
+        var params := array{mobile, prompt, yes_text, no_text, delay, yn_localized};
 
         var script := Run_Script( ":gumps:scripts/yesNo/yesNoGump", params );
         if( script.errortext )

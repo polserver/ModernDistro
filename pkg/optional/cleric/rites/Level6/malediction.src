@@ -22,7 +22,7 @@ program malediction(params)
 	if (!targ.ip && ! targ.npctemplate)
 		SendSysMessage(who, 1042023, color := 33); // Cancelled.
 		return;
-	elseif (!yesno(who, "Only use this as a last resort!", "Yes this person can be taught no other way", "No, I will find other ways to handle it"))
+	elseif (!yesno(who, "Only use this as a last resort! Are you certain?"))
 		SendSysMessage(who, 1042023, color := 33); // Cancelled.
 		return;
 	endif

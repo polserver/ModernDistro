@@ -22,7 +22,7 @@ program make_high_priest(who, devotion)
 	var cur_hp := faith.getprop("HighPriest");
 	if(cur_hp)
 		var cur_hp_char := SystemFindObjectBySerial(cur_hp, SYSFIND_SEARCH_OFFLINE_MOBILES);
-		var replace := YesNo( who, prompt:=devotion + " already has a high priest. It is " +  cur_hp_char.name + ". Do you want continue?", yes_text:="Yes", no_text:="No", delay:=0 );
+		var replace := YesNo( who, prompt:=devotion + " already has a high priest. It is " +  cur_hp_char.name + ". Do you want continue?" );
 		if(!replace)
 			return 0;
 		endif
