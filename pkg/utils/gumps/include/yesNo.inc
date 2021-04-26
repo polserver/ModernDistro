@@ -18,7 +18,7 @@ const LOCALIZED := 1;
 const NOT_LOCALIZED := 0;
 
 /*
- * YesNo( mobile, prompt:="", yes_text:="Yes", no_text:="No", delay:=0 )
+ * YesNo( mobile, prompt:="", yes_text:="Yes", no_text:="No", delay:=0, yn_localized := NOT_LOCALIZED )
  *
  * Purpose
  * Template to create a yes / no gump.
