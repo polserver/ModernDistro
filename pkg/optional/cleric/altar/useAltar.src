@@ -24,21 +24,22 @@ program UseAltar(who, altar)
 
 	endif
 	var status := hpboost(who);
+	// Gms and above can access HP functions.
+	if(who.cmdlevel > 2)
+		status := 1;
+	endif
+
 	case(status)
 		0:	ServiceCleric(who);
 		1:	ServiceHighPriest(who, altar);
 	endcase
-	// Gms and above can access HP functions.
-	if(who.cmdlevel > 2)
-		ServiceHighPriest(who, altar);
-	endif
 
 endprogram
 
 function ServiceHighPriest(who, altar)
 
 	var result := HPGump_gump( who );
-	if((result[0] == 666) || (result[0] == 1))
+	if((result[0] == 666)/* || (result[0] == 1)*/)
 		SendSysMessage(who, "Canceled", color := 33);
 		return 0;
 	endif

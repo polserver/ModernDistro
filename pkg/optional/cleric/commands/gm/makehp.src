@@ -39,8 +39,7 @@ program make_high_priest(who, devotion)
 	SendSysMessage(who, targ.name + " is now the high priest of the " + devotion + " faith.", color := 66);
 	SendSysMessage(targ, "You are now the high priest of the " + devotion + " faith.", color := 66);
 	var symbol := CreateItemInContainer(targ.backpack, HP_SYMBOL, 1);
-	SetObjProperty(symbol, "Devotion", devotion);
-	SetObjProperty(symbol, "Owner", targ.serial);
+	SetObjProperty(targ, "Devotion", devotion);
 	symbol.newbie := 1;
 	SendSysMessage(targ, "Your holy symbol has been placed in your backpack.", color := 66);
 	SendSysMessage(targ, "You must use (double-click) the symbol to complete your ascension to high priest.", color := 88);

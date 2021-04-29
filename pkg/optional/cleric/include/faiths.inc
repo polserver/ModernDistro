@@ -70,3 +70,25 @@ function Faiths_DeleteFaith( byref Faith_name, byref datafile := 0 )
 
 	return 1;
 endfunction
+
+function Faiths_ListFaiths( byref datafile := 0 )
+
+	var faith_list := 0;
+	if( TypeOfInt( datafile ) != OT_DATAFILEREF )
+		datafile := Faiths_OpenDatafile();
+		if( datafile.errortext )
+			return datafile.errortext;
+		endif
+	endif
+
+	faith_list := datafile.keys();
+	foreach faith in faith_list
+		case(faith)
+			"Foci": faith_list.erase(_faith_iter);
+			"UntroddenPaths": faith_list.erase(_faith_iter);
+		endcase
+	endforeach
+	return faith_list;
+
+endfunction
+
