@@ -1,4 +1,5 @@
 use uo;
+use cliloc;
 use datafile;
 
 include ":cleric:cleric";
@@ -10,11 +11,18 @@ var faiths_datafile := Faiths_OpenDatafile();
 
 program make_high_priest(who, devotion)
 
+	var piety := 0;
 	if(!devotion)
 		devotion := RequestGump(who, "For which devotion?", "", "", 1);
+		if(!devotion)
+			SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+			return 0;
+		endif
 	endif
-	var faith := Faiths_FindFaith( devotion );
-	if(!faith)
+	var faith := devotion;
+	var faith_list := Faiths_ListFaiths();
+	var is_valid_faith := faith in faith_list;
+	if(!is_valid_faith)
 		SendSysMessage(who, "Could not find the devotion " + devotion + ".", color := 33);
 		SendSysMessage(who, "Be sure you spelled it correctly.", color := 33);
 		return 0;
@@ -35,11 +43,17 @@ program make_high_priest(who, devotion)
 		SendSysMessage(who, "You must choose a player.", color := 33);
 		return 0;
 	endif
+	piety := CInt(RequestGump(who, "How much piety shall be assigned to this High Priest?", "", "3", 1));
+	if(!piety)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return 0;
+	endif
 	faith.setprop("HighPriest", targ.serial);
 	SendSysMessage(who, targ.name + " is now the high priest of the " + devotion + " faith.", color := 66);
 	SendSysMessage(targ, "You are now the high priest of the " + devotion + " faith.", color := 66);
 	var symbol := CreateItemInContainer(targ.backpack, HP_SYMBOL, 1);
 	SetObjProperty(targ, "Devotion", devotion);
+	SetObjProperty(targ, "Piety", piety);
 	symbol.newbie := 1;
 	SendSysMessage(targ, "Your holy symbol has been placed in your backpack.", color := 66);
 	SendSysMessage(targ, "You must use (double-click) the symbol to complete your ascension to high priest.", color := 88);
