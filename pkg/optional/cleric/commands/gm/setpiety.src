@@ -1,13 +1,21 @@
 use uo;
 use os;
+use cliloc;
 
 include "include/client";
+include ":gumps:requestGump";
 
-
-program SetPiety(who, textline)
+program SetPiety(who, text)
 	SendSysMessage(who, "Choose the item or character:", color := 88);
-        var targ := Target(who);
-        var Piety := CInt(textline);
-		SendSysMessage (who, "Piety = " + Piety);
-        SetObjProperty(targ, "Piety", Piety);
+	var targ := Target(who);
+	if(!text)
+		text := RequestGump(who, "Enter the piety value:",  "", "", CANCEL_BTN_ON);
+		if(!text)
+			SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+			return 0;
+		endif
+	endif
+	var Piety := CInt(text);
+	SendSysMessage (who, "Piety = " + Piety);
+	SetObjProperty(targ, "Piety", Piety);
 endprogram
