@@ -107,21 +107,24 @@ function rites(who, book, method)
 					data.append(riteinfo(i).Level);
 					layout.append("text 60 " + ypos + " " + ritelevel(riteinfo(i).Level) + " " + (len(data)-1));
 					data.append(riteinfo(i).Name);
-					layout.append("text 75 " + ypos + " 1893 " + (len(data)-1));
+//					layout.append("text 75 " + ypos + " 1893 " + (len(data)-1));
+					layout.append("text 75 " + ypos + " 0 " + (len(data)-1));
 					ypos := ypos+20;
 				elseif (leftright == "right")
 					layout.append("checkbox 225 " + (ypos) + " 210 211 0 " + i);
 					data.append(riteinfo(i).Level);
 					layout.append("text 245 " + ypos + " " + ritelevel(riteinfo(i).Level) + " " + (len(data)-1));
 					data.append(riteinfo(i).Name);
-					layout.append("text 260 " + ypos + " 1893 " + (len(data)-1));
+//					layout.append("text 260 " + ypos + " 1893 " + (len(data)-1));
+					layout.append("text 260 " + ypos + " 0 " + (len(data)-1));
 					ypos := ypos+20;
 				endif
 				if (counter % 9 == 0 && total-counter != 0)
 					if (leftright == "left")
 						leftright := "right";
 						data.append("Rites");
-						layout.append("text 285 15 1893 " + (len(data)-1));
+//						layout.append("text 285 15 1893 " + (len(data)-1));
+						layout.append("text 285 15 0 " + (len(data)-1));
 						layout.append("gumppic 220 35 96");
 						ypos := 40;
 					else
@@ -132,7 +135,8 @@ function rites(who, book, method)
 						layout.append("button 5 5 501 501 0 " + (pagenum-1));
 						leftright := "left";
 						data.append("Rites");
-						layout.append("text 100 15 1893 " + (len(data)-1));
+//						layout.append("text 100 15 1893 " + (len(data)-1));
+						layout.append("text 100 15 0 " + (len(data)-1));
 						layout.append("gumppic 35 35 96");
 						ypos := 40;
 					endif
