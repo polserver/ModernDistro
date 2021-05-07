@@ -11,9 +11,10 @@ program Install()
 endprogram
 
 exported function IsContainer( unused container )
-	// object.IsA(POLCLASS_CONTAINER) is more ideal but this allows for securable containers without checking for objtypes
 
+	// object.IsA(POLCLASS_CONTAINER) is more ideal but this allows for securable containers without checking for objtypes
 	return 1;
+
 endfunction
 
 exported function GetBaseMaterial( container )
@@ -22,6 +23,7 @@ exported function GetBaseMaterial( container )
 	var object := FindConfigElem( itemdesc, container.objtype );
 	var BaseMaterial := object.BaseMaterial;
 	return BaseMaterial;
+
 endfunction
 
 exported function IsSecured( container )
@@ -32,11 +34,13 @@ exported function IsSecured( container )
 	endif
 
 	return secured;
+
 endfunction
 
 exported function GetSecureLevel( container )
 
 	return IsSecured( container ).level;
+
 endfunction
 
 exported function IsLeatherContainer( item )
@@ -44,6 +48,7 @@ exported function IsLeatherContainer( item )
 	var item_info := GetItemDescInfo( item.objtype );
 
 	return ( item_info.BaseMaterial == CT_LEATHER );
+
 endfunction
 
 exported function IsMetalContainer( item )
@@ -51,6 +56,7 @@ exported function IsMetalContainer( item )
 	var item_info := GetItemDescInfo( item.objtype );
 
 	return ( item_info.BaseMaterial == CT_METAL );
+
 endfunction
 
 exported function IsWoodContainer( item )
@@ -58,21 +64,45 @@ exported function IsWoodContainer( item )
 	var item_info := GetItemDescInfo( item.objtype );
 
 	return ( item_info.BaseMaterial == CT_WOOD );
+
 endfunction
 
 exported function IsEngraved( item )
 
 	return GetObjProperty( item, "EngravedText" );
+
 endfunction
 
 exported function RemoveEngraving( item )
 
 	EraseObjProperty( item, "EngravedText" );
 	IncRevision( item );
+
 endfunction
 
 exported function SetEngraving( item, engraving )
 
 	SetObjProperty( item, "EngravedText", engraving );
 	IncRevision( item );
+
 endfunction
+
+// You can just make it a function as well but basically looking through ServUO,
+// I found how they close the bank container on move and this is how they do it.
+
+// The 0x1D packet removes the packet from the player's client, then setting the item's color
+// to it's color sends the DrawObject packet from the server to the player and any player in range.
+// The better way to do this is to build the DrawObject packet and only send it to the client affected
+// and I might do that but just for testing purposes, this works.
+// If I do the more responsible thing and write the DrawObject packet I will send you the update to this.
+// Method created by ThisIsMe
+
+exported function CloseContainer( item, mobile )
+
+    var packet := CreatePacket( 0x1D, 5 );
+    packet.SetInt32( 1, item.serial );
+    packet.SendPacket( mobile );
+    return item.color := item.color;
+
+endfunction
+
