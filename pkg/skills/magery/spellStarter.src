@@ -19,12 +19,19 @@ program SpellStarter(params)
 	var scroll := params[3]; // Scroll ObjType being used
 	var targ := params[4]; // NPC target used if NPC is casting the spell
 //        targ := targ; // stop compiler unused warning
-        if (scroll == 1)
-        endif
-	if ( !Attach(mobile) )
-		SendSysMessage(mobile, "You are already doing something.", color := 33);
+	if (scroll == 1)
+	endif
+	var ss_pid := GetPid();
+	// if ( !Attach(mobile) )
+		// SendSysMessage(mobile, "You are already doing something.", color := 33);
+		// return 0;
+	// endif
+	if(ss_pid == GetObjProperty(mobile, "SpellStarterPID"))
+		SendSysMessage(mobile, "You are currently casting a spell.", color := 33);
 		return 0;
 	endif
+	SetObjProperty(mobile, "SpellStarterPID", ss_pid);
+
 	var spell_elem := MS_GetSpellsCfgElem(spell_id);
 	var manacost := CInt(spell_elem.ManaCost);
 	// If spell is set to 'TestOnly 1', then it requires cmdlevel or #SpellTester CProp before it can be used.
@@ -86,6 +93,14 @@ program SpellStarter(params)
 		return 0;
 	endif
 
+	if ( requires_regs )
+		if ( !CheckReagents(mobile, spell_elem, scroll) )
+			SendSysMessage(mobile, "You don't have the proper reagents.", color := 33);
+			FailSpell(mobile);
+			return 0;
+		endif
+	endif
+
 	if ( requires_mana )
 	// Added to support necro spell mind rot.
 		if(GetObjProperty(mobile, "#mindrot"))
@@ -97,14 +112,6 @@ program SpellStarter(params)
 		endif
 		if ( !AP_ConsumeVital(mobile, VITALID_MANA, manacost) )
 			SendSysMessage(mobile, "You don't have enough mana to cast that spell!", color := 33);
-			FailSpell(mobile);
-			return 0;
-		endif
-	endif
-
-	if ( requires_regs )
-		if ( !CheckReagents(mobile, spell_elem, scroll) )
-			SendSysMessage(mobile, "You don't have the proper reagents.", color := 33);
 			FailSpell(mobile);
 			return 0;
 		endif
@@ -175,18 +182,16 @@ program SpellStarter(params)
 	endwhile
 ////////////////////////////////////////////////////
 
-	var attribute := Lower(spell_elem.Attribute);
+	// var attribute := Lower(spell_elem.Attribute);
+	var attribute := spell_elem.Attribute;
 
 	if ( !attribute )
 		attribute := MAGERY;
 	endif
-
 	var difficulty := CInt(spell_elem.Difficulty);
-
 	if ( !difficulty )
 		difficulty := -1;
 	endif
-
 //	var skill_check := SkillCheck(mobile, attribute, difficulty, 50);
 	var skill_check := SkillCheck(mobile, attribute, difficulty, 30);
 
@@ -209,9 +214,9 @@ program SpellStarter(params)
 		info.+spell_config := spell_elem;
 		info.+damage_typ := spell_elem.DamageType;
 		info.+difficulty := spell_elem.Difficulty;
-
 		var script := Start_Script(spell_elem.SpellScript, {mobile, info, spell_id, targ});
 		Detach();
+		EraseObjProperty(mobile, "SpellStarterPID");
 		EraseObjProperty(mobile, "#Casting");
 
 		if ( script.errortext )
