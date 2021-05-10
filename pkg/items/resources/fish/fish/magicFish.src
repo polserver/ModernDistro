@@ -4,7 +4,6 @@ use cfgfile;
 use os;
 use util;
 
-include "include/statMod";
 include "include/canAccess";
 include ":timedScripts:poisonUtil";
 include ":timedScripts:timedScripts";

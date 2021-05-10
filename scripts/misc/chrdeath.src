@@ -3,7 +3,6 @@ use os;
 use util;
 
 include ":attributes:attributes";
-include "include/statMod";
 include ":virtue:noto";
 include "include/reportMurder";
 include ":timedScripts:poisonUtil";

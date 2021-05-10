@@ -17,7 +17,7 @@ CONST CANCEL_BTN_OFF	:= 0x0;
 CONST CANCEL_BTN_ON	:= 0x1;
 
 /*
- * RequestGump(mobile, question, option, pre_val, cancel_btn)
+ * RequestGump(mobile, question, option := "", pre_val := "", cancel_btn:=CANCEL_BTN_OFF, txt_lmt := 0)
  *
  * Purpose
  * Template to create a single field, single line, input gump.
@@ -27,8 +27,8 @@ CONST CANCEL_BTN_ON	:= 0x1;
  * question:	Primary text field, instructing the mobile on what to enter.
  * option:	Optional text placed directly above the text entry area.
  * pre_val:	The text to display in the text entry field.
- * cancel_btn:	0 - No cancel button will be shown
- * 		1 - A cancel button will be shown.
+ * cancel_btn:	0 or CANCEL_BTN_OFF - No cancel button will be shown
+ * 				1 or CANCEL_BTN_ON - A cancel button will be shown.
  *
  * Return value
  * Returns 'error' if the cancel button is clicked.
