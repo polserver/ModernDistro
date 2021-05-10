@@ -2,6 +2,7 @@ use uo;
 use vitals;
 use attributes;
 
+include ":timedScripts:timedScripts";
 include ":magery:spellRestrictions";
 
 program chrcast_iweapon( parms )
@@ -44,12 +45,8 @@ PlayObjectCenteredEffect( caster, 0x3779, 10,45 );
 PlaySoundEffect(caster, 0x210);
 SetObjProperty(caster, "#reaper", 1);
 SetAttributeTemporaryMod( caster, SPELLWEAVING, 500 );
-    if(CanMod(caster, "dex"))
-	DoTempMod(caster, "dex", 25, duration);
-  endif
-  if(CanMod(caster, "str"))
-	DoTempMod(caster, "str", 25, duration);
-  endif
+TS_StartTimer(caster, "Agility", duration, 25);
+TS_StartTimer(caster, "Strength", duration, 25);
 SetAttributeTemporaryMod( caster, RESISTING_SPELLS, -500 );
 SetObjProperty(caster, "oldgraphic", caster.graphic);
 SetObjProperty (caster, "oldname", caster.name);
