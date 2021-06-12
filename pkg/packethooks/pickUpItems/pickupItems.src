@@ -1,0 +1,29 @@
+use uo;
+use os;
+use polsys;
+
+program pickupItems()
+
+	Print("INSTALLING: Item Pickup..." );
+
+	return 1;
+endprogram
+
+exported function HandleItemPickup( mobile, byref packet )
+
+	packet := packet; // Avoid Compiler Warnings...
+
+	// Change the cprop name...
+	if( GetObjProperty( mobile, "FarSightInfo" ) )
+		// Create a new packet. This packet is used to send the Denied Pickup Request back to
+		// the client. Then. send the packet off. The "Return 1;" is used so that the pickup
+		// request is NOT sent on to the core to handle.
+		var newpacket := CreatePacket( 0x27, 2 );
+		newpacket.SetInt8( 1, 0x0 );
+		newpacket.SendPacket( mobile );
+
+		return 1;
+	endif
+
+	return 0;
+endfunction
