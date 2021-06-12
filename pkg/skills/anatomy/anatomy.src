@@ -9,12 +9,12 @@ include ":attributes:attributes";
 include "include/trainingskill";
 
 program Anatomy(who)
-        var data := {};
-        data[1] := "anatomy";
-        data[2] := ReadGameClock();
-        data[3] := CStr(1);
-        SetObjProperty(who, "LastUsedSkill", data );
-        TrainingSkill(who, data[3]);
+	var data := {};
+	data[1] := "anatomy";
+	data[2] := ReadGameClock();
+	data[3] := CStr(1);
+	SetObjProperty(who, "LastUsedSkill", data );
+	TrainingSkill(who, data[3]);
   EraseObjProperty(who, "IsMeditating");
   EraseObjProperty(who, "HealTimer");
   SendSysMessageUC(who, CAscZ("Whom shall I examine?"), "ENG");
@@ -38,7 +38,7 @@ program Anatomy(who)
   // variables for sys messages
   var streng := getStreng(AP_GetStat(subject, STRENGTH), subject.graphic, subject.gender);
   var dext := getDext(AP_GetStat(subject, DEXTERITY), subject.graphic, subject.gender);
-  var endur := getEnd(CInt(CInt(AP_GetVital(subject, VITALID_STAMINA))/CDbl(AP_GetVitalMaximumValue(subject, VITALID_STAMINA))*100));
+  var endur := getEnd(CInt(CInt(AP_GetVital(subject, STAMINA))/CDbl(AP_GetVitalMaximumValue(subject, STAMINA))*100));
   var skill := GetAttribute(who, ANATOMY);
   // adjust succeed and fail msgs here
   var strMsg, strFail;

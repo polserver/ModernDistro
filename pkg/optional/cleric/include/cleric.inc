@@ -267,8 +267,8 @@ function FocusName(number)
 endfunction
 
 function CheckMana(who, amount)
-	if (GetMana(who) >= amount)
-		SetMana(who, (GetMana(who) - amount));
+	if (AP_GetVital(who, MANA) >= amount)
+		AP_SetVital(who, MANA, (AP_GetVital(who, MANA) - amount));
 		return 1;
 	else
 		return 0;

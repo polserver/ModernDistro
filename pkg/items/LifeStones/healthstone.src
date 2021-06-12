@@ -73,7 +73,7 @@ program use_healthstone (who, stone)
             if (amt <= hpdif) // If she needs more hp than the stone has
                 hpdif := amt; // just give her all the hp left in the stone
             endif
-            SetHp (who, myhp + hpdif ); // Transfer the hp to her
+            AP_SetVital (who, HITS, myhp + hpdif ); // Transfer the hp to her
             SendSysMessage (who, "Your body feels stronger.", color := 68);
             SetObjProperty (stone, "Amount", amt - hpdif); // Take the hp "out of" the stone
             PlaySoundEffect(who, 0x1FB); // Play a cool sound effect

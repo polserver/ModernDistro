@@ -48,15 +48,15 @@ function StatLoss(mobile)
 	if (dice == 1)
 		PrintTextAbove(mobile, "*" + mobile.name + " feels weaker*");
 		SendSysMessage(mobile, "You permanently lost 2 strength");
-		mobile.setstr(mobile.strength-2);
+		AP_SetTrueStat(MOBILE, STRENGTH, AP_GetStat(mobile, STRENGTH) - 2);
 	elseif (dice == 2)
 		PrintTextAbove(mobile, "*" + mobile.name + " feels less nimble*");
 		SendSysMessage(mobile, "You permanently lost 2 dexterity");
-		mobile.setdex(mobile.dexterity-2);
+		AP_SetTrueStat(MOBILE, DEXTERITY, AP_GetStat(mobile, DEXTERITY) - 2);
 	elseif (dice == 3)
 		PrintTextAbove(mobile, "*" + mobile.name + " feels less intelligent*");
 		SendSysMessage(mobile, "You permanently lost 2 intelligence");
-		mobile.setint(mobile.intelligence-2);
+		AP_SetTrueStat(MOBILE, INTELLIGENCE, AP_GetStat(mobile, INTELLIGENCE) - 2);
 	endif
 endfunction
 

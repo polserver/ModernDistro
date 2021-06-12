@@ -52,7 +52,7 @@ program use_staminastone (who, stone)
 	endif
         capacity := GetObjProperty (stone, "MaxCapacity"); // Get the stones Maximum cap for stamina
         amt := GetObjProperty(stone, "Amount"); //  How much stamina is in the stone now
-        mystamina := AP_GetVital(who, VITALID_STAMINA); // How much stamina does she have
+        mystamina := AP_GetVital(who, STAMINA); // How much stamina does she have
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Section where we decide what to do based on what was targetted by the Stamina Stone user      //
@@ -61,7 +61,7 @@ program use_staminastone (who, stone)
 // If she targets herself then transfer any stored stamina to her until either she is full or
 // the stone is empty
         if (what == who)
-            maxstamina := AP_GetVitalMaximumValue(who, VITALID_STAMINA);
+            maxstamina := AP_GetVitalMaximumValue(who, STAMINA);
             if (!amt) //If the stone is bone dry of stamina
                 SendSysMessage(who, "That stone has no stored stamina.", color := 666);
                 return;
@@ -74,7 +74,7 @@ program use_staminastone (who, stone)
             if (amt <= staminadif) // If she needs more stamina than the stone has
                 staminadif := amt; // just give her all the stamina left in the stone
             endif
-            SetStamina (who, mystamina + staminadif ); // Transfer the stamina to her
+            AP_SetVital(who, STAMINA, mystamina + staminadif ); // Transfer the stamina to her
             SendSysMessage (who, "Your mind feels stronger.", color := 68);
             SetObjProperty (stone, "Amount", amt - staminadif); // Take the stamina "out of" the stone
             PlaySoundEffect(who, 0x1FB); // Play a cool sound effect
@@ -103,7 +103,7 @@ program use_staminastone (who, stone)
                 if (staminadif + amt >= capacity) // If giving the stone all her stamina will put it over
                     staminadif := capacity - amt; // its max cap then only give it what it needs.
                 endif
-                ApplyStaminaDamage (who, staminadif); // Take the stamina from her
+				AP_SetVital(who, STAMINA, AP_GetVital(who, STAMINA) - staminadif); // Take the stamina from her
                 SetObjProperty (stone, "Amount", amt + staminadif); // Place it "in" the stone
                 SetObjProperty(stone, "Charges", GetObjProperty(stone, "Charges") -1); // Lose a charge
                 SendSysMessage (who, "You transfer the stamina.", color := 68);
@@ -117,7 +117,7 @@ endprogram
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// This function is called the first time a Stamina Stone is used to initialize the stones CProps //
+// This function is called the first time a Stamina Stone is used to initialize the stone's CProps //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
         function Init(who, stone)
 
