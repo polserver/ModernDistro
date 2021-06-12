@@ -1,0 +1,17 @@
+use uo;
+
+include ":gumps:yesNo";
+
+program textcmd_sorcerytext( who )
+	var doit := YesNo( who, "Shall I create a pack containing all sorcery scrolls?" );
+	if(!doit)
+		SendSysMessage(who, "Cancelled.", color := 33);
+		return 0;
+	endif
+	var scrollpack := CreateItemInBackpack(who, "backpack", 1);
+	scrollpack.color := 0x2E;
+	for scroll := 0x2AB01 to 0x2AB28
+		CreateItemInContainer(scrollpack, scroll, 1);
+	endfor
+endprogram
+

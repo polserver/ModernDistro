@@ -1,0 +1,74 @@
+use vitals;
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include "include/fields";
+//include ":sorcery:sorceryOpts";
+
+program fortress(parms)
+
+	var caster := parms[1];
+	var info := parms[2];
+	var cast_on := parms[4]; // If NPC casting there'll be something here.
+	if (!cast_on) // If no cast_on then this is being cast by a player.
+		cast_on := MS_Target(caster, info.targ, "Select a location:");
+	endif
+	if (!cast_on)
+		SendSysMessage (caster, "Cancelled.", color := 33);
+		return 0;
+	endif
+	if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+		return 0;
+	endif
+
+	var fieldsa := { };
+	var fieldsb := { };
+	var fieldsc := { };
+	var fieldsd := { };
+
+	PlaySoundEffect(caster, 0x21f);
+	fieldsa:= CreateEastWestField(cast_on, 0x81, (cast_on.x+2), (cast_on.y+1), cast_on.z, 3);
+	fieldsc:= CreateNorthSouthField(cast_on, 0x81, (cast_on.x), (cast_on.y+2), cast_on.z, 3);
+	fieldsb:= CreateEastWestField(cast_on, 0x81, (cast_on.x-2), (cast_on.y), cast_on.z, 3);
+	fieldsd:= CreateNorthSouthField(cast_on, 0x81, (cast_on.x+1), (cast_on.y-2), cast_on.z, 3);
+
+	var duration := CInt( RandomInt( CInt(AP_GetStat(caster, INTELLIGENCE) / 2) ) + (AP_GetStat(caster, INTELLIGENCE)/3) );
+	var victims, dmg;
+
+	foreach fieldpart in fieldsa
+		fieldpart.movable := 0;
+	endforeach
+	foreach fieldpart in fieldsb
+		fieldpart.movable := 0;
+	endforeach
+	foreach fieldpart in fieldsc
+		fieldpart.movable := 0;
+	endforeach
+	foreach fieldpart in fieldsd
+		fieldpart.movable := 0;
+	endforeach
+
+	Detach();
+	sleep(duration);
+
+	foreach fieldpart in fieldsa
+		DestroyItem(fieldpart);
+	endforeach
+	foreach fieldpart in fieldsb
+		DestroyItem(fieldpart);
+	endforeach
+	foreach fieldpart in fieldsc
+		DestroyItem(fieldpart);
+	endforeach
+	foreach fieldpart in fieldsd
+		DestroyItem(fieldpart);
+	endforeach
+
+
+endprogram
+

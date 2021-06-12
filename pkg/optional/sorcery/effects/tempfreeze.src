@@ -1,0 +1,16 @@
+use uo;
+use os;
+
+
+program tempfreeze(params)
+
+	var who := params[1];
+	var duration := params[2];
+
+	PrintTextAbove(who, CStr(who.name) + " is frozen by the wind!");
+	Detach();
+	who.setParalyzed(1);
+	sleep(duration);
+	who.setParalyzed(0);
+
+endprogram

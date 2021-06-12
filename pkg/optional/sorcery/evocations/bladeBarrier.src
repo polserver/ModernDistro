@@ -1,0 +1,84 @@
+use vitals;
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":sorcery:sorceryOpts";
+include ":damage:damage";
+
+program bladebarrier(parms)
+
+	var caster := parms[1];
+	var info := parms[2];
+	var cast_on := parms[4]; // If NPC casting there'll be something here.
+	if (!cast_on) // If no cast_on then this is being cast by a player.
+		cast_on := MS_TargetCoordinates(caster, info.targ, "Select a location:");
+	endif
+	if (!cast_on)
+		SendSysMessage (caster, "Cancelled.", color := 33);
+		return 0;
+	endif
+	if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+		return 0;
+	endif
+
+	var fields := { };
+	case ( get_direction(caster, cast_on.x, cast_on.y, cast_on.z) )
+		"north" : fields:= CreateNorthSouthField(caster, 0x37a0, cast_on.x, cast_on.y, cast_on.z, 5);
+		"south" : fields:= CreateNorthSouthField(caster, 0x37a0, cast_on.x, cast_on.y, cast_on.z, 5);
+		"east"  : fields:= CreateEastWestField(caster, 0x37a0, cast_on.x, cast_on.y, cast_on.z, 5);
+		"west"  : fields:= CreateEastWestField(caster, 0x37a0, cast_on.x, cast_on.y, cast_on.z, 5);
+		default:
+		case (RandomInt(2))
+			0: fields:= CreateNorthSouthField(caster, 0x37a0, cast_on.x, cast_on.y, cast_on.z, 5);
+			1: fields:= CreateEastWestField(caster, 0x37a0, cast_on.x, cast_on.y, cast_on.z, 5);
+		endcase
+	endcase
+	var duration := RandomInt( CInt(AP_GetStat(caster, INTELLIGENCE) / 2) + CInt(AP_GetStat(caster, INTELLIGENCE)/10) );
+	if(duration < 10)
+		duration := 10;
+	endif
+	var victims, dmg;
+	foreach fieldpart in fields
+		fieldpart.movable := 0;
+	endforeach
+	Detach();
+
+	while (duration > 0)
+
+		PlaySoundEffect(fields[3], 0x21d);
+		foreach fieldpart in fields
+			victims := ListMobilesInLineOfSight(fieldpart, 1);
+			foreach victim in victims
+				dmg := RandomDiceRoll("1d4+1");
+				if (victim.isA(POLCLASS_NPC))
+					send_attack(victim, caster);
+					dmg := dmg * 2;
+				endif
+				SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "Bladebarrier" });
+				ApplyDamageEX(victim, dmg, DMG_PHYSICAL, caster);
+			endforeach
+		endforeach
+		sleepms(200);
+		PlaySoundEffect(fields[3], 0x21d);
+		sleepms(200);
+		PlaySoundEffect(fields[3], 0x21d);
+		sleepms(200);
+		PlaySoundEffect(fields[3], 0x21d);
+		sleepms(200);
+		PlaySoundEffect(fields[3], 0x21d);
+		sleepms(200);
+		duration := duration - 1;
+
+	endwhile
+
+	foreach fieldpart in fields
+		DestroyItem(fieldpart);
+	endforeach
+
+endprogram
+

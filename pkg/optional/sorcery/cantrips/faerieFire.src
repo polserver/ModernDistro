@@ -1,0 +1,47 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":sorcery:sorceryOpts";
+
+program createlightsource(params)
+	var caster := params[1];
+	var info := params[2];
+	var cast_on := MS_TargetCoordinates(caster, info.targ, "Select a target.");
+	if (!cast_on) // If no cast_on then get cast_on from params[4]. Used mostly for NPC casting.
+		cast_on := params[4];
+	endif
+	if (!cast_on)
+		SendSysMessage (caster, "Cancelled.", color := 33);
+	  return 0;
+	endif
+	if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+		return 0;
+	endif
+
+	AwardRawAttributePoints( caster, MAGERY, 50, SKILLID_MAGERY);
+	var thecreature;
+	var thecritter;
+	var npcparams := struct;
+	npcparams .+ script := ":sorcery:ai/light";
+	thecritter := CreateNpcFromTemplate(":sorcery:light", cast_on.x, cast_on.y, cast_on.z, npcparams, cast_on.realm);
+	if(!thecritter)
+		Print(thecritter.errortext);
+	endif
+	SetObjProperty(thecritter,"master", caster.serial);
+	SetObjProperty(thecritter, "summoned",1);
+	thecritter.guardignore := 1;
+	RestartScript(thecritter);
+	var thelight := CreateItemAtLocation(1, 1, 1, 0xa22, 1, "britannia_alt");
+	thelight.newbie := 1;
+	EquipItem(thecritter, thelight);
+	PlaySoundEffect(caster, SFX_SPELL_SUMMON_ELEMENTAL);
+	MoveObjectToLocation(thecritter,  cast_on.x, cast_on.y, cast_on.z, thecritter.realm, MOVEOBJECT_FORCELOCATION);
+	Detach();
+	sleep(120);
+	ApplyDamage(thecritter, 3);
+endprogram

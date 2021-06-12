@@ -1,0 +1,89 @@
+/*
+        Maintained by The POL Distro Team
+
+        2018-07-25
+*/
+use uo;
+use cliloc;
+
+include ":attributes:attributes";
+include ":containers:checks";
+include ":itemUtils:itemdesc";
+include ":magery:spells";
+
+program canInsert( mobile, container, move_type, unused inserttype, adding_item, unused existing_stack, unused amount_to_add )
+
+	var sorcery_cfg := ReadConfigFile(":sorcery:itemdesc");
+	var scroll_elem := FindConfigElem(sorcery_cfg, adding_item.objtype);
+	var spell_id := CInt(scroll_elem.SpellId);
+	var spell_elem := MS_GetSpellsCfgElem(spell_id);
+	var mana_required := CInt(spell_elem.ManaCost);
+	Print("mana_required = " + mana_required);
+	if( move_type == MOVETYPE_COREMOVE )
+		return 1;
+	elseif( adding_item.amount > 1 )
+		SendSysMessage(mobile, "You cannot inscribe more than one scroll at a time.", color := 33);
+		return 0;
+	elseif(scroll_elem.SpellType != "Sorcery")
+		SendSysMessage(mobile, "You cannot inscribe that into a book of sorcery.", color := 33);
+		return 0;
+	elseif(IsInSpellInBook(container, spell_id))
+		SendSysMessage(mobile, "That spell is already in the book.", color := 33);
+		return 0;
+	elseif(!SkillCheck(mobile, INSCRIPTION, 90, 50))
+	// elseif(AP_GetSkill(mobile, INSCRIPTION) < 80)
+		SendSysMessage(mobile, "You failed to inscribe that scroll.", color := 33);
+		return 0;
+	elseif( AP_GetVital( mobile, MANA ) < mana_required )
+		SendSysMessageCL ( mobile, 1044380, color := 33 ); // You don't have enough mana to inscribe that spell.
+		return 0;
+	endif
+
+	return 1;
+endprogram
+
+function IsInSpellInBook(container, spell_id)
+
+	// If the spell is in the book, return 1.
+	var incantations :={1709, 1710, 1711, 1712, 1713, 1714, 1715, 1716};
+	var invocations := {1717, 1718, 1719, 1720, 1721, 1722, 1723, 1724, 1725, 1726, 1727, 1728, 1729, 1730, 1731, 1732};
+	var conjurations := {1733, 1734, 1735, 1736, 1737, 1738, 1739, 1740, 1741, 1742, 1743, 1744, 1745, 1746, 1747, 1748};
+	var bit_position, incant_prop, invoc_prop, conj_prop := 0;
+	if(spell_id in incantations)
+		bit_position := 8 - (spell_id in incantations);
+		incant_prop := GetObjProperty(container, "Incantations");
+		if(incant_prop.errortext)
+			incant_prop := 0;
+		endif
+		bit_position := CInt(Pow(2, bit_position));
+		incant_prop := incant_prop & bit_position;
+		if(conj_prop := conj_prop & bit_position)
+			return 1;
+		endif
+	elseif(spell_id in invocations)
+		bit_position := 16 - (spell_id in invocations);
+		invoc_prop := GetObjProperty(container, "Invocations");
+		if(invoc_prop.errortext)
+			invoc_prop := 0;
+		endif
+		bit_position := CInt(Pow(2, bit_position));
+	// Print(CInt(Pow(2, bit_position)));
+		invoc_prop := invoc_prop & bit_position;
+		if(invoc_prop := invoc_prop & bit_position)
+			return 1;
+		endif
+	elseif(spell_id in conjurations)
+		bit_position := 16 - (spell_id in conjurations);
+		conj_prop := GetObjProperty(container, "Conjurations");
+		if(conj_prop.errortext)
+			conj_prop := 0;
+		endif
+		bit_position := CInt(Pow(2, bit_position));
+		if(conj_prop := conj_prop & bit_position)
+			return 1;
+		endif
+	else
+		return 0;
+	endif
+
+endfunction

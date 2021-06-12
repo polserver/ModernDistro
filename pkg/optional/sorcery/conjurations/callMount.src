@@ -1,0 +1,28 @@
+/////////////////////////////////////////////////////////////////////
+// Runs the script :sorcery:mount/createMount.src
+// which mounts the caster on a random mount.
+// See :sorcery:mount/createMount.src for the list of mounts.
+/////////////////////////////////////////////////////////////////////
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":sorcery:sorceryOpts";
+
+program CallMount(parms)
+
+	var caster := parms[1];
+
+    if(GetEquipmentByLayer(caster, 25))
+        SendSysMessage(caster, "You cannot summon a mount", color := 33);
+        SendSysMessage(caster, "while you are mounted.", color := 33);
+        return;
+    endif
+	Run_Script(":sorcery:mount/createMount", {caster});
+
+endprogram
+

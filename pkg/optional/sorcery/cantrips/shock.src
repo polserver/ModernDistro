@@ -1,0 +1,50 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":sorcery:sorceryOpts";
+include ":damage:damage";
+
+var npccfg := ReadConfigFile("npcdesc");
+
+program shock(parms)
+
+    var caster := parms[1];
+    var info := parms[2];
+    var cast_on := parms[4];
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+	cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_HELPFUL);
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+    if ( !MS_MobileCheck(caster, cast_on) )
+        return 0;
+    endif
+
+    AwardRawAttributePoints( caster, MAGERY, 50, SKILLID_MAGERY);
+    var dmg := CInt( RandomInt(3) + (AP_GetStat(caster, INTELLIGENCE)/19) );
+    PlayMovingEffect(caster, cast_on, 0x379f, 0xf, 0x1e );
+    PlaySoundEffect(cast_on, 0x020b);
+    SetObjProperty(cast_on, "LastHit", {caster.name, caster.serial, "Sorcery" });
+    if(cast_on.isA(POLCLASS_NPC))
+            var element := npccfg[cast_on.npctemplate].elemental;
+            if(element == "air")
+                    HealDamage(cast_on, dmg);
+            elseif(element == "water")
+                    ApplySpellDamageEX(cast_on, dmg*3, DMG_ENERGY, caster, info.Circle);
+            else
+                    ApplySpellDamageEX(cast_on, dmg*2, DMG_ENERGY, caster, info.Circle);
+            endif
+    else
+            ApplySpellDamageEX(cast_on, dmg, DMG_ENERGY, caster, info.Circle);
+    endif
+
+    return 1;
+
+endprogram

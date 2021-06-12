@@ -1,0 +1,13 @@
+use uo;
+
+program textcmd_sorcerytext( who )
+    var book := CreateItemInBackpack(who,"bookofsorcery", 1);
+    if (!book)
+        SendSysMessage ( who, "For some reason I could not create the text of sorcery in your backpack.", color := 33);
+        return;
+    endif
+    SetObjProperty (book, "Incantations", "11111111");
+    SetObjProperty (book, "Evocations", "1111111111111111");
+    SetObjProperty (book, "Conjurations", "1111111111111111");
+    SetObjProperty (book, "MySpells", "0000000000000000");
+endprogram

@@ -1,0 +1,318 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":sorcery:sorceryOpts";
+include ":damage:damage";
+
+
+program toxicstorm(parms)
+
+	var caster := parms[1];
+	var info := parms[2];
+	var cast_on := parms[4]; // If NPC casting there'll be something here.
+	if (!cast_on) // If no cast_on then this is being cast by a player.
+	cast_on := MS_TargetCoordinates(caster, info.targ, "Select a location:");
+	endif
+	if (!cast_on)
+	SendSysMessage (caster, "Cancelled.", color := 33);
+	return 0;
+	endif
+	if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+	return 0;
+	endif
+
+
+	PlaySoundEffect(caster, 0x232);
+
+	var thevortex;
+	var vortexlist := {};
+	if (CheckLosAt(caster, cast_on.x-1, cast_on.y-3, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x-1, cast_on.y-3, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x, cast_on.y-3, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x, cast_on.y-3, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x+1, cast_on.y-3, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x+1, cast_on.y-3, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster,cast_on.x-2, cast_on.y-2, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x-2, cast_on.y-2, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x-1, cast_on.y-2, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x-1, cast_on.y-2, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x, cast_on.y-2, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x, cast_on.y-2, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x+1, cast_on.y-2, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x+1, cast_on.y-2, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x+2, cast_on.y-2, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x+2, cast_on.y-2, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x-3, cast_on.y-1, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x-3, cast_on.y-1, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x-2, cast_on.y-1, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x-2, cast_on.y-1, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x-1, cast_on.y-1, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x-1, cast_on.y-1, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x, cast_on.y-1, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x, cast_on.y-1, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x+1, cast_on.y-1, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x+1, cast_on.y-1, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x+2, cast_on.y-1, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x+2, cast_on.y-1, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x+3, cast_on.y-1, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x+3, cast_on.y-1, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x-3, cast_on.y, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x-3, cast_on.y, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x-2, cast_on.y, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x-2, cast_on.y, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x-1, cast_on.y, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x-1, cast_on.y, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x, cast_on.y, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x+1, cast_on.y, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x+1, cast_on.y, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x+2, cast_on.y, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x+2, cast_on.y, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x+3, cast_on.y, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x+3, cast_on.y, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x-3, cast_on.y+1, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x-3, cast_on.y+1, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x-2, cast_on.y+1, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x-2, cast_on.y+1, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x-1, cast_on.y+1, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x-1, cast_on.y+1, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x, cast_on.y+1, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x, cast_on.y+1, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x+1, cast_on.y+1, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x+1, cast_on.y+1, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x+2, cast_on.y+1, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x+2, cast_on.y+1, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x+3, cast_on.y+1, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x+3, cast_on.y+1, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x-2, cast_on.y+2, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x-2, cast_on.y+2, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x-1, cast_on.y+2, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x-1, cast_on.y+2, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x, cast_on.y+2, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x, cast_on.y+2, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x+1, cast_on.y+2, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x+1, cast_on.y+2, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x+2, cast_on.y+2, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x+2, cast_on.y+2, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x-1, cast_on.y+3, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x-1, cast_on.y+3, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x, cast_on.y+3, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x, cast_on.y+3, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+	if (CheckLosAt(caster, cast_on.x+1, cast_on.y+3, cast_on.z) )
+		thevortex := CreateItemAtLocation(cast_on.x+1, cast_on.y+3, cast_on.z, 0x3728, 1, cast_on.realm);
+		thevortex.movable := 0;
+		thevortex.color := 57;
+		vortexlist.append(thevortex);
+	endif
+
+	var duration := CInt(AP_GetStat(caster, INTELLIGENCE)/5) + RandomInt(AP_GetStat(caster, INTELLIGENCE)/5);
+	var hvictims, victims, newx, newy, newz;
+	Detach();
+
+	while (duration > 0)
+		foreach thevortex in vortexlist
+		if (thevortex)
+			hvictims := ListMobilesNearLocationEx(thevortex.x, thevortex.y, thevortex.z, 1, LISTEX_FLAG_HIDDEN, thevortex.realm);
+			foreach victim in hvictims
+				if (AP_GetVital(victim, HITS) > 0)
+					if (victim.npctemplate)
+						send_attack(victim, caster);
+					endif
+					SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "Sorcery" });
+					if(GetObjProperty(victim,"poison_level") > 1)
+						ApplySpellDamageEX(victim, 2, DMG_POISON, victim, 6);
+					else
+						if(!GetObjProperty(victim,"#poisonisrunning"))
+							var amt := Resisted(3, caster, victim, (RandomInt(15)+1));
+							SetObjProperty(victim,"poison_level", amt);
+							var passparams := { victim, 0, "poison cloud"};
+							SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "Sorcery" });
+							SetObjProperty(victim,"#poisonisrunning", 1);
+							start_script( ":spells:poisondamage", passparams);
+						endif
+					endif
+				endif
+			endforeach
+			victims := ListMobilesNearLocation(thevortex.x, thevortex.y, thevortex.z, 1, thevortex.realm);
+
+			foreach victim in victims
+				if (AP_GetVital(victim, HITS) > 0)
+					if(GetObjProperty(victim,"#poisonisrunning"))
+						SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "Sorcery" });
+						ApplySpellDamageEX(victim, 4, DMG_POISON, victim, 6);
+					else
+						var amt := Resisted(3, caster, victim, (RandomInt(20)+1));
+						SetObjProperty(victim,"poison_level", amt);
+						var passparams := { victim, 0, "poison cloud"};
+						SetObjProperty(victim,"#poisonisrunning", 1);
+						start_script( ":spells:poisondamage", passparams);
+					endif
+				endif
+			endforeach
+			newx := thevortex.x + RandomInt(2) - RandomInt(2);
+			newy := thevortex.y + RandomInt(2) - RandomInt(2);
+			newz := GetWorldHeight(newx, newy, thevortex.realm);
+			if (CheckLosAt(thevortex, newx, newy, newz) )
+				thevortex.movable := 1;
+				MoveObjectToLocation(thevortex, newx, newy, newz, thevortex.realm, MOVEOBJECT_FORCELOCATION);
+				thevortex.movable := 0;
+			endif
+		endif
+		endforeach
+		sleepms(500);
+		duration := duration - 1;
+	endwhile
+	foreach thevortex in vortexlist
+		DestroyItem(thevortex);
+	endforeach
+endprogram
+

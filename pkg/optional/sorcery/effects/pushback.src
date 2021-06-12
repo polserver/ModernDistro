@@ -1,0 +1,57 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":sorcery:sorceryOpts";
+include ":damage:damage";
+
+var npccfg := ReadConfigFile("npcdesc");
+
+program pushback(victim)
+
+	if (victim.frozen)
+		return 0;
+	endif
+
+	var movedist := 4;
+	var movex, movey;
+
+	SendSysMessage(victim, "You are tossed about by the wind!");
+
+	while (movedist > 0)
+
+		movex := victim.x + RandomInt(2) - RandomInt(2);
+		movey := victim.y + RandomInt(2) - RandomInt(2);
+
+		if(victim.isA(POLCLASS_NPC))
+			var element := npccfg[victim.npctemplate].elemental;
+			if(element == "air")
+				HealDamage(victim, (RandomDiceRoll("1d6") ) );
+			else
+				if(element == "water")
+					ApplyRawDamageEX(victim, RandomDiceRoll("3d6"), DMG_PHYSICAL, 0);
+				endif
+				if (CheckLosAt(victim, movex, movey, (GetWorldHeight(movex, movey, victim.realm) ) ) )
+					MoveObjectToLocation(victim, movex, movey, (GetWorldHeight(movex, movey, victim.realm) ), victim.realm );
+				else
+					ApplyRawDamageEX(victim, RandomDiceRoll("2d6"), DMG_PHYSICAL, 0);
+				endif
+			endif
+		else
+			if (CheckLosAt(victim, movex, movey, (GetWorldHeight(movex, movey) ) ) )
+				MoveObjectToLocation(victim, movex, movey, (GetWorldHeight(movex, movey, victim.realm) ), victim.realm );
+			else
+				ApplyRawDamageEX(victim, RandomDiceRoll("2d3"), DMG_PHYSICAL, 0);
+			endif
+		endif
+
+		PlaySoundEffect(victim, 0x15);
+		sleepms(300);
+		movedist := movedist - 1;
+	endwhile
+
+endprogram

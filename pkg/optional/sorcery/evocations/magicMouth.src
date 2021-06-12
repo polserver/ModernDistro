@@ -1,0 +1,32 @@
+/////////////////////////////////////////////////////////////////////
+// This script extends the speaking range to 66 for a single
+// message.
+/////////////////////////////////////////////////////////////////////
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":gumps:requestGump";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":sorcery:sorceryOpts";
+
+program MagicMouth(parms)
+
+    var caster := parms[1];
+    var info := parms[2];
+	var exclude := 0;
+	var message := RequestGump(caster, "What do you want to say?", "", "", CANCEL_BTN_ON, 160);
+	var near_mobs := ListMobilesNearLocation( caster.x, caster.y, caster.z, 66, caster.realm );
+	foreach mob in near_mobs
+		if(mob.IsA(POLCLASS_NPC))
+			continue;
+		else
+			SendSysMessage(mob, message);
+		endif
+	endforeach
+
+endprogram
+

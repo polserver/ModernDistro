@@ -1,0 +1,38 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":sorcery:sorceryOpts";
+
+program Cocoon(parms)
+
+	var caster := parms[1];
+	var info := parms[2];
+	var cast_on := parms[4];
+	if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+		cast_on := MS_Target(caster, info.targ, "Select a target:", TGTOPT_CHECK_LOS+TGTOPT_HARMFUL);
+	endif
+	if ( !MS_MobileCheck(caster, cast_on) )
+		return 0;
+	endif
+	if (!cast_on)
+		SendSysMessage (caster, "Cancelled.", color := 33);
+		return 0;
+	endif
+
+	var cocoon := CreateItemAtLocation(cast_on.x, cast_on.y, cast_on.z, "SorcCocoon", 1, cast_on.realm);
+	SetObjProperty(cast_on, "OrigZ", cast_on.z);
+	SetObjProperty(cocoon, "PrisonerSerial", cast_on.serial);
+	MoveObjectToLocation(cast_on, cast_on.x, cast_on.y, cast_on.z - 100, cast_on.realm, MOVEOBJECT_FORCELOCATION);
+	SendSysMessage(cast_on, "You have been temporarily sealed in a cocoon and cannot move!", color := 43);
+	Set_Critical(1);
+	var max_hp_mod := CInt(AP_GetSkill(caster, MAGERY) * 3);
+	cocoon.maxhp_mod := max_hp_mod;
+	cocoon.hp += cocoon.maxhp_mod;
+	Set_Critical(0);
+endprogram
+

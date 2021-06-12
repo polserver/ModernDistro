@@ -1,0 +1,82 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":sorcery:sorceryOpts";
+
+
+program domination(parms)
+
+    var npccfg := ReadConfigFile(":*:npcdesc");
+    var caster := parms[1];
+    var info := parms[2];
+    var cast_on := parms[4]; // If NPC casting there'll be something here.
+    if (!cast_on) // If no cast_on then this is being cast by a player.
+        cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_HELPFUL);
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+    if ( !MS_MobileCheck(caster, cast_on) )
+        return 0;
+    endif
+
+
+	if (!cast_on.isA(POLCLASS_NPC))
+		SendSysMessage(caster, "Aborted.");
+		return 0;
+	endif
+
+	send_attack(cast_on, caster);
+
+	if ( (!cast_on.criminal) && (!cast_on.murderer) )
+		caster.setCriminal(1);
+	endif
+
+	if ( !cast_on.npctemplate )
+		SendSysMessage(caster, "Domination has no effect.", color := 40);
+		PlaySoundEffect(caster, 0x005d);
+		PlayObjectCenteredEffect(caster, 0x3735, 0x0a, 0x1e);
+		return 0;
+	endif
+
+	if ( npccfg[cast_on.npctemplate].nopsych )
+		SendSysMessage(caster, "Your spell has no effect.", color := 40);
+		PlaySoundEffect(caster, 0x005d);
+		PlayObjectCenteredEffect(caster, 0x3735, 0x0a, 0x1e);
+		return 0;
+	endif
+
+    var resistcheck := CInt(AP_GetStat(cast_on, INTELLIGENCE) + AP_GetSkill(cast_on, RESISTING_SPELLS) - AP_GetSkill(caster, MAGERY) - AP_GetSkill(caster, EVALUATING_INTELLIGENCE) );
+	if (RandomInt(100) <= resistcheck)
+		SendSysMessage(caster, "Your victim has resisted Domination.", color := 40);
+		PlaySoundEffect(caster, 0x005d);
+		PlayObjectCenteredEffect(caster, 0x3735, 0x0a, 0x1e);
+		return 0;
+	endif
+
+	SetObjProperty(cast_on, "master", caster.serial);
+	SetObjProperty(cast_on, "OldScript", cast_on.script);
+	SetScriptController(cast_on);
+	SetObjProperty(cast_on, "happiness", 100);
+	cast_on.script := "tamed";
+	RestartScript(cast_on);
+	PrintTextAbove(cast_on, CStr(cast_on.name) + " appears confused!");
+	PlaySoundEffect(cast_on, SFX_SPELL_WEAKEN);
+	PlayObjectCenteredEffect(cast_on, FX_CURSE_EFFECT, 10,10);
+
+	Detach();
+	sleep( CInt( (AP_GetStat(caster, INTELLIGENCE) / 2) + RandomInt(AP_GetStat(caster, INTELLIGENCE)) ) );
+	cast_on.script := GetObjProperty(cast_on, "OldScript");
+	RestartScript(cast_on);
+	EraseObjProperty(cast_on, "master");
+	EraseObjProperty(cast_on, "happiness");
+	EraseObjProperty(cast_on, "OldScript");
+
+endprogram
+

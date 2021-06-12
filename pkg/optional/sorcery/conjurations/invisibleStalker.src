@@ -1,0 +1,60 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include "include/eventID";
+include ":sorcery:sorceryOpts";
+
+program InvisibleStalker(parms)
+
+	var caster := parms[1];
+	var info := parms[2];
+	var cast_on := parms[4]; // If NPC casting there'll be something here.
+	if (!cast_on) // If no cast_on then this is being cast by a player.
+		cast_on := MS_Target(caster, info.targ, "Select aan enemy:");
+	endif
+	if (!cast_on)
+		SendSysMessage (caster, "Cancelled.", color := 33);
+		return 0;
+	endif
+	if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+		SendSysMessage(caster, "you cannot see that.", color := 33);
+		return 0;
+	endif
+
+	var stalker := CreateNpcFromTemplate("troll2", 6143, 1279, 0, 0, "britannia");
+	stalker.concealed := 1;
+    SetObjProperty( stalker, "happiness", 100);
+    SetObjProperty( stalker, "master", caster.serial );
+    SetObjProperty( stalker, "script", stalker.script );
+    stalker.setmaster( caster );
+    stalker.script := "tamed";
+    RestartScript(stalker);
+	MoveObjectToLocation(stalker, caster.x, caster.y, caster.z, caster.realm, MOVEOBJECT_FORCELOCATION);
+	SendSysMessage(cast_on, "You are being attacked by an invisible enemy!!!", color := 33);
+
+	var ev := array;
+	ev.+ type;
+	ev.+ source;
+	ev.type := EVID_PEACEMADE;
+	ev.source := cast_on;
+	SendEvent(stalker, ev);
+	ev.source := stalker;
+	SendEvent(cast_on, ev);
+	ev.type := EVID_ENGAGED;
+	ev.source := cast_on;
+	SendEvent(stalker, ev);
+	ev.source := stalker;
+	SendEvent(cast_on, ev);
+
+	Sleep(30);
+	SetObjProperty(stalker, "guardkill", 1);
+	stalker.kill();
+	SendSysMessage(cast_on, "The invisible enemy is gone.", color := 66);
+
+endprogram
+

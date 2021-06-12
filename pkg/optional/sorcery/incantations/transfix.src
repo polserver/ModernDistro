@@ -1,0 +1,29 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":timedScripts:timedScripts";
+include ":sorcery:sorceryOpts";
+
+program transfix(parms)
+
+	var caster := parms[1];
+	var victims := ListMobilesInLineOfSight(caster, 7);
+	var amt, duration;
+	var CIRCLE := 7;
+
+	foreach cast_on in victims
+		send_attack(cast_on, caster);
+		amt := 10 + RandomInt(CInt(AP_GetSkill(caster, MAGERY)/5));
+		duration := Resisted(caster, cast_on, circle, amt);
+		PlayStationaryEffect( cast_on.x, cast_on.y, cast_on.z, FX_CURSE_EFFECT, 10, 0xa, 0 );
+		PlaySoundEffect( cast_on, SFX_SPELL_PARALYZE );
+		TS_StartTimer(cast_on, "Paralysis", duration, 1, caster);
+	endforeach
+
+endprogram
+

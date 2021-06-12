@@ -1,0 +1,14 @@
+use uo;
+use os;
+use cfgfile;
+
+program Install()
+	return 1;
+endprogram
+
+exported function IsSorceryBook( unused scorcery_book )
+
+	return 1;
+
+endfunction
+

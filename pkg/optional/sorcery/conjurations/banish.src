@@ -1,0 +1,68 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":damage:damage";
+include ":sorcery:sorceryOpts";
+
+program Banish(parms)
+
+	var caster := parms[1];
+	var info := parms[2];
+	var whereto := struct;
+	var success;
+	var cast_on := parms[4];
+	if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+		cast_on := MS_Target(caster, info.targ, "Select a target:", TGTOPT_CHECK_LOS+TGTOPT_HARMFUL);
+	endif
+	if (!cast_on)
+		SendSysMessage (caster, "Cancelled.", color := 33);
+		return 0;
+	endif
+	if ( !MS_MobileCheck(caster, cast_on) )
+		return 0;
+	endif
+	if(cast_on.isA(POLCLASS_NPC))
+		SendSysMessage(caster, "You may only banish players.", color := 33);
+		return 0;
+	endif
+	if(cast_on.cmdlevel > 1)
+		SendSysMessage(caster, "You will be punished for your misdeed!!!", color := 33);
+		SleepMS(500);
+		PlayLightningBoltEffect(caster);
+		ApplyRawDamageEx(caster, Cint(AP_GetVital(caster, HITS) / 2));
+		SendSysMessage(cast_on, caster.name + " attempted to caster the sorcery spell Banish on you.", color := 33);
+		return 0;
+	endif
+	whereto := GetLocation();
+	success := MoveObjectToLocation(cast_on,whereto.xloc, whereto.yloc, whereto.zloc, whereto.facetloc, MOVEOBJECT_FORCELOCATION);
+	SendSysMessage(cast_on, "You have been bannished to " + whereto.nameloc + "!", 2, 33);
+
+endprogram
+
+function GetLocation();
+	var place := struct;
+	var locations := {  "Skull Island", 2951, 2167, 51, "britannia",	"Amoeba Island", 2145, 3962, 3, "britannia",
+						"Dragon Isle", 1094, 3208, 0, "britannia",		"Blanche Isle", 2196, 1984, 0, "britannia",
+						"Ocarina Isle", 2100, 1967, 0, "britannia",		"Marble Isle", 1919, 2089, 0, "britannia",
+						"Dot Isle", 1504, 365, 0, "britannia",			"Unnamed Isle", 1386, 362, 0, "britannia",
+						"No Name Isle", 1378, 371, 0, "britannia",		"Bald Island", 2355, 3431, 0, "britannia",
+						"Temple Island", 2461, 3583, 0, "britannia",	"Valorian Island", 2481, 3967, 0, "britannia" };
+	var bannish_location := RandomDiceRoll("1d12");
+	bannish_location *= 5;
+	place.+facetloc := locations[bannish_location];
+	bannish_location -=1;
+	place.+zloc := locations[bannish_location];
+	bannish_location -=1;
+	place.+yloc := locations[bannish_location];
+	bannish_location -=1;
+	place.+xloc := locations[bannish_location];
+	bannish_location -= 1;
+	place.+nameloc := locations[bannish_location];
+	return place;
+endfunction
+

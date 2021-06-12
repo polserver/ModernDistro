@@ -1,0 +1,73 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":sorcery:sorceryOpts";
+include ":gumps:yesNo";
+
+program familiar(parms)
+
+	var caster := parms[1];
+	var info := parms[2];
+	var cast_on := parms[4];
+	var npccfg := ReadConfigFile(":*:npcdesc");
+
+	Detach();
+	var myfamiliar := GetObjProperty(caster, "Familiar");
+	if (myfamiliar != error)
+		myfamiliar := SystemFindObjectBySerial(myfamiliar);
+		if (myfamiliar != error)
+			SendSysMessage(caster, "You have a familiar - would you like to call it?", color := 88);
+			if(yesNo(caster, "Call Familiar?") == 1)
+				MoveObjectToLocation(myfamiliar, caster.x, caster.y, caster.z, caster.realm, MOVEOBJECT_FORCELOCATION);
+				PlaySoundEffect(myfamiliar, 0xff);
+				return 1;
+			endif
+		endif
+		EraseObjProperty(caster, "Familiar");
+		EraseObjProperty(myfamiliar, "Familiar");
+	endif
+
+	if (!cast_on)
+		SendSysMessage (caster, "Cancelled.", color := 33);
+		return 0;
+	endif
+	if ( !MS_MobileCheck(caster, cast_on) )
+		SendSysMessage(caster, "You must select a non-player character.", color := 33);
+		return 0;
+	endif
+
+	if (cast_on.ip)
+		SendSysMessage(caster, "That cannot become your familiar.", color := 33);
+		return 0;
+	endif
+
+	var element := npccfg[cast_on.npctemplate].familiar;
+	if (!element)
+		SendSysMessage(caster, "That cannot become your familiar.", color := 33);
+		return 0;
+	else
+		element := CInt(element);
+	endif
+
+	if (SkillCheck(caster, MEDITATION, element, (element * 3) ) )
+		SendSysMessage(caster, "You have bonded with " + CStr(cast_on.name) + ".", color := 66);
+		cast_on.master := caster.serial;
+		SetObjProperty(cast_on, "master", caster.serial);
+		SetObjProperty(cast_on, "Familiar", caster.serial);
+		SetObjProperty(caster, "Familiar", cast_on.serial);
+		SetObjProperty(cast_on, "NeverRelease", 1);
+		cast_on.script := "tamed";
+		RestartScript(cast_on);
+		PlaySoundEffect(myfamiliar, 0xff);
+		element := AP_GetStat(caster, STRENGTH) - 5;
+		SetBaseStrength(caster,element);
+	else
+		SendSysMessage(caster, "You have failed to bond with " + CStr(cast_on.name) + ".", color := 33);
+	endif
+
+endprogram

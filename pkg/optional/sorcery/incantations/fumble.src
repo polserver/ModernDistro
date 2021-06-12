@@ -1,0 +1,47 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":sorcery:sorceryOpts";
+
+
+program fumble(parms)
+
+	var caster := parms[1];
+	var info := parms[2];
+	var cast_on := parms[4];
+	if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+		cast_on := MS_Target(caster, info.targ, "Select a target:", TGTOPT_CHECK_LOS+TGTOPT_HARMFUL);
+	endif
+	if (!cast_on)
+		SendSysMessage (caster, "Cancelled.", color := 33);
+		return 0;
+    endif
+	if ( !MS_MobileCheck(caster, cast_on) )
+		return 0;
+	endif
+
+	if ( SkillCheck(cast_on, RESISTING_SPELLS, 30, 40) )
+		SendSysMessage(cast_on, "You feel yourself resisting magical energy!");
+		PlaySoundEffect(cast_on, SFX_SPELL_WEAKEN);
+		PlayObjectCenteredEffect(cast_on, FX_CURSE_EFFECT, 5,5);
+		return 0;
+	endif
+
+	var drop := GetEquipmentByLayer(cast_on, 0x1);
+	if (GetObjProperty(drop, "type") != "cursed")
+		MoveObjectToLocation(drop, cast_on.x, cast_on.y, cast_on.z, cast_on.realm, MOVEOBJECT_FORCELOCATION);
+	endif
+
+	drop := GetEquipmentByLayer(cast_on, 0x2);
+	if (GetObjProperty(drop, "type") != "cursed")
+		MoveObjectToLocation(drop, cast_on.x, cast_on.y, cast_on.z, cast_on.realm, MOVEOBJECT_FORCELOCATION);
+	endif
+
+	PlaySoundEffect(cast_on, 0x253);
+
+endprogram

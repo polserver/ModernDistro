@@ -1,0 +1,13 @@
+use uo;
+use os;
+
+program SorcCocoon_methods_install()
+	return 1;
+endprogram
+
+exported function IsSorcCocoon( item )
+
+	item := item; // Avoid Compiler Warnings...
+
+	return 1;
+endfunction

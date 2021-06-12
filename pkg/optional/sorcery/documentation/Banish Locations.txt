@@ -1,0 +1,36 @@
+Skull Island
+2951 2167 51
+
+Amoeba Island
+2145 3962 3
+
+Dragon Isle
+1094 3208 0
+
+Blanche Isle
+2196 1984 0
+
+Ocarina Isle
+2100 1967 0
+
+Marble Isle
+1919 2089 0
+
+Dot Isle
+1504 365 0 
+
+Three Tile Isle
+1386 362 0
+
+No Name Isle
+1378 371 0
+
+Bald Island
+2355 3431 0
+
+Temple Island
+2461 3583 0
+
+Valorian Island
+2481 3967 0
+

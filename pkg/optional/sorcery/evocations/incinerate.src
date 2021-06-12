@@ -1,0 +1,55 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":sorcery:sorceryOpts";
+include ":damage:damage";
+
+program incinerate(parms)
+
+	var caster := parms[1];
+	var info := parms[2];
+	var cast_on := parms[4];
+	if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+	cast_on := MS_Target(caster, info.targ, "Select a target:", TGTOPT_CHECK_LOS+TGTOPT_HARMFUL);
+	endif
+	if (!cast_on)
+	SendSysMessage (caster, "Cancelled.", color := 33);
+	return 0;
+	endif
+	if ( !MS_MobileCheck(caster, cast_on) )
+	return 0;
+	endif
+
+
+	Detach();
+	var dmg;
+	var npccfg1 := ReadConfigFile(":*:npcdesc");
+	var CIRCLE := 8;
+
+	PlayMovingEffect(caster, cast_on, 0x36fe, 0xa, 0x1e );
+	PlaySoundEffect(cast_on, 0x0228);
+
+	dmg := "40d8+" + CStr(AP_GetStat(caster, INTELLIGENCE) / 2);
+	dmg := RandomDiceRoll(dmg);
+	SetObjProperty(cast_on, "LastHit", {caster.name, caster.serial, "Sorcery" });
+	if (cast_on.isA(POLCLASS_NPC))
+		Send_attack(cast_on, caster);
+		var element := npccfg1[cast_on.npctemplate].elemental;
+		if (element == "fire")
+			HealDamage(cast_on, CInt(dmg/2) );
+		elseif ( (element == "earth") || (element == "ice") )
+			ApplyDamage(cast_on, Resisted(CIRCLE, caster, cast_on, (dmg*2) ) );
+			ApplySpellDamageEX(cast_on, dmg*3, DMG_FIRE, caster, info.Circle);
+		else
+			ApplySpellDamageEX(cast_on, dmg*2, DMG_FIRE, caster, info.Circle);
+		endif
+	else
+		ApplySpellDamageEX(cast_on, dmg, DMG_FIRE, caster, info.Circle);
+	endif
+
+endprogram

@@ -1,0 +1,82 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":sorcery:sorceryOpts";
+
+
+program elementalswarm(parms)
+
+	var caster := parms[1];
+	var info := parms[2];
+	var cast_on := parms[4]; // If NPC casting there'll be something here.
+	if (!cast_on) // If no cast_on then this is being cast by a player.
+		cast_on := MS_TargetCoordinates(caster, info.targ, "Select a location:");
+	endif
+	if (!cast_on)
+		SendSysMessage (caster, "Cancelled.", color := 33);
+		return 0;
+	endif
+	if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+		return 0;
+	endif
+
+	Detach();
+	var qty := CStr(CInt(AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 24) ) + "d3+2";
+	qty := RandomDiceRoll(qty);
+	Detach();
+	w_summon_creature(caster, 9, cast_on, qty);
+
+endprogram
+
+
+function w_summon_creature( caster, circle := 9, cast_loc, qty )
+
+	circle := circle;
+	var thecreature;
+	var thecritter := { };
+	var magery_skill := AP_GetSkill(caster, MAGERY);
+	var duration := 60 + (magery_skill);
+	var tparms := {};
+	var npct;
+
+	tparms .+ script := "tamed";
+
+	for i := 1 to qty
+		case(	RandomDiceRoll("1d7") )
+			1: npct := "waterelemental";
+			2: npct := "earthelemental";
+			3: npct := "airelemental";
+			4: npct := "fireelemental";
+			5: npct := "iceelemental";
+			6: npct := "bloodelemental";
+			7: npct := "poisonelemental";
+		endcase
+
+		thecritter := CreateNpcFromTemplate(npct, cast_loc.x, cast_loc.y,cast_loc.z, tparms);
+		SetObjProperty(thecritter,"master", caster.serial);
+		SetObjProperty(thecritter, "summoned",1);
+		AP_SetTrueSkill( thecritter[i], RESISTING_SPELLS,  magery_skill*10  );
+		SetObjProperty(thecritter, "NeverRelease", 1);
+		thecritter.master := caster.serial;
+	endfor
+
+
+	PlaySoundEffect(caster, SFX_SPELL_SUMMON_ELEMENTAL);
+
+	Detach();
+	sleep(duration);
+
+	for i := 1 to qty
+		SetObjProperty(thecritter[i], "guardkill", 1);
+		PlaySoundEffect( thecritter[i], SFX_SPELL_MANA_VAMPIRE );
+		PlayStationaryEffect( thecritter[i].x, thecritter[i].y, thecritter[i].z, FX_SMOKE, 0xa, 0xa, realm := thecritter.realm);
+		MoveObjectToLocation(thecritter[i],0,0,0,"britannia_alt",MOVEOBJECT_FORCELOCATION);
+		thecritter[i].kill();
+	endfor
+
+endfunction

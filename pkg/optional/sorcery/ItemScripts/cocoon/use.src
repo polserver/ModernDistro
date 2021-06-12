@@ -1,0 +1,56 @@
+use uo;
+use os;
+
+include ":attributes:attributes";
+
+program spawnportal_use( mobile, cocoon )
+
+	if( Distance( mobile, cocoon ) > 2 )
+		SendSysMessage( mobile, "You are too far away to attempt to close the portal.", 0x3, 0x22 );
+		return 0;
+	endif
+
+	while( cocoon )
+		if( Distance( mobile, cocoon ) > 2 )
+			SendSysMessage( mobile, "You have moved too far from the portal to continue.", 0x3, 0x22 );
+			return 0;
+		endif
+
+		PerformAction( mobile, 0xB );
+		SleepMS( 2000 );
+
+		ApplyDamageToCocoon( mobile, cocoon );
+	endwhile
+
+	return 1;
+endprogram
+
+function ApplyDamageToCocoon( byref mobile, byref cocoon )
+
+	var damage := CInt( GetAttribute( mobile, STRENGTH ) / 5 );
+	var	hp_diff := 0;
+
+	if( damage > 14 )
+		damage := 14;
+	elseif( damage < 1 )
+		damage := 1;
+	endif
+
+	PrintTextAbove( cocoon, "Damage: " + damage, 0x3, 0x42, JOURNAL_PRINT_NAME );
+	if( cocoon.hp > 0 )
+		if( damage > cocoon.hp )
+			hp_diff := damage - cocoon.hp;
+
+			cocoon.hp := 0;
+			cocoon.maxhp_mod -= damage;
+		else
+			cocoon.hp -= damage;
+		endif
+	else
+		if( damage > cocoon.maxhp )
+			DestroyItem( cocoon );
+		else
+			cocoon.maxhp_mod -= damage;
+		endif
+	endif
+endfunction

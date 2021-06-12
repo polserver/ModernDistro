@@ -1,0 +1,96 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":sorcery:sorceryOpts";
+include ":damage:damage";
+
+
+program vortex(parms)
+
+	var caster := parms[1];
+	var info := parms[2];
+	var cast_on := parms[4]; // If NPC casting there'll be something here.
+	if (!cast_on) // If no cast_on then this is being cast by a player.
+		cast_on := MS_TargetCoordinates(caster, info.targ, "Select a location:");
+	endif
+	if (!cast_on)
+		SendSysMessage (caster, "Cancelled.", color := 33);
+		return 0;
+	endif
+	if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+		return 0;
+	endif
+
+
+	var thevortex := CreateItemAtLocation(cast_on.x, cast_on.y, cast_on.z, 0x37cc, 1, cast_on.realm);
+	thevortex.movable := 0;
+	var duration := CInt( RandomInt( CInt(AP_GetStat(caster, INTELLIGENCE) / 2)) + CInt(AP_GetStat(caster, INTELLIGENCE) / 8));
+	var victims, newx, newy, newz;
+
+	Detach();
+
+	while (duration > 0)
+
+		PlaySoundEffect(thevortex, 0x15);
+
+		victims := ListMobilesNearLocationEx(thevortex.x, thevortex.y, thevortex.z, 4, LISTEX_FLAG_NORMAL + LISTEX_FLAG_HIDDEN, thevortex.realm);
+		foreach victim in victims
+			if ( (AP_GetVital(victim, HITS)) && (victim.serial != caster.serial) )
+				PlayLightningBoltEffect(victim);
+				PlaySoundEffect(victim, SFX_SPELL_LIGHTNING);
+				SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "Sorcery" });
+				ApplySpellDamageEX(victim, RandomDiceRoll("2d4+2"), DMG_ENERGY, caster, info.Circle);
+			endif
+		endforeach
+
+		victims := ListMobilesNearLocationEx(thevortex.x, thevortex.y, thevortex.z, 3, LISTEX_FLAG_NORMAL + LISTEX_FLAG_HIDDEN, thevortex.realm);
+		foreach victim in victims
+			if ( (AP_GetVital(victim, HITS)) && (victim.serial != caster.serial) )
+				PlaySoundEffect(victim, SFX_SPELL_HARM);
+				AP_SetVital(victim, MANA, AP_GetVital(victim, MANA) - RandomDiceRoll("2d6"));
+				if ( (AP_GetVital(victim, MANA) < 0) || (AP_GetVital(victim, MANA) > 1000) )
+					AP_SetVital(victim, MANA, 0);
+				endif
+			endif
+		endforeach
+
+		victims := ListMobilesNearLocationEx(thevortex.x, thevortex.y, thevortex.z, 1, LISTEX_FLAG_NORMAL + LISTEX_FLAG_HIDDEN, thevortex.realm);
+		foreach victim in victims
+			if ( (AP_GetVital(victim, HITS)) && (victim.serial != caster.serial) )
+				PlayMovingEffect(thevortex, victim, 0x379f, 0xf, 0x1e );
+				PlaySoundEffect(victim, 0x020b);
+				SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "Sorcery" });
+				ApplySpellDamageEX(victim, RandomDiceRoll("4d6"), DMG_ENERGY, caster, info.circle);
+			endif
+		endforeach
+
+		newx := thevortex.x + RandomInt(2) - RandomInt(2);
+		newy := thevortex.y + RandomInt(2) - RandomInt(2);
+		newz := GetWorldHeight(newx, newy, thevortex.realm);
+
+		if (CheckLosAt(thevortex, newx, newy, newz) )
+			PlayMovingEffectXYZ(thevortex.x, thevortex.y, thevortex.z, newx, newy, newz, 0x37cc, 0xf, 0x1e, 0, thevortex.realm);
+			thevortex.movable := 1;
+			MoveObjectToLocation(thevortex, newx, newy, newz, thevortex.realm, MOVEOBJECT_FORCELOCATION);
+			thevortex.movable := 0;
+		endif
+
+		sleepms(1500);
+
+		if (!thevortex)
+			duration := 0;
+		else
+			duration := duration - 1;
+		endif
+
+	endwhile
+
+	DestroyItem(thevortex);
+
+endprogram
+
