@@ -403,8 +403,8 @@ function MS_GetVaildTargets(targ, area_size:=1, check_los:=1, exclude:="", inclu
 
 	// Remove targs with serial in exclude if exclude exists or not in includes if includes exists
 	for i := 1 to (targs.Size())
-		if ( (exclude != "" && (targs[i].serial in exclude || targs[i].serial == exclude )) ||
-                (includes != "" && (!(targs[i].serial in includes) || targs[i].serial != includes )))
+		if((exclude != "" && (targs[i].serial in exclude || targs[i].serial == exclude )) ||
+			(includes != "" && (!(targs[i].serial in includes) || targs[i].serial != includes )))
 			targs.Erase(i);
 		endif
 	endfor
