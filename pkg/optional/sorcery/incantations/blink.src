@@ -1,0 +1,50 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":sorcery:sorceryOpts";
+
+program blink(parms)
+
+    var caster := parms[1];
+
+	var blinks := CInt( RandomDiceRoll("2d4") + (AP_GetStat(caster, INTELLIGENCE)/10) );
+	var x, y, z, i;
+	var success := 0;
+	SetObjProperty(caster, "#BLINKING", CInt( ReadGameClock() + (blinks * 3) ) );
+	Detach();
+	while (blinks > 0)
+
+		i := 0;
+		success := 0;
+		while (success == 0)
+			x := caster.x + RandomInt(8) - RandomInt(8);
+			y := caster.y + RandomInt(8) - RandomInt(8);
+			z := GetWorldHeight(x, y, caster.realm);
+
+			if (CheckLosAt(caster, x, y, z) )
+				PlayStationaryEffect( caster.x, caster.y, caster.z, FX_SMOKE, speed:=0xa, loop:=0xa, explode := 0, realm := caster.realm );
+				PlaySoundEffect( caster, SFX_SPELL_TELEPORT );
+				MoveObjectToLocation(caster, x, y, z, caster.realm, MOVEOBJECT_FORCELOCATION);
+				success := 1;
+			endif
+
+			i := i + 1;
+			if (i > 10)
+				success := 1;
+			endif
+		endwhile
+
+		blinks := blinks - 1;
+
+		sleep(1);
+
+	endwhile
+	EraseObjProperty(caster, "#BLINKING");
+
+endprogram
+

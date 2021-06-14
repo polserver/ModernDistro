@@ -11,10 +11,6 @@ use uo;
 use os;
 
 include ":gumps:gumps";
-include ":gumps:gumps_ex";
-include ":gumps:gumpPrompt";
-include ":gumps:requestGump";
-include ":gumps:yesNo";
 include ":weapons:weaponInfo";
 include "include/uo_extend";
 

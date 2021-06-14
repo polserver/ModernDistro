@@ -21,7 +21,7 @@ program DismountCleric(params)
 	endif
 	var devotion := GetObjProperty(who, "Devotion" );
 	var faith := faithsdb.FindElement(devotion);
-	var mount_info := SplitWords(faith.GetProp("Mounts"));
+	var mount_info := SplitWords(faith.GetProp("Mount"));
 	if(!mount_info)
 		SysLog("createClericMount --> Cannot find mount_info.");
 	endif

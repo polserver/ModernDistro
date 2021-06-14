@@ -39,7 +39,7 @@ program makecanon(params)
 		SendSysMessage(who, "You do not have enough blank scrolls.");
 		return;
 		endif
-  var practice := YesNo(who,"Practice Tome?");
+  var practice := YesNo(who,"Create a practice Tome?");
 
 	// Once were sure we have AMOUNT of each focci, destroy them.
 	foreach thing in focci

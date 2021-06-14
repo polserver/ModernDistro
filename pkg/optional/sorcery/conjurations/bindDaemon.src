@@ -1,0 +1,66 @@
+use uo;
+use os;
+use cliloc;
+
+include ":attributes:attributes";
+include ":magery:spells";
+
+
+
+program binddaemon(parms)
+
+	var npccfg := ReadConfigFile(":*:npcdesc");
+	var caster := parms[1];
+	var info := parms[2];
+	var cast_on := parms[4];
+	if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+		cast_on := MS_Target(caster, info.targ, "Select a target:", TGTOPT_CHECK_LOS+TGTOPT_HARMFUL);
+	endif
+	if (!cast_on)
+		SendSysMessageCL(caster, 1042023, color := 33); // Cancelled.
+		return 0;
+	endif
+	if ( !MS_MobileCheck(caster, cast_on) )
+		return 0;
+	endif
+
+
+	Send_attack(cast_on, caster);
+	var element := npccfg[cast_on.npctemplate].elemental;
+	if (element != "daemonic")
+		SendSysMessage(caster, "That is not a daemonic entity!");
+		return 0;
+	endif
+
+	var bindresist := CDbl(AP_GetVital(cast_on, HITS) + AP_GetVital(cast_on, MANA) + GetAttribute(cast_on, RESISTING_SPELLS) );
+	var bindpower := CDbl(AP_GetStat(caster, INTELLIGENCE) + CInt( AP_GetSkill(caster, MEDITATION) * 2) );
+	if (bindresist > 400)
+		bindresist := 400;
+	endif
+
+	var bindcheck := CInt( ( (bindpower / bindresist) - 0.50) * 100);
+
+	if (bindcheck < 1)
+		bindcheck := 1;
+	elseif (bindcheck > 97)
+		bindcheck := 97;
+	endif
+
+	if (RandomInt(100) > bindcheck)
+		SendSysMessage(caster, "You have failed to bind the daemon.");
+		return 0;
+	endif
+
+	var prison := CreateItemInBackpack(caster, "stoneofbinding", 1);
+	if (!prison)
+		prison := CreateItemAtLocation(caster.x, caster.y, caster.z, "stoneofbinding", 1, caster.realm);
+	endif
+
+	SetObjProperty(prison, "Daemon", cast_on.npctemplate);
+
+	SetObjProperty(cast_on, "summoned", 1);
+	PlaySoundEffect(caster, 0xff);
+	PrintTextAbove(caster, caster.name + " has bound " + cast_on.name + "!");
+	cast_on.kill();
+
+endprogram

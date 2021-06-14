@@ -4,9 +4,9 @@ use cfgfile;
 use os;
 use util;
 
-include "include/statMod";
 include "include/canAccess";
 include ":timedScripts:poisonUtil";
+include ":timedScripts:timedScripts";
 
 program use_magicfish(who, fish)
   EraseObjProperty(who, "IsMeditating");
@@ -30,27 +30,13 @@ program use_magicfish(who, fish)
 	case (spellnum)
       4: HealDamage( who, miscprop1);
       6: who.setlightlevel( miscprop1, miscprop2 );
-      9: if (CanMod(who, "dex"))
-		   DoTempMod(who, "dex", miscprop1, miscprop2);
-		 endif
-     10: if (CanMod(who, "int"))
-		   DoTempMod(who, "int", miscprop1, miscprop2);
-		 endif
+      9: TS_StartTimer(who, "Agility", miscprop2, miscprop1);
+     10: TS_StartTimer(who, "Cunning", miscprop2, miscprop1);
      11:  if (TS_GetTimerNames(who, "P").size() > 0 )
 			TS_CurePoison(who, 120, "P", CInt(miscprop1));
           endif
-     16: if (CanMod(who, "str"))
-		   DoTempMod(who, "str", miscprop1, miscprop2);
-		 endif
-     17: if (CanMod(who, "str"))
-		   DoTempMod(who, "str", miscprop1, miscprop2);
-	     endif
-		 if (CanMod(who, "dex"))
-		   DoTempMod(who, "dex", miscprop1, miscprop2);
-		 endif
-		 if (CanMod(who, "int"))
-		   DoTempMod(who, "int", miscprop1, miscprop2);
-		 endif
+     16: TS_StartTimer(who, "Strength", miscprop2, miscprop1);
+     17: TS_StartTimer(who, "Bless", miscprop2, miscprop1);
      44: who.hidden := 1;
     endcase
   else

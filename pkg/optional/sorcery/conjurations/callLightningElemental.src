@@ -1,0 +1,37 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include ":sorcery:summon";
+include ":sorcery:sorceryOpts";
+
+
+program CallLightningElementals(parms)
+
+    var caster := parms[1];
+    var info := parms[2];
+	var cast_on := parms[4]; // If NPC casting there'll be something here.
+	if (!cast_on) // If no cast_on then this is being cast by a player.
+		cast_on := MS_TargetCoordinates(caster, info.targ, "Select a location:");
+	endif
+    if (!cast_on)
+      SendSysMessage (caster, "Cancelled.", color := 33);
+      return 0;
+    endif
+    if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+        return 0;
+    endif
+
+	var qty := CStr(CInt(AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 30) ) + "d4";
+	qty := RandomDiceRoll(qty);
+	qty := RandomDiceRoll(qty);
+	if(qty > 4)
+		qty := 4;
+	endif
+	Detach();
+    s_summon_creature(caster, "lightningelemental", cast_on, qty);
+
+endprogram
+

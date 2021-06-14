@@ -3,7 +3,7 @@ include ":itemutils:itemdesc";
 function ICP_ItemDescGump( pkg_name, info_elem )
 
 	var gump := GFCreateGump();
- 
+
 	ICP_GumpHeader( gump, ITEMDESC_BTN );
 
 	if( info_elem.GetProp( "Main" ).Main )
@@ -47,7 +47,7 @@ function ICP_ItemDescGump( pkg_name, info_elem )
 				x_pos := 25;
 				y_count += 1;
 			endif
-   
+
 			if( y_count > 4 )
 				y_pos := 100;
 				x_pos := 25;
@@ -70,8 +70,8 @@ endfunction
 function ICP_CreateItem( who, object )
 
 	var question := "Where do you want to place the item you're about to create?";
-	var yes := "In my backpack.";
-	var no := "At my feet on the ground.";
+	var yes := "My backpack.";
+	var no := "At my feet.";
 
 	var create_method := YesNo( who, question, yes, no );
 	var item := 0;

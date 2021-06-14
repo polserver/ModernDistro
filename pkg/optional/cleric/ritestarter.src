@@ -10,7 +10,13 @@ program start_rite(params, scroll)
 	var who := params[1];
 	var ritenum := params[2];
 	var npctarget := params[3];
+	var rs_pid := GetPid();
 
+	if(rs_pid == GetObjProperty(who, "RiteStarterPID"))
+		SendSysMessage(who, "You are currently casting a spell.", color := 33);
+		return 0;
+	endif
+	SetObjProperty(who, "RiteStarterPID", rs_pid);
 	if (scroll)
 		if (!IsCleric(who))
 			return;
@@ -92,6 +98,7 @@ program start_rite(params, scroll)
 	endif
 
 	EraseObjProperty(who, "#medding");
+	EraseObjProperty(who, "RiteStarterPID");
 
 endprogram
 
@@ -178,6 +185,7 @@ endfunction
 
 function FailRite(who)
 	EraseObjProperty(who, "#medding");
+	EraseObjProperty(who, "RiteStarterPID");
 endfunction
 
 function EquipmentCheck(who)

@@ -1,0 +1,26 @@
+/////////////////////////////////////////////////////////////////////
+// This script runs before the default unequip script.
+// It's purpose is to play effects prior to unequipping
+// a mount.
+/////////////////////////////////////////////////////////////////////
+use os;
+use uo;
+use datafile;
+
+program DismountCleric(params)
+	var who := params[1];
+	var mount_piece := GetEquipmentByLayer( who, 25 );
+	// This prevents a double call to this script.
+	if(mount_piece.UnEquipScript)
+		mount_piece.UnEquipScript := "";
+	endif
+	var GFX := 0x3709;
+	var frames := 30;
+	var hue := 802;
+	var SFX := 0x5CB;
+	PlaySoundEffect( who, SFX );
+	PlayObjectCenteredEffectEx( who, GFX, 1, frames, hue, 7 );
+	Sleep(1);
+	return;
+
+endprogram

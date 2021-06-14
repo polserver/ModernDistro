@@ -7,7 +7,7 @@ include ":itemutils:itemUtil";
 include "include/string";
 include ":containers:containers";
 include "include/housing";
-include ":gumps:yesNo";
+include ":gumps:gumps";
 include ":keys:key";
 
 const CANCEL_ID := 999;

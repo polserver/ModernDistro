@@ -9,13 +9,12 @@ include ":magery:spells_ex";
 include ":magery:report";
 include "include/client";
 include "include/sounds";
-include "include/statMod";
 include ":magery:spellAttack";
 
 
 const EVID_DISCHARGE := 0x123457;
 
-var MS_npccfg := ReadConfigFile("::npcdesc");
+var MS_npccfg := ReadConfigFile(":*:npcdesc");
 
 /*
  * MS_GetSpellsCfgFile()
@@ -30,7 +29,8 @@ var MS_npccfg := ReadConfigFile("::npcdesc");
  *
  */
 function MS_GetSpellsCfgFile()
-	var cfg := ReadConfigFile(":magery:spells");
+	// var cfg := ReadConfigFile(":magery:spells");
+	var cfg := ReadConfigFile(":*:spells");
 
 	if ( cfg.errortext )
 		MS_ReportText("Error::MS_GetSpellsCfgFile() - Unable to open [:magery:spells.cfg] ->"+cfg.errortext, MS_REPORT_SYSLOG);
@@ -403,8 +403,8 @@ function MS_GetVaildTargets(targ, area_size:=1, check_los:=1, exclude:="", inclu
 
 	// Remove targs with serial in exclude if exclude exists or not in includes if includes exists
 	for i := 1 to (targs.Size())
-		if ( (exclude != "" && (targs[i].serial in exclude || targs[i].serial == exclude )) ||
-                (includes != "" && (!(targs[i].serial in includes) || targs[i].serial != includes )))
+		if((exclude != "" && (targs[i].serial in exclude || targs[i].serial == exclude )) ||
+			(includes != "" && (!(targs[i].serial in includes) || targs[i].serial != includes )))
 			targs.Erase(i);
 		endif
 	endfor

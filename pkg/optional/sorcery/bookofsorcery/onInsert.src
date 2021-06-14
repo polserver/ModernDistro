@@ -1,0 +1,73 @@
+/*
+        Maintained by The POL Distro Team
+
+        2018-07-25
+*/
+use uo;
+use os;
+use math;
+
+include ":itemUtils:itemdesc";
+
+program SorceryOnInsert( mobile, container, unused move_type, unused insert_type, adding_item, unused existing_stack, unused amount_to_add )
+
+	if(!InscribeTheSpell(container, adding_item))
+		SendSysMessage(mobile, "The scroll cannot be inscribed!", color := 33);
+		SendSysMessage(mobile, "Page a staff member and report this!", color := 33);
+		CreateItemInBackpack(mobile, adding_item.objtype);
+		return 0;
+	endif
+	PlaySoundEffect(container, 0x24a);
+	SendSysMessage(mobile, "You successfully inscribe the scroll in the sorcery book.", color := 66);
+
+	return 1;
+endprogram
+
+function InscribeTheSpell(container, adding_item)
+
+	var incantations :={1709, 1710, 1711, 1712, 1713, 1714, 1715, 1716};
+	var evvocations := {1717, 1718, 1719, 1720, 1721, 1722, 1723, 1724, 1725, 1726, 1727, 1728, 1729, 1730, 1731, 1732};
+	var conjurations := {1733, 1734, 1735, 1736, 1737, 1738, 1739, 1740, 1741, 1742, 1743, 1744, 1745, 1746, 1747, 1748};
+	var bit_position, incant_prop, evvoc_prop, conj_prop := 0;
+	var scroll_elem := GetItemDescInfo(adding_item.objtype);
+	var spell_id := (scroll_elem.SpellId);
+
+	if(spell_id in incantations)
+		bit_position := 8 - (spell_id in incantations);
+		incant_prop := GetObjProperty(container, "Incantations");
+		if(incant_prop.errortext)
+			incant_prop := 0;
+		endif
+		bit_position := CInt(Pow(2, bit_position));
+		incant_prop := incant_prop | bit_position;
+		SetObjProperty(container, "Incantations", incant_prop);
+		DestroyItem(adding_item);
+		return 1;
+	elseif(spell_id in evvocations)
+		bit_position := 16 - (spell_id in evvocations);
+		evvoc_prop := GetObjProperty(container, "Evocations");
+		if(evvoc_prop.errortext)
+			evvoc_prop := 0;
+		endif
+		bit_position := CInt(Pow(2, bit_position));
+		evvoc_prop := evvoc_prop | bit_position;
+		SetObjProperty(container, "Evocations", evvoc_prop);
+		DestroyItem(adding_item);
+		return 1;
+	elseif(spell_id in conjurations)
+		bit_position := 16 - (spell_id in conjurations);
+		conj_prop := GetObjProperty(container, "Conjurations");
+		if(conj_prop.errortext)
+			conj_prop := 0;
+		endif
+		bit_position := CInt(Pow(2, bit_position));
+		conj_prop := conj_prop | bit_position;
+		SetObjProperty(container, "Conjurations", conj_prop);
+		DestroyItem(adding_item);
+		return 1;
+	else
+	// We should never get here.
+		return 0;
+	endif
+
+endfunction

@@ -1,0 +1,89 @@
+use vitals;
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include ":sorcery:sorceryOpts";
+include ":damage:damage";
+
+var npccfg := ReadConfigFile(":*:npcdesc");
+
+program flamewind(parms)
+
+	var caster := parms[1];
+	var info := parms[2];
+	var cast_on := parms[4]; // If NPC casting there'll be something here.
+	if (!cast_on) // If no cast_on then this is being cast by a player.
+		cast_on := MS_TargetCoordinates(caster, info.targ, "Select a location:");
+	endif
+	if (!cast_on)
+		SendSysMessage (caster, "Cancelled.", color := 33);
+		return 0;
+	endif
+	if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+		return 0;
+	endif
+	var targ; // Old code
+	var i := CInt(AP_GetStat(caster, INTELLIGENCE) / 10) + CInt(RandomInt(AP_GetStat(caster, INTELLIGENCE)));
+	targ := CreateItemAtLocation(cast_on.x, cast_on.y, cast_on.z, 0xeed, 1, cast_on.realm);
+	targ.graphic := 1;
+	var newtarg;
+	var x, y;
+
+	Detach();
+	PlaySoundEffect(caster, 0x231);
+
+	while (i > 0)
+		x := targ.x + RandomInt(15) - 7;
+		y := targ.y + RandomInt(15) - 7;
+		x := cast_on.x + RandomInt(15) - 7;
+		y := cast_on.y + RandomInt(15) - 7;
+		newtarg := CreateItemAtLocation(x, y, targ.z, 0xeed, 1, targ.realm);
+		newtarg.graphic := 1;
+
+		if (CheckLineOfSight(targ, newtarg) )
+			PlayMovingEffectXYZ( newtarg.x, newtarg.y, (newtarg.z + 80), newtarg.x, newtarg.y, newtarg.z, 0x36e4, 0x18, 0x10, 0, newtarg.realm);
+			DoFireDamage(newtarg, caster, info);
+			i := i - 1;
+			DestroyItem(newtarg);
+			sleepms(150);
+		else
+			DestroyItem(newtarg);
+		endif
+		SleepMS(20);
+	endwhile
+
+	DestroyItem(targ);
+
+endprogram
+
+
+function DoFireDamage(targ, byref caster, info)
+	var victims := ListMobilesNearLocationEx(targ.x, targ.y, targ.z, 5, LIST_IGNORE_Z + LISTEX_FLAG_NORMAL + LISTEX_FLAG_HIDDEN, targ.realm);
+	var dmg;
+
+	foreach victim in victims
+		if (AP_GetVital(victim, HITS))
+			dmg := "4d6+" + CStr(CInt(AP_GetStat(caster, INTELLIGENCE)) / 9);
+			dmg := RandomDiceRoll(dmg);
+			PlayObjectCenteredEffect(victim, 0x36cb, 7, 0x10);
+			PlaySoundEffect(victim, 0x228);
+			SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "Sorcery" });
+			if(victim.isA(POLCLASS_NPC))
+				Send_attack(victim, caster);
+				var element := npccfg[victim.npctemplate].elemental;
+				if(element == "fire")
+					HealDamage(victim, CInt(dmg/2) );
+				elseif ( (element == "earth") || (element == "ice") )
+					ApplySpellDamageEX(victim, dmg*3, DMG_FIRE, caster, info.Circle);
+				else
+					ApplySpellDamageEX(victim, dmg*2, DMG_FIRE, caster, info.Circle);
+				endif
+			else
+				ApplySpellDamageEX(victim, dmg, DMG_FIRE, caster, info.Circle);
+			endif
+		endif
+	endforeach
+endfunction

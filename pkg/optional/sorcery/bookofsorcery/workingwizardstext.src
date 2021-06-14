@@ -1,0 +1,429 @@
+use uo;
+use os;
+use math;
+use attributes;
+
+
+var tomelayout :=
+{
+	"page 0",
+	"gumppic 30 30 2201",
+	"page 1",
+	"text 85 40 0 0",
+	"text 245 40 0 9",
+	"button 325 34 2206 2206 0 2 2",
+	"button 60 70 2104 2103 1 0 101",
+	"button 60 90 2104 2103 1 0 102",
+	"button 60 110 2104 2103 1 0 103",
+	"button 60 130 2104 2103 1 0 104",
+	"button 60 150 2104 2103 1 0 105",
+	"button 60 170 2104 2103 1 0 106",
+	"button 60 190 2104 2103 1 0 107",
+	"button 60 210 2104 2103 1 0 108",
+	"text 80 65 0 1",
+	"text 80 85 0 2",
+	"text 80 105 0 3",
+	"text 80 125 0 4",
+	"text 80 145 0 5",
+	"text 80 165 0 6",
+	"text 80 185 0 7",
+	"text 80 205 0 8"
+};
+
+
+
+var tomedata :=
+{
+	"Lesser Spells",
+		"Chill",
+		"Douse",
+		"Faerie Fire",
+		"Flametouch",
+		"Ignite",
+		"Pyrotechnics",
+		"Shock",
+		"Ventriloquism",
+	"Incantations",
+	"Evocations",
+	"Conjurations"
+};
+
+var incantations :=
+{
+	"Blink",
+	"Chaos",
+	"Domination",
+	"Fear",
+	"Fumble",
+	"Identify",
+	"Telepathy",
+	"Transfix"
+};
+
+var invvocations :=
+{
+	"Barrage",
+	"Blade Barrier",		// Incinerate, Magic Mouth, Web, Blade Barrier
+	"Chainbolt",			// Fire Storm, Ice Storm, Cone of Cold, Flamewind
+	"Chaos Maelstrom",
+	"Cone of Cold",			// Fortress, Vortex, Gust of Wind, Chainbolt
+	"Fire Storm",			// Toxic Storm, Hurricane, Barrage, Malestrom
+	"Flamewind",
+	"Fortress",
+	"Gust of Wind",
+	"Hurricane",
+	"Ice Storm",
+	"Incinerate",
+	"Magic Mouth",
+	"Toxic Storm",
+	"Vortex",
+	"Web"
+
+};
+
+var conjurations :=
+{
+	"Aerial Servant",		// Summon Poison, Elemental Swarm, Call Horde, Familiar
+	"Banish",			// Bind Daemon, Call Fiend, Banish, Summon Lightning
+	"Bind Daemon",			// Homunculous, Aerial Servant, Invisible Stalker, Clone
+	"Call Fiend",			// Spiritwrack, Posession, Exorcism, Call Minion
+	"Call Horde",
+	"Call Minion",
+	"Clone",
+	"ElementalSwarm",
+	"Exorcism",
+	"Familiar",
+	"Homunculus",
+	"Invisible Stalker",
+	"Posession",
+	"Spiritwrack",
+	"Summon Lgtning",
+	"Summon Poison"
+};
+
+
+var leftsidebuttons :=
+{
+	"button 60 70 2104 2103 1 0 ",
+	"button 60 90 2104 2103 1 0 ",
+	"button 60 110 2104 2103 1 0 ",
+	"button 60 130 2104 2103 1 0 ",
+	"button 60 150 2104 2103 1 0 ",
+	"button 60 170 2104 2103 1 0 ",
+	"button 60 190 2104 2103 1 0 ",
+	"button 60 210 2104 2103 1 0 "
+};
+
+var rightsidebuttons :=
+{
+	"button 220 70 2104 2103 1 0 ",
+	"button 220 90 2104 2103 1 0 ",
+	"button 220 110 2104 2103 1 0 ",
+	"button 220 130 2104 2103 1 0 ",
+	"button 220 150 2104 2103 1 0 ",
+	"button 220 170 2104 2103 1 0 ",
+	"button 220 190 2104 2103 1 0 ",
+	"button 220 210 2104 2103 1 0 "
+};
+
+var leftsidetext :=
+{
+	"text 80 65 0 ",
+	"text 80 85 0 ",
+	"text 80 105 0 ",
+	"text 80 125 0 ",
+	"text 80 145 0 ",
+	"text 80 165 0 ",
+	"text 80 185 0 ",
+	"text 80 205 0 "
+};
+
+var rightsidetext :=
+{
+	"text 240 65 0 ",
+	"text 240 85 0 ",
+	"text 240 105 0 ",
+	"text 240 125 0 ",
+	"text 240 145 0 ",
+	"text 240 165 0 ",
+	"text 240 185 0 ",
+	"text 240 205 0 "
+};
+
+
+program wizardstext(who, tome)
+
+	var castopts := {};
+	var layoutoffset := len(tomelayout);
+	var spelloffset := 12;
+	var spellcount := 0;
+        var params := {};
+        if (GetAttribute(who, "Magery") < 99)
+            SendSysMessage (who, "You are not learned enough in magic to make use of this book.", font := 2, color := 33);
+            SendSysMessage (who, "To become a Wizard requires much knowledge in the magic arts first.", font := 2, color := 33);
+            return;
+        endif
+
+	var knownincantations := GetObjProperty(tome, "Incantations");
+	if (knownincantations.errortext)
+		knownincantations := 0;
+	endif
+
+	var knownevvocations := GetObjProperty(tome, "Evocations");
+	if (knownevvocations.errortext)
+		knownevvocations := 0;
+	endif
+
+	var knownconjurations := GetObjProperty(tome, "Conjurations");
+	if (knownconjurations.errortext)
+		knownconjurations := 0;
+	endif
+
+	var bit_position := 0;
+
+	for i := 1 to 8
+		bit_position := 8 - i;
+		if( knownincantations & CInt(Pow(2, bit_position)) )
+			spellcount := spellcount + 1;
+			spelloffset := spelloffset + 1;
+			tomedata[spelloffset] := incantations[i];
+			layoutoffset := layoutoffset + 1;
+			tomelayout[layoutoffset] := ( rightsidetext[spellcount] + CStr(spelloffset - 1) );
+			layoutoffset := layoutoffset + 1;
+			tomelayout[layoutoffset] := ( rightsidebuttons[spellcount] + CStr(1000 + i) );
+		endif
+	endfor
+
+	// Start Evocations layout.
+	spellcount := 0;
+	layoutoffset := layoutoffset + 1;
+	tomelayout[layoutoffset] := "page 2";
+	layoutoffset := layoutoffset + 1;
+	tomelayout[layoutoffset] := "button 53 34 2205 2205 0 1 3";
+	layoutoffset := layoutoffset + 1;
+	tomelayout[layoutoffset] := "button 325 34 2206 2206 0 3 4";
+	layoutoffset := layoutoffset + 1;
+	tomelayout[layoutoffset] := "text 85 40 0 10";
+	layoutoffset := layoutoffset + 1;
+	tomelayout[layoutoffset] := "text 245 40 0 10";
+
+	for i := 1 to 16
+		bit_position := 16 - i;
+		if( knownevvocations & CInt(Pow(2, bit_position)) )
+			spellcount := spellcount + 1;
+			spelloffset := spelloffset + 1;
+			tomedata[spelloffset] := invvocations[i];
+			if (spellcount > 8)
+				layoutoffset := layoutoffset + 1;
+				tomelayout[layoutoffset] := (rightsidetext[(spellcount-8)] + CStr(spelloffset - 1) );
+				layoutoffset := layoutoffset + 1;
+				tomelayout[layoutoffset] := (rightsidebuttons[(spellcount-8)] + CStr(2000 + i) );
+			else
+				layoutoffset := layoutoffset + 1;
+				tomelayout[layoutoffset] := (leftsidetext[spellcount] + CStr(spelloffset - 1) );
+				layoutoffset := layoutoffset + 1;
+				tomelayout[layoutoffset] := (leftsidebuttons[spellcount] + CStr(2000 + i) );
+			endif
+		endif
+	endfor
+
+	// Start Conjurations layout.
+	spellcount := 0;
+	layoutoffset := layoutoffset + 1;
+	tomelayout[layoutoffset] := "page 3";
+	layoutoffset := layoutoffset + 1;
+	tomelayout[layoutoffset] := "button 53 34 2205 2205 0 2 5";
+	layoutoffset := layoutoffset + 1;
+	layoutoffset := layoutoffset + 1;
+	tomelayout[layoutoffset] := "text 85 40 0 11";
+	layoutoffset := layoutoffset + 1;
+	tomelayout[layoutoffset] := "text 245 40 0 11";
+
+	for i := 1 to 16
+		bit_position := 16 - i;
+		if( knownconjurations & CInt(Pow(2, bit_position)) )
+			spellcount := spellcount + 1;
+			spelloffset := spelloffset + 1;
+			tomedata[spelloffset] := conjurations[i];
+			if (spellcount > 8)
+				layoutoffset := layoutoffset + 1;
+				tomelayout[layoutoffset] := (rightsidetext[(spellcount-8)] + CStr(spelloffset - 1) );
+				layoutoffset := layoutoffset + 1;
+				tomelayout[layoutoffset] := (rightsidebuttons[(spellcount-8)] + CStr(3000 + i) );
+			else
+				layoutoffset := layoutoffset + 1;
+				tomelayout[layoutoffset] := (leftsidetext[spellcount] + CStr(spelloffset - 1) );
+				layoutoffset := layoutoffset + 1;
+				tomelayout[layoutoffset] := (leftsidebuttons[spellcount] + CStr(3000 + i) );
+			endif
+		endif
+	endfor
+
+	spellcount := 0;
+
+	var res := SendDialogGump(who, tomelayout, tomedata);
+	params [1] := who;
+	var retval := 0;
+
+	case (res[0])
+
+// Cantrips
+		101:	params[2] := 1701;			// Chill
+			start_script(":magery:spellStarter", params);
+
+		102:	params[2] := 1702;			// Douse
+			start_script(":magery:spellStarter", params);
+
+		103:	params[2] := 1703;			// Faerie Fire
+			start_script(":magery:spellStarter", params);
+
+		104:	params[2] := 1704;			// Flametouch
+			start_script(":magery:spellStarter", params);
+
+		105:	params[2] := 1705;			// Ignite
+			start_script(":magery:spellStarter", params);
+
+		106:	params[2] := 1706;			// Pyrotechnics
+			start_script(":magery:spellStarter", params);
+
+		107:	params[2] := 1707;			// Shock
+			start_script(":magery:spellStarter", params);
+
+		108:	params[2] := 1708;			// Ventriloquism
+			start_script(":magery:spellStarter", params);
+
+// Incantations
+		1001:	params[2] := 1709;			// Blink
+			start_script(":magery:spellStarter", params);
+
+		1002:	params[2] := 1710;			// Chaos
+			start_script(":magery:spellStarter", params);
+
+		1003:	params[2] := 1711;			// Domination
+			start_script(":magery:spellStarter", params);
+
+		1004:	params[2] := 1712;			// Fear
+			start_script(":magery:spellStarter", params);
+
+		1005:	params[2] := 1713;			// Fumble
+			start_script(":magery:spellStarter", params);
+
+		1006:	params[2] := 1714;			// Identify
+			start_script(":magery:spellStarter", params);
+
+		1007:	params[2] := 1715;			// Telepathy
+			start_script(":magery:spellStarter", params);
+
+		1008:	params[2] := 1716;			// Transfix
+			start_script(":magery:spellStarter", params);
+
+// Evocations
+		2001:	params[2] := 1717;			// Barrage
+			retval := start_script(":magery:spellStarter", params);
+
+		2002:	params[2] := 1718;			// Blade Barrier
+			start_script(":magery:spellStarter", params);
+
+		2003:	params[2] := 1719;			// Chainbolt
+			start_script(":magery:spellStarter", params);
+
+		2004:	params[2] := 1720;			// Chaos Maelstrom
+			start_script(":magery:spellStarter", params);
+
+		2005:	params[2] := 1721;			// Cone of Cold
+			retval := start_script(":magery:spellStarter", params);
+
+		2006:	params[2] := 1722;			// Fire Storm
+			start_script(":magery:spellStarter", params);
+
+		2007:	params[2] := 1723;			// Flamewind
+			retval := start_script(":magery:spellStarter", params);
+
+		2008:	params[2] := 1724;			// Fortress
+			start_script(":magery:spellStarter", params);
+
+		2009:	params[2] := 1725;			// Gust of Wind
+			start_script(":magery:spellStarter", params);
+
+		2010:	params[2] := 1726;			// Hurricane
+			start_script(":magery:spellStarter", params);
+
+		2011:	params[2] := 1727;			// Ice Storm
+			start_script(":magery:spellStarter", params);
+
+		2012:	params[2] := 1728;			// Incinerate
+			retval := start_script(":magery:spellStarter", params);
+
+		2013:	params[2] := 1729;			// Magic Mouth
+			retval := start_script(":magery:spellStarter", params);
+
+		2014:	params[2] := 1730;			// Toxic Storm
+			start_script(":magery:spellStarter", params);
+
+		2015:	params[2] := 1731;			// Vortex
+			start_script(":magery:spellStarter", params);
+
+		2016:	params[2] := 1732;			// Web
+			retval := start_script(":magery:spellStarter", params);
+
+// Conjurations
+
+		3001:	params[2] := 1733;			// Aerial Servant
+			start_script(":magery:spellStarter", params);
+
+		3002:	params[2] := 1734;			// Banish
+			start_script(":magery:spellStarter", params);
+
+		3003:	params[2] := 1735;			// Bind Daemon
+			start_script(":magery:spellStarter", params);
+
+		3004:	params[2] := 1736;			// Call Fiend
+			start_script(":magery:spellStarter", params);
+
+		3005:	params[2] := 1737;			// Call Horde
+			start_script(":magery:spellStarter", params);
+
+		3006:	params[2] := 1738;			// Call Minion
+			start_script(":magery:spellStarter", params);
+
+		3007:	params[2] := 1739;			// Clone
+			start_script(":magery:spellStarter", params);
+
+		3008:	params[2] := 1740;			// Elemental Swarm
+			start_script(":magery:spellStarter", params);
+
+		3009:	params[2] := 1741;			// Exorcism
+			start_script(":magery:spellStarter", params);
+
+		3010:	params[2] := 1742;			// Familiar
+			start_script(":magery:spellStarter", params);
+
+		3011:	params[2] := 1743;			// Homunculus
+			start_script(":magery:spellStarter", params);
+
+		3012:	params[2] := 1744;			// Invisible Stalker
+			start_script(":magery:spellStarter", params);
+
+		3013:	params[2] := 1745;			// Possession
+			start_script(":magery:spellStarter", params);
+
+		3014:	params[2] := 1746;			// Spirit Wrack
+			start_script(":magery:spellStarter", params);
+
+		3015:	params[2] := 1747;			// Summon Lightning
+			start_script(":magery:spellStarter", params);
+
+		3016:	params[2] := 1748;			// Summon Poison
+			start_script(":magery:spellStarter", params);
+
+	endcase
+
+	while(retval)
+
+		if (retval.sendevent( {1} ) == error)
+			return 1;
+		endif
+		sleep(3);
+	endwhile
+
+endprogram

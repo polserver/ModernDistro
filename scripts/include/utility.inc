@@ -113,7 +113,7 @@ function IsInsideRectAtZLevel (object, boundary, ZCoord)
     endif
 endfunction
 
-function HLEnumerateOnlineCharacters (ex_staff := 0, ex_concealed_staff := 0);
+function HLEnumerateOnlineCharacters (ex_staff := 0, ex_concealed_staff := 0)
 
         var list := array;
         var processedList := array;
@@ -124,7 +124,7 @@ function HLEnumerateOnlineCharacters (ex_staff := 0, ex_concealed_staff := 0);
         for (index := 1; index <= list.size(); index := index + 1)
             ignore := 0;
             if (list[index].cmdlevel)
-                if (ex_concealed_staff and list[index].concealed)
+                if (ex_concealed_staff && list[index].concealed)
                     ignore := 1;
                 endif
                 if (ex_staff)

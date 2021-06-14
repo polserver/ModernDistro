@@ -1,0 +1,44 @@
+/////////////////////////////////////////////////////////////////////
+// Create Mount Support script
+// Chooses from a list of mounts to equip on a player and sets up
+// the effects to play. Effects do not change for the different
+// mounts.
+/////////////////////////////////////////////////////////////////////
+use uo;
+use util;
+use cliloc;
+use datafile;
+
+include ":itemUtils:itemdesc";
+
+program CreateMount(params)
+	var who := params[1];
+	var sorcerer_mount_piece := 0;
+	case(RandomInt(3) + 1)
+		1:sorcerer_mount_piece := 0x3e95;	// Giant Beetle
+		2:sorcerer_mount_piece := 0x3EA7;	// Nightmare 2
+		3:sorcerer_mount_piece := 0x3EB8;	// Ridgeback
+	endcase
+	var GFX := 0x3709;
+	var frames := 30;
+	var hue := 802;
+	var SFX := 0x5CB;
+	PlaySoundEffect( who, SFX );
+ 	PlayObjectCenteredEffectEx( who, GFX, 1, Frames, Hue, 7 );
+	var MountPiece := CreateMountPiece(sorcerer_mount_piece);
+    MountPiece := CreateItemAtLocation( 7158, 43, 0, MountPiece, 1, "britannia" );
+	SetObjProperty(MountPiece, "Unequip", ":sorcery:mount/unequipMount");
+    EquipItem(who, MountPiece);
+    return;
+
+endprogram
+
+function CreateMountPiece(MountPieceGraphic)
+
+    var mount_piece := GetItemDescriptor( 0x1F021 );
+    mount_piece.Graphic := MountPieceGraphic;
+    mount_piece.Invisible := 1;
+    mount_piece.Movable := 1;
+    return mount_piece;
+
+endfunction

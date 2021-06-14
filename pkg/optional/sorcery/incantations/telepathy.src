@@ -1,0 +1,71 @@
+use uo;
+use os;
+use util;
+use cliloc;
+
+include ":gumps:gumps";
+include "include/utility";
+
+program telepathy(parms)
+
+    var caster := parms[1];
+
+    var whom := SelectOnlineCharacter( caster );
+
+	if(!whom)
+		SendSysMessageCL(caster, 1042023, color := 33); // Cancelled.
+		return 0;
+	endif
+
+	if (GetObjProperty(whom, "Mindshield") )
+		SendSysMessage(caster, "Something is interfering with this spell.", color := 33);
+		SendSysMessage(whom, "Your mindshield has repulsed a telepathic message.", color := 66);
+		EraseObjProperty(whom, "Mindshield");
+		return 0;
+	endif
+
+	var themessage := RequestGump(caster, "What message would you like to communicate to " + whom.name + "?", "", "", CANCEL_BTN_ON);
+	if (!themessage)
+		SendSysMessageCL(caster, 1042023, color := 33); // Cancelled.
+		return 0;
+	endif
+
+	SendSysMessage(whom, caster.name + " : " + themessage);
+
+	foreach char in EnumerateOnlineCharacters()
+		if ( (char.cmdlevel == 5) && (GetObjProperty(char, "HearMsgs") ) )
+			SendSysMessage( char, "Telepathic message from " + caster.name + " to " + whom.name + ": " + themessage);
+		endif
+	endforeach
+
+endprogram
+
+function SelectOnlineCharacter( caster )
+
+	var char;
+	var online_players_names := {};
+	var online_players := HLEnumerateOnlineCharacters (1, 1);
+
+	foreach player in online_players
+		if(caster == player)
+			online_players.erase(_player_iter);
+			break;
+		endif
+	endforeach
+
+	foreach person in online_players
+		online_players_names.append(person.name);
+	endforeach
+
+	var selection := SelectionGump( caster, "Send a telepathic message to whom?", online_players_names, BTN_TYPE_NORMAL );
+
+	foreach thing in online_players_names
+		if(thing == selection)
+			char := online_players[_thing_iter];
+			break;
+		endif
+	endforeach
+	return char;
+
+endfunction
+

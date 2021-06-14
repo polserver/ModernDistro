@@ -1,0 +1,20 @@
+use uo;
+
+include "include/client";
+
+program mindshield(params)
+
+    var caster := params[1];
+
+	if (GetObjProperty(caster, "Mindshield") )
+		SendSysMessage(caster, "You are already protected.", color := 66);
+		return 0;
+	else
+		SetObjProperty(caster, "Mindshield", 1);
+		SendSysMessage(caster, "You feel a sense of warmth and security.", color := 66);
+		PlaySoundEffect(caster, SFX_SPELL_BLESS);
+		PlayObjectCenteredEffect(caster, FX_BLESS_EFFECT, 10, 10);
+		return 1;
+	endif
+
+endprogram

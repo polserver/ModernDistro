@@ -1,0 +1,49 @@
+use vitals;
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":sorcery:sorceryOpts";
+
+program pyrotechnics(parms)
+
+    var caster := parms[1];
+    var info := parms[2];
+    var cast_on := MS_TargetCoordinates(caster, info.targ, "Select a target.");
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+      SendSysMessage (caster, "Cancelled.", color := 33);
+      return 0;
+    endif
+    if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+        return 0;
+    endif
+
+
+    // var i := CInt( RandomInt(3) + (AP_GetStat(caster, INTELLIGENCE) / 25) );
+    var newtarg;
+    var x, y;
+    AwardRawAttributePoints( caster, MAGERY, 50, SKILLID_MAGERY);
+	for j := 1 to RandomInt(6) + 3
+		var i := CInt( RandomInt(3) + (AP_GetStat(caster, INTELLIGENCE) / 25) );
+		while (i > 0)
+				x := cast_on.x + RandomInt(3) - RandomInt(3);
+				y := cast_on.y + RandomInt(3) - RandomInt(3);
+				newtarg := CreateItemAtLocation(x, y, cast_on.z, 0xeed, 1, cast_on.realm);
+				PlayMovingEffect(caster, newtarg, 0x36e4, 0x10, 0x10, 0x10);
+				PlaySoundEffect(newtarg, 520);
+				DestroyItem(newtarg);
+				i -= 1;
+		endwhile
+		Sleepms(400);
+	endfor
+
+    return 1;
+
+endprogram

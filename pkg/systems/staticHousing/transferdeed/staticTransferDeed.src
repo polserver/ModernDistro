@@ -11,7 +11,7 @@ use uo;
 use os;
 use cfgfile;
 
-include ":gumps:yesNo";
+include ":gumps:gumps";
 include ":staticHousing:gumpMessage";
 include ":staticHousing:settings";
 include "util/bank";

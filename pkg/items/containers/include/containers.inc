@@ -1,6 +1,13 @@
 use uo;
 use os;
 
+// Container Constants...
+Const CT_BONES		:= "Bones";
+Const CT_LEATHER	:= "Leather";
+Const CT_METAL		:= "Metal";
+Const CT_STRAW		:= "Straw";
+Const CT_WOOD		:= "Wood";
+
 function AmountInContainer( container, properties )
 
 	if( Lower( TypeOf( properties )) != "dictionary" )

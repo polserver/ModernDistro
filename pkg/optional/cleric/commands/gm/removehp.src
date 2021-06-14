@@ -5,7 +5,6 @@ include ":cleric:adjustSkills";
 include ":cleric:cleric";
 include ":cleric:faiths";
 include ":gumps:requestGump";
-include ":gumps:yesNo";
 
 var faiths_datafile := Faiths_OpenDatafile();
 
@@ -49,6 +48,7 @@ program make_high_priest(who)
 		SetObjProperty(victim, "Devotion", "Faithless");
 		EraseObjProperty ( victim, "Cleric");
 		EraseObjProperty (victim, "Piety");
+		EraseObjProperty (victim, "PietyRewardTimer");
 		cur_hp := faith.eraseprop("HighPriest");
 		// Restore previous skills
 		ResetSkills(victim);

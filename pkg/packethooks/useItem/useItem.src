@@ -1,0 +1,23 @@
+use uo;
+use cliloc;
+
+program DoubleClick()
+
+	Print("PacketHooks - Double click" );
+
+	return 1;
+endprogram
+
+exported function HandleDoubleClick( mobile, byref packet )
+
+	var item := SystemFindObjectBySerial( packet.GetInt32( 1 ) );
+	if( item.IsA( POLCLASS_ITEM ) )
+		// Change the cprop name...
+		if( GetObjProperty( mobile, "FarSightInfo" ) )
+			SendSysMessageCL( mobile, 1078497, color := 33); // You cannot use that right now.
+			return 1;
+		endif
+	endif
+
+	return 0;
+endfunction

@@ -1,0 +1,22 @@
+use uo;
+use os;
+
+program OnLogoff(caster)
+
+	// If the caster is under the "far sight" spell,
+	// return them to their "body".
+	var caster_info := GetObjProperty(caster, "FarSightInfo");
+	if(caster_info)
+		var duplicate := SystemFindObjectBySerial(caster_info.duplicate);
+		caster.paralyzed := 0;
+		caster.SetFacing(caster_info.facing);
+		MoveObjectToLocation(caster, caster_info.x, caster_info.y, caster_info.z, caster_info.realm, MOVEOBJECT_FORCELOCATION);
+		MoveObjectToLocation(duplicate, 6143, 1279, 0, "britannia", MOVEOBJECT_FORCELOCATION);
+		EraseObjProperty(caster, "FarSightInfo");
+		caster.SetWarmode(0);
+		caster.concealed := 0;
+		duplicate.kill();
+	endif
+
+endprogram
+

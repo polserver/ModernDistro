@@ -49,32 +49,32 @@ program LinkAura(params)
 			break;
 		endif
 
-		hpavg := CInt((GetHp(player1) + GetHp(player2)) / 2);
-		if ( (hpavg != GetHp(player1)) || (hpavg != GetHp(player2)) )
+		hpavg := CInt((AP_GetVital(player1, HITS) + AP_GetVital(player2, HITS)) / 2);
+		if ( (hpavg != AP_GetVital(player1, HITS)) || (hpavg != AP_GetVital(player2, HITS)) )
 			PlayObjectCenteredEffect(player1, 0x376a, 10, 30);
 			PlayObjectCenteredEffect(player2, 0x376a, 10, 30);
 		endif
 
-		SetHp(player1, hpavg);
-		SetHp(player2, hpavg);
+		AP_SetVital(player1, HITS, hpavg);
+		AP_SetVital(player2, HITS, hpavg);
 
-		stamavg := CInt((GetStamina(player1) + GetStamina(player2)) / 2);
-		if ( (stamavg != GetStamina(player1)) || (stamavg != GetStamina(player2)) )
+		stamavg := CInt((AP_GetVital(player1, STAMINA) + AP_GetVital(player2, STAMINA)) / 2);
+		if ( (stamavg != AP_GetVital(player1, STAMINA)) || (stamavg != AP_GetVital(player2, STAMINA)) )
 			PlayObjectCenteredEffect(player1, 0x376a, 10, 30);
 			PlayObjectCenteredEffect(player2, 0x376a, 10, 30);
 		endif
 
-		SetStamina(player1, stamavg+20);
-		SetStamina(player2, stamavg+20);
+		AP_SetVital(player1, STAMINA, stamavg+20);
+		AP_SetVital(player2, STAMINA, stamavg+20);
 
-		manaavg := CInt( (GetMana(player1) + GetMana(player2)) / 2);
-		if ( (manaavg != GetMana(player1)) || (manaavg != GetMana(player2)) )
+		manaavg := CInt( (AP_GetVital(player1, MANA) + AP_GetVital(player2, MANA)) / 2);
+		if ( (manaavg != AP_GetVital(player1, MANA)) || (manaavg != AP_GetVital(player2, MANA)) )
 			PlayObjectCenteredEffect(player1, 0x376a, 10, 30);
 			PlayObjectCenteredEffect(player2, 0x376a, 10, 30);
 		endif
 
-		SetMana(player1, manaavg);
-		SetMana(player2, manaavg);
+		AP_SetVital(player1, MANA, manaavg);
+		AP_SetVital(player2, MANA, manaavg);
 
 		sleepms(500);
 	endfor

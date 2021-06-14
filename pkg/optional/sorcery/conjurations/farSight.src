@@ -1,0 +1,152 @@
+use uo;
+use os;
+use util;
+use cliloc;
+
+include ":sorcery:sorceryOpts";
+include "include/utility";
+include ":gumps:selectionGump";
+
+program FarSight(parms)
+
+	var caster := parms[1];
+	var info := parms[2];
+	var cv_timer := 0;
+	var duplicate := 0;
+	var caster_info := struct;
+	var cast_on := SelectOnlineCharacter( caster );
+
+	if(!cast_on)
+		SendSysMessageCL(caster, 1042023, color := 33); // Cancelled.
+		return 0;
+	endif
+
+	cv_timer := ReadGameClock() + CInt(AP_GetStat(caster, INTELLIGENCE)) + 60;
+	duplicate := CopyCaster(caster);
+	caster_info := struct{"x" := caster.x, "y" := caster.y, "z" := caster.z, "realm" := caster.realm, "facing" := caster.facing, "duplicate" := duplicate.serial};
+	caster.concealed := 1;
+	caster.SetFacing(cast_on.facing);
+	caster.paralyzed := 1;
+	caster.SetWarmode(0);
+	SetObjProperty(caster, "FarSightInfo", caster_info);
+	MoveObjectToLocation(duplicate, caster.x, caster.y, caster.z, caster.realm, MOVEOBJECT_FORCELOCATION);
+	MoveObjectToLocation(caster, cast_on.x, cast_on.y, cast_on.z, cast_on.realm, MOVEOBJECT_FORCELOCATION);
+
+	var cv_active := 1;
+	while(cv_active)
+		Sleepms(200);
+		if((Distance(caster, cast_on) > 4) || (caster.realm != cast_on.realm))
+			MoveObjectToLocation(caster, cast_on.x, cast_on.y, cast_on.z, cast_on.realm, MOVEOBJECT_FORCELOCATION);
+			caster.paralyzed := 0;
+			caster.SetFacing(cast_on.facing);
+			caster.paralyzed := 1;
+		endif
+		if(caster.warmode)
+			cv_active := 0;
+		elseif(GetObjProperty(caster, "SpellStarterPID"))
+			cv_active := 0;
+		elseif(GetObjProperty(caster, "RiteStarterPID"))
+			cv_active := 0;
+		elseif(!duplicate)
+			cv_active := 0;
+		elseif(caster.tradewindow)
+			CloseTradeWindow( caster );
+		elseif(ReadGameClock() > cv_timer)
+			cv_active := 0;
+		endif
+	endwhile
+
+	caster_info := GetObjProperty(caster, "FarSightInfo");
+	caster.paralyzed := 0;
+	caster.SetFacing(caster_info.facing);
+	MoveObjectToLocation(caster, caster_info.x, caster_info.y, caster_info.z, caster_info.realm, MOVEOBJECT_FORCELOCATION);
+	EraseObjProperty(caster, "FarSightInfo");
+	caster.SetWarmode(0);
+	caster.concealed := 0;
+	MoveObjectToLocation(duplicate, 6143, 1279, 0, "britannia", MOVEOBJECT_FORCELOCATION);
+	duplicate.kill();
+
+endprogram
+
+
+function SelectOnlineCharacter( caster )
+
+	var char;
+	var online_players_names := {};
+	var online_players := HLEnumerateOnlineCharacters (1, 1);
+
+	foreach player in online_players
+		if(caster == player)
+			online_players.erase(_player_iter);
+			break;
+		endif
+	endforeach
+
+	foreach person in online_players
+		online_players_names.append(person.name);
+	endforeach
+
+	var selection := SelectionGump( caster, "Choose the player to view:", online_players_names, BTN_TYPE_NORMAL );
+
+	foreach thing in online_players_names
+		if(thing == selection)
+			char := online_players[_thing_iter];
+			break;
+		endif
+	endforeach
+	return char;
+
+endfunction
+
+function CopyCaster(caster)
+
+	Set_Critical(1);
+	var copied_thing;
+	var copy := CreateNpcFromTemplate("peasant1", 6143, 1279, 0, 0, "britannia");
+	// The SleepMS is to give POL time to dress the NPC.
+
+	var copy_pack := GetEquipmentByLayer(copy, 0x15);
+	if (!copy_pack)
+		copy_pack := CreateItemAtLocation(copy.x, copy.y, copy.z, 0xe75, 1, caster.realm);
+	else
+		MoveObjectToLocation(copy_pack, copy.x, copy.y, copy.z, caster.realm, MOVEOBJECT_FORCELOCATION);
+	endif
+	var itemlist := ListEquippedItems(copy);
+
+	foreach thing in itemlist
+		MoveItemToContainer(thing, copy_pack);
+	endforeach
+
+	itemlist := {};
+
+	itemlist := ListEquippedItems(caster);
+	foreach thing in itemlist
+		copied_thing := CreateItemInContainer(copy_pack, thing.objtype);
+		copied_thing.color := thing.color;
+		copied_thing.name := thing.name;
+		copied_thing.desc := thing.desc;
+		EquipItem(copy, copied_thing);
+	endforeach
+
+	copy.graphic := caster.graphic;
+	copy.gender := caster.gender;
+	copy.color := caster.color;
+	copy.name := caster.name + " is in a trance.";
+	copy.SetFacing(caster.facing);
+	copy.frozen := 1;
+	copy.squelched := 1;
+	copy.title_suffix := "is in a trance.";
+	copy.paralyzed := 1;
+	SetObjProperty(copy, "guardkill", 1);
+
+	var newpack := GetEquipmentByLayer(copy, 0x15);
+	if (newpack)
+		DestroyItem(newpack);
+	endif
+
+	EquipItem(copy, copy_pack);
+	Set_Critical(0);
+	return copy;
+
+endfunction
+

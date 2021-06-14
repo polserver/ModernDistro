@@ -1,0 +1,43 @@
+use uo;
+use os;
+use util;
+
+program SorcCocoon_control( cocoon )
+
+	while( cocoon )
+
+		// if( !( ReadGameClock()%7 ) )
+			DecaySorcCocoonHP( cocoon );
+		// endif
+		Sleep( 1 );
+	endwhile
+
+	return 1;
+endprogram
+
+function DecaySorcCocoonHP( byref cocoon )
+
+	if( cocoon.hp > 0 )
+		cocoon.hp -= 1;
+		if( cocoon.hp > cocoon.maxhp )
+			cocoon.hp := cocoon.maxhp;
+		endif
+		// Print( "Decaying SorcCocoon: "+cocoon.hp );
+	else
+		DestroyItem(cocoon);
+	endif
+endfunction
+
+// function RegenSorcCocoonHP( byref cocoon )
+
+	// if( cocoon.hp > 0 )
+		// if( cocoon.hp < cocoon.maxhp )
+			// cocoon.hp += RandomInt( 5 )+1;
+			// if( cocoon.hp > cocoon.maxhp )
+				// cocoon.hp := cocoon.maxhp;
+			// endif
+			// Print( "Regenerating SorcCocoon: "+cocoon.hp );
+		// endif
+	// endif
+// endfunction
+

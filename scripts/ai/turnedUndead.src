@@ -1,0 +1,52 @@
+use os;
+use uo;
+
+include "include/speech";
+
+var me := Self();
+
+program TurnedUndead()
+
+	SetWarMode( 0 );
+	set_priority(10);
+
+	var opponent := GetObjProperty(me, "Turner");
+	opponent := SystemFindObjectBySerial(opponent);
+
+	Run( opponent );
+
+endprogram
+
+function Run( opponent )
+
+	var waittime;
+
+	TurnAwayFrom( opponent );
+
+	while (opponent && !opponent.dead)
+	        if ( OpenDistance( opponent ) )
+			sleep(10);
+		else
+			sleepms(200);
+		endif
+	endwhile
+
+endfunction
+
+/////////////////////////////////////////////////////////////////////////////
+//
+//  OpenDistance - open the distance between self and an opponent.
+//  Returns: 1 if distance is 15 (no move necessary)
+//           0 if distance is < 10 (may still need to move)
+//
+/////////////////////////////////////////////////////////////////////////////
+function OpenDistance( opponent )
+    case (Distance( me, opponent ))
+        15:
+            return 1;
+        default:
+            RunAwayFrom( opponent );
+            return 0;
+    endcase
+endfunction
+

@@ -7,7 +7,6 @@ include "include/fields";
 include ":attributes:attributes";
 include "include/client";
 include "include/objtype";
-include "include/statMod";
 include ":magery:spellAttack";
 include "include/dist";
 

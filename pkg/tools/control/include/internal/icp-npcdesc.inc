@@ -1,7 +1,7 @@
 function ICP_NPCDescGump( pkg_name, info_elem )
 
 	var gump := GFCreateGump();
- 
+
 	ICP_GumpHeader( gump, NPCDESC_BTN );
 
 	if( info_elem.GetProp( "Main" ).Main )
@@ -39,7 +39,7 @@ function ICP_NPCDescGump( pkg_name, info_elem )
 				x_pos := 25;
 				y_count += 1;
 			endif
-   
+
 			if( y_count > 4 )
 				y_pos := 100;
 				x_pos := 25;
@@ -64,7 +64,7 @@ function ICP_CreateNPC( who, template, pkg_name )
 	template := keys[template];
 	template := ":"+pkg_name+":"+template;
 
-	SendSysMessage( who, "Target where to create the npc ["+template+"]." );
+	SendSysMessage( who, "Target where to create the npc ["+template+"].", color := 88 );
 	var targ := TargetCoordinates( who );
 	if( !targ )
 		SendSysMessage( who, "Cancelled." );

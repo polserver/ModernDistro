@@ -1,0 +1,135 @@
+use npc;
+use os;
+use uo;
+
+include "include/eventID";
+include ":attributes:attributes";
+include "include/dist";
+
+set_priority(5);
+
+var me := Self();
+var masterserial := GetObjProperty( me, "master" );
+var following := 0;
+var master;
+
+program LightAI()
+  Detach();
+  var online := EnumerateOnlineCharacters();
+  foreach char in online
+    if(char.serial == CInt(masterserial))
+      master := char;
+      break;
+    endif
+  endforeach
+  me.setmaster(master);
+  SetWarMode( 0 );
+  SetObjProperty(me, "serial", me.serial);
+  MainAILoop();
+endprogram
+
+function MainAILoop()
+  var ev;
+  var evtext;
+  var waittime := 120;
+  var mhp;
+  EnableEvents(EVID_SPEECH, 12);
+  EnableEvents(EVID_PEACEMADE);
+  while (AP_GetVital(me, HITS) > 0)
+    ev := os::wait_for_event(waittime);
+    case (ev.type)
+	  EVID_SPEECH:         ProcessSpeech(ev);
+	  // EVID_ALL_FOLLOW_CMD: following := ev.target;
+    endcase
+	if (following)
+	  waittime := 0;
+	  Follow();
+	else
+	  waittime := 120;
+	endif
+  endwhile
+endfunction
+
+function Follow()
+  if(me.frozen)
+	return;
+  endif
+  var d := Distance(me, following);
+  if (d < 2)
+	sleepms(50);
+  elseif( d > 10 )
+	following := 0;
+	sleepms(50);
+  else
+	RunToward(following);
+  endif
+endfunction
+
+function ProcessSpeech(ev)
+  if( ev.source.serial != masterserial )
+	return;
+  endif
+  if (!master)
+	RestartScript( me );
+  endif
+  var evtext := lower(ev.text);
+  var mename := lower(me.name);
+  if( evtext[mename + " stop"] || evtext["all stop"])
+	following := 0;
+  elseif ((evtext[mename + " come"]) || (evtext["all come"]))
+	var done := 0;
+	var chaseloop := 0;
+	while( done == 0 )
+	  chaseloop := chaseloop +1;
+	  done := CloseDistance( ev.source );
+	  if (chaseloop > 25)
+		done :=1;
+	  endif
+	endwhile
+  elseif (evtext[mename + " follow"])
+	if (evtext["follow me"])
+	  following := ev.source;
+	else
+	  var what := Target( master, TGTOPT_CHECK_LOS );
+	  if (what)
+		following := what;
+	  endif
+	endif
+  elseif (evtext["all follow"])
+	if (evtext["follow me"])
+	  following  := ev.source;
+	else
+	  var what := Target( master, TGTOPT_CHECK_LOS );
+	  if (what)
+		AllCommand(EVID_ALL_FOLLOW_CMD, what);
+	  endif
+	endif
+  endif
+endfunction
+
+function CloseDistance( opponent )
+  case(Distance( me, opponent ))
+    1:
+    0:       return 1;
+    default: if(!RunToward( opponent ))
+               return 1;
+             else
+               return 0;
+             endif
+  endcase
+endfunction
+
+function AllCommand(evtype,what)
+  var mobs := ListMobilesNearLocation( master.x, master.y, master.z, 9 );
+  var eve array;
+  eve.+type := evtype;
+  eve.+source := me;
+  eve.+target := what;
+  SendEvent( me, eve );
+  foreach mob in mobs
+	if( GetObjProperty( mob, "master" ) == me.master.serial )
+	  SendEvent( mob, eve );
+	endif
+  endforeach
+endfunction
+

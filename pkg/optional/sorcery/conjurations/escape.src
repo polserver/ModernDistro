@@ -1,0 +1,76 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":sorcery:sorceryOpts";
+
+program Possession(parms)
+
+	var caster := parms[1];
+	var info := parms[2];
+	var copy := CopyCaster(caster);
+	MoveObjectToLocation(copy, caster.x, caster.y, caster.z, caster.realm, MOVEOBJECT_FORCELOCATION);
+	caster.hidden := 1;
+	caster.stealthsteps := 8 + CInt(AP_GetStat(caster, INTELLIGENCE) / 10);
+	Sleep(120);
+	SetObjProperty(copy, "guardkill", 1);
+	copy.kill();
+
+endprogram
+
+
+function CopyCaster(caster)
+
+	var copied_thing;
+	var override_props := struct{"graphic" := caster.graphic, "gender" := caster.gender, "name" := caster.name, "color" := caster.color, "facing" := caster.facing};
+	var copy := CreateNpcFromTemplate("peasant1", 6143, 1279, 0, override_props, "britannia");
+
+	// The SleepMS is to give POL time to dress the NPC.
+	SleepMS(100);
+
+	var copy_pack := GetEquipmentByLayer(copy, 0x15);
+	if (!copy_pack)
+		copy_pack := CreateItemAtLocation(copy.x, copy.y, copy.z, 0xe75, 1, caster.realm);
+	else
+		MoveObjectToLocation(copy_pack, copy.x, copy.y, copy.z, caster.realm, MOVEOBJECT_FORCELOCATION);
+	endif
+	var itemlist := ListEquippedItems(copy);
+
+	foreach thing in itemlist
+		MoveItemToContainer(thing, copy_pack);
+	endforeach
+
+	itemlist := {};
+
+	itemlist := ListEquippedItems(caster);
+	foreach thing in itemlist
+		copied_thing := CreateItemInContainer(copy_pack, thing.objtype);
+		copied_thing.color := thing.color;
+		copied_thing.name := thing.name;
+		copied_thing.desc := thing.desc;
+		EquipItem(copy, copied_thing);
+	endforeach
+
+	// copy.graphic := caster.graphic;
+	// copy.gender := caster.gender;
+	// copy.color := caster.color;
+	// copy.name := caster.name;
+	copy.SetFacing(caster.facing);
+	// copy.squelched := 1;
+	// copy.title_suffix := caster.title_suffix;
+	SetObjProperty(copy, "guardkill", 1);
+
+	var newpack := GetEquipmentByLayer(copy, 0x15);
+	if (newpack)
+		DestroyItem(newpack);
+	endif
+
+	EquipItem(copy, copy_pack);
+	return copy;
+
+endfunction
+

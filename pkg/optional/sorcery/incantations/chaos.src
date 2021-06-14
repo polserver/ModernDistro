@@ -1,0 +1,79 @@
+use vitals;
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":damage:damage";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":sorcery:sorceryOpts";
+
+var npccfg := ReadConfigFile("npcdesc");
+
+program chaos(parms)
+
+    var caster := parms[1];
+    var info := parms[2];
+	var cast_on := parms[4]; // If NPC casting there'll be something here.
+	if (!cast_on) // If no cast_on then this is being cast by a player.
+		cast_on := MS_TargetCoordinates(caster, info.targ, "Select a location:");
+	endif
+    if (!cast_on)
+      SendSysMessage (caster, "Cancelled.", color := 33);
+      return 0;
+    endif
+    if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+        return 0;
+    endif
+
+
+    var victimlist := ListMobilesNearLocation(cast_on.x, cast_on.y, cast_on.z, 3, caster.realm);
+    var victims := { };
+    var victimlen := 0;
+    var resistcheck;
+
+    foreach victim in victimlist
+		resistcheck := CInt(AP_GetStat(victim, INTELLIGENCE) + AP_GetSkill(victim, RESISTING_SPELLS) - AP_GetSkill(caster, MAGERY) - AP_GetSkill(caster, EVALUATING_INTELLIGENCE) );
+		if ( (AP_GetVital(victim, HITS)) && (victim.npctemplate) && (!npccfg[victim.npctemplate].nopsych) && (RandomInt(100) > resistcheck) )
+			send_attack(victim, caster);
+			victimlen := victimlen + 1;
+			victims[victimlen] := victim;
+		endif
+    endforeach
+
+    if (len(victims) == 0)
+		SendSysMessage(caster, "Your spell has no effect.");
+		return 0;
+    endif
+
+    PlaySoundEffect(caster, SFX_SPELL_WEAKEN);
+    var ev := array;
+    ev.+ type;
+    ev.+ source;
+    var dupe;
+
+    Detach();
+
+    foreach victim in victims
+		victimlist := ListMobilesInLineOfSight(victim, 5);
+		dupe := victimlist[(RandomInt(len(victimlist) ) + 1 )];
+		ApplyDamageEx(victim, 1);
+		HealDamage(victim, 1);
+		ev.source := dupe;
+		if (victim.warmode)
+			ev.type := EVID_PEACEMADE;
+			SendEvent(victim, ev);
+			sleep(1);
+		endif
+		ev.type := EVID_DAMAGED;
+		SendEvent(victim, ev);
+		ev.source := victim;
+		SendEvent(dupe, ev);
+		PrintTextAbove(victim, CStr(victim.name) + " appears confused!");
+		PlayObjectCenteredEffect(victim, FX_CURSE_EFFECT, 10,10);
+    endforeach
+
+endprogram
+

@@ -1,0 +1,54 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":sorcery:sorceryOpts";
+include ":damage:damage";
+
+
+program barrage(parms)
+
+	var caster := parms[1];
+	var info := parms[2];
+	var cast_on := parms[4];
+	if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+		cast_on := MS_TargetCoordinates(caster, info.targ, "Select a target:", TGTOPT_CHECK_LOS+TGTOPT_HARMFUL);
+	endif
+	if (!cast_on)
+		SendSysMessage (caster, "Cancelled.", color := 33);
+		return 0;
+	endif
+
+	var i := CInt( RandomDiceRoll("4d6") + (AP_GetStat(caster, INTELLIGENCE) / 10) );
+	var newtarg, victims;
+	var x, y;
+
+	Detach();
+	while (i > 0)
+		x := cast_on.x + RandomInt(5) - RandomInt(5);
+		y := cast_on.y + RandomInt(5) - RandomInt(5);
+		newtarg := CreateItemAtLocation(x, y, cast_on.z, 0xeed, 1);
+		newtarg.invisible := 1;
+		PlayMovingEffect(caster, newtarg, 0x36D4, 0x10, 0x10, 0); // This was a skull 0x1AE4. Not yet sure if this, 0x36D4, is the right GFX.
+		PlaySoundEffect(newtarg, 0x208);
+		victims := ListMobilesNearLocation(newtarg.x, newtarg.y, newtarg.z, 0, newtarg.realm);
+
+		foreach victim in victims
+			if(AP_GetVital(victim, HITS))
+				send_attack(victim, caster);
+				SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "Barrage" });
+				ApplySpellDamageEX(victim, RandomDiceRoll("4d4+4"), DMG_FIRE, caster, info.Circle);
+				PlaySoundEffect( victim, SFX_SPELL_EXPLOSION );
+				PlayStationaryEffect( victim.x,victim.y,victim.z, FX_EXPLODE_3, 7, 0x10, 0, victim.realm );
+			endif
+		endforeach
+		DestroyItem(newtarg);
+		i := i - 1;
+	endwhile
+
+endprogram
+

@@ -74,19 +74,22 @@ program TimedScript_DefaultPoison(params)
 		   break;
 	endcase
 	var cliloc_string := CStr(dmg) + "\t" + CStr(time);
-	defender.addbuff(1038, duration, 1017383, 1075633, cliloc_string);
+	var cfg_elem := TS_GetCfgElem("DefaultPoison");
+    var buff_icon := CInt( cfg_elem.BuffIcon );
+	defender.addbuff(buff_icon, duration, 1017383, 1075633, cliloc_string);
 	defender.poisoned := 1;
-	while ( 1 )
+
+	while(1)
+
 		PrintTextAbovePrivate(defender, poisonedmsg, defender);
 		foreach mobile in ( ListMobilesInLineOfSight(defender, 8) )
 			if( mobile.ip && mobile != defender )
 				PrintTextAbovePrivate(defender, viewermsg, mobile);
 			endif
-			SleepMS(2);
+			SleepMS(10);
 		endforeach
 
 		ApplyRawDamageEX(defender, dmg, DMG_POISON, attacker);
-
 		Set_Critical(1);
 		var curr := CInt(AP_GetVital(defender, "Stamina"));
 		if ( curr >= stam )
@@ -97,9 +100,9 @@ program TimedScript_DefaultPoison(params)
 		Set_Critical(0);
 
 		Sleep(time);
+
 	endwhile
-	defender.poisoned := 0;
-	defender.delbuff(1038);
+
 	return 1;
 endprogram
 

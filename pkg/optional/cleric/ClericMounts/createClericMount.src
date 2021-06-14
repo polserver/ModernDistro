@@ -12,7 +12,7 @@ program CreateClericMount(params)
 	var who := params[1];
 	var devotion := GetObjProperty(who, "Devotion" );
 	var faith := Faiths_FindFaith( devotion );
-	var mount_info := SplitWords(faith.getprop("Mounts"));
+	var mount_info := SplitWords(faith.getprop("Mount"));
 	if(!mount_info)
 		SysLog("createClericMount --> Cannot find mount_info.");
 	endif
@@ -24,10 +24,18 @@ program CreateClericMount(params)
 	PlaySoundEffect( who, SFX );
  	PlayObjectCenteredEffectEx( who, GFX, 1, Frames, Hue, 7 );
 	var MountPiece := CreateClericMountPiece(cleric_mount_piece);
+	if(!MountPiece)
+		Print("Error in createClericMount.src - Can't setup MountPiece.");
+		return 0;
+	endif
     MountPiece := CreateItemAtLocation( 7158, 43, 0, MountPiece, 1, "britannia" );
+	if(!MountPiece)
+		Print("Error in createClericMount.src - Can't create MountPiece.");
+		return 0;
+	endif
 	SetObjProperty(MountPiece, "Unequip", ":cleric:ClericMounts/UnEquipClericMount");
     EquipItem(who, MountPiece);
-    return;
+    return 1;
 
 endprogram
 

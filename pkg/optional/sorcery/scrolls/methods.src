@@ -1,0 +1,14 @@
+use uo;
+use os;
+use cfgfile;
+
+program Install()
+	return 1;
+endprogram
+
+exported function IsSorceryScroll( unused sorceryscroll )
+
+	return 1;
+
+endfunction
+

@@ -1,0 +1,72 @@
+use vitals;
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include ":sorcery:sorceryOpts";
+include ":damage:damage";
+
+var npccfg := ReadConfigFile("npcdesc");
+
+program coneofcold(parms)
+
+	var caster := parms[1];
+	var info := parms[2];
+	var cast_on := parms[4]; // If NPC casting there'll be something here.
+	if (!cast_on) // If no cast_on then this is being cast by a player.
+		cast_on := MS_TargetCoordinates(caster, info.targ, "Select a location:");
+	endif
+	if (!cast_on)
+		SendSysMessage (caster, "Cancelled.", color := 33);
+		return 0;
+	endif
+	if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+		return 0;
+	endif
+
+	var i := 15;
+	var newtarg, victims, dmg;
+	var x, y;
+
+	Detach();
+	PlaySoundEffect(caster, 0x231);
+
+	while (i > 0)
+		x := cast_on.x + RandomInt(4) - RandomInt(4);
+		y := cast_on.y + RandomInt(4) - RandomInt(4);
+		newtarg := CreateItemAtLocation(x, y, cast_on.z, 0xeed, 1);
+		PlayMovingEffect(caster, newtarg, 0x17cd, 0x10, 0x10, 0);
+		DestroyItem(newtarg);
+		i := i - 1;
+	endwhile
+	victims := ListMobilesNearLocationEx(cast_on.x, cast_on.y, cast_on.z, 3, LISTEX_FLAG_NORMAL + LISTEX_FLAG_HIDDEN, cast_on.realm);
+
+	foreach victim in victims
+		if (AP_GetVital(victim, HITS))
+			dmg := "6d5+" + CStr(CInt(AP_GetStat(caster, INTELLIGENCE) / 5));
+			dmg := RandomDiceRoll(dmg);
+			PlayObjectCenteredEffect(victim, 0x375a, 7, 0x10);
+			PlaySoundEffect(victim, 0x042);
+			SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "Sorcery" });
+			if(victim.isA(POLCLASS_NPC))
+				Send_attack(victim, caster);
+				var element := npccfg[victim.npctemplate].elemental;
+				if(element == "water")
+					HealDamage(victim, dmg );
+				elseif(element == "cold")
+					HealDamage(victim, dmg );
+				elseif(element == "fire")
+					ApplySpellDamageEX(victim, dmg*3, DMG_COLD, caster, info.Circle);
+				else
+					ApplySpellDamageEX(victim, dmg*2, DMG_COLD, caster, info.Circle);
+				endif
+			else
+				ApplySpellDamageEX(victim, dmg, DMG_COLD, caster, info.Circle);
+			endif
+		endif
+	endforeach
+
+endprogram
+

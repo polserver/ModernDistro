@@ -14,9 +14,6 @@ use storage;
 
 include ":attributes:attributes";
 include ":gumps:gumps";
-include ":gumps:gumpPrompt";
-include ":gumps:requestGump";
-include ":gumps:yesNo";
 include ":containers:storageAreas";
 include ":weapons:weaponInfo";
 include "include/arrays";

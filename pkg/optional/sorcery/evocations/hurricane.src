@@ -1,0 +1,60 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":sorcery:sorceryOpts";
+include ":damage:damage";
+
+program hurricane(parms)
+
+	var caster := parms[1];
+	var info := parms[2];
+	var cast_on := parms[4]; // If NPC casting there'll be something here.
+	if (!cast_on) // If no cast_on then this is being cast by a player.
+		cast_on := MS_TargetCoordinates(caster, info.targ, "Select a location:");
+	endif
+	if (!cast_on)
+		SendSysMessage (caster, "Cancelled.", color := 33);
+		return 0;
+	endif
+	if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+		return 0;
+	endif
+	var dmg;
+	var npccfg1 := ReadConfigFile(":*:npcdesc");
+	var duration := (AP_GetStat(caster, INTELLIGENCE) * 2) + (AP_GetSkill(caster, MEDITATION) );
+	Detach();
+
+	while (duration > 0)
+
+		duration := duration - 2;
+		foreach victim in ListMobilesNearLocationEx(cast_on.x, cast_on.y, cast_on.z, 15, LISTEX_FLAG_NORMAL + LISTEX_FLAG_HIDDEN, cast_on.realm)
+			if (victim.serial != caster.serial)
+				var element := npccfg1[cast_on.npctemplate].elemental;
+				if(element == "energy")
+					HealDamage(cast_on, (RandomDiceRoll("1d6") ) );
+				else
+					SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "Sorcery" });
+					send_attack(victim, caster);
+					if (CheckLosAt(victim, cast_on.x, cast_on.y, cast_on.z) )
+						start_script(":sorcery:effects/pushback", victim);
+						if (RandomInt(2) == 1)
+							PlayLightningBoltEffect(victim);
+							PlaySoundEffect(victim, SFX_SPELL_LIGHTNING);
+							SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "Sorcery" });
+							dmg := RandomDiceRoll("6d8+6");
+							ApplySpellDamageEX(victim, dmg, DMG_ENERGY, caster, info.Circle);
+						endif
+					endif
+				endif
+			endif
+		endforeach
+		sleep(2);
+
+	endwhile
+
+endprogram

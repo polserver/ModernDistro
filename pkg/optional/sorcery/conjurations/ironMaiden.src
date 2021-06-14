@@ -1,0 +1,54 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":damage:damage";
+include ":sorcery:sorceryOpts";
+
+program IronMaiden(parms)
+
+	var caster := parms[1];
+	var info := parms[2];
+	var cast_on;
+	cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_HELPFUL);
+	if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+		cast_on := parms[4];
+	endif
+	if (!cast_on)
+		SendSysMessage (caster, "Cancelled.", color := 33);
+		return 0;
+	endif
+	if ( !MS_MobileCheck(caster, cast_on) )
+		return 0;
+	endif
+
+	cast_on.paralyzed := 1;
+	var IronMaiden := CreateItemAtLocation( cast_on.x, cast_on.y, cast_on.z, 0x1249, 1, cast_on.realm );
+	// The following line is needed to ensure that the character
+	// appears "in front of" the iron maiden.
+	UpdateMobile( cast_on, UPDATEMOBILE_UPDATE );
+	var i;
+	for( i:=0; i<=5; i += 1 )
+		if ( 0x1249 + i == 0x124B )
+			cast_on.concealed := 1;
+		endif
+		if ( IronMaiden.Graphic < 0x124D )
+			IronMaiden.graphic := 0x1249 + i;
+		endif
+		// The following line is needed to ensure that the character
+		// appears "in front of" the iron maiden.
+		UpdateMobile( cast_on, UPDATEMOBILE_UPDATE );
+		Sleep(1);
+	endfor
+	ApplyDamageEx(cast_on, RandomDiceRoll("2d6"), DMG_PHYSICAL, caster.serial);
+	if (IronMaiden.Graphic >= 0x124D)
+		DestroyItem( IronMaiden );
+	endif
+	cast_on.concealed := 0;
+	cast_on.paralyzed := 0;
+endprogram
+

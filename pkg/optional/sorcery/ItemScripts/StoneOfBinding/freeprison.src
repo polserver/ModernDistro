@@ -1,0 +1,82 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":sorcery:sorceryOpts";
+
+program binddaemon(who, prison)
+
+	var daemon := GetObjProperty(prison, "#RELEASED");
+	var bindresist;
+	var bindpower;
+	var bindcheck;
+	var i;
+
+	if(!GetObjProperty(prison, "Daemon"))
+		SendSysMessage(who, "There are no creatures bound within this stone.", color := 33);
+		return 0;
+	endif
+
+	if (daemon)
+		daemon := CreateNpcFromTemplate(who, who.x, who.y, who.z, 0, who.realm);
+		if (daemon)
+			bindresist := CDbl(AP_GetVital(daemon, MANA) + AP_GetSkill(daemon, RESISTING_SPELLS) );
+			bindpower := CDbl(AP_GetStat(who, INTELLIGENCE) + CInt( AP_GetSkill(who, MEDITATION) * 2) );
+			bindcheck := CInt( ( (bindpower / bindresist) - 0.50) * 100);
+			i := RandomInt(100);
+			if ( (i > bindcheck) || (i == 0) )
+				SendSysMessage(who, "Your power over the daemon has broken, and the daemon turns upon you!", color := 33);
+				DestroyItem(prison);
+				daemon.script := "test";
+				RestartScript(daemon);
+				return 0;
+			endif
+			SetObjProperty(who, "summoned", 1);
+			PlaySoundEffect(who, 0xff);
+			PrintTextAbove(who, who.name + " has re-bound " + daemon.name + "!");
+			EraseObjProperty(prison, "#RELEASED");
+			daemon.kill();
+			return 1;
+		endif
+		SendSysMessage(who, "The power of this crystal has been drained, and the crystal disappears!");
+		DestroyItem(prison);
+		return 1;
+	endif
+
+	SendSysMessage(who, "Select a location to release the daemon.");
+	var targ := TargetCoordinates(who);
+	if (!targ)
+		SendSysMessage(who, "Aborted.");
+		return 0;
+	endif
+
+	if (!CheckLosAt(who, targ.x, targ.y, targ.z) )
+		SendSysMessage(who, "You cannot see that location.");
+		return 0;
+	endif
+
+	daemon := CreateNpcFromTemplate( (GetObjProperty(prison, "Daemon") ), targ.x, targ.y, targ.z, 0, targ.realm);
+	SetObjProperty(targ, "summoned", 1);
+	PlaySoundEffect(who, 0xff);
+	PrintTextAbove(who, who.name + " has released " + daemon.name + "!");
+	bindresist := CDbl(AP_GetVital(daemon, MANA) + AP_GetSkill(daemon, RESISTING_SPELLS) );
+	bindpower := CDbl(AP_GetStat(who, INTELLIGENCE) + CInt( GetAttribute(who, MEDITATION) * 2) );
+	bindcheck := CInt( ( (bindpower / bindresist) - 0.50) * 100);
+	i := RandomInt(100);
+	if ( (i > bindcheck) || (i == 0) )
+		SendSysMessage(who, "Your power over the daemon has broken, and the daemon turns upon you!");
+		RestartScript(daemon);
+		DestroyItem(prison);
+		return 1;
+	endif
+	daemon.script := "tamed";
+	daemon.master := who.serial;
+	SetObjProperty(daemon, "master", who.serial);
+	SetObjProperty(prison, "#RELEASED", daemon.serial);
+	RestartScript(daemon);
+
+endprogram

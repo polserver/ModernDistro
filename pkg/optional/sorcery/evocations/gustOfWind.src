@@ -1,0 +1,91 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":sorcery:sorceryOpts";
+include ":damage:damage";
+
+
+program gustofwind(parms)
+
+	var caster := parms[1];
+	var info := parms[2];
+	var cast_on := parms[4];
+	if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+		cast_on := MS_Target(caster, info.targ, "Select a target:", TGTOPT_CHECK_LOS+TGTOPT_HARMFUL);
+	endif
+	if (!cast_on)
+		SendSysMessage (caster, "Cancelled.", color := 33);
+		return 0;
+	endif
+	if ( !MS_MobileCheck(caster, cast_on) )
+		return 0;
+	endif
+
+
+	var npccfg1 := ReadConfigFile(":*:npcdesc");
+	var movedist := CInt(AP_GetStat(caster, INTELLIGENCE) / 10) + 1;
+
+	if ( SkillCheck(cast_on, RESISTING_SPELLS, 60, 40) )
+		movedist := CInt(movedist / 2);
+		SendSysMessage(cast_on, "You feel yourself resisting magical energy!");
+		PlaySoundEffect(cast_on, SFX_SPELL_WEAKEN);
+		PlayObjectCenteredEffect(cast_on, FX_CURSE_EFFECT, 5,5);
+	endif
+
+
+	var movex, movey;
+	PrintTextAbove(cast_on, CStr(cast_on.name) + " is tossed about by the wind!");
+	send_attack(cast_on, caster);
+	SetObjProperty(cast_on, "LastHit", {caster.name, caster.serial, "Sorcery" });
+	while (movedist > 0)
+		cast_on.setParalyzed(1);
+		if (caster.x > cast_on.x)
+			movex := cast_on.x - 1;
+		elseif (caster.x < cast_on.x)
+			movex := cast_on.x + 1;
+		else
+			movex := cast_on.x;
+		endif
+
+		if (caster.y > cast_on.y)
+			movey := cast_on.y - 1;
+		elseif (caster.y < cast_on.y)
+			movey := cast_on.y + 1;
+		else
+			movey := cast_on.y;
+		endif
+
+		if(cast_on.isA(POLCLASS_NPC))
+			var element := npccfg1[cast_on.npctemplate].elemental;
+			if(element == "air")
+				HealDamage(cast_on, (RandomDiceRoll("1d6") ) );
+			else
+				if(element == "water")
+					ApplySpellDamageEX(cast_on, RandomDiceRoll("2d8"), DMG_PHYSICAL, caster, info.Circle);
+				endif
+				if (CheckLosAt(cast_on, movex, movey, (GetWorldHeight(movex, movey, cast_on.realm) ) ) )
+					MoveObjectToLocation(cast_on, movex, movey, (GetWorldHeight(movex, movey, cast_on.realm) ), cast_on.realm );
+				else
+					ApplySpellDamageEX(cast_on, RandomDiceRoll("2d3"), DMG_PHYSICAL, caster, info.Circle);
+				endif
+			endif
+		else
+			if (CheckLosAt(cast_on, movex, movey, (GetWorldHeight(movex, movey) ) ) )
+					MoveObjectToLocation(cast_on, movex, movey, (GetWorldHeight(movex, movey, cast_on.realm) ), cast_on.realm );
+			else
+					ApplySpellDamageEX(cast_on, RandomDiceRoll("2d3"), DMG_PHYSICAL, caster, info.Circle);
+			endif
+		endif
+
+		PlaySoundEffect(cast_on, 0x15);
+		sleepms(300);
+		movedist := movedist - 1;
+    endwhile
+    cast_on.setParalyzed(0);
+
+endprogram

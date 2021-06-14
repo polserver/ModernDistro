@@ -1,0 +1,42 @@
+use uo;
+use os;
+use polsys;
+
+program drag()
+
+	Print("INSTALLING: Drop Item..." );
+
+	return 1;
+endprogram
+
+/*
+Packet Build
+	2D Client Version (before v6.0.1.7)
+	BYTE[1] 0x08
+	BYTE[4] Item Serial
+	BYTE[2] X Location
+	BYTE[2] Y Location
+	BYTE[1] Z Location
+	BYTE[4] Container Serial Dropped Onto (FF FF FF FF drop to ground)
+*/
+exported function DropItem( mobile, byref packet )
+
+	var item := SystemFindObjectBySerial( packet.GetInt32( 1 ) ),
+		container_serial := packet.GetInt32( 10 );
+
+	// Change the cprop name...
+	if( GetObjProperty( mobile, "FarSightInfo" ) )
+		// The value should be 0xFFFFFFFF but with that I could not
+		// get this to work, using -1 seems to get this working...
+		if( container_serial == -1 )
+			var newpacket := CreatePacket( 0x28, 5 );
+			newpacket.SetInt32( 1, item.serial );
+			newpacket.SendPacket( mobile );
+
+			mobile.ClearGottenItem(); // Places the item back in it's original location.
+			return 1;
+		endif
+	endif
+
+	return 0;
+endfunction

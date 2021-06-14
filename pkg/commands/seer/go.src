@@ -38,7 +38,6 @@ include ":datafile:datafile";
 include ":gumps:gumps";
 include ":gumps:gumpPrompt";
 include ":gumps:gumps_ex";
-include ":gumps:yesNo";
 include ":commands:goAdd";
 include ":commands:goEdit";
 include ":commands:goText";
@@ -77,11 +76,11 @@ var zg_pos;
 program command_go( who, text )
         var gump_Open;
             Go_CheckInit(who);
-    
+
             // See if there is an element in the DataFile that matches their
             // account name.
             go_prop := go_elem.GetProp( who.acctname );
-    
+
             // If there is no Element in the DataFile that matches their account name
             // let's create it now.
             if ( !go_prop )
@@ -89,13 +88,13 @@ program command_go( who, text )
                     go_elem.SetProp(who.acctname, temp);
                     go_prop  := go_elem.GetProp(who.acctname);
             endif
-    
+
             go_keys  := go_prop.Keys();
-    
+
             if( Go_Parse_Text(who, text) )
                     return 0;
             endif
-    
+
             gump_Open := GetObjProperty(who, "#Go_Gump");
             case(gump_Open)
                     1: Go_LocationIndex(who);

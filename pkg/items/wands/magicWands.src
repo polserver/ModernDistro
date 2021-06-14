@@ -4,11 +4,9 @@ use cfgfile;
 
 include "include/client";
 include ":attributes:attributes";
-include "include/statMod";
+include ":timedScripts:timedScripts";
 include "include/canAccess";
 include ":damage:damage";
-include":magery:spells";
-
 
 program magicwands(who, item)
   EraseObjProperty(who, "IsMeditating");
@@ -86,14 +84,10 @@ function cast_clumsy(caster, cast_on)
   endif
   PlaySoundEffect(cast_on, SFX_SPELL_CURE);
   PlayObjectCenteredEffect(cast_on, FX_CURSE_EFFECT, 7,7);
-  if(!CanMod(cast_on, "dex"))
-    SendSysMessage(caster,"Already under the influence!");
-    return;
-  endif
   var magery := 20;
-  var mod_amount := MWresisted(10, cast_on, (GetModAmount(magery)));
-  var duration := GetModDuration(magery);
-  DoTempMod(cast_on, "dex", 0 - mod_amount, duration);
+  var mod_amount := MWresisted(10, cast_on, (CalculateModAmount(magery)));
+  var duration := CalculateModDuration(magery);
+  TS_StartTimer(cast_on, "Clumsy", duration, mod_amount, caster);
 endfunction
 
 function cast_feeblemind(caster, cast_on)
@@ -103,14 +97,10 @@ function cast_feeblemind(caster, cast_on)
   endif
   PlaySoundEffect(cast_on, SFX_SPELL_FEEBLEMIND);
   PlayObjectCenteredEffect( cast_on, FX_CURSE_EFFECT, 7, 7 );
-  if (!CanMod(cast_on, "int"))
-    SendSysMessage(caster,"Already under the influence!");
-    return;
-  endif
   var magery := 20;
-  var mod_amount := MWresisted(20, cast_on, (GetModAmount(magery)));
-  var duration := GetModDuration(magery);
-  DoTempMod(cast_on, "int", 0 - mod_amount, duration);
+  var mod_amount := MWresisted(20, cast_on, (CalculateModAmount(magery)));
+  var duration := CalculateModDuration(magery);
+  TS_StartTimer(cast_on, "FeebleMind", duration, mod_amount, caster);
 endfunction
 
 function cast_heal(caster, cast_on)
@@ -132,13 +122,10 @@ function cast_weaken(caster, cast_on)
   endif
   PlaySoundEffect(cast_on, SFX_SPELL_WEAKEN);
   PlayObjectCenteredEffect( cast_on, FX_CURSE_EFFECT, 7,7);
-  if(!CanMod(cast_on, "str"))
-    return;
-  endif
   var magery := 20;
-  var mod_amount := MWresisted(20, cast_on, (GetModAmount(magery)));
-  var duration := GetModDuration(magery);
-  DoTempMod(cast_on, "str", 0 - mod_amount, duration);
+  var mod_amount := MWresisted(20, cast_on, (CalculateModAmount(magery)));
+  var duration := CalculateModDuration(magery);
+  TS_StartTimer(cast_on, "Weaken", duration, mod_amount, caster);
 endfunction
 
 function cast_harm(caster, cast_on)
@@ -223,6 +210,19 @@ function cast_manadrain(caster, cast_on)
     endif
     AP_SetVital(cast_on, VITALID_MANA, (AP_GetVital(cast_on, VITALID_MANA) - diff));
   endif
+endfunction
+
+function CalculateModDuration(magery)
+  var duration := CInt(60 +((magery / 30) * 60));
+  return(duration);
+endfunction
+
+function CalculateModAmount(magery)
+  var mod_amount := CInt(RandomInt(3) +(magery/10));
+  if(mod_amount > 10)
+    mod_amount := 10;
+  endif
+  return mod_amount;
 endfunction
 
 function MWReflected(cast_on)

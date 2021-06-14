@@ -1,0 +1,39 @@
+use uo;
+use os;
+use polsys;
+
+program install()
+
+	return 1;
+endprogram
+
+exported function IsEngravingTool( item )
+
+	item := item; // Avoid Compiler Warnings...
+
+	return 1;
+endfunction
+
+exported function GetUsesRemaining( item )
+
+	var uses := GetObjProperty( item, "UsesRemaining" );
+	if( uses.errortext )
+		uses := 250;
+	endif
+
+	return uses;
+endfunction
+
+exported function ConsumeUses( item )
+
+	var uses := GetObjProperty( item, "UsesRemaining" );
+	if( uses.errortext )
+		uses := 250;
+	endif
+
+	uses := uses - 1;
+	SetObjProperty( item, "UsesRemaining", uses );
+	IncRevision( item );
+
+	return uses;
+endfunction

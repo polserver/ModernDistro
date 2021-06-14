@@ -66,7 +66,7 @@ program textcmd_dropSkill( mobile )
         input := input[0];
         var option := skills_list[input];
 
-        if( !YesNo( mobile, "Are you sure you want to drop your "+option+"?", "Yes, drop my "+option+" to 0.", "It's a mistake, do not drop my "+option+"!" ))
+        if( !YesNo( mobile, "Are you sure you want to drop your "+option+"?", "Yes, drop to 0.", "No!", 0, NOT_LOCALIZED ))
                 SendSysMessage( mobile, "Cancelled." );
                 return 0;
         endif

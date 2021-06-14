@@ -1,0 +1,22 @@
+/*
+ * $Id: endAgility.src 921 2006-12-20 23:27:45Z tekproxy $
+ *
+ */
+
+use uo;
+use os;
+
+include ":attributes:attributes";
+include ":timedScripts:timedScripts";
+
+program TimedScript_EndAgility(params)
+	var mobile := params[1];
+
+	var cfg_elem := TS_GetCfgElem("DefaultPoison");
+    var buff_icon := CInt( cfg_elem.BuffIcon );
+	mobile.poisoned := 0;
+	mobile.delbuff(buff_icon);
+
+	return 1;
+endprogram
+

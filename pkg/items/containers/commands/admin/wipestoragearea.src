@@ -4,7 +4,6 @@ use file;
 use storage;
 
 include ":gumps:gumps";
-include ":gumps:yesNo";
 
 program wipe_storage_area( mobile )
 

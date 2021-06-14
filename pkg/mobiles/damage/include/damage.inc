@@ -110,7 +110,7 @@ function ApplyRawDamageEX(mobile, amount, type:=DMG_FORCED, source:=0)
 			SetLastDamageInfo(mobile, amount, type, source);
 			SetScriptController(source);
 		endif
-		
+
 		// Added for necro wraith form
 		if(source and GetObjProperty(source, "wraith"))
 			DoManaSuck(mobile, source, amount);
@@ -149,20 +149,18 @@ function ApplySpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circle 
 
 	// Check to see if we are using magic resistance with damage spells.
 	var settings := DMG_GetSettingsCfgElem("Settings");
-	if ( settings.UseMRInAllSpells )
+	if ( CInt(settings.UseMRInAllSpells) )
 	    amount := Resisted(circle, source, mobile, amount);
 	endif
 	// Check to see if we will take standard resistances into account against spell damage.
-	settings := DMG_GetSettingsCfgElem("Settings");
-	if ( settings.UseDamageMembers )
+	// settings := DMG_GetSettingsCfgElem("Settings");
+	if ( CInt(settings.UseDamageMembers) )
       amount := CalcDamageAmount(mobile, amount, type);
 	endif
 
 	if ( amount == error )
 	    return 0;
 	endif
-
-	settings := DMG_GetSettingsCfgElem("Settings");
 
 	if ( amount < 0 )
 	    HealDamage(mobile, Abs(amount));
@@ -208,7 +206,7 @@ function ApplyRawSpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circ
 	endif
 
 	settings := DMG_GetSettingsCfgElem("Settings");
-	if ( settings.UseDamageMembers )
+	if ( settings.UseDamageTypes )
     amount := CalcDamageAmount(mobile, amount, type);
 	endif
 

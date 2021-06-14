@@ -1,0 +1,36 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":sorcery:sorceryOpts";
+
+program ventriloquism(parms)
+
+    var caster := parms[1];
+    var info := parms[2];
+    var cast_on;
+    cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_HELPFUL);
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+	SendSysMessage(caster, "What do you want to say?", color := 88);
+    var saytext := RequestInput(caster, caster.backpack, "");
+    if (!saytext)
+            SendSysMessage(caster, "Invalid.");
+            return 0;
+    endif
+
+    AwardRawAttributePoints( caster, MAGERY, 50, SKILLID_MAGERY);
+
+    PrintTextAbove(cast_on, saytext, color := caster.last_textcolor);
+    return 1;
+
+endprogram

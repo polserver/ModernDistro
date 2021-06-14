@@ -1,0 +1,97 @@
+use uo;
+use os;
+use util;
+
+include ":attributes:attributes";
+include ":magery:spells";
+include "include/client";
+include "include/sounds";
+include ":sorcery:sorceryOpts";
+
+var unlitsources :=
+{
+	0x9fb,			// candle in wallsconce
+	0xa00,			// candle in wallsconce
+	0xa05,			// torch in wallsconce
+	0xa0a,			// torch in wallsconce
+	0xa28,			// unlit candle
+	0xf64,			// unlit torch
+	0xa18,			// hanging lamp
+	0xa1d,			// hanging lamp
+	0xa25,			// lantern
+	0xa26,			// candle in stick
+	0xa27,			// candleabra
+	0xa29,			// tall candleabra
+	0xb21,			// lamppost
+	0xb23,			// lamppost
+	0xb25,			// lamppost
+	0xde1,			// kindling
+	0xde2,			// kindling
+	0x1853,			// skull candle
+	0x1857,			// skull candle
+	0x1849,			// Heating Stand
+	0x184d			// Heating Stand
+};
+
+var litsources :=
+{
+	0x9fd,			// candle in wallsconce
+	0xa02,			// candle in wallsconce
+	0xa07,			// torch in wallsconce
+	0xa0c,			// torch in wallsconce
+	0xa0f,			// lit candle
+	0xa12,			// unlit torch
+	0xa15,			// hanging lamp
+	0xa1a,			// hanging lamp
+	0xa22,			// lantern
+	0xb1a,			// candle in stick
+	0xb1d,			// candleabra
+	0xb26,			// tall candleabra
+	0xb20,			// lamppost
+	0xb22,			// lamppost
+	0xb24,			// lamppost
+	0xde3,			// campfire
+	0xde3,			// campfire
+	0x1854,			// skull candle
+	0x1858,			// skull candle
+	0x184a,			// Heating Stand
+	0x184e			// Heating Stand
+};
+
+
+program ignite(parms)
+
+    var caster := parms[1];
+    var info := parms[2];
+    var cast_on;
+    cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_HELPFUL);
+    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+        cast_on := parms[4];
+    endif
+    if (!cast_on)
+        SendSysMessage (caster, "Cancelled.", color := 33);
+        return 0;
+    endif
+
+    SendSysMessage(caster, "Select target.");
+    var targ := Target(caster);
+    if (!targ)
+            SendSysMessage(caster, "Aborted.");
+            return 0;
+    endif
+
+    if (targ.graphic in unlitsources)
+            for i := 1 to len(litsources)
+                    if (unlitsources[i] == targ.graphic)
+                            PlaySoundEffect(targ, 44);
+                            SendSysMessage(caster, "Lit.");
+                            targ.graphic := litsources[i];
+                            AwardRawAttributePoints( caster, MAGERY, 50, SKILLID_MAGERY);
+                            return 1;
+                    endif
+            endfor
+    endif
+
+    SendSysMessage(caster, "Your spell has no effect.");
+
+endprogram

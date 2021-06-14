@@ -1,7 +1,6 @@
 use uo;
 use cliloc;
 
-include ":gumps:yesNo";
 include ":cleric:cleric";
 include ":cleric:faiths";
 include ":damage:damage";
@@ -94,6 +93,7 @@ program UseAltar(who, altar_deed)
 	SendSysMessage(who, "Where would you like the untrodden home to be?", color := 88);
 	var untrodden_home := TargetCoordinates(who);
 	faith.setprop("UntroddenHome", untrodden_home);
+	SendSysMessage(who, "Untrodded Home location has been set.", color := 66);
 	DestroyItem(altar_deed);
 
 endprogram

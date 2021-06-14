@@ -52,12 +52,12 @@ function sacraments()
 	for (i;i<=total;i:=i+1)
 		if (leftright == "left")
 			data.append(sacramentinfo(i).Name);
-			layout.append("text 60 " + ypos + " 2224 " + (len(data)-1));
+			layout.append("text 60 " + ypos + " 0 " + (len(data)-1));
 			layout.append("button 40 " + (ypos+5) + " 2103 2104 1 0 " + i);
 			ypos := ypos+20;
 		elseif (leftright == "right")
 			data.append(sacramentinfo(i).Name);
-			layout.append("text 245 " + ypos + " 2224 " + (len(data)-1));
+			layout.append("text 245 " + ypos + " 0 " + (len(data)-1));
 			layout.append("button 225 " + (ypos+5) + " 2103 2104 1 0 " + i);
 			ypos := ypos+20;
 		endif
