@@ -20,7 +20,7 @@ program poisondamage (passparms)
   elseif(who.cmdlevel > 1)
     return;
   endif
-  TS_StartTimer(who, "defaultPoison", 120, level, attacker);
+  TS_StartTimer(who, "DefaultPoison", 120, level, attacker);
   if(pfield == 1)
     PrintTextAbovePrivate(who, "You choke on the noxious fumes!", who);
 //    var dmg := Resisted(5, attacker, who, CInt(GetAttribute(attacker, "magery") / 25));
