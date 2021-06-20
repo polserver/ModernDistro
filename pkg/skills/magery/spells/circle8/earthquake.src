@@ -23,8 +23,9 @@ program earthquake( parms )
 	// Get all targets in area excluding party and self. Damaged is divided by number of valid targets.
 	var area_size := CInt(GetConfigInt(info.spell_config, "AreaSize"));
 	var exclude := GetObjProperty(caster, "#Party");
+	var includes := ListMobilesNearLocationEx( caster.x, caster.y, caster.z, area_size, LISTEX_FLAG_NORMAL + LISTEX_FLAG_HIDDEN, caster.realm );
 	exclude.Append(caster.serial);
-	var targs := MS_GetVaildTargets(caster, area_size, 1, exclude);
+	var targs := MS_GetVaildTargets(caster, area_size, 1, exclude, includes);
 
 	foreach vtarg in targs
 		base_damage := (CDbl(AP_GetVital(vtarg, HITS)) / 3);
