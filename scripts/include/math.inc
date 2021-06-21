@@ -817,3 +817,44 @@ function RoundToTens( n, behaviour := ROUND_NORMAL )
 	endif
 
 endfunction
+
+/*
+ *
+ * FractionToDouble( fraction )
+ *
+ * Parameters:
+ * fraction - String fraction value.
+ *
+ * Purpose:
+ * Converts a string fraction to a double.
+ *
+ * Date: 2021-06-19	23:46:54
+ * Shard Name: Pangaea
+ *
+ * Author: Oden (ThisIsMe)
+ * Email: DavidJSGardner@Gmail.com
+ * ICQ: 625-658-845
+ * Skype: DavidJSGardner
+ * Discord: ThisIsMe#7491
+ *
+ * Return Values:
+ * double
+ *
+ */
+function FractionToDouble( fraction )
+
+    var parts := SplitWords( fraction, "/" ),
+        whole := 0,
+        numerator := parts[1],
+        denominator := CDbl( parts[2] );
+
+    if( Len( numerator ) == 3 )
+        parts := SplitWords( numerator, " " );
+        whole := CDbl( parts[1] );
+        numerator := CDbl( parts[2] );
+    else
+        numerator := CDbl( numerator );
+    endif
+
+    return CDbl( whole + ( numerator / denominator ) );
+endfunction
