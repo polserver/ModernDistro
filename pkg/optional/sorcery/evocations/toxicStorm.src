@@ -3,6 +3,7 @@ use os;
 use util;
 
 include ":attributes:attributes";
+include ":timedScripts:timedScripts";
 include ":magery:spells";
 include "include/client";
 include "include/sounds";
@@ -257,7 +258,7 @@ program toxicstorm(parms)
 	var duration := CInt(AP_GetStat(caster, INTELLIGENCE)/5) + RandomInt(AP_GetStat(caster, INTELLIGENCE)/5);
 	var hvictims, victims, newx, newy, newz;
 	Detach();
-
+	var timer_name := "DefaultPoison";
 	while (duration > 0)
 		foreach thevortex in vortexlist
 		if (thevortex)
