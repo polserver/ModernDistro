@@ -1,0 +1,54 @@
+use os;
+use uo;
+use util;
+use cfgfile;
+
+include ":doors:doors";
+// include "include/housing";
+
+program door_use_script( mobile, door )
+
+	if( !CanUseDoor( mobile, door ) )
+		return 0;
+	endif
+
+	// var sign := FindMyHouseSign( mobile, 1, mobile.realm );
+	// if( sign )
+		// RefreshHouse( sign );
+	// endif
+
+	Detach();
+	if( door.IsOpen() )
+		while( door )
+			if( !IsOccupied( door ).Size() )
+				break;
+			endif
+			Sleep( 1 );
+		endwhile
+		door.DoorSound( 0 );
+		door.Close();
+	else
+		if( DoorIsLocked( mobile, door ) )
+			return 0;
+		endif
+		door.DoorSound( 1 );
+		door.Open();
+
+		if( door.IsOpen() )
+			Sleep( 10 );
+			while( door )
+				if( !IsOccupied( door ).Size() )
+					break;
+				endif
+				Sleep( 1 );
+			endwhile
+
+			if( door.IsOpen() )
+				door.DoorSound( 0 );
+				door.Close();
+			endif
+		endif
+	endif
+
+	return 1;
+endprogram

@@ -1,0 +1,173 @@
+/////////////////////////////////////////////////////////////////////
+//
+// Program Name: CreateMassNPCs
+//
+// Author: Kiko
+//
+// Date Created: 2021-07-23
+//
+// Description: This is a staff text command to create many of one
+// type of NPC distributed pseudo-randomly throughout
+// the entire facet the staff member is in.
+// I needed to test the server load with an unrealistic
+// amount of NPCs. So I wrote this program.
+//
+// There is a lot of user input error checking for a staff level
+// text command but it was good practice writing it.
+//
+// The command syntax is:
+// .createmassnpcs [NPC Name] [Amount to create]
+//
+// The NPC Name and Amount parameters are both optional.
+// If no parameters are entered the default of horse will
+// be used for the NPC and default of 5,000 will be used for
+// the amount to create.
+//
+// If only one parameter is entered the program will determine
+// whether an integer or string was entered. If a valid integer,
+// greater than 0, it will use that for the amount and default to
+// horse for the NPC. If the parameter is a string, and
+// string is a valid NPC, it will create that NPC using the
+// default amount of 5,000.
+//
+// Parameters:	string::NPC Name
+//				integer::Amount to create
+//
+//
+// Return Value: 1 if successful and 0 if unsuccessful.
+//
+/////////////////////////////////////////////////////////////////////
+
+
+
+use uo;
+use os;
+use util;
+use basic;
+use polsys;
+use cfgfile;
+
+program CreateMassNPCs(who, text)
+
+	var params := {};
+	var default_npc := "horse";
+	var default_amount := 5000;
+	var num_npcs := 0;
+	var npc_template := "";
+	// If no text then defaults are used.
+	if(!text)
+		npc_template := default_npc;
+		num_npcs := default_amount;
+		SendSysMessage(who, "No NPC or amount specified. Defaulting to 'horse' and amount to 5,000.", color := 66);
+		CreateLoop(who, npc_template, num_npcs);
+		return 1;
+	// If text was entered then do error checks.
+	else
+		params := SplitWords(text);
+		if(params.size() > 2)
+			SendSysMessage(who, "You entered too many parameters.", color := 33);
+			Usage(who);
+			return 0;
+		// If split text == 2 parameters
+		elseif(params.size() == 2)
+			npc_template := params[1];
+			if(!IsValidNPC(npc_template))
+				SendSysMessage(who, "You entered an invalid NPC.", color := 33);
+				Usage(who);
+				return 0;
+			endif
+			num_npcs := CInt(params[2]);
+			if(num_npcs <= 0)
+				SendSysMessage(who, "You entered an invalid amount.", color := 33);
+				Usage(who);
+				return 0;
+			else
+				CreateLoop(who, npc_template, num_npcs);
+				return 1;
+			endif
+		// If only one parameter
+		elseif(params.Size() == 1)
+			// Is it an integer?
+			if(CInt(params[1]) > 0)
+				num_npcs := CInt(params[1]);
+				npc_template := default_npc;
+				SendSysMessage(who, "Only an integer was entered. Using default 'horse' NPC.", color := 66);
+				CreateLoop(who, npc_template, num_npcs);
+				return 1;
+			// Is it a string?
+			elseif(IsValidNPC(params[1]))
+				npc_template := params[1];
+				num_npcs := default_amount;
+				SendSysMessage(who, "Only an NPC was entered. Using default 5,000 as amount.", color := 66);
+				CreateLoop(who, npc_template, num_npcs);
+				return 1;
+			// It was neither a valid integer nor a valid NPC template.
+			else
+				SendSysMessage(who, "You entered only one parameter and it was either", color := 33);
+				SendSysMessage(who, "an invalid NPC template or an invalid amount.", color := 33);
+				Usage(who);
+				return 0;
+			endif
+		endif
+	endif
+
+endprogram
+
+function CreateLoop(who, npc_template, num_npcs)
+
+	SendSysMessage(who, "Starting to create " + num_npcs + " " + npc_template + "s...", color := 88);
+	for x := 1 to num_npcs
+		CreateTheCritter(who, npc_template);
+		// SleepMS(10);
+	endfor
+	SendSysMessage(who, "Done creating NPCs.", color := 66);
+	return;
+
+endfunction
+
+function GetRandomCoords(who)
+
+	// "realm_name" ->	"width"
+	//					"height"
+	//					"mapid"
+	//					"toplevel_item_count"
+	//					"mobile_count"
+	//					"season"
+	var facet_info := Realms(who.realm);
+	var where := struct{"height", "width", "level"};
+	where.height := RandomInt(facet_info.width);
+	where.width := RandomInt(facet_info.height);
+	where.level := GetStandingHeight(where.width, where.height, 0, who.realm).z;
+	return where;
+
+endfunction
+
+function CreateTheCritter(who, text)
+
+	var at := struct;
+	var critter;
+	repeat
+		at := GetRandomCoords(who);
+		critter := CreateNpcFromTemplate(text, at.width, at.height, at.level, 0, who.realm);
+	until(critter);
+
+endfunction
+
+function IsValidNPC(template)
+
+	var npc_cfg := ReadConfigFile(":*:npcdesc");
+	var npc_names := GetConfigStringKeys(npc_cfg);
+	if(template in npc_names)
+		return 1;
+	else
+		return 0;
+	endif
+
+endfunction
+
+function Usage(byref who)
+
+	SendSysMessage(who, "Usage is .createmassnpcs [NPC] [amount to create]", color := 88);
+	SendSysMessage(who, "NPC must be a valid NPC template. Amount must be > 0.", color := 88);
+
+endfunction

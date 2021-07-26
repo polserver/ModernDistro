@@ -1,0 +1,56 @@
+use uo;
+use os;
+
+include ":itemutils:itemdesc";
+
+program door_methods()
+
+	return 1;
+endprogram
+
+exported function IsDoor( item )
+
+	item := item;
+
+	return 1;
+endfunction
+
+exported function IsOpen( item )
+
+	var item_info := GetItemDescInfo( item.objtype );
+
+	return item.graphic == item_info.OpenGraphic;
+endfunction
+
+exported function Offset( item )
+
+	var item_info := GetItemDescInfo( item.objtype );
+
+	return Struct{ "XMod":=item_info.XMod, "YMod":=item_info.YMod };
+endfunction
+
+exported function DoorSound( item, open:=1 )
+
+	var item_info := GetItemDescInfo( item.objtype );
+	if( open )
+		case( item_info.DoorType )
+			"Portcullis":	PlaySoundEffect( item, 0xF0 ); break;
+			"Metal":		PlaySoundEffect( item, 0xEC ); break;
+			"Secret":		PlaySoundEffect( item, 0xED ); break;
+			"Sliding":		PlaySoundEffect( item, 0x2F ); break;
+			"Stone":		PlaySoundEffect( item, 0xEE ); break;
+			"Wood":			PlaySoundEffect( item, 0xEB ); break;
+			default:		PlaySoundEffect( item, 0xEB ); break;
+		endcase
+	else
+		case( item_info.DoorType )
+			"Portcullis":	PlaySoundEffect( item, 0xF1 ); break;
+			"Metal":		PlaySoundEffect( item, 0xF3 ); break;
+			"Secret":		PlaySoundEffect( item, 0xF4 ); break;
+			"Sliding":		PlaySoundEffect( item, 0x30 ); break;
+			"Stone":		PlaySoundEffect( item, 0xF5 ); break;
+			"Wood":			PlaySoundEffect( item, 0xF2 ); break;
+			default:		PlaySoundEffect( item, 0xF2 ); break;
+		endcase
+	endif
+endfunction

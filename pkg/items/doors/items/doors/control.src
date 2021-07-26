@@ -1,0 +1,11 @@
+use uo;
+use os;
+
+program door_control_script( door )
+
+	if( door.isopen )
+		door.Close();
+	endif
+
+	return 1;
+endprogram

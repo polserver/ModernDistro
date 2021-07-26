@@ -1,9 +1,0 @@
-use uo;
-
-
-exported function IsDoor(door)
-
-	door := door;
-	return 1;
-	
-endfunction

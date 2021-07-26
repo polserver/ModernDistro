@@ -1,0 +1,32 @@
+use uo;
+use os;
+
+program install_door_macro()
+
+	Print( "Packet Hook -> Open Door Macro" );
+
+	return 1;
+endprogram
+
+exported function OpenDoor( mobile, byref packet )
+
+	packet := packet; // Avoid compiler warnings...
+
+	foreach door in ( ListItemsNearLocationWithFlag( mobile.x, mobile.y, mobile.z, 1, TILEDATA_FLAG_DOOR, mobile.realm ) )
+		if( !CheckLineOfSight( mobile, door ) )
+			continue;
+		elseif( mobile.frozen )
+			return 0;
+		elseif( mobile.paralyzed )
+			return 0;
+		elseif( mobile.dead )
+			return 0;
+		elseif( mobile.hidden )
+			mobile.hidden := 0;
+		endif
+
+		UseItem( door, mobile );
+	endforeach
+
+	return 1;
+endfunction

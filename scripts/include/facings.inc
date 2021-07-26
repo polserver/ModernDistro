@@ -7,8 +7,22 @@ use math;
 
 const FACE_POS_BEHIND := 1;
 const FACE_POS_INFRONT := 2;
- 
- 
+
+
+/*
+	+----------------------------> x
+	|	NW		  N			NE
+	|		+---+---+---+
+	|		| 7 | 0 | 1 |
+	|		+---+---+---+
+	|	W	| 6 | C | 2 |	E
+	|		+---+---+---+
+	|		| 5 | 4 | 3 |
+	|		+---+---+---+
+	|	SW		  S			SE
+	y
+*/
+
 /*
  * TurnObjectToward(object, x_pos, y_pos)
  *
@@ -86,6 +100,38 @@ function InPosition(tgt_mob, locx, locy, flag)
 	endif
 endfunction
 
+///////////////////////////////////////////////////////////
+//
+// IsRelativeFacing( mobile, x, y )
+//
+// Purpose: Determines whether the x and y coordinates
+//			are in the area 90 degrees to the right or
+//			90 degrees to the left of mobile's facing
+//			direction.
+//
+//
+//
+// Parameter:	mobile::MobileRef
+//				x::Integer
+//				y::Integer
+//
+// Returns:	1 if
+//
+///////////////////////////////////////////////////////////
+function IsRelativeFacing( mobile, x, y )
+
+	var obj_facing := GetFacing( mobile.x, mobile.y, x, y );
+	var d := (mobile.facing-obj_facing)%8;
+
+	if( d>3 )
+		d := d - 8;
+	elseif( d < -3 )
+		d := d + 8;
+ 	endif
+
+	return ( Abs( d ) <= 2 );
+endfunction
+
 /*
  * GetPointsByfacing(x_pos, y_pos, facing, dist)
  *
@@ -102,32 +148,22 @@ endfunction
  * Returns an array of structs containing .x .y members for coordinates.
  *
  */
-function GetPointsByFacing(x_pos, y_pos, facing, dist)
-	var coord := struct{"x", "y"};
-	var coord_list := array{};
+function GetPointsByFacing( x_pos, y_pos, facing, dist )
 
 	var xmod := 0, ymod := 0;
-	case ( facing ) // Should find a more sleek mathish way to do this!
-		0: xmod := 0;  ymod := -1; break;
-		1: xmod := +1; ymod := -1; break;
-		2: xmod := +1; ymod := 0;  break;
-		3: xmod := +1; ymod := +1; break;
-		4: xmod := 0;  ymod := +1; break;
-		5: xmod := -1; ymod := +1; break;
-		6: xmod := -1; ymod := 0;  break;
-		7: xmod := -1; ymod := -1; break;
+	case( facing )
+		0: xmod := 0;  ymod := -dist; break;
+		1: xmod := +dist; ymod := -dist; break;
+		2: xmod := +dist; ymod := 0;  break;
+		3: xmod := +dist; ymod := +dist; break;
+		4: xmod := 0;  ymod := +dist; break;
+		5: xmod := -dist; ymod := +dist; break;
+		6: xmod := -dist; ymod := 0;  break;
+		7: xmod := -dist; ymod := -dist; break;
 		default:
 			return error{"errortext":="Invalid facing."};
 			break;
 	endcase
 
-	var i;
-	for( i:=1; i<=dist; i+=1 )
-		coord.x := x_pos+(i*xmod);
-		coord.y := y_pos+(i*ymod);
-		coord_list.Append(coord);
-		SleepMS(2);
-	endfor
-
-	return coord_list;
+	return GetCoordsInLine( x_pos, y_pos, x_pos+xmod, y_pos+ymod );
 endfunction
