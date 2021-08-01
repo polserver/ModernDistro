@@ -8,7 +8,6 @@ include ":attributes:attributes";
 include "include/sysEvent";
 include ":npcs:NPCCast";
 include ":npcs:randName";
-include "include/dist";
 include ":timedScripts:timedScripts";
 
 set_priority(5);
@@ -283,7 +282,7 @@ function Fight(opponent)
   SetOpponent(opponent);
   var ev;
   var loops := 0;
-  while((opponent) && (!opponent.dead || !opponent.hidden || !opponent.concealed) && (dist(me,opponent) < 15))
+  while((opponent) && (!opponent.dead || !opponent.hidden || !opponent.concealed) && (Distance(me,opponent) < 15))
 	if(!CloseDistance(opponent))
 	  loops := loops + 1;
 	  waittime := 0;
@@ -464,7 +463,7 @@ function Guard()
       return;
     endforeach
   endif
-  if( (!AP_GetStat(guarding, STRENGTH)) || (guarding.dead) || (dist(me,guarding) > 15) )
+  if( (!AP_GetStat(guarding, STRENGTH)) || (guarding.dead) || (Distance(me,guarding) > 15) )
     guarding := 0;
   endif
 endfunction
@@ -492,7 +491,7 @@ function Follow()
       waittime := 0;
     endif
   endif
-  if( (!AP_GetStat(escortee, STRENGTH)) || (escortee.dead) || (dist(me,escortee) > 15) )
+  if( (!AP_GetStat(escortee, STRENGTH)) || (escortee.dead) || (Distance(me,escortee) > 15) )
     guarding := 0;
   endif
   if(guarding)

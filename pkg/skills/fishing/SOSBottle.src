@@ -6,7 +6,6 @@ use util;
 include "include/client";
 include "include/objtype";
 include "include/startEqp";
-include "include/dist";
 include "include/canAccess";
 
 program use_bottle( who, bottle )

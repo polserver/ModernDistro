@@ -9,7 +9,6 @@ include "include/eventID";
 include "include/sysEvent";
 include "include/client";
 include "include/anchors";
-include "include/dist";
 include "include/begging";
 include "include/string";
 include "include/findCity";
@@ -86,7 +85,7 @@ program banker();
 		if(ReadGameClock() >= next_wander)
 			begpurse(me);
 			wander();
-			if(coordist(me.x, me.y, myanchor[1], myanchor[2]) > 5)
+			if(CoordinateDistance(me.x, me.y, myanchor[1], myanchor[2]) > 5)
 				MoveObjectToLocation(me, myanchor[1], myanchor[2], myanchor[3], me.realm, MOVEOBJECT_FORCELOCATION);
 			endif
 			next_wander := ReadGameClock() + 10;

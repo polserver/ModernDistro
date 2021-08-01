@@ -6,7 +6,6 @@ use math;
 
 include "include/client";
 include ":attributes:attributes";
-include "include/dist";
 include "include/math";
 include "include/objtype";
 include "include/startEqp";

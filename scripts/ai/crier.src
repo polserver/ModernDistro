@@ -10,7 +10,6 @@ include "include/sysEvent";
 include ":npcs:randName";
 include "include/NPCUtil";
 include "include/objtype";
-include "include/dist";
 include "include/anchors";
 include "ai/main/mainLoopCrier";
 include "ai/combat/fight";
@@ -69,7 +68,7 @@ function Herd(ev)
 endfunction
 
 function CloseIn(me, lx, ly)
-  case (coordist(me.x, me.y, lx, ly))
+  case (CoordinateDistance(me.x, me.y, lx, ly))
     1:
     0:       return 1;
     default: WalkTowardLocation(lx, ly);

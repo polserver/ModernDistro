@@ -10,7 +10,6 @@ include ":npcs:randName";
 include ":npcs:garment";
 include "include/NPCUtil";
 include "include/objtype";
-include "include/dist";
 include "include/anchors";
 
 const HALT_THRESHOLD := 8; // how close before he attacks?
@@ -77,7 +76,7 @@ function Fight(opponent)
   var loops := 0;
   var ev;
   var waittime := 0;
-  while((opponent) && (!opponent.dead) && (!opponent.hidden) && (!opponent.concealed) && (dist(me,opponent) < 20))
+  while((opponent) && (!opponent.dead) && (!opponent.hidden) && (!opponent.concealed) && (Distance(me,opponent) < 20))
 	if(!CloseDistance(opponent))
 	  loops := loops + 1;
 	  waittime := 0;
@@ -111,7 +110,7 @@ endfunction
 
 function in_combat_event_loop(opponent, loops)
   if(loops > 50)
-    if((dist(me, opponent) > 12) && (!CheckLineOfSight(me, opponent)))
+    if((Distance(me, opponent) > 12) && (!CheckLineOfSight(me, opponent)))
 	  RestartScript(me);
 	  return;
     endif

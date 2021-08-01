@@ -19,7 +19,7 @@ function spellattack(opponent);
   if(RandomInt(4) != 1)
     return;
   endif
-  if(CheckLineOfSight(me, opponent) && (dist(me, opponent) < 10))
+  if(CheckLineOfSight(me, opponent) && (Distance(me, opponent) < 10))
     PerformAction(me,0x0c);
     sleep(1);
     PlaySoundEffect(me, 0x16b);

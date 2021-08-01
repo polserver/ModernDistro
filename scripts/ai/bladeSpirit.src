@@ -11,7 +11,6 @@ include ":npcs:randName";
 include "include/NPCUtil";
 include "include/objtype";
 include "include/anchors";
-include "include/dist";
 include "ai/main/setup";
 include "ai/main/sleepMode";
 include ":damage:damage";
@@ -92,7 +91,7 @@ function Fight(opponent)
   var loops := 0;
   var ev;
   var waittime := 0;
-  while((opponent) && not (opponent.dead || opponent.hidden || opponent.concealed) && (dist(me,opponent) < 20) )
+  while((opponent) && not (opponent.dead || opponent.hidden || opponent.concealed) && (Distance(me,opponent) < 20) )
 	if(!CloseDistance(opponent))
 	  loops := loops + 1;
 	  waittime := 0;
@@ -209,7 +208,7 @@ function Herd(ev)
 	  loops := 0;
 	  waittime := 1;
 	endif
-	if((loops >= 30) or (coordist(me.x, me.y, lx, ly) <= 1))
+	if((loops >= 30) or (CoordinateDistance(me.x, me.y, lx, ly) <= 1))
 	  break;
 	endif
 	ev := wait_for_event(waittime);
@@ -226,7 +225,7 @@ function Herd(ev)
 endfunction
 
 function CloseIn(me, lx, ly)
-  case (coordist(me.x, me.y, lx, ly))
+  case (CoordinateDistance(me.x, me.y, lx, ly))
     0:       return 1;
     default: WalkTowardLocation(lx, ly);
              return 0;

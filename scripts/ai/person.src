@@ -19,7 +19,6 @@ include ":npcs:randName";
 include ":npcs:garment";
 include "include/speech";
 include "include/anchors";
-include "include/dist";
 include "ai/main/loot";
 include "include/begging";
 

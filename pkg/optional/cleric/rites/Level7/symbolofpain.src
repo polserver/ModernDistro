@@ -2,7 +2,6 @@ use uo;
 use os;
 
 include ":cleric:cleric";
-include "include/dist";
 
 program symbolofpain(params)
 	var who := params[1];
@@ -19,7 +18,7 @@ program symbolofpain(params)
 
 	ClericReleaseScript(info.pid);
 
-	if (coordist(targ.x, targ.y, who.x, who.y) > piety+5)
+	if (CoordinateDistance(targ.x, targ.y, who.x, who.y) > piety+5)
 		SendSysMessage(who, "Cancelled - too far away", color := 33);
 		return;
 	endif

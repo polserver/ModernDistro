@@ -43,18 +43,18 @@ function NavigateTo(destination);
   for X:=1 to 24
     sleepms(1);
     if (CheckLOSat(me, me.x + X - 12, me.y, me.z) and CheckLOSat(destination, me.x + X - 12, me.y, me.z))
-      if(coordist(destination.x , destination.y , me.x+X-12 , me.y) < maxdist)
+      if(CoordinateDistance(destination.x , destination.y , me.x+X-12 , me.y) < maxdist)
         dX := me.x+X-12;
         dY := me.y;
-        maxdist := coordist(destination.x , destination.y , me.x+X-12 , me.y );
+        maxdist := CoordinateDistance(destination.x , destination.y , me.x+X-12 , me.y );
       endif
     else
       for Y:=1 to 24
         if(CheckLOSat(me, me.x + X - 12, me.y + Y - 12, me.z) and CheckLOSat(destination, me.x+X-12, me.y+Y-12, me.z))
-          if(coordist(destination.x , destination.y , me.x+X-12 , me.y+Y-12 ) < maxdist)
+          if(CoordinateDistance(destination.x , destination.y , me.x+X-12 , me.y+Y-12 ) < maxdist)
             dX := me.x+X-12;
             dY := me.y+Y-12;
-            maxdist := coordist(destination.x , destination.y , me.x + X - 12 , me.y);
+            maxdist := CoordinateDistance(destination.x , destination.y , me.x + X - 12 , me.y);
           endif
         endif
       endfor
@@ -78,7 +78,7 @@ function CloseDistancetoLocation(x, y)
       chk := chk + 1;
     endif
     lastface :=myface;
-  until((coordist( me.x , me.y , x , y ) <= 0) or (chk > 1));
+  until((CoordinateDistance( me.x , me.y , x , y ) <= 0) or (chk > 1));
   if(chk > 1)
     return 1;
   endif

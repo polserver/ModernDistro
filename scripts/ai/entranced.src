@@ -6,7 +6,6 @@ use uo;
 include "include/eventID";
 include ":attributes:attributes";
 include "include/sysEvent";
-include "include/dist";
 
 var me := Self();
 

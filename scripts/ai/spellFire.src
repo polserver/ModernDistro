@@ -10,7 +10,6 @@ include ":npcs:randName";
 include ":npcs:garment";
 include "include/NPCUtil";
 include "include/objtype";
-include "include/dist";
 include ":npcs:NPCCast";
 include "include/anchors";
 include "ai/main/killPCsLoop";

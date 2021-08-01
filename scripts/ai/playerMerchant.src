@@ -13,7 +13,6 @@ include ":npcs:randName";
 include ":npcs:garment";
 include "include/utility";
 include "include/mrcSpawn";
-include "include/dist";
 include "include/client";
 include ":npcs:NPCBackpacks";
 include ":gumps:confirmationSizable";

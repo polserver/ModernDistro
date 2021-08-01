@@ -69,6 +69,54 @@ endfunction
 
 
 /*
+ * IsRelativeFacing( mobile, x, y, vision_dist )
+ * Determines if a location (x and y location) is relatively speaking
+ * in front of the mobile.
+ *
+ * Notes:
+ * 0 is directly in front of the mobile.
+ *
+ * 1 equates to what would essentially be a 90
+ * degree view in front of the mobile
+ *
+ * 2 equates to what would essentially be a 180
+ * degree view in front of the character.
+ *
+ * vision_dist = 0 ->*
+ *
+ *					 *
+ * vision_dist = 1 ->*
+ *					 *
+ *
+ *					**
+ * vision_dist = 2 ->*
+ *					**
+ *
+ * Parameters
+ * mobile:	Mobile to check the coordinates with.
+ * x_pos:	X position to check.
+ * y_pos:	Y position to check.
+ *
+ * Return value
+ * Returns 1 if the coordinates are behind the mobile.
+ * Returns 0 if not.
+ *
+ */
+function IsRelativeFacing( mobile, x, y, vision_dist:=2 )
+
+	var obj_facing := GetFacing( mobile.x, mobile.y, x, y );
+	var d := (mobile.facing-obj_facing)%8;
+
+	if( d>3 )
+		d := d - 8;
+	elseif( d < -3 )
+		d := d + 8;
+ 	endif
+
+	return ( Abs( d ) <= vision_dist );
+endfunction
+
+/*
  * InPosition(mobile, x_pos, y_pos, flag)
  * Determines if a set of coordinates are behind a character.
  * Example ( @ - character * - valid )
@@ -98,38 +146,6 @@ function InPosition(tgt_mob, locx, locy, flag)
 	elseif ( flag == FACE_POS_INFRONT )
 		return (frot > 2);
 	endif
-endfunction
-
-///////////////////////////////////////////////////////////
-//
-// IsRelativeFacing( mobile, x, y )
-//
-// Purpose: Determines whether the x and y coordinates
-//			are in the area 90 degrees to the right or
-//			90 degrees to the left of mobile's facing
-//			direction.
-//
-//
-//
-// Parameter:	mobile::MobileRef
-//				x::Integer
-//				y::Integer
-//
-// Returns:	1 if
-//
-///////////////////////////////////////////////////////////
-function IsRelativeFacing( mobile, x, y )
-
-	var obj_facing := GetFacing( mobile.x, mobile.y, x, y );
-	var d := (mobile.facing-obj_facing)%8;
-
-	if( d>3 )
-		d := d - 8;
-	elseif( d < -3 )
-		d := d + 8;
- 	endif
-
-	return ( Abs( d ) <= 2 );
 endfunction
 
 /*
@@ -167,3 +183,48 @@ function GetPointsByFacing( x_pos, y_pos, facing, dist )
 
 	return GetCoordsInLine( x_pos, y_pos, x_pos+xmod, y_pos+ymod );
 endfunction
+
+/*
+ *
+ * ConvertDirectionToLocX( facing )
+ *
+ * Parameters:
+ * facing - facing value between 0-7
+ *
+ * Purpose:
+ * Returns the x modifier for the given facing.
+ *
+ * Return Values:
+ * int between -1 and 1
+ *
+ * Contributor:
+ * Turley
+ *
+ */
+function ConvertDirectionToLocX( byref facing )
+
+	return CInt( Sin( facing * 0.78 ) * 1.5 );
+endfunction
+
+/*
+ *
+ * ConvertDirectionToLocY( facing )
+ *
+ * Parameters:
+ * facing - facing value between 0-7
+ *
+ * Purpose:
+ * Returns the y modifier for the given facing.
+ *
+ * Return Values:
+ * int between -1 and 1
+ *
+ * Contributor:
+ * Turley
+ *
+ */
+function ConvertDirectionToLocY( byref facing )
+
+	return CInt( Cos( facing * 0.78 ) * -1.5 );
+endfunction
+

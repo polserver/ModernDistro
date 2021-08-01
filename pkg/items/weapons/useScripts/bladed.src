@@ -7,7 +7,6 @@ include ":attributes:attributes";
 include "include/string";
 include "include/objtype";
 include "include/canAccess";
-include "include/dist";
 include "include/toolWear";
 include ":virtue:noto";
 include ":crafting:crafting";
@@ -67,7 +66,7 @@ endprogram
 
 function process_wool(who, blade, sheep, craftingbag)
   blade := blade;
-  if((!CheckLineOfSight(who, sheep)) || (dist(who, sheep) > 2))
+  if((!CheckLineOfSight(who, sheep)) || (Distance(who, sheep) > 2))
     SendSysMessage(who, "That sheep is too far away!", color := 33);
     return 0;
   endif
@@ -106,7 +105,7 @@ endfunction
 
 function CarveTree(who, blade, use_on, craftingbag)
   blade := blade;
-  if(dist(who, use_on) > 2)
+  if(Distance(who, use_on) > 2)
     SendSysMessage(who, "You cannot use that");
     return;
   endif
@@ -118,7 +117,7 @@ endfunction
 
 function CarveFish(who, blade, use_on, craftingbag)
   blade := blade;
-  if((!Accessible(who, use_on)) || (!CheckLineOfSight(who, use_on)) || (dist(who, use_on) > 2))
+  if((!Accessible(who, use_on)) || (!CheckLineOfSight(who, use_on)) || (Distance(who, use_on) > 2))
     SendSysMessage(who, "You cannot use that");
     return 0;
   endif

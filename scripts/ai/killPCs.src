@@ -10,7 +10,6 @@ include ":npcs:randName";
 include ":npcs:garment";
 include "include/NPCUtil";
 include "include/objtype";
-include "include/dist";
 include "include/anchors";
 include "ai/main/killPCsLoop";
 include "ai/combat/fight";

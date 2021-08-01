@@ -7,8 +7,6 @@ include "include/eventID";
 include ":attributes:attributes";
 include "include/sysEvent";
 include ":damage:damage";
-include "include/dist";
-include "util/bank";
 
 var npclist := {};
 var spawn, amt, item, status;

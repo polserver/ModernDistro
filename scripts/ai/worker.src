@@ -8,7 +8,6 @@ include "include/sysEvent";
 include ":npcs:randName";
 include "include/speech";
 include "include/anchors";
-include "include/dist";
 include "ai/main/mainLoopGood";
 include "ai/combat/warriorCombatEvent";
 include "ai/combat/fight";
@@ -309,7 +308,7 @@ function Herd(ev)
 	  loops := 0;
 	  hwaittime := 1;
 	endif
-	if((loops >= 30) or (coordist(me.x, me.y, lx, ly) <= 1))
+	if((loops >= 30) or (CoordinateDistance(me.x, me.y, lx, ly) <= 1))
 	  break;
 	endif
 	ev := wait_for_event(hwaittime);
@@ -326,7 +325,7 @@ function Herd(ev)
 endfunction
 
 function CloseIn(me, lx, ly)
-  case (coordist(me.x, me.y, lx, ly))
+  case (CoordinateDistance(me.x, me.y, lx, ly))
     0:       return 1;
     default: WalkTowardLocation(lx, ly);
              return 0;

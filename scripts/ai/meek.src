@@ -26,7 +26,6 @@ include ":npcs:randName";
 include "include/NPCUtil";
 include "include/objtype";
 include "include/speech";
-include "include/dist";
 include "include/anchors";
 include "ai/main/mainLoopMeek";
 include "ai/combat/fight";

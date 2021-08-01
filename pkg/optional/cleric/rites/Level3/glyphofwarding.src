@@ -4,7 +4,6 @@ use os;
 use cliloc;
 
 include ":cleric:cleric";
-include "include/dist";
 
 program glyphofwarding(params)
 	var who := params[1];

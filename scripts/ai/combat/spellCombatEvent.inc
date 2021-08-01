@@ -33,7 +33,7 @@ endfunction
 function spellattack(opponent)
   if(LAST_BREATH > ReadGameClock())
     return;
-  elseif((CheckLineOfSight(me, opponent)) and (dist(me, opponent) <= 12))
+  elseif((CheckLineOfSight(me, opponent)) and (Distance(me, opponent) <= 12))
     cast_offensive_spell(me, opponent);
     LAST_BREATH := Cint(ReadGameClock() + (RandomInt(4) + 4));
   endif

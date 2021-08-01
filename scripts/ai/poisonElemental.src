@@ -10,7 +10,6 @@ include ":npcs:randName";
 include ":npcs:garment";
 include "include/NPCUtil";
 include "include/objtype";
-include "include/dist";
 include ":npcs:NPCCast";
 include "include/anchors";
 include ":magery:spells";
@@ -82,7 +81,7 @@ function spellattack(opponent)
   if(LAST_BREATH > ReadGameClock())
     return;
   endif
-  if((CheckLineOfSight(me, opponent)) and (dist(me, opponent) <= 15))
+  if((CheckLineOfSight(me, opponent)) and (Distance(me, opponent) <= 15))
     cast_offensive_spell(me, opponent);
     LAST_BREATH := Cint(ReadGameClock() + (RandomInt(4) + 4));
   endif

@@ -11,7 +11,6 @@ include ":npcs:garment";
 include "include/client";
 include "include/anchors";
 include "include/findCity";
-include "include/dist";
 include "include/begging";
 include ":attributes:attributes";
 include ":npcs:trainSkill";
@@ -138,7 +137,7 @@ program barber()
     if(ReadGameClock() >= next_wander)
     begpurse(me);
       wander();
-      if(coordist(me.x, me.y, myanchor[1], myanchor[2]) > 5)
+      if(CoordinateDistance(me.x, me.y, myanchor[1], myanchor[2]) > 5)
         MoveObjectToLocation(me, myanchor[1], myanchor[2], myanchor[3], me.realm, MOVEOBJECT_FORCELOCATION);
       endif
       next_wander := ReadGameClock() +(RandomInt(9) + 21);

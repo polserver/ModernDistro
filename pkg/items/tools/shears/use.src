@@ -8,7 +8,6 @@ use uo;
 include ":attributes:attributes";
 include ":crafting:crafting";
 include "include/client";
-include "include/dist";
 include "include/toolWear";
 
 program shears(who, shears)
@@ -21,7 +20,7 @@ program shears(who, shears)
 		return;
 	endif
 
-	if((!CheckLineOfSight(who, sheep)) or (dist(who, sheep) > 2))
+	if((!CheckLineOfSight(who, sheep)) or (Distance(who, sheep) > 2))
 		SendSysMessage(who, "That sheep is too far away!", color := 33);
 		return 0;
 	endif

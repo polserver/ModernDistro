@@ -8,7 +8,6 @@ include ":attributes:attributes";
 include "include/sysEvent";
 include ":npcs:randName";
 include "include/anchors";
-include "include/dist";
 include "ai/main/mainLoopGood";
 include "ai/combat/animalCombatEvent";
 include "ai/combat/fight";
@@ -199,7 +198,7 @@ function Follow()
       waittime := 0;
     endif
   endif
-  if((!AP_GetStat(escortee, STRENGTH)) || (escortee.dead) || (dist(me,escortee) > 15) )
+  if((!AP_GetStat(escortee, STRENGTH)) || (escortee.dead) || (Distance(me,escortee) > 15) )
     following := 0;
   endif
 endfunction
@@ -228,7 +227,7 @@ function Herd(ev)
 	  loops := 0;
 	  wait_time := 1;
 	endif
-	if((loops >= 30) or (coordist(me.x, me.y, lx, ly) <= 1))
+	if((loops >= 30) or (CoordinateDistance(me.x, me.y, lx, ly) <= 1))
 	  break;
 	endif
 	ev := wait_for_event(wait_time);
@@ -245,7 +244,7 @@ function Herd(ev)
 endfunction
 
 function CloseIn(me, lx, ly)
-  case (coordist(me.x, me.y, lx, ly))
+  case (CoordinateDistance(me.x, me.y, lx, ly))
     0:       return 1;
     default: WalkTowardLocation(lx, ly);
              return 0;

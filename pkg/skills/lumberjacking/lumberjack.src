@@ -9,7 +9,6 @@ include "include/string";
 include "include/objtype";
 include "include/canAccess";
 include "include/utility";
-include "include/dist";
 include ":itemutils:toolWear";
 include ":virtue:noto";
 include ":damage:damage";
@@ -96,7 +95,7 @@ function TreeNearby(me, axe)
     SendSysMessage(me, "Cancelled");
     return 0;
   endif
-  var distt := coordist( me.x, me.y, tree.x, tree.y );
+  var distt := CoordinateDistance( me.x, me.y, tree.x, tree.y );
   if(distt > 1 )
     if(!tree.item.container)
       SendSysMessage(me,"That is too far away");

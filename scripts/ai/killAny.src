@@ -26,7 +26,6 @@ include ":npcs:randName";
 include "include/NPCUtil";
 include "include/objtype";
 include "include/anchors";
-include "include/dist";
 include "ai/main/mainLoopKillAny";
 include "ai/combat/fight";
 include "ai/main/defaultNonCombatEvent";

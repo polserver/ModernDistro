@@ -88,7 +88,7 @@ function Herd(ev)
 	  loops := 0;
 	  waittime := 1;
 	endif
-	if((loops >= 30) or (coordist(me.x, me.y, lx, ly) <= 1))
+	if((loops >= 30) or (CoordinateDistance(me.x, me.y, lx, ly) <= 1))
 	  break;
 	endif
 	ev := wait_for_event(waittime);
@@ -105,7 +105,7 @@ function Herd(ev)
 endfunction
 
 function CloseIn(me, lx, ly)
-  case (coordist(me.x, me.y, lx, ly))
+  case (CoordinateDistance(me.x, me.y, lx, ly))
     0:       return 1;
     default: WalkTowardLocation(lx, ly);
              return 0;

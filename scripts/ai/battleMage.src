@@ -10,7 +10,6 @@ include "include/eventID";
 include "include/sysEvent";
 include ":npcs:randName";
 include ":npcs:garment";
-include "include/dist";
 include "include/anchors";
 include ":npcs:skillLists";
 include ":timedScripts:poisonUtil";
@@ -87,7 +86,7 @@ program CastleGuard()
       endcase
 	endif
 	if(ReadGameClock() >= next_wander)
-      if(coordist(me.x, me.y, myanchor[1], myanchor[2]) > 15)
+      if(CoordinateDistance(me.x, me.y, myanchor[1], myanchor[2]) > 15)
         MoveObjectToLocation(me, myanchor[1], myanchor[2], myanchor[3], me.realm, MOVEOBJECT_FORCELOCATION);
       endif
       next_wander := ReadGameClock() + 10;
@@ -101,7 +100,7 @@ endprogram
 
 function WanderMe()
   wander();
-  if(coordist(me.x, me.y, myanchor[1], myanchor[2]) > 15)
+  if(CoordinateDistance(me.x, me.y, myanchor[1], myanchor[2]) > 15)
     MoveObjectToLocation(me, myanchor[1], myanchor[2], myanchor[3], me.realm, MOVEOBJECT_FORCELOCATION);
   endif
 endfunction

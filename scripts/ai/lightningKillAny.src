@@ -9,7 +9,6 @@ include ":attributes:attributes";
 include ":npcs:randName";
 include "include/NPCUtil";
 include "include/objtype";
-include "include/dist";
 include "include/anchors";
 include "ai/main/mainLoopKillAny";
 include "ai/combat/animalCombatEvent";
@@ -57,7 +56,7 @@ function Fight( opponent )
   var loops := 0;
   var ev;
   var waittime := 0;
-  while ( (opponent) && not (opponent.dead || opponent.hidden || opponent.concealed) && (dist(me,opponent) < 20) )
+  while ( (opponent) && not (opponent.dead || opponent.hidden || opponent.concealed) && (Distance(me,opponent) < 20) )
 	if (Distance(me,opponent) < 2)
       PlayLightningBoltEffect(me);
 	  ApplyDamageEX(opponent, 2, DMG_ENERGY, me);

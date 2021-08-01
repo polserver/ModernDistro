@@ -5,7 +5,6 @@ use os;
 
 include "include/client";
 include ":attributes:attributes";
-include "include/dist";
 include ":timedScripts:poisonUtil";
 
 var config;
@@ -20,7 +19,7 @@ program use_bandages (parms)
   EraseObjProperty(who, "IsMeditating");
 
   //var anatomy:= GetAttribute(who, ANATOMY);
-  if(dist(who, patient) > 2)
+  if(Distance(who, patient) > 2)
     SendSysMessage(who, "Your patient is too far away.", color := 33);
     return;
   elseif(!CheckLineOfSight(who,patient))
@@ -37,7 +36,7 @@ program use_bandages (parms)
       SendSysMessage(who,"You can't see your patient.", color := 33);
       return;
     endif
-    if(dist(who, patient) <= 2)
+    if(Distance(who, patient) <= 2)
       SendSysMessage(who,"You start to cure "+patient.name+".");
       cure(who, patient, bandage);
     else
@@ -49,7 +48,7 @@ program use_bandages (parms)
 	  SendSysMessage(who,"You can't see your patient.", color := 33);
       return;
     endif
-    if(dist(who, patient) <= 2)
+    if(Distance(who, patient) <= 2)
       SendSysMessage(who,"You start to heal "+patient.name + ".", color := 66);
       heal(who, patient, bandage);
     else
@@ -92,7 +91,7 @@ function heal(who, patient, bandy)
     endif
     chp:=AP_GetVital(who, VITALID_LIFE);
     sleep(1);
-    if(dist(who, patient) > 2)
+    if(Distance(who, patient) > 2)
       SendSysMessage(who,"Your patient isn't close enough.", color := 33);
       break;
     endif
@@ -170,7 +169,7 @@ function cure(who, patient, bandy)
     endif
     chp:=AP_GetVital(who, VITALID_LIFE);
     sleep(1);
-    if(dist(who, patient) > 1)
+    if(Distance(who, patient) > 1)
       SendSysMessage(who,"Your patient isn't close enough.", color := 33);
       break;
     endif

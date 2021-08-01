@@ -8,7 +8,6 @@ include ":attributes:attributes";
 include "include/client";
 include "include/objtype";
 include ":magery:spellAttack";
-include "include/dist";
 
 var caster;
 var npccfg := ReadConfigFile("::npcdesc");
@@ -173,7 +172,7 @@ function CanTargetSpell(caster, circle, targopt := (TGTOPT_NEUTRAL | TGTOPT_CHEC
     SendSysMessage(caster,"You can't see that.", 3, 40);
     return 0;
   endif
-  if(dist(caster, cast_on) >= 12)
+  if(Distance(caster, cast_on) >= 12)
     SendSysMessage(caster, "That is too far away.", 3, 40);
     return 0;
   endif
@@ -193,7 +192,7 @@ function CanTargetArea(caster, circle)
     SendSysMessage(caster, "You can't see that.", 3, 40);
     return 0;
   endif
-  if(coordist(caster.x, caster.y, cast_loc.x, cast_loc.y) >= 12)
+  if(CoordinateDistance(caster.x, caster.y, cast_loc.x, cast_loc.y) >= 12)
     SendSysMessage(caster, "That is too far away.", 3, 40);
     return 0;
   endif
@@ -404,7 +403,7 @@ function newusemana(who, circle, cast_on, delivery)
       return 0;
     endif
   endif
-  if(cdist(who.x, who.y, cast_on.x, cast_on.y) > 12)
+  if(cDistance(who.x, who.y, cast_on.x, cast_on.y) > 12)
     var check := 0;
     foreach thing in EnumerateItemsInContainer(who.backpack)
       if(thing == cast_on)
@@ -536,7 +535,7 @@ function getresistpoints(c, victim, skillid)
   return points;
 endfunction
 
-function cdist(x1, y1, x2, y2)
+function cDistance(x1, y1, x2, y2)
   var xd := x1 - x2;
   var yd := y1 - y2;
   if (xd < 0)
@@ -564,7 +563,7 @@ function usemana(who, circle, cast_on)
       return 0;
     endif
   endif
-  if(cdist(who.x, who.y, cast_on.x, cast_on.y) > 12)
+  if(cDistance(who.x, who.y, cast_on.x, cast_on.y) > 12)
     SendSysMessage(who,"The target is out of range.", 3, 40);
     return 0;
   endif

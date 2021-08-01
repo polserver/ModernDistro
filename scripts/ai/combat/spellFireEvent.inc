@@ -36,7 +36,7 @@ function spellattack(opponent)
   if(LAST_BREATH > ReadGameClock())
     return;
   endif
-  if((CheckLineOfSight(me, opponent)) and (dist(me, opponent) <= 15))
+  if((CheckLineOfSight(me, opponent)) and (Distance(me, opponent) <= 15))
     if(RandomInt(4) == 1)
       PerformAction(me,0x0c);
       PlaySoundEffect(me, 0x16b);

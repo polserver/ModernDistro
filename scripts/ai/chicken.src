@@ -8,7 +8,6 @@ include "include/sysEvent";
 include ":npcs:randName";
 include "include/NPCUtil";
 include "include/objtype";
-include "include/dist";
 include "include/anchors";
 include "ai/main/mainLoopChicken";
 include "ai/combat/fight";

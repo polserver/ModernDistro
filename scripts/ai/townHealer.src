@@ -12,7 +12,6 @@ include "include/mrcSpawn";
 include ":npcs:garment";
 include "include/client";
 include "include/anchors";
-include "include/dist";
 include "include/res";
 include "include/resPenalty";
 include "include/findCity";
@@ -128,7 +127,7 @@ set_priority(50);
 	if(ReadGameClock() >= next_wander)
 	  begpurse(me);
       wander();
-      if(coordist(me.x, me.y, myanchor[1], myanchor[2]) > 5)
+      if(CoordinateDistance(me.x, me.y, myanchor[1], myanchor[2]) > 5)
         MoveObjectToLocation(me, myanchor[1], myanchor[2], myanchor[3], me.realm, MOVEOBJECT_FORCELOCATION);
       endif
       next_wander := ReadGameClock() + 30;

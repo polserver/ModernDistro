@@ -8,9 +8,7 @@ include ":attributes:attributes";
 include "include/sysEvent";
 include "include/mrcSpawn";
 include "include/utility";
-include "include/dist";
 include ":damage:damage";
-//include "util/bank";
 
 var npclist := {};
 var spawn, amt, item, status, rng, tmplate;
@@ -271,7 +269,7 @@ function ProcessBankerText(ev)
 		var dis := 15;
 		foreach mob in npclist
 			if(CheckLineOfSight(ev.source, mob))
-				var dst := dist(who, mob);
+				var dst := Distance(who, mob);
 				if(dst < dis)
 					dis := dst;
 					npc := mob;
@@ -309,7 +307,7 @@ function ProcessMerchantText(ev)
 			var dis := 7;
 			foreach mob in npclist
 				if(CheckLineOfSight(who, mob))
-					var dst := dist(who, mob);
+					var dst := Distance(who, mob);
 					if(dst < dis)
 						dis := dst;
 						npc := mob;
