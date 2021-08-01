@@ -92,10 +92,10 @@ function CreateRepairDeed(who, scroll, craft_skill)
 
 	var type, title, color;
 	case( craft_skill )
-		 BLACKSMITHY: 		type := "Blacksmith"; color := CInt(2110);
+		 BLACKSMITHY: 			type := "Blacksmith"; color := CInt(2110);
 		 BOWCRAFT_FLETCHING: 	type := "Bowyer"; color := CInt(2116);
-		 CARPENTRY: 		type := "Carpenter"; color := CInt(2113);
-		 TAILORING: 		type := "Tailor"; color := CInt(2128);
+		 CARPENTRY: 			type := "Carpenter"; color := CInt(2113);
+		 TAILORING: 			type := "Tailor"; color := CInt(2128);
 	endcase
 	var ramt := AP_GetSkill(who, craft_skill);
 	if(ramt < 50)
@@ -120,7 +120,7 @@ function CreateRepairDeed(who, scroll, craft_skill)
 		title := "A repair service contract from a Legendary "+type;
 	endif
 	type := Lower(type);
-	var ret := GetItemDescriptor(0xee09);
+	var ret := GetItemDescriptor(0x2EE09);
 	ret.Color := color;
 	ret.CProps.Insert("type", type);
 	ret.CProps.Insert("skill", craft_skill);
