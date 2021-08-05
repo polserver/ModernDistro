@@ -20,6 +20,12 @@ var nototitles :=
     {"Trustworthy", "Estimable",    "Great",     "Glorious",      "Glorious"}
 };
 
+// AdjustNoto(attacker, defender)
+// Applies Karma and Fame to the attacker and defender, only if the
+// defender is killed as a result of the attacker.  Yes, NPCs can
+// have their Karma and Fame adjusted as a result of their actions.
+// Note: "evil" characters NEVER gain Karma for killing other evil
+// characters.
 function AdjustNoto(attacker, defender)
   if(attacker.isA(POLCLASS_NPC))
     return;
