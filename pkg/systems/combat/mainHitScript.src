@@ -15,8 +15,6 @@ use os;
 use cfgfile;
 
 include ":attributes:attributes";
-//include ":blood:blood";
-include "include/hitscriptinc";
 include ":combat:hitScripts";
 include ":combat:settings";
 include ":timedScripts:timedScripts";
@@ -294,3 +292,4 @@ function ParryCheck(attacker, defender, byref rawdamage)
 
 	return 1;
 endfunction
+
