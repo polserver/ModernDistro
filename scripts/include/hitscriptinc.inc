@@ -5,11 +5,12 @@ use util;
 use math;
 use cfgfile;
 use vitals;
+
+include ":virtue:noto";
 include ":damage:damage";
 
 // DealDamage(defender, attacker, rawdamage)
 // Modifies damage for anatomy, then applies it to the target.
-
 function DealDamage(defender, attacker, rawdamage)
 
 	rawdamage := rawdamage + ( CInt(GetAttribute(attacker, "anatomy") ) / 9);
@@ -18,50 +19,8 @@ function DealDamage(defender, attacker, rawdamage)
 endfunction
 
 
-// AdjustNoto(attacker, defender)
-// Applies Karma and Fame to the attacker and defender, only if the
-// defender is killed as a result of the attacker.  Yes, NPCs can
-// have their Karma and Fame adjusted as a result of their actions.
-// Note: "evil" characters NEVER gain Karma for killing other evil
-// characters.
-
-function AdjustNoto(attacker, defender)
-
-	if (!defender.dead)
-		return 0;
-	endif
-
-	var Karma := CInt(GetObjProperty(attacker, "Karma") );
-	var Fame := CInt(GetObjProperty(attacker, "Fame") );
-	var vKarma := CInt(GetObjProperty(defender, "Karma") );
-	var vFame := CInt(GetObjProperty(defender, "Fame") );
-	var KMod := 1;
-
-	Fame := Fame + CInt( (vFame / 10) / ( CInt(Log10(Fame)) + 1 ) );
-	if (!defender.npctemplate)
-		vFame := CInt(vFame * 0.9);
-	endif
-
-	if ( (Karma < -15) and (vKarma < -15) )
-		return;
-	endif
-
-	if (vKarma > 15)
-		KMod := -1;
-		Karma := Abs(Karma);
-	else
-		vKarma := Abs(vKarma);
-	endif
-
-	KMod := KMod * CInt( (vKarma / 10) / ( CInt(Log10(Karma)) + 1 ) );
-	Karma := Karma + KMod;
-
-endfunction
-
-
 // AdjustDamageFactor(byref weapon, byref defender, byref attacker)
 // Scales the damage done based on the weapon type and the target qualities.
-
 function AdjustDamageFactor(weapon, defender, attacker)
 
 	var cfile := ReadConfigFile("::npcdesc");
@@ -136,7 +95,6 @@ endfunction
 // function CheckTempProtections(attacker, defender, rawdamage)
 //
 // Check for specific, temporary protections.
-
 function CheckTempProtections(attacker, defender, rawdamage)
 
 	var ProtCheck;
@@ -195,3 +153,4 @@ function CheckTempProtections(attacker, defender, rawdamage)
 	return rawdamage;
 
 endfunction
+
