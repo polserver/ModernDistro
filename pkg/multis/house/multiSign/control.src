@@ -179,7 +179,7 @@ endfunction
 function HouseFunction(house, event, num)
 	var itemt := Target(event.source, TGTOPT_NOCHECK_LOS);
 	if(!itemt)
-		SendSysMessage(event.source, "Cancelled.");
+		SendSysMessageCL(event.source, 1042023, color := 33); // Cancelled.
 		return;
 	endif
 	var house_sign := SystemFindObjectBySerial(GetObjProperty(house, "signserial"));
@@ -207,7 +207,7 @@ function HouseFunction(house, event, num)
 						SetObjProperty(itemt, "lockeddown", 1);
 						SetObjProperty(itemt, "houseserial", house.serial);
 						SetObjProperty(house_sign, "RemainingLockdowns", GetObjProperty(house_sign, "RemainingLockdowns") - 1);
-						SendSysMessage(event.source, 501721, color := 66); // Locked down!
+						SendSysMessageCL(event.source, 501721, color := 66); // Locked down!
 					elseif((itemt.movable == 0) && (GetObjProperty(itemt,"lockeddown") ==1))
 						SendSysMessageCL(event.source, 501719, color := 33); // This is already locked down!
 						return;
@@ -289,39 +289,46 @@ function secure(sign, event)
 		SendSysMessageCL(event.source, 1042023, color := 33); // Cancelled.
 		return;
 	endif
+	if(GetObjProperty(itemt, "secure"))
+		SendSysMessageCL(event.source, 501714, color := 33); // This is already secure!
+		return;
+	elseif(!itemt.isa(POLCLASS_CONTAINER))
+		SendSysMessageCL(event.source, 501682, color := 33); // not a container
+		return;
+	endif
 	if(GetObjProperty(sign, "RemainingSecures"))
-	var lists := GetObjProperty(sign, "footage");
-	var itemlist := {};
-	var holder;
-	foreach thing in lists
-		holder := ListObjectsInBox(thing[1], thing[2], thing[3], thing[4], thing[5],thing[6], sign.realm);
-		foreach thing in holder
-			itemlist.append(thing);
+		var lists := GetObjProperty(sign, "footage");
+		var itemlist := {};
+		var holder;
+		foreach thing in lists
+			holder := ListObjectsInBox(thing[1], thing[2], thing[3], thing[4], thing[5],thing[6], sign.realm);
+			foreach thing in holder
+				itemlist.append(thing);
+			endforeach
 		endforeach
-	endforeach
-	if(itemt in itemlist)
-	if(itemt.movable == 0)
-		if(GetObjProperty(itemt,"lockeddown") ==1)
-			SendSysMessage(event.source, "securing this container. your house will be credited with one lockdown.");
-			SetObjProperty(sign, "RemainingLockdowns", GetObjProperty(sign, "RemainingLockdowns") + 1);
-			EraseObjProperty(itemt,"lockeddown");
-		else
-			SendSysMessage(event.source, "you cannot secure that.");
-			return;
+		if(itemt in itemlist)
+			if(itemt.movable == 0)
+				if(GetObjProperty(itemt,"lockeddown") ==1)
+					SendSysMessage(event.source, "securing this container. your house will be credited with one lockdown.");
+					SetObjProperty(sign, "RemainingLockdowns", GetObjProperty(sign, "RemainingLockdowns") + 1);
+					EraseObjProperty(itemt,"lockeddown");
+				else
+					SendSysMessage(event.source, "you cannot secure that.");
+					return;
+				endif
+			endif
+			itemt.movable := 0;
+			SetObjProperty(itemt, "boxserial", itemt.serial);
+			SetObjProperty(itemt, "houseserial", house.serial);
+			SetObjProperty(itemt, "secure", 1);
+			SetObjProperty(itemt,"oldscript", itemt.script);
+			itemt.usescript := ":multihousing:secureCont";
+			SetObjProperty(sign, "RemainingSecures", GetObjProperty(sign, "RemainingSecures") - 1);
+			SendSysMessageCL(event.source, 1010563, color := 66); // This container is secure.
+			SendSysMessage(event.source, "that item is not inside your house.");
 		endif
-	endif
-	itemt.movable := 0;
-	SetObjProperty(itemt, "boxserial", itemt.serial);
-	SetObjProperty(itemt, "houseserial", house.serial);
-	SetObjProperty(itemt, "secure", 1);
-	SetObjProperty(itemt,"oldscript", itemt.script);
-	itemt.usescript := ":multihousing:secureCont";
-	SetObjProperty(sign, "RemainingSecures", GetObjProperty(sign, "RemainingSecures") - 1);
-	SendSysMessageCL(event.source, 1010563, color := 66); // This container is secure.
-	SendSysMessage(event.source, "that item is not inside your house.");
-	endif
 	else
-	SendSysMessageCL(event.source, 1061839, color := 33); // This action would exceed the secure storage limit of the house.
+		SendSysMessageCL(event.source, 1061839, color := 33); // This action would exceed the secure storage limit of the house.
 	endif
 endfunction
 

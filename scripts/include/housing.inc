@@ -194,15 +194,21 @@ function GetHouseComponents()
 endfunction
 
 function IsInHouse(trg)
-	if(trg in GetHouseMobiles())
+	var hsign := GetHouseSign(trg);
+	if(trg in GetHouseMobiles(hsign))
 		return 1;
 	else
 		return 0;
 	endif
 endfunction
 
-function GetHouseMobiles()
+function GetHouseMobiles(hsign)
 	var itemlist := {};
+	// var hsign := GetHouseSign(mobile);
+	// if(!hsign)
+		// return itemlist;
+	// endif
+	footage := GetObjProperty(hsign, "footage");
 	foreach thing in footage
 		var holder := ListObjectsInBox(thing[1], thing[2], thing[3], thing[4], thing[5],thing[6]);
 		foreach obj in holder

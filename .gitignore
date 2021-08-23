@@ -70,6 +70,7 @@ info/
 
 # Other files
 core-changes.txt
+breaking-changes.txt
 objtypes.txt
 packethooks.txt
 packets.zip

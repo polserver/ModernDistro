@@ -54,7 +54,7 @@ endfunction
 // Returns: 1 if true and 0 if false.
 ///////////////////////////////////////////////////////////
 exported function IsStaticHouseSign( byref unused sign )
-	var signs := {CInt(0x20BD1), CInt(0x20BD2), CInt(0x20BCF), CInt(0x20BD0), CInt(0x260FA)};
+	var signs := {0x20BD1, 0x20BD2, 0x20BCF, 0x20BD0, 0x260FA};
 	foreach thing in signs
 		thing := thing; // stops unused warning.
 		if(GetObjProperty(thing, "footage"))
@@ -140,12 +140,8 @@ exported function IsObjectInsideHouse(byref sign, byref object)
 			(object.x >= thing[1] && object.x <= thing[4]) &&
 			(object.y >= thing[2] && object.y <= thing[5]) &&
 			(object.z >= thing[3] && object.z <= thing[6]) )
-			return 1;
 			chk := 1;
-			break;
-		endif
-		if(chk)
-			break;
+			return chk;
 		endif
 	endforeach
 	return chk;
