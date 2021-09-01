@@ -717,12 +717,15 @@ const SFX_LUTE_FAIL                 :=  SFX_4E;
 const SFX_DRUM_FAIL                 :=  SFX_3A;
 const SFX_TAMB_FAIL                 :=  SFX_54;
 
-
 // * doors *
 const SFX_OPEN_WOODEN_DOOR          :=  SFX_EB;
 const SFX_CLOSE_WOODEN_DOOR         :=  SFX_F2;
+const SFX_OPEN_STONE_DOOR          :=  SFX_EC;
+const SFX_CLOSE_STONE_DOOR         :=  SFX_F3;
 const SFX_OPEN_METAL_DOOR           :=  SFX_ED;
 const SFX_CLOSE_METAL_DOOR          :=  SFX_F4;
+const SFX_OPEN_SLIDING_DOOR          :=  0x53a;
+const SFX_CLOSE_SLIDING_DOOR         :=  0x538;
 
 
 ////
