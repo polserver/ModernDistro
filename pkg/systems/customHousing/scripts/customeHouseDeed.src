@@ -1,0 +1,417 @@
+use uo;
+use os;
+use util;
+use cfgfile;
+
+include "include/client";
+include "include/objtype";
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+include "include/utility";
+//include "include/itemtypes";
+include ":customhousing:house";
+include "util/bank";
+
+Const UOBJECT_BRASS_SIGN := 0x0bd2;
+Const UOBJECT_WOOD_SIGN := 0x0bd0;
+
+program usehousedeed (character, deed)
+
+	if (!ReserveItem (deed))
+		SendSysMessage (character, "You can't use that right now.");
+		return;
+	endif
+
+	var housecfgfile := ReadConfigFile (":customhousing:itemdesc");
+	var elem := FindConfigElem (housecfgfile, deed.objtype);
+	var housetype := GetConfigInt (elem, "housetype");
+	if (!housetype)
+		PrintTextAbovePrivate (deed, "That house deed appears to be broken.", character);
+		return;
+	endif
+	var multiid := 0;
+	var dims := 0;
+	var extracharges := 0;
+	var gump := 0;
+	var input := 0;
+	if (housetype == 0x113ec)
+		gump := BuildTwoStoryGump();
+	elseif (housetype == 0x1147b)
+		gump := BuildThreeStoryGump();
+	else
+		PrintTextAbovePrivate (deed, "That house deed appears to be broken.", character);
+		return;
+	endif
+	input := GFSendGump( character, gump );
+	if (input[0]!=0x10)
+		SendSysMessage (character, "Canceled.");
+		return;
+	endif
+	housetype := input.keys[3];
+	Broadcast("ht:"+housetype);
+	multiid := housetype - 0x10000;
+	dims := GetMultiDimensions (multiid);
+	extracharges := ((3+dims.xmax-dims.xmin)*(1+dims.ymax-dims.ymin)-3)*500;
+
+	var where := TargetMultiPlacement (character, housetype);
+	if (!where)
+		SendSysMessage (character, "Canceled.");
+		return;
+	endif
+
+	if (!LegalHouseLocation (where.x, where.y, where.realm))
+		SendSysMessage (character, "House placement not allowed there!");
+		return;
+	endif
+
+	set_critical( 1 );
+	var created := CreateHouseAndKeys ( character, housetype, where.x, where.y, where.z, where.realm );
+	if (!created)
+		return;
+	endif
+	if (extracharges > 0 && character.cmdlevel == 0)
+		SendSysMessage (character, "The cost of buying this foundation is " + extracharges + " gold!");
+		if (!YesNo(character, "Buy it?"))
+			SendSysMessage(character, "Canceled.");
+			DestroyItem(created.packkey);
+			DestroyItem(created.bankkey);
+			DestroyMulti(created.house);
+			return;
+		elseif (!character.spendgold (extracharges))
+			SendSysMessage (character, "You don't have enough money");
+			DestroyItem(created.packkey);
+			DestroyItem(created.bankkey);
+			DestroyMulti(created.house);
+			return;
+		endif
+	endif
+
+   	DestroyItem(deed);
+	SetObjProperty (created.house, "ownerserial", character.serial);
+	var lockid := created.house.serial;
+	SetObjProperty(created.packkey, "lockid", lockid);
+	SetObjProperty(created.bankkey, "lockid", lockid);
+
+	//now we add some special stuff based on what kind of a house it is
+	var item, sign, component := array { };
+	if (housetype >= 0x113ec && housetype <= 0x1147b) // custom houses
+		created.house.setcustom(1);
+		sign :=CreateItemAtLocation( where.x+dims.xmin, where.y+dims.ymax+1, where.z+7, 0xfbd2, 1, where.realm );
+		SetObjProperty(sign, "house_serial", created.house.serial);
+		sign.movable:=0;
+		component.append (sign.serial);
+		SetObjProperty (sign, "lockid", lockid );
+		SetObjProperty (sign, "account", character.acctname );
+		SetObjProperty (sign, "baseprice", extracharges);
+		SetObjProperty (sign, "houseprice", extracharges);
+		//make bracket
+		item :=CreateItemAtLocation( where.x+dims.xmin, where.y+dims.ymax+1, where.z+7, 0x0b9c, 1, where.realm );
+		SetObjProperty(item, "house_serial", created.house.serial);
+		item.movable:=0;
+		component.append (item.serial);
+		//make pole
+		item :=CreateItemAtLocation( where.x+dims.xmin, where.y+dims.ymax, where.z+7, 0x09, 1, where.realm );
+		SetObjProperty(item, "house_serial", created.house.serial);
+		item.movable:=0;
+		component.append (item.serial);
+	endif
+
+	if (component.size())
+		SetObjProperty (created.house, "components", component);
+	endif
+	foreach item in (created.house.components)
+		if (item.isa (POLCLASS_DOOR))
+			item.locked := 1;
+			SetObjProperty (item, "lockid", lockid);
+		elseif (item.objtype == UOBJECT_BRASS_SIGN or item.objtype == UOBJECT_WOOD_SIGN)
+			SetObjProperty (item, "lockid", lockid );
+			SetObjProperty (item, "account", character.acctname );
+		endif
+	endforeach
+
+
+endprogram
+
+
+
+
+///////////////////
+//  builds the house and creates the keys, if possible.  If it can't it gives the reason why and return 0;
+//  Otherwise, it returns a structure with refrences to the items
+///////////////////
+
+function CreateHouseAndKeys (character, housetype, x, y, z, rlm)
+
+	var packkey := CreateItemInBackpack( character, UOBJ_GOLD_KEY );
+	if (!packkey)
+		PrintTextAbovePrivate (character, "*Your backpack is full!*", character );
+		return 0;
+    endif
+
+	var bankbox := FindBankBox(character.acctname);
+	var bankkey := CreateItemInContainer (bankbox, UOBJ_GOLD_KEY);
+	if (!bankkey)
+		PrintTextAbovePrivate (character, "*Your bankbox is full!*", character );
+		DestroyItem (packkey);
+		return 0;
+	endif
+
+	var house := CreateMultiAtLocation (x, y, z, housetype, 0, rlm);
+	if (!house)
+		PrintTextAbovePrivate (character, "*You can't place the house there!*", character );
+		SendSysMessage (character, house.errortext);
+
+		if (character.cmdlevel)
+			SendSysMessage (character, "Since you're a GM, though, you can cheat");
+			SendSysMessage (character, "Do you wish to place the house here anyway?");
+			if (!YesNo (character, "Continue?"))
+				DestroyItem (packkey);
+				DestroyItem (bankkey);
+				return 0;
+			endif
+			house := CreateMultiAtLocation (x, y, z, housetype, CRMULTI_IGNORE_ALL, rlm);
+		else
+			DestroyItem (packkey);
+			DestroyItem (bankkey);
+			return 0;
+		endif
+	endif
+
+	var result := struct;
+	result.+packkey := packkey;
+	result.+bankkey := bankkey;
+	result.+house := house;
+	return result;
+
+endfunction
+
+
+
+
+///////////////////
+//  determines if the area is one where houses can legally be placed
+///////////////////
+
+function LegalHouseLocation (x, y, rlm)
+	//no houses on farmland
+	var maptile := GetMapInfo (x, y, rlm);
+	if (maptile.landtile > 8 and maptile.landtile < 22)
+		return 0;
+	elseif (maptile.landtile >= 0x150 and maptile.landtile <= 0x15c)
+		return 0;
+	elseif (maptile.landtile >= 0x150 and maptile.landtile <= 0x15c)
+		return 0;
+	endif
+
+	if (rlm == _DEFAULT_REALM)
+		//cove
+		if (x > 2192 and x < 2361 and y > 1052 and y < 1271)
+			return 0;
+		//desert
+		elseif (x > 1810 and x < 2060 and y > 800 and y < 890)
+			return 0;
+		//more desert
+		elseif (x > 1810 and x < 1970 and y > 890 and y < 950)
+			return 0;
+		//Despise entrance
+		elseif (x > 1280 and x < 1370 and y > 1040 and y < 1100)
+			return 0;
+		//Britain suburbs teleporter
+		elseif (x > 2080 and x < 2120 and y > 770 and y < 820)
+			return 0;
+		//The heart
+		elseif (x > 750 and x < 850 and y > 1450 and y < 1500)
+			return 0;
+		//Large area with islands south of Trinsic
+		elseif (x > 1550 and x < 2650 and y > 3380 and y < 4080)
+			return 0;
+		//Beach south of Britain
+		elseif (x > 1460 and x < 1530 and y > 1860 and y < 1900)
+			return 0;
+		//The heart
+		elseif (x > 100 and x < 160 and y > 1450 and y < 1490)
+			return 0;
+		//The heart
+		elseif (x > 2700 and x < 2800 and y > 1030 and y < 1130)
+			return 0;
+		//Trinsic and some surrounding land
+		elseif (x > 1780 and x < 2220 and y > 2200 and y < 3000)
+			return 0;
+		//Occlo
+		elseif (x > 3550 and x < 3800 and y > 2350 and y < 2750)
+			return 0;
+		//Magincia
+//		elseif (x > 3500 and x < 3820 and y > 2000 and y < 2300)
+//			return 0;
+		//N'Julem
+		elseif (x > 3450 and x < 3850 and y > 1030 and y < 1430)
+			return 0;
+		//Fellowship hall
+		elseif (x > 2100 and x < 2150 and y > 750 and y < 820)
+			return 0;
+		//Covetous Entrance
+		elseif (x > 2440 and x < 2540 and y > 900 and y < 950)
+			return 0;
+		//Mountains north of Britain
+		elseif (x > 1420 and x < 1480 and y > 1200 and y < 1250)
+			return 0;
+		//Mountains north of Britain
+		elseif (x > 1600 and x < 1660 and y > 1170 and y < 1220)
+			return 0;
+		endif
+	endif
+
+	return 1;
+
+endfunction
+
+function BuildTwoStoryGump( )
+
+	var gump := GFCreateGump();
+	GFResizePic( gump, 0, 0, GFGetCfgConst( "Defaults", "BackGround" ), 340, 330 );
+	GFResizePic( gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 310, 300 );
+
+	GFTextMid( gump, 20, 30, 310, 1720, "Select House Dimensions" );
+	GFAddButton( gump, 35, 250, 2128, 2129, GF_CLOSE_BTN, 0x10 );
+	GFAddButton( gump, 35, 280, 2119, 2120, GF_CLOSE_BTN, 0x0 );
+
+	var y_pos := 60;
+	var page := 2;
+	var widths := array { 7, 8, 9, 10, 11, 12, 13 };
+	foreach housewidth in widths
+		GFAddButton( gump, 30, y_pos+3, 2117, 2118, GF_PAGE_BTN, page );
+		GFTextLine( gump, 50, y_pos, 1720, housewidth + " tiles wide" );
+		y_pos += 20;
+		page += 2;
+                SleepMS(10);
+	endforeach
+	var heights := array { 7, 8, 9, 10, 11, 12 };
+
+	page := 2;
+	var btn_id := 0x113ec;
+	var offsetstep := 6;
+	foreach housewidth in widths
+		y_pos := 60;
+
+		GFPage( gump, page );
+
+		foreach househeight in heights
+			GFRadioButton( gump, 150, y_pos, 210, 211, 0, btn_id );
+			GFTextLine( gump, 173, y_pos, 2100, housewidth + "x" + househeight + " at " + ((((housewidth+2)*househeight)-3)*500) + " gold");
+			y_pos += 20;
+			btn_id += 1;
+                	SleepMS(10);
+		endforeach
+		btn_id += offsetstep;
+                SleepMS(10);
+		page += 2;
+		if (housewidth == 7)
+			heights.append(13);
+			offsetstep := 5;
+		endif
+		if (housewidth == 12)
+			heights.erase(1);
+		endif
+	endforeach
+
+	return gump;
+endfunction
+
+function BuildThreeStoryGump( )
+
+	var gump := GFCreateGump();
+	GFResizePic( gump, 0, 0, GFGetCfgConst( "Defaults", "BackGround" ), 340, 330 );
+	GFResizePic( gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 310, 300 );
+
+	GFTextMid( gump, 20, 30, 310, 1720, "Select House Dimensions" );
+	GFAddButton( gump, 35, 250, 2128, 2129, GF_CLOSE_BTN, 0x10 );
+	GFAddButton( gump, 35, 280, 2119, 2120, GF_CLOSE_BTN, 0x0 );
+
+	var y_pos := 60;
+	var page := 2;
+	var widths := array { "9-11", "12-13", 14, 15, 16, 17, 18 };
+	foreach housewidth in widths
+		GFAddButton( gump, 30, y_pos+3, 2117, 2118, GF_PAGE_BTN, page );
+		GFTextLine( gump, 50, y_pos, 1720, housewidth + " tiles wide" );
+		y_pos += 20;
+		page += 2;
+                SleepMS(10);
+	endforeach
+	widths.erase(1);
+	widths.erase(1);
+	var heights := array { 9, 10, 11, 12, 13, 14, 15, 16, 17, 18 };
+
+	page := 2;
+	GFPage( gump, page );
+	GFRadioButton( gump, 150, 60, 210, 211, 0, 0x1140b );
+	GFTextLine( gump, 173, 60, 2100, "9x14 at 75500 gold");
+
+	GFRadioButton( gump, 150, 80, 210, 211, 0, 0x11417 );
+	GFTextLine( gump, 173, 80, 2100, "10x14 at 82500 gold");
+
+	GFRadioButton( gump, 150, 100, 210, 211, 0, 0x11418 );
+	GFTextLine( gump, 173, 100, 2100, "10x15 at 88500 gold");
+
+	GFRadioButton( gump, 150, 120, 210, 211, 0, 0x11423 );
+	GFTextLine( gump, 173, 120, 2100, "11x14 at 89500 gold");
+
+	GFRadioButton( gump, 150, 140, 210, 211, 0, 0x11424 );
+	GFTextLine( gump, 173, 140, 2100, "11x15 at 96000 gold");
+
+	GFRadioButton( gump, 150, 160, 210, 211, 0, 0x11425 );
+	GFTextLine( gump, 173, 160, 2100, "11x16 at 102500 gold");
+
+	page := 4;
+	GFPage( gump, page );
+	GFRadioButton( gump, 150, 60, 210, 211, 0, 0x1142f );
+	GFTextLine( gump, 173, 60, 2100, "12x14 at 96500 gold");
+
+	GFRadioButton( gump, 150, 80, 210, 211, 0, 0x11430 );
+	GFTextLine( gump, 173, 80, 2100, "12x15 at 103500 gold");
+
+	GFRadioButton( gump, 150, 100, 210, 211, 0, 0x11431 );
+	GFTextLine( gump, 173, 100, 2100, "12x16 at 110500 gold");
+
+	GFRadioButton( gump, 150, 120, 210, 211, 0, 0x11432 );
+	GFTextLine( gump, 173, 120, 2100, "12x17 at 117500 gold");
+
+	GFRadioButton( gump, 150, 140, 210, 211, 0, 0x1143b );
+	GFTextLine( gump, 173, 140, 2100, "13x14 at 103500 gold");
+
+	GFRadioButton( gump, 150, 160, 210, 211, 0, 0x1143c );
+	GFTextLine( gump, 173, 160, 2100, "13x15 at 111000 gold");
+
+	GFRadioButton( gump, 150, 180, 210, 211, 0, 0x1143d );
+	GFTextLine( gump, 173, 180, 2100, "13x16 at 118500 gold");
+
+	GFRadioButton( gump, 150, 200, 210, 211, 0, 0x1143e );
+	GFTextLine( gump, 173, 200, 2100, "13x17 at 126000 gold");
+
+	GFRadioButton( gump, 150, 220, 210, 211, 0, 0x1143f );
+	GFTextLine( gump, 173, 220, 2100, "13x18 at 133500 gold");
+
+
+	var btn_id := 0x11442;
+	var offsetstep := 3;
+	page := 6;
+	foreach housewidth in widths
+		y_pos := 60;
+
+		GFPage( gump, page );
+
+		foreach househeight in heights
+			GFRadioButton( gump, 150, y_pos, 210, 211, 0, btn_id );
+			GFTextLine( gump, 173, y_pos, 2100, housewidth + "x" + househeight + " at " + ((((housewidth+2)*househeight)-3)*500) + " gold");
+			y_pos += 20;
+			btn_id += 1;
+                	SleepMS(10);
+		endforeach
+		btn_id += offsetstep;
+		offsetstep += 1;
+                SleepMS(10);
+		page += 2;
+		heights.erase(1);
+	endforeach
+
+	return gump;
+endfunction

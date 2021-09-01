@@ -3,7 +3,10 @@ use uo;
 use util;
 use cfgfile;
 
+include "include/client";
 include ":keys:key";
+
+var doordesc := ReadConfigFile (":doors:itemdesc");
 
 // New requried functions.....
 // Checks to see if the item can be used...
@@ -75,3 +78,80 @@ function IsOccupied( item )
 
 	return ListMobilesNearLocationEX( x, y, item.z, 0, LISTEX_FLAG_HIDDEN+LISTEX_FLAG_NORMAL, item.realm );
 endfunction
+
+///////////////////
+//  closes the given door, ignoring locked status
+///////////////////
+
+function CloseDoor (door)
+	if (door.graphic == door.objtype)
+		return;
+	endif
+
+	var xmod := CINT (doordesc[door.objtype].xmod);
+	var ymod := CINT (doordesc[door.objtype].ymod);
+
+	var newx := door.x - xmod;
+	var newy := door.y - ymod;
+	if (GetObjProperty (door, "x"))
+		newx := GetObjProperty (door, "x");
+		newy := GetObjProperty (door, "y");
+		EraseObjProperty (door, "x");
+		EraseObjProperty (door, "y");
+	endif
+
+	var newz := door.z;
+	var newr := door.realm;
+	if (door.graphic != door.objtype)
+		set_critical (1);
+		door.movable := 1;
+		door.graphic := door.objtype;
+		MoveObjectToLocation( door, newx, newy, newz, newr, flags :=MOVEOBJECT_FORCELOCATION );
+		door.movable := 0;
+		set_critical (0);
+		PlayDoorCloseSound (door);
+	endif
+endfunction
+
+///////////////////
+// plays the sound effect for opening the door
+///////////////////
+
+function PlayDoorOpenSound (door)
+	case (doordesc[door.objtype].doortype)
+		"wood":
+			PlaySoundEffect (door, SFX_OPEN_WOODEN_DOOR);
+    "stone":
+      PlaySoundEffect (door, SFX_OPEN_STONE_DOOR);
+		"metal":
+			PlaySoundEffect (door, SFX_OPEN_METAL_DOOR);
+    "sliding":
+      PlaySoundEffect (door, SFX_OPEN_SLIDING_DOOR);
+		default:
+			PlaySoundEffect (door, SFX_OPEN_METAL_DOOR);
+	endcase
+endfunction
+
+
+
+
+///////////////////
+// plays the sound effect for closing the door
+///////////////////
+
+function PlayDoorCloseSound (door)
+	case (doordesc[door.objtype].doortype)
+		"wood":
+			PlaySoundEffect (door, SFX_CLOSE_WOODEN_DOOR);
+    "stone":
+      PlaySoundEffect (door, SFX_CLOSE_STONE_DOOR);
+		"metal":
+			PlaySoundEffect (door, SFX_CLOSE_METAL_DOOR);
+    "sliding":
+      PlaySoundEffect (door, SFX_CLOSE_SLIDING_DOOR);
+		default:
+			PlaySoundEffect (door, SFX_CLOSE_METAL_DOOR);
+	endcase
+endfunction
+
+

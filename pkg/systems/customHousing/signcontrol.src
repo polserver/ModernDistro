@@ -1,0 +1,164 @@
+use uo;
+use os;
+use cfgfile;
+
+include "include/eventID";
+include "include/utility";
+//include "include/itemtypes";
+include ":customhousing:house";
+
+program SignListener (sign)
+	if (!GetObjProperty (sign, "house_serial"))
+		sign.controlscript := "";
+		return;
+	endif
+
+	var house := SystemFindObjectBySerial (GetObjProperty (sign, "house_serial"));
+	if (!house)
+		DestroyItem (sign);
+		return;
+	endif
+
+	var homeinfo := GetObjProperty (sign, "homeinfo");
+	if (!homeinfo)
+		BuildHouseLockdownArea (sign, house.objtype);
+	endif
+
+	homeinfo := GetObjProperty (sign, "homeinfo");
+	if (!homeinfo)
+		sign.controlscript := "";
+		return;
+	endif
+
+	RecordHouseSignOwner (sign);
+	RegisterForSpeechEvents (sign, 30);
+
+	var ev;
+	while (sign)
+        	ev := wait_for_event (600);
+		if (ev)
+			if (ev.type == EVID_SPEECH)
+				if (ev.source.acctname)
+					handle_speech (ev, sign);
+				endif
+			endif
+		endif
+	endwhile
+endprogram
+
+
+
+
+///////////////////
+//  used when the sign is first created to set up the area around the house where items can be locked down
+///////////////////
+
+function BuildHouseLockdownArea (sign, housetype)
+	var homeinfo := array {};
+	homeinfo[1] := 0;
+	case (housetype)
+		69732:	//
+		69734:	//
+		69736:  //
+		69738:	//The small houses
+		69740:	//
+		69742:	//
+			homeinfo[2] := sign.x - 6;
+			homeinfo[3] := sign.y - 8;
+			homeinfo[4] := sign.x + 2;
+			homeinfo[5] := sign.y + 1;
+		69748:	//large brick house
+			homeinfo[2] := sign.x - 11;
+			homeinfo[3] := sign.y - 15;
+			homeinfo[4] := sign.x + 4;
+			homeinfo[5] := sign.y + 1;
+		69750:	//Two story houses
+		69752:
+			homeinfo[2] := sign.x - 9;
+			homeinfo[3] := sign.y - 15;
+			homeinfo[4] := sign.x + 6;
+			homeinfo[5] := sign.y + 1;
+		69754:	//tower
+			homeinfo[2] := sign.x - 14;
+			homeinfo[3] := sign.y - 15;
+			homeinfo[4] := sign.x + 9;
+			homeinfo[5] := sign.y + 1;
+		69756:	//keep
+			homeinfo[2] := sign.x - 16;
+			homeinfo[3] := sign.y - 23;
+			homeinfo[4] := sign.x + 9;
+			homeinfo[5] := sign.y + 2;
+		69758:	//castle
+			homeinfo[2] := sign.x - 20;
+			homeinfo[3] := sign.y - 32;
+			homeinfo[4] := sign.x + 12;
+			homeinfo[5] := sign.y + 1;
+		69772:	//large patio house
+		69773:	//ranch house
+			homeinfo[2] := sign.x - 8;
+			homeinfo[3] := sign.y - 15;
+			homeinfo[4] := sign.x + 8;
+			homeinfo[5] := sign.y + 1;
+		69792:	//small stone shop
+		69794:	//small marble shop
+			homeinfo[2] := sign.x - 7;
+			homeinfo[3] := sign.y - 8;
+			homeinfo[4] := sign.x + 1;
+			homeinfo[5] := sign.y + 1;
+		69784:	//small tower
+			homeinfo[2] := sign.x - 5;
+			homeinfo[3] := sign.y - 8;
+			homeinfo[4] := sign.x + 4;
+			homeinfo[5] := sign.y + 1;
+		69788:	//sandstone patio house
+			homeinfo[2] := sign.x - 9;
+			homeinfo[3] := sign.y - 10;
+			homeinfo[4] := sign.x + 4;
+			homeinfo[5] := sign.y + 1;
+		69786:	//2 story log cabin
+			homeinfo[2] := sign.x - 8;
+			homeinfo[3] := sign.y - 14;
+			homeinfo[4] := sign.x + 1;
+			homeinfo[5] := sign.y + 1;
+		69790:	//2 story villa
+			homeinfo[2] := sign.x - 7;
+			homeinfo[3] := sign.y - 12;
+			homeinfo[4] := sign.x + 5;
+			homeinfo[5] := sign.y + 1;
+		69782:	//marble patio house
+			homeinfo[2] := sign.x - 8;
+			homeinfo[3] := sign.y - 15;
+			homeinfo[4] := sign.x + 8;
+			homeinfo[5] := sign.y + 1;
+//		0x113ec:	//foundation 7x7		
+//			homeinfo[2] := sign.x - 1;
+//			homeinfo[3] := sign.y - 8;
+//			homeinfo[4] := sign.x + 7;
+//			homeinfo[5] := sign.y;
+//		0x1147b:	//foundation 18x18
+//			homeinfo[2] := sign.x - 1;
+//			homeinfo[3] := sign.y - 19;
+//			homeinfo[4] := sign.x + 18;
+//			homeinfo[5] := sign.y;
+		default:
+			if (housetype >= 0x113ec and housetype <= 0x1147b)
+				var multiid := housetype - 0x10000;
+				var dims := GetMultiDimensions (multiid);
+				var width := 1+dims.xmax-dims.xmin;
+				var height := 1+dims.ymax-dims.ymin;
+				homeinfo[2] := sign.x - 1;
+				homeinfo[3] := sign.y - (height+1);
+				homeinfo[4] := sign.x + width;
+				homeinfo[5] := sign.y;
+			endif
+				
+//			//
+//			homeinfo[2] := sign.x - ;
+//			homeinfo[3] := sign.y - ;
+//			homeinfo[4] := sign.x + ;
+//			homeinfo[5] := sign.y + ;
+
+	endcase
+	homeinfo[6] := sign.realm;
+	SetObjProperty (sign, "homeinfo", homeinfo);
+endfunction
