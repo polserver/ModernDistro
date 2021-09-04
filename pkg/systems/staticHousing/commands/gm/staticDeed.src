@@ -54,26 +54,25 @@ program textcmd_staticdeed(character)
 	GFRadioButton( h_gump, 140, 100, 210, 211, 0, 2 );
 	GFRadioButton( h_gump, 240, 100, 210, 211, 0, 3 );
 	GFRadioButton( h_gump, 340, 100, 210, 211, 0, 4 );
-	var ok    := GFAddButton( h_gump, 280, 435, 249, 248, GF_CLOSE_BTN, 0 );
+	var ok    := GFAddButton( h_gump, 280, 435, 249, 248, GF_CLOSE_BTN, 6 );
 	ok := ok;
 	var close := GFAddButton( h_gump, 360, 435, 242, 241, GF_CLOSE_BTN, 5 );
 	var ret   := GFSendGump( who, h_gump );
-	if((ret[close.keyid]) or (ret[0] == 1))
+	// if((ret[close.keyid]) or (ret[0] == 1))
+	if((ret[close.keyid]))
 		SendSysMessage(who, "Cancelled.", 3, 40);
 		return;
-	else
-	foreach key in (ret.keys)
-
-		case(key)
-			1: signgraphic := 0x20bd1;
-			2: signgraphic := 0x20bd2;
-			3: signgraphic := 0x20bcf;
-			4: signgraphic := 0x20bd0;
-			5: SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
-			   return;
-		endcase
-
-	endforeach
+	elseif( ret[5] )
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return;
+	elseif( ret[1] )
+		signgraphic := 0x20bd1;
+	elseif( ret[2] )
+		signgraphic := 0x20bd2;
+	elseif( ret[3] )
+		signgraphic := 0x20bcf;
+	elseif( ret[4] )
+		signgraphic := 0x20bd0;
 	endif
 
 	var chk := 1;
@@ -135,20 +134,25 @@ program textcmd_staticdeed(character)
 	SendSysMessage(who, "Press <esc> when done targeting. Remember not to target doors to interior rooms.", color := 88);
 	holder := array;
 	chk := 1;
-	ct := 0;
+	ct := 0;	// Flag that indicates at least one door has been targeted.
 	while(chk)
 		var trg := Target(who, TGTOPT_NOCHECK_LOS);
-		if(!trg)
-			if(ct < 1)
-				SendSysMessage(who, "You must target at least one door.", 3, 40);
+		if(!(trg.serial in holder && holder.size()))
+			if(!trg)
+				if(ct < 1)
+					SendSysMessage(who, "You must target at least one door.", 3, 40);
+				else
+					chk := 0;
+				endif
 			else
-				chk := 0;
+				holder.append(trg.serial);
+				ct += 1;
+				SendSysMessage(who, Cstr(ct) + " door(s) selected.", color := 66);
 			endif
 		else
-			holder.append(trg.serial);
-			ct += 1;
-			SendSysMessage(who, Cstr(ct) + " door(s) selected.", color := 66);
+			SendSysMessage(who, "That door has already been targeted.", 3, 40);
 		endif
+		Print("holder = " + holder);
 		sleepms(500);
 	endwhile
 	SetObjProperty(hsign, "exteriordoors", holder);
