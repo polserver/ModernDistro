@@ -152,7 +152,6 @@ program textcmd_staticdeed(character)
 		else
 			SendSysMessage(who, "That door has already been targeted.", 3, 40);
 		endif
-		Print("holder = " + holder);
 		sleepms(500);
 	endwhile
 	SetObjProperty(hsign, "exteriordoors", holder);
