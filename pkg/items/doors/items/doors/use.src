@@ -4,18 +4,15 @@ use util;
 use cfgfile;
 
 include ":doors:doors";
-// include "include/housing";
+include ":doors:settings";
 
 program door_use_script( mobile, door )
 
+	var dismount_tile;
+	var settings := DP_GetSettingsCfgElem("Settings");
 	if( !CanUseDoor( mobile, door ) )
 		return 0;
 	endif
-
-	// var sign := FindMyHouseSign( mobile, 1, mobile.realm );
-	// if( sign )
-		// RefreshHouse( sign );
-	// endif
 
 	Detach();
 	if( door.IsOpen() )
@@ -32,10 +29,21 @@ program door_use_script( mobile, door )
 			return 0;
 		endif
 		door.DoorSound( 1 );
+		// This code is commented out because it is optional.
+		// The code, if enabled, will create a DismountTile to be
+		// created inside the house causing a mounted character
+		// to be dismounted upon entering a house.
+		if(GetObjProperty(door, "SignSerial"));
+			if(CInt(settings.DismountCharacter))
+				dismount_tile := CreateItemAtLocation(door.x, door.y, door.z, "DismountTile", 1, door.realm);
+			endif
+		endif
 		door.Open();
-
 		if( door.IsOpen() )
 			Sleep( 10 );
+			if(CInt(settings.DismountCharacter))
+				DestroyItem(dismount_tile);
+			endif
 			while( door )
 				if( !IsOccupied( door ).Size() )
 					break;

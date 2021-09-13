@@ -1,0 +1,17 @@
+This is the doors package documentation.
+
+So far, it only contains info about how the dismount tiles work for doors.
+The doors package has a settings file in :doors:settings.cfg. In this file
+there is a setting, DismountCharacter, which, when set, enables the door
+use script to place a dismount tile at any exterior door in a house.
+It is currently disabled.
+
+I must confess that this capability was added for personal reasons
+I was introduced to Ultima Online on a fairly strict role playing
+free shard. It used to annoy me when players would ride their horses into
+their houses. In real life you would bang your head on the top of the door
+jamb if you did that. So, being from a role play shard, I decided to add
+the capability to dismount players who try to enter houses whilst mounted.
+
+Yukiko
+

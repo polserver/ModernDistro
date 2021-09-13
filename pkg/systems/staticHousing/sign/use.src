@@ -124,6 +124,7 @@ sign := sgn;
 		SetObjProperty( packkey, "LockID", LockID );
 		SetObjProperty( bankkey, "LockID", LockID );
 		extdoors := GetObjProperty(sign, "exteriordoors");
+		var bantiles := {};
 		foreach item in extdoors
 				exteriordoor := SystemFindObjectBySerial(CInt(item));
 				if(exteriordoor.IsA(POLCLASS_DOOR))
@@ -132,9 +133,11 @@ sign := sgn;
 					SetObjProperty(tile,"signserial", signserial);
 					tile.invisible := 1;
 					tile.movable := 0;
+					bantiles.append(tile.serial);
 					SetObjProperty(exteriordoor, "LockID", LockID);
 				endif
 		endforeach
+		SetObjProperty(sign, "bantiles", bantiles);
 		SendSysMessage(who, "Congratulations! You are the new owner of this house.", 1, 66);
 		Sleep(3);
 		EraseObjProperty(sign, "NewHouse");
