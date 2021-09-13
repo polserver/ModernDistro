@@ -147,6 +147,7 @@ program textcmd_staticdeed(character)
 			else
 				holder.append(trg.serial);
 				ct += 1;
+				SetObjProperty(trg, "SignSerial", hsign.serial);
 				SendSysMessage(who, Cstr(ct) + " door(s) selected.", color := 66);
 			endif
 		else

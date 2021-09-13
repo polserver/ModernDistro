@@ -41,27 +41,29 @@ program StaticHouseDestruction(sgn)
 
   foreach thing in itemlist
     if(GetObjProperty(thing, "houseserial") == sign.serial)
-      if((GetObjProperty(thing, "secure")) && (!thing.movable))
-        EraseObjProperty(thing, "secure");
-        var oldscript := GetObjProperty(thing, "oldscript");
-        if(oldscript == error)
-          oldscript := "";
-        endif
-        thing.usescript := oldscript;
-        thing.movable := 1;
-        EraseObjProperty(thing, "houseserial");
-        EraseObjProperty(thing, "oldscript");
-      elseif((GetObjProperty(thing, "lockeddown")) && (!thing.movable))
-        thing.movable := 1;
-        EraseObjProperty(thing, "houseserial");
-        EraseObjProperty(thing, "lockeddown");
-      elseif((!thing.movable) && (!thing.isa(POLCLASS_DOOR)) && (!thing.IsStaticHouseSign()))
-        if(thing.objtype == 0x2a390) // GuildStone
-          thing.movable := 1;
-          MoveObjectToLocation(thing, sign.x, sign.y, sign.z, MOVEOBJECT_FORCELOCATION);
-          thing.movable := 0;
-        endif
-      endif
+		if((GetObjProperty(thing, "secure")) && (!thing.movable))
+			EraseObjProperty(thing, "secure");
+			var oldscript := GetObjProperty(thing, "oldscript");
+			if(oldscript == error)
+				oldscript := "";
+			endif
+			thing.usescript := oldscript;
+			thing.movable := 1;
+			EraseObjProperty(thing, "houseserial");
+			EraseObjProperty(thing, "oldscript");
+		elseif((GetObjProperty(thing, "lockeddown")) && (!thing.movable))
+			thing.movable := 1;
+			EraseObjProperty(thing, "houseserial");
+			EraseObjProperty(thing, "lockeddown");
+		elseif((!thing.movable) && (!thing.isa(POLCLASS_DOOR)) && (!thing.IsStaticHouseSign()))
+			if(thing.objtype == 0x2a390) // GuildStone
+				thing.movable := 1;
+				MoveObjectToLocation(thing, sign.x, sign.y, sign.z, MOVEOBJECT_FORCELOCATION);
+				thing.movable := 0;
+			endif
+		elseif(thing.objtype == 0x260FC) // Static ban tile
+			DestroyItem(thing);
+		endif
     endif
     sleepms(5);
   endforeach
