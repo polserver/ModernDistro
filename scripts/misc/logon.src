@@ -120,7 +120,7 @@ program onlogon(who)
 		endif
 	endforeach
 	var time := FormatTime(GetTimeStruct(GetTime()), "<HH>:<MM>:<SS> on <DAY>-<MON>-<YY>");
-	SendSySMessage(who, "You have logged on at " + time, color := 88);
+	SendSySMessage(who, "You have logged on at " + time + " local server time.", color := 88);
 
 	var acct := who.acct;
 	acct.SetProp ("lastlogon", ReadGameClock() );
