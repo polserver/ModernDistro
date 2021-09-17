@@ -1,0 +1,11 @@
+use uo;
+
+include ":attributes:attributes";
+
+// See documentation at https://docs.polserver.com/pol100/scripttypes.php#CustomHouseCommitScript on suggested actions
+program CustomHouseCommitScript(who, house)
+    if (who.concealed)
+        who.concealed := 0;
+    endif
+    house.acceptcommit(who,1);
+endprogram
