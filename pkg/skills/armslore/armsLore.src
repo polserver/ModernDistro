@@ -47,7 +47,6 @@ program do_armslore( who )
     var damage_real := (hp  * 100) / max_hp;
     var damage_nbr := CInt(damage_real);
     var quality_real :=  (the_item.quality  * 100);
-	Print(the_item.quality);
     var quality_nbr := CInt(quality_real);
     if(damage_nbr > 90)
       damage_descr := "good";
