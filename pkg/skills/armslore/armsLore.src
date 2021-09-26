@@ -24,7 +24,7 @@ program do_armslore( who )
     SendSysMessage(who, "Targetting cancelled.");
     return;
   endif
-  var cfg := ReadConfigFile(":combat:itemdesc");
+  var cfg := ReadConfigFile(":*:itemdesc");
   var entry := cfg[the_item.objtype];
   if(!entry)
     SendSysMessage(who, "You can only use this skill on weapons or armor!");
@@ -47,6 +47,7 @@ program do_armslore( who )
     var damage_real := (hp  * 100) / max_hp;
     var damage_nbr := CInt(damage_real);
     var quality_real :=  (the_item.quality  * 100);
+	Print(the_item.quality);
     var quality_nbr := CInt(quality_real);
     if(damage_nbr > 90)
       damage_descr := "good";
