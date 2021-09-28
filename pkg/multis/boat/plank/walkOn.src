@@ -1,21 +1,49 @@
 use uo;
 use os;
+use math;
 
 include "include/facings";
 
-program PlankWalkOn( mobile, unused plank )
-	var get_land := GetPointsByFacing( mobile.x, mobile.y, mobile.facing, 2 );
-	foreach pos in get_land
-		var z_pos := GetStandingHeight( pos.x, pos.y, mobile.z, mobile.realm ).z;
-			if( CheckLosBetween( mobile.x, mobile.y, mobile.z, pos.x, pos.y, z_pos, mobile.realm ))
-					var move := MoveObjectToLocation( mobile, pos.x, pos.y, z_pos, mobile.realm, MOVEOBJECT_FORCELOCATION );
-					if( move )
-							//We found the ground, abord searching.
-							break;
-					endif
-			endif
-			SleepMS(5);
-	endforeach
+program PlankWalkOn( mobile, unused plank, unused last_x, unused last_y, unused last_z )
 
-return 1;
+	var i := 0,
+		z := 0,
+		coords := GetCoordsInFrontOf( mobile, 2 );
+
+	for( i:=1; i<=coords.Size(); i+=1 )
+		z := GetStandingHeight( coords[i].x, coords[i].y, mobile.z, mobile.realm ).z;
+		if( !CheckLosBetween( mobile.x, mobile.y, mobile.z, coords[i].x, coords[i].y, z, mobile.realm ) )
+			continue;
+		endif
+
+		if( MoveObjectToLocation( mobile, coords[i].x, coords[i].y, z, mobile.realm, MOVEOBJECT_FORCELOCATION ) )
+			break;
+		endif
+	endfor
+
+	return 1;
 endprogram
+
+function GetCoordsInFrontOf( byref mobile, byref dist )
+
+	var x := mobile.x+ConvertDirectionToLocX( mobile.facing ),
+		y := mobile.y+ConvertDirectionToLocY( mobile.facing ),
+		xmod := 0,
+		ymod := 0;
+
+	case( mobile.facing )
+		0: xmod := 0;  ymod := -dist; break;
+		1: xmod := +dist; ymod := -dist; break;
+		2: xmod := +dist; ymod := 0;  break;
+		3: xmod := +dist; ymod := +dist; break;
+		4: xmod := 0;  ymod := +dist; break;
+		5: xmod := -dist; ymod := +dist; break;
+		6: xmod := -dist; ymod := 0;  break;
+		7: xmod := -dist; ymod := -dist; break;
+		default:
+			return error{"errortext":="Invalid facing."};
+			break;
+	endcase
+
+	return GetCoordsInLine( x, y, x+xmod, y+ymod );
+endfunction
