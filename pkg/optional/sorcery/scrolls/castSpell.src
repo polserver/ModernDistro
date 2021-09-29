@@ -1,0 +1,18 @@
+/*
+ * $Id: castSpell.src 373 2006-06-17 18:27:33Z austinheilman $
+ *
+ */
+
+use uo;
+use os;
+use cfgfile;
+
+program castSpell(who, spell_id)
+	var script := Start_Script(":magery:spellStarter", {who, spell_id});
+	if ( script.errortext )
+		SendSysMessage(who, "Error - Could not start spell starter ->"+script.errortext);
+		return 0;
+	endif
+
+	return 1;
+endprogram
