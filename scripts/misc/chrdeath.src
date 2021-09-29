@@ -95,7 +95,7 @@ function dismount(corpse)
 	endif
 	// End Reward Mount adition.
 	foreach item in EnumerateItemsInContainer(corpse)
-		if (item.objtype == 0xf021)
+		if (item.objtype == 0x1f021)
 			mount := item;
 			break;
 		endif
