@@ -839,7 +839,7 @@ program Mulit_House_sign(who, sign)
 			13:	if((oserial == who.serial) or (who.cmdlevel > 2))          //transfer ownership
 					var targetow := Target(who);
 					SendSysMessage(who, "Transfer the house to whom?");
-					if(ChangeHouseOwner(who, targetow, house, bank_region) == 1)
+					if(ChangeHouseOwner(who, targetow, sign, bank_region) == 1)
 						SendSysMessage(who, "House transfer was successful.", color := 66);
 					else
 						SendSysMessage(who, "House transfer was NOT successful.", color := 33);
@@ -1140,11 +1140,11 @@ function ListCoowner(sign, who)
 	return retval;
 endfunction
 
-function ChangeHouseOwner(oldowner, who, sign, bank_region)
+function ChangeHouseOwner(oldowner, newowner, sign, bank_region)
 	var oldownerserial:=GetObjProperty(sign, "ownerserial");
-	if(oldownerserial == who.serial)
+	if(oldownerserial == newowner.serial)
 		return 0;
-	elseif(who.acctname)
+	elseif(newowner.acctname)
 		var chk;
 		var builtdeed := GetObjProperty(sign, "builtdeed");
 		if(builtdeed)
@@ -1156,32 +1156,36 @@ function ChangeHouseOwner(oldowner, who, sign, bank_region)
 				chk := SystemFindObjectBySerial(builtdeed, 2);
 			endif
 			if(!chk)
-				SendSysMessage(who, "Error: Could not find built deed. Page a GM.", color := 33);
+				SendSysMessage(newowner, "Error: Could not find built deed. Page a GM.", color := 33);
 				return 0;
 			endif
 		else
-			SendSysMessage(who, "Error: Could not find built deed. Page a GM.", color := 33);
+			SendSysMessage(newowner, "Error: Could not find built deed. Page a GM.", color := 33);
 			return 0;
 		endif
-		var hisbank := CP_GetStorageContainerForMobile( who, bank_region, CP_CREATE );
+		var hisbank := CP_GetStorageContainerForMobile( newowner, bank_region, CP_CREATE );
 		if(!hisbank)
-			SendSysMessage(who,      "House transfer was NOT successful. I could not find your bank.", color := 33);
-			SendSysMessage(oldowner, "House transfer was NOT successful. I could not find the bank for " + who.name + ".", color := 33);
+			SendSysMessage(newowner,      "House transfer was NOT successful. I could not find your bank.", color := 33);
+			SendSysMessage(oldowner, "House transfer was NOT successful. I could not find the bank for " + newowner.name + ".", color := 33);
 			return 0;
 		endif
 		if(!MoveItemToContainer(builtdeed, hisbank))
-			SendSysMessage(who,      "House transfer was NOT successful.", color := 33);
+			SendSysMessage(newowner,      "House transfer was NOT successful.", color := 33);
 			SendSysMessage(oldowner, "House transfer was NOT successful.", color := 33);
 			return 0;
 		endif
-		SetObjProperty(sign,    "ownerserial", who.serial);
-		SetObjProperty(sign,    "owneracct",   who.acctname);
-		SendSysMessage(who,      "House transfer was successful.", color := 66);
-		SendSysMessage(who,      "It would be wise to change the locks soon.");
+		SetObjProperty(sign,    "ownerserial", newowner.serial);
+		SetObjProperty(sign,    "owneracct",   newowner.acctname);
+		EraseObjProperty(sign, "coowners");
+		EraseObjProperty(sign, "friendlist");
+		EraseObjProperty(sign, "banlist");
+		EraseObjProperty(sign, "Public");
+		SendSysMessage(newowner,      "House transfer was successful.", color := 66);
+		SendSysMessage(newowner,      "It would be wise to change the locks soon.", color := 45);
 		SendSysMessage(oldowner, "House transfer was successful.", color := 66);
 		return 1;
 	endif
-	SendSysMessage(who,      "House transfer was NOT successful.", color := 33);
+	SendSysMessage(newowner,      "House transfer was NOT successful.", color := 33);
 	SendSysMessage(oldowner, "House transfer was NOT successful.", color := 33);
 	return 0;
 endfunction
@@ -1274,24 +1278,8 @@ function checklists(hsign, who, list1, list2)
 	if(junk)
 		listb.erase(junk);
 	endif
-	// var newarray := {};
-	// if(who.serial in lista)
-		// foreach thing in lista
-			// if(thing != who.serial)
-				// newarray.append(thing);
-			// endif
-		// endforeach
 		SetObjProperty(hsign, list1, lista);
-//	endif
-	// newarray := {};
-	// if(who.serial in listb)
-		// foreach thing in listb
-			// if(thing != who.serial)
-				// newarray.append(thing);
-			// endif
-		// endforeach
 		SetObjProperty(hsign, list2, listb);
-//	endif
 endfunction
 
 function demolish(house, sign, who, bank_region)
@@ -1444,9 +1432,14 @@ function SetPlaqueName(sign, unused house)
   endif
 endfunction
 
-function ChangeLocks(who,house)
+function ChangeLocks(who, house)
   SendSysMessage(who, "Target the new master key.", color := 88);
-  var addonitem,newkey:=Target(who);
+  var newkey:=Target(who);
+  if(!newkey)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return;
+  endif
+  var addonitem;
   if((newkey.IsKey()) && (!newkey.IsKeyring()))
     var LockID:=AllocateLockID();
     newkey.SetLockId(LockID);

@@ -103,6 +103,7 @@ function Buildhouse(who, deed)
 			SetObjProperty(item,			"owneracct", who.acctname);
 			SetObjProperty(item,			"builtdeed", created.builtdeed.serial);
 			SetObjProperty(item,			"decay", (ReadGameClock() + get_abandon_time()));
+			SetObjProperty(created.builtdeed, "signserial", item.serial);
 		endif
     endforeach
   else
