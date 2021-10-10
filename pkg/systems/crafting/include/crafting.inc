@@ -87,7 +87,6 @@ SendSysMessage(who, ""+type);
 		return 0;
 	endif
 	var rtype := Lower(resource_config[materialobjtype].Type);
-//	var rtype := Lower(resource_config[materialobjtype].type);
 
   var materialchk := 0;
 	if( rtype == type )
