@@ -1,0 +1,22 @@
+use uo;
+use os;
+use cfgfile;
+
+include ":itemutils:itemdesc";
+
+program Install()
+	return 1;
+endprogram
+
+exported function IsClothes( unused item )
+	return 1;
+endfunction
+
+exported function GetMaterialAmount( item )
+
+	var tailoring_cfg := ReadConfigFile(":tailoring:tailoring");
+	var clothing_elem := FindConfigElem( tailoring_cfg, item.objtype );
+	return GetConfigInt( clothing_elem, "Material" );
+
+endfunction
+
