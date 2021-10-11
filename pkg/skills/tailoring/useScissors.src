@@ -54,19 +54,51 @@ function cutItems(who, item, tool)
 		return 0;
 	endif
 
-	// Let's start everything off looking at it's Class type. If this is an
-	// armor item (clothing/armor), we can chop it back to raw material.
+	// If it is an armor class, then fetermine if it is cloth or leather.
 	var material, new_item, material_cnt, item_color, new_cloth;
 	if (item.isA(POLCLASS_ARMOR))
 		// Is crafted, so now let's build the info.
-		if (GetObjProperty(item, "material"))
+		// It is cloth. So cut it into bandages.
+		if(item.IsClothes())
+			playCraftWork(who, "tailoring", 1);
+			var bandage_amount := CInt(item.GetMaterialAmount() / 2);
+			if(bandage_amount < 1)
+				bandage_amount := 1;
+			endif
+			var created := CreateItemInBackpack(who, "bandage", bandage_amount);
+			if(!created)
+				SendSysMessage(who, "You drop " + bandage_amount + " bandages at your feet.", color := 56);
+				created := CreateItemAtLocation(who.x, who.y, who.z, "bandage", bandage_amount, who.realm);
+			endif
+			created.color := item.color;
+			SendSysMessage(who, "You place " + bandage_amount + " bandages in your backpack.", color := 66);
+			DestroyItem(item);
+			CheckToolWear(who, tool, TAILORING);
+			return;
+		elseif(item.IsLeatherClothes())
+			playCraftWork(who, "tailoring", 1);
+			var leather_amount := CInt((item.GetMaterialAmount() * AP_GetSkill(who, TAILORING) * 75) / 10000);
+			if(leather_amount < 1)
+				leather_amount := 1;
+			endif
+			var created := CreateItemInBackpack(who, "cutleather", leather_amount);
+			if(!created)
+				SendSysMessage(who, "You drop " + leather_amount + " pieces of cut leather at your feet.", color := 56);
+				created := CreateItemAtLocation(who.x, who.y, who.z, "bandage", leather_amount, who.realm);
+			endif
+			created.color := item.color;
+			SendSysMessage(who, "You place " + leather_amount + " pieces of cut leather in your backpack.", color := 66);
+			DestroyItem(item);
+			CheckToolWear(who, tool, TAILORING);
+			return;
+		elseif (GetObjProperty(item, "material"))
 			material := FindConfigElem(resource_config, GetObjProperty(item, "material"));
 			new_item := material;
-			material_cnt := CInt(craft_config[item.objtype].material);
+			material_cnt := CInt(craft_config[item.objtype].Material);
 	 		item_color := material.Color;
 		else
 			// Since not crafted, block cutting it!
-			SendSysMessage(who, "Scissors cannot be used on that to produce anything.");
+			SendSysMessage(who, "Scissors cannot be used on that to produce anything.", color := 33);
 			return;
 		endif
 	else
@@ -75,32 +107,33 @@ function cutItems(who, item, tool)
 	 	material := FindConfigElem(scissors_config, item.objtype);
 		// If it's fine, pull the information.
 		if (material && !material.errortext)
-	 		new_item := material.newitem;
-			material_cnt := material.material;
+	 		new_item := CInt(material.newitem);
+			material_cnt := CInt(material.material);
+			// material_cnt := material_cnt * item.amount;
 	 		item_color := item.color;
 		else
 			// Since not listed in crafting config, or scissors, don't cut it!
-			SendSysMessage(who, "Scissors cannot be used on that to produce anything.");
+			SendSysMessage(who, "Scissors cannot be used on that to produce anything.", color := 33);
 			return;
 		endif
 	endif
 
 	// If there is still nothing, we can't do anything with this item! Redundancy
 	if (!material || material.errortext)
-		SendSysMessage(who, "Scissors cannot be used on that to produce anything.");
+		SendSysMessage(who, "Scissors cannot be used on that to produce anything.", color := 33);
 		return;
-	endif		
+	endif
 
 	// If there is no product to make from this, we can't do anything with this item! Redundancy
 	if (!new_item || new_item.errortext)
-		SendSysMessage(who, "Scissors cannot be used on that to produce anything.");
+		SendSysMessage(who, "Scissors cannot be used on that to produce anything.", color := 33);
 		return;
-	endif		
-
+	endif
+// mods
 	// Now let's handle cutting this bad boy up!
 	if ( material )
 		playCraftWork(who, "tailoring", 1);
-		
+
 		// If it's armor, the amount gets modified based on skill to get original cost back.
 		var amt := 1;
 		if (item.isA(POLCLASS_ARMOR))
@@ -114,14 +147,17 @@ function cutItems(who, item, tool)
 
 		if ( DestroyItem(item) )
  			CheckToolWear(who, tool, TAILORING);
-
+			// CreateItemInBackpack(who, new_item, material_cnt);
+			// return;
 			var leftovers, tempname;
 			// If this is leather, let's make it's base objtype.
 			if (Lower(resource_config[new_item].Type) == "leather")
-				leftovers := GetItemDescriptor(0x1067);
-				leftovers.Color := material.Color;
+				leftovers := GetItemDescriptor(new_item);
+				if(item_color)
+					leftovers.color := item_color;
+				endif
 				leftovers.CProps.insert("material", new_item);
-				tempname := (material.Name) + " cut hide";
+				tempname := ("cut " + material.Name);
 				new_cloth := CreateItemInBackpack(who, leftovers, amt);
 				if (tempname && !tempname.errortext)
 					SetName(new_cloth, tempname);
@@ -147,7 +183,7 @@ function cutItems(who, item, tool)
 			endif
 		endif
  	else
-  		SendSysMessage(who, "Scissors cannot be used on that to produce anything.");
+  		SendSysMessage(who, "Scissors cannot be used on that to produce anything.", color := 33);
   		return;
 	endif
 endfunction
