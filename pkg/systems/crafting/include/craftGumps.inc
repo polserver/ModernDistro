@@ -21,7 +21,7 @@ function sendCraftGump(who, skill_name)
 	display_skill    := menu_config[skill_name].Name;
 	// Craft Cprop is a dictionary storing the information for each crafting skill
 	craft_settings := GetObjProperty(who, "Craft");
-	if( TypeOf(craft_settings) != "Dictionary" )
+	if( TypeOfInt(craft_settings) != OT_DICTIONARY )
 		craft_settings := cBaseCraftDict();
 		SetObjProperty(who, "Craft", craft_settings);
 	endif
@@ -34,7 +34,7 @@ function sendCraftGump(who, skill_name)
 
 		var craft_gump := Craft_IndexGump(who, skill_name);
 		if( !craft_gump )
-			exit;
+			return 0;
 		endif
 	        var res := GFSendGump(who, craft_gump);
 
@@ -503,12 +503,13 @@ function cBaseCraftDict()
 	var baseDict  := dictionary;
 	foreach skillentry in GetConfigStringArray(menu_config["Skills"], "Skill")
 		var temp := dictionary;
-		temp.+skill  := menu_config[skillentry].Attribute;
-		temp.+amount := CInt(menu_config["Setup"].DefaultAmount);
-		temp.+mark   := CInt(menu_config[skillentry].MakersMark);
-		temp.+retain := CInt(menu_config[skillentry].RetainColor);
-		temp.+last   := 0;
-		baseDict[temp.skill] := temp;
+		temp.Insert( "skill", menu_config[skillentry].Attribute );
+		temp.Insert( "amount", CInt(menu_config["Setup"].DefaultAmount) );
+		temp.Insert( "mark", CInt(menu_config[skillentry].MakersMark) );
+		temp.Insert( "retain", CInt(menu_config[skillentry].RetainColor) );
+		temp.Insert( "last", 0 );
+
+		baseDict.Insert( menu_config[skillentry].Attribute, temp );
 	endforeach
 
 	return baseDict;

@@ -81,10 +81,14 @@ function cutItems(who, item, tool)
 			if(leather_amount < 1)
 				leather_amount := 1;
 			endif
-			var created := CreateItemInBackpack(who, "cutleather", leather_amount);
+			var base_resource := CInt(GetObjProperty(item, "material"));
+			if(!base_resource)
+				base_resource := 0x1081;
+			endif
+			var created := CreateItemInBackpack(who, base_resource, leather_amount);
 			if(!created)
 				SendSysMessage(who, "You drop " + leather_amount + " pieces of cut leather at your feet.", color := 56);
-				created := CreateItemAtLocation(who.x, who.y, who.z, "bandage", leather_amount, who.realm);
+				created := CreateItemAtLocation(who.x, who.y, who.z, base_resource, leather_amount, who.realm);
 			endif
 			created.color := item.color;
 			SendSysMessage(who, "You place " + leather_amount + " pieces of cut leather in your backpack.", color := 66);
