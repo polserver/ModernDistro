@@ -1,6 +1,6 @@
 use cfgfile;
 use util;
- 
+
 include ":attributes:attributes";
 include ":crafting:crafting";
 include ":crafting:craftingRepair";
@@ -34,24 +34,25 @@ program use_InscTool(mobile, tool)
 
 	var the_objtype := rinfo[1];
 	var amt         := rinfo[2];
-	
+
 	if(craft_config[Hex(the_objtype)].assemble == 1)
 		CraftAssembly(mobile, TINKERING, tool, the_objtype, amt);
 	else
-		makeScribeItems(mobile, the_objtype, amt, tool);
+		makeTinkerItems(mobile, the_objtype, amt, tool);
 	endif
 
 endprogram
 
-function makeScribeItems(mobile, what, amt, tool)
-
+function makeTinkerItems(mobile, what, amt, tool)
+Print("'what' is " + Hex(what));
 	if(!what)
 		SendSysMessage(mobile, "Cancelled");
 		return 0;
 	endif
 
 	// what's type is sent for the ResourceList entry type.
-	var itemchk := MaterialSelection(mobile, craft_skill, lower(craft_config[what].type));
+//	               MaterialSelection(who, craft_skill, type)
+	var itemchk := MaterialSelection(mobile, craft_skill, lower(craft_config[what].Type));
 	if(!itemchk)
 		return 0;
 	endif
