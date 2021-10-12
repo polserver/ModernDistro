@@ -56,12 +56,16 @@ function cutItems(who, item, tool)
 
 	// If it is an armor class, then fetermine if it is cloth or leather.
 	var material, new_item, material_cnt, item_color, new_cloth;
-	if (item.isA(POLCLASS_ARMOR))
-		// Is crafted, so now let's build the info.
-		// It is cloth. So cut it into bandages.
-		if(item.IsClothes())
+//	if (item.isA(POLCLASS_ARMOR))
+		// It is clothing or cloth. So cut it into bandages.
+		if(item.IsClothes() || item.IsCloth())
 			playCraftWork(who, "tailoring", 1);
+			// If the item is clothing we default to this.
 			var bandage_amount := CInt(item.GetMaterialAmount() / 2);
+			// Otherwise if it is cloth we need the quantity of cloth
+			if(item.IsCloth())
+				bandage_amount := item.amount * 2;
+			endif
 			if(bandage_amount < 1)
 				bandage_amount := 1;
 			endif
@@ -100,12 +104,12 @@ function cutItems(who, item, tool)
 			new_item := material;
 			material_cnt := CInt(craft_config[item.objtype].Material);
 	 		item_color := material.Color;
-		else
-			// Since not crafted, block cutting it!
-			SendSysMessage(who, "Scissors cannot be used on that to produce anything.", color := 33);
-			return;
+		// else
+			// // Since not crafted, block cutting it!
+			// SendSysMessage(who, "Scissors cannot be used on that to produce anything.", color := 33);
+			// return;
 		endif
-	else
+//	else
 		// Since it's not armor, it's either resourceList material or scissors.cfg item.
 		// ResourceList items MUST be in the scissors config!
 	 	material := FindConfigElem(scissors_config, item.objtype);
@@ -120,7 +124,7 @@ function cutItems(who, item, tool)
 			SendSysMessage(who, "Scissors cannot be used on that to produce anything.", color := 33);
 			return;
 		endif
-	endif
+//	endif
 
 	// If there is still nothing, we can't do anything with this item! Redundancy
 	if (!material || material.errortext)

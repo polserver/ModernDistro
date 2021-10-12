@@ -44,7 +44,7 @@ program use_InscTool(mobile, tool)
 endprogram
 
 function makeTinkerItems(mobile, what, amt, tool)
-Print("'what' is " + Hex(what));
+
 	if(!what)
 		SendSysMessage(mobile, "Cancelled");
 		return 0;
@@ -90,19 +90,19 @@ Print("'what' is " + Hex(what));
 				theitem := CreateCraftItem(mobile, craft_skill, use_on, use_on.objtype, what, material, itemname, reqd);
 				if( TypeOf(theitem) != "ItemRef" )
 					SubtractAmount(use_on, (material / 2));
-					SendSysMessage(mobile, "You failed to create the item, and some of your materials are lost.");
+					SendSysMessage(mobile, "You failed to create the item, and some of your materials are lost.", color := 33);
 					counter := counter + 1;
 					continue;
 				endif
 			else
 				num := CInt(randomint(material)/2) + 1;
 				if(SubtractAmount(use_on, num))
-					SendSysMessage(mobile, "You lost some material");
+					SendSysMessage(mobile, "You lost some material", color := 33);
 				endif
 			endif
 			CheckToolWear (mobile, tool, craft_skill);
 		else
-			SendSysMessage(mobile, "You don't have the resources required to make that item.");
+			SendSysMessage(mobile, "You don't have the resources required to make that item.", color := 33);
 			counter := 100;
 			break;
 		endif

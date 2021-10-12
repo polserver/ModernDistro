@@ -13,11 +13,17 @@ include "include/toolWear";
 program shears(who, shears)
 	var craftingbag := FindCraftingbag (who);
 	shears := shears;
+	SendSysMessage(who, "What sheep do you want to shear?", color := 88);
 	var sheep := TargetCoordinates(who);
 
 	if(!sheep)
 		SendSysMessage(who, "Cancelled.", 3, 33);
 		return;
+	endif
+
+	if(sheep.graphic != CID_SHEEP)
+		SendSysMessage(who, "You can only use shears on a sheep.", color := 33);
+		return 0;
 	endif
 
 	if((!CheckLineOfSight(who, sheep)) or (Distance(who, sheep) > 2))
@@ -34,9 +40,6 @@ program shears(who, shears)
 			sheep.graphic := 223;
 			CreateItemInContainer(craftingbag, 0xdf8, 3);
 		endif
-	else
-		SendSysMessage(who, "You can only use shears on sheep.", 3, 33);
-		return 0;
 	endif
 	CheckToolWear (who, shears, TAILORING);
 

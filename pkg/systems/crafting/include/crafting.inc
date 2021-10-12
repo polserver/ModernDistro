@@ -63,7 +63,7 @@ SendSysMessage(who, ""+type);
     SendSysMessage(who, resource_config.errortext, 1, 33);
     return 0;
   endif
-	SendSysMessage(who, "Select the "+Lower(type)+" you would like to work with.");
+	SendSysMessage(who, "Select the "+Lower(type)+" you would like to work with.", color := 88);
 	var material := Target(who);
 	if( !material )
     SendSysMessage(who, "Cancelled.", 3, 33);
@@ -82,18 +82,20 @@ SendSysMessage(who, ""+type);
 	else
 		materialobjtype := CStr ( Hex ( material.objtype ) );
 	endif
-  if( !canUseMaterial(who, materialobjtype, craft_skill) )
-		SendSysMessage(who, "You are not skilled enough to make anything out of that.");
+
+	if( !canUseMaterial(who, materialobjtype, craft_skill) )
+		SendSysMessage(who, "You are not skilled enough to make anything out of that.", color := 33);
 		return 0;
 	endif
+
 	var rtype := Lower(resource_config[materialobjtype].Type);
 
-  var materialchk := 0;
+	var materialchk := 0;
 	if( rtype == type )
 		materialchk := 1;
 	endif
 	if( materialchk == 0 )
-		SendSysMessage(who, "That's not the proper material.");
+		SendSysMessage(who, "That's not the proper material.", color := 33);
 		SendSysMessage(who, CStr(Hex(materialobjtype)) + " " + rtype + " " + type, 1, 88);
 		return 0;
 	endif
