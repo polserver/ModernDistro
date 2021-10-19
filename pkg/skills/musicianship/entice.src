@@ -28,7 +28,7 @@ program enticement(who)
     SendSysMessage(who, "You don't have an instrument to play!");
     return;
   endif
-  var success := play(who, diff, instrument, SKILLID_DISCORDANCE);
+  var success := play(who, diff, instrument, DISCORDANCE);
   if(success)
     var ev := array;
     ev.+type := EVID_ALL_FOLLOW_CMD;

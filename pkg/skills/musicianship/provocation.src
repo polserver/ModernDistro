@@ -54,7 +54,7 @@ program bard_provoke(who)
   elseif(difficulty > 100)
 	difficulty := 110;
   endif
-  if(play(who, difficulty, instrument, SKILLID_PROVOCATION))
+  if(play(who, difficulty, instrument, PROVOCATION))
 	SendSysMessage(who, "Select a target to provoke this onto.");
 	var newtarg := Target(who, (TGTOPT_NOCHECK_LOS + TGTOPT_HARMFUL) );
         if(newtarg == thetarg)

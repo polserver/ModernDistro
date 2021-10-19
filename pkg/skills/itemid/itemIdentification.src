@@ -22,7 +22,6 @@ program do_itemid( who )
 	var cfg := AP_GetAttributeCfgElem( ITEM_IDENTIFICATION );
 	var thepoints := cfg.AwardDefault;
 
-  //var thepoints := get_default_points(SKILLID_ITEM_IDENTIFICATION);
   var the_item;
   var ncharges;
   SendSysMessage( who, "Select an object to identify." );

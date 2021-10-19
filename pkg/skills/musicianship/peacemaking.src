@@ -23,7 +23,7 @@ program bard_peacemake(who)
   var ev := array;
   ev.+ type;
   ev.type := EVID_PEACEMADE;
-  var success := play(who, -1, instrument, SKILLID_PEACEMAKING);
+  var success := play(who, -1, instrument, PEACEMAKING);
   foreach thetarg in ListMobilesNearLocation(who.x, who.y, who.z, 8)
 	if(success)
       SendEvent(thetarg, ev);

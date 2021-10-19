@@ -30,6 +30,11 @@ program SpellStarter(params)
 		SendSysMessage(mobile, "You are currently casting a spell.", color := 33);
 		return 0;
 	endif
+	// If no line of sight, cancel casting.
+	// It seems NPCs are casting on targets where there is no LOS.
+	if(!CheckLosBetween( mobile.x, mobile.y, mobile.z, targ.x, targ.y, targ.z, targ.realm ))
+		return 0;
+	endif
 	SetObjProperty(mobile, "SpellStarterPID", ss_pid);
 
 	var spell_elem := MS_GetSpellsCfgElem(spell_id);
