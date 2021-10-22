@@ -52,10 +52,8 @@ program use_bandages(who, item)
 	detach();
 	SetObjProperty(who, "HealTimer", clock);
 
-	// If we're dealing with a person
-	//	Human male					  Human female					Elf male					  Elf female					GM Form
-	if((patient.graphic == 0x190) || (patient.graphic == 0x191) || (patient.graphic == 0x25D) || (patient.graphic == 0x25E) || (patient.graphic == 0x3DB)
-	|| (patient.graphic == 0x29A) || (patient.graphic == 0x29)) // Gargy male and Gargy female
+// If we're dealing with a person
+	if((patient.graphic == 0x190) or (patient.graphic == 0x191) )
 
 	// if the patient is the doctor
 		If(patient == who)
@@ -102,7 +100,7 @@ program use_bandages(who, item)
 			return;
 		else
 
-	// routine heal
+		// routine heal
 			if(patient.dead)
 				if((healing < 80) or (anatomy < 80))
 					SendSysMessage(who, "You have no chance of reviving your patient.", color := 33);
@@ -125,7 +123,7 @@ program use_bandages(who, item)
 		endif
 		return;
 
-	//if we're dealing with a dead person
+//if we're dealing with a dead person
 	elseif(patient.dead)
 		if((healing < 80) or (anatomy < 80))
 			SendSysMessage(who, "You have no chance of reviving your patient", color := 33);
@@ -140,7 +138,7 @@ program use_bandages(who, item)
 		endif
 		return;
 
-	// Send the animals to vet.
+// Send the animals to vet.
 	elseif(patient.npctemplate)
 		if(Distance(who, patient) >= 2)
 			SendSysMessage(who, "Your patient is too far away.", color := 33);
@@ -163,7 +161,7 @@ function heal(who, patient, counter, healing)
 
 	// Determine how many attempts are made to heal.
 	if(patient == who)
-		var dexcheck := CInt((AP_GetTrueStat(who, DEXTERITY) / 20)); // Trying to debug, added CInt wrapper.
+		var dexcheck := (AP_GetTrueStat(who, DEXTERITY) / 20);
 		cycles := (15 - dexcheck);
 	else
 		if(AP_GetStat(who, DEXTERITY) <= 33)
@@ -184,20 +182,20 @@ function heal(who, patient, counter, healing)
 		sleep(1);
 		if (counter%4 == 0)
 		    if(who==patient)
-				SendSysMessage(who, "You continue to heal yourself.", color := 56);
+			SendSysMessage(who, "You continue to heal yourself.", color := 56);
 		    else
-				SendSysMessage(patient, who.name + " continues to heal you.", color := 56);
+			SendSysMessage(patient, who.name + " continues to heal you.", color := 56);
 		    endif
 		endif
 
 		// break out if anyone does anything that should cause heal to stop.
 		if(!GetObjProperty(who, "HealTimer"))
 		    if(who==patient)
-				SendSysMessage(who, "You stop healing yourself.", color := 33);
-				break;
+			SendSysMessage(who, "You stop healing yourself.", color := 33);
+			break;
 		    else
-				SendSysMessage(who, "You stop healing your patient.", color := 33);
-				break;
+			SendSysMessage(who, "You stop healing your patient.", color := 33);
+			break;
 		    endif
 		elseif(clock != GetObjProperty(who, "HealTimer"))
 			break;
@@ -222,22 +220,22 @@ function heal(who, patient, counter, healing)
 		elseif(TS_GetTimerNames(patient, "P").size() > 0)
 		// can't heal a patient who is poisoned.
 		    if((healing < 60) or (anatomy < 60))
-				if(who==patient)
-					SendSysMessage(who, "You have no chance of curing yourself of poisoning.", color := 33);
-				else
-					SendSysMessage(who, "You have no chance of curing your patient's poison.", color := 33);
-					SendSysMessage(patient, who.name + " has stopped curing you.", color := 33);
-				endif
+			if(who==patient)
+			    SendSysMessage(who, "You have no chance of curing yourself of poisoning.", color := 33);
+			else
+			    SendSysMessage(who, "You have no chance of curing your patient's poison.", color := 33);
+			    SendSysMessage(patient, who.name + " has stopped curing you.", color := 33);
+			endif
 		    else
-				if(who==patient)
-					SendSysMessage(who, "You start to cure yourself.", color := 56);
-				else
-					SendSysMessage(who,"You start to cure " + patient.name + ".", color := 56);
-				endif
-				if(patient != who)
-					SendSysMessage(patient, who.name + " starts to cure you.", color := 56);
-				endif
-				cure(who, patient, counter, healing);
+			if(who==patient)
+			    SendSysMessage(who, "You start to cure yourself.", color := 56);
+			else
+			    SendSysMessage(who,"You start to cure " + patient.name + ".", color := 56);
+			endif
+			    if(patient != who)
+				    SendSysMessage(patient, who.name + " starts to cure you.", color := 56);
+			    endif
+			    cure(who, patient, counter, healing);
 		    endif
 		    break;
 
@@ -256,47 +254,30 @@ function heal(who, patient, counter, healing)
 		// The last cycle of the loop.  All actual healing is done here.
 		elseif(counter >= cycles)
 		    var diff := 100 - Cint((AP_GetVital(patient, VITALID_LIFE) * 100.0) / AP_GetVitalMaximumValue(patient, VITALID_LIFE));
-			Print("diff = " + diff);
 		    if((SkillCheck(who, HEALING, diff, 100)) and (healamt != -1))
-			Print("Passed SkillCheck.");
 			    var chkamt := Cint(AP_GetVitalMaximumValue(patient, VITALID_LIFE) - AP_GetVital(patient, VITALID_LIFE));
 			    if(healamt > chkamt)
 				    healamt := chkamt;
 				    if(who==patient)
-						SendSysMessage(who, "You have healed yourself completely.", color := 66);
+					SendSysMessage(who, "You have healed yourself completely.", color := 66);
 				    else
-						SendSysMessage(who, "You have healed your patient completely.", color := 66);
-						SendSysMessage(patient, who.name + " has healed you completely.", color := 66);
+					SendSysMessage(who, "You have healed your patient completely.", color := 66);
+					SendSysMessage(patient, who.name + " has healed you completely.", color := 66);
 				    endif
 			    else
 				    SendSysMessage(who, "You successfully heal " + patient.name +".", color := 66);
 				    SendSysMessage(patient, who.name + " has healed you.", color := 66);
 			    endif
 			    HealDamage(patient, healamt);
-				if(who == patient)
-					SendSysMessage(who, "You have healed " + CStr(healamt) + " of your damage.", color := 56);
-				else
-					SendSysMessage(patient, who.name + " has healed " + CStr(healamt) + " of damage.", color := 56);
-					SendSysMessage(who, "You have healed " + patient.name + " of " + CStr(healamt) + " of damage.", color := 56);
-				endif
-				Print("Passed SkillCheck and healed " + healamt + " hit points.");
 			    AwardPoints(who, SKILLID_HEALING, (healamt * 2));
 			    break;
 		    else
 			    // Throw 'em a bone.  No chance of gain, though.
 			    SendSysMessage(who,"You finish applying the bandages, but they barely help.", color := 56);
 			    if(who != patient)
-					SendSysMessage(patient, who.name + " has tried to heal you but had little effect.");
+				SendSysMessage(patient, who.name + " has tried to heal you but had little effect.");
 			    endif
-				healamt := RandomInt(6)+1;
-			    HealDamage(patient, healamt);
-				if(who == patient)
-					SendSysMessage(who, "You have healed " + CStr(healamt) + " of your damage.", color := 56);
-				else
-					SendSysMessage(patient, who.name + " has healed " + CStr(healamt) + " of damage.", color := 56);
-					SendSysMessage(who, "You have healed " + patient.name + " of " + CStr(healamt) + " of damage.", color := 56);
-				endif
-				Print("Healed " + healamt + " hit points. Did not pass SkillCheck.");
+			    HealDamage(patient, RandomInt(6)+1);
 			    break;
 		    endif
 		endif
@@ -310,7 +291,7 @@ function cure(who, patient, counter, healing)
 	var cycles;
 	var count := 0;
 	if(patient == who)
-		var dexcheck := CInt((AP_GetTrueStat(who, DEXTERITY) / 33)); // Trying to debug, added CInt wrapper.
+		var dexcheck := (AP_GetTrueStat(who, DEXTERITY) / 33);
 		cycles := (15 - dexcheck);
 	else
 		if(AP_GetTrueStat(who, DEXTERITY) <= 33)
