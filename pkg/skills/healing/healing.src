@@ -265,8 +265,12 @@ function heal(who, patient, counter, healing)
 					SendSysMessage(patient, who.name + " has healed you completely.", color := 66);
 				    endif
 			    else
-				    SendSysMessage(who, "You successfully heal " + patient.name +".", color := 66);
-				    SendSysMessage(patient, who.name + " has healed you.", color := 66);
+			    	    if( who==patient)
+				        SendSysMessage(who, "You have healed some of your wounds.", color := 66);
+			            else
+				        SendSysMessage(who, "You successfully heal " + patient.name +".", color := 66);
+				        SendSysMessage(patient, who.name + " has healed you.", color := 66);
+				    endif
 			    endif
 			    HealDamage(patient, healamt);
 			    AwardPoints(who, SKILLID_HEALING, (healamt * 2));
