@@ -43,9 +43,11 @@ function SkillCheck( mobile, attrib_name, difficulty, award_diff:="", advance_fl
   var skill_check_result := 0;
 	if( mobile.dead )
 		SendSysMessage( mobile, "You can't use skills while dead.", 3, 33 );
+        print("Skill Check Failed Because Player Dead");
 		return -100;
 	elseif( GetObjProperty( mobile, "NoGains" ))
 		SendSysMessage( mobile, "Your skills are disabled.", 3, 33 );
+        print("Skill Check Failed Because Player Dead");
 		return -100;
 	elseif( mobile.IsA( POLCLASS_NPC ))
     if( GetObjProperty( mobile, "CanTrain" ))
@@ -73,8 +75,10 @@ function SkillCheck( mobile, attrib_name, difficulty, award_diff:="", advance_fl
     var hc_settings := AP_GetSettingsCfgElem( "Hunger" ),
     hunger_setting := CInt( hc_settings.MaxHungerAffect ),
     hunger_value := CInt( pass_chance * CDbl( hunger_setting ));
+    // print("Hunger Val:"+hunger_value);
 
     pass_chance -= CInt( hunger_value - CDbl( hunger_value * CDbl( hunger / 10 )));
+    // print("Pass chance 2:"+pass_chance);
   endif
 
 	// Ensure skill- and stat-gain if it's a -1 skillcheck
@@ -97,6 +101,8 @@ function SkillCheck( mobile, attrib_name, difficulty, award_diff:="", advance_fl
 	endif
 
   skill_check_result := (( pass_chance - check_roll ) + 1 );
+
+  // print("Check skill result:"+skill_check_result);
   if( skill_check_result < 0)
     skill_check_result := 0;
   endif
@@ -121,30 +127,25 @@ function CalcSuccessPercent( unused mobile, unused attrib_name, difficulty, effe
 	var min_chance := CInt( sc_settings.MinChance );
 	var max_chance := CInt( sc_settings.MaxChance );
 	var percent := CInt( 50.0 + (( effective_skill - difficulty ) * 1.5 )); // For every 5 points difference there will be a +-10 for percent
-
 	// Note: variable declaration was wrong so this may need some testing
 	/*
 		Previous version redeclared percent inside if so it was local only.
-		
-		var neg1chance := CInt( sc_settings.MaxNeg1Chance ), <<< that little coma instead of semicolon :-) 
-		percent := CInt( neg1chance * effective_skill / 150 );
 
-		After change we now have new formula that may need checking for difficulty == -1 
+		var neg1chance := CInt( sc_settings.MaxNeg1Chance ), <<< that little coma instead of semicolon :-)
+		percent := CInt( neg1chance * effective_skill / 150 );
+		After change we now have new formula that may need checking for difficulty == -1
 	*/
 	if( difficulty == -1 )
 		var neg1chance := CInt( sc_settings.MaxNeg1Chance );
 		percent := CInt( neg1chance * effective_skill / 150 );
 	endif
-
 	if( percent < min_chance )
 		percent := min_chance;
 	elseif( percent > max_chance )
 		percent := max_chance;
 	endif
-
 	return percent;
 endfunction
-
 /*
  * DifficultyTooEasy( effective_skill, difficulty )
  *
@@ -161,17 +162,13 @@ endfunction
  *
  */
 function DifficultyTooEasy( effective_skill, difficulty )
-
 	var sc_settings := AP_GetSettingsCfgElem( "Skills" );
-
         var max_diff := difficulty + CDbl( sc_settings.TooEasy );
         if( max_diff > effective_skill )
                 return 0;
         endif
-
 	return 1;
 endfunction
-
 /*
  * DifficultyTooHard( effective_skill, difficulty )
  *
@@ -193,7 +190,5 @@ function DifficultyTooHard(effective_skill, difficulty)
 	if( max_diff <= effective_skill )
 		return 0;
 	endif
-
 	return 1;
 endfunction
-
