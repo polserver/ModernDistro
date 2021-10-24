@@ -1,6 +1,6 @@
 /*
-        Maintened by *Edwards
-        
+        Maintened by the POL Distro Team
+
         2009-02-21
 */
 use uo;
@@ -28,7 +28,7 @@ function MP_GetMountsCfgElem( elem_name, byref cfg_file:=0 )
 	if( !cfg_file )
 		cfg_file := MP_GetMountsCfgFile();
 	endif
-	
+
 	var elem := cfg_file[elem_name];
 	if( elem.errortext )
 		SysLog( "Error::MP_GetMountsCfgElem() - Unable to find elem ["+elem_name+"] ->"+elem.errortext );
@@ -45,10 +45,10 @@ function MP_GetMountGraphic( mobile )
 	else
 		mobile_graphic := Hex( CInt( mobile ));
 	endif
-	
+
 	var elem := MP_GetMountsCfgElem( "MobileToMount" );
 	var tile_graphic := GetConfigInt( elem, mobile_graphic );
-	
+
 	if( tile_graphic )
 		return tile_graphic;
 	else
@@ -63,10 +63,10 @@ function MP_GetMobileGraphic( mount )
 	else
 		mount := CInt( mount );
 	endif
-	
+
 	var elem := MP_GetMountsCfgElem( "MountToMobileGraphic" );
 	var tile_graphic := GetConfigInt( elem, mount );
-	
+
 	if( tile_graphic )
 		return tile_graphic;
 	else
@@ -87,7 +87,7 @@ function MP_GetMountTemplate( mount )
 	else
 		mount_graphic := Hex( CInt( mount ));
 	endif
-	
+
 	if( template )
 		return template;
 	else
@@ -103,22 +103,22 @@ function MP_Mount( mobile, npc )
 	if( mount_piece )
 		return error{"errortext":="Mobile is already mounted."};
 	endif
-        
+
 	var mount_graphic := MP_GetMountGraphic( npc );
 	if( !mount_graphic )
 		return mount_graphic;
 	endif
-	
+
 	mount_piece := CreateItemAtLocation( mobile.x, mobile.y, mobile.z, "MountPiece", 1 );
 	mount_piece.graphic := mount_graphic;
         mount_piece.color := npc.color;
-        
+
 	SetName( mount_piece, npc.name );
- 
+
         //Retrieve the mount...
         SetObjProperty( mount_piece, "serial", npc.serial );
         SetObjProperty( mount_piece, "color", npc.color );
-	
+
 	var result := EquipItem( mobile, mount_piece );
 	if( !result )
 		// Unable to equip the mount piece.
@@ -128,16 +128,16 @@ function MP_Mount( mobile, npc )
 		// Setting equipped mounts prevents un-equip exploits.
 		mount_piece.movable := 0;
 	endif
- 
+
         mobile.facing := npc.facing;
-        
+
         MoveObjectToLocation( npc, 5140, 1773, 0, "britannia", MOVEOBJECT_FORCELOCATION );
         SetObjProperty( npc, "mounted", 1 );
         SetObjProperty( npc, "MustSleep", mobile.serial );
-        
+
         npc.hidden := 1;
         npc.frozen := 1;
-	
+
 	return mount_piece;
 endfunction
 
@@ -151,7 +151,7 @@ function MP_Unmount( mobile )
 		DestroyItem( mount_piece );
 		return 0;
 	endif
- 
+
 	return MP_RestoreMountToAnimal( mobile, mount_piece );
 endfunction
 
@@ -160,7 +160,7 @@ function MP_DeathUnmount( corpse )
 	if( !corpse.IsA( POLCLASS_CORPSE ))
 		return error{"errortext":="Object passed is not a corpse."};
 	endif
-	
+
 	foreach item in ( EnumerateItemsInContainer( corpse ))
 		if ( item.IsMount() )
 			return MP_RestoreMountToAnimal( corpse, item );
@@ -168,7 +168,7 @@ function MP_DeathUnmount( corpse )
 		endif
                 SleepMS(5);
 	endforeach
-	
+
 	return error{"errortext":="No mount pieces were found on the corpse."};
 endfunction
 
@@ -183,7 +183,7 @@ function MP_RestoreMountToAnimal( mobile, mount )
                 animal.facing := mobile.facing;
 
                 EraseObjProperty( animal, "MustSleep" );
-                
+
 		MoveObjectToLocation( animal, mobile.x, mobile.y, mobile.z, mobile.realm, MOVEOBJECT_FORCELOCATION );
 	else
 		var template := MP_GetMountTemplate( mount );
@@ -191,12 +191,12 @@ function MP_RestoreMountToAnimal( mobile, mount )
 			DestroyItem( mount );
 			return template;
 		endif
-		
+
 		animal := CreateNPCFromTemplate( template, mobile.x, mobile.y, mobile.z );
 		animal.facing := mobile.facing;
 		animal.color := mount.color;
 		animal.name := mount.desc;
-  
+
 		var mobile_graphic := MP_GetMobileGraphic( mount );
 		if( mobile_graphic )
 			animal.graphic := mobile_graphic;
@@ -205,19 +205,19 @@ function MP_RestoreMountToAnimal( mobile, mount )
 
 	tameCreature( animal, mobile );
         EraseObjProperty( animal, "mounted" );
- 
+
 	DestroyItem( mount );
- 
+
         if( mobile.dead )
                 var last_damage := GetLastDamageInfo( mobile ),
                     last_attacker := last_damage[1];
-                    
+
                 var source := SystemFindObjectBySerial( last_attacker );
                 if( source )
                         AI_Attack( animal, source );
                 endif
         endif
-	
+
 	return animal;
 endfunction
 
@@ -227,6 +227,6 @@ function MP_GetMount( mobile )
 	if( mount_piece.errortext )
 		return error{"errortext":=mount_piece.errortext};
 	endif
- 
+
         return 1;
 endfunction
