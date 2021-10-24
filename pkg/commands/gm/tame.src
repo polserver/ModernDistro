@@ -12,6 +12,6 @@ program tame( who )
     SetObjProperty( npc, "master", who.serial );
     SetObjProperty( npc, "script", npc.script );
     npc.setmaster( who );
-    npc.script := "tamed";
+    npc.script := "tamed2";
     RestartScript(npc);
 endprogram

@@ -2,12 +2,13 @@ use uo;
 use os;
 use npc;
 
+include ":mounts:mounts";
 include "include/eventID";
 include ":itemUtils:itemdesc";
 
 program dblclickself( who )
-	var mount := GetEquipmentByLayer( who, 25 );
-	if (!mount)
+	var mount_piece := GetEquipmentByLayer( who, 25 );
+	if (!mount_piece)
 		OpenPaperdoll( who, who );
 		return;
 	endif
@@ -16,25 +17,29 @@ program dblclickself( who )
 		return;
 	endif
 	// This allows a script to run prior to unequipping
-	// a mount for any efects or mods to the player.
-	var unequip := GetObjProperty(mount, "Unequip");
+	// a mount piece for any efects or mods to the player.
+	var unequip := GetObjProperty(mount_piece, "Unequip");
 	if(unequip)
 		Run_Script(unequip, {who});
+		MoveItemToContainer(mount_piece, who.backpack);
+		DestroyItem( mount_piece );
+		return 1;
 	endif
-    var serial := GetObjProperty(mount, "serial");
-	var animal := SystemFindObjectBySerial(CInt(serial));
-    EraseObjProperty(animal,"serial");
-    EraseObjProperty(animal,"mounted");
-    EraseObjProperty(animal,"mounted_on");
-	animal.facing := who.facing;
-	var ev := array;
-    ev.+ type;
-    ev.+ source;
-    ev.type := EVID_WAKEUP;
-    ev.source := who;
-    SendEvent(animal, ev);
-    MoveObjectToLocation(animal, who.x, who.y, who.z, who.realm, MOVEOBJECT_FORCELOCATION);
-    RestartScript(animal);
-	MoveItemToContainer(mount, who.backpack);
-	DestroyItem( mount );
+	MP_Unmount( who );
+    // var serial := GetObjProperty(mount_piece, "serial");
+	// var animal := SystemFindObjectBySerial(CInt(serial));
+    // EraseObjProperty(animal,"serial");
+    // EraseObjProperty(animal,"mounted");
+    // EraseObjProperty(animal,"mounted_on");
+	// animal.facing := who.facing;
+	// var ev := array;
+    // ev.+ type;
+    // ev.+ source;
+    // ev.type := EVID_WAKEUP;
+    // ev.source := who;
+    // SendEvent(animal, ev);
+    // MoveObjectToLocation(animal, who.x, who.y, who.z, who.realm, MOVEOBJECT_FORCELOCATION);
+    // RestartScript(animal);
+	// MoveItemToContainer(mount_piece, who.backpack);
+	// DestroyItem( mount_piece );
 endprogram

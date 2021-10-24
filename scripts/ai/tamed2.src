@@ -1,0 +1,1014 @@
+use npc;
+use os;
+use uo;
+use cfgfile;
+
+include "include/eventID";
+include ":attributes:attributes";
+include "include/sysEvent";
+include ":npcs:NPCCast";
+include ":npcs:randName";
+include "include/snooping";
+include ":damage:damage";
+include ":mounts:mounts";
+
+set_priority(5);
+
+const  HALT_THRESHOLD := 15;
+const  SYSEVENT_ALL_GUARD_CMD := 0x13;
+
+Const me := Self();
+var npccfgfile     := ReadConfigFile("npcdesc");
+var dmgsound       := npccfgfile[me.npctemplate].damagedsound;
+var hit            := npccfgfile[me.npctemplate].attackhitsound;
+var idlesnd1       := npccfgfile[me.npctemplate].idlesound1;
+var idlesnd2       := npccfgfile[me.npctemplate].idlesound2;
+var FLAME_STRENGTH := npccfgfile[me.npctemplate].flamestrength;
+var caster := 0;
+var spells;
+var firebreather;
+if(!me.backpack)
+    var newbackpack := CreateItemAtLocation(5288, 1176, 0, 0xe75,1, "britannia_alt");  // New map problem
+    EquipItem(me, newbackpack);
+endif
+var mypack := me.backpack;
+// var mypack := FindPack(me.serial);
+var orneriness := npccfgfile[me.npctemplate].orneriness;
+var masterserial := GetObjProperty(me, "master");
+var saywords := 0;
+var master;
+var chaseloop := 0;
+var guarding :=0;
+var following := 0;
+var nextwatch := ReadGameClock();
+var happiness := CInt(GetObjProperty(me,"happiness"));
+var waittime := 120;
+var LAST_BREATH := ReadGameClock();
+if((!happiness)||(happiness == error))
+  happiness := 100;
+  SetObjProperty(me,"happiness", 100);
+endif
+
+program TamedAI()
+  Detach();
+  var time := ReadGameClock();
+  SetObjProperty(me,"countercheck", time);
+  var parms := {};
+  parms[1] := me;
+  parms[2] := time;
+  start_script(":taming:happyCounter", parms);
+  master := SystemFindObjectBySerial(masterserial, SYSFIND_SEARCH_OFFLINE_MOBILES);
+  if(!master)
+    KillMobile(me);
+    return;
+  endif
+  me.setmaster(master);
+  if(me.name["<random>"])
+    SetName(me, RandomName(me));
+  endif
+  if(!happiness)
+    happiness := 10;
+  endif
+  if(!orneriness)
+    orneriness := 0;
+  endif
+  if(!me.backpack)
+    var newbackpack := CreateItemAtLocation(5288, 1176, 0, 0xe75,1, "britannia_alt");  // New map problem
+    EquipItem(me, newbackpack);
+  endif
+  SetAnchor(me.x, me.y, 20, 0);
+  var npccfg := ReadConfigFile("npcdesc");
+  if(npccfg[me.npctemplate].spell)
+    caster := 1;
+    spells := GetConfigStringArray(npccfg[me.npctemplate], "spell");
+  endif
+  if(FLAME_STRENGTH)
+    firebreather := 1;
+  endif
+  SetWarMode(0);
+  SetObjProperty(me, "serial", me.serial);
+  MainAILoop();
+endprogram
+
+function FindPack(myserial)
+  var mybank := OpenTamedStorageAreas();
+  var bank_obj_name := "Bankbox  " + Hex(myserial);
+  var bankbox := FindRootItemInStorageArea(mybank, bank_obj_name);
+  if(!bankbox)
+    if((me.graphic == 0x123)||(me.graphic == 0x124))
+      bankbox := CreateRootItemInStorageArea(mybank, bank_obj_name, 0x1966B);
+    else
+      bankbox := CreateRootItemInStorageArea(mybank, bank_obj_name, UOBJ_BANKBOX);
+    endif
+  else
+    if(((me.graphic == 0x123)||(me.graphic == 0x124))&&((me.backpack).objtype == UOBJ_BANKBOX))
+      DestroyItem(bankbox);
+      bankbox := CreateRootItemInStorageArea(mybank, bank_obj_name, 0x1966B);
+    endif
+  endif
+  return bankbox;
+endfunction
+
+function MainAILoop()
+  var ev;
+  nextwatch := ReadGameClock();
+  var mhp;
+  EnableMainEvents();
+  while(AP_GetVital(me, VITALID_LIFE)> 0)
+    if ( GetObjProperty(me, "totem") )
+	SetObjProperty(me, "happiness", 100);
+    endif
+    if(master.cmdlevel)
+	SetObjProperty(me, "happiness", 1000);
+    endif
+    happiness := GetObjProperty(me,"happiness");
+    mhp := AP_GetVital(me, VITALID_LIFE);
+    if(GetObjProperty(me, "onhold"))
+      HoldLoop("onhold");
+    elseif(GetObjProperty(me, "stabled"))
+      HoldLoop("stabled");
+    elseif(GetObjProperty(me, "mounted"))
+      HoldLoop("mounted");
+    else
+      if(happiness < 10)
+	if (GetObjProperty(me, "NeverRelease") != 1)
+		release();
+	endif
+      endif
+      ev := os::wait_for_event(waittime);
+      case(ev.type)
+        SYSEVENT_SPEECH:        ProcessSpeech(ev);
+        SYSEVENT_ENGAGED:       Fight(ev.source);
+        SYSEVENT_DAMAGED:       if(AP_GetVital(me, VITALID_LIFE)< mhp)
+                                  if(ev.source)
+                                    Fight(ev.source);
+                                  endif
+                                  PlaySoundEffect(me,dmgsound);
+                                endif
+        SYSEVENT_DOUBLECLICKED: if((ev.source == master) or (ev.source.cmdlevel > 2))
+                                  OpenMyPack();
+                                else
+                                  snoop(ev.source, me);
+                                endif
+        SYSEVENT_ITEM_GIVEN:    if(ev.source == master)
+                                  TakeItem(ev);
+                                endif
+        EVID_ALL_ATTACK_CMD:    Fight(ev.target);
+        EVID_ALL_FOLLOW_CMD:    following := ev.target;
+        SYSEVENT_ALL_GUARD_CMD: guarding := ev.target;
+                                PrintTextAbove(me,"*guarding " + guarding.name + "*");
+      endcase
+      if(master.dead)
+        dismountme(master);
+      endif
+      if(following)
+        waittime := 0;
+        Follow();
+      elseif(guarding)
+        waittime := 7;
+        Guard();
+      else
+        waittime := 120;
+        EraseObjProperty(me,"#flees");
+      endif
+    endif
+  endwhile
+endfunction
+
+function HoldLoop(type)
+  disablemainevents();
+  EnableTameEvents();
+  var ev, hl_happiness;
+  while(GetObjProperty(me, type))
+    if(type == "mounted")
+      hl_happiness := GetObjProperty(me, "happiness");
+      ev := os::wait_for_event(60);
+      if(hl_happiness < 10)
+        release();
+      endif
+    else
+      ev := os::wait_for_event(300);
+    endif
+    case(ev.type)
+      EVID_WAKEUP:         EraseObjProperty(me, type);
+    endcase
+  endwhile
+  EnableMainEvents();
+endfunction
+
+function Fight(opponent)
+  var oldfollowing := following;
+  var flees := 0;
+  AP_SetStatMod(me, DEXTERITY, 0);
+  following := 0;
+  if(opponent == me)
+    return;
+  endif
+  if (opponent.hidden)
+    return;
+  endif
+  TurnToward(opponent);
+  SetOpponent(opponent);
+  //var nextbreath := ReadGameClock(); //not used
+  var ev;
+  var loops := 0;
+  var f_waittime := 0;
+  while((opponent) && (!opponent.dead || !opponent.hidden || !opponent.concealed)&&(Distance(me,opponent)< 15))
+    if(!CloseDistance(opponent))
+      loops := loops + 1;
+      f_waittime := 0;
+    else
+      if(!CheckLineOfSight(me, opponent))
+        loops := loops + 1;
+      endif
+      f_waittime := 1;
+    endif
+    ev := wait_for_event(f_waittime);
+    case(ev.type)
+      EVID_ALL_ATTACK_CMD:     opponent := ev.target;
+                               SetOpponent(opponent);
+      EVID_ALL_FOLLOW_CMD:     following := ev.target;
+      SYSEVENT_ALL_GUARD_CMD:  guarding := ev.target;
+                               PrintTextAbove(me,"*guarding " + guarding.name + "*");
+      SYSEVENT_SPEECH:         ProcessSpeech(ev);
+      SYSEVENT_ENGAGED:
+      SYSEVENT_DAMAGED:        if(ev.source == opponent)
+                                 PlaySoundEffect(me,dmgsound);
+                               endif
+                               if(ev.source)
+                                 if(ev.source != opponent)
+                                   if((!CheckLineOfSight(me, opponent))||(RandomInt(8)==1))
+                                     opponent := ev.source;
+                                     SetOpponent(opponent);
+                                   endif
+                                 endif
+                                 TurnToward(opponent);
+                               endif
+      EVID_PEACEMADE:          SetWarMode(0);
+                               opponent := 0;
+                               following := oldfollowing;
+                               return;
+      SYSEVENT_DOUBLECLICKED:  if((ev.source == master) or (ev.source.cmdlevel > 2))
+                                 OpenMyPack();
+                               else
+                                 snoop(ev.source, me);
+                               endif
+    endcase
+    if(master.dead)
+       dismountme(master);
+    endif
+    if(following)
+      SetWarMode(0);
+      opponent := 0;
+      return;
+    endif
+    if(firebreather and caster)
+      if(LAST_BREATH <= ReadGameClock())
+        if((CheckLineOfSight(me, opponent)) and (Distance(me, opponent) <= 15))
+          if(RandomInt(4) == 1)
+            cast_meteor(opponent);
+          else
+	        cast_offensive_spell(me,opponent);
+          endif
+          LAST_BREATH := Cint(ReadGameClock() + (RandomInt(4) + 4));
+        endif
+      endif
+    elseif(caster)
+      if(LAST_BREATH <= ReadGameClock())
+        if((CheckLineOfSight(me, opponent)) and (Distance(me, opponent) <= 15))
+          cast_offensive_spell(me, opponent);
+          LAST_BREATH := Cint(ReadGameClock() + (RandomInt(4) + 4));
+        endif
+      endif
+    elseif(firebreather)
+      if(LAST_BREATH <= ReadGameClock())
+        if(RandomInt(4)== 1)
+          cast_meteor(opponent);
+        endif
+        LAST_BREATH := Cint(ReadGameClock() + (RandomInt(4) + 4));
+      endif
+    endif
+    if(loops > 30)
+      flees := flees + 1;
+      if(flees > 4)
+        flee(opponent);
+      endif
+      return;
+    endif
+  endwhile
+  SetWarMode(0);
+  opponent := 0;
+  following := oldfollowing;
+endfunction
+
+function CloseDistance(opponent)
+  case (Distance(me, opponent))
+    1:
+    0:       return 1;
+    default: if(!RunToward(opponent))
+               return 1;
+             else
+               return 0;
+             endif
+  endcase
+endfunction
+
+function Transfer()
+  if(GetObjProperty(me, "summoned"))
+    return;
+  endif
+  SendSysMessage(master, "Transfer " + me.name + " to whom?");
+   var whom := Target(master, TGTOPT_NOCHECK_LOS);
+  if(!whom)
+    SendSysMessage(master, "Canceled");
+    return;
+  endif
+  if(!whom.acctname)
+    printtextabove(me, "your pet refuses to accept that as a master.");
+    return;
+  endif
+  if(whom == master)
+    printtextabove(me, "you are already my master.");
+    return;
+  endif
+  //var npccfgfile := ReadConfigFile("npcdesc"); // unneeded due to global 'npccfgfile'!!
+  var tameskill  := CInt(npccfgfile[me.npctemplate].tameskill);
+  var mastaming  := AP_GetSkill(master, TAMING);
+  var maslore    := AP_GetSkill(master, ANIMAL_LORE)/5;
+  var tgttaming  := CInt(AP_GetSkill(whom, TAMING));
+  var tgtlore    := CInt(AP_GetSkill(whom, ANIMAL_LORE)/5);
+  happiness := GetObjProperty(me, "happiness");
+  if(tgttaming <(tameskill - 50))
+    PlaySoundEffect(me, dmgsound);
+    if(!orneriness)
+      orneriness := 1;
+    endif
+    happiness := happiness - orneriness;
+    if(happiness < 10)
+      release();
+    else
+      SetObjProperty(me, "happiness", happiness);
+      SendSysMessage(master, "That person has no chance of controlling this beast!");
+      return;
+    endif
+  endif
+  var dif  := CInt(tameskill -((mastaming/10)+ maslore));
+  var diff := CInt((tameskill-20)-((tgttaming/10)+ tgtlore));
+  if(dif < 1)
+    dif := 1;
+  endif
+  if(diff < 1)
+    diff := 1;
+  endif
+  var tsm  := CInt(RandomInt(40)+(mastaming + 40));
+  var tst  := CInt(RandomInt(40)+(tgttaming + 40));
+  if(tsm > dif)
+    if(tst < diff)
+      PlaySoundEffect(me, dmgsound);
+      happiness := happiness - orneriness;
+      if(happiness < 10)
+        release();
+      else
+        SetObjProperty(me, "happiness", happiness);
+        SendSysMessage(master,"your pet refuses to accept " + whom.name + " as a master");
+        return;
+      endif
+    else
+      PlaySoundEffect(me, hit);
+      SetObjProperty(me, "master", whom.serial);
+      PrintTextAbove(me, me.name + " accepts " + whom.name+ " as its new master");
+      RestartScript(me);
+    endif
+  else
+    PlaySoundEffect(me, dmgsound);
+    happiness := happiness - orneriness;
+    SetObjProperty(me, "happiness", happiness);
+    if(happiness < 10)
+      release();
+    else
+      SendSysMessage(master,"your pet refuses to listen to you");
+      return;
+    endif
+  endif
+endfunction
+
+function release()
+  if((GetObjProperty(me,"onhold")) or (GetObjProperty(me,"stabled")))
+    return;
+  endif
+  var owner := SystemFindObjectBySerial(GetObjProperty(me, "master"));
+  var char;
+  var mounted_char;
+  var onchars := EnumerateOnlineCharacters();
+    var totem := CInt(GetObjProperty( me, "totem" ));
+    if (totem)
+	if(GetObjProperty(me,"mounted") == 1)
+	    char := GetObjProperty(me,"mounted_on");
+	    foreach person in onchars
+		if(person.serial == CInt(char))
+		    mounted_char := person;
+		    break;
+		endif
+	    endforeach
+	    dismountme(mounted_char);
+	endif
+	set_critical(1);
+	var it := CreateItemAtLocation(me.x, me.y, me.z, totem, 1, me.realm);
+	if (it)
+	    it.decayAt := 0;
+	    it.name := me.name;
+	    it.color := CInt(GetObjProperty( me, "totemcolor" ));
+	    SetObjProperty(it, "critter", me.npctemplate);
+	    SetObjProperty(it, "critcolor", me.color);
+	    SetObjProperty(it, "critgraphic", me.graphic);
+	    SetObjProperty(it, "totemhp", AP_GetVital(me, VITALID_LIFE));
+	    it.usescript := ":magicitems:use_totem";
+	    it.decay := 0;
+	    it.movable := 1;
+//	    MoveItemToContainer(SystemFindObjectBySerial(char).backpack, it);
+	    MoveItemToContainer(it, owner.backpack);
+	    drop();
+
+	    PlaySoundEffect( me, SFX_SPELL_DISPEL );
+	    PlayStationaryEffect( me.x, me.y, me.z, FX_SMOKE, 0xa, 0xa );
+	    MoveObjectToLocation(me, 0, 0, 0, "britannia_alt", MOVEOBJECT_FORCELOCATION);
+	    SetObjProperty(me, "guardkill", 1);
+	    KillMobile(me);
+	else
+	    say("*Argh*");
+	    return;
+	endif
+	set_critical(0);
+  elseif(GetObjProperty(me,"summoned") == 1)
+    if(GetObjProperty(me,"mounted") == 1)
+      char := GetObjProperty(me,"mounted_on");
+      foreach person in onchars
+        if(person.serial == CInt(char))
+          mounted_char := person;
+          break;
+        endif
+      endforeach
+      dismountme(mounted_char);
+    endif
+    PlayStationaryEffect(me.x, me.y, me.z, FX_SMOKE, 0xa, 0xa, 0, me.realm);
+    MoveObjectToLocation(me,5288, 1176, 0,"britannia_alt",MOVEOBJECT_FORCELOCATION);
+    KillMobile(me);
+  else
+    if(GetObjProperty(me,"mounted"))
+      char := GetObjProperty(me,"mounted_on");
+      foreach person in onchars
+        if(person.serial == CInt(char))
+          mounted_char := person;
+          break;
+        endif
+      endforeach
+      dismountme(mounted_char);
+    endif
+    me.script := npccfgfile[me.npctemplate].script;
+    PrintTextAbove(me, me.name + " has decided it is better off without a master.");
+    me.setmaster(0);
+    EraseObjProperty(me, "master");
+    EraseObjProperty(me, "serial");
+    EraseObjProperty(me, "script");
+    EraseObjProperty(me, "happiness");
+    EraseObjProperty(me, "mounted");
+    EraseObjProperty(me, "mounted_on");
+    SetAnchor(me.x,me.y,10,1);
+    SetHpRegenRate(me ,(100)* 12);
+    RestartScript(me);
+  endif
+endfunction
+
+function dismountme(who)
+  var mount := GetEquipmentByLayer(who, 25);
+  me.facing := who.facing;
+  MoveObjectToLocation(me, master.x, who.y, who.z, who.realm, MOVEOBJECT_FORCELOCATION);
+  EraseObjProperty(me, "mounted");
+  EraseObjProperty(me, "mounted_on");
+  DestroyItem(mount);
+endfunction
+
+function Fetch()
+  var tobj := Target(master);
+  if(tobj.container)
+    PlaySoundEffect(me, dmgsound);
+    return;
+  endif
+  var times := 0;
+  while((Distance(me, tobj)> 1)&&(times <= 5)&& CheckLineOfSight(me,tobj))
+    if(!walktoward(tobj))
+      sleepms(100);
+      times := times + 1;
+    else
+      times := 0;
+    endif
+  endwhile
+  if(Accessible(me,tobj))
+    PlaySoundEffect(me, hit);
+    // Changed from mypack to me.backpack. Upon death npcs would not have the item
+    // on them for loot, causing stuff to be left in their storage. BAD NPC!
+    MoveItemToContainer(tobj, me.backpack);
+    while((Distance(me, master)> 1)&&(times <= 5)&& CheckLineOfSight(me,master))
+      if(!walktoward(master))
+        sleepms(100);
+        times := times + 1;
+      else
+        times := 0;
+      endif
+    endwhile
+//    MoveObjectToLocation(tobj, me.x, me.y, me.z, tobj.realm, MOVEOBJECT_FORCELOCATION);
+  else
+    PlaySoundEffect(me, dmgsound);
+  endif
+endfunction
+
+function Get()
+  var tobj := Target(master);
+  if(tobj.container)
+    PlaySoundEffect(me, dmgsound);
+    return;
+  endif
+  var times := 0;
+  while((Distance(me, tobj)> 1)&&(times <= 5)&& CheckLineOfSight(me,tobj))
+    if(!walktoward(tobj))
+      sleepms(100);
+      times := times + 1;
+    else
+      times := 0;
+    endif
+  endwhile
+  if(Accessible(me,tobj))
+    PlaySoundEffect(me, hit);
+    // Changed from mypack to me.backpack. Upon death npcs would not have the item
+    // on them for loot, causing stuff to be left in their storage. BAD NPC!
+    MoveItemToContainer(tobj, me.backpack);
+  else
+    PlaySoundEffect(me, dmgsound);
+  endif
+endfunction
+
+function drop()
+  foreach myitems in EnumerateItemsInContainer(me.backpack)
+    if(myitems.container.serial == me.backpack.serial)
+      MoveObjectToLocation(myitems, me.x, me.y, me.z, me.realm, 0);
+      sleepms(100);
+    endif
+  endforeach
+endfunction
+
+function speak()
+  if(RandomInt(1)+1 == 1)
+    PlaySoundEffect(me, idlesnd1);
+  else
+    PlaySoundEffect(me, idlesnd1);
+  endif
+endfunction
+
+function OpenMyPack()
+	var mounttype := 0;
+	if((me.graphic == 0x123)||(me.graphic == 0x124))
+		if(Distance(me, master)> 2)
+			return;
+		endif
+		return  SendOpenSpecialContainer(master, me.backpack);
+	else
+		if(Distance(me, master)> 1)
+			return;
+		endif
+		var alreadymounted := GetEquipmentByLayer(master, 25);
+		if(alreadymounted)
+			SendSysMessage(master, "Already mounted.", color := 33);
+			return;
+		endif
+		Print("Preparing to mount.");
+
+
+		// case(me.graphic)
+			// 0x72:	mounttype := 0x3EA9;	// Dark Steed
+			// 0x73:	mounttype := 0x3EAA;	// Ethereal Horse
+			// 0x74:	mounttype := 0x3EB5;	// Nightmare 1
+			// 0x75:	mounttype := 0x3EA8;	// Silver Steed
+			// 0x76:	mounttype := 0x3EB2;	// Britannia War Horse (Purple)
+			// 0x77:	mounttype := 0x3EB1;	// Mage Council War Horse (Light Blue)
+			// 0x78:	mounttype := 0x3EAF;	// Minax War Horse (Blood Red) 		warhorse5
+			// 0x79:	mounttype := 0x3EB0;	// Shadow War Horse (Light Green)
+			// 0x7A:	mounttype := 0x3EB4;	// Unicorn
+			// 0x84:	mounttype := 0x3EAD;	// Kirin
+			// 0x90:	mounttype := 0x3EB3;	// Sea Horse (Medium Blue)
+			// 0xA9:	mounttype := 0x3e95;	// Giant Beetle
+			// 0xAA:	mounttype := 0x3EAB;	// Ethereal Llama
+			// 0xB1:	mounttype := 0x3EA7;	// Nightmare 2
+			// 0xB2:	mounttype := 0x3EB6;	// Nightmare 3
+			// 0xB3:	mounttype := 0x3EB7;	// Nightmare 4
+			// 0xBB:	mounttype := 0x3EB8;	// Ridgeback
+			// 0xBC:	mounttype := 0x3EBA;	// Ridgeback, Savage
+			// 0xBE:	mounttype := 0x3e9e;	// Fire Steed
+			// 0xBF:	mounttype := 0x3E9C;	// Ethereal Kirin
+			// 0xC0:	mounttype := 0x3E9D;	// Ethereal Unicorn
+			// 0xC1:	mounttype := 0x3E9A;	// Ethereal Ridgeback
+			// 0xC2:	mounttype := 0x3E98;	// Ethereal Swamp Dragon
+			// 0xC3:	mounttype := 0x3E97;	// Ethereal Giant Beetle
+			// 0xC8:	mounttype := 0x3E9F;	// Horse2 - dappled brown
+			// 0xCC:	mounttype := 0x3EA2;	// Horse1 - dark brown
+			// 0xD2:	mounttype := 0x3EA3;	// Desert Ostard
+			// 0xD5:	mounttype := 0x3ec5;	// Polar bear
+			// 0xDA:	mounttype := 0x3EA4;	// Frenzied Ostard
+			// 0xDB:	mounttype := 0x3EA5;	// Forest Ostard
+			// 0xDC:	mounttype := 0x3EA6;	// Llama
+			// 0xE2:	mounttype := 0x3EA0;	// Horse3 - grey
+			// 0xE4:	mounttype := 0x3EA1;	// Horse4 - tan
+			// 0xF3:	mounttype := 0x3e94;	// Hai-Riyo
+			// 0x114:	mounttype := 0x3e90;	// Raptalon - not sure about the mounttype though
+			// 0x115:	mounttype := 0x3e91;	// CuShidhe - not sure about the mounttype though
+			// 0x319:  mounttype := 0x3EBB;	// Skeletal Mount
+			// 0x11C:	mounttype := 0x3e92;	// MondainSteed
+			// 0x1B0:  mounttype := 0x3ec6;	// Armored Boura
+			// 0x317:  mounttype := 0x3EBC;	// Giant Beetle2
+			// 0x31A:  mounttype := 0x3EBD;	// SwampDragon
+			// 0x31F:  mounttype := 0x3EBE;	// Armored Swamp Dragon
+			// 0x42d:  mounttype := 0x3ec9;	// Hell Hound
+			// 0x4E6:  mounttype := 0x3ec7;	// Tiger
+			// 0x4E7:  mounttype := 0x3ec8;	// Etherial Tiger
+			// 0x579:  mounttype := 0x3ECA;	// Giant Tarantula
+			// 0x57F:	mounttype := 0x3ECB;	// Lasher - a rainbow highlighted unicorn.
+			// 0x580:	mounttype := 0x3ECD;	// horse6 palomino
+			// 0x582:	mounttype := 0x3ECC;	// Windrunner
+			// 0x59A:	mounttype := 0x3ECE;	// Serpentine Dragon
+			// 0x5A0:	mounttype := 0x3ECF;	// peacock
+			// 0x5A1:	mounttype := 0x3ED0;	// skeletal hound
+			// 0x5E6:	mounttype := 0x3ED1;	// coconut crab
+			// 0x5F6:	mounttype := 0x3ED2;	// war boar
+			// 0x5F7:	mounttype := 0x3ED3;	// capybara
+		// endcase
+
+		// if (mounttype == 0x3eb4 and master.graphic == 0x190) // male attempting to ride a unicorn
+			// SendSysMessage (master, "The unicorn only allows females to mount it.", color := 88);
+			// return;
+		// endif
+
+		// if (mounttype == 0x3ead and master.graphic == 0x191) // female attempting to ride a ki-rin
+			// SendSysMessage (master, "The ki-rin only allows males to mount it.", color := 88);
+			// return;
+		// endif
+
+		// if (mounttype == 0x3e9d and master.graphic == 0x190) // male attempting to ride a unicorn
+			// SendSysMessage (master, "The unicorn only allows females to mount it.", color := 88);
+			// return;
+		// endif
+
+		// if (mounttype == 0x3e9c and master.graphic == 0x191) // female attempting to ride a ki-rin
+			// SendSysMessage (master, "The ki-rin only allows males to mount it.", color := 88);
+			// return;
+		// endif
+		// if(mounttype)
+			mounttype := MP_Mount( master, me );
+		// endif
+		// if(mounttype)
+			// if(MoveObjectToLocation(master,me.x,me.y,me.z,master.realm,0))
+				// master.facing := me.facing;
+				// var mount := CreateItemAtLocation(5228, 1182, 0, 0x1f021,1, "britannia");
+				// if(Cint(GetObjProperty(me, "summoned")) == 1)
+					// SetObjProperty(mount, "summoned", 1);
+				// endif
+				// mount.color := me.color;
+				// MoveObjectToLocation(me, 5228, 1182, 0, "britannia", MOVEOBJECT_FORCELOCATION); // newmap problem
+				// mount.graphic := mounttype;
+				// EquipItem(master,mount);
+				// SetObjProperty(mount,"serial", me.serial);
+				// SetObjProperty(me,"mounted", 1);
+				// SetObjProperty(me,"mounted_on", master.serial);
+				// if (GetObjProperty(me, "totem"))
+					// SetObjProperty(mount, "totem", GetObjProperty(me, "totem"));
+				// endif
+				// if (GetObjProperty(me, "totemcolor"))
+					// SetObjProperty(mount, "totemcolor", GetObjProperty(me, "totemcolor"));
+				// endif
+
+				// guarding := 0;
+				// following := 0;
+			// endif
+		// endif
+	endif
+endfunction
+
+function TakeItem(ev)
+  var npccfg := ReadConfigFile("npcdesc");
+  var foodtype := npccfg[me.npctemplate].food;
+  if(!foodtype)
+    foodtype := "all";
+  endif
+  var cfg := ReadConfigFile("::food");
+  var elem := FindConfigElem(cfg,foodtype);
+  var foodarray := GetConfigStringArray(elem,"food");
+  if(CStr(ev.item.objtype)in foodarray)
+    PlaySoundEffect(me, CInt(0x3b)+ RandomInt(3));
+    DestroyItem(ev.item);
+    PrintTextAbovePrivate(me,"your pet looks happier.", master);
+    SetObjProperty(me,"happiness", 100);
+    return;
+  endif
+  if((me.graphic == 0x123)||(me.graphic == 0x124))
+    // Changed from mypack to me.backpack. Upon death npcs would not have the item
+    // on them for loot, causing stuff to be left in their storage. BAD NPC!
+    if(!MoveItemToContainer(ev.item, me.backpack))
+      say("*your pet cannot hold that item*");
+      return;
+    else
+      PlaySoundEffect(me,0x49);
+    endif
+  else
+    var yourpack := ev.source.backpack;
+    MoveItemToContainer(ev.item,yourpack);
+  endif
+endfunction
+
+function Guard()
+  if(nextwatch <= ReadGameClock())
+    nextwatch := ReadGameClock()+ 7;
+    if(RandomInt(8)==1)
+      PrintTextAbove(me,"*guarding " + guarding.name + "*");
+    endif
+    foreach mob in ListHostiles(guarding, 9, 0);
+      Fight(mob);
+      return;
+    endforeach
+  endif
+  if((!AP_GetStat(guarding, STRENGTH))||(guarding.dead)||(Distance(me,guarding)> 15))
+    guarding := 0;
+  endif
+endfunction
+
+function Follow()
+  var d := Distance(me, following);
+  if(d <= 2)
+    waittime := 1;
+  elseif(d > 15)
+    following := 0;
+    waittime := 120;
+  elseif(d > 6)
+    if(GetObjProperty(me, "Pause"))
+      waittime := 2;
+    else
+      var ma := 200 - CInt(AP_GetStat(me, DEXTERITY));
+      AP_SetStatMod(me, DEXTERITY, CInt(AP_GetStatMod(me, DEXTERITY))+ ma);
+      RunToward(following);
+      AP_SetStatMod(me, DEXTERITY, CInt(AP_GetStatMod(me, DEXTERITY))- ma);
+      waittime := 0;
+    endif
+  else
+    if(GetObjProperty(me, "Pause"))
+      waittime := 2;
+    else
+      var ma := 200 - CInt(AP_GetStat(me, DEXTERITY));
+      AP_SetStatMod(me, DEXTERITY, CInt(AP_GetStatMod(me, DEXTERITY))+ ma);
+      walktoward(following);
+      AP_SetStatMod(me, DEXTERITY, CInt(AP_GetStatMod(me, DEXTERITY))- ma);
+      waittime := 0;
+    endif
+  endif
+  if(guarding)
+    Guard();
+  endif
+endfunction
+
+function ProcessSpeech(ev)
+  if(ev.source.serial != masterserial)
+    return;
+  endif
+  if(!master)
+    RestartScript(me);
+  endif
+  var evtext := lower(ev.text);
+  var mename := lower(me.name);
+  if(evtext[mename + " kill"] || evtext[mename + " attack"] || evtext["all kill"] || evtext["all attack"])
+    var what := Target(master, TGTOPT_HARMFUL + TGTOPT_CHECK_LOS);
+    if(what)
+      if(what == ev.source)
+        return;
+      elseif(evtext["all kill"] || evtext["all attack"])
+        if(obediencecheck()== 0)
+          return;
+        endif
+        AllCommand(EVID_ALL_ATTACK_CMD, what);
+      else
+        if(obediencecheck()== 0)
+          return;
+        endif
+        Fight(what);
+      endif
+    endif
+  elseif(evtext[mename + " stop"] || evtext["all stop"])
+    if(obediencecheck()== 0)
+      return;
+    endif
+    guarding := 0;
+    following := 0;
+  elseif((evtext[mename + " come"])||(evtext["all come"]))
+    if(obediencecheck()== 0)
+      return;
+    endif
+    var done := 0;
+    chaseloop := 0;
+    while(done == 0)
+      chaseloop := chaseloop +1;
+      done := CloseDistance(ev.source);
+      if(chaseloop > 25)
+        done :=1;
+      endif
+    endwhile
+  elseif(evtext[mename + " follow"])
+    if(obediencecheck()== 0)
+      return;
+    endif
+    if(evtext["follow me"])
+      following := ev.source;
+    else
+      var what := Target(master, TGTOPT_CHECK_LOS);
+      if(what)
+        following := what;
+      endif
+    endif
+  elseif(evtext["all follow"])
+    if(obediencecheck()== 0)
+      return;
+    endif
+    if(evtext["follow me"])
+      following  := ev.source;
+    else
+      var what := Target(master, TGTOPT_CHECK_LOS);
+      if(what)
+        AllCommand(EVID_ALL_FOLLOW_CMD, what);
+      endif
+    endif
+  elseif(evtext[mename + " transfer"] ||(evtext["all transfer"]))
+    Transfer();
+  elseif(evtext[mename + " release"] ||(evtext["all release"]))
+    release();
+  elseif(evtext[mename + " guard me"])
+	guarding := ev.source;
+	PrintTextAbove(me,"Im guarding you.");
+  elseif(evtext[mename + " guard"])
+    say("Who should I guard?");
+    var what := Target(master, TGTOPT_HELPFUL + TGTOPT_CHECK_LOS);
+	if(what.isA(POLCLASS_UOBJECT))
+      guarding := what;
+	  PrintTextAbove(me,"Im guarding " + guarding.name);
+	endif
+  elseif(evtext["all guard me"])
+	guarding := ev.source;
+	PrintTextAbove(me,"Im guarding you");
+  elseif(evtext["all guard"])
+    say("Who should I guard?");
+	var what := Target(master, TGTOPT_HELPFUL + TGTOPT_CHECK_LOS);
+	if(AP_GetVital(what, VITALID_LIFE))
+      AllCommand(SYSEVENT_ALL_GUARD_CMD, what);
+	endif
+  elseif(evtext[mename + " fetch"])
+    if(obediencecheck()== 0)
+      return;
+    endif
+    Fetch();
+  elseif(evtext[mename + " get"])
+    if(obediencecheck()== 0)
+      return;
+    endif
+    Get();
+  elseif(evtext[mename + " drop"])
+    if(obediencecheck()== 0)
+      return;
+    endif
+    drop();
+  elseif(evtext[mename + " speak"]  ||(evtext["all speak"]))
+    if(obediencecheck()== 0)
+      return;
+    endif
+    speak();
+  endif
+endfunction
+
+function AllCommand(evtype,what)
+  var mobs := ListMobilesNearLocation(master.x, master.y, master.z, 9, me.realm);
+  var eve := struct;
+  eve.+type := evtype;
+  eve.+source := me;
+  eve.+target := what;
+  SendEvent(me, eve);
+  foreach mob in mobs
+    if(GetObjProperty(mob, "master")== me.master.serial)
+      SendEvent(mob, eve);
+    endif
+  endforeach
+endfunction
+
+function cast_meteor(opponent)
+  var base := Cint(((FLAME_STRENGTH * AP_GetVital(me, VITALID_LIFE)) / AP_GetVitalMaximumValue(me, VITALID_LIFE)) / 2);
+  var dmg :=  RandomInt(base) + base;
+  PerformAction(me,0x0c);
+  PlaysoundEffect(me, 0x16b);
+  sleep(3);
+  PlayMovingEffect(me, opponent, 0x36d4, 10, 1, 1);
+  ApplyRawDamage(opponent, dmg, DMG_FIRE);
+endfunction
+
+function flee(opponent)
+  var numflees := GetObjProperty(me,"#flees");
+  if(numflees)
+    if(numflees > 5)
+	EraseObjProperty(me,"#flees");
+	var totem := CInt(GetObjProperty( me, "totem" ));
+	if (totem)
+		sleep(30);
+		return;
+	else
+		MoveObjectToLocation(me,5288,1176,0,"britannia_alt",MOVEOBJECT_FORCELOCATION);
+		SetObjProperty(me,"guardkill",1);
+		KillMobile(me);
+	endif
+    else
+      numflees := numflees + 1;
+    endif
+  else
+    numflees := 1;
+  endif
+  SetObjProperty(me,"#flees",numflees);
+  var runs := 0;
+  while((Distance(me, opponent)< 20)&&(runs < 50))
+    RunAwayFrom(opponent);
+    runs := runs +1;
+    wait_for_event(0);
+  endwhile
+  RestartScript(me);
+endfunction
+
+function obediencecheck()
+  var arry := { 0xcc, 0xc8, 0xe2, 0xe4, 0x123, 0x124, 0xd2, 0xdb };
+  if(me.objtype in arry)
+    return 1;
+  endif
+  var maslore    := AP_GetSkill(master, ANIMAL_LORE)/5;
+  var mastaming  := CInt(AP_GetSkill(master, TAMING)+ maslore);
+  var checkvalue := CInt(mastaming - 20);
+  happiness := GetObjProperty(me, "happiness");
+  var happybonus := happiness/10;
+  checkvalue := checkvalue + happybonus;
+  var defiance :=(orneriness * 20)-30;
+  if(defiance < 1)
+    defiance := 1;
+  endif
+  defiance := defiance + petcount();
+  var finaldefiance := CInt(defiance + RandomInt(40));
+  if(GetObjProperty(me, "summoned")== 1)
+    return 1;
+  elseif(finaldefiance > checkvalue)
+    PlaySoundEffect(me, dmgsound);
+    happiness := happiness - orneriness;
+    SetObjProperty(me, "happiness",(happiness-1));
+    if(happiness < 10)
+      release();
+    endif
+    return 0;
+  else
+    PlaySoundEffect(me,hit);
+    if(happiness < 10)
+      release();
+      return 0;
+    endif
+    return 1;
+  endif
+endfunction
+
+function petcount()
+  var pets := 0;
+  var mobs := ListMobilesNearLocation(me.x,me.y,me.z,8, me.realm);
+  foreach mob in mobs
+    if((mob.script == "tamed")&&(GetObjProperty(mob,"master")==masterserial))
+      if(GetObjProperty(mob, "summoned"))
+        pets := pets + 0;
+      else
+        pets := pets+5;
+      endif
+    endif
+  endforeach
+  return pets;
+endfunction
+
+function EnableTameEvents()
+  EnableEvents(EVID_WAKEUP);
+endfunction
+
+function EnableMainEvents()
+  EnableEvents(SYSEVENT_SPEECH, 8);
+  EnableEvents(SYSEVENT_ENGAGED);
+  EnableEvents(SYSEVENT_DAMAGED);
+  EnableEvents(SYSEVENT_DOUBLECLICKED);
+  EnableEvents(SYSEVENT_ITEM_GIVEN);
+  EnableEvents(EVID_PEACEMADE);
+endfunction
+
+function disablemainevents()
+  DisableEvents(SYSEVENT_SPEECH);
+  DisableEvents(SYSEVENT_ENGAGED);
+  DisableEvents(SYSEVENT_DAMAGED);
+  DisableEvents(SYSEVENT_ITEM_GIVEN);
+  DisableEvents(EVID_PEACEMADE);
+endfunction
