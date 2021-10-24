@@ -1,10 +1,15 @@
+/*
+        Maintened by the POL Distro Team
+
+        2009-02-21
+*/
 use uo;
 use os;
-// use npc;
 use cfgfile;
 
 include "include/client";
 include ":attributes:attributes";
+include "include/facings";
 // include ":animaltaming:taming";
 // include ":brainAI:npcCommands";
 // include ":damage:damage_ex";
@@ -304,7 +309,6 @@ function MP_RestoreMountToAnimal( mobile, mount_piece )
 	var orig_serial := CInt( GetObjProperty( mount_piece, "serial" ));
 	var animal := SystemFindObjectBySerial( orig_serial );
 	if( animal.IsA( POLCLASS_NPC ))
-	Print("is a POLCLASS_NPC");
 		// Supports systems where the npc is moved to a storage area rather than killed.
 		animal.hidden := 0;
 		animal.frozen := 0;
@@ -314,7 +318,6 @@ function MP_RestoreMountToAnimal( mobile, mount_piece )
 
 		MoveObjectToLocation( animal, mobile.x, mobile.y, mobile.z, mobile.realm, MOVEOBJECT_FORCELOCATION );
 	else
-	Print("NOT is a POLCLASS_NPC");
 		var template := MP_GetMountTemplate( mount_piece );
 		if( !template )
 			DestroyItem( mount_piece );
@@ -349,8 +352,8 @@ function MP_RestoreMountToAnimal( mobile, mount_piece )
 		var last_attacker := last_damage.serial;
 		var source := SystemFindObjectBySerial(CInt(last_attacker));
 		var opponent := source;
-		SetOpponent(opponent);
-		TurnToward(opponent);
+		TurnObjectToward(animal, opponent.x, opponent.y);
+		SendEvent( animal, EVID_DAMAGED );
 		// var last_damage := GetLastDamageInfo( mobile ),
 			// last_attacker := last_damage[1];
 

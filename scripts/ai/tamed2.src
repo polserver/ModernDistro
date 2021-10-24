@@ -580,8 +580,6 @@ function OpenMyPack()
 			SendSysMessage(master, "Already mounted.", color := 33);
 			return;
 		endif
-		Print("Preparing to mount.");
-
 
 		// case(me.graphic)
 			// 0x72:	mounttype := 0x3EA9;	// Dark Steed

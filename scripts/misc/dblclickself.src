@@ -7,8 +7,8 @@ include "include/eventID";
 include ":itemUtils:itemdesc";
 
 program dblclickself( who )
-	var mount_piece := GetEquipmentByLayer( who, 25 );
-	if (!mount_piece)
+	var mount := GetEquipmentByLayer( who, 25 );
+	if (!mount)
 		OpenPaperdoll( who, who );
 		return;
 	endif
@@ -17,13 +17,10 @@ program dblclickself( who )
 		return;
 	endif
 	// This allows a script to run prior to unequipping
-	// a mount piece for any efects or mods to the player.
-	var unequip := GetObjProperty(mount_piece, "Unequip");
+	// a mount for any efects or mods to the player.
+	var unequip := GetObjProperty(mount, "Unequip");
 	if(unequip)
 		Run_Script(unequip, {who});
-		MoveItemToContainer(mount_piece, who.backpack);
-		DestroyItem( mount_piece );
-		return 1;
 	endif
 	MP_Unmount( who );
     // var serial := GetObjProperty(mount_piece, "serial");
