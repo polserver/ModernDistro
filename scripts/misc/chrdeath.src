@@ -6,6 +6,7 @@ include ":attributes:attributes";
 include ":virtue:noto";
 include "include/reportMurder";
 include ":timedScripts:poisonUtil";
+include ":mounts:mounts";
 include "include/utility";
 
 var allmyjunk := {};
@@ -28,7 +29,7 @@ program chrdeath(corpse, ghost)
 	fame := (fame - CInt(fame / 20));
 	SetObjProperty(ghost, "Fame", fame);
 	SetObjProperty(corpse,"serial", ghost.serial);
-	dismount(corpse);
+	MP_DeathUnmount(corpse);
 	CheckForAutoRes(ghost, corpse);
 	CheckForDivineRes(ghost, corpse);
 	var corpsenamearray := SplitWords(corpse.name);

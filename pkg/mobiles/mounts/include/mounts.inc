@@ -10,6 +10,7 @@ use cfgfile;
 include "include/client";
 include ":attributes:attributes";
 include "include/facings";
+include "include/eventID";
 // include ":animaltaming:taming";
 // include ":brainAI:npcCommands";
 // include ":damage:damage_ex";
@@ -275,13 +276,16 @@ endfunction
 ///////////////////////////////////////////////////////////
 function MP_DeathUnmount( corpse )
 
+	var mobile;
 	if( !corpse.IsA( POLCLASS_CORPSE ))
 		return error{"errortext":="Object passed is not a corpse."};
 	endif
 
 	foreach item in ( EnumerateItemsInContainer( corpse ))
 		if ( item.IsMount() )
-			return MP_RestoreMountToAnimal( corpse, item );
+			mobile := SystemFindObjectBySerial(GetObjProperty(corpse, "serial"), SYSFIND_SEARCH_OFFLINE_MOBILES);
+			return MP_RestoreMountToAnimal( mobile, item );
+			// return MP_RestoreMountToAnimal( corpse, item );
 			break;
 		endif
         SleepMS(5);
@@ -310,13 +314,13 @@ function MP_RestoreMountToAnimal( mobile, mount_piece )
 	var animal := SystemFindObjectBySerial( orig_serial );
 	if( animal.IsA( POLCLASS_NPC ))
 		// Supports systems where the npc is moved to a storage area rather than killed.
-		animal.hidden := 0;
-		animal.frozen := 0;
-		animal.facing := mobile.facing;
 
 		EraseObjProperty( animal, "MustSleep" );
 
 		MoveObjectToLocation( animal, mobile.x, mobile.y, mobile.z, mobile.realm, MOVEOBJECT_FORCELOCATION );
+		animal.hidden := 0;
+		animal.frozen := 0;
+		animal.facing := mobile.facing;
 	else
 		var template := MP_GetMountTemplate( mount_piece );
 		if( !template )
@@ -337,9 +341,9 @@ function MP_RestoreMountToAnimal( mobile, mount_piece )
 		endif
 	endif
 
-    SetObjProperty( animal, "happiness", 100);
-    SetObjProperty( animal, "master", mobile.serial );
-    SetObjProperty( animal, "script", animal.script );
+	SetObjProperty( animal, "happiness", 100 );
+	SetObjProperty( animal, "master", mobile.serial );
+	SetObjProperty( animal, "script", animal.script );
     animal.setmaster( mobile );
     animal.script := "tamed2";
     RestartScript(animal);
@@ -351,9 +355,9 @@ function MP_RestoreMountToAnimal( mobile, mount_piece )
 		var last_damage := GetObjProperty( mobile, "LastDamage" );
 		var last_attacker := last_damage.serial;
 		var source := SystemFindObjectBySerial(CInt(last_attacker));
-		var opponent := source;
-		TurnObjectToward(animal, opponent.x, opponent.y);
-		SendEvent( animal, EVID_DAMAGED );
+		// var opponent := source;
+		TurnObjectToward(animal, source.x, source.y);
+		SendEvent( animal, Struct{ "source":=source, "type":=EVID_ENGAGED} );
 		// var last_damage := GetLastDamageInfo( mobile ),
 			// last_attacker := last_damage[1];
 
