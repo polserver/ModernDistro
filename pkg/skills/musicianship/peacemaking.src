@@ -20,7 +20,7 @@ program bard_peacemake(who)
   if(!ReserveItem(instrument))
     return;
   endif
-  var ev := array;
+  var ev := Struct;
   ev.+ type;
   ev.type := EVID_PEACEMADE;
   var success := play(who, -1, instrument, PEACEMAKING);

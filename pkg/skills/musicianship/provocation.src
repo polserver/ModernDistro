@@ -46,7 +46,7 @@ program bard_provoke(who)
   if(!difficulty)
 	difficulty := 100;
   endif
-  var ev := array;
+  var ev := Struct;
   ev.+ type;
   ev.+ source;
   if(difficulty < 1)
