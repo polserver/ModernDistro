@@ -95,6 +95,7 @@ function MP_GetMountPieceGraphic( npc_mobile )
 	else
 		npc_mobile_graphic := Hex( CInt( npc_mobile ));
 	endif
+e
 	var elem := MP_GetMountsCfgElem( "MobileToMount" );
 	var tile_graphic := GetConfigInt( elem, npc_mobile_graphic );
 
@@ -132,6 +133,7 @@ function MP_GetMobileGraphic( mount_piece )
 	endif
 
 	var elem := MP_GetMountsCfgElem( "MountToMobileGraphic" );
+
 	var tile_graphic := GetConfigInt( elem, mount_piece );
 
 	if( tile_graphic )
@@ -201,6 +203,7 @@ function MP_Mount( mobile, npc_mount )
 		return error{"errortext":="Mobile is already mounted."};
 	endif
 
+
 	var mount_graphic := CInt(MP_GetMountPieceGraphic( npc_mount ));
 	if( !mount_graphic )
 		return mount_graphic;
@@ -215,6 +218,7 @@ function MP_Mount( mobile, npc_mount )
 	SetObjProperty( mount_piece, "serial", npc_mount.serial );
 	SetObjProperty( mount_piece, "color", npc_mount.color );
 
+
 	var result := EquipItem( mobile, mount_piece );
 	if( !result )
 		// Unable to equip the mount piece.
@@ -225,6 +229,7 @@ function MP_Mount( mobile, npc_mount )
 		mount_piece.movable := 0;
 	endif
 
+
 	mobile.facing := npc_mount.facing;
 
 	MoveObjectToLocation( npc_mount, 5302, 1163, 0, "britannia", MOVEOBJECT_FORCELOCATION );
@@ -233,6 +238,7 @@ function MP_Mount( mobile, npc_mount )
 
 	npc_mount.hidden := 1;
 	npc_mount.frozen := 1;
+
 
 	return mount_piece;
 endfunction
@@ -315,6 +321,7 @@ function MP_RestoreMountToAnimal( mobile, mount_piece )
 	if( animal.IsA( POLCLASS_NPC ))
 		// Supports systems where the npc is moved to a storage area rather than killed.
 
+
 		EraseObjProperty( animal, "MustSleep" );
 
 		MoveObjectToLocation( animal, mobile.x, mobile.y, mobile.z, mobile.realm, MOVEOBJECT_FORCELOCATION );
@@ -330,16 +337,19 @@ function MP_RestoreMountToAnimal( mobile, mount_piece )
 
 		animal := CreateNPCFromTemplate( template, mobile.x, mobile.y, mobile.z );
 		animal.facing := mobile.facing;
+
 		animal.color := mount_piece.color;
 		animal.name := mount_piece.desc;
 		animal.hidden := 0;
 		animal.frozen := 0;
 
 		var mobile_graphic := MP_GetMobileGraphic( mount_piece );
+
 		if( mobile_graphic )
 			animal.graphic := mobile_graphic;
 		endif
 	endif
+
 
 	SetObjProperty( animal, "happiness", 100 );
 	SetObjProperty( animal, "master", mobile.serial );
@@ -366,6 +376,7 @@ function MP_RestoreMountToAnimal( mobile, mount_piece )
 			// AI_Attack( animal, source );
 		// endif
 	endif
+
 
 	return animal;
 endfunction
