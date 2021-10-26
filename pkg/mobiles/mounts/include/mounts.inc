@@ -345,7 +345,7 @@ function MP_RestoreMountToAnimal( mobile, mount_piece )
 	SetObjProperty( animal, "master", mobile.serial );
 	SetObjProperty( animal, "script", animal.script );
     animal.setmaster( mobile );
-    animal.script := "tamed2";
+    animal.script := "tamed";
     RestartScript(animal);
 	EraseObjProperty( animal, "mounted" );
 
