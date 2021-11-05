@@ -21,7 +21,10 @@ function main_AI_loop()
     if(ev)
       repeat
         case(ev.type)
-          SYSEVENT_ENTEREDAREA:
+          SYSEVENT_ENTEREDAREA:	if(CheckLineOfSight( me, ev.source ))
+									fight(ev.source);
+								endif
+
           SYSEVENT_ENGAGED:
           SYSEVENT_DAMAGED:     Fight(ev.source);
           EVID_HERDING:         Herd(ev);

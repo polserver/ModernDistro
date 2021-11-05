@@ -8,7 +8,10 @@ function main_AI_loop(next_wander := 0)
       case(ev.type)
         SYSEVENT_ENGAGED:
         SYSEVENT_ENTEREDAREA: if((!(ev.source).npctemplate) ||(((ev.source).script == "employed") ||((ev.source).script == "tamed")))
-                                RunAwayFrom( ev.source);
+									if(CheckLineOfSight( me, ev.source ))
+										RunAwayFrom( ev.source);
+									endif
+//                               RunAwayFrom( ev.source);
                               endif
         SYSEVENT_DAMAGED:     if(ev.source)
                                 Fight( ev.source);

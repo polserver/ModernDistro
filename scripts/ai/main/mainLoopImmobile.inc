@@ -18,8 +18,10 @@ function main_AI_loop()
       if(ev)
         case(ev.type)
           SYSEVENT_ENTEREDAREA: if((!(ev.source).npctemplate) ||(((ev.source).script == "employed") ||((ev.source).script == "tamed")))
-                                  Fight(ev.source);
-                                endif
+									if(CheckLineOfSight( me, ev.source ))
+										fight(ev.source);
+									endif
+								endif
           SYSEVENT_ENGAGED:
           SYSEVENT_DAMAGED:     Fight(ev.source);
         endcase
