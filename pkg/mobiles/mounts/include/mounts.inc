@@ -95,6 +95,7 @@ function MP_GetMountPieceGraphic( npc_mobile )
 	else
 		npc_mobile_graphic := Hex( CInt( npc_mobile ));
 	endif
+
 	var elem := MP_GetMountsCfgElem( "MobileToMount" );
 	var tile_graphic := GetConfigInt( elem, npc_mobile_graphic );
 
@@ -132,6 +133,7 @@ function MP_GetMobileGraphic( mount_piece )
 	endif
 
 	var elem := MP_GetMountsCfgElem( "MountToMobileGraphic" );
+
 	var tile_graphic := GetConfigInt( elem, mount_piece );
 
 	if( tile_graphic )
@@ -314,7 +316,6 @@ function MP_RestoreMountToAnimal( mobile, mount_piece )
 	var animal := SystemFindObjectBySerial( orig_serial );
 	if( animal.IsA( POLCLASS_NPC ))
 		// Supports systems where the npc is moved to a storage area rather than killed.
-
 		EraseObjProperty( animal, "MustSleep" );
 
 		MoveObjectToLocation( animal, mobile.x, mobile.y, mobile.z, mobile.realm, MOVEOBJECT_FORCELOCATION );
@@ -355,8 +356,16 @@ function MP_RestoreMountToAnimal( mobile, mount_piece )
 		var last_damage := GetObjProperty( mobile, "LastDamage" );
 		var last_attacker := last_damage.serial;
 		var source := SystemFindObjectBySerial(CInt(last_attacker));
+		// var opponent := source;
 		TurnObjectToward(animal, source.x, source.y);
 		SendEvent( animal, Struct{ "source":=source, "type":=EVID_ENGAGED} );
+		// var last_damage := GetLastDamageInfo( mobile ),
+			// last_attacker := last_damage[1];
+
+		// var source := SystemFindObjectBySerial( last_attacker );
+		// if( source )
+			// AI_Attack( animal, source );
+		// endif
 	endif
 
 	return animal;
