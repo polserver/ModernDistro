@@ -50,8 +50,11 @@ function main_AI_loop()
       repeat
         case(ev.type)
           SYSEVENT_ENTEREDAREA: if((!(ev.source).npctemplate) || (((ev.source).script == "employed") || ((ev.source).script == "tamed")))
-                                  Fight(ev.source);
-                                endif
+									if(CheckLineOfSight( me, ev.source ))
+										fight(ev.source);
+									endif
+								endif
+
           EVID_ALL_ATTACK_CMD:  Fight(ev.source);
           SYSEVENT_ENGAGED:
           SYSEVENT_DAMAGED:     if(ev.source)

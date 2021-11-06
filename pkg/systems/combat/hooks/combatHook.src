@@ -68,6 +68,7 @@ exported function Attack(attacker, defender)
 		var attribute := GetConfigString(a_info.cfginfo, a_info.prefix+"Attribute");
 		var gain_flag := GetCombatGainFlags(attacker, defender);
 		SkillCheck(attacker, attribute, -1, "", gain_flag);
+		SkillCheck(attacker, TACTICS, -1, "", gain_flag);
 
 		PlayHitSound(a_info, d_info);
 

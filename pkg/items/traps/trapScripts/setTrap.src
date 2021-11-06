@@ -1,0 +1,48 @@
+use uo;
+use os;
+use cliloc;
+
+include ":traps:traps";
+include ":attributes:attributes";
+
+program ApplyTrap(who, trap)
+
+	var trap_name := "";
+	var trap_cont;
+	var strenth := 1;
+	var check := 0;
+	if(!SkillCheck(who, TINKERING, 30, 15))
+		SendSysMessage(who, "Your ability in tinkering is too low to set a trap.", color := 33);
+		return;
+	endif
+	SendSysMessage(who, "What container do you want trapped?", color := 88);
+	while(!check)
+		trap_cont := Target(who);
+		if(!trap_cont)
+			SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+			return 0;
+		elseif(!trap_cont.IsA(POLCLASS_CONTAINER))
+			SendSysMessage(who, "You must select a container.", color := 40);
+		elseif(trap_cont.IsLeatherContainer())
+			SendSysMessage(who, "You cannot set a physical trap on leather containers.", color := 33);
+			SendSysMessage(who, "Choose a different container.", color := 88);
+			continue;
+		else
+			check := 1;
+			break;
+		endif
+	endwhile
+
+	case (trap.name)
+		"dart trap":		trap_name := "Dart";
+		"gas trap":			trap_name := "Gas";
+							strenth := 2;
+		"explosion trap":	trap_name := "Explosion";
+							strenth := 2;
+	endcase
+
+	AddTrap(trap_cont, trap_name, strenth, 1);
+	DestroyItem(trap);
+	SendSysMessage(who, "The trap is set!", color := 66);
+
+endprogram

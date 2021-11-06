@@ -28,7 +28,9 @@ function main_AI_loop()
     if(ev)
       case(ev.type)
         SYSEVENT_ENTEREDAREA:   if((!ev.source.npctemplate) or (ev.source.script == "employed") || (ev.source.script == "tamed"))
-                                  Fight(ev.source);
+									if(CheckLineOfSight( me, ev.source ))
+										Fight(ev.source);
+									endif
                                 endif
         SYSEVENT_ENGAGED:       Fight(ev.source);
         EVID_ALL_ATTACK_CMD:    Fight(ev.source);

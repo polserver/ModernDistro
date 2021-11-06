@@ -1,6 +1,5 @@
 use uo;
 use os;
-use npc;
 
 include ":mounts:mounts";
 include "include/eventID";

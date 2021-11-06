@@ -17,7 +17,9 @@ function main_AI_loop(next_wander := 0)
                                 fight(ev.source);
                               endif
         SYSEVENT_ENTEREDAREA: if((!(ev.source).npctemplate) ||(((ev.source).script == "employed") ||((ev.source).script == "tamed")))
-                                fight(ev.source);
+								if(CheckLineOfSight( me, ev.source ))
+									fight(ev.source);
+								endif
                               endif
         EVID_HERDING:           Herd(ev);
       endcase

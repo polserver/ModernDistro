@@ -29,10 +29,9 @@ program door_use_script( mobile, door )
 			return 0;
 		endif
 		door.DoorSound( 1 );
-		// This code is commented out because it is optional.
-		// The code, if enabled, will create a DismountTile to be
-		// created inside the house causing a mounted character
-		// to be dismounted upon entering a house.
+		// The code, if the setting is enabled, will create a DismountTile to be
+		// created at the door causing a mounted character
+		// to be dismounted upon passing through the door.
 		if(GetObjProperty(door, "SignSerial"));
 			if(CInt(settings.DismountCharacter))
 				dismount_tile := CreateItemAtLocation(door.x, door.y, door.z, "DismountTile", 1, door.realm);

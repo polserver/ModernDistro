@@ -1447,7 +1447,7 @@ function ChangeLocks(who, house)
       if(item.IsA(POLCLASS_DOOR))
         item.locked := 1;
         SetObjProperty(item,"LockID",LockID);
-	  elseif(item.IsMultiSign())
+	  elseif(item.IsMultiHouseSign())
         SetObjProperty(item,"LockID",LockID);
       endif
     endforeach

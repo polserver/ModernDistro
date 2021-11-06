@@ -12,7 +12,10 @@ function main_AI_loop()
 	if(ev)
 	  repeat
 	    case(ev.type)
-          SYSEVENT_ENTEREDAREA:
+          SYSEVENT_ENTEREDAREA:	if(CheckLineOfSight( me, ev.source ))
+									fight(ev.source);
+								endif
+
           EVID_ENGAGED:
           EVID_DAMAGED:         Fight(ev.source);
 	    endcase

@@ -1,7 +1,5 @@
 /*
-        Maintened by *Edwards
-
-        2009-02-21
+        Maintened by the POL Distro Team
 */
 use uo;
 use cfgfile;

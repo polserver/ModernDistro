@@ -12,9 +12,11 @@ function main_AI_loop(next_wander := 0)
         SYSEVENT_DAMAGED:     if(ev.source)
                                 Fight(ev.source);
                                 endif
-        SYSEVENT_ENTEREDAREA: if((!critter.npctemplate) ||(critter.script == "tamed") || (critter.script == "employed"))
-                                Fight(ev.source);
-                              endif
+        SYSEVENT_ENTEREDAREA:	if((!critter.npctemplate) ||(critter.script == "tamed") || (critter.script == "employed"))
+									if(CheckLineOfSight( me, ev.source ))
+										fight(ev.source);
+									endif
+								endif
         EVID_HERDING:         Herd(ev);
       endcase
     until(!(ev := os::wait_for_event(5)));
