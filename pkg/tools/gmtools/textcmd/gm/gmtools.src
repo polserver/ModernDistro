@@ -53,8 +53,8 @@ function maintaingump(who)
     5: invokegotomenu(who);
     6: setmakehidden(who);;
     7: setcrimflagging(who);
-    8: return gmtool;
-    9: return gmtool;
+    8: return gmtool[0];
+    9: return gmtool[0];
    10: setitemtodefaults(who);
    11: setinfernotrap(who);
    12: invokegomenu(who);
