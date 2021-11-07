@@ -3,6 +3,7 @@ use os;
 
 
 include ":envirohazards:settings";
+include ":timedScripts:timedScripts";
 include "include/sysEvent";
 include "include/eventID";
 include ":damage:damage";
@@ -55,17 +56,17 @@ function DoEffects(tile)
 	var proximity := 0;
 	var thing;
 	var random_number := RandomInt(CInt(settings.ChanceRange)) + 1;
-	if(random_number != 42)
+	if(random_number < CInt(CInt(settings.ChanceRange) / 4))
 		Sleepms(1000);
-		return;;
+		return;
 	endif
 	victims := ListMobilesNearLocation( tile.x, tile.y, tile.z, range, tile.realm );
-	foreach one in victims
+	foreach victim in victims
 		// We add 1 to proximity to adjust for damage dealt.
 		// eg. if mobile is standing on the tile Distance (one, tile) == 0.
 		// eg. if Distance (one, tile) == 1 would apply full damage to the mobile
 		// next to the tile, which is not what we want.
-		proximity := Distance (one, tile) + 1;
+		proximity := Distance (victim, tile) + 1;
 		// Determine the damage per square.
 		dmg_unit := CInt(damage / range);
 
@@ -79,11 +80,11 @@ function DoEffects(tile)
 		endif
 
 		case(effect)
-			"Fire":		DoFire(tile, one, dmg);
-			"Swamp":	DoGas(tile, one, dmg);
-			"Steam":	DoSteam(tile, one, dmg);
-			"Lighting":	DoLightning(tile, one, damage);
-			"Rocks":	DoRocks(tile,one, damage);
+			"Fire":		DoFire(tile, victim, dmg);
+			"Swamp":	DoGas(tile, victim, dmg);
+			"Steam":	DoSteam(tile, victim, dmg);
+			"Lighting":	DoLightning(tile, victim, damage);
+			"Rocks":	DoRocks(tile, victim, damage);
 		endcase
 	endforeach
 
@@ -104,7 +105,8 @@ function DoGas(tile, victim, dmg)
 
 	PlaySoundEffect(tile, SOUND_EFFECT_STEAM);
 	PlayStationaryEffectEx( tile.x, tile.y, tile.z, tile.realm, 0x3709, 0x0a, 0x1e, 56, 4 );
-	ApplyDamageEX(victim, dmg, DMG_FIRE, 0);
+	SleepMS(1500);
+	TS_StartTimer(victim, "defaultPoison", 15, dmg);
 
 endfunction
 
