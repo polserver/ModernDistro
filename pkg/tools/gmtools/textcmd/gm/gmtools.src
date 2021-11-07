@@ -53,8 +53,8 @@ function maintaingump(who)
     5: invokegotomenu(who);
     6: setmakehidden(who);;
     7: setcrimflagging(who);
-    8: return ;
-    9: return;
+    8: return gmtool;
+    9: return gmtool;
    10: setitemtodefaults(who);
    11: setinfernotrap(who);
    12: invokegomenu(who);
@@ -150,7 +150,7 @@ function createswitch(who);
 endfunction
 
 function lighting(who)
-  SendSysMessage(who,"tartet the item you want wish to set this command to.");
+  SendSysMessage(who,"Target the item you want wish to set this command to.");
   var targetitem :=Target(who);
   var oldscript := targetitem.script;
   SetObjProperty(targetitem,"oldscript", oldscript);
@@ -161,8 +161,8 @@ function lighting(who)
   var oldname := targetitem.name;
   SetObjProperty(targetitem,"oldname", oldname);
   targetitem.name    := "lighting crystal";
-  targetitem.graphic :=  7885;
-  targetitem.color   :=  0x455;
+  targetitem.graphic :=  0x1ECD;
+  targetitem.color   :=  0x0;
   targetitem.usescript := ":gmtools:lightingItem";
   targetitem.newbie := 1;
   maintaingump(who);
