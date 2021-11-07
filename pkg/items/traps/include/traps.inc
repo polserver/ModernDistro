@@ -40,7 +40,7 @@ function GetTrapInfo(trap_name)
 endfunction
 
 /*
- * AddTrap(object, trap_name, strength, count)
+ * AddTrap(object, trap_name, strength, count := 0)
  *
  * Purpose
  * Adds a trap to an object (its use-script must use this include file)

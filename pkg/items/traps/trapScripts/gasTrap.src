@@ -9,16 +9,20 @@ include "include/client";
 include ":damage:damage";
 include ":timedScripts:timedScripts";
 
+
 program trapScript(params)
 	var mobile := params[1];
 	var object := params[2];
 	var trap_info := params[3];
-	//var trap_index := params[4];
+	var trap_index := params[4];
 	params := 0; // Not needed anymore.
 
 	SendSysMessage(mobile, "You set off a poison gas trap!", color := 33);
-	PlayStationaryEffect(object.x, object.y, object.z, FX_POISON_GAS, 10,10, 0, object.realm);
+	PlaySoundEffect(object, 0x231);
+	PlayStationaryEffectEx( object.x, object.y, object.z, object.realm, 0x3709, 0x0a, 0x1e, 56, 4 );
+	SleepMS(1500);
 	TS_StartTimer(mobile, "defaultPoison", 15, trap_info.Strength);
 
 	return 1;
 endprogram
+
