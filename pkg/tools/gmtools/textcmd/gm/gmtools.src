@@ -25,17 +25,22 @@ var playercount := 0;
 var bank_region := CP_DEFAULT_AREA;
 
 program textcmd_gmtools(params)
-  var who;
-  if(params[1] == "ICP")
-    who := params[2];
-  else
-	who := params;
-  endif
-  if(who  == -1)
-	return 1;
-  endif
-  Detach();
-  maintaingump(who);
+
+	var who;
+	var retval := 9999;
+	if(params[1] == "ICP")
+		who := params[2];
+	else
+		who := params;
+	endif
+	if(who  == -1)
+		return 1;
+	endif
+	Detach();
+	while(retval > 0)
+		retval := maintaingump(who);
+	endwhile
+
 endprogram
 
 function maintaingump(who)
@@ -48,7 +53,7 @@ function maintaingump(who)
     5: invokegotomenu(who);
     6: setmakehidden(who);;
     7: setcrimflagging(who);
-    8: return;
+    8: return ;
     9: return;
    10: setitemtodefaults(who);
    11: setinfernotrap(who);
@@ -179,7 +184,7 @@ function permgate(caster)
   SetObjProperty(gate2, "GateDestX", gate1.x);
   SetObjProperty(gate2, "GateDestY", gate1.y);
   SetObjProperty(gate2, "GateDestZ", gate1.z);
-  maintaingump(caster);
+//  maintaingump(caster);
 endfunction
 
 function gate(caster)
@@ -206,7 +211,7 @@ function gate(caster)
   DestroyItem(gate1);
   DestroyItem(gate2);
   set_critical(0);
-  maintaingump(caster);
+//  maintaingump(caster);
 endfunction
 
 function mark(caster)
@@ -217,7 +222,7 @@ function mark(caster)
   SetObjProperty(cast_on, "z", caster.z);
   SendSysMessage(caster, "You marked: " +  caster.x + " " + caster.y + " " + caster.z);
   SetName(cast_on, "a Marked Recall Rune");
-  maintaingump(caster);
+//  maintaingump(caster);
 endfunction
 
 function recall(caster)
@@ -227,7 +232,7 @@ function recall(caster)
   var toy := CInt(GetObjProperty(cast_on, "y"));
   var toz := CInt(GetObjProperty(cast_on, "z"));
   MoveObjectToLocation(caster, tox, toy, toz, caster.realm);
-  maintaingump(caster);
+//  maintaingump(caster);
 endfunction
 
 function hideinferno(who, range)
