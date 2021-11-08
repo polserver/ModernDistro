@@ -12,9 +12,11 @@ include ":keys:key";
 
 program OnCreateContainer( item )
 
-        if( KP_IsLockable( item ))
-                Create_ChestKey( item );
-        endif
-        
+	if(GetObjProperty(item, "NoKey"))
+		return 1;
+	elseif( KP_IsLockable( item ))
+		Create_ChestKey( item );
+	endif
+
 	return 1;
 endprogram

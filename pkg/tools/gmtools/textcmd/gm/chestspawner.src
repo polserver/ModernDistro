@@ -1,6 +1,7 @@
 use uo;
 use os;
 use util;
+use cliloc;
 
 var layout := array(
 	"page 0                            ",
@@ -55,14 +56,16 @@ var data := array(
     "Chest Amount",
     "Spawn Radius",
     "Rest Period [in minutes]",
-    "1",
+    "10",
     "Show Chest Spawners [radius 5]",
     "Hide Chest Spawners [radius 5]"
 );
 
 program chestspawner(who)
   var res := SendDialogGump(who, layout, data);
-  print(res[5]);
+	if(res[0] == 1)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+	endif
   if(res[0] == 99)
     var duration := res[5];
     var amount;
@@ -89,18 +92,18 @@ program chestspawner(who)
       SendSysMessage(who,"Duration Error: Aborting");
       return;
     endif
-    var item := CreateItemAtLocation(targ.x, targ.y, targ.z, 0x888b, 1, who.realm);
+    var item := CreateItemAtLocation(targ.x, targ.y, targ.z, 0x1888B, 1, who.realm);
     SetObjProperty(item,"level", level);
     SetObjProperty(item,"range", range);
     SetObjProperty(item,"amount", amount);
     SetObjProperty(item,"duration", CInt(newduration));
     EraseObjProperty(item,"waiting");
   elseif(res[0] == 89)
-    foreach item in ListItemsNearLocationOfType( who.x, who.y, who.z, 5, 0x888b, who.realm);
+    foreach item in ListItemsNearLocationOfType( who.x, who.y, who.z, 5, 0x1888B, who.realm);
       item.graphic := 4483;
     endforeach
   else
-    foreach item in ListItemsNearLocationOfType( who.x, who.y, who.z, 5, 0x888b, who.realm);
+    foreach item in ListItemsNearLocationOfType( who.x, who.y, who.z, 5, 0x1888B, who.realm);
       item.graphic := 1;
     endforeach
   endif

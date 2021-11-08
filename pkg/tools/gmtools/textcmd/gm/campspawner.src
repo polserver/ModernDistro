@@ -97,7 +97,7 @@ program chestspawner(who)
     if(!targ)
       return;
     endif
-    var item := CreateItemAtLocation(targ.x, targ.y, targ.z, 0x888c, 1, who.realm);
+    var item := CreateItemAtLocation(targ.x, targ.y, targ.z, 0x1888C, 1, who.realm);
     if(!item)
       SendSysMessage(who, "Error. couldnt create spawner.");
       return;

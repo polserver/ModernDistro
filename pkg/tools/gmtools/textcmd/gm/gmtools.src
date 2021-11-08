@@ -27,7 +27,7 @@ var bank_region := CP_DEFAULT_AREA;
 program textcmd_gmtools(params)
 
 	var who;
-	var retval := 9999;
+	var retval := 1;
 	if(params[1] == "ICP")
 		who := params[2];
 	else
@@ -37,52 +37,51 @@ program textcmd_gmtools(params)
 		return 1;
 	endif
 	Detach();
-	while(retval > 0)
+	repeat
 		retval := maintaingump(who);
-	endwhile
+	until(retval == 0);
 
 endprogram
 
 function maintaingump(who)
-  var gmtool := SendDialogGump(who, layout, data);
-  case(gmtool[0])
-    1: setsummonnpc(who);
-    2: setsummongroup(who);
-    3: setgomenu(who);
-    4: itemaddset(who);
-    5: invokegotomenu(who);
-    6: setmakehidden(who);;
-    7: setcrimflagging(who);
-    8: return gmtool[0];
-    9: return gmtool[0];
-   10: setitemtodefaults(who);
-   11: setinfernotrap(who);
-   12: invokegomenu(who);
-   13: spawnpoint(who);
-   14: showspawn(who, 5);
-   15: showspawn(who, 10);
-   16: hidespawn(who, 5);
-   17: hidespawn(who, 10);
-   18: standard_trap(who, 3);
-   19: standard_trap(who, 2);
-   20: standard_trap(who, 1);
-   21: GMT_removetrap(who);
-   22: hideinferno(who, 5);
-   23: hideinferno(who, 10);
-   24: showinferno(who, 5);
-   25: showinferno(who, 10);
-   26: recall(who);
-   27: gate(who);
-   28: mark(who);
-   29: permgate(who);
-   30: lighting(who);
-   31: SendSysMessage(who,"Target the character whos account you wish to view. canceling will bring up a listing of all accounts.");
-       var person := Target(who);
-       var trg := FindAccount(person.acctname);
-       accountmanagement(who, trg);
-   32: createswitch(who);
-   33: chestspawner(who);
-  endcase
+	var gmtool := SendDialogGump(who, layout, data);
+	case(gmtool[0])
+		0: exit;
+		1: setsummonnpc(who);
+		2: setsummongroup(who);
+		3: setgomenu(who);
+		4: itemaddset(who);
+		5: invokegotomenu(who);
+		6: setmakehidden(who);;
+		7: setcrimflagging(who);
+		8: exit;
+		9: exit;
+		10: setitemtodefaults(who);
+		11: setinfernotrap(who);
+		12: invokegomenu(who);
+		13: spawnpoint(who);
+		14: showspawn(who, 5);
+		15: showspawn(who, 10);
+		16: hidespawn(who, 5);
+		17: hidespawn(who, 10);
+		18: standard_trap(who, 3);
+		19: standard_trap(who, 2);
+		20: standard_trap(who, 1);
+		21: GMT_removetrap(who);
+		22: hideinferno(who, 5);
+		23: hideinferno(who, 10);
+		24: showinferno(who, 5);
+		25: showinferno(who, 10);
+		26: recall(who);
+		27: gate(who);
+		28: mark(who);
+		29: permgate(who);
+		30: lighting(who);
+		31: Run_Script(":accounts:commands/gm/acctinfo", {who});
+		32: createswitch(who);
+		33: chestspawner(who);
+	endcase
+	return 1;
 endfunction
 
 ////////////////////////////////////////
@@ -133,7 +132,7 @@ function chestspawner(who)
       item.graphic := 1;
     endforeach
   endif
-  maintaingump(who);
+
 endfunction
 
 function createswitch(who);
@@ -146,7 +145,7 @@ function createswitch(who);
     SendSysMessage(who, "You create a switch out of the item, be sure to change its graphic through the interface.");
     chest.usescript := ":gmtools:lever";
   endif
-  maintaingump(who);
+
 endfunction
 
 function lighting(who)
@@ -165,7 +164,7 @@ function lighting(who)
   targetitem.color   :=  0x0;
   targetitem.usescript := ":gmtools:lightingItem";
   targetitem.newbie := 1;
-  maintaingump(who);
+
 endfunction
 
 function permgate(caster)
@@ -243,7 +242,7 @@ function hideinferno(who, range)
 	i := i + 1;
   endforeach
   SendSysMessage(who, "hid " + i + " infernos.");
-  maintaingump(who);
+
 endfunction
 
 function showinferno(who, range)
@@ -254,7 +253,7 @@ function showinferno(who, range)
 	i := i + 1;
   endforeach
   SendSysMessage(who, "Revealed " + i + " infernos.");
-  maintaingump(who);
+
 endfunction
 
 function GMT_removetrap(who)
@@ -270,7 +269,7 @@ function GMT_removetrap(who)
 			SendSysMessage(who, "All traps removed.", color := 66);
 		endif
 	endif
-	maintaingump(who);
+
 endfunction
 
 function standard_trap(who, type)
@@ -292,7 +291,7 @@ function standard_trap(who, type)
 			SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
 		endif
 	endif
-	maintaingump(who);
+
 endfunction
 
 function hidespawn(who, range)
@@ -302,7 +301,7 @@ function hidespawn(who, range)
 	i := i + 1;
   endforeach
   SendSysMessage(who, "hid " + i + " spawnpoints.");
-  maintaingump(who);
+
 endfunction
 
 function showspawn(who, range)
@@ -313,7 +312,7 @@ function showspawn(who, range)
 	i := i + 1;
   endforeach
   SendSysMessage(who, "Revealed " + i + " spawnpoints.");
-  maintaingump(who);
+
 endfunction
 
 function spawnpoint(who)
@@ -325,7 +324,7 @@ function spawnpoint(who)
     var doodad := CreateItemAtLocation(tar.x, tar.y, tar.z, 0x1A401, 1, who.realm);
     doodad.movable := 0;
   endif
-  maintaingump(who);
+
 endfunction
 
 function setinfernotrap(who)
@@ -333,7 +332,7 @@ function setinfernotrap(who)
   var where := TargetCoordinates(who);
   CreateItemAtLocation(where.x, where.y, where.z, 0x1888a, 1, who.realm);
   Detach();
-  maintaingump(who);
+
 endfunction
 
 function setsummonnpc(who)
@@ -343,7 +342,7 @@ function setsummonnpc(who)
   if(!npctarget.isA(POLCLASS_NPC))
     SendSysMessage(who,"that is not a NPC");
   else
-    SendSysMessage(who,"now tartet the item you want wish to call the npc from");
+    SendSysMessage(who,"Now target the item you want wish to call the npc from");
     var targetitem :=Target(who);
     var oldscript := targetitem.script;
     SetObjProperty(targetitem,"oldscript", oldscript);
@@ -351,7 +350,7 @@ function setsummonnpc(who)
     SetObjProperty(targetitem,"mobilearray", mobilearray);
     targetitem.usescript := ":gmtools:summonNPC";
   endif
-  maintaingump(who);
+
 endfunction
 
 function setsummongroup(who)
@@ -368,22 +367,22 @@ function setsummongroup(who)
       mobilearray.append(item.serial);
     endif
   endforeach
-  SendSysMessage(who,"now tartet the item you want wish to call the npc from");
+  SendSysMessage(who,"Now target the item you want wish to call the npc from");
   var targetitem :=Target(who);
   var oldscript := targetitem.script;
   SetObjProperty(targetitem,"oldscript", oldscript);
   SetObjProperty(targetitem,"mobilearray", mobilearray);
   targetitem.usescript := ":gmtools:summonNPC";
-  maintaingump(who);
+
 endfunction
 
 function setgomenu(who)
-  SendSysMessage(who,"tartet the item you want wish to set this command to.");
+  SendSysMessage(who,"Target the item you want wish to set this command to.");
   var targetitem :=Target(who);
   var oldscript := targetitem.script;
   SetObjProperty(targetitem,"oldscript", oldscript);
   targetitem.usescript := ":gmtools:itemGo";
-  maintaingump(who);
+
 endfunction
 
 function itemaddset(who)
@@ -414,20 +413,20 @@ function itemaddset(who)
   var oldscript := targetitem.script;
   SetObjProperty(targetitem,"oldscript", oldscript);
   targetitem.usescript := ":gmtools:itemAddSet";
-  maintaingump(who);
+
 endfunction
 
 function setmakehidden(who)
-  SendSysMessage(who,"tartet the item you want wish to set this command to.");
+  SendSysMessage(who,"Target the item you want wish to set this command to.");
   var targetitem :=Target(who);
   var oldscript := targetitem.script;
   SetObjProperty(targetitem,"oldscript", oldscript);
   targetitem.usescript := ":gmtools:makeHidden";
-  maintaingump(who);
+
 endfunction
 
 function setcrimflagging(who)
-  SendSysMessage(who,"tartet the item you want wish to set this command to.");
+  SendSysMessage(who,"Target the item you want wish to set this command to.");
   var targetitem :=Target(who);
   var oldscript := targetitem.script;
   SetObjProperty(targetitem,"oldscript", oldscript);
@@ -442,7 +441,7 @@ function setcrimflagging(who)
   targetitem.color   :=  88;
   targetitem.usescript := ":gmtools:greyItem";
   targetitem.newbie := 1;
-  maintaingump(who);
+
 endfunction
 
 function setitemtodefaults(who)
@@ -477,7 +476,7 @@ function setitemtodefaults(who)
     endfor
   endif
   targetitem.usescript := scrip;
-  maintaingump(who);
+
 endfunction
 
 ///////////////////////////////////
@@ -498,7 +497,7 @@ function invokegotomenu(who)
       break;
     endif
   endforeach
-  maintaingump(who);
+
 endfunction
 
 function FillIngotoArrays()
@@ -571,7 +570,7 @@ function invokegomenu(who)
     MoveObjectToLocation(traveler, dest.X, dest.Y, GetMapInfo(dest.X, dest.Y, who.realm).z, who.realm); // newmap problem - needs updated for re3alms
     UnloadConfigFile("::golocs");
   endif
-  maintaingump(who);
+
 endfunction
 
 function FillIngoArrays(tname)
@@ -721,7 +720,7 @@ function maintainaccountgump(who, trg)
      11: ban(who, trg.name);
     endcase
   endif
-  maintaingump(who);
+
 endfunction
 
 function SetNotes(acctname) // Added by Shinigami

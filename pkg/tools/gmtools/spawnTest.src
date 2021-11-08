@@ -2,6 +2,7 @@ use uo;
 use os;
 
 include "include/startEqp";
+include ":traps:traps";
 include ":keys:key";
 
 var chestarray := {};
@@ -36,7 +37,7 @@ endprogram
 function cleanarray()
   var newarray := {};
   foreach chest in chestarray
-    if((chest.locked == 0) || (chest.usescript != ":tinkering:tinkerTraps") || (!chest))
+    if((chest.locked == 0) || (!chest))
       DestroyItem(chest);
     elseif(chest)
       newarray.append(chest);
@@ -48,7 +49,10 @@ endfunction
 function CreateTreasureChests(item, amt)
   var lvl := GetObjProperty(item, "level");
   var rng := GetObjProperty(item, "range");
-  var newx, newy, newz, checker, type, gfx, lootgroup, chest, LockID, strngth, traptype;
+  var newx, newy, newz, checker, type, gfx, lootgroup, chest, LockID, strngth, junk;
+  var trap_types := {"Dart", "Gas", "Explosion"};
+  var trap_type := "";
+  var trap_strength := 1;
   if(rng > 10)
     rng := 10;
   endif
@@ -62,27 +66,26 @@ function CreateTreasureChests(item, amt)
       newy := cint(item.y + RandomInt(rng) - RandomInt(rng));
       newz:= cint(GetWorldHeight(newx, newy, item.realm));
       if(len(ListItemsNearLocation(newx, newy, newz, 0, item.realm)) == 0)
-        type := RandomInt(4)+1;
+        type := RandomInt(5)+1;
         case(type)
-          1: gfx := 3650;
-          2: gfx := 3651;
-          3: gfx := 3703;
-          4: gfx := 3648;
-          5: gfx := 3708;
+          1: gfx := 0xE42;
+          2: gfx := 0xE43;
+          3: gfx := 0xE41;
+          4: gfx := 0xE40;
+          5: gfx := 0xE7C;
         endcase
-        chest := CreateItemAtLocation(newx, newy, newz, gfx, 1);
+        var chest_descr := GetItemDescriptor( gfx );
+		chest_descr.CProps.insert("NoKey","1");
+        chest := CreateItemAtLocation(newx, newy, newz, chest_descr, 1);
         if(chest)
           checker := 1;
         else
           checker := 0;
         endif
       endif
-      sleepms(10);
+      sleepms(50);
     endwhile
     SetObjProperty(chest,"link", item.serial);
-    chest.locked :=  1;
-    chest.movable := 0;
-    chest.usescript := ":tinkering:tinkerTraps";
     LockID := AllocateLockID();
     SetObjProperty(chest, "LockID", LockID);
     SetObjProperty(chest, "level", lvl);
@@ -94,19 +97,23 @@ function CreateTreasureChests(item, amt)
       4: lootgroup := 72;    strngth :=  80;
       5: lootgroup := 73;    strngth := 100;
     endcase
-    traptype := RandomInt(10)+1;
-    if(traptype > 3)
-      traptype := 3;
-    else
-      traptype := 2;
-    endif
-    SetObjProperty(chest, "trap_type", (CStr(traptype)));
+	case(strngth)
+		 20:
+		 40: trap_strength := 1;
+		 60:
+		 80: trap_strength := 2;
+		100: trap_strength := 2;
+	endcase
+    junk := RandomInt(3)+1;
+	trap_type := trap_types[junk];
+	AddTrap(chest, trap_type, trap_strength, 1);
     SetObjProperty(chest, "LockPickDiff", (strngth - RandomInt(20)));
-    SetObjProperty(chest, "trap_strength", strngth);
-    makeloot(chest, lootgroup);
+    MakeLoot(chest, lootgroup);
     CreateFromGroup(chest, lootgroup);
     chestarray.append(chest);
     total := total + 1;
+    chest.movable := 0;
+    chest.locked :=  1;
     sleepms(10);
   endwhile
 endfunction
