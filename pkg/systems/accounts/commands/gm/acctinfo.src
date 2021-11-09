@@ -29,6 +29,8 @@ CONST CHANGE_ACCTNAME	:= 0xA0008;
 var msg_array := array{};
 
 program textcmd_AccountInfo(who, acctname)
+
+	// If 'acctinfo' command started by another script.
 	if(TypeOf(who) == "Array")
 		who := who[1];
 	endif
