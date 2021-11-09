@@ -4,6 +4,7 @@ use os;
 
 include "include/startEqp";
 include ":damage:damage";
+include ":traps:traps";
 include ":keys:key";
 
 var chestarray := {};
@@ -235,7 +236,10 @@ endfunction
 function CreateTreasureChest(item)
   var lvl := GetObjProperty(item,"level");
   var rng := (GetObjProperty(item,"range") * 2);
-  var newx, newy, newz, chest, gfx, type;
+  var newx, newy, newz, chest, gfx, type, junk;
+  var trap_types := {"Dart", "Gas", "Explosion"};
+  var trap_type := "";
+  var trap_strength := 1;
   if(rng > 10)
     rng := 10;
   endif
@@ -268,12 +272,14 @@ function CreateTreasureChest(item)
     endforeach
     type := RandomInt(5)+1;
     case(type)
-      1: gfx := 3650;
-      2: gfx := 3651;
-      3: gfx := 3703;
-      4: gfx := 3648;
-      5: gfx := 3708;
+      1: gfx := 0xE42;
+      2: gfx := 0xE43;
+      3: gfx := 0xE41;
+      4: gfx := 0xE40;
+      5: gfx := 0xE7C;
     endcase
+	var chest_descr := GetItemDescriptor( gfx );
+	chest_descr.CProps.insert("NoKey","1");
     chest := CreateItemAtLocation( newx, newy, newz, gfx, 1, item.realm );
     if(chest)
       checker := 1;
@@ -281,9 +287,6 @@ function CreateTreasureChest(item)
   endwhile
   SetObjProperty(chest,"link", item.serial);
   chest.graphic := 1;
-  chest.locked :=  1;
-  chest.movable := 0;
-  chest.usescript := ":tinkering:tinkerTraps";
   var LockID := AllocateLockID();
   SetObjProperty( chest, "LockID", LockID );
   var lootgroup;
@@ -295,17 +298,21 @@ function CreateTreasureChest(item)
     4: lootgroup := 72;    strngth :=  80;
     5: lootgroup := 73;    strngth := 100;
   endcase
-  var traptype := RandomInt(10)+1;
-  if(traptype > 3)
-    traptype := 3;
-  else
-    traptype := 2;
-  endif
-  SetObjProperty(chest, "trap_type", (CStr(traptype)));
+	case(strngth)
+		 20:
+		 40: trap_strength := 1;
+		 60:
+		 80: trap_strength := 2;
+		100: trap_strength := 2;
+	endcase
+    junk := RandomInt(3)+1;
+	trap_type := trap_types[junk];
+	AddTrap(chest, trap_type, trap_strength, 1);
   SetObjProperty(chest, "LockPickDiff", (strngth - RandomInt(20)));
-  SetObjProperty(chest, "trap_strength", strngth);
   makeloot( chest, lootgroup );
   CreateFromGroup(chest, lootgroup);
+  chest.locked :=  1;
+  chest.movable := 0;
   chestarray.append(chest.serial);
   SetObjProperty(item,"chestarray", chestarray);
 endfunction
@@ -324,5 +331,8 @@ function CreateGuardian(chest, template)
   var dx := RandomInt( 8 ) - 4;
   var dy := RandomInt( 8 ) - 4;
   var nasty := CreateNpcFromTemplate( template, chest.x+dx, chest.y+dy, chest.z, 0, chest.realm );
+	if(!nasty)
+		Print("Could not create " + nasty.npctemplate);
+	endif
   return nasty.serial;
 endfunction
