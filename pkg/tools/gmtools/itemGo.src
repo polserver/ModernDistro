@@ -1,86 +1,19 @@
 // Go v2.0
 // Author: Unknown
-// Updated by: Sentack
+// Updated by: Yukiko
 // Updates:
-//   1/13/2000 : v2.0
-//     - displays gump of all available locations (Stole from .goto command)
-//     - Can now teleport other mobles with "Send" button in gump window (Got some help from .info Command)
-//     - Updated and editied s.cfg to better work with gump
+//   11/21/2021 : v3.0
+//     - Now uses the standard .go command.
 
 use os;
 use uo;
-use cfgfile;
-use util;
-
-include "include/math"; // Used for Mod
-include ":attributes:attributes";
-
-const TEXTSTARTLOCY :=  70;  // The location of the top of the gump
-const DEFAULT_REALM := "britannia";
-var who;
-
-var locationscount := 0;  // The number of locations found for this user
-var pagecount := 1;       // The current developing page
-
-var layout := array(      // The layout of the gump with text notes to be added later
-
-"page 0",
-"nodispose",
-"gumppic 0 50 2620",
-"gumppic 20 50 2621",
-"gumppic 290 50 2622",
-"gumppic 0 68 2623",
-"gumppic 22 68 2624",
-"gumppic 288 68 2625",
-"gumppic 0 272 2623",
-"gumppic 22 272 2624",
-"gumppic 288 272 2625",
-"gumppic 0 476 2626",
-"gumppic 20 476 2627",
-"gumppic 290 476 2628",
-"gumppic 20 80 2621",
-
-"text 20 59 40 0",
-"text 200 59 40 1",
-"text 260 59 40 2"
-);
-
-var data := array(      // The data array that holds all the text to be displayed in the gump
-       "Location",         //0
-       "Goto",
-       "Send"
-);
-
-DEFAULT_REALM := "britannia";
 
 program go(who)
     if (who.cmdlevel < 2)
       return;
     endif
-    UnloadConfigFile("::golocs");
-    var tname := lower(who.name);
-    FillInArrays( tname );
-    var result := SendDialogGump( who, layout, data );
-    if (result[0] == 0)
-      return;
-    endif
-    var locs    := ReadConfigFile("::golocs");
-    var MaxLocs := GetConfigMaxIntKey(locs)+1;
-    var dest    := locs[result[0] % MaxLocs];
-    var traveler;
-    if ( result[0] > MaxLocs )
-       SendSysMessage( who, "Select a MOBILE." );
-       traveler :=  Target( who, TGTOPT_NOCHECK_LOS );
-       if(!traveler || !AP_GetStat(traveler, STRENGTH))
-         SendSysMessage( who, "Invalid selection." );
-         return;
-       endif
-//       dest := dest+2;
-    else
-      traveler := who;
-    endif
-    MoveObjectToLocation(traveler, dest.X, dest.Y, GetMapInfo(dest.X, dest.Y, who.realm).z, realm := who.realm);
-    UnloadConfigFile("::golocs");
+	Start_Script(":commands:seer/go", {who});
+
 endprogram
 
 
