@@ -9,15 +9,11 @@ include ":attributes:attributes";
 include "include/math";
 include ":traps:traps";
 include ":gmtools:layout";
-// include ":gmtools:goLayout";
 include ":gmtools:info";
-// include ":gmtools:gotoLayout";
-// include ":gmtools:accountLayout";
 include ":gmtools:spawnerLayout";
 include ":gumps:requestGump";
 include ":containers:storageAreas";
 include "include/gumpUtil"; // Added by Shinigami
-
 
 const TEXTSTARTLOCY :=  70;
 var locationscount := 0;
