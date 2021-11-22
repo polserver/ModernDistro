@@ -87,22 +87,14 @@ exported function SetEngraving( item, engraving )
 
 endfunction
 
-// You can just make it a function as well but basically looking through ServUO,
-// I found how they close the bank container on move and this is how they do it.
-
-// The 0x1D packet removes the packet from the player's client, then setting the item's color
-// to it's color sends the DrawObject packet from the server to the player and any player in range.
-// The better way to do this is to build the DrawObject packet and only send it to the client affected
-// and I might do that but just for testing purposes, this works.
-// If I do the more responsible thing and write the DrawObject packet I will send you the update to this.
-// Method created by ThisIsMe
-
 exported function CloseContainer( item, mobile )
 
-    var packet := CreatePacket( 0x1D, 5 );
-    packet.SetInt32( 1, item.serial );
-    packet.SendPacket( mobile );
-    return item.color := item.color;
+    var packet := CreatePacket( 0xBF, 12 );
+    packet.SetInt16( 1, 12 );
+    packet.SetInt16( 3, 0x16 );
+    packet.SetInt32( 5, 0x0C );
+    packet.SetInt32( 9, item.serial );
 
+    return packet.SendPacket( mobile );
 endfunction
 
