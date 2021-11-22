@@ -85,9 +85,7 @@ program chestspawner(who)
       return;
     endif
     duration[1, find(duration, ": ", 1)+1]:="";
-    print("dur " +duration);
     var newduration := (CInt(duration) * 60);
-    print("new " +newduration);
     if(newduration < 60)
       SendSysMessage(who,"Duration Error: Aborting");
       return;
