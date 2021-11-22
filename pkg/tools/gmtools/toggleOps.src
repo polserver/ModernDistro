@@ -1,11 +1,18 @@
 use uo;
 
 program toggleops(who, unused item)
-	if(who.cmdlevel > 0)
+
+	var cmd_levels := {"player", "counselor", "seer", "gm", "admin", "developer", "test"};
+	var level := who.cmdlevel;
+	if(level > 0)
+		SetObjProperty(who, "OrigCmdLvl", level - 1);
 		who.cmdlevel := 0;
-		SendSysMessage(who, "You're a player.");
+		SendSysMessage(who, "You are now a player.", color := 66);
+	elseif(!GetObjProperty(who, "OrigCmdLvl") == "player")
+		who.cmdlevel := (GetObjProperty(who, "OrigCmdLvl") in cmd_levels) - 1;
+		SendSysMessage(who, "You have been restored to " + cmd_levels[who.cmdlevel - 1] + " level.", color := 66);
 	else
-		who.cmdlevel := 5;
-		SendSysMessage(who, "You're an admin.");
+		SendSysMessage(who, "There was a problem restoring your command level.", color := 33);
 	endif
+	EraseObjProperty(who, "OrigCmdLvl");
 endprogram
