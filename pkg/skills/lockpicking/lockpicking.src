@@ -56,7 +56,7 @@ function PickTreasureChest(me, lockpick, chest)
   PlaySoundEffect(chest,SFX_242);
   sleep(2);
   var diff := (lvl * 20)+10;
-  if ( SkillCheck(me, LOCKPICKING,diff,0) )
+  if ( SkillCheck( me, LOCKPICKING, diff, 0 ) > 0 )
 	PlaySoundEffect(chest,SFX_200);
 	PrintTextAbovePrivate(chest,"*Unlocked!*",me);
   else
@@ -66,7 +66,7 @@ function PickTreasureChest(me, lockpick, chest)
 	else
 	  diff := diff -10;
 	endif
-	if (!SkillCheck(me, LOCKPICKING,diff,0) )
+	if (!SkillCheck( me, LOCKPICKING, diff, 0 ) > 0 )
 	  PlaySoundEffect(chest,0xef);
 	  SendSysMessage(me,"Your pick breaks!");
 	  SubtractAmount(lockpick,1);
@@ -91,7 +91,7 @@ function PickSpawnChest(me, lockpick, chest)
   PlaySoundEffect(chest,SFX_242);
   sleep(2);
   var diff := (lvl * 10)+10;
-  if ( SkillCheck(me, LOCKPICKING,diff,0) )
+  if ( SkillCheck( me, LOCKPICKING, diff, 0 ) > 0 )
 	PlaySoundEffect(chest,SFX_200);
 	PrintTextAbovePrivate(chest,"*Unlocked!*",me);
   else
@@ -101,7 +101,7 @@ function PickSpawnChest(me, lockpick, chest)
 	else
 	  diff := diff -10;
 	endif
-	if (!SkillCheck(me, LOCKPICKING,diff,0) )
+	if (!SkillCheck( me, LOCKPICKING, diff, 0 ) > 0 )
 	  PlaySoundEffect(chest,0xef);
 	  SendSysMessage(me,"Your pick breaks!");
 	  SubtractAmount(lockpick,1);
@@ -140,7 +140,7 @@ function PickLockedItem(me, lockpick, chest)
   PlaySoundEffect(chest,SFX_242);
   sleepms(1500);
   var diff := (lvl+10);
-  if ( SkillCheck(me, LOCKPICKING,diff,(diff*2)) )
+  if ( SkillCheck( me, LOCKPICKING, diff, (diff*2) ) > 0 )
 	PlaySoundEffect(chest,SFX_200);
     chest.locked := 0;
   else

@@ -11,7 +11,7 @@ program ApplyTrap(who, trap)
 	var trap_cont;
 	var strenth := 1;
 	var check := 0;
-	if(!SkillCheck(who, TINKERING, 30, 15))
+	if(SkillCheck(who, TINKERING, 30, 15) <= 0)
 		SendSysMessage(who, "Your ability in tinkering is too low to set a trap.", color := 33);
 		return;
 	endif

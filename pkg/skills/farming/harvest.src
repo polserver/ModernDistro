@@ -82,7 +82,7 @@ program harvest (who, plant)
 				if(pts > 35)
 					pts := 35;
 				endif
-				if(SkillCheck(who,LUMBERJACKING, -1, pts/3))
+				if(SkillCheck( who,LUMBERJACKING, -1, pts/3 ) > 0)
                     if (RandomInt(100) == 0)
                             SendSysMessage(who, "You have found some fertile dirt!", color :=66);
                             CreateItemInContainer(craftingbag, UOBJ_FERTILE_DIRT, 1);
@@ -127,7 +127,7 @@ function DestroyPlant(me, plant);
         0x0d9e:         //peach tree top
         0x0da4:         //pear tree
         0x0da6:         //pear tree top
-        
+
 		return;
 	default:
 		if (YesNo(me,"Destroy it?"))

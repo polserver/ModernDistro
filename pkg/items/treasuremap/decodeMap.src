@@ -24,7 +24,7 @@ program decode_map( who, map )
   if( maplevel > maxlevel )
     SendSysMessage( who, "You cannot comprehend the map." );
   else
-    if(SkillCheck( who, CARTOGRAPHY, (maplevel*20), (maplevel*100)))
+    if(SkillCheck( who, CARTOGRAPHY, (maplevel*20), (maplevel*100)) > 0)
       CreateTreasureMap( who, map, maplevel );
     else
       SendSysMessage( who, "You understand the map, but fail to decode it." );

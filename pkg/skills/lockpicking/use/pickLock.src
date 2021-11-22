@@ -51,7 +51,7 @@ function PickMLockedItem(me, lockpick, chest, diff)
   endif
   PlaySoundEffect(me, SFX_242);
   sleep(1);
-  if(SkillCheck(me, LOCKPICKING, diff,(diff * 2)))
+  if(SkillCheck(me, LOCKPICKING, diff, (diff * 2)) > 0)
     PrintTextAbovePrivate(chest,"*Unlocked!*",me);
     EraseObjProperty(chest, "MLockPickDiff");
     chest.locked := 0;
@@ -62,7 +62,7 @@ function PickMLockedItem(me, lockpick, chest, diff)
     else
       diff := diff -10;
     endif
-    if(!SkillCheck(me, LOCKPICKING,diff,0))
+    if(!SkillCheck(me, LOCKPICKING, diff, 0) > 0)
       PlaySoundEffect(chest,0xef);
       SendSysMessage(me,"Your pick breaks!");
       SubtractAmount(lockpick,1);
@@ -78,7 +78,7 @@ function PickLockedItem(me, lockpick, chest, diff)
   endif
   PlaySoundEffect(me, SFX_242);
   sleep(1);
-  if(SkillCheck(me, LOCKPICKING, diff,(diff * 2)))
+  if(SkillCheck(me, LOCKPICKING, diff, (diff * 2)) > 0)
     PrintTextAbovePrivate(chest,"*Unlocked!*",me);
   else
     PrintTextAbovePrivate(chest,"You fail to pick the lock.",me);
@@ -87,7 +87,7 @@ function PickLockedItem(me, lockpick, chest, diff)
     else
       diff := diff -10;
     endif
-    if(!SkillCheck(me, LOCKPICKING,diff,0))
+    if(!SkillCheck(me, LOCKPICKING, diff, 0) > 0)
       PlaySoundEffect(chest,0xef);
       SendSysMessage(me,"Your pick breaks!");
       SubtractAmount(lockpick,1);
@@ -110,7 +110,7 @@ function PickTreasureChest(me, lockpick, chest)
   PlaySoundEffect(me, SFX_242);
   sleep(1);
   var diff :=(lvl * 20)+10;
-  if(SkillCheck(me, LOCKPICKING,diff,(diff * 2)))
+  if(SkillCheck(me, LOCKPICKING, diff, (diff * 2)) > 0)
     PlaySoundEffect(chest,SFX_200);
     PrintTextAbovePrivate(chest,"*Unlocked!*",me);
     chest.locked := 0;
@@ -121,7 +121,7 @@ function PickTreasureChest(me, lockpick, chest)
     else
       diff := diff -10;
     endif
-    if(!SkillCheck(me, LOCKPICKING,diff,0))
+    if(!SkillCheck(me, LOCKPICKING, diff, 0) > 0)
       PlaySoundEffect(chest,0xef);
       SendSysMessage(me,"Your pick breaks!");
       SubtractAmount(lockpick,1);

@@ -31,7 +31,7 @@ program do_armslore( who )
   var cfg := ReadConfigFile(":*:itemdesc");
   var entry := cfg[the_item.objtype];
   var pts := CInt(GetAttribute(who, ARMS_LORE)) + 15;
-  if(SkillCheck(who,ARMS_LORE, -1, pts/3))
+  if(SkillCheck( who,ARMS_LORE, -1, pts/3 ) > 0)
     var item_max_hp := the_item.maxhp;
     var max_hp := item_max_hp;
     var hp := the_item.hp;

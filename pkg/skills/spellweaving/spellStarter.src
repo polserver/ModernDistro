@@ -8,7 +8,7 @@ include ":attributes:attributes";
 /******************************************************
 *
 *	spellStarter( parms )
-* 
+*
 *	Desc:
 *		This script will carry out all checks and consume resources/mana prior to starting the spell script.
 *		On failure - Will return 0, however all error messages are handled within this script.
@@ -17,7 +17,7 @@ include ":attributes:attributes";
 *		Full setup for the spell should be done within this script, that includes skill check to succeed, delay of cast, word of power, consuming mana.
 *		The spell script itself should only handle processing of the spells actual actions.
 *
-*	Args: 
+*	Args:
 *		Parms - This should be an array from either the spellbook script, scroll script or NPC script.
 *		The parms argument should be an array of the following:
 *			[1]	string		-	#book, #scroll, #npc - this would be set depending on how the spell has been called.
@@ -31,7 +31,7 @@ program spellStarter( parms )
 	var mobile, cast_from, info;
 
 	case(parms[1])
-		"#book":		
+		"#book":
 		"#scroll":	mobile		:=	parms[2];
 								cast_from :=	parms[3];
 								info			:=	parms[4];
@@ -42,7 +42,7 @@ program spellStarter( parms )
 	EraseObjProperty(mobile, "IsMeditating");
 	EraseObjProperty(mobile, "HealTimer");
 	EraseObjProperty(mobile, "#Medding");
-	
+
 	/*****************************************
 	*
 	*	CHECK BLOCK:
@@ -54,8 +54,8 @@ program spellStarter( parms )
 	*		6.	Check if it can consume mana.
 	*
 	******************************************/
-	
-	if ( GetObjProperty(mobile, "#Casting") ) 
+
+	if ( GetObjProperty(mobile, "#Casting") )
 		SendSysMessageCL(mobile, 502642, uc_text:= 0, font:= _DEFAULT_CLFONT, color := 33); // You are already casting a spell.
 		return 0;
 	elseif ( mobile.squelched && !mobile.npctemplate )
@@ -75,7 +75,7 @@ program spellStarter( parms )
 		if( !ConsumeSubstance(mobile.backpack, cast_from.objtype, amount := 1 ) )
 			SendSysMessageCL(mobile, 501625, uc_text:= 0, font:= _DEFAULT_CLFONT, color := 33); // You seem to have lost track of your scroll.
 			return 0;
-		endif			
+		endif
 	endif
 
 	// Added to support necro spell mind rot.
@@ -87,23 +87,23 @@ program spellStarter( parms )
 			mana_cost := mana_cost * 1.25;
 		endif
 	endif
-	
+
 	/********************************************
 	*
 	* Insert LMC calcs here once added to distro/core
 	*
 	********************************************/
-	
+
 	if ( !AP_ConsumeVital(mobile, VITALID_MANA, mana_cost) )
 		SendSysMessageCL(mobile, 501903, uc_text:= 0, font:= _DEFAULT_CLFONT, color := 33); // You don't have enough mana to cast that spell!
 		//FailSpell(mobile);
 		return 0;
 	endif
-	
+
 	/****************
 	*END CHECK BLOCK
 	****************/
-	
+
 	SetObjProperty(mobile, "#Casting", GetPid());
 	mobile.frozen := 1;
 	mobile.hidden := 0;
@@ -113,7 +113,7 @@ program spellStarter( parms )
 	var protection := GetObjProperty(mobile, "Protection");
 	var orig_hp := AP_GetVital(mobile, "Hits");
 	//DELAY
-	
+
 	while ( delay > 0 )
 		if ( !protection )
 			// There is a small chance, perhaps, that the mobile is damaged and then regens
@@ -128,7 +128,7 @@ program spellStarter( parms )
 				return 0;
 			endif
 		endif
-		
+
 		mod := delay % 50;
 		if ( mod )
 				SleepMS(mod);
@@ -138,9 +138,9 @@ program spellStarter( parms )
 				delay := delay - 50;
 		endif
 	endwhile
-	
+
 	//SKILLCHECK
-	
+
 	var skill_check := SkillCheck(mobile, SPELLWEAVING, info.difficulty, 30);
 
 	// Added to support necro wraith form can recall regardless of their magery skill level.
@@ -148,9 +148,9 @@ program spellStarter( parms )
 		skill_check := 1;
 	endif
 	mobile.frozen := 0;
-	
+
 	start_script(":spellweaving:"+info.Script, parms);
-	
+
 	return 0;
-	
+
 endprogram

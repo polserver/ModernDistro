@@ -29,7 +29,7 @@ program skill_hide(who)
     PrintTextAbovePrivate(who, "You cannot hide as there are hostiles in view!", who);
     return 0;
   endif
-  if(SkillCheck(who,HIDING, -1, pts/3))
+  if(SkillCheck( who,HIDING, -1, pts/3) > 0)
     who.hidden := 1;
     PrintTextAbovePrivate(who, "You have hidden yourself well", who);
   else

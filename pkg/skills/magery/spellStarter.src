@@ -197,8 +197,8 @@ program SpellStarter(params)
 	if ( !difficulty )
 		difficulty := -1;
 	endif
-//	var skill_check := SkillCheck(mobile, attribute, difficulty, 50);
-	var skill_check := SkillCheck(mobile, attribute, difficulty, 30);
+//	var skill_check := SkillCheck( mobile, attribute, difficulty, 50 );
+	var skill_check := SkillCheck( mobile, attribute, difficulty, 30 );
 
 	// Added to support necro wraith form can recall regardless of their magery skill level.
 	if(GetObjProperty(mobile, "wraith") && spell_id == 32)
@@ -207,7 +207,7 @@ program SpellStarter(params)
 	mobile.frozen := 0;
 
 	// skill_check > 0 on success
-	if ( skill_check )
+	if ( skill_check > 0)
 		var info := struct;
 		info.+script := spell_elem.Script;
 		info.+attribute := attribute;

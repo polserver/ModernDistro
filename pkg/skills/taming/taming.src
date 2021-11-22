@@ -116,7 +116,7 @@ program tame( who )
     SendSysMessage(who, "That creature looks pretty tame already.");
     return;
   endif
-  if(SkillCheck(who, TAMING, difficulty + 10, points))
+  if(SkillCheck( who, TAMING, difficulty + 10, points ) > 0)
     SendSysMessage(who, "You successfully tame the " + thename);
     Run_Script_To_Completion(":spawnregion:death", thecreature);
     thecreature.script := "tamed";

@@ -30,7 +30,7 @@ program canInsert( mobile, container, move_type, unused inserttype, adding_item,
 	elseif(IsInSpellInBook(container, spell_id))
 		SendSysMessage(mobile, "That spell is already in the book.", color := 33);
 		return 0;
-	elseif(!SkillCheck(mobile, INSCRIPTION, 90, 50))
+	elseif(!SkillCheck(mobile, INSCRIPTION, 90, 50) > 0)
 	// elseif(AP_GetSkill(mobile, INSCRIPTION) < 80)
 		SendSysMessage(mobile, "You failed to inscribe that scroll.", color := 33);
 		return 0;

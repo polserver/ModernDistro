@@ -57,7 +57,7 @@ program Anatomy(who)
   if(CInt(pts < 30))
 	  pts := 30;
   endif
-  if(SkillCheck(who,ANATOMY, -1, pts/3))
+  if(SkillCheck(who,ANATOMY, -1, pts/3) > 0)
     PrintTextAbovePrivateUC(subject, CAscZ(strMsg + " looks " + streng + " and " + dext + "."), "ENG", who);
     // player's anatomy skill equal/greater than 65 can get endurance info
     if(skill >= 65)

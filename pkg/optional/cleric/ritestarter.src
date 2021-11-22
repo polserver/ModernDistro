@@ -70,7 +70,7 @@ program start_rite(params, scroll)
 		SubtractAmount(scroll, 1);
 	endif
 
-        if (SkillCheck(who, CLERIC_SKILL, difficulty, 20) > 0)
+        if (SkillCheck( who, CLERIC_SKILL, difficulty, 20 ) > 0)
 		var info := struct;
 		info .+ ritenum;
 		info .+ npctarget;

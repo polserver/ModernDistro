@@ -36,7 +36,7 @@ program skill_stealth( who )
   if(skill > 35)
     skill := 35;
   endif
-  if(SkillCheck(who, STEALTH, -1, skill))
+  if(SkillCheck( who, STEALTH, -1, skill ) > 0)
     skill := (skill / 10);
     who.stealthsteps := skill + RandomInt(skill);
     PrintTextAbovePrivateCL(who, who, 502730, color := 66); // You begin to move quietly.

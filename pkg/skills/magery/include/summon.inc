@@ -11,7 +11,7 @@ function summon_creature( caster, circle := 8, npctemplate, cast_loc, controldif
 	var duration := 20 + (magery * 2);
 	var parms := struct;
 
-	if (SkillCheck(caster, MEDITATION, controldiff, (circle * 50) ) )
+	if (SkillCheck(caster, MEDITATION, controldiff, (circle * 50) ) > 0)
 		parms .+ script := "tamed";
 		thecritter := CreateNpcFromTemplate(npctemplate, cast_loc.x, cast_loc.y,cast_loc.z, parms, caster.realm);
 

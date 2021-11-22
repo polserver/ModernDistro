@@ -83,8 +83,8 @@ program createfocus(params)
 	var created;
 	CheckMana(who, CInt(10/piety));
 	ConsumeSubstance(who.backpack, targ.objtype, CInt(foci_info[2]));
-    if (SkillCheck(who, CLERIC_SKILL, 40, 80))
-		SkillCheck(who, CLERIC_SKILL, 40, 80);
+    if (SkillCheck( who, CLERIC_SKILL, 40, 80 ) > 0)
+		SkillCheck( who, CLERIC_SKILL, 40, 80 );
 		created := CreateItemInBackpack( who, foci_info[4], 1 );
 		SendSysMessage(who, "You created a " + foci_info[3] + " focus.", color := 66);
 		PlaySoundEffect(who, 508);

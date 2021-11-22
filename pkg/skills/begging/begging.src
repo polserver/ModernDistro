@@ -76,7 +76,7 @@ program skill_begging( who )
     SendSysMessage(who, "Perhaps talking to them would be a better idea.");
     return;
   endif
-  
+
   var cfgtemplate := ReadConfigFile("::npcdesc");
   var ismob := tgt.isa(POLCLASS_MOBILE);
   if (ismob)
@@ -115,7 +115,7 @@ program skill_begging( who )
 
   var pts := CInt(GetAttribute(who, BEGGING)) + 15;
 
-  if(!SkillCheck(who,BEGGING, -1, pts/3))
+  if(!SkillCheck(who,BEGGING, -1, pts/3) > 0)
     PrintRandomMessage( tgt, zFails );
     return;
   endif

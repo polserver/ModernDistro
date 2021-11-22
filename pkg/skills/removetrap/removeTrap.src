@@ -1,10 +1,5 @@
 /*
-        Maintened by *Edwards
-
-        2008-10-19
-
-        Last Modifications 2009-08-24
-             * Added useItem_check()
+        Maintened by the POL Distro Team
 */
 use uo;
 use cliloc;

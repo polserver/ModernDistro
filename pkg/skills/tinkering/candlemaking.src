@@ -82,7 +82,7 @@ function MakeKettleOfWax(character, wax, empty_kettle)
 	PlaySoundEffect(character, 0x0022);
 	sleep(1);
 
-	if (!SkillCheck(character, TINKERING, 10) )
+	if (SkillCheck( character, TINKERING, 10) <= 0)
 		SendSysMessage(character, "You ruin some of the wax!");
 		var wax_destroyed := RandomInt(WAX_PER_CANDLE) + 1;
 		SubtractAmount(wax, wax_destroyed);
@@ -117,7 +117,7 @@ function MakeCandles(character, dipper, kettle_of_wax)
 		PlaySoundEffect(character, 0x023f);
 		sleep(3);
 
-		if (!SkillCheck(character, TINKERING, -1, 10) )
+		if (SkillCheck( character, TINKERING, -1, 10 ) <= 0)
 			 SendSysMessage(character, "You fail to make any candles.");
 			else
 			 SendSysMessage(character, "You place the candles in your backpack.");
@@ -154,7 +154,7 @@ function MakeSkullOutOfHead(character, head)
 	PlaySoundEffect(character, 0x0021);
 	sleep(5);
 // This should reduce karma and/or virtue
-	if (!SkillCheck(character, TINKERING, 30) )
+	if (SkillCheck( character, TINKERING, 30 ) <= 0)
 		SendSysMessage(character, "You destroy the head.");
 		SubtractAmount(head, 1);
 		return;
@@ -186,7 +186,7 @@ function MakeSkullCandle(character, skull, targetted)
 	PlaySoundEffect(character, 0x022c);
 	Sleep(1);
 
-	if (!SkillCheck(character, TINKERING, 30) )
+	if (SkillCheck( character, TINKERING, 30 ) <= 0)
 		SendSysMessage(character, "You fail to place the candle in the skull.");
 		SubtractAmount(skull, 1);
 		SubtractAmount(targetted, 1);

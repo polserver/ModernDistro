@@ -39,7 +39,7 @@ program do_tasteid( character )
 
     content_descr := "";
 
-    if (SkillCheck(character, TASTE_IDENTIFICATION, -1, thepoints ))
+    if (SkillCheck( character, TASTE_IDENTIFICATION, -1, thepoints ) > 0)
 
 		var itemdesc := alchemcfg[the_item.objtype].sname;
 		if (itemdesc)

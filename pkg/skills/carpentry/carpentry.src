@@ -81,7 +81,7 @@ function CreateBoards(who, tool, objtype)
 
 	sleep(2);
 	var theitem := 0;
-	if( SkillCheck(who, craft_skill, 0, (ptmod/2)) > 0 )
+	if( SkillCheck( who, craft_skill, 0, (ptmod/2) ) > 0 )
 		var amt := item1.amount;
 		if( SubtractAmount(item1, 1) )
 			var ret := GetItemDescriptor(0x1bd7);
@@ -177,7 +177,7 @@ function CarpentryItems(who, tool, objtype, amt)
 				if( TypeOf(theitem) == "ItemRef" )
 					theitem.movable := 1;
 					if( craft_config[theitem.objtype].lockable )
-						if( SkillCheck(who, TINKERING, 40, 40) > 0 )
+						if( SkillCheck( who, TINKERING, 40, 40 ) > 0 )
 							SetObjProperty(theitem, "Lockable","1");
 							var LockID := CreateLockID();
 							var thekey := CreateItemInContainer(theitem, 0x100E, 1 );

@@ -69,7 +69,7 @@ function breakglyphs(who, piety)
 	foreach item in ListItemsNearLocation(who.x, who.y, who.z, piety, who.realm)
 		if (item.objtype in glyphs)
 			var power := CInt(GetObjProperty(item, "power"));
-                        if (SkillCheck(who, CLERIC_SKILL, (power*10), (power*2)) > 0)
+			if (SkillCheck(who, CLERIC_SKILL, (power*10), (power*2)) > 0)
 				PrintTextAbove(item, "*" + item.desc + " crumbles*");
 				PlaySoundEffect(item, 531);
 				sleepms(600);

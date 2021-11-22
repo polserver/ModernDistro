@@ -25,7 +25,7 @@ program fumble(parms)
 		return 0;
 	endif
 
-	if ( SkillCheck(cast_on, RESISTING_SPELLS, 30, 40) )
+	if ( SkillCheck( cast_on, RESISTING_SPELLS, 30, 40 ) > 0)
 		SendSysMessage(cast_on, "You feel yourself resisting magical energy!");
 		PlaySoundEffect(cast_on, SFX_SPELL_WEAKEN);
 		PlayObjectCenteredEffect(cast_on, FX_CURSE_EFFECT, 5,5);

@@ -52,7 +52,11 @@ program meditation(who)
 
 
 	if ( GetAttribute(who, MEDITATION) < 5.0 )
-		loss := SkillCheck(who, MEDITATION, 10, 50);
+		loss := SkillCheck( who, MEDITATION, 10, 50 );
+		// This 'if' added to account for a negative 1 return by SkillCheck.
+		if(loss < 0)
+			loss := 0;
+		endif
 		SendSysMessage(who, "You cannot focus your concentration.");
 		lastmed := CInt(ReadGameClock()) + 15;
 		SetObjProperty(who, "LastMeditation", lastmed);
@@ -70,8 +74,8 @@ program meditation(who)
 		pts := 35;
 	endif
 
-//	if(SkillCheck(who, ATTRIBUTEID_MEDITATION, diff, (CInt(GetAttribute(who,ATTRIBUTEID_MEDITATION)) * 5) ))
-	if(SkillCheck(who, MEDITATION, diff, pts))
+//	if(SkillCheck( who, ATTRIBUTEID_MEDITATION, diff, (CInt(GetAttribute(who,ATTRIBUTEID_MEDITATION)) * 5) ) > 0)
+	if(SkillCheck( who, MEDITATION, diff, pts ) > 0)
 		var oldx := who.x;
 		var oldy := who.y;
 		var oldstamina := AP_GetVital(who, VITALID_STAMINA);

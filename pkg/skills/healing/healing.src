@@ -256,7 +256,7 @@ function heal(who, patient, counter, healing)
 		// The last cycle of the loop.  All actual healing is done here.
 		elseif(counter >= cycles)
 		    var diff := 100 - Cint((AP_GetVital(patient, VITALID_LIFE) * 100.0) / AP_GetVitalMaximumValue(patient, VITALID_LIFE));
-		    if((SkillCheck(who, HEALING, diff, 100)) and (healamt != -1))
+		    if((SkillCheck( who, HEALING, diff, 100 ) > 0) and (healamt != -1))
 			    var chkamt := Cint(AP_GetVitalMaximumValue(patient, VITALID_LIFE) - AP_GetVital(patient, VITALID_LIFE));
 			    if(healamt > chkamt)
 				    healamt := chkamt;
@@ -353,7 +353,7 @@ function cure(who, patient, counter, healing)
 			endif
 		endif
 		if(counter >= cycles)
-			if(SkillCheck(who, HEALING, 48, 100))
+			if(SkillCheck( who, HEALING, 48, 100 ) > 0)
 				if(!healamt)
 				    healamt := 1;
 				endif
@@ -407,7 +407,7 @@ function resurrect_pc(who, patient, counter)
 			break;
 		endif
 		if(counter >= 10)
-			if(SkillCheck(who, HEALING, healamt, 100))
+			if(SkillCheck( who, HEALING, healamt, 100 ) > 0)
 				AwardPoints(who, SKILLID_HEALING, 400);
 				if(do_res(who, patient))
 				VS_AdjustVirtue(who, "Compassion", 1, 100);

@@ -30,7 +30,7 @@ program gustofwind(parms)
 	var npccfg1 := ReadConfigFile(":*:npcdesc");
 	var movedist := CInt(AP_GetStat(caster, INTELLIGENCE) / 10) + 1;
 
-	if ( SkillCheck(cast_on, RESISTING_SPELLS, 60, 40) )
+	if ( SkillCheck( cast_on, RESISTING_SPELLS, 60, 40 ) > 0)
 		movedist := CInt(movedist / 2);
 		SendSysMessage(cast_on, "You feel yourself resisting magical energy!");
 		PlaySoundEffect(cast_on, SFX_SPELL_WEAKEN);

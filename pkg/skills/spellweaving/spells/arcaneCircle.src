@@ -28,7 +28,7 @@ program spell_ArcaneCircle( params )
   endif
 
   //Skill check and then create the arcane focus crystal
-  if( SkillCheck(mobile, SPELLWEAVING, 10, 30) )
+  if( SkillCheck(mobile, SPELLWEAVING, 10, 30) > 0 )
     SendSysMessageCL(mobile, 1072740); // An arcane focus appears in your backpack.
     PlaySoundEffect(mobile, SFX_ARCANE_CIRCLE); // ServUO suggests sound should be 0x5C0
     PlayStationaryEffect( mobile.x, mobile.y, mobile.z, 0x3779, 1 );
@@ -68,7 +68,7 @@ endfunction
 function GetArcanists(mobile)
   var count := 0;
   foreach other in ListMobilesNearLocation( mobile.x, mobile.y, mobile.z, 1, mobile.realm )
-    if( SkillCheck( other, SPELLWEAVING, -1, 0 ) )
+    if( SkillCheck( other, SPELLWEAVING, -1, 0 ) > 0 )
       count+= 1;
     endif
     if( count == MAX_ARCANIST_ALLOWED )

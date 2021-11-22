@@ -68,7 +68,7 @@ function Do_Chops(me, axe, tree)
     return 1;
   endif
   var points := CInt((AP_GetSkill(me, LUMBERJACKING) * 2) + 10);
-  if(SkillCheck(me, LUMBERJACKING, difficulty, points))
+  if(SkillCheck(me, LUMBERJACKING, difficulty, points) > 0)
     var wood_amount := HarvestResource( "wood", tree.x, tree.y, 1, 10 );
     if(wood_amount == 0)
       SendSysMessage(me, "There's not enough wood here to chop.");
@@ -491,7 +491,7 @@ function CarveLogs(who, blade, logs)
   PlaySoundEffect(who, 0x5a);
   PerformAction(who, 0x021);
   sleep(2);
-  if(SkillCheck(who, BOWCRAFT_FLETCHING, difficulty, pointvalue))
+  if(SkillCheck(who, BOWCRAFT_FLETCHING, difficulty, pointvalue) > 0)
     if(what == UOBJ_SHAFTS)
       var amt := logs.amount;
       if(DestroyItem(logs))

@@ -721,7 +721,7 @@ function GMTResisted(who, amt)
   var evalint := CInt(RandomInt(99)+1);
   var halfamt := amt/2;
   var rezamt := CInt(((RandomInt(halfamt)+1) * evalint ) / 100);
-  if(SkillCheck(who, RESISTING_SPELLS, 70, 300))
+  if(SkillCheck( who, RESISTING_SPELLS, 70, 300 ) > 0)
 	SendSysMessage(who, "You feel yourself resisting magical energy!");
 	PlaySoundEffect(who, SFX_SPELL_WEAKEN);
 	PlayObjectCenteredEffect( who, FX_CURSE_EFFECT, 5,5);

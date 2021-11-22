@@ -105,7 +105,7 @@ function makeCartographyMap(who, objtype, amt, tool)
 						"tokuno":			FacetNum :=4;
 						"termur":			FacetNum :=5;
 					endcase
-						
+
 					case(theitem.objtype)
 						0x16500:	case(FacetNum)
 										0:

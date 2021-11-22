@@ -62,13 +62,13 @@ function DummyRock(dummy)
 			SleepMS(3600);
 			dummy.graphic := 4212;
 			break;
-			
+
 		38940:
 			dummy.graphic := 38941;
 			SleepMS(3600);
 			dummy.graphic := 38940;
 			break;
-			
+
 		38945:
 			dummy.graphic := 38946;
 			SleepMS(3600);

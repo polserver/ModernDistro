@@ -16,8 +16,8 @@ function play(character, theskill, item, attrib)
     0x0e9e:  success := 0x53;  fail := 0x54;
   endcase
   var thepoints := GetAttribute(character, MUSICIANSHIP);
-  if(SkillCheck(character, MUSICIANSHIP, theskill, thepoints))
-    if(SkillCheck(character, attrib, theskill, thepoints * 2))
+  if(SkillCheck( character, MUSICIANSHIP, theskill, thepoints) > 0)
+    if(SkillCheck( character, attrib, theskill, thepoints * 2) > 0)
       PlaySoundEffect( character, success);
       return 1;
     else
@@ -63,7 +63,7 @@ function PlayNoise(me, instrument, difficulty)
 	if (!difficulty)
 		MakeSound (me, elem.succeed);
 		return 1;
-	elseif (  SkillCheck(me, instrument, MUSICIANSHIP, difficulty) )
+	elseif (  SkillCheck( me, instrument, MUSICIANSHIP, difficulty) > 0 )
 		MakeSound (me, elem.succeed);
 		return 1;
 	else
@@ -227,7 +227,7 @@ function BardResisted(caster, cast_on, amt, circle := 0)
         if(cast_on.dead)
                 return 0;
         endif
-        if(SkillCheck(cast_on, RESISTING_SPELLS, diff, points))
+        if(SkillCheck( cast_on, RESISTING_SPELLS, diff, points ) > 0)
                 SendSysMessage(cast_on, "You feel yourself resisting magical energy!");
                 PlaySoundEffect(cast_on, SFX_SPELL_WEAKEN);
                 PlayObjectCenteredEffect(cast_on, FX_CURSE_EFFECT, 5,5);

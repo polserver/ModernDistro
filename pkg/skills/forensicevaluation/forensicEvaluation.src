@@ -28,7 +28,7 @@ program forensic(who)
   if(pts < 10)
     pts := 10;
   endif
-  if (SkillCheck(who, FORENSIC_EVALUATION, -1, pts))
+  if (SkillCheck(who, FORENSIC_EVALUATION, -1, pts) > 0)
     var lastHit := array;
     var kname, kserial, kweapon, strmessage;
     lastHit := GetObjProperty(what, "LastHit");

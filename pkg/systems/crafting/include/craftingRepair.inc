@@ -45,7 +45,7 @@ function repair_item(character, what, craft_skill )
 		SendSysMessage(character, "The brittle material breaks when you handle it");
 		DestroyItem(what);
 		return 0;
-	elseif (SkillCheck(character, craft_skill, CInt(damaged / 3), 0))
+	elseif (SkillCheck( character, craft_skill, CInt(damaged / 3), 0 ) > 0)
 		var repaired_amount := CInt( ((randomint(hisskill) + 1))/2);
 		if (damaged == 1)
 			repaired_amount := 1;
@@ -92,10 +92,10 @@ function CreateRepairDeed(who, scroll, craft_skill)
 
 	var type, title, color;
 	case( craft_skill )
-		 BLACKSMITHY: 		type := "Blacksmith"; color := CInt(2110);
+		 BLACKSMITHY: 			type := "Blacksmith"; color := CInt(2110);
 		 BOWCRAFT_FLETCHING: 	type := "Bowyer"; color := CInt(2116);
-		 CARPENTRY: 		type := "Carpenter"; color := CInt(2113);
-		 TAILORING: 		type := "Tailor"; color := CInt(2128);
+		 CARPENTRY: 			type := "Carpenter"; color := CInt(2113);
+		 TAILORING: 			type := "Tailor"; color := CInt(2128);
 	endcase
 	var ramt := AP_GetSkill(who, craft_skill);
 	if(ramt < 50)
@@ -120,7 +120,7 @@ function CreateRepairDeed(who, scroll, craft_skill)
 		title := "A repair service contract from a Legendary "+type;
 	endif
 	type := Lower(type);
-	var ret := GetItemDescriptor(0xee09);
+	var ret := GetItemDescriptor(0x2EE09);
 	ret.Color := color;
 	ret.CProps.Insert("type", type);
 	ret.CProps.Insert("skill", craft_skill);
@@ -283,7 +283,7 @@ function resmelt(who, the_attribute)
 				Sleep(1);
 				PlaySoundEffect(who, 0x22);
 				if(DestroyItem(thing))
-					if(SkillCheck(who, the_attribute, skill, 10))
+					if(SkillCheck( who, the_attribute, skill, 10 ) > 0)
 						CreateItemInContainer(who.backpack, ingot, amt);
 					else
 						SendSysMessage(who, "You destroy the item.");
@@ -333,7 +333,7 @@ function resmelt(who, the_attribute)
 		Sleep(1);
 		if( DestroyItem(use_on) )
 			PlaySoundEffect(who, 0x22);
-			if(SkillCheck(who, the_attribute, skill, 10))
+			if(SkillCheck( who, the_attribute, skill, 10 ) > 0)
 				CreateItemInContainer(who.backpack, ingot, amt);
 			else
 				SendSysMessage(who, "You destroy the item.");

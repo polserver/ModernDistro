@@ -34,7 +34,7 @@ program do_itemid( who )
     SendSysMessage(who, "That's not an item!");
     return;
   endif
-  if(SkillCheck(who,ITEM_IDENTIFICATION, -1, thepoints))
+  if(SkillCheck(who,ITEM_IDENTIFICATION, -1, thepoints) > 0)
     var name := "";
     var itsname := the_item.name;
     if (!itsname)
@@ -96,7 +96,7 @@ program do_itemid( who )
   	  endif
     endif
     if(GetObjProperty(the_item, "type") == "cursed")
-	  if(SkillCheck(who,ITEM_IDENTIFICATION, 65, 0) )
+	  if(SkillCheck(who,ITEM_IDENTIFICATION, 65, 0) > 0)
 	    SendSysMessage(who, "* This item is cursed! *");
 	  endif
     endif

@@ -110,7 +110,7 @@ function heal(who, patient, bandy)
       break;
     endif
     if(counter >= cycles)
-      if(SkillCheck(who, VETERINARY, -1, 0))
+      if(SkillCheck( who, VETERINARY, -1, 0 ) > 0)
         if(healamt <= 10)
           SendSysMessage(who,"You finish applying the bandages, but they barely help.", color := 88);
         endif
@@ -184,7 +184,7 @@ function cure(who, patient, bandy)
       endif
 	endif
     if(counter >= cycles)
-      if(SkillCheck(who, VETERINARY, 80, 0) && (CInt(GetAttribute(who, ANATOMY)) >= 61))
+      if((SkillCheck( who, VETERINARY, 80, 0 ) > 0) && (CInt(GetAttribute(who, ANATOMY)) >= 61))
         if((RandomInt(100) + 1) < healamt)
 			TS_CurePoison(patient, healamt/40, "P", 1);
           if (TS_GetTimerNames(patient, "P").size() > 0)

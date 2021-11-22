@@ -9,10 +9,10 @@ function repair_item(who, what, attribid)
   var hisskill := GetAttribute(who, attribid);
   var damageamount := 0.0;
   damageamount := (125 -  hisskill)/3000.0;
-  
+
   if(what.hp == what.maxhp)
     SendSysMessage(who, "That item is not damaged.");
-    return 0; 
+    return 0;
   endif
 
     for i := 1 to 3
@@ -43,7 +43,7 @@ function repair_item(who, what, attribid)
     DestroyItem(what);
     return 0;
   endif
-  if (SkillCheck(who, attribid, CInt(damaged / 3), 0))
+  if (SkillCheck( who, attribid, CInt(damaged / 3), 0 ) > 0)
     var repaired_amount := cint( ((randomint(hisskill) + 1))/2);
     if (damaged == 1)
       repaired_amount := 1;
@@ -62,7 +62,7 @@ function repair_item(who, what, attribid)
       DestroyItem(what);
       Print("Destroyed item when " + who.name + " repaired it");
       return 0;
-    endif     
+    endif
   else
     var damage_amount := RandomInt(10);
     if (thehp <= damage_amount)
@@ -84,7 +84,7 @@ function repair_item(who, what, attribid)
       SendSysMessage(who, "The brittle material breaks when you handle it");
       DestroyItem(what);
       return 0;
-    endif     
+    endif
   endif
   return 0;
 endfunction

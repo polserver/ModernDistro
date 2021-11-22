@@ -33,7 +33,7 @@ program play(who, item)
   if(pts < 10)
     pts := 10;
   endif
-  if(SkillCheck(who, MUSICIANSHIP, -1, pts))
+  if(SkillCheck( who, MUSICIANSHIP, -1, pts ) > 0)
     PlaySoundEffect(who, success);
   else
     PlaySoundEffect(who, fail);

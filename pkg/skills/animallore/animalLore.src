@@ -36,7 +36,7 @@ program animal_lore(who)
     foodtype := "all";
   endif
   var pts := CInt(GetAttribute(who, ANIMAL_LORE)) + 15;
-  if(SkillCheck(who,ANIMAL_LORE, -1, pts/3))
+  if(SkillCheck(who,ANIMAL_LORE, -1, pts/3) > 0)
     phisical := GetStr(AP_GetStat(targ, STRENGTH)/20);
     health := GetHealth(10*AP_GetVital(targ, VITALID_LIFE)/AP_GetVitalMaximumValue(targ, VITALID_LIFE));
     if (TS_GetTimerNames(targ, "P").size() > 0 )

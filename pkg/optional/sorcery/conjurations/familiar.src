@@ -54,7 +54,7 @@ program familiar(parms)
 		element := CInt(element);
 	endif
 
-	if (SkillCheck(caster, MEDITATION, element, (element * 3) ) )
+	if (SkillCheck(caster, MEDITATION, element, (element * 3) ) > 0)
 		SendSysMessage(caster, "You have bonded with " + CStr(cast_on.name) + ".", color := 66);
 		cast_on.master := caster.serial;
 		SetObjProperty(cast_on, "master", caster.serial);

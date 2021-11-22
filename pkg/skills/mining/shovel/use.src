@@ -148,7 +148,7 @@ function CheckOreVeins(who, targ, range)
 	foreach ore_vein in ( vein_list )
 		var remaining_ore := ore_vein.GetRemainingOre();
 		if ( remaining_ore > 0 )
-			if ( SkillCheck(who, MINING, ore_vein.GetDifficulty()) > 0 )
+			if ( SkillCheck( who, MINING, ore_vein.GetDifficulty() ) > 0 )
 				var yield := ore_vein.GetYield();
 				if ( remaining_ore < yield )
 					yield := remaining_ore;
@@ -202,7 +202,7 @@ function CheckGlobalOre(who, targ)
 	endif
 
 	var difficulty := CInt(100 - (amount * 100 / 30));
-	if ( SkillCheck(who, MINING, difficulty) > 0 )
+	if ( SkillCheck( who, MINING, difficulty ) > 0 )
 		var ore := CreateItemInBackpack(who, type, 1);
 		if ( ore.errortext )
 			SendSysMessage(who, "Unable to create "+type+"->"+ore.errortext);

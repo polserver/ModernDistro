@@ -15,7 +15,7 @@ CONST SUCCESS_SOUND := 0x58;
 CONST FAIL_SOUND := 0x41;
 
 program PocketDip( who, dummy )
-        
+
 	if( dummy.container )
 		return 0;
 	elseif( Distance( who, dummy ) > 2 )
@@ -26,7 +26,7 @@ program PocketDip( who, dummy )
         elseif( !HasThiefGloves( who ))
                 SendSysMessage( who, "You need to equip thief gloves to do that!" );
 		return 0;
-	elseif( SkillCheck( who, "Stealing", -1, TP_CanAdvance( who, "Stealing" )) > 0 )
+	elseif( SkillCheck( who, "Stealing", -1, TP_CanAdvance( who, "Stealing" ) ) > 0 )
 		PlaySoundEffect( who, SUCCESS_SOUND );
 		SendSysMessage( who, "You successfully slip your hand into the bag." );
 		ReleaseItem( dummy );
@@ -39,7 +39,7 @@ program PocketDip( who, dummy )
 		DummyRock( dummy );
                 return 1;
 	endif
- 
+
         return 1;
 endprogram
 

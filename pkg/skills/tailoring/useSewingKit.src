@@ -45,7 +45,7 @@ program use_SewingKit(who, tool)
 	else
 		makeTailoringItems(who, the_objtype, amt, tool);
 	endif
-	
+
 endprogram
 
 function makeTailoringItems(who, what, amt, tool)
@@ -54,16 +54,16 @@ function makeTailoringItems(who, what, amt, tool)
 		SendSysMessage(who, "Cancelled");
 		return 0;
 	endif
-	
-	// ResourceList entry type.	
+
+	// ResourceList entry type.
 	var itemchk := MaterialSelection(who, craft_skill, lower(craft_config[what].type));
-	if (!itemchk) 
+	if (!itemchk)
 		return 0;
 	endif
 	var item1 := itemchk[1];
 	var item1objtype := itemchk[2];
 	var ptmod := itemchk[3];
-	
+
 	var x := who.x, y := who.y, item2 := 0;
 	var material2obj := craft_config[what].material2obj;
 	if (TypeOf(material2obj) == "String")

@@ -233,7 +233,7 @@ function Resisted(circle, caster, cast_on, amt)
 		return 0;
 	endif
 
-	if (SkillCheck(cast_on, RESISTING_SPELLS, (circle * 10), (circle * 30) ) )
+	if (SkillCheck( cast_on, RESISTING_SPELLS, (circle * 10), (circle * 30) ) > 0)
 		SendSysMessage(cast_on, "You feel yourself resisting magical energy!");
 		PlaySoundEffect(cast_on, SFX_SPELL_WEAKEN);
 		PlayObjectCenteredEffect( cast_on, FX_CURSE_EFFECT, 5,5);
@@ -340,7 +340,7 @@ function spellcast( me, circle, scroll)
 		endfor
 		sleepms(delay);
 		me.frozen :=0;
-		if ( SkillCheck(me,MAGERY, diff, 0) )
+		if ( SkillCheck( me,MAGERY, diff, 0 ) > 0)
 			if(mhp > AP_GetVital(me, HITS))
 				sendsysmessage(me,"You have lost your concentration.");
 				return 0;
@@ -437,7 +437,7 @@ function mobspellcast( me, circle, scroll)
       sleepms(1200);
     endfor
     sleepms(delay);
-    if (SkillCheck(me,MAGERY, diff, points))
+    if (SkillCheck( me,MAGERY, diff, points ) > 0)
       if(mhp < AP_GetVital(me, HITS))
         return 0;
       endif

@@ -45,7 +45,7 @@ function repair_item(character, what, craft_skill )
 		SendSysMessage(character, "The brittle material breaks when you handle it");
 		DestroyItem(what);
 		return 0;
-	elseif (SkillCheck(character, craft_skill, CInt(damaged / 3), 0))
+	elseif (SkillCheck( character, craft_skill, CInt(damaged / 3), 0 ) > 0)
 		var repaired_amount := CInt( ((randomint(hisskill) + 1))/2);
 		if (damaged == 1)
 			repaired_amount := 1;
@@ -283,7 +283,7 @@ function resmelt(who, the_attribute)
 				Sleep(1);
 				PlaySoundEffect(who, 0x22);
 				if(DestroyItem(thing))
-					if(SkillCheck(who, the_attribute, skill, 10))
+					if(SkillCheck( who, the_attribute, skill, 10 ) > 0)
 						CreateItemInContainer(who.backpack, ingot, amt);
 					else
 						SendSysMessage(who, "You destroy the item.");
@@ -333,7 +333,7 @@ function resmelt(who, the_attribute)
 		Sleep(1);
 		if( DestroyItem(use_on) )
 			PlaySoundEffect(who, 0x22);
-			if(SkillCheck(who, the_attribute, skill, 10))
+			if(SkillCheck( who, the_attribute, skill, 10 ) > 0)
 				CreateItemInContainer(who.backpack, ingot, amt);
 			else
 				SendSysMessage(who, "You destroy the item.");

@@ -10,7 +10,7 @@ include ":traps:traps";
 
 program skill_DetectHidden( mobile )
 
-        if( !SkillCheck( mobile, DETECTING_HIDDEN, -1 ) && !mobile.multi )
+        if( !(SkillCheck( mobile, DETECTING_HIDDEN, -1 ) > 0)&& !mobile.multi )
 			SendSysMessage( mobile, "You do not detect anything." );
 			return 0;
         endif

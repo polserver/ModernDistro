@@ -48,7 +48,7 @@ program herd(who)
 		if(pts > 35)
 			pts := 35;
 		endif
-		if(SkillCheck(who,HERDING, herdskill, pts/3))
+		if(SkillCheck( who,HERDING, herdskill, pts/3 ) > 0)
 
                 SendSysMessage(who, "Where do you want to move "+ npc.name +" to?");
                 var location := TargetCoordinates(who);

@@ -97,7 +97,7 @@ program UseStuff(character, stuff)
     endif
 
     if ( len(skill))
-        if (SkillCheck(character, skill, skill_needed, points))
+        if (SkillCheck(character, skill, skill_needed, points) > 0)
             if (!dont_destroy_success)
               SubtractAmount(stuff, quantity1);  //use material
             endif

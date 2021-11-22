@@ -58,7 +58,7 @@ program EvaluatingIntelligence(who)
   if(pts > 35)
     pts := 35;
   endif
-  if(SkillCheck(who,EVALUATING_INTELLIGENCE, -1, pts/3))
+  if(SkillCheck(who,EVALUATING_INTELLIGENCE, -1, pts/3) > 0)
     PrintTextAbovePrivateUC(subject, CAscZ(strMsg + " looks " + intell + "." ), "ENG", who);
     // player's EVALUATING_INTELLIGENCE skill equal/greater than 76 can get mental strength info
     if(skill >= 76)

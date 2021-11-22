@@ -52,7 +52,7 @@ program harvest_honey (character, beehive)
 		sleep(3);
 
 		//do a skill check to see if they manage to harvest anything
-		if (SkillCheck(character, LUMBERJACKING, 30, 20))
+		if (SkillCheck( character, LUMBERJACKING, 30, 20) > 0)
 			already_harvested_amount := CInt(GetObjProperty(beehive, "#harvested"));
 			if (!already_harvested_amount)
 				SetObjProperty(beehive, "#harvested", 1);
@@ -65,7 +65,7 @@ program harvest_honey (character, beehive)
 		endif
 
 		//See if they stir up any bees
-		if (!SkillCheck(character, ANIMAL_LORE, 50, 250))
+		if (!SkillCheck( character, ANIMAL_LORE, 50, 250) > 0)
 			if (RandomInt(4) == 1)
 				CreateItemAtLocation(beehive.x, beehive.y, beehive.z, ITEM_SWARM, 1, character.realm);
 				SendSysMessage(character, "Uh-oh...");

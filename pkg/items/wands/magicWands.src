@@ -273,7 +273,7 @@ function MWResisted(magery, cast_on, amt)
   if(cast_on.dead)
     return 0;
   endif
-  if(SkillCheck(cast_on, RESISTING_SPELLS, magery, (magery * 2)))
+  if(SkillCheck( cast_on, RESISTING_SPELLS, magery, (magery * 2) ) > 0)
     SendSysMessage(cast_on, "You feel yourself resisting magical energy!");
     PlaySoundEffect(cast_on, SFX_SPELL_WEAKEN);
     PlayObjectCenteredEffect( cast_on, FX_CURSE_EFFECT, 5,5);
@@ -371,7 +371,7 @@ function identifyit(who, item)
     endif
   endif
   if(GetObjProperty(the_item, "type") == "cursed")
-    if(SkillCheck(who, ITEM_IDENTIFICATION, 65, 0) )
+    if(SkillCheck( who, ITEM_IDENTIFICATION, 65, 0 ) > 0)
       SendSysMessage(who, "* This item is cursed! *");
     endif
   endif

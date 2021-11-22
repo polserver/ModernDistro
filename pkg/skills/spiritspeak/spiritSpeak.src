@@ -29,7 +29,7 @@ program spiritspeak(who)
 		pts := 35;
 	endif
 
-  if(SkillCheck(who, SPIRIT_SPEAK, -1,  pts))
+  if(SkillCheck( who, SPIRIT_SPEAK, -1,  pts ) > 0)
     SendSysMessage(who, "You contact the netherworld.", color := 66);
 	VS_AdjustVirtue(who, "spirituality", 1, 50);
 	TS_StartTimer(who, "SpiritSpeak", 60);
