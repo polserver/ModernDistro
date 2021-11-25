@@ -25,7 +25,7 @@ function RandomFoodObjType(category:=0)
 	if ( cfg_file.errortext )
 		return error{"errortext":="Unable to read food.cfg ->"+cfg_file.errortext};
 	endif
-	
+
 	var food_list := array{};
 	if ( category )
 		var cfg_elem := cfg_file[category];
@@ -40,9 +40,9 @@ function RandomFoodObjType(category:=0)
 			SleepMS(2);
 		endforeach
 	endif
-	
+
 	if ( food_list.Size() > 0 )
-		return CInt(food_list[RandomInt(food_list.Size())+1]);
+		return CInt(food_list.randomentry());
 	else
 		return error{"errortext":="No food items found in food.cfg"};
 	endif
