@@ -742,6 +742,56 @@ function normal_distribution_dice ( minimum, maximum )
 endfunction
 
 
+/*
+ *
+ * FormulateDiceString( mod, amount, setting )
+ *
+ * Parameters:
+ * mod - Depending on the 'setting' parameter option, determines either the sides of dice to use or the number of dice to use.
+ * amount - The total value the dice string should equal on a max roll value.
+ * setting - Determines if the function should decide whether to find the max dice cnt or dice sides for the dice string.
+ *
+ * Purpose:
+ * Formulates a dice string based on a max value and either a total number of sides or a number of dice.
+ *
+ * Date: 2021-11-23	00:59:43
+ * Shard Name: Pangaea
+ *
+ * Author: Oden (ThisIsMe)
+ * Email: DavidJSGardner@Gmail.com
+ * ICQ: 625-658-845
+ * Skype: DavidJSGardner
+ * Discord: ThisIsMe#7491
+ *
+ * Return Values:
+ * string/error
+ *
+ */
+function FormulateDiceString( byref mod, byref amount, byref setting := SIDE_CNT )
+
+	if( mod > amount )
+		return error{ "errortext":="'mod' cannot exceed amount." };
+	endif
+
+	var remainder := amount%mod,
+		val := CInt( amount / mod );
+	if( setting == SIDE_CNT ) // Original functionality...
+		if( !remainder )
+			return CStr( val+"d"+mod );
+		else
+			return CStr( val+"d"+mod+"+"+remainder );
+		endif
+	elseif( setting == DICE_CNT )
+		if( !remainder )
+			return CStr( mod+"d"+val );
+		else
+			return CStr( mod+"d"+val+"+"+remainder );
+		endif
+	endif
+
+	return error{ "errortext":="Invalid 'setting' parameter." };
+endfunction
+
 ///////////////////////////////////////
 //
 // function round( num )
@@ -858,3 +908,39 @@ function FractionToDouble( fraction )
 
     return CDbl( whole + ( numerator / denominator ) );
 endfunction
+
+///////////////////////////////////////////////////////////
+//
+// FunctionName: IsPrime( byref n )
+//
+// Purpose: Determines if a number sent to the function
+//			is a prime number.
+//
+// Parameter: n:: integer
+//
+// Returns: 1 if n is a prime, 0 if not.
+//
+///////////////////////////////////////////////////////////
+function IsPrime( byref n )
+
+	if(TypeOf(n) != "Integer")
+		return error{"errortext" := "The value passed was not an integer."};
+	endif
+	if( n == 2 )
+        return 1;
+    endif
+
+    if( n < 2 || ( n % 2 == 0 ) )
+        return 0;
+    endif
+
+    var i := 3;
+    for( i:=3; i*i<=n; i+=2 )
+        if( n % i == 0 )
+            return 0;
+        endif
+    endfor
+
+    return 1;
+endfunction
+
