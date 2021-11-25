@@ -1,0 +1,118 @@
+/////////////////////////////////////////////////////////////////////
+//
+// Program Name: Sleep( who)
+//
+// Author:	Unknown nut it was given to the Distro
+//			by Pumpkins, I think.
+//			Originally it was called fakedead.
+//
+// Date Created: Unknown but added to the Distro on 2021-11-25
+//
+// Description:	Causes the player to lay down and appear to be
+//				Dead. If the player moves they return to a normal
+//				standing position.
+//
+// Parameters:	who::charref
+//
+// Return Value: 1 upon exit.
+//
+/////////////////////////////////////////////////////////////////////
+use uo;
+use os;
+
+program txt_testliedown( character, wake_up )
+
+	FakeDead( character, wake_up );
+
+	return 1;
+
+endprogram
+
+
+function FakeDead( who, wake_up:=1 )
+
+	Detach();
+
+	if( GetProcess( CInt( GetObjProperty( who, "#FakeDeadPid" ))))
+		return 0;
+	else
+		SetObjProperty( who, "#FakeDeadPid", GetPid() );
+	endif
+
+	if( wake_up )
+		PlayCharAnim( who );
+	else
+		var x := who.x;
+		var y := who.y;
+
+		while( who.connected )
+			PlayCharAnim( who );
+			// Commented out the 'Zs' so a "sleeping" character doesnt spam nearby
+			// players but left the code here just in case a dev wants it.
+			// PrintTextAbove(who, "Z...Z...Z...");
+			// Sleep(3);
+			if( who.x != x || who.y != y )
+				break;
+			endif
+			SleepMS( 100 );
+		endwhile
+	endif
+
+	return 1;
+
+endfunction
+
+
+function PlayCharAnim( who )
+
+	var dir := 1;
+	var speed := 30; //0 = fastest, 30 = way too  slow
+	var doesrepeat := 0;
+	var framecount := 6; // seems to set the frame it uses?
+	var numrepeats := 1;
+
+	var packetString := "6E";
+	packetString := packetString + fixPacketLength( hex( who.serial ), 4 );
+	packetString := packetString + fixPacketLength( hex( 21 ), 2 ); // animation
+	packetString := packetString + fixPacketLength( hex( framecount ), 2 ); // frame count
+	packetString := packetString + fixPacketLength( hex( numrepeats ), 2 ); // Repetition times
+	packetString := packetString + fixPacketLength( hex( dir ), 1 ); // 00 == fwd, 01 == bkwd
+	packetString := packetString + fixPacketLength( hex( doesrepeat ), 1 ); // Does this animation repeat? 01 == yes
+	packetString := packetString + fixPacketLength( hex( speed ), 1 ); // frame delay
+
+	foreach chr in ListMobilesNearLocation( who.x, who.y, who.z, 16, who.realm );
+		SendPacket( chr, packetString );
+		SleepMS(10);
+	endforeach
+
+	return 1;
+
+endfunction
+
+
+function FixPacketLength( packetString, byteLength )
+
+	if( !packetString || packetString == error )
+		packetString := 0;
+	endif
+
+	packetString := CStr( packetString );
+
+	if( packetString[1,2] == "0x" )
+		packetString := cStr( packetString[3, len( packetString )] );
+	endif
+
+	if( len( packetString ) > byteLength * 2 )
+		var extraBytes := len( packetString ) - ( byteLength*2 ) + 1;
+		return cStr( packetString[extraBytes, len( packetString )] );
+	endif
+
+	while( len( packetString ) < byteLength * 2 )
+		packetString := "0"+packetString;
+		SleepMS(10);
+	endwhile
+
+	return packetString;
+
+endfunction
+

@@ -1,0 +1,24 @@
+//////////////////////////////////////////////////////////
+// This program will drop the HP of the user by the		//
+// specified amount or, if not specified, by 50%.		//
+//////////////////////////////////////////////////////////
+
+
+use uo;
+
+include ":attributes:attributes";
+
+program DropMyHP(who, text)
+
+	var drop_amount := 0;
+	if(!text)
+		drop_amount := CInt(AP_GetVital(who, "Hits") / 2);
+	else
+		drop_amount := CInt(text);
+	endif
+	SendSysMessage(who, "HP Dropped by " + Cstr(drop_amount), color := 66);
+	AP_SetVital(who, "Hits", drop_amount);
+	return;
+
+endprogram
+

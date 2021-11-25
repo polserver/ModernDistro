@@ -1,0 +1,114 @@
+// Created 12/6/2020 1:36:02 AM, with Gump Studio.
+// Exported with POLGumpExporter ver 1.1 for gump pkg
+
+use uo;
+use os;
+
+include ":gumps:gumps";
+
+var moongates :=
+{
+	{4467,	1283,	5,		"britannia"},		// Moonglow
+	{1336,	1997,	5,		"britannia"},		// Britain
+	{1499,	3771,	5,		"britannia"},		// Jhelom
+	{771,	753,	5,		"britannia"},		// Yew
+	{2701,	693,	5,		"britannia"},		// Minoc
+	{1828,	2948,	-20,	"britannia"},		// Trinsic
+	{643,	2067,	5,		"britannia"},		// Skara Brae
+	{3564,	2140,	34,		"britannia"}		// Magincia
+};
+
+
+program gump_gump( who )
+
+	if ( GetObjProperty(who, "#justgated") == 1 )
+		return 0;
+	endif
+
+	var gump := GFCreateGump( 0, 0 );
+
+	GFPage( gump, 0 );
+
+	// Background 1
+	GFResizePic( gump, 8, 73, 9200, 285, 335 );
+
+	// Label 1
+	GFTextLine( gump, 58, 90, 0, "Select Your Destination:" );
+
+	// Label 2
+	GFTextLine( gump, 78, 120, 0, "Moonglow" );
+
+	// Label 3
+	GFTextLine( gump, 78, 150, 0, "Britain" );
+
+	// Label 4
+	GFTextLine( gump, 78, 180, 0, "Jhelom" );
+
+	// Label 5
+	GFTextLine( gump, 78, 210, 0, "Yew" );
+
+	// Label 6
+	GFTextLine( gump, 78, 240, 0, "Minoc" );
+
+	// Label 7
+	GFTextLine( gump, 78, 270, 0, "Trinsic" );
+
+	// Label 8
+	GFTextLine( gump, 78, 300, 0, "Skara Brae" );
+
+	// Label 9
+	GFTextLine( gump, 78, 330, 0, "Magincia" );
+
+	// Radio Button 1: Moonglow
+	GFSetRadioGroup( gump, 0 );
+	GFRadioButton( gump, 54, 120, 208, 209, 0, 1000 );
+
+	// Radio Button 2: Britain
+	GFRadioButton( gump, 54, 150, 208, 209, 0, 2000 );
+
+	// Radio Button 3: Jhelom
+	GFRadioButton( gump, 54, 180, 208, 209, 0, 3000 );
+
+	// Radio Button 4: Yew
+	GFRadioButton( gump, 54, 210, 208, 209, 0, 4000 );
+
+	// Radio Button 5: Minoc
+	GFRadioButton( gump, 54, 240, 208, 209, 0, 5000 );
+
+	// Radio Button 6: Trinsic
+	GFRadioButton( gump, 54, 270, 208, 209, 0, 6000 );
+
+	// Radio Button 7: Skara Brae
+	GFRadioButton( gump, 54, 300, 208, 209, 0, 7000 );
+
+	// Radio Button 8: Magincia
+	GFRadioButton( gump, 54, 330, 208, 209, 0, 8000 );
+
+	// Button 1
+	GFAddButton( gump, 200, 364, 241, 248, GF_CLOSE_BTN, 666 );
+
+	// Button 2
+	GFAddButton( gump, 36, 364, 247, 248, GF_CLOSE_BTN, 777 );
+
+	var gate := GFSendGump( who, gump );
+	if(!gate[0] || (gate[0] == 666))
+		SendSysMessage(who, "No gate selected.", color := 33);
+		return;
+	endif
+	if(gate[0] == 777)
+		foreach key in ( gate.keys )
+			if ( key >= 1000 && key <= 8000 )
+				SendSysMessage(who, Cstr(key), color := 88);
+				key := key / 1000;
+				var loc := moongates[key];
+				SetObjProperty(who, "#justgated", 1);
+				MoveObjectToLocation(who, loc[1], loc[2], loc[3], loc[4], MOVEOBJECT_FORCELOCATION);
+				SleepMS(10);
+				EraseObjProperty(who, "#justgated");
+				return;
+			endif
+			SleepMS(10);
+		endforeach
+	endif
+
+endprogram
