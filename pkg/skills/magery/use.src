@@ -14,7 +14,7 @@ program useScroll(who, scroll)
 	item_cfg := ReadConfigFile(":*:itemdesc");
 	item_cfg := item_cfg[scroll.objtype];
 	spell_id := item_cfg.SpellId;
-	DestroyItem(scroll);
+	SubtractAmount( scroll, 1 );
 	var script := Start_Script("spellStarter", {who, spell_id, scroll_objtype});
 	if ( script.errortext )
 		SendSysMessage(who, "Error - Could not start spell starter ->"+script.errortext);

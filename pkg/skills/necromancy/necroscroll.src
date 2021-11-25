@@ -32,7 +32,7 @@ program use_scroll(who, scroll)
 	params[2] := spellid;
 	params[3] := scroll.objtype;
 	if (scroll)
-		DestroyItem(scroll);
+		SubtractAmount( scroll, 1 );
 	endif
 	Start_script(":magery:spellStarter", params);
 /*
