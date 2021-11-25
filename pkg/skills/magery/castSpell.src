@@ -7,11 +7,8 @@ use uo;
 use os;
 use cfgfile;
 
-include ":itemUtils:itemdesc";
+program castSpell(who, spell_id)
 
-program castSpell(who, scroll)
-	var scroll_itemdesc_info := GetItemDescInfo(scroll.objtype);
-	var spell_id := CInt(scroll_itemdesc_info.SpellID);
 	var script := Start_Script("spellStarter", {who, spell_id});
 	if ( script.errortext )
 		SendSysMessage(who, "Error - Could not start spell starter ->"+script.errortext);

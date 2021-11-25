@@ -12,6 +12,7 @@ include ":magery:spells";
 include ":containers:containers";
 include ":itemUtils:itemdesc";
 include "include/client";
+include "include/sounds";
 
 program SpellStarter(params)
 	var mobile := params[1]; // Caster
@@ -19,28 +20,15 @@ program SpellStarter(params)
 	var scroll := params[3]; // Scroll ObjType being used
 	var targ := params[4]; // NPC target used if NPC is casting the spell
 //        targ := targ; // stop compiler unused warning
-	if (scroll == 1)
-	endif
-	var ss_pid := GetPid();
-	// if ( !Attach(mobile) )
-		// SendSysMessage(mobile, "You are already doing something.", color := 33);
-		// return 0;
-	// endif
-	if(ss_pid == GetObjProperty(mobile, "SpellStarterPID"))
-		SendSysMessage(mobile, "You are currently casting a spell.", color := 33);
+	if ( !Attach(mobile) )
+		SendSysMessage(mobile, "You are already doing something.", color := 33);
 		return 0;
 	endif
-	// If no line of sight, cancel casting.
-	// It seems NPCs are casting on targets where there is no LOS.
-	if(!CheckLosBetween( mobile.x, mobile.y, mobile.z, targ.x, targ.y, targ.z, targ.realm ))
-		return 0;
-	endif
-	SetObjProperty(mobile, "SpellStarterPID", ss_pid);
 
 	var spell_elem := MS_GetSpellsCfgElem(spell_id);
 	var manacost := CInt(spell_elem.ManaCost);
 	// If spell is set to 'TestOnly 1', then it requires cmdlevel or #SpellTester CProp before it can be used.
-	if ( spell_elem.TestOnly && !mobile.cmdlevel )
+	if ( spell_elem.TestOnly and !mobile.cmdlevel )
 		// TestOnly spell, check for #SpellTester
 		if ( !GetObjProperty(mobile, "#SpellTester") )
 			SendSysMessage(mobile, "This spell has been temporarily disabled.", color := 33);
@@ -98,14 +86,6 @@ program SpellStarter(params)
 		return 0;
 	endif
 
-	if ( requires_regs )
-		if ( !CheckReagents(mobile, spell_elem, scroll) )
-			SendSysMessage(mobile, "You don't have the proper reagents.", color := 33);
-			FailSpell(mobile);
-			return 0;
-		endif
-	endif
-
 	if ( requires_mana )
 	// Added to support necro spell mind rot.
 		if(GetObjProperty(mobile, "#mindrot"))
@@ -116,13 +96,20 @@ program SpellStarter(params)
 			endif
 		endif
 		if ( !AP_ConsumeVital(mobile, VITALID_MANA, manacost) )
-			SendSysMessage(mobile, "You don't have enough mana to cast that spell!", color := 33);
+			SendSysMessage(mobile, "You don't have enough mana to cast that spell!");
 			FailSpell(mobile);
 			return 0;
 		endif
 	endif
 
-	// might want to send events to this script
+	if ( requires_regs )
+		if ( !CheckReagents(mobile, spell_elem, scroll) )
+			SendSysMessage(mobile, "You don't have the proper reagents.", color := 33);
+			FailSpell(mobile);
+			return 0;
+		endif
+	endif
+
 	SetObjProperty(mobile, "#Casting", GetPid());
 	mobile.frozen := 1;
 	mobile.hidden := 0;
@@ -187,18 +174,20 @@ program SpellStarter(params)
 	endwhile
 ////////////////////////////////////////////////////
 
-	// var attribute := Lower(spell_elem.Attribute);
-	var attribute := spell_elem.Attribute;
+	var attribute := Lower(spell_elem.Attribute);
 
 	if ( !attribute )
 		attribute := MAGERY;
 	endif
+
 	var difficulty := CInt(spell_elem.Difficulty);
+
 	if ( !difficulty )
 		difficulty := -1;
 	endif
-//	var skill_check := SkillCheck( mobile, attribute, difficulty, 50 );
-	var skill_check := SkillCheck( mobile, attribute, difficulty, 30 );
+
+//	var skill_check := SkillCheck(mobile, attribute, difficulty, 50);
+	var skill_check := SkillCheck(mobile, attribute, difficulty, 30);
 
 	// Added to support necro wraith form can recall regardless of their magery skill level.
 	if(GetObjProperty(mobile, "wraith") && spell_id == 32)
@@ -207,9 +196,9 @@ program SpellStarter(params)
 	mobile.frozen := 0;
 
 	// skill_check > 0 on success
-	if ( skill_check > 0)
+	if ( skill_check )
 		var info := struct;
-		info.+script := spell_elem.Script;
+		info.+script := spell_elem.script;
 		info.+attribute := attribute;
 		info.+skill_check := skill_check;
 		info.+targ := targ;
@@ -218,14 +207,13 @@ program SpellStarter(params)
 		info.+circle := spell_elem.Circle;
 		info.+spell_config := spell_elem;
 		info.+damage_typ := spell_elem.DamageType;
-		info.+difficulty := spell_elem.Difficulty;
+
 		var script := Start_Script(spell_elem.SpellScript, {mobile, info, spell_id, targ});
 		Detach();
-		EraseObjProperty(mobile, "SpellStarterPID");
 		EraseObjProperty(mobile, "#Casting");
 
 		if ( script.errortext )
-			Broadcast("Unable to start ["+spell_elem.SpellScript+"] -> "+script.errortext);
+			Print("Unable to start ["+spell_elem.SpellScript+"] -> "+script.errortext);
 		endif
 
 		var ev;
