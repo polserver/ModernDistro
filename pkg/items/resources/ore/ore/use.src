@@ -71,7 +71,7 @@ function SmeltOre(who, ore, ingot, difficulty)
 			return;
 		endif
 		if(SkillCheck(who, MINING, CDbl(difficulty), 10) > 0)
-			PlaySoundEffect(forge, 0x22);
+			PlaySoundEffect(forge, 0x2C);
 			sleep(2);
 			var ingots := CreateItemInBackpack(who, ingot, (GetAmount(ore) / 2));
 			ReserveItem(ingots);

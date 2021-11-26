@@ -73,3 +73,13 @@ exported function SetEngraving( item, engraving )
 	SetObjProperty( item, "EngravedText", engraving );
 	IncRevision( item );
 endfunction
+
+exported function GetBaseMaterial( container )
+
+	var itemdesc := ReadConfigFile(":containers:itemdesc");
+	var object := FindConfigElem( itemdesc, container.objtype );
+	var BaseMaterial := object.BaseMaterial;
+	return BaseMaterial;
+
+endfunction
+

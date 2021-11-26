@@ -13,7 +13,7 @@ program onInsert( unused mobile, container, unused move_type, unused insert_type
 	var Sound := 0;
 	if(adding_item.IsCoin())
 		case(ContainerMaterial)
-			"Leather":	Sound := 0x2E5;
+			"Leather":	Sound := 0x2E6;
 			"Wood":		Sound := 0x037;
 			"Metal":	Sound := 0x2E4;
 			"Straw":	Sound := 0x2E6;
@@ -23,8 +23,8 @@ program onInsert( unused mobile, container, unused move_type, unused insert_type
 	elseif(adding_item.IsGem())
 		Sound := adding_item.GetDropSound();
 	else
-		PlaySoundEffect(container, 0x3AF);
+		Sound := 0x3AF;
 	endif
-
+	PlaySoundEffect(container, sound);
 	return 1;
 endprogram
