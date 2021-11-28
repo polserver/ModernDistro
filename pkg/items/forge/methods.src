@@ -26,3 +26,11 @@ exported function Animate( item )
 	// Just a simple fail safe.
 	return item.graphic := item.objtype;
 endfunction
+
+exported function ObjectKind( unused item )
+
+	return "fire";
+
+endfunction
+
+
