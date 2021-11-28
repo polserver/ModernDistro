@@ -1,0 +1,66 @@
+use uo;
+use os;
+
+include ":itemutils:itemdesc";
+
+program Install()
+
+	return 1;
+endprogram
+
+exported function Iscampfire( campfire )
+
+        campfire := campfire;
+
+	return 1;
+endfunction
+
+exported function IsOn( campfire )
+
+	return GetItemDescInfo( campfire.graphic ).IsOn;
+endfunction
+
+exported function TurnOn( campfire )
+
+	if( IsOn( campfire ))
+		return error{"errortext":="campfire is already burning."};
+	endif
+
+	var cfg_info := GetItemDescInfo( campfire.graphic );
+	campfire.graphic := CInt( cfg_info.ChangeTo );
+	cfg_info := GetItemDescInfo( campfire.graphic );
+	campfire.facing := CInt(cfg_info.Facing);
+	return 1;
+
+endfunction
+
+exported function TurnOff( campfire )
+
+	if( !IsOn( campfire ))
+		return error{"errortext":="campfire is already out."};
+	endif
+
+	var cfg_info := GetItemDescInfo( campfire.graphic );
+	campfire.graphic := CInt( cfg_info.ChangeTo );
+
+	return 1;
+
+endfunction
+
+exported function Toggle( campfire )
+
+	if( IsOn( campfire ))
+		return TurnOff( campfire );
+	else
+		return TurnOn( campfire );
+	endif
+
+endfunction
+exported function ObjectKind( campfire )
+	if(campfire.IsOn())
+		return "fire";
+	else
+		return "";
+	endif
+endfunction
+

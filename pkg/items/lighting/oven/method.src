@@ -1,0 +1,15 @@
+use uo;
+use os;
+
+include ":itemutils:itemdesc";
+
+program Install()
+
+	return 1;
+endprogram
+
+exported function ObjectKind( unused oven )
+
+	return "fire";
+
+endfunction
