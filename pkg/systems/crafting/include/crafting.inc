@@ -58,7 +58,7 @@ var makermark := 1;
 // was originally colored logs. The colored log objtype is stored
 // in the cprop, and is used to get it's "ResourceList" reference.
 function MaterialSelection(who, craft_skill, type)
-SendSysMessage(who, ""+type);
+// SendSysMessage(who, ""+type);
   if(resource_config.errortext)
     SendSysMessage(who, resource_config.errortext, 1, 33);
     return 0;
@@ -69,10 +69,10 @@ SendSysMessage(who, ""+type);
     SendSysMessage(who, "Cancelled.", 3, 33);
 		return 0;
 	elseif( !(material in EnumerateItemsInContainer(who.backpack)) )
-		SendSysMessage(who, "That is not in your backpack.");
+		SendSysMessage(who, "That is not in your backpack.", color := 33);
 		return 0;
 	elseif( !Accessible(who, material) || (!material.movable) )
-		SendSysMessage(who, "You cannot use that.");
+		SendSysMessage(who, "You cannot use that.", color := 33);
 		return 0;
 	endif
 
@@ -144,7 +144,7 @@ function CreateCraftItem(who, craft_skill, use_on, use_onobjtype, objtype, amoun
 		endif
 		SetObjProperty(theitem, "material", use_onobjtype);
 		if( !SubtractAmount(use_on, amount) )
-			SendSysMessage(who, "You don't have enough materials in your backpack!");
+			SendSysMessage(who, "You don't have enough materials in your backpack!", color := 33);
 			DestroyItem(theitem);
 			return -1;
 		endif
@@ -188,7 +188,7 @@ function CreateCraftItem(who, craft_skill, use_on, use_onobjtype, objtype, amoun
 			endif
 			theitem.maxhp_mod := CInt(temp[3])+(RandomInt(11));
 			theitem.hp := theitem.maxhp;
-			SendSysMessage(who, "You create an exceptional quality item.");
+			SendSysMessage(who, "You create an exceptional quality item.", color := 66);
 		else
 			var rint := randomint(AP_GetSkill(who, craft_skill));
 			if(reqd >= 23)
@@ -197,7 +197,7 @@ function CreateCraftItem(who, craft_skill, use_on, use_onobjtype, objtype, amoun
 				reqd := 3;
 			endif
 			if(rint < reqd)
-				SendSysMessage(who, "You were barely able to make this item. It's quality is below average.");
+				SendSysMessage(who, "You were barely able to make this item. It's quality is below average.", color := 56);
 				if(theitem.isA(POLCLASS_WEAPON))
 					theitem.dmg_mod := CInt(temp[1])-(RandomInt(2)+1);
 				elseif(theitem.isA(POLCLASS_ARMOR))
@@ -206,7 +206,7 @@ function CreateCraftItem(who, craft_skill, use_on, use_onobjtype, objtype, amoun
 				theitem.maxhp_mod := CInt(temp[3])-(RandomInt(10)+1);
 				theitem.hp := theitem.maxhp;
 			else
-				SendSysMessage(who, "You create the item and put it in your backpack.");
+				SendSysMessage(who, "You create the item and put it in your backpack.", color := 66);
 				if(theitem.isA(POLCLASS_WEAPON))
 					theitem.dmg_mod := CInt(temp[1]);
 				elseif(theitem.isA(POLCLASS_ARMOR))
@@ -246,7 +246,7 @@ function CreateCraftItem(who, craft_skill, use_on, use_onobjtype, objtype, amoun
 			endif
 		endif
 	else
-		SendSysMessage(who, "You don't have enough room in your backpack!");
+		SendSysMessage(who, "You don't have enough room in your backpack!", color := 33);
 		return 0;
 	endif
 
@@ -279,7 +279,7 @@ function CraftAssembly(who, craft_skill, tool, objtype, amt)
 	// Example2: objtype := array[x]; amt := array[x+mod];
 	var parts_list := SplitWords(craft_config[objtype].parts);
 	if( TypeOf(parts_list) != "Array" || !parts_list )
-		SendSysMessage(who, "This item does not require parts to be made! Contact a GM.");
+		SendSysMessage(who, "This item does not require parts to be made! Contact a GM.", color := 33);
 		return 0;
 	endif
 	var temp_list := dictionary;
@@ -313,7 +313,7 @@ function CraftAssembly(who, craft_skill, tool, objtype, amt)
 
 		foreach part in ( parts_list.Keys() )
 			if( material_list[part] < parts_list[part] )
-				SendSysMessage(who, "You do not have the required materials to make that.");
+				SendSysMessage(who, "You do not have the required materials to make that.", color := 33);
 				return 0;
 			endif
 		endforeach
@@ -331,7 +331,7 @@ function CraftAssembly(who, craft_skill, tool, objtype, amt)
         var ChangeTo := CInt(UsedPart.ChangeTo);
 				if ( amount > 0 )
 					if( !ConsumeSubstance(who.backpack, material_objtype, amount) )
-						SendSysMessage(who, "Error - Unable to consume ["+amount+"] of material ["+material_objtype+"]");
+						SendSysMessage(who, "Error - Unable to consume ["+amount+"] of material ["+material_objtype+"]", color := 33);
 						return 0;
 					endif
           // For occasions when we need to replace a full container with any empty one
@@ -341,14 +341,19 @@ function CraftAssembly(who, craft_skill, tool, objtype, amt)
 				endif
 			endforeach
 			Set_Critical(0);
-			theitem := CreateItemInBackpack(who, objtype, 1);
+			var product_quantity := CInt(craft_config[objtype].ProductQty);
+			if(!product_quantity)
+				product_quantity := 1;
+			endif
+			theitem := CreateItemInBackpack(who, objtype, product_quantity);
+			// theitem := CreateItemInBackpack(who, objtype, 1);
 			if( !theitem )
-				SendSysMessage(who, "You don't have enough room in your backpack!");
+				SendSysMessage(who, "You don't have enough room in your backpack!", color := 33);
 				return 0;
 			endif
 			CheckToolWear (who, tool, craft_skill);
 			theitem.movable := 1;
-			SendSysMessage(who, "You create the item and put it in your backpack.");
+			SendSysMessage(who, "You create the item and put it in your backpack.", color := 66);
 			if( theitem.isA(POLCLASS_CONTAINER) )
 				SetObjProperty(theitem, "trappable", 1);
 			endif
@@ -357,11 +362,11 @@ function CraftAssembly(who, craft_skill, tool, objtype, amt)
 			Set_Critical(1);
 			foreach material_objtype in ( parts_list.Keys() )
 				var amount := parts_list[material_objtype];
-        var UsedPart := GetItemDescInfo(CInt(material_objtype));
-        var ChangeTo := CInt(UsedPart.ChangeTo);
+				var UsedPart := GetItemDescInfo(CInt(material_objtype));
+				var ChangeTo := CInt(UsedPart.ChangeTo);
 				if ( amount > 0 )
 					if( !ConsumeSubstance(who.backpack, material_objtype, amount) )
-						SendSysMessage(who, "Error - Unable to consume ["+amount+"] of material ["+material_objtype+"]");
+						SendSysMessage(who, "Error - Unable to consume ["+amount+"] of material ["+material_objtype+"]", color := 33);
 						return 0;
 					endif
           // For occasions when we need to replace a full container with any empty one
@@ -371,7 +376,7 @@ function CraftAssembly(who, craft_skill, tool, objtype, amt)
 				endif
 			endforeach
 			Set_Critical(0);
-			SendSysMessage(who, "You failed to create the item, and some of your materials are lost.");
+			SendSysMessage(who, "You failed to create the item, and some of your materials are lost.", color := 33);
 		endif
 		counter := counter + 1;
 	endwhile
@@ -387,7 +392,7 @@ function CreateCraftedMap(who, craft_skill, use_on, objtype, amount, itemname, r
 	var theitem := CreateItemInBackpack(who, objtype, 1);
 	if( theitem )
 		if( !SubtractAmount(use_on, amount) )
-			SendSysMessage(who, "You don't have enough materials in your backpack!");
+			SendSysMessage(who, "You don't have enough materials in your backpack!", color := 33);
 			DestroyItem(theitem);
 			return -1;
 		endif
@@ -398,9 +403,9 @@ function CreateCraftedMap(who, craft_skill, use_on, objtype, amount, itemname, r
 			reqd := 3;
 		endif
 		if( rint < reqd )
-			SendSysMessage(who, "You were barely able to make this item.	Its quality is below average.");
+			SendSysMessage(who, "You were barely able to make this item. Its quality is below average.", color := 56);
 		else
-			SendSysMessage(who, "You create the item and put it in your backpack.");
+			SendSysMessage(who, "You create the item and put it in your backpack.", color := 66);
 		endif
 		var word := "";
 		if((itemname[1] == "a") || (itemname[1] == "e") || (itemname[1] == "i") || (itemname[1] == "o") || (itemname[1] == "u"))
@@ -412,7 +417,7 @@ function CreateCraftedMap(who, craft_skill, use_on, objtype, amount, itemname, r
 		itemname := itemname - "plain ";
 		SetName(theitem, itemname);
 	else
-		SendSysMessage(who, "You don't have enough room in your backpack!");
+		SendSysMessage(who, "You don't have enough room in your backpack!", color := 33);
 		return 0;
 	endif
 
@@ -461,7 +466,7 @@ function RequiredObjectMissing(who, objtype)
 	if( MissingObject == "nothing" )
 		return -1; // -1 = not required. Should never happen unless you misuse this function.
 	endif
-	SendSysMessage(who, "You must be near a " + MissingObject + " in order to make this.");
+	SendSysMessage(who, "You must be near a " + MissingObject + " in order to make this.", color := 40);
 	return 1;
 endfunction
 
