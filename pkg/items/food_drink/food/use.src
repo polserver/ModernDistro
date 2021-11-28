@@ -20,7 +20,7 @@ program eat(who, food)
 	endif
 	var magiceffect := {};
 	magiceffect := GetObjTypeArray( food.objtype, "MagicEffect" );
-
+	var food_objtype := food.objtype;
 	var cfg_elem := GetItemDescInfo(food.objtype);
 	var themsg;
 	var strength := CInt(GetObjProperty(food, "PoisonStrength"));
@@ -40,6 +40,11 @@ program eat(who, food)
 	if ( !SubtractAmount(food, 1) )
 		SendSysMessage(who, "Error - unable to subtract 1 from item.");
 		return 0;
+	endif
+
+	// If player eats form a triple muffin, create the two left over.
+	if(food_objtype == 0x9EB)
+		CreateItemInBackpack(who, 0x9EA, 2);
 	endif
 
 	case ( RandomInt(3) + 1 )
