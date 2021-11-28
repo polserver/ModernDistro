@@ -39,12 +39,16 @@ program UseWood( who, wood )
 		var y := wood.y;
 		var z := wood.z;
 		Detach();
-		var campfire := CreateItemAtLocation( x, y, z, UOBJ_CAMPFIRE, 1, who.realm );
+		var campfire := CreateItemAtLocation( x, y, z, "campfire", 1, who.realm );
 		campfire.movable := 0;
 		SubtractAmount(wood,1);
 		sleep(60);
 		DestroyItem(campfire);
-		campfire := CreateItemAtLocation(x,y,z,UOBJ_ASHES,1, who.realm);
+		campfire := CreateItemAtLocation(x,y,z,"embers",1, who.realm);
+		campfire.movable := 0;
+		sleep(60);
+		DestroyItem(campfire);
+		campfire := CreateItemAtLocation(x,y,z,"ashes",1, who.realm);
 		campfire.movable := 0;
 		sleep(60);
 		DestroyItem(campfire);
