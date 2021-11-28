@@ -43,7 +43,7 @@ program use_cookingtool(who, tool)
 	var amt         := rinfo[2];
 
 	var CraftNear := isNearRequiredObject(who, the_objtype);
-	SendSysMessage(who, "Debug msg: cooking.src -> CraftNear == " + CStr(CraftNear), 3, 88);
+	// SendSysMessage(who, "Debug msg: cooking.src -> CraftNear == " + CStr(CraftNear), 3, 88);
 	if ( CraftNear == 0 )
 		RequiredObjectMissing(who, the_objtype);
 		return 0;
