@@ -7,6 +7,8 @@ include ":itemutils:itemUtil";
 include ":resourcecore:resourceCore";
 include ":resourcecore:clay";
 include ":resourcecore:sand";
+include "include/startEqp";
+include ":keys:key";
 
 // Need to damage the tool in the main gathering loop
 // Need to figure out why the tracking script is not doing what it should be doing
@@ -24,22 +26,269 @@ program use_shovel( mobile, shovel )
 		return 0;
 	endif
 
-	SendSysMessage( mobile, "Where do you wish to dig?", 0x3, 0x42 );
+	var itms := EnumerateItemsInContainer(mobile.backpack);
+	var items := {};
+	var treasuremap := 0;
+	var map := 0;
 
-	use_on := TargetCoordinates( mobile );
-	if( !use_on )
-		SendSysMessage( mobile, "Cancelled.", 0x3, 0x32 );
-		return 0;
+	foreach itm in itms
+		if((itm.graphic == 0x14eb) && (GetObjProperty(itm,"level")))
+			items.append(itm);
+			treasuremap := 1;
+		endif
+	endforeach
+
+	if(treasuremap == 0)
+		SendSysMessage( mobile, "Where do you wish to dig?", 0x3, 0x42 );
+
+		use_on := TargetCoordinates( mobile );
+		if( !use_on )
+			SendSysMessage( mobile, "Cancelled.", 0x3, 0x32 );
+			return 0;
+		endif
+
+		if( !RC_IsSandPatch( use_on ) && !RC_IsSwampPatch( use_on ) )
+			SendSysMessage( mobile, "You can only use a shovel to dig for sand or clay.", 0x3, 0x22 );
+			return 0;
+		endif
+		SHOVEL_HarvestResource( mobile, use_on );
+
+		return 1;
+	else
+		var x;
+		var y;
+		var themap := 0;
+		foreach itm in items
+			x := GetObjProperty(itm,"chestx");
+			y := GetObjProperty(itm,"chesty");
+			if(x and y)
+				if((mobile.x >= x-30) && (mobile.x <= x+30) && (mobile.y >= y-30) && (mobile.y <= y+30))
+					themap := 1;
+					map := itm;
+					break;
+				endif
+			endif
+		endforeach
+		if(themap == 0)
+			SendSysMessage(mobile, "Target a location to dig.", color := 88);
+			var dig := TargetCoordinates( mobile );
+			PerformAction(mobile, 0x0b);
+			PlaySoundEffect(mobile, 0x126);
+			sleep(1);
+			SendSysMessage(mobile,"You dig and dig, but do not find any treasure.", color := 40);
+			return 0;
+		endif
+		if(GetObjProperty(map, "Solved"))
+			SendSysMessage(mobile, "That map has already been dug up.", color := 33);
+			return 0;
+		endif
+		if(!ReserveItem(map))
+			return 0;
+		endif
+		var chestx := GetObjProperty( map, "chestx" );
+		var chesty := GetObjProperty( map, "chesty" );
+		var chestz := GetWorldHeight(chestx, chesty, mobile.realm);
+		if((!chestx) || (!chesty))
+			SendSysMessage( mobile, "That is not a treasure map.", color := 33 );
+			return 0;
+		endif
+		if( mobile.serial !=  (GetObjProperty( map, "decoder" ) ) )
+			SendSysMessage( mobile, "You must have decoded the map to dig for it.", color := 33 );
+			return 0;
+		endif
+		SendSysMessage(mobile, "Target a location to dig.");
+		var dig := TargetCoordinates( mobile );
+		if(!dig)
+			SendSysMessage(mobile, "Cancelled.", color := 33);
+			return 0;
+		endif
+		if(!CheckLosAt( mobile, dig.x, dig.y, dig.z ) );
+			SendSysMessage( mobile, "You can't see that.", color := 33 );
+			return 0;
+		endif
+		PerformAction(mobile, 0x0b);
+		PlaySoundEffect(mobile, 0x126);
+		var range := GetRange( mobile );
+		var distn := CoordinateDistance( dig.x, dig.y, chestx, chesty );
+		var dirns := "None";
+		var direw := "None";
+		var maxrange := 20;
+		var mobiles := ListMobilesNearLocation(dig.x, dig.y, dig.z, 0, mobile.realm);
+		if(distn > maxrange)
+			SendSysMessage(mobile,"You dig and dig, but do not find any treasure.", color := 40);
+			return 0;
+		elseif((distn > range) && (distn <= maxrange))
+			SendSysMessage(mobile,"You dig and dig, but no treasure seems to be here.", color := 40);
+			return 0;
+		elseif((distn < range) && (len(mobiles) > 0))
+			SendSysMessage(mobile,"You stop digging because something is directly on top of the treasure chest.", color := 40);
+			return 0;
+		else
+			var i := 1;
+			var mex := mobile.x;
+			var mey := mobile.y;
+			var parts := {};
+			var chest := CreateTreasureChest( map, chestx, chesty, chestz-8 );
+			chest.movable := 0;
+			while((i <= 9) && (mobile.x == mex) && (mobile.y == mey))
+				if((mobile.x != mex) && (mobile.y != mey))
+					foreach thing in parts
+						DestroyItem(thing);
+					endforeach
+					break;
+				endif
+				PerformAction(mobile, 0x0b);
+				PlaySoundEffect(mobile, 0x126);
+				sleep(1);
+				if(i == 2)
+					var patch := CreateItemAtLocation(chestx, chesty, chestz, 2321, 1, mobile.realm);
+					patch.movable := 0;
+					parts.append(patch);
+				elseif(i == 3)
+					var patch := CreateItemAtLocation(chestx, chesty, chestz, 2322, 1, mobile.realm);
+					patch.movable := 0;
+					parts.append(patch);
+				elseif(i == 4)
+					var patch := CreateItemAtLocation(chestx, chesty, chestz, 2323, 1, mobile.realm);
+					patch.movable := 0;
+					parts.append(patch);
+				elseif(i == 5)
+					var patch := CreateItemAtLocation(chestx, chesty, chestz, 2324, 1, mobile.realm);
+					patch.movable := 0;
+					parts.append(patch);
+					chest.movable := 1;
+					MoveObjectToLocation(chest, chest.x, chest.y, chest.z+2, chest.realm, MOVEOBJECT_FORCELOCATION);
+					chest.movable := 0;
+				elseif(i == 6)
+					var patch := CreateItemAtLocation(chestx, chesty, chestz, 2324, 1, mobile.realm);
+					patch.movable := 0;
+					parts.append(patch);
+					chest.movable := 1;
+					MoveObjectToLocation(chest, chest.x, chest.y, chest.z+2, chest.realm, MOVEOBJECT_FORCELOCATION);
+					chest.movable := 0;
+				elseif(i == 7)
+					var patch := CreateItemAtLocation(chestx, chesty, chestz, 2324, 1, mobile.realm);
+					patch.movable := 0;
+					parts.append(patch);
+					chest.movable := 1;
+					MoveObjectToLocation(chest, chest.x, chest.y, chest.z+2, chest.realm, MOVEOBJECT_FORCELOCATION);
+					chest.movable := 0;
+				elseif(i == 8)
+					chest.movable := 1;
+					MoveObjectToLocation(chest, chest.x, chest.y, chest.z+2, chest.realm, MOVEOBJECT_FORCELOCATION);
+					chest.movable := 0;
+					foreach thing in parts
+						DestroyItem(thing);
+					endforeach
+				endif
+				i := i + 1;
+			endwhile
+			if((mobile.x != mex) || (mobile.y != mey))
+				SendSysMessage(mobile,"You must stand still while digging.", color := 33);
+				DestroyItem(chest);
+				return 0;
+			endif
+			var maplevel := CInt(GetObjProperty(map, "level") );
+			SetObjProperty(chest, "level", maplevel);
+			SetObjProperty(chest, "trap_type", "3");
+			var strength := 0;
+			case (maplevel)
+				1: strength :=  20;
+				2: strength :=  40;
+				3: strength :=  60;
+				4: strength :=  80;
+				5: strength := 100;
+			endcase
+			if ((strength == 0) || (strength == error))
+				strength := 20;
+			endif
+			SetObjProperty(chest, "trap_strength", strength);
+			chest.usescript := ":tinkering:tinkerTraps";
+			var lockid := AllocateLockID();
+			SetObjProperty( chest, "lockid", lockid );
+			chest.locked :=  1;
+			chest.movable := 0;
+			EraseObjProperty(map, "level");
+			EraseObjProperty(map, "chestx");
+			EraseObjProperty(map, "chesty");
+			SetObjProperty(map, "Solved", 1);
+			map.name := "a treasure map [completed by " + mobile.name + "]";
+			var lvl := GetObjProperty( chest, "level" );
+			var cfgfile := ReadConfigFile(":treasuremap:guardians");
+			if(!cfgfile)
+				SendSysMessage(mobile,"Something is wrong with this map.", color := 33);
+				return 0;
+			endif
+			var elem := FindConfigElem( cfgfile, lvl );
+			if(!elem)
+				SendSysMessage(mobile,"Something is wrong with this map.");
+				return 0; // This line wasn't here originally but considering the check above, I think it belongs here too.
+			endif
+			var total := GetConfigString( elem, "total" );
+			var num := GetConfigInt( elem, "num" );
+			var limit := RandomDiceRoll( total );
+			var rand;
+			var template;
+			i := 1;
+			for( i := 1; i <= limit; i := i + 1 )
+				rand := RandomInt( num ) + 1;
+				template := GetConfigString( elem, ("creature" + rand) );
+				CreateGuardian( chest, template );
+			endfor
+			UnloadConfigFile(":treasuremap:guardians");
+			SendSysMessage( mobile, "You unleash the treasure's guardians!", color := 33 );
+			ReleaseItem(shovel);
+			Detach();
+			sleep(1800);
+			DestroyItem(chest);
+		endif
 	endif
-
-	if( !RC_IsSandPatch( use_on ) && !RC_IsSwampPatch( use_on ) )
-		SendSysMessage( mobile, "You can only use a shovel to dig for sand or clay.", 0x3, 0x22 );
-		return 0;
-	endif
-	SHOVEL_HarvestResource( mobile, use_on );
-
-	return 1;
 endprogram
+
+function GetRange( mobile );
+  var skill := AP_GetSkill( mobile, MINING );
+  if( skill >= 100 )
+    return 5;
+  elseif( skill >= 80 )
+    return 4;
+  elseif( skill >= 60 )
+    return 3;
+  elseif( skill >= 40 )
+    return 2;;
+  elseif( skill >= 20 )
+    return 1;
+  else
+    return 0;
+  endif
+endfunction
+
+function CreateTreasureChest( map, x, y, z )
+	z := GetWorldHeight( x, y );
+	var chest := CreateItemAtLocation(x, y, z-8, 0x0e40, 1, map.realm);
+	chest.movable := 0;
+	var lvl := GetObjProperty( map, "level" );
+	SetObjProperty(chest, "level", lvl);
+	var lootgroup;
+	case(lvl)
+		1: lootgroup := 5;
+		2: lootgroup := 6;
+		3: lootgroup := 7;
+		4: lootgroup := 8;
+		5: lootgroup := 9;
+	default: lootgroup := 5;
+	endcase
+	makeloot(chest, lootgroup);
+	return chest;
+endfunction
+
+function CreateGuardian( chest, template )
+	var dx := RandomInt( 8 ) - 4;
+	var dy := RandomInt( 8 ) - 4;
+	var nasty := CreateNpcFromTemplate( template, chest.x+dx, chest.y+dy, chest.z, 0, chest.realm );
+	if( nasty == "<error>" )
+		CreateGuardian( chest, template );
+	endif
+endfunction
 
 function SHOVEL_HarvestResource( byref mobile, byref use_on )
 
