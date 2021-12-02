@@ -26,49 +26,57 @@ program use_shovel( mobile, shovel )
 		return 0;
 	endif
 
-	var itms := EnumerateItemsInContainer(mobile.backpack);
-	var items := {};
 	var treasuremap := 0;
 	var map := 0;
 
-	foreach itm in itms
-		if((itm.graphic == 0x14eb) && (GetObjProperty(itm,"level")))
-			items.append(itm);
-			treasuremap := 1;
-		endif
-	endforeach
+	SendSysMessage(mobile, "What do you wish to do with the shovel?", color := 88);
 
-	if(treasuremap == 0)
-		SendSysMessage( mobile, "Where do you wish to dig?", 0x3, 0x42 );
-
-		use_on := TargetCoordinates( mobile );
-		if( !use_on )
-			SendSysMessage( mobile, "Cancelled.", 0x3, 0x32 );
+	use_on := TargetCoordinates( mobile );
+	if( !use_on )
+		SendSysMessage( mobile, "Cancelled.", 0x3, 0x32 );
+		return 0;
+	endif
+	// First we check to see if a map was targeted.
+	if(use_on.item.IsA(POLCLASS_MAP))
+		map := use_on.item;
+		// Yes a map was targeted.
+		// Now we check to see if the treasure has already been found.
+		if(GetObjProperty(map, "Solved"))
+			SendSysMessage(mobile, "That treasure has already been found.", color := 33);
 			return 0;
 		endif
+		// Are we dealing with a treasure map?
+		if(GetObjProperty(map, "level"))
+			treasuremap := 1;
+		endif
+	endif
 
+	// This block is executed if a map was not targeted.
+	if(treasuremap == 0)
+		// If the player did not target sand or swamp.
+		// We notify the player and exit the script.
 		if( !RC_IsSandPatch( use_on ) && !RC_IsSwampPatch( use_on ) )
 			SendSysMessage( mobile, "You can only use a shovel to dig for sand or clay.", 0x3, 0x22 );
 			return 0;
 		endif
+		// Otherwise we harvest sand if sand was targeted or clay if swamp.
 		SHOVEL_HarvestResource( mobile, use_on );
-
+		// Done harvesting, so exit.
 		return 1;
+
+	// This section is executed if a treasure map was targeted
 	else
 		var x;
 		var y;
 		var themap := 0;
-		foreach itm in items
-			x := GetObjProperty(itm,"chestx");
-			y := GetObjProperty(itm,"chesty");
-			if(x and y)
-				if((mobile.x >= x-30) && (mobile.x <= x+30) && (mobile.y >= y-30) && (mobile.y <= y+30))
-					themap := 1;
-					map := itm;
-					break;
-				endif
+		x := GetObjProperty(map,"chestx");
+		y := GetObjProperty(map,"chesty");
+		if(x and y)
+			if((mobile.x >= x-30) && (mobile.x <= x+30) && (mobile.y >= y-30) && (mobile.y <= y+30))
+				themap := 1;
 			endif
-		endforeach
+		endif
+
 		if(themap == 0)
 			SendSysMessage(mobile, "Target a location to dig.", color := 88);
 			var dig := TargetCoordinates( mobile );
@@ -78,16 +86,13 @@ program use_shovel( mobile, shovel )
 			SendSysMessage(mobile,"You dig and dig, but do not find any treasure.", color := 40);
 			return 0;
 		endif
-		if(GetObjProperty(map, "Solved"))
-			SendSysMessage(mobile, "That map has already been dug up.", color := 33);
-			return 0;
-		endif
 		if(!ReserveItem(map))
 			return 0;
 		endif
 		var chestx := GetObjProperty( map, "chestx" );
 		var chesty := GetObjProperty( map, "chesty" );
 		var chestz := GetWorldHeight(chestx, chesty, mobile.realm);
+		// Final check to be absolutely certain we have a treasure map.
 		if((!chestx) || (!chesty))
 			SendSysMessage( mobile, "That is not a treasure map.", color := 33 );
 			return 0;
@@ -96,7 +101,7 @@ program use_shovel( mobile, shovel )
 			SendSysMessage( mobile, "You must have decoded the map to dig for it.", color := 33 );
 			return 0;
 		endif
-		SendSysMessage(mobile, "Target a location to dig.");
+		SendSysMessage(mobile, "Target a location to dig.", color := 88);
 		var dig := TargetCoordinates( mobile );
 		if(!dig)
 			SendSysMessage(mobile, "Cancelled.", color := 33);
@@ -110,8 +115,6 @@ program use_shovel( mobile, shovel )
 		PlaySoundEffect(mobile, 0x126);
 		var range := GetRange( mobile );
 		var distn := CoordinateDistance( dig.x, dig.y, chestx, chesty );
-		var dirns := "None";
-		var direw := "None";
 		var maxrange := 20;
 		var mobiles := ListMobilesNearLocation(dig.x, dig.y, dig.z, 0, mobile.realm);
 		if(distn > maxrange)
@@ -246,19 +249,15 @@ program use_shovel( mobile, shovel )
 endprogram
 
 function GetRange( mobile );
-  var skill := AP_GetSkill( mobile, MINING );
+  var skill := AP_GetSkill( mobile, CARTOGRAPHY );
   if( skill >= 100 )
-    return 5;
-  elseif( skill >= 80 )
     return 4;
-  elseif( skill >= 60 )
+  elseif( skill >= 80 )
     return 3;
-  elseif( skill >= 40 )
-    return 2;;
-  elseif( skill >= 20 )
+  elseif( skill >= 50 )
+    return 2;
+  elseif( skill >= 0 )
     return 1;
-  else
-    return 0;
   endif
 endfunction
 
