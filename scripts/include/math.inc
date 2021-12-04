@@ -60,6 +60,10 @@ use math;
 const CONST_E := 2.718282;
 const CONST_PI := 3.141592;
 
+// Used in FormulateDiceString() function
+CONST SIDE_CNT    := 0;
+CONST DICE_CNT    := 1;
+
 // Used in the RoundToTens() function
 const ROUND_NORMAL := 0;
 const ROUND_DOWN := 1;
