@@ -296,7 +296,7 @@ function ParryChecks(byref a_info, byref d_info, byref raw_damage)
 			shield.hp := shield.hp - 1;
 
 			if ( shield.hp <= 1 )
-				MoveObjectToLocation(shield, 1, 1, 1, shield.realm, MOVEOBJECT_FORCELOCATION);
+				MoveObjectToLocation(shield, 1, 1, 1, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION);
 				SendSysMessage(d_info.mobile, shield.desc+" has been destroyed.");
 				DestroyItem(shield);
 			endif

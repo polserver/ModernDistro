@@ -12,7 +12,7 @@ function sleepmode()
   endforeach
   if(GetObjProperty(me,"killme"))
     SetObjProperty(me, "guardkill", 1);
-    MoveObjectToLocation(me, 5276, 1185, 0, "britannia_alt", MOVEOBJECT_FORCELOCATION);
+    MoveObjectToLocation(me, 5276, 1185, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION);
     KillMobile(me);
   endif
   EraseObjProperty(me,"#flees");

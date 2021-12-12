@@ -493,7 +493,7 @@ function info(who, character)
             SendSysMessage(character, "You were kicked by " + who.name + ".");
             DisconnectClient(character);
           endif
-      20: MoveObjectToLocation(character, 5288, 1176, 0, "britannia"); // newmap problem
+      20: MoveObjectToLocation(character, 5288, 1176, 0, "britannia");
       21: if(!character.isA(POLCLASS_NPC))
             var bankbox := FindBankBox(character);
             SendOpenSpecialContainer(who, bankbox);

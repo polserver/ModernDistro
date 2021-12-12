@@ -128,7 +128,7 @@ function DespawnAll()
 	foreach thing in npclist
 		var hp := AP_GetVital(thing, VITALID_LIFE);
 		if(hp)
-			MoveObjectToLocation(thing, 5279, 1184, 0, "britannia", MOVEOBJECT_FORCELOCATION); // newmap problem
+			MoveObjectToLocation(thing, 5279, 1184, 0, "britannia", MOVEOBJECT_FORCELOCATION);
 			KillMobile(thing);
 		endif
 	endforeach

@@ -107,7 +107,7 @@ program CastleGuard()
       endif
       next_wander := ReadGameClock() + 10;
     elseif((ReadGameClock() > killtime) && (killtime != 0))
-      MoveObjectToLocation(me, 5555, 1111, 0, "britannia", MOVEOBJECT_FORCELOCATION); // newmap problem
+      MoveObjectToLocation(me, 5555, 1111, 0, "britannia", MOVEOBJECT_FORCELOCATION);
       SetObjProperty(me, "guardkill", 1);
       KillMobile(me);
       break;

@@ -11,7 +11,7 @@ program summon_familiar( params )
 
 	var familiar :=SystemFindObjectBySerial(Cint(getobjproperty(caster, "familiar")));
 	if(familiar)
-		MoveObjectToLocation(familiar, 10, 10, 10, familiar.realm, MOVEOBJECT_FORCELOCATION);
+		MoveObjectToLocation(familiar, 10, 10, 10, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION);
 		KillMobile(familiar);
 		EraseObjProperty(caster, "familiar");
 	endif

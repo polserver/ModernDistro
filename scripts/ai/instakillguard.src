@@ -130,7 +130,7 @@ function ClearGuard()
   SetProperty("guardkill", 1);
   PlaySoundEffect(me, 0x1ff);
   PlayStationaryEffect( me.x, me.y, me.z, FX_SMOKE, speed:=0xa, loop:=0xa, realm := me.realm );
-  MoveObjectToLocation(me, 5283,1184,0);
+  MoveObjectToLocation(me, 5283, 1184, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION);
   KillMobile(me);
 endfunction
 
