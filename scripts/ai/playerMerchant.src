@@ -51,7 +51,7 @@ program player_merchant()
   var oldpack := me.backpack;
   if(oldpack.objtype != 0x1966c)
     MoveObjectToLocation(oldpack, 5851, 1161, 0, "britannia_alt", MOVEOBJECT_FORCELOCATION);
-    var newpack := CreateItemAtLocation(5851, 1162, 0, 0x1966c, 1);
+    var newpack := CreateItemAtLocation(5851, 1162, 0, 0x1966c, 1, _DEFAULT_REALM);
     EquipItem(me, newpack);
     foreach thing in EnumerateItemsInContainer(oldpack, ENUMERATE_ROOT_ONLY)
       MoveItemToContainer(thing, newpack);

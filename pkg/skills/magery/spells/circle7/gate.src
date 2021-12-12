@@ -75,7 +75,7 @@ program spell_gate(parms)
 	SendSysMessageCL(caster, 502632, color := 33); // The spell fizzles.
     chk := 1;
   endif
-  var multicheck := CreateItemAtLocation(5833, 1125, 0, 0xeed, 1, caster.realm); // newmap problem
+  var multicheck := CreateItemAtLocation(5833, 1125, 0, 0xeed, 1, _DEFAULT_REALM); // newmap problem
   multicheck.hidden := 1;
   if(!MoveObjectToLocation(multicheck, tox, toy, toz, caster.realm, MOVEOBJECT_NORMAL)) // realm gating and recall issues
     SendSysMessage(caster, "Ethereal forces bar you from gating there.");

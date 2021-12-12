@@ -28,7 +28,7 @@ var caster := 0;
 var spells;
 var firebreather;
 if(!me.backpack)
-    var newbackpack := CreateItemAtLocation(5288, 1176, 0, 0xe75,1, "britannia_alt");  // New map problem
+    var newbackpack := CreateItemAtLocation(5288, 1176, 0, 0xe75,1, "britannia_alt");
     EquipItem(me, newbackpack);
 endif
 var mypack := me.backpack;

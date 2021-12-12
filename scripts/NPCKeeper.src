@@ -177,7 +177,7 @@ program npckeep(who)
         who.color := randomint(Cint(parms[2]) - Cint(parms[1]))+Cint(parms[1]);
       endif
       if(pncfg[who.npctemplate].mount)
-        var mymount := CreateItemAtLocation(5288,1176,0,0xf021,1);
+        var mymount := CreateItemAtLocation(5288, 1176, 0, 0xf021, 1, _DEFAULT_REALM);
         var mountparms := splitwords(pncfg[who.npctemplate].mount);
         mymount.graphic := Cint(mountparms[1]);
         mymount.color := Cint(mountparms[2]);

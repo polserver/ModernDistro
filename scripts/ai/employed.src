@@ -54,7 +54,7 @@ program employed()
   endif
   me.setmaster(master);
   if(!me.backpack)
-    mypack := CreateItemAtLocation(5288, 1176, 0, 0xe75,1, me.realm); // newmap problem
+    mypack := CreateItemAtLocation(5288, 1176, 0, 0xe75,1, _DEFAULT_REALM);
     EquipItem(me, mypack);
   endif
   var npccfg := ReadConfigFile("npcdesc");
