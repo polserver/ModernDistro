@@ -2,52 +2,49 @@ use uo;
 use util;
 
 include ":cleric:cleric";
+include "include/client";
 
 program distract(params)
 	var who := params[1];
 	var info := params[2];
-
+	var npc_props := struct;
 	var devotion := GetObjProperty(who, "Devotion");
 	var piety := DevotionPiety(devotion, who);
 	var pietyboost := CInt(GetConcentratingClerics(who, 5)/2);
 	if (pietyboost + piety <= 7)
 		piety := piety + pietyboost;
 	endif
+	var duration := piety * 60;
 
 	ClericReleaseScript(info.pid);
 
-	who.hidden := 1;
+	// Setup the properties before creating the clone NPC
+	npc_props.+name := who.name;
+	npc_props.+facing := who.facing;
+	npc_props.+gender := who.gender;
+	npc_props.+color := who.color;
+	npc_props.+truecolor := who.truecolor;
+	npc_props.+hidden := 1;
+	npc_props.+CProps := dictionary;
+	npc_props.CProps.insert("Devotion", GetObjProperty(who, "Devotion"));
+	npc_props.CProps.insert("master", who.serial);
 
-	//var fake := CreateNpcFromTemplate("peasant1", 7100, 4030, 0, 0, who.realm);
-	//var fake := CreateNpcFromTemplate("peasant1", who.x, who.y, -100, 0, who.realm);
-	var fake := CreateNpcFromTemplate("peasant1", who.x, who.y, who.z, 0, who.realm);
-	MoveObjectToLocation(fake, 7100, 4030, 0, "britannia", MOVEOBJECT_FORCELOCATION);
-	Sleepms(100);
+	// Create the clone with our props.
+	var fake := CreateNpcFromTemplate("peasant1", who.x, who.y, who.z, npc_props, who.realm);
 	if(!fake)
 		SysLog("Could not create NPC 'clone'.");
+		SendSysMessage(who, "Could not create your clone. Report this to staff.", color := 33);
+		return 0;
 	endif
-	set_critical(1);
+
+	// Strip the peasant NPC so we can dress it to look like the cleric.
 	var remove := ListEquippedItems(fake);
-	Print(remove.name);
 	foreach thing in remove
 		MoveObjectToLocation(thing, 1, 1, 1, "britannia", MOVEOBJECT_FORCELOCATION);
 		DestroyItem(thing);
 	endforeach
-	SetObjProperty(fake, "Duration", piety * 60);
-	var hair := GetEquipmentByLayer( who, 11 );
-	var fake_hair := CreateItemAtLocation(1, 1, 1, hair.objtype, 1, "britannia");
-	fake_hair.color := hair.color;
-	EquipItem(fake, fake_hair);
-	var facial_hair := GetEquipmentByLayer( who, 11 );
-	fake_hair := CreateItemAtLocation(1, 1, 1, facial_hair.objtype, 1, "britannia");
-	fake_hair.color := facial_hair.color;
-	EquipItem(fake, fake_hair);
-	fake.graphic := who.graphic;
-	fake.color := who.color;
-	fake.truecolor := who.truecolor;
-	fake.name := who.name;
-	fake.facing := who.facing;
-	SetObjProperty(fake, "Devotion", GetObjProperty(who, "Devotion"));
+
+	// Get the cleric's equipped items, copy their attributes and equip them on our clone.
 	var priest_equip := ListEquippedItems( who );
 	var dupe_item;
 	foreach thing in priest_equip
@@ -57,11 +54,14 @@ program distract(params)
 		dupe_item.graphic := thing.graphic;
 		EquipItem(fake, dupe_item);
 	endforeach
-	SetObjProperty(fake, "master", who.serial);
-	SetObjProperty( fake, "duration", (piety*2)+15 );
-	MoveObjectToLocation(fake, who.x, who.y, who.z, who.realm, MOVEOBJECT_FORCELOCATION);
-	set_critical(0);
 
+	who.hidden := 1;
+	fake.hidden := 0;
 	who.stealthsteps := (piety*2) + 5;
+	Sleep(duration);
+	PlaySoundEffect( fake, SFX_SPELL_MANA_VAMPIRE );
+	PlayStationaryEffect( fake.x, fake.y, fake.z, FX_SMOKE, 0xa, 0xa, 0, fake.realm );
+	fake.hidden := 1;
+	fake.kill();
 
 endprogram
