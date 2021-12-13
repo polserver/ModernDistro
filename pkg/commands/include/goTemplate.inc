@@ -13,7 +13,11 @@ function Go_CheckInit(who)
                 for i:=1 to MaxLocs
                         // Open files and set veriables
                         var dest := oldlocs[i];
-                        Go_SetLocation("base_Distro", who, dest.name, dest.realm, dest.x, dest.y, dest.z);
+						var facet := dest.realm;
+						if( !facet )
+							facet := _DEFAULT_REALM;
+						endif
+                        Go_SetLocation("base_Distro", who, dest.name, facet, dest.x, dest.y, dest.z);
                         SleepMS(2);
                 endfor
 
