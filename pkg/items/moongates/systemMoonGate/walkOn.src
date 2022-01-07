@@ -1,0 +1,59 @@
+/* $Id$
+ *
+ */
+
+use uo;
+use os;
+use polsys;
+
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+include ":moongates:moongate";
+
+program walkOnScript(mobile, tile)
+	if ( mobile.npctemplate )
+		return 0;
+	elseif ( JustTeleported(mobile) )
+		return 0;
+	endif
+	
+	var gump := tile.GetGump();
+	var input := GFSendGump(mobile, gump);
+	
+	if ( !input[MG_OKAY_BTN] )
+		SendSysMessage(mobile, "Cancelled.");
+		return 0;
+	elseif ( Distance(mobile, tile) > 1 )
+		SendSysMessage(mobile, "No longer close enough to the moongate.");
+		return 0;
+	endif
+	
+	var select := 0;
+	foreach key in ( input.Keys )
+		if ( key >= MG_LOCATION_START )
+			select := key-MG_LOCATION_START;
+			break;
+		endif
+		SleepMS(2);
+	endforeach
+	
+	var dest := MG_FindDestination(select);
+	SetObjProperty(mobile, "#Teleported", ReadMillisecondClock());
+	var result := MoveObjectToLocation(mobile, dest.x, dest.y, dest.z, dest.realm, MOVEOBJECT_NORMAL);				
+	if ( result.errortext )
+		SendSysMessage(mobile, "Unable to move ->"+result.errortext);
+	endif
+		
+	return 1;
+endprogram
+
+function JustTeleported(mobile)
+	var tele_time := CInt(GetObjProperty(mobile, "#Teleported"));
+	if ( tele_time > ReadMillisecondClock()-800 )
+		// Mobile just teleported. Too soon to teleport again.
+		return 1;
+	else
+		// Safe to teleport the mobile
+		return 0;
+	endif
+endfunction

@@ -1,0 +1,32 @@
+/* $Id$
+ *
+ */
+ 
+use uo;
+use polsys;
+
+program walkOnScript(mobile, tile)
+	if ( JustTeleported(mobile) )
+		return 0;
+	endif
+	
+	SetObjProperty(mobile, "#Teleported", ReadMillisecondClock());
+	var result := tile.SendToDestination(mobile);
+	if ( result.errortext )
+		SendSysMessage(mobile, "Error teleporting:"+result.errortext);
+		return 0;
+	endif
+	
+	return 1;
+endprogram
+
+function JustTeleported(mobile)
+	var tele_time := CInt(GetObjProperty(mobile, "#Teleported"));
+	if ( tele_time > ReadMillisecondClock()-800 )
+		// Mobile just teleported. Too soon to teleport again.
+		return 1;
+	else
+		// Safe to teleport the mobile
+		return 0;
+	endif
+endfunction

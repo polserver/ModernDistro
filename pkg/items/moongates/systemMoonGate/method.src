@@ -1,0 +1,36 @@
+/* $Id$
+ *
+ */
+
+use uo;
+
+include ":moongates:moongate";
+
+program Install()
+	return 1;
+endprogram
+
+exported function IsSystemMoonGate(moongate)
+	moongate := moongate;
+	return 1;
+endfunction
+
+exported function SaveGump(moongate, gump)
+	var data_elem := MG_GetDataElem(Hex(moongate.serial));
+	return data_elem.SetProp("Gump", gump);
+endfunction
+
+exported function GetGump(moongate)
+	var data_elem := MG_GetDataElem(Hex(moongate.serial));
+	return data_elem.GetProp("Gump");
+endfunction
+
+exported function SetTownName(moongate, name)
+	var data_elem := MG_GetDataElem(Hex(moongate.serial));
+	return data_elem.SetProp("TownName", name);
+endfunction
+
+exported function GetTownName(moongate)
+	var data_elem := MG_GetDataElem(Hex(moongate.serial));
+	return data_elem.GetProp("TownName");
+endfunction

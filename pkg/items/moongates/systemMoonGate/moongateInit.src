@@ -1,0 +1,130 @@
+/* $Id$
+ *
+ */
+
+use uo;
+use os;
+use polsys;
+use cfgfile;
+
+include ":moongates:report";
+include ":moongates:moongate";
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+
+program CreateSystemMoonGates()
+	MG_ReportText("---=[ MOONGATE INIT SCRIPT HAS STARTED UP ]=---", MG_REPORT_SYSLOG);
+	var config := ReadConfigFile(":moongates:moongate");
+	if ( config.errortext )
+		MG_ReportText("ERROR: Could not open moongate.cfg - "+config.errortext, MG_REPORT_SYSLOG);
+		return 0;
+	endif
+
+	CleanupOldMoongates();
+
+	var realm_names := Realms();
+	foreach realm_name in ( GetConfigStringKeys(config) )
+		var cfg_elem := config[realm_name];
+		if ( !realm_names.Exists(realm_name) )
+			MG_ReportText("ERROR: moongate.cfg elem '"+realm_name+"' is not a valid realm.", MG_REPORT_SYSLOG);
+			continue; // Not a valid realm name.
+		elseif ( !cfg_elem.Active )
+			continue;
+		else
+			foreach entry in ( GetConfigStringDictionary(cfg_elem, "Town") )
+				var gate := CreateMoongate(realm_name, _entry_iter, entry);
+				BuildGumpForGate(gate, _entry_iter, config);
+				SleepMS(2);
+			endforeach
+		endif
+
+		SleepMS(2);
+	endforeach
+
+	UnloadConfigFile(":moongates:moongate");
+
+	MG_ReportText("---=[ MOONGATE INIT SCRIPT HAS FINISHED ]=---", MG_REPORT_SYSLOG);
+
+	return 1;
+endprogram
+
+function CreateMoongate(byref realm_name, byref town_name, byref entry)
+	var coords := SplitWords(entry);
+
+	var item := CreateItemAtLocation(CInt(coords[1]), CInt(coords[2]), CInt(coords[3]), "systemmoongate", 1, realm_name);
+	if ( !item )
+		MG_ReportText("ERROR: Unable to create "+town_name+" ("+entry+") - "+item.errortext, MG_REPORT_SYSLOG);
+		return 0;
+	else
+		item.facing := 29;
+		item.movable := 0;
+		item.SetTownName(town_name);
+		return item;
+	endif
+endfunction
+
+function BuildGumpForGate(gate, byref town_name, byref config)
+	var gump := GFCreateGump();
+	GFResizePic(gump, 0, 0, GFGetCfgConst("Defaults", "BackGround"), 340, 330);
+	GFResizePic(gump, 15, 15, GFGetCfgConst("Defaults", "ForeGround"), 310, 300);
+
+	GFTextMid(gump, 20, 20, 310, 2100, "Select a Destination");
+	GFAddButton(gump, 35, 250, 2128, 2129, GF_CLOSE_BTN, MG_OKAY_BTN);
+	GFAddButton(gump, 35, 280, 2119, 2120, GF_CLOSE_BTN, MG_CANCEL_BTN);
+
+	var y_pos := 50;
+	var page := 2;
+	foreach realm in ( Realms() )
+		realm := realm; // To avoid compiler warnings.
+		var cfg_elem := config[_realm_iter];
+		GFAddButton(gump, 20, y_pos+3, 2117, 2118, GF_PAGE_BTN, page);
+		GFTextLine(gump, 40, y_pos, 2100, cfg_elem.Faction);
+		y_pos += 20;
+		page += 2;
+	endforeach
+
+	page := 2;
+	var btn_id := 1;
+	foreach realm in ( Realms() )
+		realm := realm; // To avoid compiler warnings.
+		y_pos := 50;
+		var cfg_elem := config[_realm_iter];
+		GFPage(gump, page);
+
+		foreach entry in ( GetConfigStringDictionary(cfg_elem, "Town") )
+			entry := entry; // To avoid compiler warnings.
+			if ( _entry_iter == town_name && _realm_iter == gate.realm )
+				GFGumpPic(gump, 153, y_pos+5, 2104);
+			else
+				GFRadioButton(gump, 150, y_pos, 210, 211, 0, btn_id+MG_LOCATION_START);
+			endif
+			GFTextLine(gump, 173, y_pos, 2100, _entry_iter);
+			y_pos += 20;
+			btn_id += 1;
+			SleepMS(2);
+		endforeach
+
+		SleepMS(2);
+		page += 2;
+	endforeach
+
+	gate.SaveGump(gump);
+endfunction
+
+function CleanupOldMoongates()
+	var data_file := MG_GetDataFile();
+
+	foreach elem_name in ( DFGetElemNames(data_file) )
+		var serial := CInt(elem_name);
+		var item := SystemFindObjectBySerial(serial);
+		if ( !item )
+			continue;
+		elseif ( item.IsSystemMoongate() )
+			DestroyItem(item);
+		endif
+		data_file.DeleteElement(elem_name);
+		SleepMS(2);
+	endforeach
+
+	return 1;
+endfunction
