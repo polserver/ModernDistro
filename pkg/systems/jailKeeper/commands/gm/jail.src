@@ -1,0 +1,236 @@
+/*
+        Created by *Edwards
+
+        2008-10-11
+*/
+use uo;
+use os;
+
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+include ":gumps:requestGump";
+include ":timeutils:time";
+include ":security:commandReport";
+include ":jailKeeper:jailKeeper";
+include ":datafile:datafile";
+include "include/security";
+
+program textcmd_jail( mobile )
+
+        if( !AuthorizationCode( mobile ))
+                SendSysMessage( mobile, "Cancelled." );
+                return 0;
+        endif
+
+        var gump := GFCreateGump();
+
+	GFResizePic( gump, 0, 0, GFGetCfgConst( "Defaults", "BackGround" ), 310, 420 );
+	GFResizePic( gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 280, 390 );
+
+	GFTextLine( gump, 25, 20, 2100, "Player Name" );
+	GFTextLine( gump, 255, 20, 2100, "Jail" );
+
+	var names_list := GetPlayersList();
+	var num_players := names_list.Size();
+        var list_keys := names_list.Keys();
+	var counter := 0;
+	var y_pos := 45;
+
+	GFPage( gump, 1 );
+	foreach serial in ( list_keys )
+
+                var character := SystemFindObjectBySerial( serial, SYSFIND_SEARCH_OFFLINE_MOBILES );
+		GFTextLine( gump, 25, y_pos, 2100, character.name );
+		GFAddButton( gump, 261, y_pos+3, 2117, 2118, GF_CLOSE_BTN, _serial_iter );
+
+		y_pos += 20;
+		counter += 1;
+
+		if ( counter >= 18 && _serial_iter < num_players )
+			GFAddButton( gump, 283, 385, 0xA92, 0xA93, GF_PAGE_BTN, gump.cur_page+1 );
+			GFPage( gump, gump.cur_page+1 );
+			GFAddButton( gump, 283, 40, 0xA90, 0xA91, GF_PAGE_BTN, gump.cur_page-1 );
+			counter := 0;
+			y_pos := 40;
+		endif
+		SleepMS(2);
+	endforeach
+
+	var input := GFSendGump( mobile, gump );
+	input := input[0];
+
+	if( !input )
+		SendSysMessage( mobile, "Cancelled." );
+		return 0;
+	endif
+
+        var jailed := SystemFindObjectBySerial( list_keys[input], SYSFIND_SEARCH_OFFLINE_MOBILES );
+	return JailPlayer( mobile, jailed );
+endprogram
+
+function GetPlayersList();
+
+	var the_list := dictionary; // Used to store names in ABC order
+ 	foreach acct_name in ( ListAccounts() )
+		var account := FindAccount( acct_name );
+		var i := 1;
+                while( i <= 5 )
+                       var character := account.GetCharacter(i);
+                       if( character )
+                              the_list.Insert( character.serial, character.name );
+                       endif
+                       i += 1;
+                       SleepMS(5);
+                endwhile
+		SleepMS(5);
+	endforeach
+
+	return the_list;
+endfunction
+
+function JailPlayer( mobile, jailed )
+
+       var time := GetJTime( mobile, jailed );
+       if( time )
+                var message_txt := RequestInput( mobile, mobile.backpack, "Please insert a description of your decision to be sent to "+jailed.name+". (hit escape to cancel)" );
+                if( !message_txt )
+                          SendSysMessage( mobile, "Cancelled." );
+                          return 0;
+                endif
+
+                var script := start_script( ":accounts:commands/coun/acctnote", {mobile, jailed.acctname} );
+                if( script.errortext )
+                         SendSysMessage( mobile, "Error starting script <:accounts:commands/coun/acctnote> -->"+script.errortext );
+                endif
+
+                SendSysMessage( jailed, "You receive a notification from staff:", 3, 55 );
+                SendSysMessage( jailed, mobile.name+" >>> "+message_txt, 3, 55 );
+
+                MovePlayer( mobile, jailed );
+
+                CMD_ReportText( mobile, time+" day(s) character:"+jailed.serial+" Description is:"+message_txt, CMD_REPORT_SYSLOG );
+       endif
+
+       return 1;
+endfunction
+
+function GetJTime( mobile, jailed )
+
+	var jail_time := RequestGump( mobile, "How many days do you want to jail "+jailed.name+"?","", CStr( GetNumJailDays( jailed )), 1 );
+	if( !jail_time )
+		SendSysMessage( mobile, "Cancelled." );
+		return 0;
+	else
+		jail_time := CInt( jail_time );
+	endif
+
+	if( jail_time == 0 )
+                var script := start_script( ":jailKeeper:getOutJail", mobile );
+                if( script.errortext )
+                         SendSysMessage( mobile, "Error starting script <:jailKeeper:getOutJail> -->"+script.errortext );
+                         return 0;
+                endif
+
+                return 0;
+	else
+		if( jail_time > 0 )
+			jail_time := jail_time * SECONDS_IN_DAY;
+                        var data_elem := DFFindElement( g_datafile, jailed.serial, DF_CREATE );
+                        data_elem.SetProp( "JailReleaseTime", POLCore().systime + jail_time );
+		endif
+	endif
+
+	return jail_time;
+endfunction
+
+function GetNumJailDays( jailed )
+
+        var data_elem := DFFindElement( g_datafile, jailed.serial );
+        var seconds := data_elem.GetProp( "JailReleaseTime" );
+	if( !seconds )
+		return 0;
+	endif
+
+	var num_days := CInt(( seconds - POLCore().systime) / SECONDS_IN_DAY )+1;
+	return num_days;
+endfunction
+
+function MovePlayer( mobile, jailed )
+
+	//Initialize the gump
+        var gump := GFCreateGump();
+
+        //Load Main Background
+	GFResizePic( gump, 0, 0, GFGetCfgConst( "Defaults", "BackGround" ), 565, 450 );
+
+        GFResizePic( gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 535, 25 );
+	GFTextMid( gump, 15, 17, 535, 1720, "Jail Arena ( For Staff )" );
+
+        //BackgroundAreas
+	GFResizePic( gump, 15, 45, GFGetCfgConst( "Defaults", "ForeGround" ), 535, 395 );
+        GFTextMid( gump, 15, 60, 535, 1720, "Select a cell." );
+
+        //Build the cells of the jail
+        GFResizePic( gump, 50, 100, GFGetCfgConst( "BackGrounds", "GOLDTRIM" ), 115, 100 ); //Cell 1
+        GFAddButton( gump, 100, 150, 0x837, 0x838, GF_CLOSE_BTN, 1 );
+
+        GFResizePic( gump, 165, 100, GFGetCfgConst( "BackGrounds", "GOLDTRIM" ), 115, 100 ); //Cell 2
+        GFAddButton( gump, 215, 150, 0x837, 0x838, GF_CLOSE_BTN, 2 );
+
+        GFResizePic( gump, 280, 100, GFGetCfgConst( "BackGrounds", "GOLDTRIM" ), 115, 100 ); //Cell 3
+        GFAddButton( gump, 330, 150, 0x837, 0x838, GF_CLOSE_BTN, 3 );
+
+        GFResizePic( gump, 395, 100, GFGetCfgConst( "BackGrounds", "GOLDTRIM" ), 115, 100 ); //Cell 4
+        GFAddButton( gump, 445, 150, 0x837, 0x838, GF_CLOSE_BTN, 4 );
+
+        GFResizePic( gump, 50, 200, GFGetCfgConst( "BackGrounds", "GOLDTRIM" ), 115, 100 ); //Cell 5
+        GFAddButton( gump, 100, 250, 0x837, 0x838, GF_CLOSE_BTN, 5 );
+
+        GFResizePic( gump, 165, 200, GFGetCfgConst( "BackGrounds", "GOLDTRIM" ), 115, 100 ); //Cell 6
+        GFAddButton( gump, 215, 250, 0x837, 0x838, GF_CLOSE_BTN, 6 );
+
+        GFResizePic( gump, 280, 200, GFGetCfgConst( "BackGrounds", "GOLDTRIM" ), 115, 100 ); //Cell 7
+        GFAddButton( gump, 330, 250, 0x837, 0x838, GF_CLOSE_BTN, 7 );
+
+        GFResizePic( gump, 395, 200, GFGetCfgConst( "BackGrounds", "GOLDTRIM" ), 115, 100 ); //Cell 8
+        GFAddButton( gump, 445, 250, 0x837, 0x838, GF_CLOSE_BTN, 8 );
+
+        GFResizePic( gump, 50, 300, GFGetCfgConst( "BackGrounds", "GOLDTRIM" ), 230, 100 ); //Cell 9
+        GFAddButton( gump, 155, 350, 0x837, 0x838, GF_CLOSE_BTN, 9 );
+
+        GFResizePic( gump, 280, 300, GFGetCfgConst( "BackGrounds", "GOLDTRIM" ), 230, 100 ); //Cell 10
+        GFAddButton( gump, 385, 350, 0x837, 0x838, GF_CLOSE_BTN, 10 );
+
+        var input := GFSendGump( mobile, gump );
+        var cell;
+
+        if( input[1] )
+                 cell := 1;
+        elseif( input[2] )
+                 cell := 2;
+        elseif( input[3] )
+                 cell := 3;
+        elseif( input[4] )
+                 cell := 4;
+        elseif( input[5] )
+                 cell := 5;
+        elseif( input[6] )
+                 cell := 6;
+        elseif( input[7] )
+                 cell := 7;
+        elseif( input[8] )
+                 cell := 8;
+        elseif( input[9] )
+                 cell := 9;
+        elseif( input[10] )
+                 cell := 10;
+        endif
+
+        var data_elem := DFFindElement( g_datafile, jailed.serial, DF_CREATE );
+
+        data_elem.SetProp( "JailCell", cell );
+
+        Goto_Cell( jailed );
+
+        return 1;
+endfunction

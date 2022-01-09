@@ -1,0 +1,34 @@
+/*
+        Created by *Edwards
+        
+        2008-10-11
+*/
+use uo;
+use os;
+use util;
+
+include ":jailKeeper:jailKeeper";
+include ":datafile:datafile";
+
+program Jail_Reconnect( mobile )
+
+        var data_elem := DFFindElement( g_datafile, mobile.serial );
+        
+        var release_time := data_elem.GetProp( "JailReleaseTime" );
+	if( release_time )
+                if( POLCore().systime > release_time )
+                         var script := start_script( ":jailKeeper:getOutJail", mobile );
+                         if( script.errortext )
+                               SendSysMessage( mobile, "Error starting script <:jailKeeper:getOutJail> -->"+script.errortext );
+                               return 0;
+                         endif
+	        elseif( release_time && POLCore().systime < release_time )
+                         Goto_Cell( mobile );
+                         var time := StrFormatTime( "%m-%d-%Y %I:%M:%S %p", CInt( release_time ));
+                         SendSysMessage( mobile, "Release Time ( Server Time ):" );
+                         SendSysMessage( mobile, time );
+	        endif
+        endif
+
+	return 1;
+endprogram

@@ -1,0 +1,116 @@
+/*
+        Created by *Edwards
+
+        2008-10-11
+*/
+use uo;
+use os;
+
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+include ":security:commandReport";
+include ":jailKeeper:jailKeeper";
+include ":datafile:datafile";
+include ":timeutils:time";
+include ":security:commandReport";
+include "include/security";
+
+program textcmd_listjailed( mobile )
+
+        if( !AuthorizationCode( mobile ))
+                SendSysMessage( mobile, "Cancelled." );
+                return 0;
+        endif
+
+        var gump := GFCreateGump();
+
+	GFResizePic( gump, 0, 0, GFGetCfgConst( "Defaults", "BackGround" ), 460, 420 );
+	GFResizePic( gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 430, 390 );
+
+	GFTextLine( gump, 25, 20, 2100, "Player Name" );
+        GFTextLine( gump, 235, 20, 2100, "Cell #" );
+        GFTextLine( gump, 300, 20, 2100, "Day(s)" );
+	GFTextLine( gump, 375, 20, 2100, "Forgive" );
+
+	var names_list := GetPlayerList();
+	var num_players := names_list.Size();
+        var list_keys := names_list.Keys();
+	var counter := 0;
+	var y_pos := 45;
+
+	GFPage( gump, 1 );
+	foreach serial in ( list_keys )
+
+                var character := SystemFindObjectBySerial( serial, SYSFIND_SEARCH_OFFLINE_MOBILES );
+		GFTextLine( gump, 25, y_pos, 2100, character.name );
+
+                var data_elem := DFFindElement( g_datafile, serial );
+                GFTextLine( gump, 244, y_pos, 2100, data_elem.GetProp( "JailCell" ));
+                GFTextLine( gump, 305, y_pos, 2100, CStr( GetNumJailDays( character )));
+		GFAddButton( gump, 390, y_pos+3, 2117, 2118, GF_CLOSE_BTN, _serial_iter );
+
+		y_pos += 20;
+		counter += 1;
+
+		if ( counter >= 18 && _serial_iter < num_players )
+			GFAddButton( gump, 283, 385, 0xA92, 0xA93, GF_PAGE_BTN, gump.cur_page+1 );
+			GFPage( gump, gump.cur_page+1 );
+			GFAddButton( gump, 283, 40, 0xA90, 0xA91, GF_PAGE_BTN, gump.cur_page-1 );
+			counter := 0;
+			y_pos := 40;
+		endif
+		SleepMS(2);
+	endforeach
+
+	var input := GFSendGump( mobile, gump );
+	input := input[0];
+
+	if( !input )
+		SendSysMessage( mobile, "Cancelled" );
+		return 0;
+	endif
+
+        var forgive := SystemFindObjectBySerial( list_keys[input], SYSFIND_SEARCH_OFFLINE_MOBILES );
+        CMD_ReportText( mobile, "Character:"+forgive.name, CMD_REPORT_SYSLOG );
+
+	var script := start_script( ":jailKeeper:getOutJail", forgive );
+        if( script.errortext )
+                SendSysMessage( mobile, "Error starting script <:jailKeeper:getOutJail> -->"+script.errortext );
+                return 0;
+        endif
+
+        return 1;
+endprogram
+
+function GetPlayerList();
+
+	var the_list := dictionary; // Used to store names in ABC order
+ 	foreach acct_name in ( ListAccounts() )
+		var account := FindAccount( acct_name );
+		var i := 1;
+                while( i <= 5 )
+                       var character := account.GetCharacter(i);
+                       var data_elem := DFFindElement( g_datafile, character.serial );
+                       if( character && data_elem.GetProp( "JailReleaseTime" ))
+                              the_list.Insert( character.serial, character.name );
+                       endif
+                       i += 1;
+                       SleepMS(5);
+                endwhile
+		SleepMS(5);
+	endforeach
+
+	return the_list;
+endfunction
+
+function GetNumJailDays( character )
+
+        var data_elem := DFFindElement( g_datafile, character.serial );
+	var seconds := data_elem.GetProp( "JailReleaseTime" );
+	if ( !seconds )
+		return 0;
+	endif
+
+	var num_days := CInt(( seconds-POLCore().systime) / SECONDS_IN_DAY )+1;
+	return num_days;
+endfunction

@@ -1,0 +1,61 @@
+/*
+        Created by *Edwards
+        
+        2008-10-11
+*/
+use uo;
+use os;
+
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+include ":datafile:datafile";
+include ":moongates:moongate";
+include ":jailKeeper:jailKeeper";
+
+program Get_Out_Jail( mobile )
+
+        var gump := GFCreateGump();
+        
+	BuildGumpForGate( gump );
+ 
+        var input := GFSendGump( mobile, gump );
+        if( !input[0x10] )
+		var script := start_script( ":jailKeeper:getOutJail", mobile );
+                if( script.errortext )
+                         SendSysMessage( mobile, "Error starting script <:jailKeeper:getOutJail> -->"+script.errortext );
+                         return 0;
+                endif
+                
+	        return 0;
+        endif
+
+	var select := 0;
+	foreach key in ( input.Keys )
+		if ( key >= 0xA00 )
+			select := key-0xA00;
+			break;
+		endif
+		SleepMS(2);
+	endforeach
+
+	var dest := MG_FindDestination( select );
+        SetObjProperty( mobile, "#Teleported", ReadMillisecondClock() );
+        
+	var result := MoveObjectToLocation( mobile, dest.x, dest.y, dest.z, dest.realm, MOVEOBJECT_FORCELOCATION );
+	if( result.errortext )
+		var script := start_script( ":jailKeeper:getOutJail", mobile );
+                if( script.errortext )
+                         SendSysMessage( mobile, "Error starting script <:jailKeeper:getOutJail> -->"+script.errortext );
+                         return 0;
+                endif
+                
+	        return 0;
+	endif
+
+        var data_elem := DFFindElement( g_datafile, mobile.serial );
+        data_elem.EraseProp( "JailReleaseTime" );
+        data_elem.EraseProp( "JailCell" );
+        EraseObjProperty( mobile, "NoGains" );
+
+        return 1;
+endprogram
