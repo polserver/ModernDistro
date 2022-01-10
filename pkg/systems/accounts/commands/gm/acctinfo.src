@@ -4,6 +4,7 @@
 
 use uo;
 use os;
+use basic;
 
 include ":timeutils:time";
 include ":accounts:settings";
@@ -32,7 +33,9 @@ program textcmd_AccountInfo(who, acctname)
 
 	// If 'acctinfo' command started by another script.
 	if(TypeOf(who) == "Array")
+		var person := who[2];
 		who := who[1];
+		acctname := person.acctname;
 	endif
 	if ( !acctname )
 		SendSysMessage(who, "Select a player.");
