@@ -1,0 +1,229 @@
+/*
+        Maintened by *Edwards
+
+        2009-02-15
+*/
+use uo;
+use os;
+
+include ":datafile:datafile";
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+include ":gumps:gumpPrompt";
+include ":help:help";
+include ":help:help-gumps";
+include "include/string";
+
+program HelpSystem( mobile )
+
+	if( GetProcess( CInt( GetObjProperty( mobile, "#HelpPID" ))))
+		return 0;
+	else
+		SetObjProperty( mobile, "#HelpPID", GetPid() );
+	endif
+
+	var input, gump;
+	var cur_menu := MAIN_PAGE_BTN;
+	var cur_txt := array;
+
+	while( mobile.connected )
+		if( cur_menu == HELP_TOPIC_START )
+			gump := RetrieveTopicGump( mobile, input[0] );
+		else
+			gump := RetrieveGump( mobile, cur_menu, cur_txt );
+		endif
+
+                if( !gump )
+                        return 0;
+                endif
+
+		input := GFSendGump( mobile, gump );
+
+		if( !input[0] || input[CLOSE_BTN] )
+			SendSysMessage( mobile, "Cancelled." );
+			break;
+		elseif( input[SEND_PAGE_BTN] )
+			var result := SubmitPage( mobile, cur_menu, input );
+			if( result )
+				break;
+			endif
+		elseif( input[WORD_WRAP_BTN] )
+			cur_txt := GFWordWrap( RetrievePageText( input ), 370 );
+		elseif( input[MAIN_PAGE_BTN] )
+			cur_menu := MAIN_PAGE_BTN;
+		elseif( input[STUCK_PAGE_BTN] )
+			cur_menu := STUCK_PAGE_BTN;
+		elseif( input[STAFF_PAGE_BTN] )
+			cur_menu := STAFF_PAGE_BTN;
+		elseif( input[HELP_TOPICS_BTN] )
+			cur_menu := HELP_TOPICS_BTN;
+		elseif( input[UNCACHE_GUMPS_BTN] )
+			UncacheGumps(mobile);
+		elseif( input[0] >= HELP_TOPIC_START )
+			cur_menu := HELP_TOPIC_START;
+		else
+			SendSysMessage( mobile, "Cancelled." );
+			break;
+		endif
+	endwhile
+
+	return 1;
+endprogram
+
+function RetrieveGump( mobile, cur_menu, byref cur_txt )
+
+	var gump;
+	case( cur_menu )
+		MAIN_PAGE_BTN:
+			gump := LoadHelpInfo( "MainGump", "Gump" );
+			if( !gump )
+				gump := BuildIntroGump();
+				SaveHelpInfo( "MainGump", "Gump", gump );
+			endif
+			break;
+
+		HELP_TOPICS_BTN:
+			gump := LoadHelpInfo( "HelpTopicIndex", "Gump" );
+			if( !gump )
+				gump := BuildHelpTopicsIndexGump();
+				SaveHelpInfo( "HelpTopicsIndex", "Gump", gump );
+			endif
+			break;
+
+		STUCK_PAGE_BTN:
+                        if( HelpTeleported( mobile ))
+                                 return gump;
+                        endif
+
+			gump := BuildHelpStuckCommand( mobile );
+			return gump;
+
+		STAFF_PAGE_BTN:
+			// Cant cache the whole thing because of the text entries.
+			gump := BuildTextEntryGump( "Staff Page", cur_txt );
+			break;
+
+		default:
+			gump := BuildGumpTemplate();
+			GFTextLine( gump, 10, 25, 32, "!!! --- INVALID CUR_MENU ["+cur_menu+"] --- !!!" );
+			break;
+	endcase
+
+	if( mobile.cmdlevel > 2 )
+		GFAddButton( gump, 30, 23, 2117, 2118, GF_CLOSE_BTN, UNCACHE_GUMPS_BTN );
+		GFTextLine( gump, 50, 20, 2100, "Uncache Gumps" );
+	endif
+
+	return gump;
+endfunction
+
+function RetrieveTopicGump( mobile, byref input )
+
+	input -= HELP_TOPIC_START;
+	var topic_list := LoadHelpInfo( "TopicNames", "List" );
+	var topic_name := topic_list[input];
+
+	var gump := LoadHelpInfo( "HelpTopic-"+topic_name, "Gump" );
+	if( !gump )
+		gump := BuildHelpTopicGump( topic_name );
+		SaveHelpInfo( "HelpTopic-"+topic_name, "Gump", gump );
+	endif
+
+	if( mobile.cmdlevel > 2 )
+		GFAddButton( gump, 30, 23, 2117, 2118, GF_CLOSE_BTN, UNCACHE_GUMPS_BTN );
+		GFTextLine( gump, 50, 20, 2100, "Uncache Gumps" );
+	endif
+
+	return gump;
+endfunction
+
+function RetrievePageText( byref input )
+
+	var i;
+	var text := "";
+	for( i:=PAGE_TXT_START; i<=PAGE_TXT_END; i+=1 )
+		var data := GFExtractData( input, i );
+		if( data )
+			text += CStr( data )+" ";
+		endif
+		SleepMS(2);
+	endfor
+	text := RemoveSpaces( text, CLR_LEADING_SPACES+CLR_TRAILING_SPACES+CLR_DOUBLE_SPACES );
+
+	return text;
+endfunction
+
+function SubmitPage( mobile, cur_menu, byref input )
+
+	var message := RetrievePageText( input );
+	if( Len( message ) < 30 )
+		GumpPrompt( mobile, "Please enter a more descriptive message." );
+		return 0;
+	endif
+
+	var type;
+	case( cur_menu )
+		STAFF_PAGE_BTN:
+			type := "Staff";
+			break;
+		default:
+			GumpPrompt( mobile, "Error - Invalid Menu "+cur_menu );
+			return 0;
+	endcase
+
+	var elem_name := "Queue-"+type;
+	var queue := LoadHelpInfo( elem_name, Hex( mobile.serial ));
+	var info := struct;
+	info.+message := message;
+	info.+time := POLCore().systime;
+
+	SaveHelpInfo(elem_name, Hex( mobile.serial ), info );
+	foreach player in ( EnumerateOnlineCharacters() )
+		if( player.cmdlevel )
+			SendSysMessage( player, mobile.name+" has submitted a help page into the "+type+" queue.", 3, 76 );
+		endif
+		SleepMS(2);
+	endforeach
+
+	if( queue )
+		GumpPrompt( mobile, "Your previous page was overwritten: the next available staff will respond as soon as possible. Check your Journal for messages every few minutes." );
+	else
+		GumpPrompt( mobile, "Your page has been submitted: the next available staff will respond as soon as possible. Check your Journal for messages every few minutes." );
+	endif
+
+	return 1;
+endfunction
+
+function UncacheGumps( mobile )
+
+	if( mobile.cmdlevel < 3 )
+		return 0;
+	endif
+
+	var data_file := GetHelpDataFile();
+	foreach elem_name in ( DFGetElemNames( data_file ))
+		var elem := DFFindElement( data_file, elem_name );
+		if( elem.Getprop( "Gump" ))
+			data_file.DeleteElement( elem_name );
+		elseif( elem.GetProp( "List" ))
+			data_file.DeleteElement( elem_name );
+		endif
+		SleepMS(2);
+	endforeach
+
+	GumpPrompt( mobile, "All gumps uncached." );
+
+	return 1;
+endfunction
+
+function HelpTeleported( mobile )
+
+	var tele_time := CInt( GetObjProperty( mobile, "#TeleportedHelp" ));
+	if( tele_time < ReadGameClock() )
+		return 0;
+	endif
+
+        SendSysMessage( mobile, "You already used this privilege in the last 2 hours." );
+
+	return 1;
+endfunction

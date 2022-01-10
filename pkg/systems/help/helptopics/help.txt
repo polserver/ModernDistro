@@ -1,0 +1,7 @@
+<CENTER><U>.help</U></CENTER>
+
+Syntax:<BR>
+<I>help topic</I><BR>
+<BR>
+Purpose:<BR>
+Brings up help for <I>topic</I>.

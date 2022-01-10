@@ -1,0 +1,30 @@
+/*
+        Created by *Edwards
+
+        2010-12-05
+*/
+use uo;
+use os;
+
+include ":help:help";
+
+program Logon( mobile )
+
+        if( !mobile.cmdlevel )
+                return 0;
+        endif
+
+	var data_file := GetHelpDataFile();
+	var data_elem := DFFindElement( data_file, "Queue-Staff", DF_NO_CREATE );
+	var prop_names := data_elem.PropNames();
+ 
+        if( prop_names.Size() )
+                var script := Start_Script( ":help:commands/coun/helpqueue", mobile );
+                if( script.errortext )
+                        SendSysMessage( mobile, "Error couldn't start script <:help:commands:coun/helpqueue> -->"+script.errortext );
+                        return 0;
+                endif
+        endif
+        
+	return 1;
+endprogram

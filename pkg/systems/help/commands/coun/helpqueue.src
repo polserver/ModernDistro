@@ -1,0 +1,141 @@
+/*
+        Maintened by *Edwards
+
+        2009-02-15
+*/
+use uo;
+use os;
+
+include ":help:queue-gumps";
+include "include/security";
+
+program HelpQueue( mobile, queue_name )
+
+	var gump, input, page_id;
+	var cur_menu := SHOW_QUEUE_START;
+
+        if( !queue_name )
+                queue_name := "Staff";
+        endif
+
+	if( CanAccessQueue( queue_name, mobile.cmdlevel ))
+		cur_menu := PAGE_LIST_BTN;
+	endif
+
+	while( mobile.connected )
+		if( cur_menu == SHOW_QUEUE_START )
+			gump := ShowQueueTypes( mobile.cmdlevel );
+		elseif( cur_menu == PAGE_LIST_BTN )
+			gump := ShowPagesInQueue( queue_name, mobile.cmdlevel );
+		elseif( cur_menu == SHOW_PAGE_BTN )
+			gump := ShowPageInQueue( mobile, queue_name, page_id, mobile.cmdlevel );
+		endif
+
+		input := GFSendGump( mobile, gump );
+		if( !input[0] || input[CLOSE_BTN] )
+			SendSysMessage( mobile, "Cancelled." );
+			break;
+		elseif( input[0] >= SHOW_PAGE_START )
+			var key := input[0] - SHOW_PAGE_START;
+			page_id := key;
+			cur_menu := SHOW_PAGE_BTN;
+		elseif( input[0] >= SHOW_QUEUE_START )
+			var key := input[0] - SHOW_QUEUE_START;
+			var queues := GetQueueNamesAccess( mobile.cmdlevel );
+			queue_name := queues[key];
+			cur_menu := PAGE_LIST_BTN;
+		else
+			var result := PageButtons( mobile, input, cur_menu, queue_name, page_id );
+			if( result )
+				cur_menu := QUEUE_TYPES_BTN;
+			endif
+		endif
+
+		SleepMS(2);
+	endwhile
+
+	return 1;
+endprogram
+
+function PageButtons( mobile, byref input, byref cur_menu, byref queue_name, byref page_id )
+
+	var data_file := GetHelpDataFile(),
+	    data_elem := DFFindElement( data_file, "Queue-"+queue_name, DF_NO_CREATE ),
+		list_elem := DFGetElemProps( data_elem ),
+		elem_info := CInt( list_elem[page_id] );
+	var pager := SystemFindObjectBySerial( elem_info );
+	var params := {};
+
+	if( input[EMAIL_BTN] )
+		params := {mobile, pager};
+		var script := Start_Script( ":commands:coun/msg", params );
+		if( script.errortext )
+			GumpPrompt( mobile, "Error - "+script.errortext );
+		endif
+		return 1;
+	elseif( input[DELETE_PAGE_BTN] )
+		cur_menu := PAGE_LIST_BTN;
+		data_elem.EraseProp( Hex( CInt( elem_info )));
+		SendSysMessage( mobile, "Page deleted." );
+
+		return 0;
+	elseif( mobile.cmdlevel < 3 )
+		return 0;
+		// GM and above only buttons after this point.
+	elseif( input[GOTO_BTN] )
+		var pager := SystemFindObjectBySerial( elem_info );
+		SendSysMessage( mobile, "Going to "+pager.name );
+		MoveObjectToLocation( mobile, pager.x, pager.y, pager.z, pager.realm, MOVEOBJECT_FORCELOCATION );
+		return 1;
+	elseif( input[SUMMON_BTN] )
+		var pager := SystemFindObjectBySerial( elem_info );
+		SendSysMessage( mobile, "Bringing "+pager.name+" to your location." );
+		MoveObjectToLocation( pager, mobile.x, mobile.y, mobile.z, mobile.realm, MOVEOBJECT_FORCELOCATION );
+		return 1;
+	elseif( input[ACCTNOTE_BTN] )
+        	// var script := Start_Script( ":accounts:commands/coun/acctnote", array{mobile, pager.acctname} );
+        	// var script := Start_Script( ":accounts:commands/gm/acctinfo", {mobile, pager.acctname} );
+			params := {mobile, pager};
+        	// var script := Start_Script( ":accounts:commands/gm/acctinfo", {mobile, pager} );
+        	var script := Start_Script( ":accounts:commands/gm/acctinfo", params );
+		if( script.errortext )
+			GumpPrompt( mobile, "Error - "+script.errortext );
+		endif
+		return 1;
+	elseif( input[INFO_BTN] )
+//		var pager := SystemFindObjectBySerial( elem_info );
+        	var script := Start_Script( ":commands:gm/info", array{mobile, pager.serial} );
+		if( script.errortext )
+			GumpPrompt( mobile, "Error - "+script.errortext );
+		endif
+		return 1;
+	endif
+
+	return 0;
+endfunction
+
+function CanAccessQueue( byref queue_name, cmdlevel )
+
+	queue_name := Lower( queue_name );
+	foreach name in ( GetQueueNamesAccess( cmdlevel ))
+		if( Lower( name ) == queue_name )
+			// Sets it to the proper case.
+			queue_name := name;
+			return 1;
+		endif
+		SleepMS(2);
+	endforeach
+
+	return 0;
+endfunction
+
+function GetQueueNamesAccess( cmdlevel )
+
+	var names := array;
+
+	if( cmdlevel >= 1 ) // Counselor +
+		names.Append( "Staff" );
+	endif
+
+	return names;
+endfunction

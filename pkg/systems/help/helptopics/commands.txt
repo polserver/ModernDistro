@@ -1,0 +1,12 @@
+<CENTER><U><B>Commands</B></U></CENTER><BR>
+<br>
+This list should be completed by the shard developer.<br>
+The changepassword entry can be used as a template.
+<I>.changepassword</I><BR>
+Use this command to change your account password.
+<BR>
+<BR>
+<I>.point</I><BR>
+This will give a target you can use to 'point' to a location.
+<BR>
+<BR>

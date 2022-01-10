@@ -1,0 +1,97 @@
+<CENTER><U><B>Rules</B></U></CENTER><BR>
+<BR>
+<B>Section 1: Definitions</B><BR>
+<BR>
+<U>1.1 Player</U><BR>
+A person who has access to an Ultime Online account and using it to play a character shall henceforth be known as a player.<BR>
+<BR>
+<U>1.2 Staff</U><BR>
+Volunteers who include Counselors, Seers, Game Masters, Administrators and Developers easily identified by their job title in front of their name. Such volunteers shall henceforth be known as staff.<BR>
+<BR>
+<U>1.3 Harassment</U><BR>
+Abuse, threatening or otherwise violating the legal rights (such as rights of privacy) of others. Publishing, posting, uploading, distributing or disseminating any inappropriate, profane, defamatory, infringing, obcsene, indecent or unlawful topic, name, material or information shall henceforth be known as harassment.<BR>
+<BR>
+<U>1.4 Non Player Character (NPC)</U><BR>
+A character generated that is run on scripted AI by the server and not actively controlled by a player shall henceforth be known as an NPC.
+<BR><BR>
+<U>1.5 Player Killer (PK)</U><BR>
+The attacking of another player, willing or not, shall henceforth be known as PK.<BR>
+<BR>
+<U>1.6 Res-Killing</U><BR>
+The death of another player multiple times within a short period of time by another player(s), willing or not shall henceforth be known as res-killing.<BR>
+<BR>
+<CENTER>********************************************</CENTER><BR>
+<B>Section 2: General Rules</B><BR>
+<BR>
+<U>2.1 Harassment</U><BR>
+Harassment is strictly prohibited. Violating this rule may result in permanent termination of your account.<BR>
+<BR>
+<U>2.2 Paging</U><BR>
+Staff are available to aid you with any problems or concerns you may have. Do not page with threatening pages, profanity or obscene and graphic language.<BR>
+<BR>
+<U>2.3 Bugs</U><BR>
+Cheating or deliberately using game bugs to disrupt the game is considered a violation of the rules. If you learn of a bug, notify the staff immediately.<BR>
+<BR>
+<U>2.4 Banned Accounts</U><BR>
+Do not allow players who have been banned from <THIS SHARD NAME HERE> to access your account. Such a violation will result in the permanent termination of the account.<BR>
+<BR>
+<U>2.5 3rd Party Tools</U><BR>
+The use of 3rd party tools is allowed with some caveats. 3rd party tools are to be used solely for the intention of making game play a little less tedious and thus easier.<BR>
+- Using 3rd party tools to loot in any fashion is expressly forbidden.<BR>
+- Using 3rd party tools to gain an advantage via seeing hidden players or items is expressly forbidden.<BR>
+- Using 3rd party tools to modify the look & feel of the game world, such as removing the darkness that comes with in-game nights is expressly forbidden<BR>
+<BR>
+<U>Forbidden 3rd Party Programs and Tools</U><BR>
+- AssistUO<BR>
+- Injection<BR>
+- Razor<BR>
+- YokoInjection<BR>
+
+<BR>
+<CENTER>********************************************</CENTER><BR>
+<B>Section 3: Player Activities</B><BR>
+<BR>
+<U>3.1 Killing</U><BR>
+Unwarranted res-killing is forbidden.<BR>
+<BR>
+<U>3.2 Blocking/Walling</U><BR>
+Continual, repeated or permanent use of objects/spells to block access by players/NPCs to a location is expressly forbidden.<BR>
+<BR>
+<U>3.3 Fighting</U><BR>
+It is prohibited to spar/macro with above eight different NPC's and/or players.<BR>
+<BR>
+<CENTER>********************************************</CENTER><BR>
+<B>Section 4: Staff Activities</B><BR>
+<BR>
+<U>4.1 Replacing Lost Items</U><BR>
+Staff members will not and cannot replace lost items, skills or anything else lost due to anything but a bug.<BR>
+<BR>
+<U>4.2 Adaptability</U><BR>
+Due to complex situations arising from a dynamic environment such as a multiplayer world, the staff reserves the right to alter the rules in order to accomodate for new situations that may arise in the course of gameplay.<BR>
+<BR>
+<CENTER>********************************************</CENTER><BR>
+<B>Section 5: Chain of Punishment</B><BR>
+<BR>
+<U>5.1 Minor Offenses</U><BR>
+You will be notified of what you have done wrong and/or disconnected from <THIS SHARD NAME HERE> and issued a warning that shall be stored in your account file. Repeat offenses will get you jailed for a period of time between one and four days and shall receive another warning stored in your account file.<BR>
+<BR>
+<U>5.2 Medium Offenses</U><BR>
+You will be jailed for a period of time between one and four days and shall receive a warning stored into your account file. Repeat offenses will get you jailed for a period of time between four and nine days and shall receive another warning stored into your account file.
+<BR><BR>
+<U>5.3 Serious Offenses</U><BR>
+Particularly serious violations can result in extended jail time or permanent termination of your account, without warning.<BR>
+<BR>
+<CENTER>********************************************</CENTER><BR>
+<B>Section 6: Message Board Rules</B><BR>
+<BR>
+These are the rules that you will need to follow in order to have the privileges of posting messages on the FS-Community board: We will not tolerate any abuse of the message boards. A lot is allowed however, failure to follow these rules will result in your account being banned or jailed from the message board.<BR>
+<BR>
+6.1 Harassment is expressely forbidden, you don't have to love your fellow players but a dislike or abhorrence toward another player(s) does not give you the right to harass or be malevolent toward others. Violation of this rule will result in very steep punishments toward the offender(s). 
+<BR>
+6.2 The posting of material of explicitly sexual, discriminatory, derogatory in nature is inappropriate and will be removed and possible further action taken against the offender.<BR>
+<BR>
+6.3 Excessive foul language often times unnecessary and unwarranted, choose your words with which you use, the English language has a rich history and catalogue of vocabulary with which you can use, expand your vocabulary when and where ever possible, excessive foul language will result in action being taken against the offender(s).<BR>
+<BR>
+6.4 Links and/or downloads not from <THIS SHARD'S WEBPAGE URL HERE> will get deleted.<BR>
+<BR>
+We have the ability to remove objectionable messages and we will make every effort to do so, within a reasonnable time frame, if we determine that removal is necessary. This is a manual process, however, so please realize that we may not be able to remove or edit particular messages immediately.<BR>
