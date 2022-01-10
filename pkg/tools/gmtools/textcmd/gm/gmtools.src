@@ -74,7 +74,7 @@ function maintaingump(who)
 		28: mark(who);
 		29: permgate(who);
 		30: lighting(who);
-		31: Run_Script(":accounts:commands/gm/acctinfo", {who});
+		31: Run_Script(":accounts:commands/gm/acctinfo", who);
 		32: createswitch(who);
 		33: chestspawner(who);
 	endcase
