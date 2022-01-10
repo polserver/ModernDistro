@@ -91,7 +91,7 @@ function RequestGump(mobile, question, option := "", pre_val := "", cancel_btn:=
 endfunction
 
 /*
- * RequestGump2(mobile, question, option, pre_val, cancel_btn)
+ * RequestGumpEx (mobile, question, option := "", pre_val := "", cancel_btn:=CANCEL_BTN_OFF)
  *
  * Purpose
  * Template to create a single field, 3 line, input gump.
