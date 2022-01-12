@@ -1,9 +1,9 @@
 /*
-        Maintened by *Edwards
+        Maintened by The POL Distro Team
 
-        2008-12-14
+        2022-01-12
 
-        Last Modifications 2008-12-14
+        Last Modifications 2022-01-12
              * Added an if statement for close option
 */
 use uo;

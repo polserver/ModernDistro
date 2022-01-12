@@ -1,7 +1,7 @@
 /*
-        Maintened by *Edwards
+        Maintened by The POL Distro Team
 
-        2009-05-30
+        2022-01-12
 */
 use uo;
 use os;
@@ -14,7 +14,7 @@ program textcmd_openGuild( mobile )
                 SendSysMessage( mobile, "Cancelled." );
                 return 0;
         endif
-        
+
         SendSysMessage( mobile, "Select a player to view guild." );
         var targ := Target( mobile, TGTOPT_NOCHECK_LOS );
         if( !targ )
@@ -32,6 +32,6 @@ program textcmd_openGuild( mobile )
         if( start.errortext )
                 SendSysMessage( mobile, "Error starting <:guilds:guildMenu> from command viewGuild -->"+start.errortext );
         endif
- 
+
         return 1;
 endprogram

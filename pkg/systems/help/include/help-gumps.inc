@@ -1,7 +1,7 @@
 /*
-        Maintened by *Edwards
+        Maintened by The POL Distro Team
 
-        2009-02-15
+        2022-01-12
 
         Last Modifications 2009-12-28
              * Changed text presentation for intro
