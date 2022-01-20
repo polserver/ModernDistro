@@ -1,0 +1,106 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    <meta http-equiv="Content-Language" content="en-us">
+    <title>Help Documentation</title>
+    <link rel="stylesheet" type="text/css" href="docs.css">
+  </head>
+  <body>
+    <div id="container">
+      <div id="header">
+        <h1 style="text-align: center;">Help package Documentation<br>
+        </h1>
+        <div style="text-align: center;"> </div>
+        <p style="text-align: center;">For the help package in the Distro, by <a
+            href="mailto:distro@polserver.com">Yukiko</a>.</p>
+        <hr>
+        <h2 style="text-align: center;">Help Topics Files and the Help Topics
+          List File</h2>
+      </div>
+      <div id="content"><big><big><span style="font-weight: bold;">Help Topics
+              Files<br>
+              This is a typical help topic file.<br>
+            </span></big></big><font style="font-size: 14pt" size="4"><br>
+        </font><big><big>The topics files are located in
+            \pkg\systems\help\helptopics. This is what the <b>Credits</b> file
+            looks like if you open it in your editor:</big></big> <br>
+        <br>
+        &lt;CENTER&gt;&lt;U&gt;097 and Modern Distro
+        Developers&lt;/U&gt;&lt;/CENTER&gt;<br>
+        <br>
+        &lt;B&gt;o&lt;/B&gt; Austin&lt;BR&gt;<br>
+        &lt;B&gt;o&lt;/B&gt; MuadDib&lt;BR&gt;<br>
+        &lt;B&gt;o&lt;/B&gt; tekproxy&lt;BR&gt;<br>
+        &lt;B&gt;o&lt;/B&gt; MontuZ&lt;BR&gt;<br>
+        &lt;B&gt;o&lt;/B&gt; DevGiB&lt;BR&gt;<br>
+        &lt;B&gt;o&lt;/B&gt; Bishop&lt;BR&gt;<br>
+        &lt;B&gt;o&lt;/B&gt; Turley&lt;BR&gt;<br>
+        &lt;B&gt;o&lt;/B&gt; Edwards&lt;BR&gt;<br>
+        &lt;B&gt;o&lt;/B&gt; ThisIsMe&lt;BR&gt;<br>
+        &lt;B&gt;o&lt;/B&gt; Yukiko&lt;BR&gt;<br>
+        &lt;br&gt;There are so many contributors to the Dstro. I am certain I
+        have unintentionally missed listing many of them.<br>
+        <br>
+        <big><big>In the gump, the help topics are displayed within an HTML
+            element. When you edit or create the topic files, use HTML tags to
+            format them properly.<br>
+            <br>
+            <br>
+            <b>The Help Topics List</b><br>
+            In order to display a help topic in the help gump it must be added
+            to helptopics.cfg located in /systems/help/config. In this file you
+            enter the topic title and associated TXT file containing the HTML
+            formatted text to be displayed.<br>
+            This is what a typical helptopics.cfg looks like:<br>
+            <br>
+          </big></big><br>
+        # $Id: helptopics.cfg 614 2006-07-06 15:23:38Z austinheilman $<br>
+        #<br>
+        #<br>
+        <br>
+        Topic&nbsp;&nbsp;&nbsp; [Shard] Behavior<br>
+        {<br>
+        &nbsp;&nbsp;&nbsp; File&nbsp;&nbsp;&nbsp; behavior<br>
+        }<br>
+        Topic&nbsp;&nbsp;&nbsp; [Shard] Credits<br>
+        {<br>
+        &nbsp;&nbsp;&nbsp; File&nbsp;&nbsp;&nbsp; credits<br>
+        }<br>
+        Topic&nbsp;&nbsp;&nbsp; [Shard] Rules<br>
+        {<br>
+        &nbsp;&nbsp;&nbsp; File&nbsp;&nbsp;&nbsp; rules<br>
+        }<br>
+        Topic&nbsp;&nbsp;&nbsp; [System] Awards<br>
+        {<br>
+        &nbsp;&nbsp;&nbsp; File&nbsp;&nbsp;&nbsp; awards<br>
+        }<br>
+        Topic&nbsp;&nbsp;&nbsp; [System] Commands<br>
+        {<br>
+        &nbsp;&nbsp;&nbsp; File&nbsp;&nbsp;&nbsp; commands<br>
+        }<br>
+        Topic&nbsp;&nbsp; [System] Help<br>
+        {<br>
+        &nbsp;&nbsp;&nbsp; File&nbsp;&nbsp;&nbsp; help<br>
+        }<br>
+        Topic&nbsp;&nbsp; [System] Skills<br>
+        {<br>
+        &nbsp;&nbsp;&nbsp; File&nbsp;&nbsp;&nbsp; skills<br>
+        }<br>
+        <big><big><br>
+            <br>
+            The topic entry for <strong>Credits</strong> is:<br>
+          </big></big><big><big>Topic&nbsp;&nbsp;&nbsp; [Shard]
+            Credits&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ---&gt; The text
+            following the keyword <strong>Topic</strong> will appear in the
+            help topics gump.<br>
+          </big></big><big><big>{<br>
+          </big></big><big><big>&nbsp;&nbsp;&nbsp; File&nbsp;&nbsp;&nbsp;
+            credits&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            ---&gt; This is the name of the TXT file that will be read from the
+            <strong>helptopics</strong> directory.<br>
+          </big></big><big><big>}</big></big><br>
+      </div>
+    </div>
+  </body>
+</html>
