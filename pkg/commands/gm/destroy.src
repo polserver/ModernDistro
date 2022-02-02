@@ -9,9 +9,9 @@ program textcmd_destroy( who )
 			SendSysMessage(who, "Cancelled.", 1, 33);
 			return 0;
 		endif
-		if(GetObjProperty(tgt, "Permanent"))
+		if(GetObjProperty(tgt, "Static"))
 			SendSysMessage(who, "That item cannot be destroyed.", 1, 33);
-			return 0;
+			SendSysMessage(who, "Only a developer can destroy it ", 1, 33);
 		endif
 		if(!tgt.isA(POLCLASS_NPC) || !tgt.client)
 			DestroyItem( tgt);

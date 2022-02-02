@@ -1,0 +1,27 @@
+//
+// Destroy an item even if marked by "Permanent" CProp
+//
+
+use uo;
+
+program textcmd_udestroy( who )
+	SendSysMessage(who, "This command only destroys items placed", color := 88);
+	SendSysMessage(who, "by the decoratefacets command", color := 88);
+	SendSysMessage( who, "Please target something to destroy.", 1, 88 );
+	SendSysMessage( who, "Press <esc>> when you are done..", 1, 88 );
+	while(1)
+		var tgt := Target( who );
+		if(!tgt)
+			SendSysMessage(who, "Cancelled.", 1, 33);
+			return 0;
+		endif
+		if(!GetObjProperty(tgt, "Static"))
+			SendSysMessage(who, "You may only use this command to destroy items", color := 40);
+			SendSysMessage(who, "placed by the decoratefacets command.", color := 40);
+		elseif(!tgt.isA(POLCLASS_NPC) || !tgt.client)
+			DestroyItem( tgt);
+		else
+		SendSysMessage( who, "You can only destroy items", 1, 33 );
+		endif
+	endwhile
+endprogram

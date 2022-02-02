@@ -1,0 +1,237 @@
+// Metal Door
+new DoorInfo(typeof(MetalDoor), 0x679)	
+new DoorInfo(typeof(MetalDoor), 0x67B)	
+new DoorInfo(typeof(MetalDoor), 0x675)	
+new DoorInfo(typeof(MetalDoor), 0x677)	
+new DoorInfo(typeof(MetalDoor), 0x67D)	
+new DoorInfo(typeof(MetalDoor), 0x67F)	
+new DoorInfo(typeof(MetalDoor), 0x681)	
+new DoorInfo(typeof(MetalDoor), 0x683)
+
+// Metal Gate
+new DoorInfo(typeof(BarredMetalDoor2), 0x1FF1)	
+new DoorInfo(typeof(BarredMetalDoor2), 0x1FF3)	
+new DoorInfo(typeof(BarredMetalDoor2), 0x1FED)	
+new DoorInfo(typeof(BarredMetalDoor2), 0x1FEF)	
+new DoorInfo(typeof(BarredMetalDoor2), 0x1FF5)	
+new DoorInfo(typeof(BarredMetalDoor2), 0x1FF7)	
+new DoorInfo(typeof(BarredMetalDoor2), 0x1FF9)	
+new DoorInfo(typeof(BarredMetalDoor2), 0x1FFB)
+
+// Rattan Door
+new DoorInfo(typeof(RattanDoor), 0x699)	
+new DoorInfo(typeof(RattanDoor), 0x69B)	
+new DoorInfo(typeof(RattanDoor), 0x695)	
+new DoorInfo(typeof(RattanDoor), 0x697)	
+new DoorInfo(typeof(RattanDoor), 0x69D)	
+new DoorInfo(typeof(RattanDoor), 0x69F)	
+new DoorInfo(typeof(RattanDoor), 0x6A1)	
+new DoorInfo(typeof(RattanDoor), 0x6A3)
+
+// Dark Wood Door
+new DoorInfo(typeof(DarkWoodDoor), 0x6A9)	
+new DoorInfo(typeof(DarkWoodDoor), 0x6AB)	
+new DoorInfo(typeof(DarkWoodDoor), 0x6A5)	
+new DoorInfo(typeof(DarkWoodDoor), 0x6A7)	
+new DoorInfo(typeof(DarkWoodDoor), 0x6AD)	
+new DoorInfo(typeof(DarkWoodDoor), 0x6AF)	
+new DoorInfo(typeof(DarkWoodDoor), 0x6B1)	
+new DoorInfo(typeof(DarkWoodDoor), 0x6B3)
+
+// Wood Door
+new DoorInfo(typeof(MediumWoodDoor), 0x6B9)	
+new DoorInfo(typeof(MediumWoodDoor), 0x6BB)	
+new DoorInfo(typeof(MediumWoodDoor), 0x6B5)	
+new DoorInfo(typeof(MediumWoodDoor), 0x6B7)	
+new DoorInfo(typeof(MediumWoodDoor), 0x6BD)	
+new DoorInfo(typeof(MediumWoodDoor), 0x6BF)	
+new DoorInfo(typeof(MediumWoodDoor), 0x6C1)	
+new DoorInfo(typeof(MediumWoodDoor), 0x6C3)
+
+// Light Wood Door
+new DoorInfo(typeof(LightWoodDoor), 0x6D9)	
+new DoorInfo(typeof(LightWoodDoor), 0x6DB)	
+new DoorInfo(typeof(LightWoodDoor), 0x6D5)	
+new DoorInfo(typeof(LightWoodDoor), 0x6D7)	
+new DoorInfo(typeof(LightWoodDoor), 0x6DD)	
+new DoorInfo(typeof(LightWoodDoor), 0x6DF)	
+new DoorInfo(typeof(LightWoodDoor), 0x6E1)	
+new DoorInfo(typeof(LightWoodDoor), 0x6E3)
+
+// Wood and Metal Door
+new DoorInfo(typeof(StrongWoodDoor), 0x6E9)	
+new DoorInfo(typeof(StrongWoodDoor), 0x6EB)	
+new DoorInfo(typeof(StrongWoodDoor), 0x6E5)	
+new DoorInfo(typeof(StrongWoodDoor), 0x6E7)	
+new DoorInfo(typeof(StrongWoodDoor), 0x6ED)	
+new DoorInfo(typeof(StrongWoodDoor), 0x6EF)	
+new DoorInfo(typeof(StrongWoodDoor), 0x6F1)	
+new DoorInfo(typeof(StrongWoodDoor), 0x6F3)
+
+// Tall Wrought Iron Gate
+new DoorInfo(typeof(IronGate), 0x828)	
+new DoorInfo(typeof(IronGate), 0x82A)	
+new DoorInfo(typeof(IronGate), 0x824)	
+new DoorInfo(typeof(IronGate), 0x826)	
+new DoorInfo(typeof(IronGate), 0x82C)	
+new DoorInfo(typeof(IronGate), 0x82E)	
+new DoorInfo(typeof(IronGate), 0x830)	
+new DoorInfo(typeof(IronGate), 0x832)
+
+// Light Wood Gate
+new DoorInfo(typeof(LightWoodGate), 0x83D)	
+new DoorInfo(typeof(LightWoodGate), 0x83F)	
+new DoorInfo(typeof(LightWoodGate), 0x839)	
+new DoorInfo(typeof(LightWoodGate), 0x83B)	
+new DoorInfo(typeof(LightWoodGate), 0x841)	
+new DoorInfo(typeof(LightWoodGate), 0x843)	
+new DoorInfo(typeof(LightWoodGate), 0x845)	
+new DoorInfo(typeof(LightWoodGate), 0x847)
+
+// Short Wrought Iron Gate
+new DoorInfo(typeof(IronGateShort), 0x850)	
+new DoorInfo(typeof(IronGateShort), 0x852)	
+new DoorInfo(typeof(IronGateShort), 0x84C)	
+new DoorInfo(typeof(IronGateShort), 0x84E)	
+new DoorInfo(typeof(IronGateShort), 0x854)	
+new DoorInfo(typeof(IronGateShort), 0x856)	
+new DoorInfo(typeof(IronGateShort), 0x858)	
+new DoorInfo(typeof(IronGateShort), 0x85A)
+
+// Dark Wood Gate
+new DoorInfo(typeof(DarkWoodGate), 0x86A)	
+new DoorInfo(typeof(DarkWoodGate), 0x86C)	
+new DoorInfo(typeof(DarkWoodGate), 0x866)	
+new DoorInfo(typeof(DarkWoodGate), 0x868)	
+new DoorInfo(typeof(DarkWoodGate), 0x86E)	
+new DoorInfo(typeof(DarkWoodGate), 0x870)	
+new DoorInfo(typeof(DarkWoodGate), 0x872)	
+new DoorInfo(typeof(DarkWoodGate), 0x874)
+
+// Weathered Stone Secret Door
+new DoorInfo(typeof(SecretStoneDoor2), 0x328)	
+new DoorInfo(typeof(SecretStoneDoor2), 0x32A)	
+new DoorInfo(typeof(SecretStoneDoor2), 0x324)	
+new DoorInfo(typeof(SecretStoneDoor2), 0x326)	
+new DoorInfo(typeof(SecretStoneDoor2), 0x32C)	
+new DoorInfo(typeof(SecretStoneDoor2), 0x32E)	
+new DoorInfo(typeof(SecretStoneDoor2), 0x330)	
+new DoorInfo(typeof(SecretStoneDoor2), 0x332)
+
+// Dark Wood Secret Door
+new DoorInfo(typeof(SecretWoodenDoor), 0x338)	
+new DoorInfo(typeof(SecretWoodenDoor), 0x33A)	
+new DoorInfo(typeof(SecretWoodenDoor), 0x334)	
+new DoorInfo(typeof(SecretWoodenDoor), 0x336)	
+new DoorInfo(typeof(SecretWoodenDoor), 0x33C)	
+new DoorInfo(typeof(SecretWoodenDoor), 0x33E)	
+new DoorInfo(typeof(SecretWoodenDoor), 0x340)	
+new DoorInfo(typeof(SecretWoodenDoor), 0x342)
+
+// Light Wood Secret Door
+new DoorInfo(typeof(SecretLightWoodDoor), 0x348)	
+new DoorInfo(typeof(SecretLightWoodDoor), 0x34A)	
+new DoorInfo(typeof(SecretLightWoodDoor), 0x344)	
+new DoorInfo(typeof(SecretLightWoodDoor), 0x346)	
+new DoorInfo(typeof(SecretLightWoodDoor), 0x34C)	
+new DoorInfo(typeof(SecretLightWoodDoor), 0x34E)	
+new DoorInfo(typeof(SecretLightWoodDoor), 0x350)	
+new DoorInfo(typeof(SecretLightWoodDoor), 0x352)
+
+// Grey Stone Secret Door
+new DoorInfo(typeof(SecretStoneDoor3), 0x358)	
+new DoorInfo(typeof(SecretStoneDoor3), 0x35A)	
+new DoorInfo(typeof(SecretStoneDoor3), 0x354)	
+new DoorInfo(typeof(SecretStoneDoor3), 0x356)	
+new DoorInfo(typeof(SecretStoneDoor3), 0x35C)	
+new DoorInfo(typeof(SecretStoneDoor3), 0x35E)	
+new DoorInfo(typeof(SecretStoneDoor3), 0x360)	
+new DoorInfo(typeof(SecretStoneDoor3), 0x362)
+
+// BarredMetalDoor
+new DoorInfo(typeof(BarredMetalDoor), 0x686)
+new DoorInfo(typeof(BarredMetalDoor), 0x688)
+new DoorInfo(typeof(BarredMetalDoor), 0x68A)
+new DoorInfo(typeof(BarredMetalDoor), 0x68C)
+new DoorInfo(typeof(BarredMetalDoor), 0x68E)
+new DoorInfo(typeof(BarredMetalDoor), 0x690)
+new DoorInfo(typeof(BarredMetalDoor), 0x692)
+
+// BarredMetalDoor2
+new DoorInfo(typeof(BarredMetalDoor2), 0x1FEE)
+new DoorInfo(typeof(BarredMetalDoor2), 0x1FF0)
+new DoorInfo(typeof(BarredMetalDoor2), 0x1FF2)
+new DoorInfo(typeof(BarredMetalDoor2), 0x1FF4)
+new DoorInfo(typeof(BarredMetalDoor2), 0x1FF6)
+new DoorInfo(typeof(BarredMetalDoor2), 0x1FF8)
+new DoorInfo(typeof(BarredMetalDoor2), 0x1FFA)
+new DoorInfo(typeof(BarredMetalDoor2), 0x1FFC)
+
+// MetalDoor2
+new DoorInfo(typeof(MetalDoor2), 
+
+// Japanese Doors
+0x2423	0x241F
+
+// Sliding Doors 1
+0x2A0F	0x2A0D	0x2A13	0x2A11
+
+// Sliding Doors 2
+0x2A07	0x2A05	0x2A0B	0x2A09
+
+// Sliding Doors 3
+0x2A17	0x2A15	0x2A1B	0x2A19
+
+// Elvan Wood Door
+0x31AE	0x31AC	0x2D48	0x2D46
+
+Elvan White Wooden Door 1
+0x2D65	0x31A0	0x2D63	0x31A2
+
+// Elvan Ornate Door
+0x2D69	0x31A4	0x2D67	0x31A6
+
+// Elvan Kia Wood Door 2
+0x2D6D	0x31AA	0x2D6B	0x31A8
+
+// Elvan Moon Door
+0x2FE4	0x319C	0x2FE2	0x319E
+
+// Crystal Door
+0x367F	0x3681	0x367B	0x367D	0x3683	0x3685	0x3687	0x3689
+
+// Shadow Door
+0x368F	0x3691	0x368B	0x368D	0x3693	0x3695	0x3697	0x3699
+
+// Gargish Carved Green Door
+0x409B	0x409D	0x409F	0x40A1
+
+// Gargish Brown Door
+0x410C	0x410E	0x4110	0x4112
+
+// Sun Door
+0x41C2	0x41C4	0x41C6	0x41C8
+
+// Gargish Grey Door
+0x41CF	0x41D1	0x41D3	0x41D5
+
+// Gargish Set Door
+0x436E	0x4370	0x4372	0x4374	0x4376	0x4378	0x437A	0x437C
+
+// Ruined Door
+0x46DD	0x46DF	0x46E1	0x46E3
+
+// Gargish Blue Door
+19746	19748	19750	19752
+
+// Gargish Red Doors
+0x50C8	0x50CA	0x50D0	0x50D2	0x50CC	0x50CE	0x50D4	0x50D6
+
+// Gargish Prison Door
+0x5142	0x5144	0x5146	0x5148
+
+// Jungle Doors
+0x9ADB	0x9ADD	0x9AD7	0x9AD9	0x9ADF	0x9AE1	0x9AE3	0x9AE5
+
+// Shadowguard Doors
+0x9B40	0x9B42	0x9B3C	0x9B3E	0x9B44	0x9B46	0x9B48	0x9B4A

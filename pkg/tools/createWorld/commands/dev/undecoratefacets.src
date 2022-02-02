@@ -1,0 +1,182 @@
+/////////////////////////////////////////////////////////////////////
+//
+// Program Name: UndecorateFacets( who )
+//
+// Author: Yukiko
+//
+// Date Created: 2022-02-01
+//
+// Description: Removes all decorations from a facet placed by
+//				the decoratefacets command.
+//
+// Parameters: who::objref to the user of the command.
+//
+// Return Value: none
+//
+/////////////////////////////////////////////////////////////////////
+
+
+use uo;
+use cfgfile;
+use file;
+use polsys;
+use cliloc;
+
+include ":createWorld:decorate";
+include ":clilocs:clilocs";
+include ":timeutils:time";
+include "include/arrays";
+include ":gumps:gumps";
+include ":gumps:yesNo";
+
+
+program UndecorateFacets( who )
+
+	var selected_facets := {};	// An array that contains the facets to be undecorated.
+	var decorate_all := 0;
+	var Post_SA := YesNo( who, "Please select the map version you are using, pre-Stygian Abyss or post Stygian Abyss:", "Post", "Pre", 0, NOT_LOCALIZED );
+	selected_facets := UnecorateFacetsGump ( who, decorate_all );
+	foreach facet in selected_facets
+		case(facet)
+			"britannia":		RemoveDecorations(facet);
+								if(Post_SA)
+									facet := facet + "/newMagincia";
+									RemoveDecorations(facet);
+								else
+									facet := facet + "/oldMagincia";
+									RemoveDecorations(facet);
+								endif
+								EraseGlobalProperty("britannia_Decorated");
+			"britannia_alt":	if(Post_SA)
+									facet := facet + "/postSA";
+									RemoveDecorations(facet);
+								else
+									RemoveDecorations(facet + "/preSA");
+									facet := facet + "/preSA/oldMagincia";
+									RemoveDecorations(facet);
+								endif
+								EraseGlobalProperty("britannia_alt_Decorated");
+			"ilshenar":			RemoveDecorations(facet);
+								EraseGlobalProperty("ilshenar_Decorated");
+			"malas":			RemoveDecorations(facet);
+								EraseGlobalProperty("malas_Decorated");
+			"tokuno":			RemoveDecorations(facet);
+								EraseGlobalProperty("tokuno_Decorated");
+			"termur":			RemoveDecorations(facet);
+								EraseGlobalProperty("termur_Decorated");
+		endcase
+	endforeach
+
+endprogram
+
+function RemoveDecorations(facet)
+
+	Print("Processing facet " + facet);
+	var files := ListDecorationConfigFiles( ":createWorld:decorations/" + facet );
+	var deco_keys := {};
+	var cfg_elem;
+	var cfg_file;
+	foreach cfg_file_name in files
+		cfg_file := OpenDecorationCfgfile( ":createWorld:decorations/" + facet + "/" + cfg_file_name );
+		deco_keys := ListDecorationCfgfileContents( cfg_file );
+		foreach key in deco_keys
+			cfg_elem := FindConfigElem( cfg_file, key );
+			RemoveDecorationFromFacet( cfg_elem );
+		endforeach
+	endforeach
+
+endfunction
+
+function UnecorateFacetsGump ( who, check_all := 0 )
+	var continuousloop := 1;
+	var deco_these := Array {};
+	var facet_list := Array { "britannia", "britannia_alt", "ilshenar", "malas", "tokuno", "termur", "eoden" };
+	var facet_clilocs := Array { 1012001, 1012000, 1012002, 1060643, 1063258, 1112178, 1156262 };
+	// "eoden" is only named for future reference. Research needs to be made as to what needs to be added to that
+	// facet for deco purposes and if it is even a separate map file or is it part of termur which it might be
+	// much like The Lost Lands being part of Felucca and Trammel.
+	while ( continuousloop )
+		var paper_modifier := CInt( 0 );
+		var present_facets := Array {};
+		var multiplier, ArrayPlace, RealmY, RealmCheck;
+		var facet_gump := GFCreateGump ( 250, 200 );
+		GFClosable ( facet_gump, 0 );
+		GFMovable ( facet_gump, 0 );
+		GFPage ( facet_gump, 0 );
+		GFResizePic ( facet_gump, 0, 0, 9200, 280, 375 );
+		GFHTMLArea ( facet_gump, 10, 10, 260, 26, "UNDECORATE WHICH FACETS?:", 1, 0 ); // Title
+
+		// Generated the size of the "Paper" background and a list of present facets
+		foreach relm in Realms()
+			relm := relm;
+			foreach facet_name in facet_list
+				if ( _relm_iter == facet_name  )
+					paper_modifier += 1;
+					present_facets.Append ( facet_clilocs[CInt(_facet_name_iter)] );
+				endif
+			endforeach
+		endforeach
+
+		GFResizePic ( facet_gump, 10, 40, 3000, 260, CInt ( 34 * paper_modifier ) );
+
+		foreach facet in present_facets
+			multiplier := CInt ( _facet_iter - 1 );
+			RealmY := CInt ( 54 + ( 32 * ( multiplier % 7 ) ) );
+			RealmCheck := CInt ( 49 + ( 32 * ( multiplier % 7 ) ) );
+			// Need to grab the place within the array the facet cliloc number is to check against
+			// POL's funky facet names
+			ArrayPlace := facet in facet_clilocs;
+			if ( GetGlobalProperty ( CStr ( facet_list[CInt ( ArrayPlace )]+"_Decorated" ) ) )
+				GFCheckBox ( facet_gump, 15, RealmCheck, 9792, 9793, check_all, facet ); // Facet Check Box
+				GFAddHTMLLocalized ( facet_gump, 40, RealmY, 220, 26, facet, 0, 0, 0x7C00  ); // Facet Name
+			else
+				GFAddHTMLLocalized ( facet_gump, 40, RealmY, 220, 26, facet, 0, 0, 0x1F ); // Facet Name
+			endif
+		endforeach
+
+		GFAddButton ( facet_gump, 15, 282, 4005, 4007, GF_CLOSE_BTN, 99 );
+		if ( !check_all )
+			GFHTMLArea ( facet_gump, 50, 279, 220, 26, "SELECT ALL REALMS", 1, 0 );
+			check_all := 1;
+		else
+			GFHTMLArea ( facet_gump, 50, 279, 220, 26, "DESELECT REALMS", 1, 0 );
+			check_all := 0;
+		endif
+
+		GFAddButton ( facet_gump, 15, 311, 4005, 4007, GF_CLOSE_BTN, 33 );
+		GFAddHTMLLocalized ( facet_gump, 50, 309, 220, 26, 1011011, 1, 0 ); // CONTINUE
+		GFAddButton ( facet_gump, 15, 340, 4005, 4007, GF_CLOSE_BTN, 66 );
+		GFAddHTMLLocalized ( facet_gump, 50, 338, 220, 26, 1011012, 1, 0 ); // CANCEL
+
+		var result := GFSendGump ( who, facet_gump );
+		var facet_toggle := 0;
+		foreach key in ( result.keys )
+			if ( 99 in result.keys )
+				facet_toggle := 99;
+			endif
+
+			if ( !result || 66 in result.keys )
+				SendSysMessageCL ( who, 1071555, color := 34 ); // Canceled operation.
+				return 0;
+			endif
+
+			if ( 33 in result.keys )
+				if ( key in facet_clilocs );
+					foreach clil in facet_clilocs
+						if ( key == clil )
+							deco_these.Append ( facet_list[CInt(_clil_iter)] );
+						endif
+					endforeach
+				endif
+			endif
+		endforeach
+
+		if ( facet_toggle != 99 )
+			continuousloop := 0;
+		endif
+	endwhile
+
+	return deco_these;
+
+endfunction
+
