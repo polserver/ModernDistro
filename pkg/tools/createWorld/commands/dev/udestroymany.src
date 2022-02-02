@@ -1,5 +1,8 @@
 //
-// Destroy an item even if marked by "Permanent" CProp
+// Destroy an item even if marked by "Static" CProp
+// This will destroy items placed by the decoratefacets command within
+// a specified range.
+// Max range is 10.
 //
 
 use uo;
@@ -17,6 +20,7 @@ program textcmd_udestroyRadius(who, text)
     endif
 	SendSysMessage(who, "This command only destroys items placed", color := 88);
 	SendSysMessage(who, "by the decoratefacets command", color := 88);
+	SendSysMessage(who, "Press <esc> to exit.", color := 88);
     while(1)
 		trg := TargetCoordinates(who);
 		if(!trg)

@@ -1,5 +1,5 @@
 //
-// Destroy an item even if marked by "Permanent" CProp
+// Destroy an item even if marked by "Static" CProp
 //
 
 use uo;
