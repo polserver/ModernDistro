@@ -43,15 +43,15 @@ function CreateRunebookGump( who, book )
 
   GFAddHTMLLocalized ( book_gump, 140, 40, 80, 18, 1011296, 0, 0); // Charges:
   GFHTMLArea( book_gump, 220, 40, 30, 18, charges );
-  
+
   GFAddHTMLLocalized ( book_gump, 300, 40, 100, 18, 1011297, 0, 0); // Max Charges:
   GFHTMLArea( book_gump, 400, 40, 30, 18, max_charges );
-	
-	
+
+
 
 	GFPage( book_gump, 1 );
 
-	GFAddButton( book_gump, 125, 15, 2472, 2473, GF_CLOSE_BTN, 50 ); 
+	GFAddButton( book_gump, 125, 15, 2472, 2473, GF_CLOSE_BTN, 50 );
   GFAddHTMLLocalized ( book_gump, 158, 22, 100, 18, 1011299, 0, 0); // Rename book
 	GFAddButton( book_gump, 393, 14, 2206, 2206, GF_PAGE_BTN, 2 );
 
@@ -63,7 +63,7 @@ function CreateRunebookGump( who, book )
 	var sacred_button    := 401;
   var drop_rune_button := 501;
 	var set_default_rune := 601;
-  
+
 	var rune_pos         := 1;
         var rune_use         := 101;
 
@@ -90,7 +90,7 @@ function CreateRunebookGump( who, book )
             elseif ( rune_entry.realm == "tokuno" )
                 mapcolor := 1154;
             elseif ( rune_entry.realm == "termur" )
-                mapcolor := 1645;		
+                mapcolor := 1645;
             else
                 mapcolor := 0;
             endif
@@ -107,16 +107,16 @@ function CreateRunebookGump( who, book )
 
 				GFAddButton( book_gump, 135, 115, 2437, 2438, GF_CLOSE_BTN, drop_rune_button );
         GFAddHTMLLocalized ( book_gump, 150, 115, 100, 18, 1011298, 0, 0); // Drop Rune
-				
+
         GFAddButton( book_gump, 160, 20, 2361, 2361, GF_CLOSE_BTN, set_default_rune );
         GFAddHTMLLocalized ( book_gump, 175, 15, 100, 18, 1011300, 0, 0); // Set default
-        
+
 				GFAddButton ( book_gump, 135, 140, 2103, 2104, GF_CLOSE_BTN, recall_button );
         GFAddHTMLLocalized ( book_gump, 150, 136, 110, 20, 1062722, 0, 0); // Recall
-        
+
 				GFAddButton ( book_gump, 135, 158, 2103, 2104, GF_CLOSE_BTN, gate_button );
         GFAddHTMLLocalized ( book_gump, 150, 154, 110, 20, 1062723, 0, 0); // Gate Travel
-        
+
         GFAddButton ( book_gump, 135, 176, 2103, 2104, GF_CLOSE_BTN, sacred_button );
         GFAddHTMLLocalized ( book_gump, 150, 172, 110, 20, 1062724, 0, 0); // Sacred Journey
 
@@ -149,7 +149,7 @@ function CreateRunebookGump( who, book )
             elseif ( rune_entry.realm == "tokuno" )
                 mapcolor := 1154;
             elseif ( rune_entry.realm == "termur" )
-                mapcolor := 1645;		
+                mapcolor := 1645;
             else
                 mapcolor := 0;
             endif
@@ -166,19 +166,19 @@ function CreateRunebookGump( who, book )
 
 				GFAddButton( book_gump, 295, 115, 2437, 2438, GF_CLOSE_BTN, drop_rune_button );
         GFAddHTMLLocalized ( book_gump, 310, 115, 100, 18, 1011298, 0, 0); // Drop Rune
-        
+
 				GFAddButton( book_gump, 300, 20, 2361, 2361, GF_CLOSE_BTN, set_default_rune );
 				GFAddHTMLLocalized ( book_gump, 315, 15, 100, 18, 1011300, 0, 0); // Set default
-        
+
 				GFAddButton ( book_gump, 295, 140, 2103, 2104, GF_CLOSE_BTN, recall_button );
         GFAddHTMLLocalized ( book_gump, 310, 136, 110, 20, 1062722, 0, 0); // Recall
-        
+
 				GFAddButton ( book_gump, 295, 158, 2103, 2104, GF_CLOSE_BTN, gate_button );
         GFAddHTMLLocalized ( book_gump, 310, 154, 110, 20, 1062723, 0, 0); // Gate Travel
-        
+
         GFAddButton ( book_gump, 295, 176, 2103, 2104, GF_CLOSE_BTN, sacred_button );
         GFAddHTMLLocalized ( book_gump, 310, 172, 110, 20, 1062724, 0, 0); // Sacred Journey
-				
+
         charge_button += 1;
 				drop_rune_button += 1;
 				set_default_rune += 1;
@@ -348,5 +348,5 @@ function ToSextant( x, y )
 	latitude_minutes := CInt(( CInt(( latitude_degrees-Floor( latitude_degrees )) * 100 ) * 60 ) / 100 );
 	longitude_minutes := CInt(( CInt(( longitude_degrees-Floor( longitude_degrees )) * 100 ) * 60 ) / 100 );
 
-	return( Floor( latitude_degrees )+"Â° "+latitude_minutes+"'"+latitude_direction+", "+Floor( longitude_degrees )+"Â° "+longitude_minutes+"'"+longitude_direction );
+	return( Floor( latitude_degrees )+"° "+latitude_minutes+"'"+latitude_direction+", "+Floor( longitude_degrees )+"° "+longitude_minutes+"'"+longitude_direction );
 endfunction

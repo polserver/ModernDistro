@@ -18,8 +18,11 @@ program SpellStarter(params)
 	var mobile := params[1]; // Caster
 	var spell_id := params[2]; // Id # of the spell
 	var scroll := params[3]; // Scroll ObjType being used
-	var targ := params[4]; // NPC target used if NPC is casting the spell
-//        targ := targ; // stop compiler unused warning
+	var targ := params[4]; // NPC target used if NPC is casting the spell.
+	var runebook := params[5]; // Used if casting recall or gate from a runebook.
+	var no_regs__no_mana := params[6]; // If > 0 spell does not require regs and mana, for runebook back pages.
+	// if (scroll == 1)
+	// endif
 	if ( !Attach(mobile) )
 		SendSysMessage(mobile, "You are already doing something.", color := 33);
 		return 0;
@@ -64,7 +67,11 @@ program SpellStarter(params)
 		requires_regs := 0;
 		requires_mana := 1;
 	endif
-
+	// This check for casting from back pages of a runebook.
+	if( !no_regs__no_mana )
+		requires_regs := 1;
+		requires_mana := 1;
+	endif
 	if ( GetObjProperty(mobile, "#Casting") )
 		SendSysMessage(mobile, "You cannot cast right now.", color := 33);
 		return 0;
@@ -110,6 +117,7 @@ program SpellStarter(params)
 		endif
 	endif
 
+	// might want to send events to this script
 	SetObjProperty(mobile, "#Casting", GetPid());
 	mobile.frozen := 1;
 	mobile.hidden := 0;
@@ -207,13 +215,21 @@ program SpellStarter(params)
 		info.+circle := spell_elem.Circle;
 		info.+spell_config := spell_elem;
 		info.+damage_typ := spell_elem.DamageType;
+		if( runebook )
+			info.runebook := runebook;
+		endif
+		// The following is for rune books.
+		info.+no_target := 0;
+		if( scroll == 1 )
+			info.no_target := 1;
+		endif
 
 		var script := Start_Script(spell_elem.SpellScript, {mobile, info, spell_id, targ});
 		Detach();
 		EraseObjProperty(mobile, "#Casting");
 
 		if ( script.errortext )
-			Print("Unable to start ["+spell_elem.SpellScript+"] -> "+script.errortext);
+			Broadcast("Unable to start ["+spell_elem.SpellScript+"] -> "+script.errortext);
 		endif
 
 		var ev;

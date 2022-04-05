@@ -1,5 +1,6 @@
 use uo;
 use os;
+use basic;
 use cliloc;
 
 include ":runebook:runebookFunctions";
@@ -13,8 +14,8 @@ program on_insert( who, book, movetype, inserttype, item, existing_stack, amt );
 	movetype       := movetype;
 	inserttype     := inserttype;
 
-       	if( !useItem_check( who, book, ITEM_INCONTAINER ))
-                MoveItemToContainer( item, who.backpack );
+	if( !useItem_check( who, book, ITEM_INCONTAINER ))
+		MoveItemToContainer( item, who.backpack );
 		return 0;
 	endif
 
@@ -25,7 +26,7 @@ program on_insert( who, book, movetype, inserttype, item, existing_stack, amt );
 	endif
 
         MoveItemToContainer( item, who.backpack );
-        
+
 	return 0;
 endprogram
 
@@ -36,15 +37,15 @@ function recharge_book( who, book, scrolls )
 	if( !charges )
 		charges := 0;
 	endif
- 
+
 	var max_charges := charge_prop["max_charges"];
 	if( !max_charges )
 		max_charges := 5;
 	endif
- 
+
 	var max_amount := CInt( max_charges - charges );
 	var amount := CInt( scrolls.amount );
- 
+
 	if( max_amount <= 0 )
 		SendSysMessageCL( who, 502410, color := 0x21 ); // This book already has the maximum amount of charges.
 		MoveItemToContainer( scrolls, who.backpack );
@@ -58,10 +59,10 @@ function recharge_book( who, book, scrolls )
 	elseif( DestroyItem( scrolls ))
 		charges := charges + amount;
 	endif
- 
+
 	PlaySoundEffect( who, 0x1F1 );
 	PlayObjectCenteredEffect( who, 0x375A, 7, 0x10 );
- 
+
 	SetCharges( book, who, charges );
 	SetBookName( book, who, 1 );
 
@@ -82,13 +83,14 @@ function addRune( who, book, rune )
 	endif
 
 	var temp := GetObjProperty( rune, "Destination" );
-	temp.+name := rune.name;
+
+	temp.+name := StrReplace(rune.name, "A recall rune for ", "");
 	if( !rune.color )
 		temp.+color := 0;
 	else
 		temp.+color := CInt( rune.color );
 	endif
- 
+
 	rune_list.Append( temp );
 
 	SetObjProperty( book, "%RuneList%", rune_list );

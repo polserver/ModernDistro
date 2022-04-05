@@ -11,7 +11,7 @@ endprogram
 exported function IsRecallRune( rune )
 
 	rune := rune;
- 
+
 	return 1;
 endfunction
 
@@ -32,9 +32,9 @@ endfunction
 
 exported function GetDestination( rune )
 
-	//var destination := struct;
+	var destination := struct;
 	var dest := struct;
-	var destination := GetObjProperty( rune, "Destination" );
+	destination := GetObjProperty( rune, "Destination" );
 	// This is for the old way the destination was stored.
 	// Just in case there are older recall runes in the world.
 	if(!destination)

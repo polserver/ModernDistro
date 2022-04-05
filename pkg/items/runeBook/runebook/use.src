@@ -20,7 +20,7 @@ program use_Runebook( who, book )
 		charge_prop := dictionary { "charges" -> 0, "max_charges" -> 5 };
 		SetObjProperty(book, "%Charges%", charge_prop);
 	endif
- 
+
 	var charges := charge_prop["charges"];
 	if( !charges )
 		charges := 0;
@@ -52,12 +52,11 @@ program use_Runebook( who, book )
 			SendSysMessageCL ( who, 502412, color := 0x21 ); // There are no charges left on that item.
 			return 0;
 		endif
-  
+
 		var rune_info := GetRuneDetails( book, ( result[0]-100 ));
 		if( !rune_info )
 			return 0;
 		endif
-  
 		runebookRecall( who, rune_info, book, charges, 1 );
 		return 1;
 	elseif( result[0] >= 201 && result[0] <= 220 )
