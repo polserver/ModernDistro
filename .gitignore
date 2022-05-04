@@ -84,7 +84,7 @@ orphans.txt
 pol.cfg
 *.bak
 
-# POL binaries and cfg
+# POL binaries and cfgs that are in the polserver release
 pol.exe
 libmysql.dll
 uoconvert.exe
@@ -97,6 +97,9 @@ poltool.exe
 ecompile.cfg
 runecl.exe
 pol.cfg.example
+animxlate.cfg
+boats.cfg
+extobj.cfg
 
 # Misc files
 
