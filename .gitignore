@@ -101,6 +101,10 @@ animxlate.cfg
 boats.cfg
 extobj.cfg
 
+# PDB and DMP files
+*.pdb
+*.dmp
+
 # Misc files
 
 scripts/eCompile_commands.txt
@@ -109,3 +113,4 @@ scripts/modules/*
 Realm funcs.txt
 *.session
 original*.zip
+POLConfigurator.dat
