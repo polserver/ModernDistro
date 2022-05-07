@@ -1,0 +1,31 @@
+use uo;
+use os;
+
+program pushback_textcmd( mobile, power )
+
+	if( !Len( power ) )
+		power := 1;
+	endif
+
+	power := CInt( power );
+	if( power < 1 )
+		power := 1;
+	elseif( power > 3 )
+		power := 3;
+	endif
+
+	SendSysMessage( mobile, "Select the epicenter of the shockwave.", 0x3, 0x42 );
+	var epicenter := TargetCoordinates( mobile );
+	if( !epicenter )
+		SendSysMessage( mobile, "Cancelled action.", 0x3, 0x32 );
+		return 0;
+	endif
+
+	foreach mob in ListMobilesNearLocationEx( epicenter.x, epicenter.y, epicenter.z, ( power*3+4 ), LISTEX_FLAG_NORMAL+LISTEX_FLAG_HIDDEN, epicenter.realm );
+		if( !CheckLosAt( mob, epicenter.x, epicenter.y, epicenter.z ) )
+			continue;
+		endif
+
+		Start_Script( ":magiceffects:scripts/services/shockwave", { mob, epicenter, power } );
+	endforeach
+endprogram

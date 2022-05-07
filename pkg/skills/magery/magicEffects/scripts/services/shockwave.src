@@ -1,0 +1,44 @@
+use uo;
+use os;
+
+include "include/facings";
+
+// Lesser: 10 squares
+// Normal: 20 squares
+// Greater: 30 squares
+program shockwave_service_script( parameters )
+
+	var mobile := parameters[1],
+		location := parameters[2],
+		potion_strength := parameters[3];
+
+	var range := CInt( ( potion_strength * 10 )-CoordinateDistance( mobile.x, mobile.y, location.x, location.y ) );
+
+	return Pushback( mobile, location, range );
+endprogram
+
+function Pushback( byref mobile, byref location, byref range )
+
+	var mx := mobile.x,
+		my := mobile.y,
+		x := 0,
+		y:= 0,
+		z := 0;
+
+	while( range > 0 )
+		x := ConvertDirectionToLocX( CInt( GetFacing( mx, my, location.x, location.y )+4 )%8 );
+		y := ConvertDirectionToLocY( CInt( GetFacing( mx, my, location.x, location.y )+4 )%8 );
+		z := GetStandingHeight( mobile.x+x, mobile.y+y, mobile.z+5, mobile.realm );
+
+		if( !CheckLosAt( mobile, mobile.x+x, mobile.y+y, z.z ) )
+			break;
+		endif
+
+		MoveObjectToLocation( mobile, mobile.x+x, mobile.y+y, z.z, mobile.realm, MOVEOBJECT_NORMAL );
+
+		range := range - 1;
+		SleepMS( 10 );
+	endwhile
+
+	return 1;
+endfunction
