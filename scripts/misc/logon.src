@@ -24,6 +24,7 @@ program onlogon(who)
 	if(who.cmdlevel < 2)
 		RevokePrivilege(who, "hearghosts");
 	else
+		who.concealed := 2;
 		var oldpack := who.backpack;
 		if(oldpack.objtype != 0xE75)
 			MoveObjectToLocation(oldpack, 5851, 1161, 0, "britannia_alt", MOVEOBJECT_FORCELOCATION); // newmap problem

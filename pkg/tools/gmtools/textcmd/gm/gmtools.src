@@ -213,11 +213,14 @@ endfunction
 function mark(caster)
   SendSysMessage(caster, "Select a rune to mark.");
   var cast_on := Target(caster);
-  SetObjProperty(cast_on, "x", caster.x);
-  SetObjProperty(cast_on, "y", caster.y);
-  SetObjProperty(cast_on, "z", caster.z);
-  SendSysMessage(caster, "You marked: " +  caster.x + " " + caster.y + " " + caster.z);
-  SetName(cast_on, "a Marked Recall Rune");
+    if (cast_on.IsRecallRune())
+		cast_on.SetDestination(caster.x, caster.y, caster.z, caster.realm);
+		SendSysMessage( caster, "You marked: " +  caster.x + " " + caster.y + " " + caster.z + " " + caster.realm );
+		SetName(cast_on, "a Marked Recall Rune");
+		return 1;
+	else
+		SendSysMessage(caster, "You can only mark recall runes.", color := 33);
+	endif
 //  maintaingump(caster);
 endfunction
 

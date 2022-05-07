@@ -39,6 +39,34 @@ enum DAMAGE_MEMBERS
   DMG_POISON            := "Poison"
 endenum
 
+// Read only members
+enum RESISTANCE_MEMBERS
+  RES_FORCED         := -1,                    // This isn't an official member. It's used for applying damage without taking resistances into account.
+  RES_COLD              := "Cold",
+  RES_ENERGY            := "Energy",
+  RES_FIRE              := "Fire",
+  RES_PHYSICAL          := "Physical",
+  RES_POISON            := "Poison"
+endenum
+
+// Read/Write members
+enum DAMAGE_MOD_MEMBERS
+  DMG_COLD_MOD              := "Cold",
+  DMG_ENERGY_MOD            := "Energy",
+  DMG_FIRE_MOD              := "Fire",
+  DMG_PHYSICAL_MOD              := "Physical",
+  DMG_POISON_MOD            := "Poison"
+endenum
+
+// Read/Write members
+enum RESISTANCE_MOD_MEMBERS
+  RES_COLD_MOD              := "Cold",
+  RES_ENERGY_MOD            := "Energy",
+  RES_FIRE_MOD              := "Fire",
+  RES_PHYSICAL_MOD          := "Physical",
+  RES_POISON_MOD            := "Poison"
+endenum
+
 /*
  * ApplyDamageEX(mobile, amount, type, source)
  *
@@ -439,15 +467,19 @@ endfunction
  * Return value
  * Returns result of SetObjProperty()
  *
+ * Note: As we cannot set the base resistances,
+ * eg. resist_cold, this function sets the
+ * mod for the resistances, eg. resist_cold_mod.
+ *
  */
 function SetResistance(mobile, name, value)
   value := CInt(value);
   case(name)
-    DMG_COLD: mobile.resist_cold_mod := value;
-    DMG_ENERGY: mobile.resist_energy_mod := value;
-    DMG_FIRE: mobile.resist_fire_mod := value;
-    DMG_PHYSICAL: mobile.resist_physical_mod := value;
-    DMG_POISON: mobile.resist_poison_mod := value;
+    RES_COLD: mobile.resist_cold_mod := value;
+    RES_ENERGY: mobile.resist_energy_mod := value;
+    RES_FIRE: mobile.resist_fire_mod := value;
+    RES_PHYSICAL: mobile.resist_physical_mod := value;
+    RES_POISON: mobile.resist_poison_mod := value;
   endcase
 	return value;
 endfunction
@@ -468,11 +500,11 @@ endfunction
 function ModifyResistance(mobile, name, value)
   value := CInt(value);
   case(name)
-    DMG_PHYSICAL: mobile.resist_physical_mod := mobile.resist_physical_mod + value;
-    DMG_FIRE: mobile.resist_fire_mod := mobile.resist_fire_mod + value;
-    DMG_COLD: mobile.resist_cold_mod := mobile.resist_cold_mod + value;
-    DMG_POISON: mobile.resist_poison_mod := mobile.resist_poison_mod + value;
-    DMG_ENERGY: mobile.resist_energy_mod := mobile.resist_energy_mod + value;
+    RES_PHYSICAL_MOD: mobile.resist_physical_mod := mobile.resist_physical_mod + value;
+    RES_FIRE_MOD: mobile.resist_fire_mod := mobile.resist_fire_mod + value;
+    RES_COLD_MOD: mobile.resist_cold_mod := mobile.resist_cold_mod + value;
+    RES_POISON_MOD: mobile.resist_poison_mod := mobile.resist_poison_mod + value;
+    RES_ENERGY_MOD: mobile.resist_energy_mod := mobile.resist_energy_mod + value;
   endcase
 	return value;
 endfunction
@@ -491,6 +523,10 @@ endfunction
  *
  * Return value
  * Returns none
+ *
+ * Note: As we cannot set the base damage,
+ * eg. resist_cold, this function sets the
+ * mod for the damage, eg. resist_cold_mod.
  *
  */
 function SetDamage(mobile, name, value)
@@ -521,11 +557,11 @@ endfunction
 function ModifyDamage(mobile, name, value)
   value := CInt(value);
   case(name)
-    DMG_COLD: mobile.damage_cold_mod := mobile.damage_cold_mod + value;
-    DMG_ENERGY: mobile.damage_energy_mod := mobile.damage_energy_mod + value;
-    DMG_FIRE: mobile.damage_fire_mod := mobile.damage_fire_mod + value;
-    DMG_PHYSICAL: mobile.damage_physical_mod := mobile.damage_physical_mod + value;
-    DMG_POISON: mobile.damage_poison_mod := mobile.damage_poison_mod + value;
+    DMG_COLD_MOD: mobile.damage_cold_mod := mobile.damage_cold_mod + value;
+    DMG_ENERGY_MOD: mobile.damage_energy_mod := mobile.damage_energy_mod + value;
+    DMG_FIRE_MOD: mobile.damage_fire_mod := mobile.damage_fire_mod + value;
+    DMG_PHYSICAL_MOD: mobile.damage_physical_mod := mobile.damage_physical_mod + value;
+    DMG_POISON_MOD: mobile.damage_poison_mod := mobile.damage_poison_mod + value;
   endcase
 	return value;
 endfunction

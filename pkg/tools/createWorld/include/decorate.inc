@@ -187,7 +187,7 @@ function RemoveDecorationFromFacet( cfg_elem )
 	var	things := ListItemsAtLocation( cfg_elem.x, cfg_elem.y, cfg_elem.z, cfg_elem.realm );
 
 	foreach thing in things
-		if( thing.objtype == cfg_elem.objtype )
+		if( thing.objtype == cfg_elem.objtype && GetObjProperty(thing, "Static") )
 			DestroyItem( thing );
 			break;
 		endif
