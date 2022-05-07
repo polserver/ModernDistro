@@ -1,0 +1,7 @@
+use uo;
+
+program Moved( who )
+
+	Print(who.name + " has moved.");
+
+endprogram

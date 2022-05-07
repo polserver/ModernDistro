@@ -1,0 +1,19 @@
+use uo;
+use os;
+use cliloc;
+
+program InstallPlayerMoved()
+
+	Print("PacketHooks - Player Moved" );
+
+	return 1;
+endprogram
+
+exported function HandlePlayerMoved( mobile, byref packet )
+
+	if(!mobile.IsA(POLCLASS_NPC) )
+		Start_Script( ":playerMoved:moved", {mobile} );
+	endif
+
+	return 0;
+endfunction
