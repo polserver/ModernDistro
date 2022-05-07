@@ -1,0 +1,79 @@
+// Created 5/5/2022 23:50:07, with Gump Studio.
+// Exported with POLGumpExporter ver 1.1 for gump pkg
+
+use uo;
+use os;
+use cliloc;
+
+include ":gumps:gumps";
+include ":traps:traps";
+include ":help:textcmds";
+
+program set_trap( who, text )
+
+	var res,
+		cont,
+		strngth,
+		trap_type;
+
+	if( (text == Lower( "help" )) || (text == Lower( "h" )) || (text == "?") )
+		SendCmdHelpWindow( who, ":commands:seer/trap.hlp" );
+		return;
+	endif
+
+	if( text )
+		strngth := CInt( strngth );
+	else
+		strngth := 50;
+	endif
+	while( 1 )
+		res := trap_gump( who );
+		if( !res[0] )
+			SendSysMessageCL( who, 1042023, color := 33 ); // Cancelled.
+			return;
+		endif
+
+		case( res[0])
+			1: trap_type := "Dart";
+			2: trap_type := "Explosion";
+			3: trap_type := "Gas";
+		endcase
+		Print(trap_type + "    " + strngth );
+		cont := Target( who );
+
+		if( cont.IsA(POLCLASS_CONTAINER) )
+			AddTrap( cont, trap_type, strngth, 1 );
+		else
+			SendSysMessage( who, "You can only place traps on a container.", color := 33 );
+		endif
+
+	endwhile
+
+endprogram
+
+function trap_gump(who)
+
+	var gump := GFCreateGump( 0, 0 );
+
+	GFPage( gump, 0 );
+	// Background
+	GFResizePic( gump, 0, 0, 9250, 200, 187 );
+	// Tiled Fore
+	GFPicTiled( gump, 13, 13, 174, 161, 3004 );
+	// Needle Button
+	GFAddButton( gump, 49, 61, 9792, 9793, GF_CLOSE_BTN, 1 );
+	// Explosion Button
+	GFAddButton( gump, 49, 95, 9792, 9793, GF_CLOSE_BTN, 2 );
+	// Gas Button
+	GFAddButton( gump, 49, 129, 9792, 9793, GF_CLOSE_BTN, 3 );
+	// Needle HTML
+	GFHTMLArea( gump, 75, 65, 100, 36, "Needle", 0, 0 );
+	// Explosion HTML
+	GFHTMLArea( gump, 75, 99, 100, 36, "Explosion", 0, 0 );
+	// Gas HTML
+	GFHTMLArea( gump, 75, 133, 100, 36, "Gas", 0, 0 );
+	// Title HTML
+	GFHTMLArea( gump, 13, 13, 174, 36, "<center>Trap Types:</center>", 0, 0 );
+	return GFSendGump( who, gump );
+
+endfunction

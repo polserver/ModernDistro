@@ -1,0 +1,27 @@
+The trap command enables a staff
+member to set a trap on
+containers.
+
+Usage is: .trap strength
+The strength parameter is optional.
+Strength must be specified as a die
+roll, eg. 3d4, 2d10 etc.
+If strength is not specified it will
+default to 4d5.
+
+A gump will open allowing you to
+choose the type of trap, eg. gas,
+explosion or needle.
+
+Choose the type and target the
+container or press ESC to cancel.
+
+You will be returned to the gump
+allowing you to set more traps.
+When you are done, right-click
+on the gump to exit.
+This is very useful if you need
+to trap multiple containers.
+Just leave the gump open until
+you need to trap the next
+container

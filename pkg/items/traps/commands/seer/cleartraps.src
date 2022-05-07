@@ -1,0 +1,15 @@
+use uo;
+
+include ":traps:traps";
+
+program RemoveAllTraps(who)
+
+	SendSysMessage( who, "Remove all traps from which item?", color := 88);
+	var object := Target( who, TGTOPT_NOCHECK_LOS );
+	var traplist := GetTrapList(object);
+	foreach trap in traplist
+		RemoveTrap( object, _trap_iter );
+	endforeach
+	SendSysMessage( who, "All traps removed.", color := 66 );
+
+endprogram
