@@ -4,8 +4,15 @@ use cliloc;
 
 include "include/client";
 include "include/objtype";
+include ":help:textcmds";
 
-program make_a_tele( who )
+program make_a_tele( who, text )
+
+	if( (text == Lower( "help" )) || (text == Lower( "h" )) || (text == "?") )
+		SendCmdHelpWindow( who, ":commands:gm/maketele.chf" );
+		return;
+	endif
+
 
     SendSysMessage( who, "Select a rune to gate from." );
 
@@ -20,8 +27,8 @@ program make_a_tele( who )
             SendSysMessage(who, "You can only use this on a rune!");
             return;
     endif
-	var dest := rune.GetDestination(rune);
-	if(!dest)
+	var dest := rune.GetDestination();
+	if(!dest == 0)
 		SendSysMessageCL(who, 501803, color := 33); // That rune is not yet marked.
 		return 0;
 	endif
@@ -58,8 +65,10 @@ program make_a_tele( who )
 	sleep(30);
 
 	set_critical(1);
-	gate1.graphic := 1;
-	gate2.graphic := 1;
+	// gate1.graphic := 1;
+	// gate2.graphic := 1;
+	gate1.invisible := 1;
+	gate2.invisible := 1;
 	set_critical(0);
 
 endprogram
