@@ -11,13 +11,16 @@ include ":damage:damage";
 program trapScript(params)
 	var mobile := params[1];
 	//var object := params[2];
-	//var trap_info := params[3];
+	var trap_info := params[3];
 	//var trap_index := params[4];
 	params := 0; // Not needed anymore.
-	
+
 	SendSysMessage(mobile, "You set off a needle trap!");
 	PerformAction(mobile, ANIM_HIT);
-	ApplyRawDamageEX(mobile, RandomDiceRoll("5d10"));
-	
+	// var strngth := RandomDiceRoll("5d10");
+	var strngth := trap_info.Strength;
+	Print(strngth);
+	ApplyRawDamageEX( mobile, strngth );
+
 	return 1;
 endprogram
