@@ -59,7 +59,7 @@ endfunction
  */
 function AddTrap(object, trap_name, strength, count:=0)
 	var trap_list := GetObjProperty(object, "TrapList");
-
+	var tempstrength;
 	if ( Lower(TypeOf(trap_list)) != "array" )
 		trap_list := array{};
 	endif
@@ -78,6 +78,15 @@ function AddTrap(object, trap_name, strength, count:=0)
 		else
 			count := CInt(trap_elem.Count);
 		endif
+	endif
+
+	// Check for random die string passed for trap strength.
+	if( TypeOf( strength == "String" ) )
+		tempstrength := RandomDiceRoll( strength );
+		if( tempstrength.errortext )
+			tempstrength := RandomDiceRoll( "4d5" );
+		endif
+		strength := tempstrength;
 	endif
 
 	var trap := struct;
