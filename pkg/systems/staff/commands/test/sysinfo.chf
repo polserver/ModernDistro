@@ -1,0 +1,29 @@
+<center>sysinfo</center>The sysinfo command allows developers
+to see basic info about the server and
+to run limited diagnostics. Currently
+it shows the number of mobiles and
+items present in the server as well
+as various other information and
+it allows a developer to view
+performance info and create and view
+script performance logs.
+
+When the command is run, the Information
+page is displayed. Clicking on the
+Diagnostic button will display various
+data about performance. From this page
+a script performance log can be created
+and viewed. Click on the Performance
+Measure button. Then wait for the Log
+to finish being created. You will
+receive a green message when it is done.
+To view the log click on the View Logs
+button. The logs are date and time
+stamped using the ISO standard,
+yyyymmddThhmmss. Click the button next
+to the log you wish to view. The logs
+are stored in /logs/performance.
+
+As this is a work-in-progress, only
+the Information and Diagnostic buttons
+are functional.

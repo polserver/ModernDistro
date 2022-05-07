@@ -1,0 +1,11 @@
+use uo;
+use os;
+
+program staff_login( mobile )
+
+	if( mobile.cmdlevel < 2 || mobile.acct.defaultcmdlevel < 2 )
+		return 0;
+	endif
+
+	return 1;
+endprogram

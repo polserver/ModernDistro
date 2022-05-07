@@ -1,0 +1,197 @@
+use uo;
+use os;
+use file;
+
+include "include/arrays";
+include ":security:reports_ex";
+include ":staff:general";
+include ":staff:gumps";
+include ":staff:settings";
+include ":help:textcmds";
+
+var performance_path := STAFF_GetSettingsCfgElem( "LogFilePaths" ).Performance,
+	logs := Array,
+	log := "";
+
+program developer_textcmd( mobile, text )
+
+	if( (text == Lower( "help" )) || (text == Lower( "h" )) || (text == "?") )
+		SendCmdHelpWindow( mobile, ":staff:commands/test/sysinfo.chf" );
+		return;
+	endif
+
+// We need to verify and ensure this path exists, why not do it here...
+	VerifyDirectoryExists( performance_path );
+
+	var page := 1,
+		sub_page := 0,
+		gump := 0,
+		result := 0;
+
+	while( mobile.connected )
+		gump := BaseBackground();
+		DisplayBasicInfo( gump );
+		AddDeveloperCategories( gump, page );
+		case( page )
+			1:			DisplayInformationPage( gump );
+			2:			DisplayNetworkPage( gump );
+			3:			DisplayDiagnosticPage( gump );
+			4:			DisplayAccountsPage( gump );
+			5:			DisplayFirewallPage( gump );
+			6:			DisplayPerformanceLogs( gump );
+			7:			DisplayLog( gump, log );
+			default:	DisplayInformationPage( gump );
+		endcase
+
+		result := GFSendGump( mobile, gump );
+		if( !result[0] )
+			return 0;
+		elseif( result[0] >= 1 && result[0] <= 10 )
+			page := result[0];
+		elseif( result[0]>=1001 && result[0]<=1121 )
+			page := 7;
+			log := logs[result[0]-1000];
+		elseif( result[0] == 31 )
+			Start_Script( ":staff:scripts/developerTools/performanceMeasure", { mobile, 10, 100 } );
+		endif
+	endwhile
+
+	return 1;
+endprogram
+
+function AddDeveloperCategories( byref gump, byref page )
+
+	AddButtonLabeled( gump, 13, 13, 1, "INFORMATION", page );
+    AddButtonLabeled( gump, 13, 33, 2, "NETWORK", page );
+    AddButtonLabeled( gump, 13, 53, 3, "DIAGNOSTIC", page );
+    AddButtonLabeled( gump, 13, 73, 4, "ACCOUNT LIST", page );
+    AddButtonLabeled( gump, 13, 93, 5, "FIREWALL", page );
+endfunction
+
+function DisplayBasicInfo( byref gump )
+
+	GFTextLine( gump, 193, 18, LABEL_HUE, "Compiled at:" );
+	GFTextLine( gump, 275, 18, LABEL_HUE, POLCore().compiledatetime );
+	GFTextLine( gump, 193, 38, LABEL_HUE, "Version:" );
+	GFTextLine( gump, 275, 38, LABEL_HUE, POLCore().version );
+	GFTextLine( gump, 193, 58, LABEL_HUE, "Uptime:" );
+	GFTextLine( gump, 275, 58, LABEL_HUE, FormatSeconds( POLCore().uptime ) );
+endfunction
+
+function DisplayInformationPage( byref gump )
+
+	var accounts := FetchAccounts();
+	GFTextLine( gump, 23, 123, LABEL_HUE, "Active Accounts:" );
+	GFTextLine( gump, 203, 123, LABEL_HUE, accounts.Active );
+
+	GFTextLine( gump, 23, 143, LABEL_HUE, "Banned Accounts:" );
+	GFTextLine( gump, 203, 143, LABEL_HUE, accounts.Banned );
+
+	GFTextLine( gump, 23, 163, LABEL_HUE, "Jailed Accounts:" );
+	GFTextLine( gump, 203, 163, LABEL_HUE, accounts.Jailed );
+
+	GFTextLine( gump, 23, 188, LABEL_HUE, "Online Clients:" );
+	GFTextLine( gump, 203, 188, LABEL_HUE, EnumerateOnlineCharacters().Size() );
+
+	GFTextLine( gump, 23, 208, LABEL_HUE, "Mobiles:" );
+	GFTextLine( gump, 203, 208, LABEL_HUE, POLCore().mobilecount );
+
+	GFTextLine( gump, 23, 228, LABEL_HUE, "Last Mobile Serial:" );
+	GFTextLine( gump, 203, 228, LABEL_HUE, POLCore().last_character_serial );
+
+	GFTextLine( gump, 23, 253, LABEL_HUE, "Items:" );
+	GFTextLine( gump, 203, 253, LABEL_HUE, POLCore().itemcount );
+
+	GFTextLine( gump, 23, 273, LABEL_HUE, "Last Item Serial:" );
+	GFTextLine( gump, 203, 273, LABEL_HUE, POLCore().last_item_serial );
+
+	GFTextLine( gump, 23, 298, LABEL_HUE, "Packages:" );
+	GFTextLine( gump, 203, 298, LABEL_HUE, POLCore().packages.Size() );
+
+	// GFTextLine( gump, 23, 273, LABEL_HUE, "Item Scripts:" );
+	// GFTextLine( gump, 203, 273, LABEL_HUE, Core.ScriptItems.ToString() );
+
+	// GFTextLine( gump, 23, 293, LABEL_HUE, "Uptime:" );
+	// GFTextLine( gump, 203, 293, LABEL_HUE, FormatTimeSpan(DateTime.UtcNow - Clock.ServerStart) );
+
+	// GFTextLine( gump, 23, 313, LABEL_HUE, "Memory:" );
+	// GFTextLine( gump, 203, 313, LABEL_HUE, FormatByteAmount(GC.GetTotalMemory(false)) );
+
+	// GFTextLine( gump, 23, 333, LABEL_HUE, "Framework:" );
+	// GFTextLine( gump, 203, 333, LABEL_HUE, Environment.Version.ToString() );
+
+	// GFTextLine( gump, 23, 353, LABEL_HUE, "Operating System: " );
+
+endfunction
+
+function DisplayNetworkPage( byref gump )
+
+	gump := gump; // Avoid Compiler Warnings...
+endfunction
+
+function DisplayDiagnosticPage( byref gump )
+
+	GFTextLine( gump, 23, 123, LABEL_HUE, "Cached Scripts:" );
+	GFTextLine( gump, 203, 123, LABEL_HUE, POLCore().all_scripts.Size() );
+	GFTextLine( gump, 23, 143, LABEL_HUE, "Running Scripts:" );
+	GFTextLine( gump, 203, 143, LABEL_HUE, POLCore().running_scripts.Size() );
+
+	GFTextLine( gump, 23, 168, LABEL_HUE, "Scripts On Time:" );
+	GFTextLine( gump, 203, 168, LABEL_HUE, POLCore().scripts_ontime_per_min );
+	GFTextLine( gump, 23, 188, LABEL_HUE, "Scripts Late:" );
+	GFTextLine( gump, 203, 188, LABEL_HUE, POLCore().scripts_late_per_min );
+
+	GFTextLine( gump, 23, 213, LABEL_HUE, "Instructions Per Minute:" );
+	GFTextLine( gump, 203, 213, LABEL_HUE, POLCore().instr_per_min );
+	GFTextLine( gump, 23, 233, LABEL_HUE, "Events Per Minute:" );
+	GFTextLine( gump, 203, 233, LABEL_HUE, POLCore().events_per_min );
+	GFTextLine( gump, 23, 253, LABEL_HUE, "Errors Per Minute:" );
+	GFTextLine( gump, 203, 253, LABEL_HUE, POLCore().error_creations_per_min );
+
+	GFTextLine( gump, 23, 278, LABEL_HUE, "Memory Usage:" );
+	GFTextLine( gump, 203, 278, LABEL_HUE, POLCore().memory_usage );
+
+	GFTextLine( gump, 23, 303, LABEL_HUE, "Sysload:" );
+	GFTextLine( gump, 203, 303, LABEL_HUE, POLCore().sysload );
+	GFTextLine( gump, 23, 323, LABEL_HUE, "Sysload Severity:" );
+	GFTextLine( gump, 203, 323, LABEL_HUE, POLCore().sysload_severity );
+
+
+	AddButtonLabeled( gump, 13, 357, 31, "Performance Measure", 0 );
+	AddButtonLabeled( gump, 13, 383, 6, "View Logs", 0 );
+endfunction
+
+function DisplayAccountsPage( byref gump )
+
+	gump := gump; // Avoid Compiler Warnings...
+endfunction
+
+function DisplayFirewallPage( byref gump )
+
+	gump := gump; // Avoid Compiler Warnings...
+endfunction
+
+function DisplayPerformanceLogs( byref gump )
+
+	logs := ListDirectory( performance_path, ".log", LISTDIR_DONT_LIST_DIRS );
+	var y := 118;
+	var i:=1;
+	GFPage( gump, 1 );
+	for( i:=1; i<=logs.Size(); i++ )
+		AddButtonLabeled( gump, 13, y, 1000+i, logs[i], 0 );
+		y+=22;
+
+		if( !( i%12 ) && i>i.Size() )
+			GFAddButton( gump, 402, 359, 2706, 2707, GF_PAGE_BTN, gump.cur_page+1 );
+			GFPage( gump, gump.cur_page+1 );
+			GFAddButton( gump, 402, 118, 2704, 2705, GF_PAGE_BTN, gump.cur_page-1 );
+			y := 118;
+		endif
+	endfor
+
+endfunction
+
+function DisplayLog( byref gump, byref log )
+
+	GFHTMLArea( gump, 18, 123, 390, 250, "<BASEFONT COLOR=#FFFFFF>"+ImplodeArray( "\n", ReadFile( performance_path+log ) )+"</BASEFONT>", 0, 1 );
+endfunction

@@ -1,0 +1,65 @@
+use uo;
+use os;
+use file;
+use util;
+
+include ":security:reports_ex";
+include ":staff:settings";
+
+var log_file_settings := STAFF_GetSettingsCfgElem( "LogFilePaths" );
+program PerformanceMeasure_ToolScript( parameters )
+
+	var mobile := parameters[1],
+		seconds := parameters[2],
+		scripts := parameters[3];
+
+	if( seconds.errortext || seconds < 10 )
+		seconds := 10;
+	endif
+
+	if( scripts.errortext || scripts < 100 )
+		scripts := 100;
+	endif
+
+
+	var file_name := StrFormatTime( "%Y%m%dT%H%M%S", POLCore().systime );
+	var performance := PerformanceMeasure( seconds, scripts );
+	LogMeasureToFile( performance, file_name );
+
+	SendSysMessage( mobile, file_name+".log created.", 0x3, 0x42 );
+
+	return 1;
+endprogram
+
+/*
+Returns struct with the following members:
+total_number_observed : number of scripts alive in the timespan
+total_instructions : sum of all instructions of the observed scripts
+scripts : array of structs (max number is given max_scripts param) sorted by instructions amount
+each scripts entry has the following members:
+name : script name, if attached with name/npctemplate
+instructions : number of executed instructions
+pid : PID of the script
+percent : percent of the total instruction amount
+*/
+function LogMeasureToFile( byref measure, byref file_name )
+
+	var performance_path := log_file_settings.Performance;
+// Let's make sure the folder path exists...
+	VerifyDirectoryExists( performance_path );
+
+	var info := "";
+	info += "Total Observed: "+measure.total_number_observed+"\n";
+	info += "Total Instructions: "+measure.total_instructions+"\n\n";
+	foreach script in ( measure.scripts )
+		info += "Script Name: "+script.name+"\n";
+		info += "Instructions: "+script.instructions+"\n";
+		info += "Process ID: "+script.PID+"\n";
+		info += "Percent: "+script.percent+"\n\n";
+	endforeach
+
+	var logged := LogToFile( performance_path+file_name+".log", info, 0 );
+	if( logged.errortext )
+		Print( logged.errortext );
+	endif
+endfunction
