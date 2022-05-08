@@ -1,0 +1,40 @@
+use uo;
+use os;
+use cliloc;
+
+program DumpContainer(who)
+
+	var newcont := 0;
+	SetObjProperty( who, "#FastLooting", 1 );
+	SendSysMessage(who, "Which container? <exc> to select your backpack.", color := 88);
+	var holder := Target(who);
+	if (!holder)
+		SendSysMessage(who, "No container targetted. Selecting equipped backpack.", color := 56);
+		holder := who.backpack;
+	endif
+
+	SendSysMessage(who, "Where to? (Target the ground or a container)", color := 66);
+	var where := TargetCoordinates(who);
+	if (!where)
+		SendSysMessageCL(who, 1042023, color := 33); // Cancelled.
+		return;
+	endif
+	if( where.item && where.item.IsA(POLCLASS_CONTAINER) )
+		newcont := where.item;
+	endif
+	var contents := EnumerateItemsInContainer(holder, ENUMERATE_ROOT_ONLY );
+	Print(contents.size());
+	Print(newcont.name);
+	var x := 1;
+	foreach thing in contents
+		Print(x + "   " + thing.name);
+		x += 1;
+		if( newcont )
+			MoveItemToContainer( thing, newcont, -1, -1, 2 );
+		else
+			MoveObjectToLocation(thing, where.x, where.y, where.z, where.realm);
+		endif
+	endforeach
+	EraseObjProperty( who, "#FastLooting" );
+
+endprogram
