@@ -1,19 +1,24 @@
 use uo;
 
-program explosiontrap(who, strngth)
-  strngth := CInt(strngth);
-  if (!strngth)
-    strngth := 100;
-  endif
-  SendSysMessage(who,"select the container you wish to place a trap on");
-  var chest := Target(who);
-  if (!chest)
-    SendSysMessage(who,"canceled");
-    return;
-  endif
-    strngth := strngth/3;
-    SetObjProperty(chest, "trap_type", "2");
-    SetObjProperty(chest, "trap_strength", strngth);
-    SendSysMessage(who, "You carefully place the trap on the container");
-    chest.usescript := ":tinkering:tinkerTraps";
+include ":traps:traps";
+
+program DartTrap(who, strngth)
+
+	if (!strngth)
+		strngth := "4d5";
+	endif
+	SendSysMessage(who,"Select the container you wish to place a trap on:", color := 88);
+	var chest := Target(who);
+	if (!chest)
+		SendSysMessage(who,"canceled");
+		return;
+	endif
+	if( !chest.IsA(POLCLASS_CONTAINER) )
+		SendSysMessage( who, "You can only set traps on a container.", color := 33 );
+		return;
+	endif
+	AddTrap(chest, "Gas", strngth, 1);
+	SendSysMessage( who, "A gas trap is set on " + chest.name, color := 66 );
+
 endprogram
+
