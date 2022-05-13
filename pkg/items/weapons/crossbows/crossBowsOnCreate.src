@@ -1,0 +1,10 @@
+use uo;
+
+program CrossBowsOncreate( bow )
+
+	// Setup type and anim for default anim, crossbow bolts.
+	SetObjProperty( bow, "AmmoType", 0x1BFB );
+	SetObjProperty( bow, "ProjectileAnim", 0x1BFE );
+
+endprogram
+

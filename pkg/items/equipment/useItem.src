@@ -20,7 +20,8 @@ program use_equipment( mobile, item )
 		// instance, the player to select ammo if the item is equipped and is a bow.
 		if( item == GetEquipmentByLayer( mobile, item.tile_layer ) )
 			if( IsBow( item ) )
-				Start_Script( ":weapons:useScripts/selectAmmo", { mobile, item } );
+				// Start_Script( ":weapons:useScripts/bows/selectAmmo", { mobile, item } );
+				Start_Script( ":weapons:bows/selectAmmo", { mobile, item } );
 				return 1;
 			else
 				return 1;

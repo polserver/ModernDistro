@@ -1,0 +1,160 @@
+use uo;
+use os;
+use cfgfile;
+include ":combat:hitScriptInc";
+include ":attributes:attributes";
+include ":timedScripts:timedScripts";
+include "include/string";
+include ":damage:damage";
+
+var speech;
+
+program HookHitScript(hookParam)
+
+	var attacker := hookParam[1];
+	var defender := hookParam[2];
+	var weapon := hookParam[3];
+	var armor := hookParam[4];
+	var basedamage := hookParam[5];
+	var rawdamage := hookParam[6];
+	var weaponhit := array;
+
+	Sleep(CInt(Distance(attacker, defender) / 5));
+
+	// Added this to the CalcDamage function in damage.inc
+	/*
+	if (defender.isA(POLCLASS_NPC))
+		basedamage := CInt(basedamage * 1.3);
+		rawdamage := rawdamage * 1.3;
+		rawdamage := CInt(rawdamage * ( AdjustDamageFactor(weapon, defender, attacker) ) );
+		if (rawdamage == 0)
+			return 0;
+		endif
+	endif
+	*/
+
+	var rd := rawdamage;
+	SetObjProperty(weapon, "TempDamage", rawdamage);
+
+	if (GetObjProperty(defender, "#BLINKING") != error )
+		if ( (GetObjProperty(defender, "#BLINKING") <= ReadGameClock() ) && (RandomInt(2) == 1) )
+			PrintTextAbove(defender, CStr(defender.name) + " evades the attack!");
+			return 0;
+		endif
+	endif
+
+	var x := CheckTempProtections(attacker, defender, rawdamage);
+	if (x == 0)
+		return 0;
+	else
+		rawdamage := x;
+	endif
+
+	SetObjProperty(defender, "LastHit", {attacker.name, attacker.serial, weapon });
+
+	var armorhit;
+	if ( (armor == 0) || (!armor) )
+	  armorhit := GetObjProperty(defender, "OnArmorHit");
+	else
+	  armorhit := GetObjProperty(armor, "OnHit");
+	endif
+
+	var hit := GetObjProperty(weapon, "OnHit");
+	if (!hit)
+		hit := GetObjProperty(attacker, "OnHit");
+	endif
+	weaponhit[1] := hit;
+
+	var missilehit := GetObjProperty(weapon, "MissileHit");
+	if (missilehit)
+		if (weaponhit)
+			weaponhit := ArrayAppend(weaponhit, missilehit);
+		else
+			weaponhit := missilehit;
+		endif
+	endif
+
+	var gloves := GetEquipmentByLayer(attacker, 0x07);
+	var gloveshit := 0;
+	if (gloves)
+		gloveshit := GetObjProperty(gloves, "OnHit");
+	endif
+
+	if (armorhit)
+	    SetObjProperty(defender, "TempDamage", rawdamage);
+		foreach x in armorhit
+		  Detach();
+		  run_script_to_completion(x, { attacker, defender, weapon, armor, basedamage, rawdamage } );
+		  rawdamage := CInt(GetObjProperty(defender, "TempDamage") );
+		endforeach
+		EraseObjProperty(defender, "TempDamage");
+		if (rawdamage > 0)
+		  DealDamage(defender, attacker, rawdamage);
+		  return;
+		else
+		  return;
+		endif
+	endif
+
+	if (!weaponhit)
+		if (!gloveshit)
+			DealDamage(defender, attacker, rawdamage);
+			return;
+		else
+			foreach x in gloveshit
+				Detach();
+				run_script_to_completion(CStr(x), { attacker, defender, gloves, armor, basedamage, rawdamage } );
+				rawdamage := GetObjProperty(gloves, "TempDamage");
+			endforeach
+			EraseObjProperty(weapon, "TempDamage");
+			if (rawdamage < 1)
+        		rawdamage := 1;
+			endif
+			DealDamage(defender, attacker, rawdamage);
+			return;
+		endif
+	else
+		foreach x in weaponhit
+			Detach();
+			run_script_to_completion(CStr(x), { attacker, defender, weapon, armor, basedamage, rawdamage } );
+			rawdamage := GetObjProperty(weapon, "TempDamage");
+//			if(x == "mainHitScript")
+//				rawdamage := rd;
+//			endif
+		endforeach
+		EraseObjProperty(weapon, "TempDamage");
+		if (rawdamage < 1)
+            rawdamage := 1;
+		endif
+	    if (!gloveshit)
+			DealDamage(defender, attacker, rawdamage);
+			return;
+		else
+			foreach x in gloveshit
+				Detach();
+				run_script_to_completion(CStr(x), { attacker, defender, gloves, armor, basedamage, rawdamage } );
+				rawdamage := GetObjProperty(gloves, "TempDamage");
+			endforeach
+			EraseObjProperty(weapon, "TempDamage");
+			if (rawdamage < 1)
+				rawdamage := 1;
+			endif
+		endif
+		DealDamage(defender, attacker, rawdamage);
+		return;
+	endif
+endprogram
+
+function ArrayAppend(x, y)
+
+	var xlen := len(x);
+	var i := 0;
+	for (i := 1; i <= len(y); i := i + 1)
+		xlen := xlen + 1;
+		x[xlen] := y[i];
+	endfor
+
+	return x;
+
+endfunction
+

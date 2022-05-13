@@ -1,0 +1,10 @@
+use uo;
+
+program BowsOncreate( bow )
+
+	// Setup type and anim for default anim, arrows.
+	SetObjProperty( bow, "AmmoType", 0xF3F );
+	SetObjProperty( bow, "ProjectileAnim", 0xF42 );
+
+endprogram
+

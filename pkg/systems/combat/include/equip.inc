@@ -22,31 +22,35 @@ function HandleMods(who, item)
   if(!who.ip)
     return 1;
   endif
-  case(type)
-    "accuracy":     val := accuracy(who,item);
-    "cursed":       val := cursed(who,item);
-    "sight":        val := sight(who,item);
-    "reflect":      val := reflect(who,item);
-    "protection":   val := protection(who,item);
-    "wizzohat":     val := wizzohat(who,item);
-    "strength":     val := strengthBoost(who,item);
-    "invisibility": val := invisibility(who,item);
-    default:        val := 1;
-  endcase
+  if(type)
+	  case(type)
+		"accuracy":     val := accuracy(who,item);
+		"cursed":       val := cursed(who,item);
+		"sight":        val := sight(who,item);
+		"reflect":      val := reflect(who,item);
+		"protection":   val := protection(who,item);
+		"wizzohat":     val := wizzohat(who,item);
+		"strength":     val := strengthBoost(who,item);
+		"invisibility": val := invisibility(who,item);
+		default:        val := 1;
+	  endcase
+  endif
+  // The following lines are commented out because the Core handles
+  // AoS modifiers.
   // if(item.resist_physical)
-    // ModifyResistance(who, RES_PHYSICAL, item.resist_physical);
+    // ModifyResistance(who, RES_PHYSICAL_MOD, item.resist_physical);
   // endif
   // if(item.resist_fire)
-    // ModifyResistance(who, RES_FIRE, item.resist_fire);
+    // ModifyResistance(who, RES_FIRE_MOD, item.resist_fire);
   // endif
   // if(item.resist_cold)
-    // ModifyResistance(who, RES_COLD, item.resist_cold);
+    // ModifyResistance(who, RES_COLD_MOD, item.resist_cold);
   // endif
   // if(item.resist_poison)
-    // ModifyResistance(who, RES_POISON, item.resist_poison);
+    // ModifyResistance(who, RES_POISON_MOD, item.resist_poison);
   // endif
   // if(item.resist_energy)
-    // ModifyResistance(who, RES_ENERGY, item.resist_energy);
+    // ModifyResistance(who, RES_ENERGY_MOD, item.resist_energy);
   // endif
 
   // if(item.damage_physical)
@@ -54,6 +58,7 @@ function HandleMods(who, item)
     // SendSysMessage(who, CStr(item.damage_physical));
   // endif
   // if(item.damage_fire)
+	// Print(item.damage_fire);
     // ModifyDamage(who, DMG_FIRE_MOD, item.damage_fire);
   // endif
   // if(item.damage_cold)

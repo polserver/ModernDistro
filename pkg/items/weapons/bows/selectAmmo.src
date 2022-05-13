@@ -51,13 +51,17 @@ endprogram
 function DuplicateProps(oAmmo, oWeapon)
 
 	var CProps := GetObjPropertyNames(oAmmo);
-	EraseObjProperty(oWeapon, "MissileHit");
+	var WCProps := GetObjPropertyNames(oWeapon);
 	foreach CProp in CProps
-		if (CProp == "OnHit")
-			SetObjProperty(oWeapon, "MissileHit", GetObjProperty(oAmmo, CProp) );
-		else
+		// if (CProp == "HitScripts")
+			// SetObjProperty(oWeapon, "HitScripts", GetObjProperty(oAmmo, CProp) );
+		// else
 			SetObjProperty(oWeapon, CProp, GetObjProperty(oAmmo, CProp) );
-		endif
+		// endif
+	endforeach
+
+	foreach CProp in WCProps
+		EraseObjProperty( oWeapon, CProp );
 	endforeach
 
 endfunction

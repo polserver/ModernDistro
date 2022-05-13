@@ -16,8 +16,13 @@ program poisonhit(param)
 	//var basedamage := param[5];
 	var rawdamage := param[6];
 	var PoisonStrength := CInt(GetObjProperty(weapon, "PoisonStrength"));
+	if(!PoisonStrength)
+		PoisonStrength := 1;
+	endif
 	var duration := CInt(GetObjProperty(weapon, "Duration"));
-
+	if(!duration)
+		duration := 30;
+	endif
 	SetObjProperty(defender, "TempDamage", rawdamage);
 
 	if ( PoisonStrength )
