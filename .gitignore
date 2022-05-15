@@ -51,7 +51,7 @@ Temporary Items
 
 # POL logs
 log/*.log
-
+log/*/
 # POL realms
 realm/*
 
