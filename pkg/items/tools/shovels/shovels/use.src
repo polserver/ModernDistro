@@ -191,26 +191,26 @@ program use_shovel( mobile, shovel )
 				DestroyItem(chest);
 				return 0;
 			endif
-			var maplevel := CInt(GetObjProperty(map, "level") );
-			SetObjProperty(chest, "level", maplevel);
-			SetObjProperty(chest, "trap_type", "3");
-			var strength := 0;
-			case (maplevel)
-				1: strength :=  20;
-				2: strength :=  40;
-				3: strength :=  60;
-				4: strength :=  80;
-				5: strength := 100;
-			endcase
-			if ((strength == 0) || (strength == error))
-				strength := 20;
-			endif
-			SetObjProperty(chest, "trap_strength", strength);
-			chest.usescript := ":tinkering:tinkerTraps";
-			var lockid := AllocateLockID();
-			SetObjProperty( chest, "lockid", lockid );
-			chest.locked :=  1;
-			chest.movable := 0;
+			// var maplevel := CInt(GetObjProperty(map, "level") );
+			// SetObjProperty(chest, "level", maplevel);
+			// SetObjProperty(chest, "trap_type", "3");
+			// var strength := 0;
+			// case (maplevel)
+				// 1: strength :=  20;
+				// 2: strength :=  40;
+				// 3: strength :=  60;
+				// 4: strength :=  80;
+				// 5: strength := 100;
+			// endcase
+			// if ((strength == 0) || (strength == error))
+				// strength := 20;
+			// endif
+			// SetObjProperty(chest, "trap_strength", strength);
+			// chest.usescript := ":tinkering:tinkerTraps";
+			// var lockid := AllocateLockID();
+			// SetObjProperty( chest, "lockid", lockid );
+			// chest.locked :=  1;
+			// chest.movable := 0;
 			EraseObjProperty(map, "level");
 			EraseObjProperty(map, "chestx");
 			EraseObjProperty(map, "chesty");
