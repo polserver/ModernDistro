@@ -3,14 +3,14 @@ use uo;
 use util;
 use cliloc;
 
-include "include/client";
 include ":magery:spells";
 include ":magery:fields";
+include ":attributes:attributes";
+include ":virtue:noto";
 
-program stonewall( parms )
+program poisonfield( parms )
   var caster := parms[1];
   var info := parms[2];
-  
   var cast_on := MS_TargetCoordinates(caster, info.targ, "Select a target.");
     if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
         cast_on := parms[4];
@@ -19,44 +19,50 @@ program stonewall( parms )
         SendSysMessageCL(caster, 1042023, color := 33); // Cancelled.
         return 0;
     endif
+  if ( !CheckLosAt(caster, cast_on.x, cast_on.y, cast_on.z) )
+        SendSysMessageCL(caster, 500979, color := 33); // You cannot see that location.
+        return 0;
+  endif
 
-	MS_PlaySpellSFX(info.spell_id, cast_on);
-
-	var objtype := 0x80;
+	var objtype;
 	var direction := GetDirectionByFacing(caster);
 	case ( direction )
-		FIELD_SHAPE_HORIZONTAL: objtype := "WallofStoneEW"; break;
-		FIELD_SHAPE_VERTICAL: objtype := "WallofStoneNS"; break;
+		FIELD_SHAPE_HORIZONTAL: objtype := "wallofstone_EW"; break;
+		FIELD_SHAPE_VERTICAL: objtype := "wallofstone_NS"; break;
 	endcase
 
-	var size := GetConfigInt(info.spell_config, "AreaSize");
-	var coordinates := GetCoordinatesForField(cast_on.x, cast_on.y, direction, CInt(size/2));
+	// Duration: (3 + (Magery * 0.4)) seconds
+	var duration := CInt(3 + AP_GetSkill(caster, MAGERY) * 0.4);
+	// Level is the same as Poison spell
+	var poison_level := MS_GetPoisonLevel(caster, cast_on);
+	var area_size := GetConfigInt(info.spell_config, "AreaSize");
 
+	var coordinates := GetCoordinatesForField(cast_on.x, cast_on.y, direction, CInt(area_size/2));
 	foreach coord in ( coordinates )
-		var z := cast_on.z;
-		if ( z < GetStandingHeight(coord.x, coord.y, cast_on.z, caster.realm) )
-			z := GetStandingHeight(coord.x, coord.y, cast_on.z, caster.realm);
+		var cast_on_z := cast_on.z;
+		var standing_z := struct;
+		standing_z := GetStandingHeight(coord.x, coord.y, cast_on.z, caster.realm);
+		if ( cast_on_z < standing_z )
+			cast_on_z := GetStandingHeight(coord.x, coord.y, cast_on.z, caster.realm);
 		endif
 
-		var mobiles := ListMobilesNearLocationEx(coord.x, coord.y, z, 0, LISTEX_FLAG_NORMAL+LISTEX_FLAG_HIDDEN, caster.realm);
-		if (  mobiles.Size() > 0 )
-			continue; // Dont create walls on top of mobiles.
-		elseif ( !CheckLosAt(caster, coord.x, coord.y, z ) )
+		if ( CheckLosAt(caster, coord.x, coord.y, cast_on_z ) )
 			continue; // Only create a field piece if the caster has line of sight.
 		endif
-
-		var item := CreateItemAtLocation(coord.x, coord.y, z, objtype, 1, caster.realm);
+		var item := CreateItemAtLocation(coord.x, coord.y, cast_on_z.z, objtype, 1, caster.realm);
 		if ( item.errortext )
 			SendSysMessage(caster, "Error - "+item.errortext);
 			continue;
 		endif
 
 		SetObjProperty(item, "SummonedField", caster.serial);
+		SetObjProperty(item, "Poisonlevel", poison_level);
 		item.SetOwner(caster);
-		item.SetDuration(10);
-
+		item.SetDuration(duration);
 		SleepMS(2);
 	endforeach
+	VS_AdjustVirtue(caster, "honor", -1, 100);
+	VS_AdjustVirtue(caster, "compassion", -1, 100);
 
 	return 1;
 endprogram
