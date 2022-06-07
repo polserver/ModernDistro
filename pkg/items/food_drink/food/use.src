@@ -3,6 +3,7 @@
 use uo;
 use os;
 use util;
+use cliloc;
 use cfgfile;
 
 include ":attributes:attributes";
@@ -22,18 +23,18 @@ program eat(who, food)
 	magiceffect := GetObjTypeArray( food.objtype, "MagicEffect" );
 	var food_objtype := food.objtype;
 	var cfg_elem := GetItemDescInfo(food.objtype);
-	var themsg;
+	var themsg := 500867; // You are simply too full to eat any more!
 	var strength := CInt(GetObjProperty(food, "PoisonStrength"));
 	var duration := CInt(GetObjProperty(food, "duration"));
 
 	var foodvalue := CInt(cfg_elem.foodvalue);
 
-	var hunger := AP_GetVital(who, "Hunger");
+	var hunger := CInt(AP_GetVital(who, "Hunger"));
 	if ( !foodvalue )
 		foodvalue := 1;
 	endif
-	if ( hunger == 0 )
-		SendSysMessage(who, "You are too full to eat any more.");
+	if ( hunger >= 10 )
+		SendSysMessageCL( who, 500867, color := 33 );// You are simply too full to eat any more!
 		return 0;
 	endif
 
@@ -62,46 +63,49 @@ program eat(who, food)
 	PerformAction(who, ANIM_EAT);
 	AP_SetVital(who, "Stamina", AP_GetVital(who, "Stamina") + (RandomInt(5)+foodvalue));
 
-	hunger := hunger - foodvalue;
+	// Hunger range is 10 which is full through 0 which is famished.
+	hunger := hunger + foodvalue;
+	// Messages are cliloc numbers
+	var hue := 66;
 	case (hunger)
-		0: 1:
-			themsg := "You manage to eat the food, but you are stuffed.";
+		9:	themsg := 500872; hue := 66; // You manage to eat the food, but you are stuffed!
 			break;
-		2: 3:
-			themsg := "You feel quite full after consuming the food.";
+		8:
+		7:	themsg := 500871; hue := 66; // You feel quite full after consuming the food.
 			break;
-		4: 5: 6: 7:
-			themsg := "After eating the food you feel much less hungry.";
+		6:
+		5:	themsg := 500870; hue := 56; // After eating the food, you feel much less hungry.
 			break;
-		8: 9: 10:
-			themsg := "You eat the food but are still extremely hungry.";
+		4:
+		3:	themsg := 500869; hue := 44; // You eat the food, and begin to feel more satiated.
+			break;
+		2:
+		1:
+		0:	themsg := 500868; hue := 33; // You eat the food, but are still extremely hungry.
 			break;
 	endcase
 
-	if ( hunger < 0 )
-		themsg := "You manage to eat the food, but you are now stuffed.";
-		hunger := 0;
-	endif
+	SendSysMessageCL(who, themsg, color := hue);
 
 	AP_SetVital(who, "Hunger", hunger);
 
-	var regen := AP_GetVitalRegenRateMod(who, "Hunger");
+	var regen := AP_GetVitalRegenRateMod(who, STAMINA);
+	// Hunger range is 10 which is full through 0 which is famished.
 	case ( hunger )
-		0: regen := regen - 200; break;
-		1: regen := regen + 100; break;
-		2: regen := regen + 0; break;
-		3: regen := regen + 0; break;
-		4: regen := regen + 0; break;
-		5: regen := regen + 0; break;
-		6: regen := regen + 0; break;
-		7: regen := regen - 100; break;
-		8: regen := regen - 400; break;
-		9: regen := regen - 600; break;
-		10: regen := regen - 800; break;
+			10: regen := regen - 200; break;
+			9 : regen := regen + 100; break;
+			8 : regen := regen + 0; break;
+			7 : regen := regen + 0; break;
+			6 : regen := regen + 0; break;
+			5 : regen := regen + 0; break;
+			4 : regen := regen + 0; break;
+			3 : regen := regen - 100; break;
+			2 : regen := regen - 400; break;
+			1 : regen := regen - 600; break;
+			0 : regen := regen - 800; break;
 	endcase
-	AP_SetVitalRegenRateMod(who, "Hunger", regen);
+	AP_ModifyVitalRegenRateMod(who, STAMINA, regen);
 
-	SendSysMessage(who, themsg);
 
 //	Print(CStr(modinfo.size()));
 //	SendSysMessage(who, modinfo[1] + " " + modinfo[2] + " " + modinfo[3] + " " + modinfo[4], color := 88);

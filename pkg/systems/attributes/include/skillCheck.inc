@@ -69,15 +69,18 @@ function SkillCheck( mobile, attrib_name, difficulty, award_diff:="", advance_fl
   if( !mobile.IsA( POLCLASS_NPC ) && !mobile.cmdlevel )
     var hunger := CInt( AP_GetVital( mobile, HUNGER ));
     if( !hunger )
-      hunger := 1;
+      // hunger := 1;
+      hunger := 9;
     endif
 
+	// This determines how much hunger will affect success, I think :P
     var hc_settings := AP_GetSettingsCfgElem( "Hunger" ),
     hunger_setting := CInt( hc_settings.MaxHungerAffect ),
     hunger_value := CInt( pass_chance * CDbl( hunger_setting ));
     // print("Hunger Val:"+hunger_value);
 
-    pass_chance -= CInt( hunger_value - CDbl( hunger_value * CDbl( hunger / 10 )));
+    // pass_chance -= CInt( hunger_value - CDbl( hunger_value * CDbl( hunger / 10 )));
+    pass_chance -= CInt( hunger_value + CDbl( hunger_value * CDbl( hunger / 10 )));
     // print("Pass chance 2:"+pass_chance);
   endif
 

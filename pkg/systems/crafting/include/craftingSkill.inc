@@ -18,20 +18,25 @@ function CraftCheckSkill(who, craft_skill, difficulty, points, report:=0)
 	if ( !effective || effective.errortext )
 		effective := 1.0;
 	endif
-	var hunger  := CInt(GetObjProperty(who, "hunger"));
+	var hunger  := CInt(AP_GetVital(who, HUNGER));
 	if(!hunger || hunger.errortext)
 		hunger := 2;
 	endif
+
 	case(hunger)
-		0: effective := (effective - 10.1); points := (points * 0.95);
-		1: effective := (effective + 20.1); points := (points * 1.05);
-		5:
-		6: effective := (effective - 15.1); points := (points * 0.95);
-		7:
-		8: effective := (effective - 20.1); points := (points * 0.97);
-		9:
-		10: effective := (effective - 40.1); points := (points * 0.95);
+		10: effective := (effective - 10.1); points := (points * 0.95);
+		 9: effective := (effective + 20.1); points := (points * 1.05);
+		 8: effective := (effective + 20.1); points := (points * 1.05);
+		 7: effective := (effective + 15.1); points := (points * 0.95);
+		 6: effective := (effective + 05.1); points := (points * 0.95);
+		 5: effective := (effective - 05.1); points := (points * 0.95);
+		 4: effective := (effective - 10.1); points := (points * 0.95);
+		 3: effective := (effective - 20.1); points := (points * 0.97);
+		 2: effective := (effective - 25.1); points := (points * 0.97);
+		 1: effective := (effective - 35.1); points := (points * 0.97);
+		 0: effective := (effective - 40.1); points := (points * 0.95);
 	endcase
+
 	if(effective < 0)
 		effective := 0.0;
 	endif

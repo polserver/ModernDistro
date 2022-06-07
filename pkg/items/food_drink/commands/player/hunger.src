@@ -1,0 +1,41 @@
+/////////////////////////////////////////////////
+// Simple .hunger script that hopefully will evolve into
+// something more than just how hungry you are
+/////////////////////////////////////////////////
+
+// Variables used in this script:
+// hunger (This is a number pulled directly off the character
+//              types ".hunger".)
+
+use uo;
+
+include ":attributes:attributes";
+
+Program HungerStatus(who)
+
+    var hungerstatus;
+
+// How hungry is the who?
+	// hungerstatus := GetObjProperty(who, "hunger");
+	hungerstatus := CInt( AP_GetVital( who, "Hunger" ));
+
+// And now to display how hungry the player is...
+	if (hungerstatus <= 0)
+		hungerstatus := 0;
+    endif
+	Print(hungerstatus);
+    case (hungerstatus)
+      10 : SendSysMessage(who, "You are not hungry.");
+       9 : SendSysMessage(who, "You are not hungry.");
+       8 : SendSysMessage(who, "You are not hungry.");
+	   7 : SendSysMessage(who, "Mmm.. you could eat something.");
+	   6 : SendSysMessage(who, "You should have a bite to eat soon.");
+	   5 : SendSysMessage(who, "You are hungry.");
+	   4 : SendSysMessage(who, "You are very hungry.");
+	   3 : SendSysMessage(who, "You're so hungry you feel light headed.");
+	   2 : SendSysMessage(who, "Your body is fatigued from hunger.");
+	   1 : SendSysMessage(who, "You are extremely hungry", color := 33);
+	   0 : SendSysMessage(who, "You are desperately hungry!!!", color := 33);
+    endcase
+
+endprogram

@@ -1,0 +1,39 @@
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+//	StaffScriptTester( who )
+//
+//	Author:			Yukiko
+//
+//	Date Created:
+//
+//	Description:	Enables staff to test scripts which bypass staff when there
+//					success checks etc.
+//					Currently, its functionality is limited but in the future it
+//					will be expanded.
+//
+//	Parameters:		who::mobileref
+//
+//	Return Value:	none.
+//
+//	Created: 2022-06-06 00:22:57 by Yukiko
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+use uo;
+use os;
+
+program StaffScriptTester(who)
+
+	if( !GetObjProperty( who, "StaffScriptTester" ) )
+		SetObjProperty( who, "StaffScriptTester", 1 );
+		SendSysMessage( who, "Script testing enabled.", color := 66 );
+	else
+		EraseObjProperty( who, "StaffScriptTester" );
+		SendSysMessage( who, "Script testing disabled.", color := 66 );
+	endif
+
+	// For testing the hunger system.
+	If( !GetObjProperty( who, "#HungerPID" ) )
+		Start_Script( ":food_drink:hunger", {who} );
+	endif
+
+endprogram

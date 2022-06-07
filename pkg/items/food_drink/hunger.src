@@ -1,55 +1,97 @@
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+//	Hunger( player )
+//
+//	Author:
+//
+//	Description:	Causes the player to get "hungry" over time.
+//					Runs continuously on all players that are logged in.
+//					Currently, hunger is decremented by 1 every 30 minutes.
+//					Hunger range is 10, which is full, through 0, which is famished.
+//
+//	Parameters:		who::mobileref
+//
+//	Return Value:	none.
+//
+//	Modified: 2022-06-05 17:03:09 by Yukiko
+//
+//////////////////////////////////////////////////////////////////////////////////////////
 use uo;
 use os;
 use util;
+use attributes;
 
 include ":attributes:attributes";
 
-program Hunger(chr)
-	if( chr.cmdlevel >= 2 )
+const HUNGER_TIMER := 30; // How often, in minutes, do we decrement hunger.
+
+program Hunger(player)
+
+	var who;
+	// If started from a script.
+	if( TypeOf( player ) == "Array" )
+		who := player[1];
+	else
+		who := player;
+	endif
+
+	if( !GetObjProperty( who, "StaffScriptTester" ) && ( who.cmdlevel >= 2 ) )
 		return 0;
 	endif
 
+	SetObjProperty( who, "#HungeerPID", GetPid() );
+
 	var hunger;
-	while( chr )
-		hunger := CInt(AP_GetVital(chr, "Hunger") / 10);
-		if(hunger >= 9)
-			hunger := 9;
+	while( who )
+		// Hunger does not affect dead players.
+		while( who.dead )
+			Sleep( 10 );
+		endwhile
+
+		hunger := CInt(AP_GetVital(who, "Hunger"));
+		if(hunger >= 10)
+			hunger := 10;
 		elseif (!hunger)
 			hunger :=0;
 		endif
 
-		hunger := hunger +1;
-		SetObjProperty(chr, "hunger", hunger);
-
-		var regen := AP_GetVitalRegenRateMod(chr, "Hunger");
+		hunger -= 1;
+		AP_SetVital( who, HUNGER, hunger );
+		// Hunger affects stamina regen rate.
+		var regen := AP_GetVitalRegenRateMod(who, STAMINA);
+		// Hunger range is 10, which is full, through 0, which is famished.
 		case ( hunger )
-			0: regen := regen - 200; break;
-			1: regen := regen + 100; break;
-			2: regen := regen + 0; break;
-			3: regen := regen + 0; break;
-			4: regen := regen + 0; break;
-			5: regen := regen + 0; break;
-			6: regen := regen + 0; break;
-			7: regen := regen - 100; break;
-			8: regen := regen - 400; break;
-			9: regen := regen - 600; break;
-			10: regen := regen - 800; break;
+			10: regen := regen - 200; break;
+			9 : regen := regen + 100; break;
+			8 : regen := regen + 0; break;
+			7 : regen := regen + 0; break;
+			6 : regen := regen + 0; break;
+			5 : regen := regen + 0; break;
+			4 : regen := regen + 0; break;
+			3 : regen := regen - 100; break;
+			2 : regen := regen - 400; break;
+			1 : regen := regen - 600; break;
+			0 : regen := regen - 800; break;
 		endcase
-		AP_SetVitalRegenRateMod(chr, "Hunger", regen);
+		AP_ModifyVitalRegenRateMod(who, STAMINA, regen);
 
 		if (hunger > 8)
-			if (AP_GetVital(chr, "Stamina") > AP_GetVitalMaximumValue(chr, "Stamina"))
-				AP_SetVital(chr, "Stamina", AP_GetVitalMaximumValue(chr, "Stamina"));
-				RecalcVitals(chr);
+			if (AP_GetVital(who, "Stamina") > AP_GetVitalMaximumValue(who, "Stamina"))
+				AP_SetVital(who, "Stamina", AP_GetVitalMaximumValue(who, "Stamina"));
+				RecalcVitals(who);
 			endif
 		endif
 
+		// Hunger range is 10 which is full through 0 which is famished.
 		case (hunger)
-			4 : SendSysMessage(chr, "You could use a bite to eat...");
-			8 : SendSysMessage(chr, "You're getting pretty hungry...");
-			10: SendSysMessage(chr, "You're absolutely famished!");
+			5 : SendSysMessage( who, "You could use a bite to eat..." );
+			4 : SendSysMessage( who, "You probably should eat something soon." );
+			3 : SendSysMessage( who, "You are hungry.", color := 44 );
+			2 : SendSysMessage( who, "You're getting very hungry!", color := 44 );
+			1 : SendSysMessage( who, "You need to eat now!!!!", color := 33 );
+			0 : SendSysMessage( who, "You're absolutely famished!", color := 33 );
 		endcase
 
-		Sleep(60 * 60);
+		Sleep(60 * HUNGER_TIMER);
 	endwhile
 endprogram

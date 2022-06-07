@@ -48,6 +48,41 @@ function AP_SetVitalRegenRateMod( mobile, vital_name, number )
 endfunction
 
 /*
+ * AP_ModifyVitalRegenRateMod(mobile, vital_name, number)
+ *
+ * Purpose
+ * Modifies the regeneration rate modifier for an vital.
+ * Base values are in settings.cfg (multiply by 100)
+ *
+ * Parameters
+ * mobile:	Mobile reference to set the modifier on.
+ * skill_name:	Name of the vital to set the regen modifier for.
+ * number:	Modifier (+/-) points to set for the regen rate.
+ *
+ * Return value
+ * Returns 1
+ *
+ */
+function AP_ModifyVitalRegenRateMod( mobile, vital_name, number )
+
+	vital_name := Lower( vital_name );
+	number := CInt( number );
+
+	var regen_prop := AP_LoadVitalRegenRateProp( mobile );
+
+	if( number == 0 )
+		// Remove keys with no modifier
+		regen_prop.Erase( vital_name );
+	else
+		regen_prop[vital_name] += CInt( number );
+	endif
+
+	AP_SaveVitalRegenRateProp( mobile, regen_prop );
+
+	return 1;
+endfunction
+
+/*
  * AP_GetVitalRegenRateMod(mobile, vital_name)
  *
  * Purpose
