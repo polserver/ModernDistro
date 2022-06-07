@@ -16,7 +16,6 @@ Program HungerStatus(who)
     var hungerstatus;
 
 // How hungry is the who?
-	// hungerstatus := GetObjProperty(who, "hunger");
 	hungerstatus := CInt( AP_GetVital( who, "Hunger" ));
 
 // And now to display how hungry the player is...
@@ -25,16 +24,16 @@ Program HungerStatus(who)
     endif
 
     case (hungerstatus)
-      10 : SendSysMessage(who, "You are not hungry.");
-       9 : SendSysMessage(who, "You are not hungry.");
-       8 : SendSysMessage(who, "You are not hungry.");
-	   7 : SendSysMessage(who, "Mmm.. you could eat something.");
-	   6 : SendSysMessage(who, "You should have a bite to eat soon.");
-	   5 : SendSysMessage(who, "You are hungry.");
-	   4 : SendSysMessage(who, "You are very hungry.");
-	   3 : SendSysMessage(who, "You're so hungry you feel light headed.");
-	   2 : SendSysMessage(who, "Your body is fatigued from hunger.");
-	   1 : SendSysMessage(who, "You are extremely hungry", color := 33);
+      10 : SendSysMessage(who, "You are not hungry.", color := 66);
+       9 : SendSysMessage(who, "You are not hungry.", color := 66);
+       8 : SendSysMessage(who, "You are not hungry.", color := 66);
+	   7 : SendSysMessage(who, "Mmm.. you could eat something.", color := 56);
+	   6 : SendSysMessage(who, "You should have a bite to eat soon.", color := 56);
+	   5 : SendSysMessage(who, "You are hungry.", color := 44);
+	   4 : SendSysMessage(who, "You are very hungry.", color := 44);
+	   3 : SendSysMessage(who, "You're so hungry you feel light headed.", color := 44);
+	   2 : SendSysMessage(who, "Your body is fatigued from hunger.", color := 33);
+	   1 : SendSysMessage(who, "You are extremely hungry.", color := 33);
 	   0 : SendSysMessage(who, "You are desperately hungry!!!", color := 33);
     endcase
 

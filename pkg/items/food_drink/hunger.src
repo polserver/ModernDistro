@@ -84,12 +84,12 @@ program Hunger(player)
 
 		// Hunger range is 10 which is full through 0 which is famished.
 		case (hunger)
-			5 : SendSysMessage( who, "You could use a bite to eat..." );
-			4 : SendSysMessage( who, "You probably should eat something soon." );
-			3 : SendSysMessage( who, "You are hungry.", color := 44 );
-			2 : SendSysMessage( who, "You're getting very hungry!", color := 44 );
-			1 : SendSysMessage( who, "You need to eat now!!!!", color := 33 );
-			0 : SendSysMessage( who, "You're absolutely famished!", color := 33 );
+			5 : SendSysMessage( who, "You are hungry.", color := 44 );
+			4 : SendSysMessage( who, "You are very hungry.", color := 44 );
+			3 : SendSysMessage( who, "You're so hungry you feel light headed.", color := 44 );
+			2 : SendSysMessage( who, "Your body is fatigued from hunger.", color := 33 );
+			1 : SendSysMessage( who, "You are extremely hungry.", color := 33 );
+			0 : SendSysMessage( who, "You are desperately hungry!!!", color := 33 );
 		endcase
 
 		Sleep(60 * HUNGER_TIMER);
