@@ -39,7 +39,7 @@ program Hunger(player)
 		return 0;
 	endif
 
-	SetObjProperty( who, "#HungeerPID", GetPid() );
+	SetObjProperty( who, "#HungerPID", GetPid() );
 
 	var hunger;
 	while( who )

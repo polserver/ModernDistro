@@ -23,7 +23,7 @@ Program HungerStatus(who)
 	if (hungerstatus <= 0)
 		hungerstatus := 0;
     endif
-	Print(hungerstatus);
+
     case (hungerstatus)
       10 : SendSysMessage(who, "You are not hungry.");
        9 : SendSysMessage(who, "You are not hungry.");
