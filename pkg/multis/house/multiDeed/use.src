@@ -106,6 +106,7 @@ function Buildhouse(who, deed)
 			SetObjProperty(created.builtdeed, "signserial", item.serial);
 		endif
     endforeach
+	SetObjProperty( created.house, "signserial", GetObjProperty(created.builtdeed, "signserial") );
   else
     DestroyItem(created.builtdeed);
     DestroyItem(created.packkey);
