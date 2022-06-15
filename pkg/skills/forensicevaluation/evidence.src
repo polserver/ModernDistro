@@ -1,22 +1,55 @@
 use uo;
+use os;
 
-program evidence(who, evidence)
-  EraseObjProperty(who, "IsMeditating");
-  EraseObjProperty(who, "HealTimer");
-  var ser := GetObjProperty(evidence, "serial");
-  if (!ser)
-    SendSysMessage(who, "This proves nothing!");
-    return;
-  endif
-  SendSysMessage(who,"Select the item to which you wish to match this evidence");
-  var what := Target(who, TGTOPT_CHECK_LOS);
-  if(!what)
-    SendSysMessage(who, "Targetting cancelled");
-    return;
-  endif
-  if(what.serial == CInt(ser))
-    PrintTextAbove(what, "This matches the evidence");
-  else
-    PrintTextAbove(what, "This does not match the evidence");
-  endif
-endprogram       
+include ":gumps:gumps";
+include ":itemUtils:itemUtil";
+
+program evidence( mobile, evidence )
+
+	if( !UseItem_check( mobile, evidence, DEFAULT_ITEM ) )
+		return 0;
+	elseif( !GetObjProperty( evidence, "VictimSerial" ) )
+		SendSysMessage( mobile, "This proves nothing!" );
+		return 0;
+	endif
+
+	if( !DisplayEvidenceInfo( mobile, evidence ) )
+		return 0;
+	endif
+
+	SendSysMessage( mobile,"Select the object to check the evidence against.", 0x3, 0x42 );
+	var use_on := Target( mobile, TGTOPT_CHECK_LOS );
+	if( !use_on )
+		SendSysMessage( mobile, "Targetting cancelled", 0x3, 0x32 );
+		return 0;
+	endif
+
+	if( use_on.serial == GetObjProperty( evidence, "VictimSerial" ) )
+		SendSysMessage( mobile, "This matches the evidence", 0x3, 0x42 );
+	else
+		SendSysMessage( mobile, "This does not match the evidence", 0x3, 0x32 );
+	endif
+
+	return 1;
+endprogram
+
+function DisplayEvidenceInfo( byref mobile, byref evidence )
+
+	var gump := GFCreateGump( 50, 50 ),
+		result := 0,
+		text := GetObjProperty( evidence, "EvidenceText" );
+
+	if( text.errortext )
+		text := evidence.name;
+	endif
+
+	GFPage( gump, 0 );
+	GFResizePic( gump, 0, 0, 9390, 463, 439 );
+	GFHTMLArea( gump, 22, 33, 417, 310, text, 0, 0 );
+	GFAddButton( gump, 22, 345, 9004, 9005, GF_CLOSE_BTN, 33 );
+	GFHTMLArea( gump, 64, 356, 399, 36, "Check Evidence Against Object", 0, 0 );
+
+	result := GFSendGump( mobile, gump );
+
+	return ( result[0] == 33 );
+endfunction

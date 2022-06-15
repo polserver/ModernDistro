@@ -1,3 +1,25 @@
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+//	ForensicEvaluation(who)
+//
+//	Author:			Unknown
+//
+//	Date Created:	Unknown
+//
+//	Description:	Performs forensic evalustion on a corpse to try to determine
+//					the means of death and identity of the killer.
+//					The program was modifed to allow the player, with sufficient
+//					skill in magery to determine if the victim was killed by magic
+//					and which spell dealt the lethal blow.
+//					One other modification now stores the info in a CProp on the "proof"
+//					which is displayed in a gump when the proof is double-clicked.
+//	Parameters:		who - the user.
+//
+//	Return Value:	None
+//
+//	Modified: 2022-06-15 02:08:51 by Yukiko
+//
+//////////////////////////////////////////////////////////////////////////////////////////
 use uo;
 
 include "include/client";
@@ -7,64 +29,85 @@ include ":attributes:attributes";
 
 const UOBJ_PROOF := 0x1BE34;
 
-program forensic(who)
-        var data := {};
-        data[1] := "forensics";
-        data[2] := ReadGameClock();
-        data[3] := 19;
-        SetObjProperty(who, "LastUsedSkill", data );
-        TrainingSkill(who, data[3]);
+program ForensicEvaluation(who)
+	var data := {};
+	data[1] := "forensics";
+	data[2] := ReadGameClock();
+	data[3] := 19;
+	SetObjProperty(who, "LastUsedSkill", data );
+	TrainingSkill(who, data[3]);
 
-  EraseObjProperty(who, "IsMeditating");
-//  EraseObjProperty(who, "HealTimer");
-  SendSysMessage(who, "What would you like to evaluate?");
-  var what := Target(who, TGTOPT_CHECK_LOS);
-  if (!what)
-    SendSysMessage(who, "Targetting cancelled");
-    return;
-  endif
-//  var pts := CInt(GetAttribute(who, FORENSIC_EVALUATION)*2);
-  var pts := CInt(GetAttribute(who, FORENSIC_EVALUATION) / 10) + 20;
-  if(pts < 10)
-    pts := 10;
-  endif
-  if (SkillCheck(who, FORENSIC_EVALUATION, -1, pts) > 0)
-    var lastHit := array;
-    var kname, kserial, kweapon, strmessage;
-    lastHit := GetObjProperty(what, "LastHit");
-    if(!lastHit)
-      SendSysMessage(who, "There are no clues to be found.");
-      return;
-    endif
+	EraseObjProperty(who, "IsMeditating");
+//	EraseObjProperty(who, "HealTimer");
+	SendSysMessage(who, "What would you like to evaluate?");
+	var what := Target(who, TGTOPT_CHECK_LOS);
+	if (!what)
+		SendSysMessage(who, "Targetting cancelled");
+		return;
+	endif
+	var pts := CInt(GetAttribute(who, FORENSIC_EVALUATION) / 10) + 20;
+	if(pts < 10)
+		pts := 10;
+	endif
+	if (SkillCheck(who, FORENSIC_EVALUATION, -1, pts) > 0)
+		var last_damage := struct;
+		var kname, kserial, kweapon, kspell, strmessage;
+		last_damage := GetObjProperty(what, "LastDamage");
+		if(!last_damage)
+			SendSysMessage(who, "There are no clues to be found.");
+			return;
+		endif
 
-    kname := lastHit[1];
-    kserial := lastHit[2];
-    kweapon := lastHit[3];
+		kname := last_damage.name;
+		kserial := last_damage.serial;
+		kweapon := last_damage.weapon;
+		kspell := last_damage.spell;
 
-    if(kname)
-      SendSysMessage(who, kname + " appears to be the killer.");
-    endif
-    if(kweapon)
-      SendSysMessage(who, "A " + kweapon + " was used to kill this.");
-    endif
-    if(!kname && !kweapon)
-      SendSysMessage(who, "There are no clues to be found.");
-    else
-      if(kname && kweapon)
-        strmessage := what.desc + " was killed by " + kname + ", and the murder weapon was a " + kweapon + ".";
-      elseif(kname)
-        strmessage := what.desc + " was killed by " + kname + ", and the murder weapon is unknown.";
-      else
-        strmessage := what.desc + "'s killer is unknown, but the murder weapon was a " + kweapon + ".";
-      endif
-      var proof := CreateItemInBackpack(who, UOBJ_PROOF, 1);
-      proof.name := "Evidence indicates that " + strmessage;
-      SetObjProperty(proof, "corpseSerial", what.serial);
-      if(kserial)
-        SetObjProperty(proof, "killerSerial", kserial);
-      endif
-    endif
-  else
-    SendSysMessage(who, "You didn't find any clues.");
-  endif
+		if(kname)
+			SendSysMessage(who, kname + " appears to be the killer.");
+		endif
+		if(kweapon)
+			SendSysMessage( who, "It appears a " + kweapon + " was used to kill the subject.");
+		elseif( kspell )
+			SendSysMessage( who, "It appears a  " + kspell + " was used to kill the subject.");
+		else
+			SendSysMessage( who, "I could not determine what was used to kill the subject.");
+		endif
+		if(!kname && !kweapon && !kspell)
+			SendSysMessage(who, "There are no clues to be found.");
+		else
+			if(kname && kweapon)
+				strmessage := what.desc + " appears to be killed by " + kname + ", it appears the weapon was a " + kweapon + ".";
+			elseif(kname && kspell)
+				if( AP_GetSkill(who, MAGERY) > 80 )
+					strmessage := what.desc + " appears to be killed by " + kname + ", definitely by the spell " + kspell + ".";
+				elseif( AP_GetSkill(who, MAGERY) > 50 )
+					strmessage := what.desc + " appears to be killed by " + kname + ", possibly by the spell " + kspell + ".";
+				else
+					strmessage := what.desc + " appears to be killed by " + kname + ", possibly by supernatural means.";
+				endif
+			elseif( !kname && kspell )
+				if( AP_GetSkill(who, MAGERY) > 80 )
+					strmessage := what.desc + "'s killer is unknown, but died by the spell " + kspell + ".";
+				elseif( AP_GetSkill(who, MAGERY) > 50 )
+					strmessage := what.desc + "'s killer is unknown, but possibly died by the spell " + kspell + ".";
+				else
+					strmessage := what.desc + "'s killer is unknown, but possibly died by supernatural means.";
+				endif
+			elseif(kname && !kweapon && !kspell)
+				strmessage := what.desc + " appears to be killed by " + kname + ", and the weapon is unknown.";
+			else
+				strmessage := what.desc + "'s killer is unknown, but the weapon was a " + kweapon + ".";
+			endif
+			var proof := CreateItemInBackpack(who, UOBJ_PROOF, 1);
+			proof.name := "Evidence about the death of " + what.desc;
+			SetObjProperty( proof, "EvidenceText", strmessage );
+			SetObjProperty( proof, "VictimSerial", what.serial );
+			if(kserial)
+				SetObjProperty(proof, "KillerSerial", kserial);
+			endif
+		endif
+	else
+		SendSysMessage(who, "You didn't find any clues.");
+	endif
 endprogram
