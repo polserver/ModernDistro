@@ -5,7 +5,7 @@
  *
  */
 // Version 2
-// 20171-11-15  Yukiko changed resistances from using a CProp to use built-in members'
+// 2017-11-15  Yukiko changed resistances from using a CProp to use built-in members.
 //
 // To do: Add the ability to have custom resistances through the use of a CProp.
 //
@@ -154,7 +154,7 @@ function ApplyRawDamageEX(mobile, amount, type:=DMG_FORCED, source:=0)
 endfunction
 
 /*
- * ApplySpellDamageEX(mobile, amount, type, source, circle)
+ * ApplySpellDamageEX(mobile, amount, type, source, circle, spell := "")
  *
  * Purpose: Does spell damage to mobile taking into account mobile's AR
  *
@@ -168,51 +168,51 @@ endfunction
  * Return value: damage amount done
  *
  */
-function ApplySpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circle := 1)
+function ApplySpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circle := 1, spell := "")
+
 	amount := CInt(amount);
 
 	if( mobile.IsA(POLCLASS_NPC) )
-	    amount := amount * 2;
+		amount := amount * 2;
 	endif
 
 	// Check to see if we are using magic resistance with damage spells.
 	var settings := DMG_GetSettingsCfgElem("Settings");
 	if ( CInt(settings.UseMRInAllSpells) )
-	    amount := Resisted(circle, source, mobile, amount);
+		amount := Resisted(circle, source, mobile, amount);
 	endif
 	// Check to see if we will take standard resistances into account against spell damage.
 	// settings := DMG_GetSettingsCfgElem("Settings");
 	if ( CInt(settings.UseDamageMembers) )
-      amount := CalcDamageAmount(mobile, amount, type);
+		amount := CalcDamageAmount(mobile, amount, type);
 	endif
 
 	if ( amount == error )
-	    return 0;
+		return 0;
 	endif
 
 	if ( amount < 0 )
-	    HealDamage(mobile, Abs(amount));
+		HealDamage(mobile, Abs(amount));
 	else
-    if ( source )
-      SetLastDamageInfo(mobile, amount, type, source);
-      SetScriptController(source);
-    endif
-
-	    ApplyDamage(mobile, amount);
+		if ( source )
+			SetLastDamageInfo(mobile, amount, type, source, circle, spell);
+			SetScriptController(source);
+		endif
+	ApplyDamage(mobile, amount);
 	endif
-  // Added for necro wraith form
-  if(source and GetObjProperty(source, "wraith"))
-    DoManaSuck(mobile, source, amount);
-  endif
-  if(GetObjProperty(source, "cursed_weapon"))
-    LifeDrain(source, amount, 50);
-  endif
+	// Added for necro wraith form
+	if(source and GetObjProperty(source, "wraith"))
+		DoManaSuck(mobile, source, amount);
+	endif
+	if(GetObjProperty(source, "cursed_weapon"))
+		LifeDrain(source, amount, 50);
+	endif
 
 	return amount;
 endfunction
 
 /*
- * ApplyRawSpellDamageEX(mobile, amount, type, source, circle)
+ * ApplyRawSpellDamageEX(mobile, amount, type, source, circle, circle := 1, spell := "")
  *
  * Purpose: Does spell damage to a mobile ignoring the mobile's AR
  *
@@ -226,7 +226,7 @@ endfunction
  * Return value: damage amount done
  *
  */
-function ApplyRawSpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circle := 1)
+function ApplyRawSpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circle := 1, spell := "")
 	amount := CInt(amount);
 	var settings := DMG_GetSettingsCfgElem("Settings");
 	if ( settings.UseMRInAllSpells )
@@ -249,18 +249,18 @@ function ApplyRawSpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circ
 		HealDamage(mobile, Abs(amount));
 	else
 		if ( source )
-			SetLastDamageInfo(mobile, amount, type, source);
+			SetLastDamageInfo(mobile, amount, type, source, circle, spell);
 			SetScriptController(source);
 		endif
 		ApplyRawDamage(mobile, amount);
 	endif
-  // Added for necro wraith form
-  if(source and GetObjProperty(source, "wraith"))
-    DoManaSuck(mobile, source, amount);
-  endif
-  if(GetObjProperty(source , "cursed_weapon"))
-    LifeDrain(source, amount, 50);
-  endif
+	// Added for necro wraith form
+	if(source and GetObjProperty(source, "wraith"))
+		DoManaSuck(mobile, source, amount);
+	endif
+	if(GetObjProperty(source , "cursed_weapon"))
+		LifeDrain(source, amount, 50);
+	endif
 
 	return amount;
 endfunction
@@ -308,7 +308,7 @@ function CalcDamageAmount(mobile, amount, type)
 endfunction
 
 /*
- * SetLastDamageInfo(mobile, amount, type, source)
+ * SetLastDamageInfo(mobile, amount, type, source, circle := 1, spell := "")
  *
  * Purpose
  *
@@ -321,7 +321,8 @@ endfunction
  * Return value
  *
  */
-function SetLastDamageInfo(mobile, amount, type, source)
+function SetLastDamageInfo(mobile, amount, type, source, circle := 1, spell := "")
+
 	var last_damage := struct;
 	last_damage.+serial	:= source.serial;
 	last_damage.+time	:= POLCore().systime;
@@ -330,6 +331,15 @@ function SetLastDamageInfo(mobile, amount, type, source)
 
 	if ( source.acctname )
 		last_damage.+acctname := source.acctname;
+	endif
+
+	if ( source.weapon )
+		last_damage.+weapon := source.weapon;
+	endif
+
+	if ( spell )
+		last_damage.+spell := spell;
+		last_damage.+circle := circle;
 	endif
 
 	if ( source.name )
