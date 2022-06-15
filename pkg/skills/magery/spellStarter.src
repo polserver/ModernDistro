@@ -214,7 +214,7 @@ program SpellStarter(params)
 		info.+spell_Id := spell_id;
 		info.+circle := spell_elem.Circle;
 		info.+spell_config := spell_elem;
-		info.+damage_typ := spell_elem.DamageType;
+		info.+damage_type := spell_elem.DamageType;
 		if( runebook )
 			info.runebook := runebook;
 		endif
