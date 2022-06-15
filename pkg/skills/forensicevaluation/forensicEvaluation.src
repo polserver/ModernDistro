@@ -80,9 +80,9 @@ program ForensicEvaluation(who)
 				strmessage := what.desc + " appears to be killed by " + kname + ", it appears the weapon was a " + kweapon + ".";
 			elseif(kname && kspell)
 				if( AP_GetSkill(who, MAGERY) > 80 )
-					strmessage := what.desc + " appears to be killed by " + kname + ", definitely by the spell " + kspell + ".";
+					strmessage := what.desc + " appears to be killed by " + kname + ", by the " + kspell + " spell.";
 				elseif( AP_GetSkill(who, MAGERY) > 50 )
-					strmessage := what.desc + " appears to be killed by " + kname + ", possibly by the spell " + kspell + ".";
+					strmessage := what.desc + " appears to be killed by " + kname + ", possibly by the " + kspell + " spell.";
 				else
 					strmessage := what.desc + " appears to be killed by " + kname + ", possibly by supernatural means.";
 				endif
@@ -97,7 +97,7 @@ program ForensicEvaluation(who)
 			elseif(kname && !kweapon && !kspell)
 				strmessage := what.desc + " appears to be killed by " + kname + ", and the weapon is unknown.";
 			else
-				strmessage := what.desc + "'s killer is unknown, but the weapon was a " + kweapon + ".";
+				strmessage := what.desc + "'s killer is unknown, but the weapon most likely a " + kweapon + ".";
 			endif
 			var proof := CreateItemInBackpack(who, UOBJ_PROOF, 1);
 			proof.name := "Evidence about the death of " + what.desc;
