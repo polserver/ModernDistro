@@ -1,131 +1,140 @@
 use uo;
 use os;
 use util;
+use cliloc;
 use attributes;
 
 include "include/client";
 include ":attributes:attributes";
 
 program picklock(who, lockpick)
-  EraseObjProperty(who, "IsMeditating");
-  EraseObjProperty(who, "HealTimer");
-  SendSysMessage(who, "Select a target.");
-  var victim := Target(who);
-  if(!victim)
-    SendSysMessage(who, "Aborted.");
-    return;
-  endif
-  if(Distance(victim, who) > 1)
-    SendSysMessage(who, "That is too far away.");
-    return;
-  endif
-  if(!victim.locked)
-    SendSysMessage(who, "That is not locked.");
-    return;
-  endif
-  if(GetObjProperty(victim,"level"))
-    PickTreasureChest(who, lockpick, victim);
-    return;
-  else
-    var diffi := CInt(GetObjProperty(victim,"MLockPickDiff"));
-    if(diffi)
-      PickMLockedItem(who, lockpick, victim, diffi);
-      return;
-    else
-      var diff := CInt(GetObjProperty(victim,"LockPickDiff"));
-      if(diff)
-        PickLockedItem(who, lockpick, victim, diff);
-        return;
-      else
-        SendSysMessage(who, "You cannot pick that");
-        return;
-      endif
-    endif
-  endif
+	EraseObjProperty(who, "IsMeditating");
+	EraseObjProperty(who, "HealTimer");
+	SendSysMessageCL( who, 502068, color := 88 ); // What do you want to pick?
+	SendSysMessageCL( who, 502067, color := 44 ); // Remember!  Locked chests may also be trapped!
+	var victim := Target(who);
+	if(!victim)
+		SendSysMessageCL( who, 1042023, color := 33 ); // Cancelled.
+		return;
+	endif
+	if(Distance(victim, who) > 1)
+		SendSysMessageCL( who, 502070, color := 33 ); // I am too far away to do that.
+		return;
+	endif
+	if(!victim.locked)
+		SendSysMessageCL( who, 502069, color := 44 ); // This does not appear to be locked.
+		return;
+	endif
+	if( victim.IsSecured() )
+		SendSysMessageCL( who, 502071, color := 44 ); // That is secure
+		return;
+	endif
+	if(GetObjProperty(victim,"level"))
+		PickTreasureChest(who, lockpick, victim);
+		return;
+	else
+		var diffi := CInt(GetObjProperty(victim,"MLockPickDiff"));
+		if(diffi)
+			PickMLockedItem(who, lockpick, victim, diffi);
+			return;
+		else
+			var diff := CInt(GetObjProperty(victim,"LockPickDiff"));
+			if(diff)
+				PickLockedItem(who, lockpick, victim, diff);
+				return;
+			else
+				SendSysMessageCL( who, 502073, color := 44 ); // This lock cannot be picked by normal means...
+				return;
+			endif
+		endif
+	endif
 endprogram
 
-function PickMLockedItem(me, lockpick, chest, diff)
-  if(!chest.locked)
-    SendSysMessage(me,"That doesn't appear to be locked");
-    return;
-  endif
-  PlaySoundEffect(me, SFX_242);
-  sleep(1);
-  if(SkillCheck(me, LOCKPICKING, diff, (diff * 2)) > 0)
-    PrintTextAbovePrivate(chest,"*Unlocked!*",me);
-    EraseObjProperty(chest, "MLockPickDiff");
-    chest.locked := 0;
-  else
-    PrintTextAbovePrivate(chest,"You fail to pick the lock.",me);
-    if(diff < 10)
-      diff := 0;
-    else
-      diff := diff -10;
-    endif
-    if(!SkillCheck(me, LOCKPICKING, diff, 0) > 0)
-      PlaySoundEffect(chest,0xef);
-      SendSysMessage(me,"Your pick breaks!");
-      SubtractAmount(lockpick,1);
-    endif
-    return;
-  endif
+function PickMLockedItem(who, lockpick, chest, diff)
+	if(!chest.locked)
+		SendSysMessageCL( who, 502069, color := 44 ); // This does not appear to be locked.
+		return;
+	endif
+	PlaySoundEffect(who, SFX_242);
+	sleep(1);
+	if(SkillCheck(who, LOCKPICKING, diff, (diff * 2)) > 0)
+		SendSysMessagecl( who, 502076, color := 68 ); // The lock quickly yields to your skill.
+		PrintTextAbovePrivateCL( who, chest, 3005143, color := 68 ); // Unlocked
+		EraseObjProperty(chest, "MLockPickDiff");
+		chest.locked := 0;
+	else
+		PrintTextAbovePrivateCL( who, chest, 502075, color := 33 ); // You are unable to pick the lock.
+		if(diff < 10)
+		diff := 0;
+		else
+			diff := diff -10;
+		endif
+		if(!SkillCheck(who, LOCKPICKING, diff, 0) > 0)
+			PlaySoundEffect(chest,0xef);
+			SendSysMessageCL( who, 502074, color := 33 ); // You broke the lockpick.
+			SubtractAmount(lockpick, 1);
+		endif
+	return;
+	endif
 endfunction
 
-function PickLockedItem(me, lockpick, chest, diff)
-  if(!chest.locked)
-    SendSysMessage(me,"That doesn't appear to be locked");
-    return;
-  endif
-  PlaySoundEffect(me, SFX_242);
-  sleep(1);
-  if(SkillCheck(me, LOCKPICKING, diff, (diff * 2)) > 0)
-    PrintTextAbovePrivate(chest,"*Unlocked!*",me);
-  else
-    PrintTextAbovePrivate(chest,"You fail to pick the lock.",me);
-    if(diff < 10)
-      diff := 0;
-    else
-      diff := diff -10;
-    endif
-    if(!SkillCheck(me, LOCKPICKING, diff, 0) > 0)
-      PlaySoundEffect(chest,0xef);
-      SendSysMessage(me,"Your pick breaks!");
-      SubtractAmount(lockpick,1);
-    endif
-    return;
-  endif
-  chest.locked := 0;
+function PickLockedItem(who, lockpick, chest, diff)
+	if(!chest.locked)
+		SendSysMessageCL( who, 502069, color := 44 ); // This does not appear to be locked.
+		return;
+	endif
+	PlaySoundEffect(who, SFX_242);
+	sleep(1);
+	if(SkillCheck(who, LOCKPICKING, diff, (diff * 2)) > 0)
+		SendSysMessageCL( who, 502076, 3, 68 ); // The lock quickly yields to your skill.
+		PrintTextAbovePrivateCL( who, chest, 3005143, color := 68 ); // Unlocked
+	else
+		PrintTextAbovePrivateCL( who, chest, 502075, color := 33 ); // You are unable to pick the lock.
+		if(diff < 10)
+			diff := 0;
+		else
+			diff := diff -10;
+		endif
+		if(!SkillCheck(who, LOCKPICKING, diff, 0) > 0)
+			PlaySoundEffect(chest,0xef);
+			SendSysMessageCL( who, 502074, color := 33 ); // You broke the lockpick.
+			SubtractAmount(lockpick,1);
+		endif
+		return;
+	endif
+	chest.locked := 0;
 endfunction
 
-function PickTreasureChest(me, lockpick, chest)
-  var lvl := GetObjProperty(chest,"level");
-  if(!lvl)
-    SendSysMessage(me, "You cannot pick that.");
-    return;
-  endif
-  if(!chest.locked)
-    SendSysMessage(me,"That doesn't appear to be locked");
-    return;
-  endif
-  PlaySoundEffect(me, SFX_242);
-  sleep(1);
-  var diff :=(lvl * 20)+10;
-  if(SkillCheck(me, LOCKPICKING, diff, (diff * 2)) > 0)
-    PlaySoundEffect(chest,SFX_200);
-    PrintTextAbovePrivate(chest,"*Unlocked!*",me);
-    chest.locked := 0;
-  else
-    PrintTextAbovePrivate(chest,"You fail to pick the lock.",me);
-    if(diff < 10)
-      diff := 0;
-    else
-      diff := diff -10;
-    endif
-    if(!SkillCheck(me, LOCKPICKING, diff, 0) > 0)
-      PlaySoundEffect(chest,0xef);
-      SendSysMessage(me,"Your pick breaks!");
-      SubtractAmount(lockpick,1);
-    endif
-    return;
-  endif
+function PickTreasureChest(who, lockpick, chest)
+	var lvl := GetObjProperty(chest,"level");
+	if(!lvl)
+		SendSysMessageCL( who, 502073, color := 44 ); // This lock cannot be picked by normal means...
+		return;
+	endif
+	if(!chest.locked)
+		SendSysMessageCL( who, 502069, color := 33 ); // This does not appear to be locked.
+		return;
+	endif
+	PlaySoundEffect(who, SFX_242);
+	sleep(1);
+	var diff :=(lvl * 20)+10;
+	if(SkillCheck(who, LOCKPICKING, diff, (diff * 2)) > 0)
+		PlaySoundEffect(chest,SFX_200);
+		SendSysMessageCL( who, 502076, color := 66 ); // The lock quickly yields to your skill.
+		PrintTextAbovePrivateCL( who, chest, 3005143, 66 ); // Unlocked
+		chest.locked := 0;
+	else
+		PrintTextAbovePrivateCL(who, chest, 502075, color := 33 ); // You are unable to pick the lock.
+		if(diff < 10)
+			diff := 0;
+		else
+			diff := diff -10;
+		endif
+		if(!SkillCheck(who, LOCKPICKING, diff, 0) > 0)
+			PlaySoundEffect(chest,0xef);
+			SendSysMessageCL( who, 502074, color := 33 ); // You broke the lockpick.
+			SubtractAmount(lockpick,1);
+		endif
+		return;
+	endif
 endfunction

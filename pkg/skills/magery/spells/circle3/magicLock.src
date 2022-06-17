@@ -1,35 +1,49 @@
 use os;
 use uo;
 use util;
+use cliloc;
 
 include ":attributes:attributes";
 include ":magery:spells";
+include ":keys:key";
 
 program cast_strength( parms )
   var caster := parms[1];
   var info := parms[2];
-  
+	var lock_id;
   var cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_NEUTRAL);
     if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
         cast_on := parms[4];
     endif
     if (!cast_on)
-        SendSysMessage (caster, "Cancelled.", color := 33);
+        SendSysMessageCL(caster, 1042023, color := 33 ); // Cancelled.
         return 0;
     endif
 
-	if ( cast_on.IsA(POLCLASS_CONTAINER) )
+	if ( !cast_on.IsA(POLCLASS_CONTAINER) )
 		SendSysMessage(caster, "That is not a container.", 3, 33);
+		return 0;
+	elseif( cast_on.IsLeather() )
+		SendSysMessage( caster, "You cannot lock leather containers.", 3, 33 );
+		return 0;
+	elseif( cast_on.IsA(POLCLASS_SPELLBOOK) || cast_on.IsA(POLCLASS_CORPSE) )
+		SendSysMessage(  caster, "You cannot lock that.", 3, 33);
 		return 0;
 	elseif ( cast_on.locked )
 		SendSysMessage(caster, "That object is already locked.");
 		return 0;
 	endif
-	
+
     PlaySoundEffect(caster, SFX_SPELL_MAGIC_LOCK);
-    PrintTextAbovePrivate(cast_on, "*Locked!*", caster, color := 66);	
+    PrintTextAbovePrivateCL(caster, cast_on, 1151610, color := 66); // Locked
 	cast_on.locked := 1;
+	lock_id := AllocateLockID();
+	if( GetObjProperty( cast_on, "LockID" ) )
+		SetObjProperty(cast_on, "OrigLockID", GetObjProperty( cast_on, "LockID" ));
+	endif
+	SetObjProperty(cast_on, "LockID", lock_id);
 	SetObjProperty(cast_on, "MagicLock", caster.name);
-	
+	SetObjProperty( cast_on, "MLockPickDiff", RandomInt(15) + 1 );
+
 	return 1;
 endprogram

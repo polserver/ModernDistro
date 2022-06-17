@@ -1,49 +1,53 @@
 use os;
 use uo;
 use util;
+use cliloc;
 
 include ":magery:spells";
 include ":attributes:attributes";
 //include ":keys:key";
 
 program cast_strength( parms )
-  var caster := parms[1];
-  var info := parms[2];
-  
-  var cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_NEUTRAL);
-    if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
-        cast_on := parms[4];
-    endif
-    if (!cast_on)
-        SendSysMessage (caster, "Cancelled.", color := 33);
-        return 0;
-    endif
-	if ( cast_on.IsA(POLCLASS_CONTAINER) )
-		SendSysMessage(caster, "That is not a container.", 3, 33);
+	var caster := parms[1];
+	var info := parms[2];
+	// If magic lock was cast on a container that already had a LockID
+	// then we need a place to retrieve and store it.
+	var orig_lock_id;
+
+	var cast_on := MS_Target(caster, info.targ, "Select a target.", TGTOPT_CHECK_LOS+TGTOPT_NEUTRAL);
+	if (!cast_on) // If no cast_on then get cast_on from parms[4]. Used mostly for NPC casting.
+		cast_on := parms[4];
+	endif
+	if (!cast_on)
+		SendSysMessageCL( caster, 1042023, color := 33 ); // Cancelled.
 		return 0;
 	endif
+	if ( !cast_on.IsA(POLCLASS_CONTAINER) )
+		SendSysMessageCL( caster, 501682, color := 33 ); // not a container
+		return 0;
+		endif
 	if (!cast_on.locked)
-		SendSysMessage(caster,"That is not locked!", 3, 33);
+		SendSysMessageCL( caster, 502069, color := 44 ); // This does not appear to be locked.
 		return;
 	endif
-// Do not know what the authors were thinking with this.
-// I would think Magic Unlock wouldn't be concerned if a container
-// was lockable. After all we are using magick here :)
-/*	if ( !KP_IsLockable(targ) )
-		SendSysMessage(caster, "That is not lockable.");
-		return 0;
-	endif
-*/
 	if ( cast_on.locked )
 		// Note: No lock levels, but you could if ( CInt(GetObjProperty(cast_on, "LockLevel")) <= 1 )
 		if ( GetObjProperty(cast_on, "MagicLock") != error )
-			PlaySoundEffect(caster, SFX_SPELL_UNLOCK);
-		    PrintTextAbovePrivate(cast_on, "*Unlocked!*", caster, color := 66);	
+			// Retrieve the original lock ID, if present.
+			orig_lock_id := GetObjProperty( cast_on, "OrigLockID" );
+			EraseObjProperty(cast_on, "LockID");
 			EraseObjProperty(cast_on, "MagicLock");
+			EraseObjProperty(cast_on, "MLockPickDiff");
+			PlaySoundEffect(caster, SFX_SPELL_UNLOCK);
+			SendSysMessageCL( caster, 502076, color := 66 ); // The lock quickly yields to your skill.
+		    PrintTextAbovePrivateCL(caster, cast_on, 3005143, color := 66); // // Unlocked
+			if( orig_lock_id )
+				SetObjProperty( cast_on, "LockID", orig_lock_id );
+			endif
 			cast_on.locked := 0;
 		endif
 	endif
-	
+
 	return 1;
 
 endprogram
