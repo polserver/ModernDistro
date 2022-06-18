@@ -11,6 +11,7 @@
 //					The program was modifed to allow the player, with sufficient
 //					skill in magery to determine if the victim was killed by magic
 //					and which spell dealt the lethal blow.
+//					Forensic Evaluation now reports if the victim was poisoned.
 //					One other modification now stores the info in a CProp on the "proof"
 //					which is displayed in a gump when the proof is double-clicked.
 //	Parameters:		who - the user.
@@ -21,15 +22,21 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 use uo;
+use cliloc;
 
 include "include/client";
 include ":virtue:noto";
+include ":damage:damage";
 include "include/trainingskill";
 include ":attributes:attributes";
 
 const UOBJ_PROOF := 0x1BE34;
 
+var last_damage := struct;
+var kname, kserial, kweapon, kspell, kpoison, strmessage;
+
 program ForensicEvaluation(who)
+
 	var data := {};
 	data[1] := "forensics";
 	data[2] := ReadGameClock();
@@ -37,77 +44,123 @@ program ForensicEvaluation(who)
 	SetObjProperty(who, "LastUsedSkill", data );
 	TrainingSkill(who, data[3]);
 
+	var cprop_data;
 	EraseObjProperty(who, "IsMeditating");
 //	EraseObjProperty(who, "HealTimer");
-	SendSysMessage(who, "What would you like to evaluate?");
+	SendSysMessageCL( who, 501000, color := 88 ); // Select what you want to examine.
 	var what := Target(who, TGTOPT_CHECK_LOS);
 	if (!what)
-		SendSysMessage(who, "Targetting cancelled");
+		SendSysMessageCL( who, 1042023, color := 33 ); // Cancelled.
 		return;
 	endif
+
+	last_damage := GetObjProperty(what, "LastDamage");
+	// If no "LastDamage" CProp then nothing to report
+	if( !last_damage )
+		SendSysMessageCL( who, 501005, color := 66 ); // You notice nothing unusual.
+		return;
+	endif
+
+	// Collect the information,
+	kname := last_damage.name;				// Killer name.
+	kserial := last_damage.serial;			// Killer serial
+	kweapon := last_damage.weapon.desc;		// If a weapon was used, get the name
+	kspell := last_damage.spell;			// If a spell was used, get the name.
+	kpoison := last_damage.damage_type;		// Get the damage type. Specifically for detecting poisoning.
+	// The last damage that was inflicred will always be the damage that killed the victim.
+	// So, if poison damage is the last damage, that will be the cause of death even if
+	// a weapon was used in the attack.
+
 	var pts := CInt(GetAttribute(who, FORENSIC_EVALUATION) / 10) + 20;
 	if(pts < 10)
 		pts := 10;
 	endif
+
 	if (SkillCheck(who, FORENSIC_EVALUATION, -1, pts) > 0)
-		var last_damage := struct;
-		var kname, kserial, kweapon, kspell, strmessage;
-		last_damage := GetObjProperty(what, "LastDamage");
-		if(!last_damage)
-			SendSysMessage(who, "There are no clues to be found.");
-			return;
-		endif
+		SpeakTheFindings( who );
+		cprop_data := BuildTheCProp( who, what );
 
-		kname := last_damage.name;
-		kserial := last_damage.serial;
-		kweapon := last_damage.weapon;
-		kspell := last_damage.spell;
+		// Create the "evidence" scroll.
+		var proof := CreateItemInBackpack(who, "evidence", 1);
+		proof.name := "Evidence about the death of " + what.desc;
+		SetObjProperty( proof, "EvidenceText", cprop_data );
+		SetObjProperty( proof, "VictimSerial", what.serial );
+		if(kserial)
+			SetObjProperty(proof, "KillerSerial", kserial);
+		endif
+	endif
+	// Didn't pass the SkillCheck.
+	PrintTextAbovePrivateCL( who, what, 501001, color := 44 ); // You cannot determine anything useful.
 
-		if(kname)
-			SendSysMessage(who, kname + " appears to be the killer.");
-		endif
-		if(kweapon)
-			SendSysMessage( who, "It appears a " + kweapon + " was used to kill the subject.");
-		elseif( kspell )
-			SendSysMessage( who, "It appears a  " + kspell + " was used to kill the subject.");
-		else
-			SendSysMessage( who, "I could not determine what was used to kill the subject.");
-		endif
-		if(!kname && !kweapon && !kspell)
-			SendSysMessage(who, "There are no clues to be found.");
-		else
-			if(kname && kweapon)
-				strmessage := what.desc + " appears to be killed by " + kname + ", it appears the weapon was a " + kweapon + ".";
-			elseif(kname && kspell)
-				if( AP_GetSkill(who, MAGERY) > 80 )
-					strmessage := what.desc + " appears to be killed by " + kname + ", definitely by the spell " + kspell + ".";
-				elseif( AP_GetSkill(who, MAGERY) > 50 )
-					strmessage := what.desc + " appears to be killed by " + kname + ", possibly by the spell " + kspell + ".";
-				else
-					strmessage := what.desc + " appears to be killed by " + kname + ", possibly by supernatural means.";
-				endif
-			elseif( !kname && kspell )
-				if( AP_GetSkill(who, MAGERY) > 80 )
-					strmessage := what.desc + "'s killer is unknown, but died by the spell " + kspell + ".";
-				elseif( AP_GetSkill(who, MAGERY) > 50 )
-					strmessage := what.desc + "'s killer is unknown, but possibly died by the spell " + kspell + ".";
-				else
-					strmessage := what.desc + "'s killer is unknown, but possibly died by supernatural means.";
-				endif
-			elseif(kname && !kweapon && !kspell)
-				strmessage := what.desc + " appears to be killed by " + kname + ", and the weapon is unknown.";
-			else
-				strmessage := what.desc + "'s killer is unknown, but the weapon was a " + kweapon + ".";
+endprogram
+
+function SpeakTheFindings( who )
+
+	// Check for the killer's name.
+	if( kname )
+		SendSysMessage( who, kname + " appears to be the killer.", color := 68 );
+	else
+		SendSysMessage( who, "The killer's identity could not be confirmed.", color := 68 );
+	endif
+	// If no spell was used then attempt to identify the other possible methods used.
+	if( !kspell )
+		if( kpoison )
+			SendSysMessage( who, "The victim died from poison.", color := 68 );
+			// A weapon was used in the attack but the killing "blow" was poison.
+			if( kweapon )
+				SendSysMessage( who, "The victim was attacked with a " + kweapon + "." );
 			endif
-			var proof := CreateItemInBackpack(who, UOBJ_PROOF, 1);
-			proof.name := "Evidence about the death of " + what.desc;
-			SetObjProperty( proof, "EvidenceText", strmessage );
-			SetObjProperty( proof, "VictimSerial", what.serial );
-			if(kserial)
-				SetObjProperty(proof, "KillerSerial", kserial);
-			endif
+		elseif( kweapon )
+			SendSysMessage( who, "It appears a " + kweapon + " was used to kill the subject.", color := 68 );
+		else
+			SendSysMessage( who, "I cannot determine the weapon that was used to kill the victim.", color := 68 );
+		endif
+	// A certain amount of magery skill is required to detect death from a spell.
+	elseif( kspell )
+		if( AP_GetSkill(who, MAGERY) > 80 )
+			SendSysMessage( who, "A " + kspell + " spell was used to kill the subject.", color := 68 );
+		elseif( AP_GetSkill(who, MAGERY) > 50 )
+			SendSysMessage( who, "It appears a  " + kspell + " spell was used to kill the subject.", color := 68 );
+		else
+			SendSysMessage( who, "It appears supernatural means was used to kill the subject.", color := 68 );
 		endif
 	else
-		SendSysMessage(who, "You didn't find any clues.");
+		SendSysMessage( who, "I could not determine what was used to kill the subject.", color := 68 );
 	endif
-endprogram
+
+endfunction
+
+function BuildTheCProp( who, byref what )
+
+	// Here we build the CProp to be displayed in the HTML scroll gump.
+	if( kname )
+		strmessage := what.desc + " was killed by " + kname + ". <br>";
+	else
+		strmessage := what.desc + "'s killer's identity could not be confirmed. <br>";
+	endif
+
+	if( !kspell )
+		if( kpoison && kweapon)
+			strmessage := strmessage + "The victim was attacked with a " + kweapon + " but ";
+			strmessage := strmessage + "poison caused the victim's death ";
+		elseif( kweapon )
+			strmessage := strmessage + "It a " + kweapon + " was used to kill the subject. <br>";
+		else
+			strmessage := strmessage + "I cannot determine the weapon that was used to kill the victim.";
+		endif
+	// A certain amount of magery skill is required to detect death from a spell.
+	elseif( kspell )
+		if( AP_GetSkill(who, MAGERY) > 80 )
+			strmessage := strmessage + "A " + kspell + " spell was used to kill the subject.";
+		elseif( AP_GetSkill(who, MAGERY) > 50 )
+			strmessage := strmessage + "It appears a  " + kspell + " spell was used to kill the subject.";
+		else
+			strmessage := strmessage + "It appears the victim was killed by supernatural power.";
+		endif
+		if( kpoison )
+			strmessage := strmessage + "Poison was involved in the victim's death.";
+		endif
+	endif
+	return strmessage;
+endfunction
+
