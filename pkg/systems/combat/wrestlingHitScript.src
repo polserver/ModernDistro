@@ -64,8 +64,7 @@ program WrestlingHitScript(attacker, defender, weapon, armor, basedamage, rawdam
 			rawdamage := Cint(rawdamage + anat);
 			// This next line appears to increase that damage too high.
 			rawdamage := rawdamage + RandomInt( CInt((AP_GetSkill(attacker, ANATOMY) ) / 20));
-			ApplyRawDamageEX(defender, rawdamage);
-			SetObjProperty(defender, "LastHit", {attacker.name, attacker.serial, weapon });
+			ApplyRawDamageEX(defender, rawdamage, DMG_PHYSICAL, attacker);
 			return;
 		else
 			SetObjProperty(defender, "TempDamage", rawdamage);
@@ -85,8 +84,7 @@ program WrestlingHitScript(attacker, defender, weapon, armor, basedamage, rawdam
 			rawdamage := Cint(rawdamage + anat);
 			// This next line appears to increase that damage too high.
 			rawdamage := rawdamage + RandomInt( CInt((AP_GetSkill(attacker, ANATOMY) ) / 20));
-			ApplyRawDamageEX(defender, rawdamage);
-			SetObjProperty(defender, "LastHit", {attacker.name, attacker.serial, weapon });
+			ApplyRawDamageEX(defender, rawdamage, DMG_PHYSICAL, attacker);
 			return;
 		endif
 	else
@@ -110,8 +108,7 @@ program WrestlingHitScript(attacker, defender, weapon, armor, basedamage, rawdam
 		rawdamage := Cint(rawdamage + anat);
 		// This next line appears to increase that damage too high.
 		rawdamage := rawdamage + RandomInt( CInt((AP_GetSkill(attacker, ANATOMY) ) / 20));
-		ApplyRawDamageEX(defender, rawdamage);
-		SetObjProperty(defender, "LastHit", {attacker.name, attacker.serial, weapon});
+		ApplyRawDamageEX(defender, rawdamage, DMG_PHYSICAL, attacker);
 		return;
 	endif
 endprogram
