@@ -21,8 +21,6 @@ program cast_fireball(parms)
     if ( !MS_MobileCheck(caster, cast_on) )
         return 0;
     endif
-  SetObjProperty(cast_on, "LastHit", {caster.name, caster.serial, "fireball"});
-
 
 	MS_PlaySpellSFX(info.spell_id, cast_on);
 	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
@@ -32,8 +30,7 @@ program cast_fireball(parms)
 	var max_damage := CInt(GetConfigInt(info.spell_config, "MaxBaseDamage"));
 	var base_damage := min_damage + (CDbl(RandomInt(CInt((max_damage - min_damage) * 10)) + 1) / 10);
 	var damage := MS_GetSpellDamage(caster, cast_on, base_damage);
-
-	ApplySpellDamageEX(cast_on, damage, info.damage_type, caster);
+	ApplySpellDamageEX(cast_on, damage, info.damage_type, caster, info.circle, "Fireball");
 
 	return 1;
 endprogram

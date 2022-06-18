@@ -38,7 +38,7 @@ program chaosmaelstrom(parms)
 	var vortexlen := 1;
 
 	Detach();
-
+	var mana_dmg;
     while (duration > 0)
 
 		foreach thevortex in vortexlist
@@ -59,19 +59,16 @@ program chaosmaelstrom(parms)
 						PrintTextAbove(thevortex, "The vortex explodes!");
 						PlayObjectCenteredEffect(victim, 0x36b0, 0xf, 0x1e );
 						PlaySoundEffect(victim, 0x020b);
-						SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "chaos_Maelstrom" });
-						ApplyDamageEX(victim, RandomDiceRoll("10d6"), DMG_PHYSICAL, 0);
+						ApplyDamageEX(victim, RandomDiceRoll( "10d6" ), DMG_PHYSICAL, 0);
 					endforeach
-					DestroyItem(thevortex);
 				endif
 
 				victims := ListMobilesNearLocationEx(thevortex.x, thevortex.y, thevortex.z, 4, LISTEX_FLAG_NORMAL + LISTEX_FLAG_HIDDEN, thevortex.realm);
 				foreach victim in victims
 					if ( (AP_GetVital(victim, HITS)) && (victim.serial != caster.serial) )
 						PlayLightningBoltEffect(victim);
-						SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "chaos_Maelstrom" });
 						PlaySoundEffect(victim, SFX_SPELL_LIGHTNING);
-						ApplySpellDamageEX(victim, RandomDiceRoll("2d4+2"), DMG_ENERGY, caster, info.Circle);
+						ApplySpellDamageEX(victim, RandomDiceRoll( "2d4+2" ), DMG_ENERGY, caster, info.Circle, "Chaos Maelstrom");
 					endif
 				endforeach
 
@@ -79,12 +76,26 @@ program chaosmaelstrom(parms)
 				foreach victim in victims
 					if ( (AP_GetVital(victim, HITS)) && (victim.serial != caster.serial) )
 						PlaySoundEffect(victim, SFX_SPELL_HARM);
-						SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "chaos_Maelstrom" });
-						AP_SetVital(victim, MANA, AP_GetVital(victim, MANA) - RandomDiceRoll("3d6"));
+						mana_dmg := RandomDiceRoll( "3d6" );
+						AP_SetVital(victim, MANA, AP_GetVital(victim, MANA) - mana_dmg);
 						if ( (AP_GetVital(victim, MANA) < 0) || (AP_GetVital(victim, MANA) > 1000) )
 							AP_SetVital(victim, MANA, 0);
 						endif
 					endif
+					// Set LastDamage info.
+					var last_damage := struct;
+					last_damage.+serial	:= caster.serial;
+					last_damage.+time	:= POLCore().systime;
+					last_damage.+amount	:= mana_dmg;
+					last_damage.+type	:= "Mana";
+					if ( caster.acctname )
+						last_damage.+acctname := caster.acctname;
+					endif
+
+					if ( caster.name )
+						last_damage.+name := caster.name;
+					endif
+					SetObjProperty(victim, "LastDamage", last_damage);
 				endforeach
 
 				victims := ListMobilesNearLocationEx(thevortex.x, thevortex.y, thevortex.z, 1, LISTEX_FLAG_NORMAL + LISTEX_FLAG_HIDDEN, thevortex.realm);
@@ -92,8 +103,7 @@ program chaosmaelstrom(parms)
 					if ( (AP_GetVital(victim, HITS)) && (victim.serial != caster.serial) )
 						PlayMovingEffect(thevortex, victim, 0x379f, 0xf, 0x1e );
 						PlaySoundEffect(victim, 0x020b);
-						SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "chaos_Maelstrom" });
-						ApplySpellDamageEX(victim, RandomDiceRoll("4d6"), DMG_ENERGY, caster, info.Circle);
+						ApplySpellDamageEX(victim, RandomDiceRoll("4d6"), DMG_ENERGY, caster, info.Circle, "Chaos Maelstrom");
 					endif
 				endforeach
 

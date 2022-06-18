@@ -24,9 +24,8 @@ program cast_clumsy( parms )
     endif
 	MS_PlaySpellSFX(info.spell_id, cast_on);
 	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
-    SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "clumsy" });
     if(Reflected(cast_on))
-	SendSysMessage (caster, "The spell was reflected back onto you!!!", color := 33);
+		SendSysMessage (caster, "The spell was reflected back onto you!!!", color := 33);
         cast_on := caster;
     endif
 
@@ -37,5 +36,19 @@ program cast_clumsy( parms )
 	// Duration: ((Eval / 5) + 1) * 6
 	var duration := ((AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 5) + 1) * 6;
 	TS_StartTimer(cast_on, "Clumsy", duration, points, caster);
+	// Set LastDamage info.
+	var last_damage := struct;
+	last_damage.+serial	:= caster.serial;
+	last_damage.+time	:= POLCore().systime;
+	last_damage.+amount	:= points;
+	last_damage.+type	:= "Clumsy";
+	if ( caster.acctname )
+		last_damage.+acctname := caster.acctname;
+	endif
+
+	if ( caster.name )
+		last_damage.+name := caster.name;
+	endif
+	SetObjProperty(cast_on, "LastDamage", last_damage);
 
 endprogram

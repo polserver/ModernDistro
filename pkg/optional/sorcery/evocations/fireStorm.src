@@ -70,19 +70,18 @@ function DoFireDamage(targ, byref caster, info)
 			dmg := RandomDiceRoll(dmg);
 			PlayObjectCenteredEffect(victim, 0x36cb, 7, 0x10);
 			PlaySoundEffect(victim, 0x228);
-			SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "Sorcery" });
 			if(victim.isA(POLCLASS_NPC))
 				Send_attack(victim, caster);
 				var element := npccfg[victim.npctemplate].elemental;
 				if(element == "fire")
 					HealDamage(victim, CInt(dmg/2) );
 				elseif ( (element == "earth") || (element == "ice") )
-					ApplySpellDamageEX(victim, dmg*3, DMG_FIRE, caster, info.Circle);
+					ApplySpellDamageEX(victim, dmg*3, DMG_FIRE, caster, info.Circle,"Fire Storm");
 				else
-					ApplySpellDamageEX(victim, dmg*2, DMG_FIRE, caster, info.Circle);
+					ApplySpellDamageEX(victim, dmg*2, DMG_FIRE, caster, info.Circle,"Fire Storm");
 				endif
 			else
-				ApplySpellDamageEX(victim, dmg, DMG_FIRE, caster, info.Circle);
+				ApplySpellDamageEX(victim, dmg, DMG_FIRE, caster, info.Circle,"Fire Storm");
 			endif
 		endif
 	endforeach

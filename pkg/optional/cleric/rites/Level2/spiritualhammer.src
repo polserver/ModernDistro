@@ -37,8 +37,6 @@ program spiritualhammer(params)
 
 	success := CStr(piety * 2) + "d6+" + CStr(piety);
 	i := RandomDiceRoll(success);
-	SetObjProperty(victim, "LastHit", {who.name, who.serial, "Cleric" });
-	ApplyRawDamageEx(victim, i);
-
+	ApplyRawSpellDamageEx(victim, i, DMG_PHYSICAL, who, 10, "Cleric Rite - Spritual Hammer");
 
 endprogram

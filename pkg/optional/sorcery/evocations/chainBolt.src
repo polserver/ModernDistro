@@ -34,16 +34,14 @@ program chainbolt(parms)
 	var source := { caster.x, caster.y, caster.z };
 	var lasthit := caster.serial;
 	var victim;
-
 	while (hops > 0)
 
 		PlayMovingEffectXYZ(source[1], source[2], source[3]+5, cast_on.x, cast_on.y, cast_on.z+5, 0x3818, 0x1, 0, 0, cast_on.realm);
 		PlaySoundEffect(cast_on, 0x020b);
 		damdie := RandomDiceRoll( CStr(hops) + "d8+" + CStr(hops) );
-		SetObjProperty(cast_on, "LastHit", {caster.name, caster.serial, "Chainbolt" });
 		source := { cast_on.x, cast_on.y, cast_on.z };
 		lasthit := cast_on.serial;
-		ApplySpellDamageEX(cast_on, damdie, DMG_ENERGY, caster, info.Circle);
+		ApplySpellDamageEX(cast_on, damdie, DMG_ENERGY, caster, info.Circle, "Chain Bolt");
 		hops := hops - 1;
 		picklen := 0;
 		picklist := { };

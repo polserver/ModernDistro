@@ -49,7 +49,6 @@ program flamewind(parms)
 		if (AP_GetVital(victim, HITS))
 			dmg := "6d5+" + CStr(AP_GetStat(caster, INTELLIGENCE) / 5);
 			dmg := RandomDiceRoll(dmg);
-			SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "Sorcery" });
 			PlayObjectCenteredEffect(victim, 0x36cb, 7, 0x10);
 			PlaySoundEffect(victim, 0x228);
 			if(victim.isA(POLCLASS_NPC))
@@ -58,12 +57,12 @@ program flamewind(parms)
 				if(element == "fire")
 					HealDamage(victim, dmg );
 				elseif ( (element == "earth") || (element == "ice") )
-					ApplySpellDamageEX(victim, dmg*3, DMG_FIRE, caster, info.Circle);
+					ApplySpellDamageEX(victim, dmg*3, DMG_FIRE, caster, info.Circle, "Flame Wind");
 				else
-					ApplySpellDamageEX(victim, dmg*2, DMG_FIRE, caster, info.Circle);
+					ApplySpellDamageEX(victim, dmg*2, DMG_FIRE, caster, info.Circle, "Flame Wind");
 				endif
 			else
-				ApplySpellDamageEX(victim, dmg, DMG_FIRE, caster, info.Circle);
+				ApplySpellDamageEX(victim, dmg, DMG_FIRE, caster, info.Circle, "Flame Wind");
 			endif
 		endif
 	endforeach

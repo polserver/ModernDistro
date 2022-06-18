@@ -21,10 +21,8 @@ program cast_FEEBLEMIND( parms )
     if ( !MS_MobileCheck(caster, cast_on) )
         return 0;
     endif
-	SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "feeblemind" });
  	MS_PlaySpellSFX(info.spell_id, cast_on);
 	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
-	SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "feeblemind" });
 	if (Reflected(cast_on))
 		SendSysMessage (caster, "The spell was reflected back onto you!!!", color := 33);
 		cast_on := caster;
@@ -32,9 +30,23 @@ program cast_FEEBLEMIND( parms )
 	// Int decrease % = (Eval / 10) + 8) - (Resist / 10)
 	var percent := CDbl((AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 10) + 8) - (AP_GetSkill(cast_on, RESISTING_SPELLS) / 10);
 	var points := CInt(AP_GetStat(cast_on, INTELLIGENCE) * (percent / 100));
-	
+
 	// Duration: ((Eval / 5) + 1) * 6
 	var duration := ((AP_GetSkill(caster, EVALUATING_INTELLIGENCE) / 5) + 1) * 6;
 	TS_StartTimer(cast_on, "FeebleMind", duration, points, caster);
+	// Set LastDamage info.
+	var last_damage := struct;
+	last_damage.+serial	:= caster.serial;
+	last_damage.+time	:= POLCore().systime;
+	last_damage.+amount	:= points;
+	last_damage.+type	:= "FeebleMind";
+	if ( caster.acctname )
+		last_damage.+acctname := caster.acctname;
+	endif
+
+	if ( caster.name )
+		last_damage.+name := caster.name;
+	endif
+	SetObjProperty(cast_on, "LastDamage", last_damage);
 
 endprogram
