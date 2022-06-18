@@ -32,21 +32,20 @@ program chill(parms)
     var dmg := CInt( RandomInt(3) + (AP_GetStat(caster, INTELLIGENCE)/19) );
     PlayObjectCenteredEffect(cast_on, 0x375a, 7, 0x10);
     PlaySoundEffect(cast_on, 0x042);
-	var var_damage := dmg;
+    SetObjProperty(cast_on, "LastHit", {caster.name, caster.serial, "Sorcery" });
     if(cast_on.isA(POLCLASS_NPC))
             var element := npccfg[cast_on.npctemplate].elemental;
             if(element == "water")
                     HealDamage(cast_on, dmg);
             elseif(element == "fire")
-					var_damage := dmg * 3;
-                    ApplySpellDamageEX(cast_on, var_damage, DMG_COLD, caster, info.Circle, "Chill");
+                    ApplySpellDamageEX(cast_on, dmg*3, DMG_COLD, caster, info.Circle);
             else
-					var_damage := dmg * 2;
-                    ApplySpellDamageEX(cast_on, var_damage, DMG_COLD, caster, info.Circle, "Chill");
+                    ApplySpellDamageEX(cast_on, dmg*2, DMG_COLD, caster, info.Circle);
             endif
     else
-            ApplySpellDamageEX(cast_on, var_damage, DMG_COLD, caster, info.Circle, "Chill");
+            ApplySpellDamageEX(cast_on, dmg, DMG_COLD, caster, info.Circle);
     endif
+
     return 1;
 
 endprogram

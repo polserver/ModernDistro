@@ -43,7 +43,8 @@ program vortex(parms)
 			if ( (AP_GetVital(victim, HITS)) && (victim.serial != caster.serial) )
 				PlayLightningBoltEffect(victim);
 				PlaySoundEffect(victim, SFX_SPELL_LIGHTNING);
-				ApplySpellDamageEX(victim, RandomDiceRoll("2d4+2"), DMG_ENERGY, caster, info.Circle, "Vortex");
+				SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "Sorcery" });
+				ApplySpellDamageEX(victim, RandomDiceRoll("2d4+2"), DMG_ENERGY, caster, info.Circle);
 			endif
 		endforeach
 
@@ -63,7 +64,8 @@ program vortex(parms)
 			if ( (AP_GetVital(victim, HITS)) && (victim.serial != caster.serial) )
 				PlayMovingEffect(thevortex, victim, 0x379f, 0xf, 0x1e );
 				PlaySoundEffect(victim, 0x020b);
-				ApplySpellDamageEX(victim, RandomDiceRoll("4d6"), DMG_ENERGY, caster, info.circle, "Vortex");
+				SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "Sorcery" });
+				ApplySpellDamageEX(victim, RandomDiceRoll("4d6"), DMG_ENERGY, caster, info.circle);
 			endif
 		endforeach
 

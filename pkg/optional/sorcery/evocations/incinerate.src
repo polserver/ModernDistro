@@ -36,6 +36,7 @@ program incinerate(parms)
 
 	dmg := "40d8+" + CStr(AP_GetStat(caster, INTELLIGENCE) / 2);
 	dmg := RandomDiceRoll(dmg);
+	SetObjProperty(cast_on, "LastHit", {caster.name, caster.serial, "Sorcery" });
 	if (cast_on.isA(POLCLASS_NPC))
 		Send_attack(cast_on, caster);
 		var element := npccfg1[cast_on.npctemplate].elemental;
@@ -43,12 +44,12 @@ program incinerate(parms)
 			HealDamage(cast_on, CInt(dmg/2) );
 		elseif ( (element == "earth") || (element == "ice") )
 			ApplyDamage(cast_on, Resisted(CIRCLE, caster, cast_on, (dmg*2) ) );
-			ApplySpellDamageEX(cast_on, dmg*3, DMG_FIRE, caster, info.Circle, "Incinerate");
+			ApplySpellDamageEX(cast_on, dmg*3, DMG_FIRE, caster, info.Circle);
 		else
-			ApplySpellDamageEX(cast_on, dmg*2, DMG_FIRE, caster, info.Circle, "Incinerate");
+			ApplySpellDamageEX(cast_on, dmg*2, DMG_FIRE, caster, info.Circle);
 		endif
 	else
-		ApplySpellDamageEX(cast_on, dmg, DMG_FIRE, caster, info.Circle, "Incinerate");
+		ApplySpellDamageEX(cast_on, dmg, DMG_FIRE, caster, info.Circle);
 	endif
 
 endprogram

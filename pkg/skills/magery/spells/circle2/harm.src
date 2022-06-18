@@ -21,6 +21,7 @@ program cast_harm( parms )
     if ( !MS_MobileCheck(caster, cast_on) )
         return 0;
     endif
+  SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "harm" });
   PlaySoundEffect(cast_on, SFX_SPELL_HARM);
   PlayObjectCenteredEffect( cast_on, FX_GLOW_SPIKE, 0x0a,0x1e);
 
@@ -41,7 +42,7 @@ program cast_harm( parms )
 		default: damage := CDbl(damage) / 4;
 	endcase
 
-	ApplySpellDamageEX(cast_on, damage, info.damage_type, caster, info.circle, "Harm");
+	ApplySpellDamageEX(cast_on, damage, info.damage_type, caster);
 
 	return 1;
 endprogram

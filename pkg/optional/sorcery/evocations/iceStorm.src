@@ -68,18 +68,19 @@ function RainDamage(targ, byref caster, info)
 			dmg := RandomDiceRoll(dmg);
 			PlayObjectCenteredEffect(targ, 0x375a, 7, 0x10);
 			PlaySoundEffect(targ, 0x042);
+			SetObjProperty(targ, "LastHit", {caster.name, caster.serial, "Sorcery" });
 			if(targ.isA(POLCLASS_NPC))
 				Send_attack(targ, caster);
 				var element := npccfg[targ.npctemplate].elemental;
 				if(element == "ice")
 					HealDamage(targ, CInt(dmg/2) );
 				elseif ( (element == "fire") || (element == "water") )
-					ApplySpellDamageEX(targ, dmg*3, DMG_COLD, caster, info.Circle, "Ice Storm");
+					ApplySpellDamageEX(targ, dmg*3, DMG_COLD, caster, info.Circle);
 				else
-					ApplySpellDamageEX(targ, dmg*2, DMG_COLD, caster, info.Circle, "Ice Storm");
+					ApplySpellDamageEX(targ, dmg*2, DMG_COLD, caster, info.Circle);
 				endif
 			else
-				ApplySpellDamageEX(targ, dmg, DMG_COLD, caster, info.Circle, "Ice Storm");
+				ApplySpellDamageEX(targ, dmg, DMG_COLD, caster, info.Circle);
 			endif
 		endif
 	endforeach

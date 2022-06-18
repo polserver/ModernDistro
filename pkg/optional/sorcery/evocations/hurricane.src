@@ -38,14 +38,16 @@ program hurricane(parms)
 				if(element == "energy")
 					HealDamage(cast_on, (RandomDiceRoll("1d6") ) );
 				else
+					SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "Sorcery" });
 					send_attack(victim, caster);
 					if (CheckLosAt(victim, cast_on.x, cast_on.y, cast_on.z) )
 						start_script(":sorcery:effects/pushback", victim);
 						if (RandomInt(2) == 1)
 							PlayLightningBoltEffect(victim);
 							PlaySoundEffect(victim, SFX_SPELL_LIGHTNING);
+							SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "Sorcery" });
 							dmg := RandomDiceRoll("6d8+6");
-							ApplySpellDamageEX(victim, dmg, DMG_ENERGY, caster, info.Circle, "Hurricane");
+							ApplySpellDamageEX(victim, dmg, DMG_ENERGY, caster, info.Circle);
 						endif
 					endif
 				endif

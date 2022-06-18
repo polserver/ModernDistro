@@ -21,6 +21,18 @@ program HookHitScript(hookParam)
 
 	Sleep(CInt(Distance(attacker, defender) / 5));
 
+	// Added this to the CalcDamage function in damage.inc
+	/*
+	if (defender.isA(POLCLASS_NPC))
+		basedamage := CInt(basedamage * 1.3);
+		rawdamage := rawdamage * 1.3;
+		rawdamage := CInt(rawdamage * ( AdjustDamageFactor(weapon, defender, attacker) ) );
+		if (rawdamage == 0)
+			return 0;
+		endif
+	endif
+	*/
+
 	var rd := rawdamage;
 	SetObjProperty(weapon, "TempDamage", rawdamage);
 
@@ -37,6 +49,8 @@ program HookHitScript(hookParam)
 	else
 		rawdamage := x;
 	endif
+
+	SetObjProperty(defender, "LastHit", {attacker.name, attacker.serial, weapon });
 
 	var armorhit;
 	if ( (armor == 0) || (!armor) )
@@ -75,7 +89,7 @@ program HookHitScript(hookParam)
 		endforeach
 		EraseObjProperty(defender, "TempDamage");
 		if (rawdamage > 0)
-			ApplyDamageEx( defender,rawdamage, DMG_PHYSICAL, attacker );
+		  DealDamage(defender, attacker, rawdamage);
 		  return;
 		else
 		  return;
@@ -84,7 +98,7 @@ program HookHitScript(hookParam)
 
 	if (!weaponhit)
 		if (!gloveshit)
-			ApplyDamageEx( defender,rawdamage, DMG_PHYSICAL, attacker );
+			DealDamage(defender, attacker, rawdamage);
 			return;
 		else
 			foreach x in gloveshit
@@ -96,7 +110,7 @@ program HookHitScript(hookParam)
 			if (rawdamage < 1)
         		rawdamage := 1;
 			endif
-			ApplyDamageEx( defender,rawdamage, DMG_PHYSICAL, attacker );
+			DealDamage(defender, attacker, rawdamage);
 			return;
 		endif
 	else
@@ -113,7 +127,7 @@ program HookHitScript(hookParam)
             rawdamage := 1;
 		endif
 	    if (!gloveshit)
-			ApplyDamageEx( defender,rawdamage, DMG_PHYSICAL, attacker );
+			DealDamage(defender, attacker, rawdamage);
 			return;
 		else
 			foreach x in gloveshit
@@ -126,21 +140,7 @@ program HookHitScript(hookParam)
 				rawdamage := 1;
 			endif
 		endif
-			ApplyDamageEx( defender,rawdamage, DMG_PHYSICAL, attacker );
-			// Set LastDamage info.
-			var last_damage := struct;
-			last_damage.+serial	:= attacker.serial;
-			last_damage.+time	:= POLCore().systime;
-			last_damage.+amount	:= rawdamage;
-			last_damage.+type	:= "Archery";
-			if ( attacker.acctname )
-				last_damage.+acctname := attacker.acctname;
-			endif
-
-			if ( attacker.name )
-				last_damage.+name := attacker.name;
-			endif
-			SetObjProperty(defender, "LastDamage", last_damage);
+		DealDamage(defender, attacker, rawdamage);
 		return;
 	endif
 endprogram

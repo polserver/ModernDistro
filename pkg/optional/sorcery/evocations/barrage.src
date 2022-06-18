@@ -26,7 +26,7 @@ program barrage(parms)
 	var i := CInt( RandomDiceRoll("4d6") + (AP_GetStat(caster, INTELLIGENCE) / 10) );
 	var newtarg, victims;
 	var x, y;
-	var dmg;
+
 	Detach();
 	while (i > 0)
 		x := cast_on.x + RandomInt(5) - RandomInt(5);
@@ -40,22 +40,8 @@ program barrage(parms)
 		foreach victim in victims
 			if(AP_GetVital(victim, HITS))
 				send_attack(victim, caster);
-				dmg := RandomDiceRoll( "4d4+4" );
-				ApplySpellDamageEX(victim, dmg, DMG_FIRE, caster, info.Circle, "Barrage");
-				// Set LastDamage info.
-				var last_damage := struct;
-				last_damage.+serial	:= caster.serial;
-				last_damage.+time	:= POLCore().systime;
-				last_damage.+amount	:= dmg;
-				last_damage.+type	:= DMG_FIRE;
-				if ( caster.acctname )
-					last_damage.+acctname := caster.acctname;
-				endif
-
-				if ( caster.name )
-					last_damage.+name := caster.name;
-				endif
-				SetObjProperty(victim, "LastDamage", last_damage);
+				SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "Barrage" });
+				ApplySpellDamageEX(victim, RandomDiceRoll("4d4+4"), DMG_FIRE, caster, info.Circle);
 				PlaySoundEffect( victim, SFX_SPELL_EXPLOSION );
 				PlayStationaryEffect( victim.x,victim.y,victim.z, FX_EXPLODE_3, 7, 0x10, 0, victim.realm );
 			endif

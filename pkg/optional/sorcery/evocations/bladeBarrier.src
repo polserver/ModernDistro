@@ -59,21 +59,8 @@ program bladebarrier(parms)
 					send_attack(victim, caster);
 					dmg := dmg * 2;
 				endif
-				ApplySpellDamageEX(victim, dmg, DMG_PHYSICAL, caster, 10, "Blade Barrier");
-				// Set LastDamage info.
-				var last_damage := struct;
-				last_damage.+serial	:= caster.serial;
-				last_damage.+time	:= POLCore().systime;
-				last_damage.+amount	:= dmg;
-				last_damage.+type	:= DMG_PHYSICAL;
-				if ( caster.acctname )
-					last_damage.+acctname := caster.acctname;
-				endif
-
-				if ( caster.name )
-					last_damage.+name := caster.name;
-				endif
-				SetObjProperty(victim, "LastDamage", last_damage);
+				SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "Bladebarrier" });
+				ApplyDamageEX(victim, dmg, DMG_PHYSICAL, caster);
 			endforeach
 		endforeach
 		sleepms(200);

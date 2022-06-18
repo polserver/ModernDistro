@@ -39,7 +39,7 @@ program pain_spike( params )
 	PlayObjectCenteredEffectEx( cast_on, 0x37C4, 1, 8, 9916, 39, 0, 3 );
 	SleepMS(60);
 	PlayObjectCenteredEffectEx( cast_on, 0x37C4, 1, 8, 9916, 39, 0, 4 );
-	ApplySpellDamageEX(cast_on, dmg, DMG_PHYSICAL, caster, circle, "Pain Spike");
+	ApplySpellDamageEX(cast_on, dmg, DMG_PHYSICAL, caster, circle);
 	Detach();
 	sleep(3);
 

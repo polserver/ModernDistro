@@ -44,12 +44,12 @@ program flametouch(parms)
 		if(element == "fire")
 			HealDamage(cast_on, dmg);
 		elseif(element == "water")
-			ApplySpellDamageEX(cast_on, dmg*3, DMG_FIRE, caster, info.Circle, "Flame Touch");
+			ApplySpellDamageEX(cast_on, dmg*3, DMG_FIRE, caster, info.Circle);
 		else
-			ApplySpellDamageEX(cast_on, dmg*2, DMG_FIRE, caster, info.Circle, "Flame Touch");
+			ApplySpellDamageEX(cast_on, dmg*2, DMG_FIRE, caster, info.Circle);
 		endif
     else
-		ApplySpellDamageEX(cast_on, dmg, DMG_FIRE, caster, info.Circle, "Flame Touch");
+		ApplySpellDamageEX(cast_on, dmg, DMG_FIRE, caster, info.Circle);
     endif
 
     return 1;

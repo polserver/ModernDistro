@@ -37,7 +37,7 @@ program cast_meteor( parms )
 	foreach vtarg in targs
 		damage := MS_GetSpellDamage(caster, vtarg, base_damage) / targs.Size();
 		MS_PlaySpellGFX(info.spell_id, vtarg, caster);
-		ApplySpellDamageEX(vtarg, damage, info.damage_type, caster, info.circle, "Meteor Storm");
+		ApplySpellDamageEX(vtarg, damage, info.damage_type, caster);
 	endforeach
 
 	return 1;

@@ -49,6 +49,7 @@ program coneofcold(parms)
 			dmg := RandomDiceRoll(dmg);
 			PlayObjectCenteredEffect(victim, 0x375a, 7, 0x10);
 			PlaySoundEffect(victim, 0x042);
+			SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "Sorcery" });
 			if(victim.isA(POLCLASS_NPC))
 				Send_attack(victim, caster);
 				var element := npccfg[victim.npctemplate].elemental;
@@ -57,12 +58,12 @@ program coneofcold(parms)
 				elseif(element == "cold")
 					HealDamage(victim, dmg );
 				elseif(element == "fire")
-					ApplySpellDamageEX(victim, dmg*3, DMG_COLD, caster, info.Circle, "Cone of Cold");
+					ApplySpellDamageEX(victim, dmg*3, DMG_COLD, caster, info.Circle);
 				else
-					ApplySpellDamageEX(victim, dmg*2, DMG_COLD, caster, info.Circle, "Cone of Cold");
+					ApplySpellDamageEX(victim, dmg*2, DMG_COLD, caster, info.Circle);
 				endif
 			else
-				ApplySpellDamageEX(victim, dmg, DMG_COLD, caster, info.Circle, "Cone of Cold");
+				ApplySpellDamageEX(victim, dmg, DMG_COLD, caster, info.Circle);
 			endif
 		endif
 	endforeach

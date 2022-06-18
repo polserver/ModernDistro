@@ -32,6 +32,7 @@ program mass_dispel ( parms )
   PlaySoundEffect( caster, 0x202 );
   //var ei := GetAttribute(caster, EVALUATING_INTELLIGENCE)/10;
   foreach mobile in targets
+	SetObjProperty(mobile, "LastHit", {caster.name, caster.serial, "mass dispel"});
     if(Reflected(mobile))
 	  mobile := caster;
     endif
@@ -65,7 +66,7 @@ program mass_dispel ( parms )
 	      PlaySoundEffect( caster, 0x202 );
           PlayObjectCenteredEffect(mobile, 0x37b9,0x03, 0x0a);
           var dmg := CalcSpellDamage(info.circle,caster,mobile) + (RandomInt(20));
-          ApplySpellDamageEX(mobile, dmg, DMG_FORCED, caster, info.circle, "Mass Dispel");
+          ApplySpellDamageEX(mobile, dmg, DMG_FORCED,caster,info.circle);
         endif
       endif
     endif
