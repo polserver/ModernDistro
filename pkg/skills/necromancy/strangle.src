@@ -69,11 +69,8 @@ program strangle( params )
 		PlayObjectCenteredEffectEx( cast_on, 0x374A, 1, 17, 9502, 4, 255, 1108 );
 		dmg2 := cint (dmg * (5 - (Getvital(cast_on, "Stamina") / Getvitalmaximumvalue(cast_on, "Stamina")) * 2));
 
-		if(GetObjProperty(cast_on, "LastHit")[2] != caster.serial)
-			SetObjProperty(cast_on, "LastHit", {caster.name, caster.serial, "strangle" });
-		endif
 
-		ApplyRawDamageEX(cast_on, Resisted(CInt(info.circle), caster, cast_on, dmg2), DMG_PHYSICAL, caster);
+		ApplyRawSpellDamageEX(cast_on, Resisted(CInt(info.circle), caster, cast_on, dmg2), DMG_PHYSICAL, caster, 10, "Strangle");
 		sleep(waittime);
 
 		if(cast_on.dead)

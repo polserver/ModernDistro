@@ -21,7 +21,6 @@ program cast_mind_blast( parms )
         return 0;
     endif
 
-	SetObjProperty(cast_on, "LastHit", {caster.name,caster.serial, "mind blast" });
 	MS_PlaySpellSFX(info.spell_id, cast_on);
 	MS_PlaySpellGFX(info.spell_id, cast_on, caster);
 
@@ -32,7 +31,7 @@ program cast_mind_blast( parms )
 
 	// damage: Base Damage + ((Magery + Intelligence) / 5) (Drop decimals from result)
 	var damage := base_damage + CInt((AP_GetSkill(caster, MAGERY) + AP_GetStat(caster, INTELLIGENCE)) / 5);
-	ApplySpellDamageEX(cast_on, damage, info.damage_type, caster);
+	ApplySpellDamageEX(cast_on, damage, info.damage_type, caster, info.circle, "Mind Blast");
 
 	return 1;
 endprogram

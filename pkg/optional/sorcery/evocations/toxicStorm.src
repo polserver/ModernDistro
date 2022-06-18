@@ -268,38 +268,21 @@ program toxicstorm(parms)
 					if (victim.npctemplate)
 						send_attack(victim, caster);
 					endif
-					SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "Sorcery" });
 					var timer_info := TS_GetTimerInfo(victim, timer_name);
 					if(timer_info.level > 1)
-						ApplySpellDamageEX(victim, 2, DMG_POISON, victim, 6);
+						ApplySpellDamageEX(victim, 2, DMG_POISON, victim, 6, "Toxic Storm");
 					else
 						if(!TS_GetTimerNames(victim, "DefaultPoison"))
 							var amt := Resisted(3, caster, victim, (RandomInt(15)+1));
 							SetObjProperty(victim,"poison_level", amt);
 							// Params are {victim, attacker, poison_level, 1 for toxic cloud}
 							var passparams := { victim, caster, 1, 1};
-							SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "Sorcery" });
 							// SetObjProperty(victim,"#poisonisrunning", 1);
 							start_script( ":spells:poisondamage", passparams);
 						endif
 					endif
 				endif
 			endforeach
-			// victims := ListMobilesNearLocation(thevortex.x, thevortex.y, thevortex.z, 1, thevortex.realm);
-			// foreach victim in victims
-				// if (AP_GetVital(victim, HITS) > 0)
-					// if(GetObjProperty(victim,"#poisonisrunning"))
-						// SetObjProperty(victim, "LastHit", {caster.name, caster.serial, "Sorcery" });
-						// ApplySpellDamageEX(victim, 4, DMG_POISON, victim, 6);
-					// else
-						// var amt := Resisted(3, caster, victim, (RandomInt(20)+1));
-						// SetObjProperty(victim,"poison_level", amt);
-						// var passparams := { victim, 0, "poison cloud"};
-						// SetObjProperty(victim,"#poisonisrunning", 1);
-						// start_script( ":spells:poisondamage", passparams);
-					// endif
-				// endif
-			// endforeach
 			newx := thevortex.x + RandomInt(2) - RandomInt(2);
 			newy := thevortex.y + RandomInt(2) - RandomInt(2);
 			newz := GetWorldHeight(newx, newy, thevortex.realm);

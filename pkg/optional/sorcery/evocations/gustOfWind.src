@@ -41,7 +41,6 @@ program gustofwind(parms)
 	var movex, movey;
 	PrintTextAbove(cast_on, CStr(cast_on.name) + " is tossed about by the wind!");
 	send_attack(cast_on, caster);
-	SetObjProperty(cast_on, "LastHit", {caster.name, caster.serial, "Sorcery" });
 	while (movedist > 0)
 		cast_on.setParalyzed(1);
 		if (caster.x > cast_on.x)
@@ -66,19 +65,19 @@ program gustofwind(parms)
 				HealDamage(cast_on, (RandomDiceRoll("1d6") ) );
 			else
 				if(element == "water")
-					ApplySpellDamageEX(cast_on, RandomDiceRoll("2d8"), DMG_PHYSICAL, caster, info.Circle);
+					ApplySpellDamageEX(cast_on, RandomDiceRoll("2d8"), DMG_PHYSICAL, caster, info.Circle, "Gust of Wind");
 				endif
 				if (CheckLosAt(cast_on, movex, movey, (GetWorldHeight(movex, movey, cast_on.realm) ) ) )
 					MoveObjectToLocation(cast_on, movex, movey, (GetWorldHeight(movex, movey, cast_on.realm) ), cast_on.realm );
 				else
-					ApplySpellDamageEX(cast_on, RandomDiceRoll("2d3"), DMG_PHYSICAL, caster, info.Circle);
+					ApplySpellDamageEX(cast_on, RandomDiceRoll("2d3"), DMG_PHYSICAL, caster, info.Circle, "Gust of Wind");
 				endif
 			endif
 		else
 			if (CheckLosAt(cast_on, movex, movey, (GetWorldHeight(movex, movey) ) ) )
 					MoveObjectToLocation(cast_on, movex, movey, (GetWorldHeight(movex, movey, cast_on.realm) ), cast_on.realm );
 			else
-					ApplySpellDamageEX(cast_on, RandomDiceRoll("2d3"), DMG_PHYSICAL, caster, info.Circle);
+					ApplySpellDamageEX(cast_on, RandomDiceRoll("2d3"), DMG_PHYSICAL, caster, info.Circle, "Gust of Wind");
 			endif
 		endif
 

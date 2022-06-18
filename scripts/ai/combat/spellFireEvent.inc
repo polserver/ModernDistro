@@ -44,7 +44,7 @@ function spellattack(opponent)
       var base := Cint(((FLAME_STRENGTH * AP_GetVital(me, VITALID_LIFE)) / AP_GetVitalMaximumValue(me, VITALID_LIFE)) / 2);
       var dmg :=  RandomInt(base) + base;
       PlayMovingEffect(me, opponent, 0x36d4, 10, 1, 1);
-      ApplyRawSpellDamageEX(opponent, dmg, DMG_FIRE, me);
+      ApplyRawSpellDamageEX(opponent, dmg, DMG_FIRE, me, 7, "Flame Strike");
     else
 	  cast_offensive_spell(me,opponent);
     endif
