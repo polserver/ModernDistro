@@ -21,9 +21,10 @@ program npcdeath(corpse)
     DestroyItem(stocklist);
   endif
 
-  var killer := GetObjProperty(corpse, "LastHit");
+  var last_damage := GetObjProperty(corpse, "LastDamage");
+  var killer := last_damage.serial;
       if (killer != error)
-        i := SystemFindObjectBySerial(killer[2]);
+        i := SystemFindObjectBySerial(killer);
 		AdjustNoto(i, corpse);
         if (GetObjProperty(i, "CursedLoot") )
             SetObjProperty(corpse, "guardkill", 1);
@@ -32,7 +33,7 @@ program npcdeath(corpse)
         endif
     endif
   if((killer != error) && (!GetObjProperty(corpse, "guardkill")))
-    AdjustNoto((SystemFindObjectBySerial(killer[2])), corpse);
+    AdjustNoto((SystemFindObjectBySerial(killer)), corpse);
   endif
   var char;
   var mounted_char;

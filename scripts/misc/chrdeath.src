@@ -21,9 +21,9 @@ program chrdeath(corpse, ghost)
 	while(TS_GetTimerNames(ghost, "P").size() > 0)
 		TS_CurePoison(ghost, 100000, "P", 5);
 	endwhile
-	var killer := GetObjProperty(ghost, "LastHit");
-	if(killer != error)
-		AdjustNoto((SystemFindObjectBySerial(killer[2], SYSFIND_SEARCH_OFFLINE_MOBILES)), ghost);
+	var last_damage := GetObjProperty(ghost, "LastDamage");
+	if(last_damage != error)
+		AdjustNoto((SystemFindObjectBySerial(last_damage.serial, SYSFIND_SEARCH_OFFLINE_MOBILES)), ghost);
 	endif
 	var fame := CInt(GetObjProperty(ghost, "Fame"));
 	fame := (fame - CInt(fame / 20));
