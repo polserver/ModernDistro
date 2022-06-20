@@ -33,14 +33,6 @@ program spiritspeak(who)
     SendSysMessage(who, "You contact the netherworld.", color := 66);
 	VS_AdjustVirtue(who, "spirituality", 1, 50);
 	TS_StartTimer(who, "SpiritSpeak", 60);
-// Remove commented lines after testing.
-/*    Detach();
-    GrantPrivilege(who, "hearghosts");
-    who.enable("hearghosts");
-    PerformAction(who, 17);
-    PlaySoundEffect(who, SFX_SKILL_SPIRIT_SPEAK);
-    sleep(30);
-    RevokePrivilege(who, "hearghosts"); */
   else
     SendSysMessage(who, "You fail to communicate with the netherworld.", color := 33);
   endif

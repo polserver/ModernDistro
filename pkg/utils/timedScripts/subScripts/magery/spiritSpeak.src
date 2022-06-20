@@ -5,14 +5,41 @@
 
 use uo;
 use os;
+use util;
+use cliloc;
+use vitals;
 
 include ":attributes:attributes";
 
 program TimedScript_SpiritSpeak(params)
-	var mobile := params[1];
+	var mobile := params[1],
+	corpses_nearby;
 
 	mobile.Enable("hearghosts");
 
+	// Healing from a corpse nearby
+	corpses_nearby := ListItemsNearLocationOfType( mobile.x, mobile.y, mobile.z, 3, 0x2006, mobile.realm );
+	foreach corpse in corpses_nearby
+		if( !corpse.Channeled() )
+			SendSysMessageCL( mobile, 1061287, color := 66 ); // You channel energy from a nearby corpse to heal your wounds.
+			HealDamage( mobile, CalculateHealing( mobile, corpse ) );
+		endif
+	endforeach
 	return 1;
 endprogram
 
+function CalculateHealing( byref player, byref the_dead )
+
+	var cfame, min_heal, max_heal, heal_amount;
+	cfame := GetObjProperty( the_dead, "Fame" );
+	min_heal := CInt(cfame / 500 ) + 1;
+	max_heal := CInt( AP_GetSkill( player, NECROMANCY ) * 10 / 100 );
+	if( min_heal > max_heal )
+		heal_amount := max_heal;
+	else
+		heal_amount := RandomIntMinMax( min_heal, max_heal );
+	endif
+	the_dead.SetChanneled( player );
+	return heal_amount;
+
+endfunction

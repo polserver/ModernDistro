@@ -88,7 +88,7 @@ exported function Gibbify( corpse, range )
 		if( item.container == corpse )
 			MoveObjectToLocation( item, corpse.x, corpse.y, corpse.z, corpse.realm, MOVEOBJECT_FORCELOCATION );
 		endif
-                SleepMS(5);
+		SleepMS(10);
 	endforeach
 
 	foreach objtype in ( piece_list )
@@ -115,10 +115,21 @@ exported function Gibbify( corpse, range )
 		dowhile( CheckLosAt( corpse, newx, newy, corpse.z ));
 
 		MoveObjectToLocation( item, newx, newy, corpse.z, corpse.realm, MOVEOBJECT_FORCELOCATION );
-                SleepMS(5);
+		SleepMS(10);
 	endforeach
 
 	DestroyItem( corpse );
 
 	return 1;
+endfunction
+
+exported function IsChanneled( corpse )
+
+	return GetObjProperty( corpse, "Channeled" );
+endfunction
+
+exported function SetChanneled( corpse, mobile )
+
+	corpse.color := 0x835;
+	SetObjProperty( corpse, "Channeled", mobile.serial );
 endfunction
