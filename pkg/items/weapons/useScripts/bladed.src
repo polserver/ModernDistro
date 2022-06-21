@@ -46,13 +46,15 @@ program use_blade(who, blade)
       return;
     endif
   endif
+  Print(use_on.item.objtype);
   var checkme := use_on.item.objtype;
   if (use_on.mobile.graphic == CID_SHEERED_SHEEP)
           SendSysMessage(who, "You cannot get any more wool from that sheep", color := 33);
           return 0;
   elseif (use_on.mobile.graphic == CID_SHEEP)
           process_wool(who, blade, use_on.mobile, craftingbag);
-  elseif(use_on.item.objtype == UOBJ_CORPSE)
+  // elseif(use_on.item.objtype == UOBJ_CORPSE)
+  elseif(use_on.item.IsA( POLCLASS_CORPSE ))
     ReleaseItem(blade);
     Carve_Corpse(who, use_on.item, blade, craftingbag);
   elseif(is_fish(checkme))
@@ -142,6 +144,13 @@ function CreatableObjects( who, blade, logs )
 endfunction
 
 function Carve_Corpse(who, cadaver, blade, craftingbag)
+
+	// If we are cutting up a human then dismember it.
+	if( cadaver.corpsetype in {0x190, 0x191, 0x25D, 0x25E}  )
+		cadaver.Gibbify( 2 );
+		DestroyItem( cadaver );
+		return;
+	endif
   var thingobjtype := 0;
   var hidetype;
   var createdthing;
@@ -162,47 +171,12 @@ function Carve_Corpse(who, cadaver, blade, craftingbag)
       MoveObjectToLocation(thing, cadaver.x, cadaver.y, cadaver.z, cadaver.realm, MOVEOBJECT_FORCELOCATION);
     endforeach
     DestroyItem(cadaver);
-  elseif((c_type == 400) || (c_type == 401))
-    var beardlist := {0x203e, 0x203f, 0x2040, 0x2041, 0x204b, 0x204c, 0x204d };
-    var hairlist  := {0x2044, 0x2045, 0x2046, 0x2047, 0x2048, 0x2049, 0x204a, 0x203b, 0x203c, 0x203d };
-    foreach thing in EnumerateItemsInContainer(cadaver)
-      if((thing.objtype in hairlist) || (thing.objtype in beardlist))
-        DestroyItem(thing);
-      else
-        MoveObjectToLocation(thing, cadaver.x, cadaver.y, cadaver.z, cadaver.realm, MOVEOBJECT_FORCELOCATION);
-      endif
-    endforeach
-    var partsarray := {};
-    var part;
-    part := CreateItemAtLocation(cadaver.x-1, cadaver.y, cadaver.z, 0x1da0, 1, who.realm);
-    partsarray.append(part);
-    SetObjProperty(part, "serial", GetObjProperty(cadaver, "serial"));
-    var aname := cadaver.name;
-    aname["A corpse of"] := "";
-    part.name := "The head of " + aname;
-    part := CreateItemAtLocation(cadaver.x-1, cadaver.y, cadaver.z, 0x1da1, 1, who.realm);
-    partsarray.append(part);
-    part := CreateItemAtLocation(cadaver.x-1, cadaver.y+1, cadaver.z, 0x1da2, 1, who.realm);
-    partsarray.append(part);
-    part := CreateItemAtLocation(cadaver.x+1, cadaver.y, cadaver.z, 0x1da3, 1, who.realm);
-    partsarray.append(part);
-    part := CreateItemAtLocation(cadaver.x+1, cadaver.y+1, cadaver.z, 0x1da4, 1, who.realm);
-    partsarray.append(part);
-    part := CreateItemAtLocation(cadaver.x, cadaver.y, cadaver.z, 0x1d9f, 1, who.realm);
-    partsarray.append(part);
     var blood := CreateItemAtLocation(cadaver.x, cadaver.y, cadaver.z, 0x122a, 1, who.realm);
     blood.movable := 0;
-    DestroyItem(cadaver);
-    sleep(40);
-    foreach thing in partsarray
-      if(!thing.container)
-        DestroyItem(thing);
-      endif
-    endforeach
-    sleep(20);
+    sleep(120);
     DestroyItem(blood);
   else
-    if(c_type == 223)
+    if(c_type == 223) // Shorn sheep but we don't have one defined in the npcdesc.cfg file.
       CreateItemInContainer(cadaver, 0x9f1, 2);
       SendSysMessage(who, "You place the items on the corpse.");
       var theblood := CreateItemAtLocation(cadaver.x, cadaver.y, cadaver.z, UOBJ_BLOOD, 1, who.realm);
