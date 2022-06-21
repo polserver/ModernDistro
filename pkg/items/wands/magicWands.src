@@ -87,20 +87,7 @@ function cast_clumsy(caster, cast_on)
   var mod_amount := MWresisted(10, cast_on, (CalculateModAmount(magery)));
   var duration := CalculateModDuration(magery);
   TS_StartTimer(cast_on, "Clumsy", duration, mod_amount, caster);
-	// Set LastDamage info.
-	var last_damage := struct;
-	last_damage.+serial	:= caster.serial;
-	last_damage.+time	:= POLCore().systime;
-	last_damage.+amount	:= mod_amount;
-	last_damage.+type	:= "Clumsy";
-	if ( caster.acctname )
-		last_damage.+acctname := caster.acctname;
-	endif
-
-	if ( caster.name )
-		last_damage.+name := caster.name;
-	endif
-	SetObjProperty(cast_on, "LastDamage", last_damage);
+	SetLastDamageInfo(cast_on, mod_amount, DMG_COLD, caster, 1, "Clumsy");
 endfunction
 
 function cast_feeblemind(caster, cast_on)
@@ -113,20 +100,7 @@ function cast_feeblemind(caster, cast_on)
   var mod_amount := MWresisted(20, cast_on, (CalculateModAmount(magery)));
   var duration := CalculateModDuration(magery);
   TS_StartTimer(cast_on, "FeebleMind", duration, mod_amount, caster);
-	// Set LastDamage info.
-	var last_damage := struct;
-	last_damage.+serial	:= caster.serial;
-	last_damage.+time	:= POLCore().systime;
-	last_damage.+amount	:= mod_amount;
-	last_damage.+type	:= "FeebleMind";
-	if ( caster.acctname )
-		last_damage.+acctname := caster.acctname;
-	endif
-
-	if ( caster.name )
-		last_damage.+name := caster.name;
-	endif
-	SetObjProperty(cast_on, "LastDamage", last_damage);
+	SetLastDamageInfo(cast_on, mod_amount, DMG_COLD, caster, 1, "Feeble Mind");
 endfunction
 
 function cast_heal(caster, cast_on)
@@ -151,20 +125,7 @@ function cast_weaken(caster, cast_on)
   var mod_amount := MWresisted(20, cast_on, (CalculateModAmount(magery)));
   var duration := CalculateModDuration(magery);
   TS_StartTimer(cast_on, "Weaken", duration, mod_amount, caster);
-	// Set LastDamage info.
-	var last_damage := struct;
-	last_damage.+serial	:= caster.serial;
-	last_damage.+time	:= POLCore().systime;
-	last_damage.+amount	:= mod_amount;
-	last_damage.+type	:= "FeebleMind";
-	if ( caster.acctname )
-		last_damage.+acctname := caster.acctname;
-	endif
-
-	if ( caster.name )
-		last_damage.+name := caster.name;
-	endif
-	SetObjProperty(cast_on, "LastDamage", last_damage);
+	SetLastDamageInfo(cast_on, mod_amount, DMG_COLD, caster, 1, "Weaken");
 endfunction
 
 function cast_harm(caster, cast_on)
@@ -178,7 +139,7 @@ function cast_harm(caster, cast_on)
     if(cast_on.npctemplate)
       dmg := dmg * 2;
     endif
-    ApplyRawSpellDamageEX(cast_on, dmg, DMG_COLD, caster, 20, "Harm");
+    ApplyRawSpellDamageEX(cast_on, dmg, DMG_COLD, caster, 2, "Harm");
   endif
 endfunction
 
@@ -245,20 +206,7 @@ function cast_manadrain(caster, cast_on)
     endif
     AP_SetVital(cast_on, VITALID_MANA, (AP_GetVital(cast_on, VITALID_MANA) - diff));
   endif
-	// Set LastDamage info.
-	var last_damage := struct;
-	last_damage.+serial	:= caster.serial;
-	last_damage.+time	:= POLCore().systime;
-	last_damage.+amount	:= diff;
-	last_damage.+type	:= "ManaDrain";
-	if ( caster.acctname )
-		last_damage.+acctname := caster.acctname;
-	endif
-
-	if ( caster.name )
-		last_damage.+name := caster.name;
-	endif
-	SetObjProperty(cast_on, "LastDamage", last_damage);
+	SetLastDamageInfo(cast_on, diff, DMG_COLD, caster, 4, "Mana Drain");
 endfunction
 
 function CalculateModDuration(magery)
