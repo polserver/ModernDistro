@@ -91,7 +91,7 @@ function MaterialSelection(who, craft_skill, type)
 	endif
 
 	if( !canUseMaterial(who, materialobjtype, craft_skill) )
-		SendSysMessageCL( (who, 500298, color := 33 ); // You are not skilled enough to make anything out of that.
+		SendSysMessageCL( who, 500298, color := 33 ); // You are not skilled enough to make anything out of that.
 		return 0;
 	endif
 
