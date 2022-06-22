@@ -25,6 +25,7 @@
 //				skills for example, to ensure near a loom for Tailoring for certain items, etc.
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+use cliloc;
 use polsys;
 use datafile;
 
@@ -66,13 +67,19 @@ function MaterialSelection(who, craft_skill, type)
 	SendSysMessage(who, "Select the "+Lower(type)+" you would like to work with.", color := 88);
 	var material := Target(who);
 	if( !material )
-    SendSysMessage(who, "Cancelled.", 3, 33);
+    SendSysMessageCL( who, 1042023, color := 33 ); // Cancelled.
 		return 0;
 	elseif( !(material in EnumerateItemsInContainer(who.backpack)) )
-		SendSysMessage(who, "That is not in your backpack.", color := 33);
+		SendSysMessageCL(who, 1042593, color := 33); // That is not in your backpack.
 		return 0;
-	elseif( !Accessible(who, material) || (!material.movable) )
-		SendSysMessage(who, "You cannot use that.", color := 33);
+	elseif( !Accessible(who, material) )
+		SendSysMessageCL( who, 500294, color := 33 ); // You cannot use that.
+		return 0;
+	elseif( !material.movable )
+		SendSysMessageCL( who, 1010515, color :=33 ); // You cannot use that while it is locked down.
+		return 0;
+	elseif( !ReserveItem(material) )
+		SendSysMessageCL( who, 1062343, color := 33 ); // That item is currently in use.
 		return 0;
 	endif
 
@@ -84,7 +91,7 @@ function MaterialSelection(who, craft_skill, type)
 	endif
 
 	if( !canUseMaterial(who, materialobjtype, craft_skill) )
-		SendSysMessage(who, "You are not skilled enough to make anything out of that.", color := 33);
+		SendSysMessageCL( (who, 500298, color := 33 ); // You are not skilled enough to make anything out of that.
 		return 0;
 	endif
 
@@ -95,11 +102,15 @@ function MaterialSelection(who, craft_skill, type)
 		materialchk := 1;
 	endif
 	if( materialchk == 0 )
-		SendSysMessage(who, "That's not the proper material.", color := 33);
+		SendSysMessageCL( who, 502778, color := 33 ); // That's not the proper material.
 		SendSysMessage(who, CStr(Hex(materialobjtype)) + " " + rtype + " " + type, 1, 88);
 		return 0;
 	endif
+	// If bolts of cloth is the material then make cut cloth.
 	if( ( material.objtype >= 0xF95) && (material.objtype <= 0xF9C) )
+		// Remember the color of the bolt.
+		var bolt_color := material.color;
+		// We get 50 cut cloth from a bolt.
 		var totalcloth := material.amount * 50;
 		var cloth;
 		if( DestroyItem(material) )
@@ -109,6 +120,7 @@ function MaterialSelection(who, craft_skill, type)
 			endif
 		endif
 		material := cloth;
+		material.color := bolt_color;
 	endif
 
 	var retarray := array;
@@ -129,6 +141,7 @@ endfunction
 // special resources for crafting here also.
 function CreateCraftItem(who, craft_skill, use_on, use_onobjtype, objtype, amount, itemname, reqd)
 
+	SendSysMessageCL(who, 1077561, color := 66); // You begin working.
 	playCraftWork(who, craft_skill, CRAFT_CYCLE_SUCCESS);
 	var theitem := CreateItemInBackpack(who, objtype, 1);
 	var elem := FindConfigElem(resource_config, use_onobjtype);
@@ -144,7 +157,7 @@ function CreateCraftItem(who, craft_skill, use_on, use_onobjtype, objtype, amoun
 		endif
 		SetObjProperty(theitem, "material", use_onobjtype);
 		if( !SubtractAmount(use_on, amount) )
-			SendSysMessage(who, "You don't have enough materials in your backpack!", color := 33);
+			SendSysMessageCL(who, 1042081, color := 33); // You do not have enough resources to make that item.
 			DestroyItem(theitem);
 			return -1;
 		endif
@@ -188,7 +201,12 @@ function CreateCraftItem(who, craft_skill, use_on, use_onobjtype, objtype, amoun
 			endif
 			theitem.maxhp_mod := CInt(temp[3])+(RandomInt(11));
 			theitem.hp := theitem.maxhp;
-			SendSysMessage(who, "You create an exceptional quality item.", color := 66);
+			// Look for a maker's mark.
+			if( Find( theitem.name, "[", 1 ) )
+				SendSysMessageCL( who, 1044156, color := 66 ); // You create an exceptional quality item and affix your maker's mark.
+			else
+				SendSysMessageCL( who, 1044155, color := 66 ); // You create an exceptional quality item.
+			endif
 		else
 			var rint := randomint(AP_GetSkill(who, craft_skill));
 			if(reqd >= 23)
@@ -197,7 +215,7 @@ function CreateCraftItem(who, craft_skill, use_on, use_onobjtype, objtype, amoun
 				reqd := 3;
 			endif
 			if(rint < reqd)
-				SendSysMessage(who, "You were barely able to make this item. It's quality is below average.", color := 56);
+				SendSysMessageCL( who, 502785, color := 56 ); // You were barely able to make this item.  It's quality is below average.
 				if(theitem.isA(POLCLASS_WEAPON))
 					theitem.dmg_mod := CInt(temp[1])-(RandomInt(2)+1);
 				elseif(theitem.isA(POLCLASS_ARMOR))
@@ -206,7 +224,7 @@ function CreateCraftItem(who, craft_skill, use_on, use_onobjtype, objtype, amoun
 				theitem.maxhp_mod := CInt(temp[3])-(RandomInt(10)+1);
 				theitem.hp := theitem.maxhp;
 			else
-				SendSysMessage(who, "You create the item and put it in your backpack.", color := 66);
+				SendSysMessageCL( who, 1044154 ); // You create the item.
 				if(theitem.isA(POLCLASS_WEAPON))
 					theitem.dmg_mod := CInt(temp[1]);
 				elseif(theitem.isA(POLCLASS_ARMOR))
@@ -246,7 +264,7 @@ function CreateCraftItem(who, craft_skill, use_on, use_onobjtype, objtype, amoun
 			endif
 		endif
 	else
-		SendSysMessage(who, "You don't have enough room in your backpack!", color := 33);
+		SendSysMessageCL( who, 502868, color := 33 ); // Your backpack is too full.
 		return 0;
 	endif
 
@@ -313,7 +331,7 @@ function CraftAssembly(who, craft_skill, tool, objtype, amt)
 
 		foreach part in ( parts_list.Keys() )
 			if( material_list[part] < parts_list[part] )
-				SendSysMessage(who, "You do not have the required materials to make that.", color := 33);
+				SendSysMessageCL( who, 1053098, color := 33 ); // You do not have the required materials to make that.
 				return 0;
 			endif
 		endforeach
@@ -325,19 +343,19 @@ function CraftAssembly(who, craft_skill, tool, objtype, amt)
 			Set_Critical(1);
 			foreach material_objtype in ( parts_list.Keys() )
 				var amount := parts_list[material_objtype];
-        var UsedPart := GetItemDescInfo(CInt(material_objtype));
+				var UsedPart := GetItemDescInfo(CInt(material_objtype));
 //        SendSysMessage(who, "Debug msg: Crafting.inc --> UsedPart name is " + UsedPart.Name, 3, 88);
 //        SendSysMessage(who, "Debug msg: Crafting.inc --> UsedPart name is " + CStr(UsedPart.ChangeTo), 3, 88);
-        var ChangeTo := CInt(UsedPart.ChangeTo);
+				var ChangeTo := CInt(UsedPart.ChangeTo);
 				if ( amount > 0 )
 					if( !ConsumeSubstance(who.backpack, material_objtype, amount) )
 						SendSysMessage(who, "Error - Unable to consume ["+amount+"] of material ["+material_objtype+"]", color := 33);
 						return 0;
 					endif
-          // For occasions when we need to replace a full container with any empty one
-          if(ChangeTo)
-            CreateItemInContainer(who.backpack, ChangeTo, 1);
-          endif
+					// For occasions when we need to replace a full container with any empty one
+					if(ChangeTo)
+						CreateItemInContainer(who.backpack, ChangeTo, 1);
+					endif
 				endif
 			endforeach
 			Set_Critical(0);
@@ -348,12 +366,12 @@ function CraftAssembly(who, craft_skill, tool, objtype, amt)
 			theitem := CreateItemInBackpack(who, objtype, product_quantity);
 			// theitem := CreateItemInBackpack(who, objtype, 1);
 			if( !theitem )
-				SendSysMessage(who, "You don't have enough room in your backpack!", color := 33);
+				SendSysMessageCL( who, 502868, color := 33 ); // Your backpack is too full.
 				return 0;
 			endif
 			CheckToolWear (who, tool, craft_skill);
 			theitem.movable := 1;
-			SendSysMessage(who, "You create the item and put it in your backpack.", color := 66);
+			SendSysMessageCL( who, 1044154, color := 66 ); // You create the item.
 			if( theitem.isA(POLCLASS_CONTAINER) )
 				SetObjProperty(theitem, "trappable", 1);
 			endif
@@ -369,14 +387,14 @@ function CraftAssembly(who, craft_skill, tool, objtype, amt)
 						SendSysMessage(who, "Error - Unable to consume ["+amount+"] of material ["+material_objtype+"]", color := 33);
 						return 0;
 					endif
-          // For occasions when we need to replace a full container with any empty one
-          if(ChangeTo)
-            CreateItemInContainer(who.backpack, CInt(ChangeTo), 1);
-          endif
+					// For occasions when we need to replace a full container with any empty one
+					if(ChangeTo)
+						CreateItemInContainer(who.backpack, CInt(ChangeTo), 1);
+					endif
 				endif
 			endforeach
 			Set_Critical(0);
-			SendSysMessage(who, "You failed to create the item, and some of your materials are lost.", color := 33);
+			SendSysMessageCL( who, 1044043, color := 33 ); // You failed to create the item, and some of your materials are lost.
 		endif
 		counter := counter + 1;
 	endwhile
@@ -403,9 +421,9 @@ function CreateCraftedMap(who, craft_skill, use_on, objtype, amount, itemname, r
 			reqd := 3;
 		endif
 		if( rint < reqd )
-			SendSysMessage(who, "You were barely able to make this item. Its quality is below average.", color := 56);
+			SendSysMessageCL( who, 502785, color := 56 ); // You were barely able to make this item.  It's quality is below average.
 		else
-			SendSysMessage(who, "You create the item and put it in your backpack.", color := 66);
+			SendSysMessageCL( who, 1044154, color := 66 ); // You create the item.
 		endif
 		var word := "";
 		if((itemname[1] == "a") || (itemname[1] == "e") || (itemname[1] == "i") || (itemname[1] == "o") || (itemname[1] == "u"))
@@ -417,7 +435,7 @@ function CreateCraftedMap(who, craft_skill, use_on, objtype, amount, itemname, r
 		itemname := itemname - "plain ";
 		SetName(theitem, itemname);
 	else
-		SendSysMessage(who, "You don't have enough room in your backpack!", color := 33);
+		SendSysMessageCL( who, 502868, color := 33 ); // Your backpack is too full.
 		return 0;
 	endif
 
