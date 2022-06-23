@@ -42,6 +42,8 @@ program meditation(who)
 	endif
 
 	var shrinelist := ListItemsNearLocationOfType(who.x, who.y, who.z, 3, shrine_marker, who.realm);
+	Print(shrinelist);
+	if( shrinelist.size() > 0 )
 		if (confirmationSizable(who, "Do you wish to pray at the shrine of " + VS_Capitalize(GetObjProperty(shrinelist[1], "Virtue")) + "?", 88) )
 			var theshrine := shrinelist[1];
 			start_script( ":virtue:prayerScripts/" + (GetObjProperty(shrinelist[1], "Virtue") ), { who, GetObjProperty(theshrine, "Virtue") } );
@@ -49,6 +51,7 @@ program meditation(who)
 		else
 			PrintTextAbove(who, "Just meditating...");
 		endif
+	endif
 
 
 	if ( GetAttribute(who, MEDITATION) < 5.0 )
@@ -63,7 +66,7 @@ program meditation(who)
 		EraseObjProperty(who, "#ISMEDITATING");
 	endif
 
-	var diff := CInt(GetAttribute(who, MEDITATION) - AP_GetVital(who, VITALID_MANA)) + (loss / 1000);
+	var diff := CInt(GetAttribute(who, MEDITATION) - AP_GetVital(who, MANA)) + (loss / 1000);
 	if (diff < 0)
 		diff := 0;
 	elseif (diff > 110)
@@ -78,9 +81,9 @@ program meditation(who)
 	if(SkillCheck( who, MEDITATION, diff, pts ) > 0)
 		var oldx := who.x;
 		var oldy := who.y;
-		var oldstamina := AP_GetVital(who, VITALID_STAMINA);
-		var chp := AP_GetVital(who, VITALID_LIFE);
-		var cmana := AP_GetVital(who, VITALID_MANA);
+		var oldstamina := AP_GetVital(who, STAMINA);
+		var chp := AP_GetVital(who, HITS);
+		var cmana := AP_GetVital(who, MANA);
 		lastmed := CInt(ReadGameClock()) + 60;
 		SetObjProperty(who, "LastMeditation", lastmed);
 		SendSysMessage(who, "You start to meditate.");
@@ -88,29 +91,28 @@ program meditation(who)
 		PrintTextAbove(who, "* Meditating *");
 		SetObjProperty(who, "#ISMEDITATING", 1);
 
-		while( (oldstamina <= AP_GetVital(who, VITALID_STAMINA)) && (oldx==who.x) && (oldy==who.y) && (poisoned < 1) && (!who.warmode) && (!IsThingOnHand(who)) && (!who.hidden) )
-
+		while( (oldstamina <= AP_GetVital(who, STAMINA)) && (oldx==who.x) && (oldy==who.y) && (poisoned < 1) && (!who.warmode) && (!IsThingOnHand(who)) && (!who.hidden) )
 			loss := manaloss(who);
 			if(loss == "nomed")
 				SendSysMessage(who,"Regenerative forces cannot penetrate your armor.", color := 33);
 				EraseObjProperty(who, "#ISMEDITATING");
 				return 0;
 			endif
-			if(AP_GetVital(who, VITALID_MANA) >= AP_GetStat(who, INTELLIGENCE))
+			if(AP_GetVital(who, MANA) >= AP_GetVitalMaximumValue(who, MANA))
 				SendSysMessage(who, "Your mana has recharged.", color := 66);
 				EraseObjProperty(who, "#ISMEDITATING");
 				return 1;
 			endif
-			if((AP_GetVital(who, VITALID_LIFE) < chp) || (AP_GetVital(who, VITALID_MANA) < cmana))
+			if((AP_GetVital(who, HITS) < chp) || (AP_GetVital(who, MANA) < cmana))
 				SendSysMessage(who, "You lose your concentration.", color := 33);
 				EraseObjProperty(who, "#ISMEDITATING");
 				return 0;
 			endif
 			sleepms( CInt(50000 / GetAttribute(who, MEDITATION) ) );
-			AP_SetVital(who, VITALID_MANA, AP_GetVital(who, VITALID_MANA) + 1);
-			chp := AP_GetVital(who, VITALID_LIFE);
-			cmana := AP_GetVital(who, VITALID_MANA);
-			oldstamina := AP_GetVital(who, VITALID_STAMINA);
+			AP_SetVital(who, MANA, AP_GetVital(who, MANA) + 1);
+			chp := AP_GetVital(who, HITS);
+			cmana := AP_GetVital(who, MANA);
+			oldstamina := AP_GetVital(who, STAMINA);
 //			poisoned := CInt( GetObjProperty(who,"poison_level") );
 			poisoned := who.poisoned;
 		endwhile
