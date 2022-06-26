@@ -323,7 +323,7 @@ function stockitem(tev)
     return;
   elseif(cost == 0)
     if(item.isa(POLCLASS_CONTAINER))
-      if((item.objtype == 0x1940) || (item.objtype == 0xefa) || (item.objtype == 0x16100))
+      if((item.objtype == 0x1940) || (item.objtype == 0xefa) || (item.objtype == 0x22C5))
         PrintTextAbovePrivate(me, "You cannot sell that item for 0 gold.", tev.source);
         if(item.isa(POLCLASS_CONTAINER))
           foreach thing in EnumerateItemsInContainer(item)

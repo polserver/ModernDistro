@@ -601,7 +601,7 @@ const UOBJ_ENDHAIR			:= 0x204d;
 
 const UOBJ_RUNE                 := 0x1f14;
 const UOBJ_RECALL_RUNE          := 0x1f14;
-const UOBJ_RUNEBOOK             := 0x16100;
+const UOBJ_RUNEBOOK             := 0x22C5;
 
 const UOBJ_PARAFIELD_NS := 0x3967;
 const UOBJ_PARAFIELD_EW := 0x3979;

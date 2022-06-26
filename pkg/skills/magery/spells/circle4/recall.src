@@ -25,7 +25,7 @@ program recall(parms)
 			SendSysMessage (caster, "Cancelled.", color := 33);
 			return 0;
 		endif
-		if((cast_on.objtype != UOBJ_RUNE) && (cast_on.objtype != 0x16100))
+		if((cast_on.objtype != UOBJ_RUNE) && (cast_on.objtype != 0x22C5))
 			SendSysMessage(caster, "You can only cast that on a recall rune!");
 			return;
 		endif
@@ -85,13 +85,13 @@ program recall(parms)
 		SendSysMessage(caster, "Your spell fails!");
 		if(cast_on.objtype == UOBJ_RUNE)
 			SendSysMessage(caster,"Something is blocking the location", 1, 33);
-		elseif(cast_on.objtype == 0x16100)
+		elseif(cast_on.objtype == 0x22C5)
 			SendSysMessage(caster,"Something is blocking the location", 1, 33);
 		endif
 		// SendSysMessage(caster, "your spell fails and consumes the rune!");
 		// if(cast_on.objtype == UOBJ_RUNE)
 			// DestroyItem(cast_on);
-		// elseif(cast_on.objtype == 0x16100)
+		// elseif(cast_on.objtype == 0x22C5)
 			// removeentry(cast_on);
 		// endif
 		chk := 1;
@@ -102,7 +102,7 @@ program recall(parms)
 		SendSysMessage(caster,"Something is blocking the location", 1, 33);
 		// if(cast_on.objtype == UOBJ_RUNE)
 			// DestroyItem(cast_on);
-		// elseif(cast_on.objtype == 0x16100)
+		// elseif(cast_on.objtype == 0x22C5)
 			// removeentry(cast_on);
 		// endif
 		chk := 1;

@@ -12,7 +12,8 @@ include ":timedScripts:timedScripts";
 program TimedScript_EndInvisibility(params)
 	var defender := params[1];
 	params := 0;
-	var ts_cfg_elem := TS_GetCfgElem("Paralysis");
+	// var ts_cfg_elem := TS_GetCfgElem("Paralysis");
+	var ts_cfg_elem := TS_GetCfgElem("Invisibility");
 	var buff_icon := CInt( ts_cfg_elem.BuffIcon );
 
 	EraseObjProperty(defender, "Invisibility");

@@ -24,7 +24,7 @@ program spell_gate(parms)
 			SendSysMessage (caster, "Cancelled.", color := 33);
 			return 0;
 		endif
-		if((!cast_on.IsRecallRune()) && (cast_on.objtype != 0x16100))
+		if((!cast_on.IsRecallRune()) && (cast_on.objtype != 0x22C5))
 			SendSysMessage(caster, "You can only cast that on a recall rune!");
 			return;
 		endif
@@ -82,7 +82,7 @@ program spell_gate(parms)
 		SendSysMessage(caster, "Your spell fails!");
 		if(cast_on.objtype == UOBJ_RUNE)
 			SendSysMessage(caster,"Something is blocking the location", 1, 33);
-		elseif(cast_on.objtype == 0x16100)
+		elseif(cast_on.objtype == 0x22C5)
 			SendSysMessage(caster,"Something is blocking the location", 1, 33);
 		endif
 		chk := 1;
