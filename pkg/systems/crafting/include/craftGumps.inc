@@ -370,19 +370,19 @@ function GFCraftInfoPage(who, objtype, skill_config)
 	endif
 
 	// Get the material type required to craft the item.
-	var matname   := Lower(elem.type);
+	var matname   := Lower(elem.Material_1);
 
 	if( TypeOf(elem.mtype) == "String" )
 		matname := elem.mtype;
 	endif
 
 	// Get the materials amount required to craft the item
-	var material  := elem.material;
+	var material  := elem.Mat_1_Amt;
 
-	if((elem.material2 > 0) && (elem.material2 != error))
+	if((elem.Mat_2_Amt > 0) && (elem.Mat_2_Amt != error))
 		// Material 2 name
-		matname := matname+"\n"+elem.material2obj;
-		material := material+"\n"+elem.material2;
+		matname := matname+"\n"+elem.Material_2;
+		material := material+"\n"+elem.Mat_2_Amt;
 	endif
 
 	// Below added for checking for parts. If parts are present, then create the part list

@@ -62,27 +62,31 @@ function SkillCheck( mobile, attrib_name, difficulty, award_diff:="", advance_fl
 		difficulty := CDbl( difficulty );
 	endif
 
-  var effective_skill := AP_GetSkill( mobile, attrib_name ),
-  pass_chance := CalcSuccessPercent( mobile, attrib_name, difficulty, effective_skill ),
-  check_roll := RandomDiceRoll( "1d100+1" );
+	var effective_skill := AP_GetSkill( mobile, attrib_name ),
+	pass_chance := CalcSuccessPercent( mobile, attrib_name, difficulty, effective_skill ),
+	check_roll := RandomDiceRoll( "1d100+1" );
 
-  if( !mobile.IsA( POLCLASS_NPC ) && !mobile.cmdlevel )
-    var hunger := CInt( AP_GetVital( mobile, HUNGER ));
-    if( !hunger )
-      // hunger := 1;
-      hunger := 9;
-    endif
+	// if( !mobile.IsA( POLCLASS_NPC ) && !mobile.cmdlevel )
+	if( !mobile.IsA( POLCLASS_NPC ) )
+		if( !mobile.cmdlevel || ( mobile.cmdlevel && GetObjProperty( mobile, "StaffScriptTester" ) ) )
 
-	// This determines how much hunger will affect success, I think :P
-    var hc_settings := AP_GetSettingsCfgElem( "Hunger" ),
-    hunger_setting := CInt( hc_settings.MaxHungerAffect ),
-    hunger_value := CInt( pass_chance * CDbl( hunger_setting ));
-    // print("Hunger Val:"+hunger_value);
+			var hunger := CInt( AP_GetVital( mobile, HUNGER ));
+			if( !hunger )
+				// hunger := 1;
+				hunger := 9;
+			endif
 
-    // pass_chance -= CInt( hunger_value - CDbl( hunger_value * CDbl( hunger / 10 )));
-    pass_chance -= CInt( hunger_value + CDbl( hunger_value * CDbl( hunger / 10 )));
-    // print("Pass chance 2:"+pass_chance);
-  endif
+			// This determines how much hunger will affect success, I think :P
+			var hc_settings := AP_GetSettingsCfgElem( "Hunger" ),
+			hunger_setting := CInt( hc_settings.MaxHungerAffect ),
+			hunger_value := CInt( pass_chance * CDbl( hunger_setting ));
+			Print("Hunger Val:"+hunger_value);
+
+			// pass_chance -= CInt( hunger_value - CDbl( hunger_value * CDbl( hunger / 10 )));
+			pass_chance -= CInt( hunger_value + CDbl( hunger_value * CDbl( hunger / 10 )));
+			Print("Pass chance 2:"+pass_chance);
+		endif
+	endif
 
 	// Ensure skill- and stat-gain if it's a -1 skillcheck
 	// Do this AFTER the CalcSuccessPercent() call so '-1' isn't messed up
