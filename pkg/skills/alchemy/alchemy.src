@@ -57,7 +57,7 @@ function makeAlchemyItems(who, what, amt, tool)
 	endif
 
 	// what's type is sent for the ResourceList entry type.
-	var itemchk := MaterialSelection(who, craft_skill, lower(craft_config[what].type));
+	var itemchk := MaterialSelection(who, craft_skill, lower(craft_config[what].Material_1));
 	if(!itemchk)
 		return 0;
 	endif
@@ -66,7 +66,7 @@ function makeAlchemyItems(who, what, amt, tool)
 
 	var num, theitem;
 	var itemname := craft_config[what].name;
-	var material := Cint(craft_config[what].material);
+	var material := Cint(craft_config[what].Mat_1_Amt);
 	var reqd := Cint(craft_config[what].skill);
 	var diff := Cint(craft_config[what].difficulty);
 	var pts  := Cint(craft_config[what].points);
