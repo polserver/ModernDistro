@@ -73,9 +73,6 @@ program SpawnCycle( params )
 	// var near := ListMobilesNearLocation( spawn_coords.x, spawn_coords.y, spawn_coords.z, 3, realm_name );
 	// Do not spawn an NPC with unconcealed, hidden or ghost players nearby. Only spawn if a player is concealed.
 	var near := ListMobilesNearLocationEx( spawn_coords.x, spawn_coords.y, spawn_coords.z, 3, LISTEX_FLAG_NORMAL + LISTEX_FLAG_HIDDEN + LISTEX_FLAG_GHOST, realm_name );
-	if(region_name == "near_moon_gate")
-	Print("near_moon_gate is " + near);
-	endif
 	if( !near.Size() )
 		var created := CreateNPCFromTemplate( spawn_object, spawn_coords.x, spawn_coords.y, spawn_coords.z, 0, realm_name );
 		if( created.errortext )
