@@ -59,15 +59,15 @@ var makermark := 1;
 // was originally colored logs. The colored log objtype is stored
 // in the cprop, and is used to get it's "ResourceList" reference.
 function MaterialSelection(who, craft_skill, type)
-// SendSysMessage(who, ""+type);
-  if(resource_config.errortext)
-    SendSysMessage(who, resource_config.errortext, 1, 33);
-    return 0;
-  endif
+
+	if(resource_config.errortext)
+	SendSysMessage(who, resource_config.errortext, 1, 33);
+		return 0;
+		endif
 	SendSysMessage(who, "Select the "+Lower(type)+" you would like to work with.", color := 88);
 	var material := Target(who);
 	if( !material )
-    SendSysMessageCL( who, 1042023, color := 33 ); // Cancelled.
+		SendSysMessageCL( who, 1042023, color := 33 ); // Cancelled.
 		return 0;
 	elseif( !(material in EnumerateItemsInContainer(who.backpack)) )
 		SendSysMessageCL(who, 1042593, color := 33); // That is not in your backpack.

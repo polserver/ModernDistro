@@ -102,7 +102,7 @@ function cutItems(who, item, tool)
 		elseif (GetObjProperty(item, "material"))
 			material := FindConfigElem(resource_config, GetObjProperty(item, "material"));
 			new_item := material;
-			material_cnt := CInt(craft_config[item.objtype].Material);
+			material_cnt := CInt(craft_config[item.objtype].Mat_1_Amt);
 	 		item_color := material.Color;
 		// else
 			// // Since not crafted, block cutting it!

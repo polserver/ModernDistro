@@ -56,7 +56,7 @@ function makeTailoringItems(who, what, amt, tool)
 	endif
 
 	// ResourceList entry type.
-	var itemchk := MaterialSelection(who, craft_skill, lower(craft_config[what].type));
+	var itemchk := MaterialSelection(who, craft_skill, lower(craft_config[what].Material_1));
 	if (!itemchk)
 		return 0;
 	endif
@@ -65,12 +65,12 @@ function makeTailoringItems(who, what, amt, tool)
 	var ptmod := itemchk[3];
 
 	var x := who.x, y := who.y, item2 := 0;
-	var material2obj := craft_config[what].material2obj;
-	if (TypeOf(material2obj) == "String")
+	var material_2 := craft_config[what].Material_2;
+	if (TypeOf(material_2) == "String")
 		// Let's now select the secondary material. Chk is not passed, as currently
 		// ingots do not hold a cprop to know which type they was originally like boards
 		// or cut leather.
-		itemchk := MaterialSelection(who, craft_skill, lower(material2obj));
+		itemchk := MaterialSelection(who, craft_skill, lower(material_2));
 		if ( !itemchk )
 			return 0;
 		endif
@@ -80,8 +80,8 @@ function makeTailoringItems(who, what, amt, tool)
 
 	var theitem;
 	var itemname	 := craft_config[what].name;
-	var material	 := CInt(craft_config[what].material);
-	var material2	 := CInt(craft_config[what].material2);
+	var mat_1_amt	 := CInt(craft_config[what].Mat_1_Amt);
+	var mat_2_amt	 := CInt(craft_config[what].Mat_2_Amt);
 	var reqd 	 := CInt(craft_config[what].skill);
 	var skillid2 	 := craft_config[what].skillID;
 	var skill2 	 := CInt(craft_config[what].skill2);
@@ -100,24 +100,24 @@ function makeTailoringItems(who, what, amt, tool)
 			break;
 		endif
 		Sleep(2);
-		if ( GetAmount(item1) >= material )
-			if ( item2 != 0 && GetAmount(item2) < material2 )
+		if ( GetAmount(item1) >= mat_1_amt )
+			if ( item2 != 0 && GetAmount(item2) < mat_2_amt )
 				SendSysMessage(who, "You do not have enough materials.");
 				return 0;
 			endif
 			if ( CraftCheckSkill(who, craft_skill, diff, pts) > 0 )
 				if ( skillid2 )
 					if ( (skill2 <= AP_GetSkill(who, skillid2)) )
-						theitem := CreateCraftItem(who, craft_skill, item1, item1objtype, what, material, itemname, reqd);
+						theitem := CreateCraftItem(who, craft_skill, item1, item1objtype, what, mat_1_amt, itemname, reqd);
 					else
 						SendSysMessage(who, "You do not have the required skill.");
 						return 0;
 					endif
 				else
-					theitem := CreateCraftItem(who, craft_skill, item1, item1objtype, what, material, itemname, reqd);
+					theitem := CreateCraftItem(who, craft_skill, item1, item1objtype, what, mat_1_amt, itemname, reqd);
 					if( theitem && theitem != 0 && !theitem.errortext )
 						if ( item2 != 0 )
-							if ( !SubtractAmount(item2, material2) )
+							if ( !SubtractAmount(item2, mat_2_amt) )
 								DestroyItem(theitem);
 								SendSysMessage(who, "You do not have enough materials.");
 								return 0;
@@ -126,9 +126,9 @@ function makeTailoringItems(who, what, amt, tool)
 							SkillCheck(who, TAILORING, diff);
 						endif
 					else
-						SubtractAmount(item1, Ceil(material / 2));
-						if ( material2 )
-							if ( !SubtractAmount(item2, Ceil(material2 / 2)) )
+						SubtractAmount(item1, Ceil(mat_1_amt / 2));
+						if ( mat_2_amt )
+							if ( !SubtractAmount(item2, Ceil(mat_2_amt / 2)) )
 								SendSysMessage(who, "You do not have enough materials.");
 								return 0;
 							endif
