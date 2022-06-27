@@ -72,6 +72,22 @@ endfunction
 
 exported function Gibbify( corpse, range )
 
+	// Create head for bounty or for other despicable things. :)
+	var aname := corpse.name;
+	var head,
+		ears;
+	head := CreateItemInContainer( corpse, 0x1DAE );
+	aname["A corpse of"] := "";
+	head.name := "The head of " + aname;
+	// Create severed ears for the truly ghoulish players.
+	if( (corpse.corpsetype == 0x190) || (corpse.corpsetype == 0x191) )
+		ears := CreateItemInContainer( corpse, 0x312E );
+		// using 'severed elf ears' for human ears. So we need to rename them.
+		ears.name := "severed human ears";
+	elseif( (corpse.corpsetype == 0x25D) || (corpse.corpsetype == 0x25E) )
+		// Elf ears do not need to be assigned a name.
+		ears := CreateItemInContainer( corpse, 0x312D );
+	endif
 	var piece_list := array
 	{
 		0x1DAD, //Torso
