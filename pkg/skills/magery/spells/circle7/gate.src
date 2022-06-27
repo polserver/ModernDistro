@@ -94,41 +94,17 @@ program spell_gate(parms)
 		chk := 1;
 	endif
 
-	// Added next 20 lines for Interdictions.
-	success := 0;
-	var j;
-	var interdiction := ListItemsNearLocationOfType(caster.x, caster.y, caster.z, 20, 0x1aa07, caster.realm);
-	foreach i in interdiction
-		if (Distance(caster, i) <= Cint( GetObjProperty(i, "Range")))
-			success := 1;
-		endif
-	endforeach
-	interdiction := ListItemsNearLocationOfType(tox, toy, toz, 20, 0x1aa07, caster.realm);
-	foreach i in interdiction
-		j := CreateItemAtLocation(tox, toy, toz, 0x1aa07, 1, caster.realm);
-		if (Distance(j, i) <= Cint( GetObjProperty(i, "Range") ) )
-			success := 1;
-		endif
-		DestroyItem(j);
-	endforeach
-	if (success == 1)
-	  SendSysMessage(caster, "Something is interfering with this spell.");
-	  return 0;
-	endif
-	// End interdictions.
-
 	// Check for static houses
-    var signs := ListItemsNearLocationOfType( tox, toy, toz, 30, 0x160ff);
-	foreach item in signs
-		var infoarr := GetObjProperty( item, "homeinfo" );
-		if (infoarr)
-			if ((tox >= infoarr[2]) and (tox <= infoarr[4]) and (toy >= infoarr[3]) and (toy <= infoarr[5]))
-				SendSysMessage(caster,"Something is blocking the location", 1, 33);
-				return;
+    var signs := ListItemsNearLocation( dest.x, dest.y, dest.z, 30);
+	foreach sign in signs
+		if( sign.IsStaticHouseSign() )
+			if( sign.IsLocationInsideHouse(dest) )
+				SendSysMessage( caster, "Your spell fails and consumes the rune!" );
+				DestroyItem( cast_on );
 			endif
 		endif
     endforeach
-// End static house check.
+	// End static house check.
 
 
 	if(chk == 1)
