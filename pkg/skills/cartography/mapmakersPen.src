@@ -61,7 +61,7 @@ function makeCartographyMap(who, objtype, amt, tool)
 	endif
 
 	// ResourceList entry type.
-	var itemchk := MaterialSelection(who, craft_skill, lower(craft_config[objtype].type));
+	var itemchk := MaterialSelection(who, craft_skill, lower(craft_config[objtype].Material_1));
 	if(!itemchk)
 		return 0;
 	endif
@@ -70,7 +70,7 @@ function makeCartographyMap(who, objtype, amt, tool)
 
 	var num, theitem;
 	var itemname := craft_config[objtype].name;
-	var material := Cint(craft_config[objtype].material);
+	var material := Cint(craft_config[objtype].Mat_1_Amt);
 	var reqd := Cint(craft_config[objtype].skill);
 	var diff := Cint(craft_config[objtype].difficulty);
 	var pts  := Cint(craft_config[objtype].points);

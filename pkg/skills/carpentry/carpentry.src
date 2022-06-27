@@ -67,7 +67,7 @@ endfunction
 function CreateBoards(who, tool, objtype)
 
 	// Wood is sent for the ResourceList entry type.
-	var itemchk := MaterialSelection(who, craft_skill, lower(craft_config[objtype].type));
+	var itemchk := MaterialSelection(who, craft_skill, lower(craft_config[objtype].Material_1));
 	if( !itemchk )
 		return 0;
 	endif
@@ -86,7 +86,7 @@ function CreateBoards(who, tool, objtype)
 		if( SubtractAmount(item1, 1) )
 			var ret := GetItemDescriptor(0x1bd7);
 			ret.Color := resource_config[item1objtype].Color;
-			ret.CProps.insert(lower(craft_config[objtype].type), item1objtype); //assuming the existing stack have this color and cprop
+			ret.CProps.insert(lower(craft_config[objtype].Material_1), item1objtype); //assuming the existing stack have this color and cprop
 			theitem := CreateItemInBackpack(who, ret, 1);
 			if( TypeOf(theitem) == "ItemRef" )
 				set_critical(1);
@@ -111,7 +111,7 @@ endfunction
 
 function CarpentryItems(who, tool, objtype, amt)
 
-	var itemchk := MaterialSelection(who, craft_skill, lower(craft_config[objtype].Type));
+	var itemchk := MaterialSelection(who, craft_skill, lower(craft_config[objtype].Material_1));
 	if( !itemchk )
 		return 0;
 	endif
@@ -119,12 +119,12 @@ function CarpentryItems(who, tool, objtype, amt)
 	var item1objtype := itemchk[2];
 	var ptmod := itemchk[3];
 	var x := who.x, y := who.y, item2 := 0;
-	var material2obj := craft_config[objtype].material2obj;
-	if( TypeOf(material2obj) == "String" )
+	var Material_2 := craft_config[objtype].Material_2;
+	if( TypeOf(Material_2) == "String" )
 		// Let's now select the secondary material. Chk is not passed, as currently
-		// ingots do not hold a cprop to know which type they was originally like boards
+		// ingots do not hold a cprop to know which type they were originally, like boards
 		// or cut leather.
-		itemchk := MaterialSelection(who, craft_skill, lower(material2obj));
+		itemchk := MaterialSelection(who, craft_skill, lower(Material_2));
 		if( !itemchk )
 			return 0;
 		endif
@@ -134,8 +134,8 @@ function CarpentryItems(who, tool, objtype, amt)
 
 	var theitem;
 	var itemname  := craft_config[objtype].name;
-	var material  := Cint(craft_config[objtype].material);
-	var material2 := Cint(craft_config[objtype].material2);
+	var mat_1_amt  := Cint(craft_config[objtype].Mat_1_Amt);
+	var mat_2_amt := Cint(craft_config[objtype].Mat_2_Amt);
 	var reqd      := Cint(craft_config[objtype].skill);
 	var skillid2  := craft_config[objtype].skillID;
 	var skill2    := Cint(craft_config[objtype].skill2);
@@ -161,19 +161,19 @@ function CarpentryItems(who, tool, objtype, amt)
 			break;
 		endif
 
-		if( GetAmount(item1) >= material )
-			if( item2 != 0 && GetAmount(item2) < material2 )
+		if( GetAmount(item1) >= mat_1_amt )
+			if( item2 != 0 && GetAmount(item2) < mat_2_amt )
 				SendSysMessage(who, "You do not have enough materials.");
 				return 0;
 			endif
 			if( CraftCheckSkill(who, craft_skill, diff, pts) > 0 )
 				if( TypeOf(item2) == "ItemRef" )
-					if( !SubtractAmount(item2, material2) )
+					if( !SubtractAmount(item2, mat_2_amt) )
 						SendSysMessage(who, "You do not have enough materials.");
 						return 0;
 					endif
 				endif
-				theitem := CreateCraftItem(who, craft_skill, item1, item1objtype, objtype, material, itemname, reqd);
+				theitem := CreateCraftItem(who, craft_skill, item1, item1objtype, objtype, mat_1_amt, itemname, reqd);
 				if( TypeOf(theitem) == "ItemRef" )
 					theitem.movable := 1;
 					if( craft_config[theitem.objtype].lockable )
@@ -189,13 +189,13 @@ function CarpentryItems(who, tool, objtype, amt)
 					endif
 				endif
 			else
-				var num := CInt(RandomInt(material)/2) + 1;
+				var num := CInt(RandomInt(mat_1_amt)/2) + 1;
 				if(!SubtractAmount(item1, num))
 					SendSysMessage(who, "You do not have enough materials.");
 					return 0;
 				endif
-				if( material2 )
-					num := CInt(RandomInt(material2)/2) + 1;
+				if( mat_2_amt )
+					num := CInt(RandomInt(mat_2_amt)/2) + 1;
 					if( !SubtractAmount(item2, num) )
 						SendSysMessage(who, "You do not have enough materials.");
 						return 0;
