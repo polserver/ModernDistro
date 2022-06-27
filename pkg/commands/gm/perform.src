@@ -1,0 +1,31 @@
+use uo;
+use os;
+const ACTION_BOW     := 0x0020;
+
+
+program PerfrmAction(who, text)
+
+
+var tcount;
+var stuff := SplitWords(text);
+var action := CInt(stuff[1]);
+var count := CInt(stuff[2]);
+if (count)
+        tcount := count;
+else
+        tcount := 1;
+endif
+
+var i;
+for ( i := 1; i <= tcount; i := i + 1)
+foreach critter in ListMobilesNearLocation(who.x, who.y, who.z, 8, who.realm)
+	if(critter.serial != who.serial)
+		if (critter.graphic in {0x190, 0x191, 0x25D, 0x25E, 0x29A, 0x29B}) // H-male, H-female, E-male, E-female, G-male, G-female
+			PerformAction( critter, action );
+		endif
+	endif
+endforeach
+sleep(1);
+endfor
+
+endprogram
