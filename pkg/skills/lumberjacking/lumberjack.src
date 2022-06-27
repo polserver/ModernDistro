@@ -230,36 +230,6 @@ function chopfurniture(me, theobj)
       MoveObjectToLocation(thing, theobj.x, theobj.y, theobj.z, theobj.realm, MOVEOBJECT_FORCELOCATION);
     endif
   endforeach
-  if(theobj.usescript == ":tinkering:tinkerTraps")
-    var traptype := GetObjProperty(theobj,"trap_type");
-    var trapstrength := GetObjProperty(theobj,"trap_strength");
-    var trapperserial := CInt(GetObjProperty(theobj, "trapper"));
-    var trapper := SystemFindObjectBySerial(trapperserial, SYSFIND_SEARCH_OFFLINE_MOBILES);
-    if(trapper)
-      SetObjProperty(me, "LastHit", {trapper.name, trapper.serial, "trapped chest" });
-      SetScriptController(trapper);
-    endif
-    case (traptype)
-      "1" :   PlaySoundEffect(me, SFX_224);
-              var dmg := (RandomInt(20) + CInt(trapstrength));
-              SendSysMessage(me, "You set off a needle trap!");
-              ApplyDamageEX(me, dmg, DMG_PHYSICAL);
-              theobj.usescript := "";
-              EraseObjProperty( theobj, "trap_type" );
-              EraseObjProperty( theobj, "trap_strength" );
-
-      "2" :   start_script(":traps:poisonTrapTriggered", {me, theobj, "You set off a poison trap!", trapstrength});
-
-      "3" :   PlaySoundEffect(me, SFX_208);
-              SendSysMessage(me, "You set off an explosion trap!");
-              PlayObjectCenteredEffect( me, FX_EXPLODE_3, 10,10);
-              var dmg := (RandomInt(20) + CInt(trapstrength));
-              ApplyDamageEX(me, dmg, DMG_PHYSICAL);
-              theobj.usescript := "";
-              EraseObjProperty( theobj, "trap_type" );
-              EraseObjProperty( theobj, "trap_strength" );
-    endcase
-  endif
   var created := GetObjProperty(theobj, "ItemsCreatedSerials");
   if(created)
     var holder;
