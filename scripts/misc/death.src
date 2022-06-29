@@ -9,126 +9,109 @@ include ":attributes:attributes";
 include ":npcs:NPCBackpacks";
 include ":damage:damage";
 include ":virtue:noto";
-//include "systems:spawnregion:spawnRegion";
-//include ":spawnregion:spawnRegion";
 
 var npcdesc_cfg := ReadConfigFile( "npcdesc" );
 
 program npcdeath(corpse)
-  var i;
-  if(GetObjProperty(corpse, "restockserial"))
-    var stocklist := SystemFindObjectBySerial(CInt(GetObjProperty(corpse, "restockserial")));
-    DestroyItem(stocklist);
-  endif
+	var i;
+	if(GetObjProperty(corpse, "restockserial"))
+		var stocklist := SystemFindObjectBySerial(CInt(GetObjProperty(corpse, "restockserial")));
+		DestroyItem(stocklist);
+	endif
 
-  var last_damage := GetObjProperty(corpse, "LastDamage");
-  var killer := last_damage.serial;
-      if (killer != error)
-        i := SystemFindObjectBySerial(killer);
+	var last_damage := GetObjProperty(corpse, "LastDamage");
+	var killer := last_damage.serial;
+	if (killer != error)
+		i := SystemFindObjectBySerial(killer);
 		AdjustNoto(i, corpse);
-        if (GetObjProperty(i, "CursedLoot") )
-            SetObjProperty(corpse, "guardkill", 1);
-        elseif (GetObjProperty(i, "BlessedLoot") )
-            SetObjProperty(corpse, "BlessedLoot", 1);
-        endif
-    endif
-  if((killer != error) && (!GetObjProperty(corpse, "guardkill")))
-    AdjustNoto((SystemFindObjectBySerial(killer)), corpse);
-  endif
-  var char;
-  var mounted_char;
-  var onchars := EnumerateOnlineCharacters();
-  if(GetObjProperty(corpse,"mounted"))
-    char := GetObjProperty(corpse,"mounted_on");
-    foreach person in onchars
-      if(person.serial == CInt(char))
-        mounted_char := person;
-        break;
-      endif
-    endforeach
-    dismountme(mounted_char, corpse);
-  endif
-  var elem := GetObjProperty(corpse, "npctemplate");
-  var deathsound := 0;
-  var grphic := npcdesc_cfg[elem]."ObjType";
-  SetObjProperty(corpse, "Graphic", grphic);
-  if((grphic != 0x190) && (grphic != 0x191))
-    deathsound := npcdesc_cfg[elem]."deathsound";
-    if (deathsound)
-      PlaySoundEffect(corpse, deathsound);
-    endif
-  endif
-  set_critical(1);
-  dismount(corpse);
+		if (GetObjProperty(i, "CursedLoot") )
+			SetObjProperty(corpse, "guardkill", 1);
+		elseif (GetObjProperty(i, "BlessedLoot") )
+			SetObjProperty(corpse, "BlessedLoot", 1);
+		endif
+	endif
+	if((killer != error) && (!GetObjProperty(corpse, "guardkill")))
+		AdjustNoto((SystemFindObjectBySerial(killer)), corpse);
+	endif
+	var char;
+	var mounted_char;
+	var onchars := EnumerateOnlineCharacters();
+	if(GetObjProperty(corpse,"mounted"))
+		char := GetObjProperty(corpse,"mounted_on");
+		foreach person in onchars
+			if(person.serial == CInt(char))
+				mounted_char := person;
+				break;
+			endif
+		endforeach
+		dismountme(mounted_char, corpse);
+	endif
+	var elem := GetObjProperty(corpse, "npctemplate");
+	var deathsound := 0;
+	var grphic := npcdesc_cfg[elem]."ObjType";
+	SetObjProperty(corpse, "Graphic", grphic);
+	if((grphic != 0x190) && (grphic != 0x191))
+		deathsound := npcdesc_cfg[elem]."deathsound";
+		if (deathsound)
+			PlaySoundEffect(corpse, deathsound);
+		endif
+	endif
+	set_critical(1);
+	dismount(corpse);
 
-// The following piece of code reports to new regional spawner the death of any NPCs spawned by it.
-     Set_Critical(1);
-      if ( GetObjProperty(corpse, "regspawn") )
-         var SpawnName := GetObjProperty(corpse, "regspawn");
-         var numspawns := CInt(GetGlobalProperty(SpawnName));
-         if ( numspawns and numspawns > 1 )
-            numspawns := numspawns - 1;
-            SetGlobalProperty(SpawnName, numspawns);
-         else
-            EraseGlobalProperty(SpawnName);
-         endif
-      elseif ( !GetObjProperty(corpse, "guardkill") )
-//         AddToSpawner(corpse, npctemplate);
-      endif
-   Set_Critical(0);
-////////////////////////////////////////////////////////////////////////////////////////////////////
+	Set_Critical(0);
 
-    if (GetObjProperty(corpse, "totem"))
-	    RemakeTotem(corpse, elem);
-	    return;
-    endif
+	if (GetObjProperty(corpse, "totem"))
+		RemakeTotem(corpse, elem);
+		return;
+	endif
 
 
-  if(GetObjProperty(corpse, "guardkill"))
-    DestroyItem(corpse);
-    return;
-  endif
-  if(GetObjProperty(corpse,"npctemplate") == "employee")
-    foreach thing in EnumerateItemsInContainer(corpse)
-      if((thing.layer) && (thing.isa(POLCLASS_WEAPON) || thing.isa(POLCLASS_ARMOR)))
-        DestroyItem(thing);
-      endif
-    endforeach
-  endif
-  MoveBackpackToCorpse(corpse);
-  if(GetObjProperty(corpse, "npctemplate") == "playervendor")
-    var itemdesc := ReadConfigFile(":*:itemdesc");
-    var elm, dsc;
-    foreach thing in EnumerateItemsInContainer(corpse)
-      EraseObjProperty(thing, "Vendored");
-      if(GetObjProperty(thing, "Vendor"))
-        DestroyItem(thing);
-      else
-        var oldname := GetObjProperty(thing, "OldName");
-        if(oldname)
-          SetName(thing, oldname);
-        else
-          elm := FindConfigElem(itemdesc, thing.objtype);
-          dsc := itemdesc[thing.objtype].desc;
-          SetName(thing, dsc);
-        endif
-        EraseObjProperty(thing, "Master");
-        EraseObjProperty(thing, "OldName");
-        EraseObjProperty(thing, "price");
-      endif
-    endforeach
-  endif
-  if(GetObjProperty(corpse, "summoned"))
-    DestroyItem(corpse);
-  elseif(GetObjProperty(corpse, "nocorpse"))
-    foreach item in EnumerateItemsInContainer(corpse)
-      MoveObjectToLocation(item, corpse.x, corpse.y, corpse.z, corpse.realm, MOVEOBJECT_FORCELOCATION);
-    endforeach
-    DestroyItem(corpse);
-  else
-    var corpseof := GetObjProperty(corpse,"npctemplate");
-      corpseof := corpseof; // Added to stop the STUPID 'not used' warning from eCompile.
-  endif
+	if(GetObjProperty(corpse, "guardkill"))
+		DestroyItem(corpse);
+		return;
+	endif
+	if(GetObjProperty(corpse,"npctemplate") == "employee")
+		foreach thing in EnumerateItemsInContainer(corpse)
+			if((thing.layer) && (thing.isa(POLCLASS_WEAPON) || thing.isa(POLCLASS_ARMOR)))
+				DestroyItem(thing);
+			endif
+		endforeach
+	endif
+	MoveBackpackToCorpse(corpse);
+	if(GetObjProperty(corpse, "npctemplate") == "playervendor")
+		var itemdesc := ReadConfigFile(":*:itemdesc");
+		var elm, dsc;
+		foreach thing in EnumerateItemsInContainer(corpse)
+			EraseObjProperty(thing, "Vendored");
+			if(GetObjProperty(thing, "Vendor"))
+				DestroyItem(thing);
+			else
+				var oldname := GetObjProperty(thing, "OldName");
+				if(oldname)
+					SetName(thing, oldname);
+				else
+					elm := FindConfigElem(itemdesc, thing.objtype);
+					dsc := itemdesc[thing.objtype].desc;
+					SetName(thing, dsc);
+				endif
+				EraseObjProperty(thing, "Master");
+				EraseObjProperty(thing, "OldName");
+				EraseObjProperty(thing, "price");
+			endif
+		endforeach
+	endif
+	if(GetObjProperty(corpse, "summoned"))
+		DestroyItem(corpse);
+	elseif(GetObjProperty(corpse, "nocorpse"))
+		foreach item in EnumerateItemsInContainer(corpse)
+			MoveObjectToLocation(item, corpse.x, corpse.y, corpse.z, corpse.realm, MOVEOBJECT_FORCELOCATION);
+		endforeach
+		DestroyItem(corpse);
+	else
+		var corpseof := GetObjProperty(corpse,"npctemplate");
+		corpseof := corpseof; // Added to stop the STUPID 'not used' warning from eCompile.
+	endif
 endprogram
 
 function dismount(corpse)
@@ -189,7 +172,9 @@ function dismountme(who, corpse)
 endfunction
 
 ///////////////////
-//  if whatever died was a totem, this function (sometimes) makes another totem that can be repaired
+//  if whatever died was a totem, this function (sometimes) makes another totem that can be repaired.
+//	Note: Totems are not (yet) implemented in the Distro. If/when they are they will probably
+//  be an optional package, if they can be implemented as their own package.
 ///////////////////
 
 function RemakeTotem(corpse, npctemplate)
@@ -247,29 +232,4 @@ function RemakeTotem(corpse, npctemplate)
 	set_critical(0);
 
 endfunction
-
-///////////////////
-//  We don't use this on Hope but I added it because there was a call to it from
-//  the new code snippet added for DldNGrey's Regional Spawner.
-//  this function makes merchants and other similar NPCs respawn
-///////////////////
-/*
-function AddToSpawner (corpse, npctemplate)
-	var homepoint := GetObjProperty (corpse, "myhome");
-	if (!homepoint)
-		return;
-	endif
-
-	set_critical (1);
-	homepoint[4] := npctemplate;
-	var merchants_to_respawn := { };
-	if (GetGlobalProperty ("respawnmerchants"))
-		merchants_to_respawn := GetGlobalProperty ("respawnmerchants");
-	endif
-
-	merchants_to_respawn.append (homepoint);
-	SetGlobalProperty ("respawnmerchants", merchants_to_respawn);
-	set_critical(0);
-endfunction
-*/
 
