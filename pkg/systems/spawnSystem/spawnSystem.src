@@ -1,15 +1,16 @@
 /*
 
 	spawnSystem originally created by Austin for the 0.97 Distro
-	
+
 	Bugs fixed by Edwards
-	
+
 	Adapted for the Basic Distro by Yukiko 10-Sep-2015
 
 
 */
 use uo;
 use os;
+use util;
 
 include ":spawnsystem:engines";
 include ":spawnsystem:groups";
@@ -25,14 +26,21 @@ program SpawnSystem()
         endif
 
 	SetGlobalProperty( "#SpawnSystemPid", GetPid() );
- 
+
 	Initialize();
 
 	while ( 1 )
 		SpawnTheRegions();
 
-		var delay := CalcNextTick();
-  
+		// The following line was the original line that returned 'delay'.
+		// We were getting delay times in the area of 1656552031 seconds.
+		// That is over 52 YEARS delay.
+		// var delay := CalcNextTick();
+		// Print("Delay = " + delay );
+		// The following line is a temporary fix for the delay until
+		// we can look deeper at the code to determine why the spawn system
+		// is returning such a long delay.
+		var delay := RandomIntMinMax( 59, 121 );
 		Wait_For_Event( delay );
 	endwhile
 
