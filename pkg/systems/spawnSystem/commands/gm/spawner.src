@@ -75,8 +75,8 @@ program SpawnerCMD( who )
 				input := BuildRegionListGump( who, cur_realm );
 			elseif( cur_menu == SHOW_THIS_REGION )
 				input := BuildRegionGump( who, cur_realm, cur_region );
-			//elseif( cur_menu == ADD_REALM_BTN )
-				//input := BuildAddRealmGump( who );
+			elseif( cur_menu == ADD_REALM_BTN )
+				input := BuildAddRealmGump( who );
 			elseif( cur_menu == ADD_REGION_BTN )
 				input := BuildRegionGump( who, cur_realm );
 			elseif( cur_menu == SHOW_GROUPS_BTN )
