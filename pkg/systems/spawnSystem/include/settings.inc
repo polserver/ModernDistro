@@ -1,9 +1,9 @@
 /*
 
 	spawnSystem originally created by Austin for the 0.97 Distro
-	
+
 	Bugs fixed by Edwards
-	
+
 	Adapted for the Basic Distro by Yukiko 10-Sep-2015
 
 
@@ -12,6 +12,19 @@ use uo;
 use os;
 use cfgfile;
 
+/*
+ * SS_GetSettingsCfgFile(engine_name)
+ *
+ * Purpose
+ * Reads in an engine's settings.cfg or if no engine name is passed, the main settings.cfg.
+ *
+ * Parameters
+ * engine_name:	A string containing the name of an engine.
+ *
+ * Return value
+ * A config file reference.
+ *
+ */
 function SS_GetSettingsCfgFile( engine_name:="" )
 
 	var cfg_path := ":spawnsystem:settings";
@@ -27,6 +40,20 @@ function SS_GetSettingsCfgFile( engine_name:="" )
 	return cfg;
 endfunction
 
+/*
+ * SS_GetSettingsCfgElem(cfg_file, elem_name)
+ *
+ * Purpose
+ * Retrieves an elem from a config file.
+ *
+ * Parameters
+ * cfg_file:	A config file reference.
+ * elem_name:	A string matching the elem name to be retrieved.
+ *
+ * Return value
+ * A config file elem reference.
+ *
+ */
 function SS_GetSettingsCfgElem( cfg_file, elem_name )
 
 	var cfg := SS_GetSettingsCfgFile();
