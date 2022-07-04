@@ -1,7 +1,7 @@
 use uo;
 use os;
 
-include "include/eventid";
+include "include/eventID";
 include ":contextmenus:constants";
 include ":contextmenus:contextMenu";
 include ":contextmenus:events";
