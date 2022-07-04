@@ -1,14 +1,14 @@
 use uo;
 use os;
 
+include ":security:contextMenuReport";
 
-program popupmenu(who)
-    who := who;
+program popupmenu( mobile, obj )
 
-// A placeholder for popup menu program.
-// This should stop the console exception error reporting the missing popupmenu.ecl missing.
+	var script := Start_Script( ":contextmenus:contextMenu", { mobile, obj } );
+	if( script.errortext )
+		ContextMenu_ReportText( mobile, "Unable to start ':contextmenus:contextMenu' -> "+script.errortext, CM_REPORT_CONSOLE+CM_REPORT_SYSLOG+CM_REPORT_BROADCAST );
+	endif
 
-// In the future I will try to determine if this program is necessary and if so will actually add functional
-// code to it.
+	return 1;
 endprogram
-

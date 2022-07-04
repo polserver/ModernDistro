@@ -1,8 +1,115 @@
 use uo;
 use os;
+use cfgfile;
 use polsys;
 
+include ":body:body";
+include ":contextmenus:contextMenu";
+// include "include/mrcspawn";
+
 program Install()
-	Print( "Custom NPC Class Methods Installed." );
+
+	Print( "System Hook -> NPC Class Methods" );
+
 	return 1;
 endprogram
+
+exported function GetTooltipInfo( npc )
+
+	npc := npc;
+
+	return 1;
+endfunction
+
+exported function ControlSlots( npc, amount := 0 )
+
+	var control_slots := GetObjProperty( npc, "ControlSlots" );
+	if( !amount )
+		if( control_slots )
+			return control_slots;
+		else
+			return error{ "errortext":="This npc has no control slots set." };
+		endif
+	else
+		if( !SetObjProperty( npc, "ControlSlots", amount ) )
+			return error{ "errortext":="Could not change the control slots of this npc." };
+		endif
+	endif
+
+	return IncRevision( npc );
+endfunction
+
+exported function ParseTemplate( npc )
+
+	var npc_template := npc.npctemplate;
+
+	var colon_a := Find( npc_template, ":", 1 );
+	var colon_b := Find( npc_template, ":", 2 );
+
+	if( !colon_a || !colon_b )
+		return Struct{ "Package":="", "Template":=npc_template };
+	endif
+
+	return Struct{ "Package":=npc_template[colon_a+1, colon_b-2], "Template":=npc_template[colon_b+1, Len( npc_template )] };
+endfunction
+
+exported function NPCInfo( npc )
+
+	var template := ParseTemplate( npc );
+	var npc_cfg := ReadConfigFile( ":"+template.Package+":npcdesc" );
+	if( npc_cfg.errortext )
+		return error{"errortext":="Error::NPCInfo() - Could not open :"+template.Package+":npcdesc ->"+npc_cfg.errortext};
+	endif
+
+	var cfg_elem := npc_cfg[template.Template];
+	if( cfg_elem.errortext )
+		return error{"errortext":="Error::NPCInfo() - Could not find elem ["+template.Template+"] ->"+cfg_elem.errortext};
+	endif
+
+	return cfg_elem;
+endfunction
+
+exported function GetAlignment( npc )
+
+	var npc_info := NPCInfo( npc );
+	if( npc_info.errortext )
+		return npc_info.errortext;
+	endif
+
+	return CStr( npc_info.alignment );
+endfunction
+
+// 3006103
+exported function GetContextMenuEntries( npc, player )
+
+	var list := Array,
+		mrcspawn_cfg := ReadConfigFile("::mrcspawn"),
+		template_info := ParseTemplate( npc ),
+		disabled := ContextMenu_Disabled( player, npc, CM_RANGE_CHECK+CM_LOS_CHECK+CM_DEAD_CHECK );
+
+	if( HasPaperdoll( npc.graphic ) )
+		list.Append( 3006123 );
+	endif
+
+	if( npc.npctemplate == "banker" || npc.npctemplate == "bucsbanker" )
+		list.Append( Struct{ "cliloc":=3006105, "disabled":=disabled } );
+		list.Append( Struct{ "cliloc":=3006124, "disabled":=disabled } );
+	elseif( TypeOfInt( mrcspawn_cfg[template_info.Template] ) == OT_CONFIGELEMREF )
+		list.Append( Struct{ "cliloc":=3006103, "disabled":=disabled } );
+		list.Append( Struct{ "cliloc":=3006104, "disabled":=disabled } );
+	elseif( npc.master == player )
+		if( npc.objtype == 0x123 || npc.objtype == 0x124 )
+			list.Append( Struct{ "cliloc":=3006145, "disabled":=disabled } );
+		endif
+		list.Append( 3006109 ); // Command: Drop
+		list.Append( 3006108 ); // Command: Follow
+		list.Append( 3006107 ); // Command: Guard
+		list.Append( 3006111 ); // Command: Kill
+		list.Append( 3006112 ); // Command: Stop
+		list.Append( 3006114 ); // Command: Stay
+		list.Append( 3006118 ); // Release
+		list.Append( 3006113 ); // Transfer
+	endif
+
+	return list;
+endfunction

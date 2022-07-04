@@ -112,7 +112,7 @@ program stablemaster()
                                     elseif((text["vendor train"]) || (text["vendor teach"]) || (text["merchant train"]) || (text["merchant teach"]))
                                       TurnToward(ev.source);
                                       MerchantTrain(me, ev.source, text);
-                                    elseif(ev.text["stable"])
+                                    elseif(text["stable"])
                                     if(len(mystorage) >= 50)
                                       say("Im afraid im booked solid at the moment, please come again later");
                                     else

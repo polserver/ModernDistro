@@ -57,3 +57,51 @@ exported function SpeedWalk( mobile, toggle := 0 )
 
 	return 1;
 endfunction
+
+exported function ChangeCombatant( mobile, combatant:=0 )
+
+	var packet := CreatePacket( 0xAA, 5 );
+
+	if( !combatant.IsA( POLCLASS_MOBILE ) )
+		packet.SetInt32( 1, 0x0 );
+	else
+		packet.SetInt32( 1, combatant.serial );
+	endif
+
+	return packet.SendPacket( mobile );
+endfunction
+
+exported function IsPlayer( mobile )
+
+	return ( mobile.IsA( POLCLASS_MOBILE ) && !mobile.IsA( POLCLASS_NPC ) );
+endfunction
+
+// 0x11, 65 bytes
+exported function CloseStatusGump( mobile, serial )
+
+	var packet := CreatePacket( 0xBF, 13 );
+	packet.SetInt16( 1, 0x0D );
+	packet.SetInt16( 3, 0x16 );
+	packet.SetInt32( 5, 0x02 );
+	packet.SetInt32( 9, serial );
+
+	return packet.SendPacket( mobile );
+endfunction
+
+// For Ankh
+// 3006196 - Lock Karma
+// 3006197 - Unlock Karma
+// 3006198 - Tithe Gold
+exported function GetContextMenuEntries( mobile, player )
+
+	var list := Array;
+	if( mobile == player )
+		list.Append( 3006123 );
+		list.Append( 3006145 );
+		// list.Append( 3006201 );
+	else
+		list.Append( 3006123 );
+	endif
+
+	return list;
+endfunction

@@ -23,6 +23,18 @@ program merchantnode(itm)
 	SetNodeName("initializing");
 	sleep(RandomInt(1));
 
+// Assign Merchant Node serial to the npc as a cprop.
+	var npc := 0;
+	foreach serial in ( GetObjProperty( item, "NpcList" ) )
+		npc := SystemFindObjectBySerial( serial );
+		if( npc.IsA( POLCLASS_NPC ) )
+			if( GetObjProperty( npc, "MerchantNode" ) )
+				continue;
+			endif
+
+			SetObjProperty( npc, "MerchantNode", item.serial );
+		endif
+	endforeach
 // if all nodes are globally disabled, we sleep until they are enabled again.
 	if(GetGlobalProperty("nomerchants"))
 		SetNodeName("globally disabled");
@@ -116,7 +128,8 @@ program merchantnode(itm)
 			endif
 			var ev := os::wait_for_event(30);
 			case(ev.type)
-				SYSEVENT_SPEECH: if(template == 2)
+				SYSEVENT_SPEECH: 
+						if(template == 2)
 							ProcessBankerText(ev);
 						else
 							ProcessMerchantText(ev);
@@ -260,22 +273,25 @@ endfunction
 function ProcessBankerText(ev)
 	var text := lower(ev.text);
 	var who := ev.source;
-	var npc;
+	var npc := ev.npc;
 	var evnt := array;
 	evnt.+ type;
 	evnt.+ source;
 	evnt.+ text;
 	if(text["bankers note"] || text["banker's note"] || text["bankers order"] || text["banker's order"] || text["bank draft"] || text["balance"] || text["bank"])
 		var dis := 15;
-		foreach mob in npclist
-			if(CheckLineOfSight(ev.source, mob))
-				var dst := Distance(who, mob);
-				if(dst < dis)
-					dis := dst;
-					npc := mob;
+		if( !npc.IsA( POLCLASS_NPC ) )
+			foreach mob in npclist
+				if(CheckLineOfSight(ev.source, mob))
+					var dst := Distance(who, mob);
+					if(dst < dis)
+						dis := dst;
+						npc := mob;
+					endif
 				endif
-			endif
-		endforeach
+			endforeach
+		endif
+
 		evnt.type := EVID_NODE;
 		evnt.source := ev.source;
 		evnt.text := ev.text;
@@ -288,7 +304,7 @@ endfunction
 function ProcessMerchantText(ev)
 	var text := lower(ev.text);
 	var who := ev.source;
-	var npc;
+	var npc := ev.npc;
 	var pass := 0;
 	var evnt := array;
 	evnt.+ type;
@@ -303,29 +319,32 @@ function ProcessMerchantText(ev)
 	if (text["buy"] || text["sell"] || text["job"] || text["train"] || text["teach"] || (pass))
 
 		// Just pick the nearest vendor if the player isn't specific.
-		if( text["merchant"] || text["vendor"] || (pass) )
-			var dis := 7;
+		if( !npc.IsA( POLCLASS_NPC ) )
+			if( text["merchant"] || text["vendor"] || (pass) )
+				var dis := 7;
+				foreach mob in npclist
+					if(CheckLineOfSight(who, mob))
+						var dst := Distance(who, mob);
+						if(dst < dis)
+							dis := dst;
+							npc := mob;
+						endif
+					endif
+				endforeach
+			endif
+		
+
+		// Has the player said the name of the vendor?  Use that.
+			var vendorname;
 			foreach mob in npclist
 				if(CheckLineOfSight(who, mob))
-					var dst := Distance(who, mob);
-					if(dst < dis)
-						dis := dst;
+					vendorname := splitwords(mob.name);
+					if (text[lower(vendorname[1])])
 						npc := mob;
 					endif
 				endif
 			endforeach
 		endif
-
-		// Has the player said the name of the vendor?  Use that.
-		var vendorname;
-		foreach mob in npclist
-			if(CheckLineOfSight(who, mob))
-				vendorname := splitwords(mob.name);
-				if (text[lower(vendorname[1])])
-					npc := mob;
-				endif
-			endif
-		endforeach
 	endif
 	if (!npc)
 		return;

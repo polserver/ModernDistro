@@ -1,0 +1,31 @@
+use uo;
+use os;
+
+include ":body:body";
+include ":contextmenus:contextMenu";
+
+program stablemaster_methods()
+
+	return 1;
+endprogram
+
+exported function IsStablemaster( npc )
+
+	npc := npc; // Avoid Compiler Warnings...
+
+	return 1;
+endfunction
+
+exported function GetContextMenuEntries( npc, player )
+
+	var list := Array,
+		disabled := ContextMenu_Disabled( player, npc, CM_RANGE_CHECK+CM_LOS_CHECK+CM_DEAD_CHECK );
+
+	if( HasPaperdoll( npc.graphic ) )
+		list.Append( 3006123 );
+	endif
+
+	list.Append( Struct{ "cliloc":=3006126, "disabled":=disabled } );
+
+	return list;
+endfunction
