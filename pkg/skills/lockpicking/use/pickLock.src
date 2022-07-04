@@ -10,8 +10,8 @@ include ":attributes:attributes";
 program picklock(who, lockpick)
 	EraseObjProperty(who, "IsMeditating");
 	EraseObjProperty(who, "HealTimer");
-	SendSysMessageCL( who, 502068, color := 88 ); // What do you want to pick?
-	SendSysMessageCL( who, 502067, color := 44 ); // Remember!  Locked chests may also be trapped!
+	SendSysMessageCL( who, 502068, color := 4 ); // What do you want to pick?
+	SendSysMessageCL( who, 502067 ); // Remember!  Locked chests may also be trapped!
 	var victim := Target(who);
 	if(!victim)
 		SendSysMessageCL( who, 1042023, color := 33 ); // Cancelled.
@@ -43,7 +43,7 @@ program picklock(who, lockpick)
 				PickLockedItem(who, lockpick, victim, diff);
 				return;
 			else
-				SendSysMessageCL( who, 502073, color := 44 ); // This lock cannot be picked by normal means...
+				SendSysMessageCL( who, 502073 ); // This lock cannot be picked by normal means...
 				return;
 			endif
 		endif
@@ -52,13 +52,13 @@ endprogram
 
 function PickMLockedItem(who, lockpick, chest, diff)
 	if(!chest.locked)
-		SendSysMessageCL( who, 502069, color := 44 ); // This does not appear to be locked.
+		SendSysMessageCL( who, 502069 ); // This does not appear to be locked.
 		return;
 	endif
 	PlaySoundEffect(who, SFX_242);
 	sleep(1);
 	if(SkillCheck(who, LOCKPICKING, diff, (diff * 2)) > 0)
-		SendSysMessagecl( who, 502076, color := 68 ); // The lock quickly yields to your skill.
+		SendSysMessagecl( who, 502076 ); // The lock quickly yields to your skill.
 		PrintTextAbovePrivateCL( who, chest, 3005143, color := 68 ); // Unlocked
 		EraseObjProperty(chest, "MLockPickDiff");
 		SetObjProperty( chest, "LastPickedBySerial", who.serial );
