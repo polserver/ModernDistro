@@ -6,7 +6,7 @@
 //
 //	Date Created:	Unknown
 //
-//	Description:	Performs forensic evalustion on a corpse to try to determine
+//	Description:	Performs forensic evaluation on a corpse to try to determine
 //					the means of death and identity of the killer.
 //					The program was modifed to allow the player, with sufficient
 //					skill in magery to determine if the victim was killed by magic
@@ -37,6 +37,7 @@ var kname, kserial, kweapon, kspell, kpoison, strmessage;
 
 program ForensicEvaluation(who)
 
+Print( "forensic 01" );
 	var data := {};
 	data[1] := "forensics";
 	data[2] := ReadGameClock();
@@ -47,14 +48,20 @@ program ForensicEvaluation(who)
 	var cprop_data;
 	EraseObjProperty(who, "IsMeditating");
 //	EraseObjProperty(who, "HealTimer");
-	SendSysMessageCL( who, 501000, color := 88 ); // Select what you want to examine.
+	SendSysMessageCL( who, 501000, color := 4 ); // Select what you want to examine.
 	var what := Target(who, TGTOPT_CHECK_LOS);
 	if (!what)
 		SendSysMessageCL( who, 1042023, color := 33 ); // Cancelled.
 		return;
 	endif
 
+	if( (what.IsA( POLCLASS_CONTAINER )) && !(what.IsA( POLCLASS_CORPSE )) )
+		WasTheLockPicked( who, what );
+		return;
+	endif
+Print( "forensic 02" );
 	last_damage := GetObjProperty(what, "LastDamage");
+	Print( last_damage );
 	// If no "LastDamage" CProp then nothing to report
 	if( !last_damage )
 		SendSysMessageCL( who, 501005, color := 66 ); // You notice nothing unusual.
@@ -67,6 +74,11 @@ program ForensicEvaluation(who)
 	kweapon := last_damage.weapon.desc;		// If a weapon was used, get the name
 	kspell := last_damage.spell;			// If a spell was used, get the name.
 	kpoison := last_damage.damage_type;		// Get the damage type. Specifically for detecting poisoning.
+	Print("Name " + kname );
+	Print("Serial " + kserial );
+	Print("Weapon " + kweapon );
+	Print("Spell " + kspell );
+	Print("Poison " + kpoison );
 	// The last damage that was inflicred will always be the damage that killed the victim.
 	// So, if poison damage is the last damage, that will be the cause of death even if
 	// a weapon was used in the attack.
@@ -77,8 +89,8 @@ program ForensicEvaluation(who)
 	endif
 
 	if (SkillCheck(who, FORENSIC_EVALUATION, -1, pts) > 0)
-		SpeakTheFindings( who );
-		cprop_data := BuildTheCProp( who, what );
+		SpeakTheFindings( who, kname, kpoison, kspell );
+		cprop_data := BuildTheCProp( who, what, kname, kpoison, kspell );
 
 		// Create the "evidence" scroll.
 		var proof := CreateItemInBackpack(who, "evidence", 1);
@@ -88,13 +100,52 @@ program ForensicEvaluation(who)
 		if(kserial)
 			SetObjProperty(proof, "KillerSerial", kserial);
 		endif
+	else
+		// Didn't pass the SkillCheck.
+		PrintTextAbovePrivateCL( who, what, 501001, color := 44 ); // You cannot determine anything useful.
 	endif
-	// Didn't pass the SkillCheck.
-	PrintTextAbovePrivateCL( who, what, 501001, color := 44 ); // You cannot determine anything useful.
 
 endprogram
 
-function SpeakTheFindings( who )
+function WasTheLockPicked( who, what )
+
+	var last_picked := GetObjProperty( what, "LastPickedBySerial" );
+	var last_magic_unlocked := GetObjProperty( what, "MagUnlockedBySerial" );
+
+	if( last_picked )
+		var pts := CInt(GetAttribute(who, FORENSIC_EVALUATION) / 10) + 20;
+		if(pts < 10)
+			pts := 10;
+		endif
+
+		if (SkillCheck(who, FORENSIC_EVALUATION, -1, pts) > 0)
+			var picker := SystemFindObjectBySerial( last_picked, SYSFIND_SEARCH_OFFLINE_MOBILES );
+			PrintTextAboveCL( who, 1042749, picker.name, color := 66 ); // This lock was opened by ~1_PICKER_NAME~.
+			PrintTextAbove( who, "The lock was picked by " + picker.name, color := 56 );
+			return 1;
+		else
+			PrintTextAbove( who, "I cannot determine who might have tampered with this.", color := 40 );
+			SendSysMessageCL( who, 501001 ); // You cannot determine anything useful.
+			return 0;
+		endif
+	elseif( last_magic_unlocked )
+		var picker := SystemFindObjectBySerial( last_magic_unlocked, SYSFIND_SEARCH_OFFLINE_MOBILES );
+		if( AP_GetSkill(who, MAGERY) > 50 )
+			SendSysMessage( who, "This was magically unloced by " + picker.name + ".", color := 68 );
+			PrintTextAbove( who, picker.name + "used magic unlock to open this." );
+		else
+			SendSysMessage( who, "Magic unlock was used on this but you cannot determine who did it.", color := 68 );
+			PrintTextAbove( who, "Magic unlock was used on this but I cannot determine who did it.", color := 68 );
+		endif
+		return 1;
+	else
+		PrintTextAbove( who, "This hasn't been tampered with.", color := 66 );
+		SendSysMessageCL( who, 501005, color := 66 ); // You notice nothing unusual.
+	endif
+
+endfunction
+
+function SpeakTheFindings( byref who, byref kname, byref kpoison, byref kspell )
 
 	// Check for the killer's name.
 	if( kname )
@@ -118,11 +169,11 @@ function SpeakTheFindings( who )
 	// A certain amount of magery skill is required to detect death from a spell.
 	elseif( kspell )
 		if( AP_GetSkill(who, MAGERY) > 80 )
-			SendSysMessage( who, "A " + kspell + " spell was used to kill the subject.", color := 68 );
+			SendSysMessage( who, "The " + kspell + " spell was used to kill the subject.", color := 68 );
 		elseif( AP_GetSkill(who, MAGERY) > 50 )
-			SendSysMessage( who, "It appears a  " + kspell + " spell was used to kill the subject.", color := 68 );
+			SendSysMessage( who, "It appears the  " + kspell + " spell was used to kill the subject.", color := 68 );
 		else
-			SendSysMessage( who, "It appears supernatural means was used to kill the subject.", color := 68 );
+			SendSysMessage( who, "It appears supernatural means were used to kill the subject.", color := 68 );
 		endif
 	else
 		SendSysMessage( who, "I could not determine what was used to kill the subject.", color := 68 );
@@ -130,7 +181,7 @@ function SpeakTheFindings( who )
 
 endfunction
 
-function BuildTheCProp( who, byref what )
+function BuildTheCProp( byref who, byref what, byref kname, byref kpoison, byref kspell )
 
 	// Here we build the CProp to be displayed in the HTML scroll gump.
 	if( kname )
@@ -151,9 +202,9 @@ function BuildTheCProp( who, byref what )
 	// A certain amount of magery skill is required to detect death from a spell.
 	elseif( kspell )
 		if( AP_GetSkill(who, MAGERY) > 80 )
-			strmessage := strmessage + "A " + kspell + " spell was used to kill the subject.";
+			strmessage := strmessage + "The " + kspell + " spell was used to kill the subject.";
 		elseif( AP_GetSkill(who, MAGERY) > 50 )
-			strmessage := strmessage + "It appears a  " + kspell + " spell was used to kill the subject.";
+			strmessage := strmessage + "It appears the " + kspell + " spell was used to kill the subject.";
 		else
 			strmessage := strmessage + "It appears the victim was killed by supernatural power.";
 		endif

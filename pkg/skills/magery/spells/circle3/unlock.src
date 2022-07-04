@@ -45,6 +45,7 @@ program cast_strength( parms )
 				SetObjProperty( cast_on, "LockID", orig_lock_id );
 			endif
 			cast_on.locked := 0;
+			SetObjProperty( cast_on, "MagUnlockedBySerial", caster.serial );
 		endif
 	endif
 

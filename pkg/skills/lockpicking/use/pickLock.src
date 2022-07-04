@@ -61,6 +61,7 @@ function PickMLockedItem(who, lockpick, chest, diff)
 		SendSysMessagecl( who, 502076, color := 68 ); // The lock quickly yields to your skill.
 		PrintTextAbovePrivateCL( who, chest, 3005143, color := 68 ); // Unlocked
 		EraseObjProperty(chest, "MLockPickDiff");
+		SetObjProperty( chest, "LastPickedBySerial", who.serial );
 		chest.locked := 0;
 	else
 		PrintTextAbovePrivateCL( who, chest, 502075, color := 33 ); // You are unable to pick the lock.
@@ -88,6 +89,7 @@ function PickLockedItem(who, lockpick, chest, diff)
 	if(SkillCheck(who, LOCKPICKING, diff, (diff * 2)) > 0)
 		SendSysMessageCL( who, 502076, 3, 68 ); // The lock quickly yields to your skill.
 		PrintTextAbovePrivateCL( who, chest, 3005143, color := 68 ); // Unlocked
+		SetObjProperty( chest, "LastPickedBySerial", who.serial );
 	else
 		PrintTextAbovePrivateCL( who, chest, 502075, color := 33 ); // You are unable to pick the lock.
 		if(diff < 10)
@@ -122,6 +124,7 @@ function PickTreasureChest(who, lockpick, chest)
 		PlaySoundEffect(chest,SFX_200);
 		SendSysMessageCL( who, 502076, color := 66 ); // The lock quickly yields to your skill.
 		PrintTextAbovePrivateCL( who, chest, 3005143, 66 ); // Unlocked
+		SetObjProperty( chest, "LastPickedBySerial", who.serial );
 		chest.locked := 0;
 	else
 		PrintTextAbovePrivateCL(who, chest, 502075, color := 33 ); // You are unable to pick the lock.
