@@ -37,7 +37,6 @@ var kname, kserial, kweapon, kspell, kpoison, strmessage;
 
 program ForensicEvaluation(who)
 
-Print( "forensic 01" );
 	var data := {};
 	data[1] := "forensics";
 	data[2] := ReadGameClock();
@@ -59,7 +58,6 @@ Print( "forensic 01" );
 		WasTheLockPicked( who, what );
 		return;
 	endif
-Print( "forensic 02" );
 	last_damage := GetObjProperty(what, "LastDamage");
 	Print( last_damage );
 	// If no "LastDamage" CProp then nothing to report
@@ -74,11 +72,6 @@ Print( "forensic 02" );
 	kweapon := last_damage.weapon.desc;		// If a weapon was used, get the name
 	kspell := last_damage.spell;			// If a spell was used, get the name.
 	kpoison := last_damage.damage_type;		// Get the damage type. Specifically for detecting poisoning.
-	Print("Name " + kname );
-	Print("Serial " + kserial );
-	Print("Weapon " + kweapon );
-	Print("Spell " + kspell );
-	Print("Poison " + kpoison );
 	// The last damage that was inflicred will always be the damage that killed the victim.
 	// So, if poison damage is the last damage, that will be the cause of death even if
 	// a weapon was used in the attack.
