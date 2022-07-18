@@ -156,7 +156,8 @@ endfunction
 /*
  * ApplySpellDamageEX(mobile, amount, type, source, circle, spell := "")
  *
- * Purpose: Does spell damage to mobile taking into account mobile's AR
+ * Purpose: Does spell damage to mobile taking into account
+ * the mobile's elemental resistances if enabled in settings.
  *
  * Parameters
  * mobile: Victim
@@ -183,7 +184,7 @@ function ApplySpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circle 
 	endif
 	// Check to see if we will take standard resistances into account against spell damage.
 	// settings := DMG_GetSettingsCfgElem("Settings");
-	if ( CInt(settings.UseDamageMembers) )
+	if ( CInt(settings.UseDamageTypes) )
 		amount := CalcDamageAmount(mobile, amount, type);
 	endif
 
@@ -214,7 +215,7 @@ endfunction
 /*
  * ApplyRawSpellDamageEX(mobile, amount, type, source, circle, circle := 1, spell := "")
  *
- * Purpose: Does spell damage to a mobile ignoring the mobile's AR
+ * Purpose: Does spell damage to a mobile ignoring the mobile's elemental resistances.
  *
  * Parameters
  * mobile: Victim
@@ -232,12 +233,6 @@ function ApplyRawSpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circ
 	if ( settings.UseMRInAllSpells )
 		amount := Resisted(circle, source, mobile, amount);
 	endif
-
-	settings := DMG_GetSettingsCfgElem("Settings");
-	if ( settings.UseDamageTypes )
-    amount := CalcDamageAmount(mobile, amount, type);
-	endif
-
 
 	if ( amount == error )
 		return 0;
