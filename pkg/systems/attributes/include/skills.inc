@@ -206,7 +206,7 @@ endfunction
  * skill_name:	Name of the skill to retrieve default points for.
  *
  * Return value
- * Returns a dictionary or error if the skill has no AwardDefault entry.
+ * Returns an integer or error if the skill has no AwardDefault entry.
  *
  */
 function AP_GetSkillDefaultAward( skill_name )

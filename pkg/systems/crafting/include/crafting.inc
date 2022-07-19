@@ -151,9 +151,11 @@ function CreateCraftItem(who, craft_skill, use_on, use_onobjtype, objtype, amoun
 			nme[Find(nme, "plain ", 1),6] := "";
 		endif
 		if( (rcolor == 1) && (craft_config[objtype].Retain == 1) )
-			if( resource_config[use_onobjtype].Color )
-				theitem.color := resource_config[use_onobjtype].Color;
-			endif
+			// I am leaving the original code commented out until my change has been verified to work properly.
+			// if( resource_config[use_onobjtype].Color )
+				// theitem.color := CInt(resource_config[use_onobjtype].Color);
+				theitem.color := use_on.color;
+			// endif
 		endif
 		SetObjProperty(theitem, "material", use_onobjtype);
 		if( !SubtractAmount(use_on, amount) )
