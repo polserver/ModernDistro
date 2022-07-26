@@ -21,6 +21,7 @@ program chrdeath(corpse, ghost)
 	while(TS_GetTimerNames(ghost, "P").size() > 0)
 		TS_CurePoison(ghost, 100000, "P", 5);
 	endwhile
+	TS_Death(ghost); // This should delete all buffs upon player's death.
 	var last_damage := GetObjProperty(ghost, "LastDamage");
 	if(last_damage != error)
 		AdjustNoto((SystemFindObjectBySerial(last_damage.serial, SYSFIND_SEARCH_OFFLINE_MOBILES)), ghost);
