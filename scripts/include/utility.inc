@@ -1,6 +1,7 @@
 use basic;
 use storage;
 
+// Used in two files...
 function find_or_create_storage( areaname )
   var area;
   area := FindStorageArea( areaname );
@@ -12,6 +13,7 @@ function find_or_create_storage( areaname )
   return area;
 endfunction
 
+// Used in three files...
 function find_or_create_item(storage, name, objtype := 0x1966a)
 	var item_found := FindRootItemInStorageArea(storage, name);
 	if(item_found)
@@ -21,6 +23,7 @@ function find_or_create_item(storage, name, objtype := 0x1966a)
 	item_found := CreateRootItemInStorageArea( storage, name, objtype);
 	return item_found;
 endfunction
+
 
 function IsLocationAccessible(character, x, y, z)
   var xd, yd, zd;
@@ -42,7 +45,6 @@ endfunction
 ///////////////////
 // Sends messages to all online GMs. Useful for important errors
 ///////////////////
-
 function SendGMErrorMessage(text, syslogit := 0, mincmdlevel := 1)
     if ( syslogit )
         syslog(text);
@@ -72,7 +74,6 @@ endfunction
 //                        might contain numeric values as strings in its elements.
 //
 /////////////////////////////////////////////////////////////////////////////////////////
-
 function IsInsideRectangle (object, boundary)
 
     if ((object.x >= CInt(boundary[1]) && object.x <= CInt(boundary[3])) && (object.y >= CInt(boundary[2]) && object.y <= CInt(boundary[4])))
@@ -101,7 +102,6 @@ endfunction
 //  Returns               0 if 'object' isn't within the rectangle at the ZCoord
 //                        1 if 'object' is in the rectangle AND at the desired ZCoord
 //////////////////////////////////////////////////////////////////////////////////////////////
-
 function IsInsideRectAtZLevel (object, boundary, ZCoord)
 
     SendSysMessage(object, ZCoord + "     " +  CStr(object.z));
@@ -159,6 +159,7 @@ function EnumerateItemsInContainerOfObjtype(container, objtype)
 endfunction
 
 //returns all the 'top-level' items in container of objtype
+// Deprecated for: FindSubstance( container, objtype, 1, 0, FINDSUBSTANCE_ROOT_ONLY+FINDSUBSTANCE_FIND_ALL )
 function ListRootItemsInContainerOfObjtype(container, objtype)
 
 	var ret := { };
@@ -172,16 +173,19 @@ function ListRootItemsInContainerOfObjtype(container, objtype)
 
 endfunction
 
-function InInventory(inventory, it)
+function InInventory( inventory, item )
 
-	foreach item in EnumerateItemsInContainer(inventory)
-		if (item == it)
-			return 1;
-		endif
+	return ( item in EnumerateItemsInContainer( inventory ) );
+endfunction
+
+function CountItemsOfObjtypeInContainer( byref container, byref objtype )
+
+	var amt := 0;
+	foreach item in ( FindSubstance( container, objtype, 1, 0, FINDSUBSTANCE_FIND_ALL ) )
+		amt+=item.amount;
 	endforeach
 
-	return 0;
-
+	return amt;
 endfunction
 
 function IsContainer( it )
@@ -210,7 +214,6 @@ function IsDungeon( x, y )
 	endif
 
 	return 0;
-
 endfunction
 
 function NoTeleportZone( x, y )
@@ -222,46 +225,4 @@ function NoTeleportZone( x, y )
 	endif
 
 	return 0;
-
 endfunction
-
-//	GetStacksOfTypeInContainer (container, objtype)
-//	Loops through the given container looking for item stacks from the given objtype.
-//	Returns: an array where the first element is the sum of items from the
-//		 given objtype within the container, and the following elements are
-//	ObjRefs to the item stacks found.
-//	Example: if used at a container with 2 stacks of 50 cloth, the function
-//		 would return {100, 1st_stack_of_cloth, 2nd_stack_of_cloth}.
-function GetStacksOfTypeInContainer (container, objtype)
-	var result := {0};
-	foreach item in EnumerateItemsInContainer(container)
-		if (item.objtype == objtype)
-			result.append(item);
-			result[1] := result[1]+item.amount;
-		endif
-	endforeach
-	return result;
-endfunction
-
-//	SubtractFromStackArray (byref arrayofobjrefs, amount)
-//	Loops through the array of objects until the given amount of items is subtracted, or the last item is destroyed. IE if 2 piles
-//	of 10k gold are passed as the first argument, and 15000 is passed as the second argument, the first pile will be destroyed and the
-//	second pile will have 5000 gold subtracted from it.
-//	In case the array contains non-POL-items objects, those objects are ignored.
-//	Returns: amount of items successfully subtracted.
-
-function SubtractFromStackArray (byref arrayofobjrefs, amount)
-	var needed := amount;
-	foreach item in arrayofobjrefs
-		if (!item.IsA(POLCLASS_ITEM)) continue; endif
-		if (item.amount<needed)
-			needed := needed-item.amount;
-			SubtractAmount(item, item.amount);
-		else
-			SubtractAmount(item, needed);
-			return amount;
-		endif
-	endforeach
-	return (amount-needed);
-endfunction
-

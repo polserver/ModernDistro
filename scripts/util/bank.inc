@@ -11,6 +11,7 @@ use os;
 use storage;
 
 include ":containers:storageAreas";
+include ":currency:currency";
 include "include/objtype";
 include "include/utility";
 
@@ -63,14 +64,3 @@ function OpenWorldBank()
   endif
   return wbank;
 endfunction
-
-function SpendCoin(who, quantity, cont, cointype)
-    var hisGold := GetStacksOfTypeInContainer(cont, cointype);
-    who := who;
-    if(hisGold[1] < quantity)
-	return 0;
-    endif
-    SubtractFromStackArray (hisGold, quantity);
-    return 1;
-endfunction
-

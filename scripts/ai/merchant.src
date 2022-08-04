@@ -373,7 +373,7 @@ function BuyAll (byref you)
 	var totalsale := 0;
 	var itemamount := 0;
 
-	foreach item in ListRootItemsInContainerOfObjtype (items.container, items.objtype)
+	foreach item in ( FindSubstance( items.container, items.objtype, 1, 0, FINDSUBSTANCE_ROOT_ONLY+FINDSUBSTANCE_FIND_ALL ) )
 		if ( item.color == thecolor and IsBuyableItem (you, item, 0) )
 			itemamount := item.amount;
 			if (totalsale + (itemprice * itemamount) < 50000)
