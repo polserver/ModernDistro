@@ -35,39 +35,40 @@ program onlogon(who)
 			endforeach
 		endif
 	endif
-	var rm := GetObjProperty(who, "ReportMenu");
-	if(rm)
-		var defender;
-		var rept := {};
-		foreach serial in rm
-			foreach chr in EnumerateOnlineCharacters()
-				if(chr.serial == serial)
-					defender := chr;
-					break;
-				endif
-			endforeach
-			if(!defender)
-				defender := SystemFindObjectBySerial(serial, SYSFIND_SEARCH_OFFLINE_MOBILES);
-			endif
-			rept.append(defender);
-			defender := 0;
-		endforeach
-		SendReportGump(who, rept);
-		EraseObjProperty(who, "LoginNotify");
-		EraseObjProperty(who, "ReportMenu");
-	endif
-	var lr := GetObjProperty(who, "LoginReport");
-	if(lr)
-		var reportdata := {};
-		var jerk;
-		foreach serial in lr
-			jerk := SystemFindObjectBySerial(serial, SYSFIND_SEARCH_OFFLINE_MOBILES);
-			if(jerk)
-				reportdata.append(jerk);
-			endif
-		endforeach
-		EraseObjProperty(who, "LoginReport");
-	endif
+
+	// var rm := GetObjProperty(who, "ReportMenu");
+	// if(rm)
+	// 	var defender;
+	// 	var rept := {};
+	// 	foreach serial in rm
+	// 		foreach chr in EnumerateOnlineCharacters()
+	// 			if(chr.serial == serial)
+	// 				defender := chr;
+	// 				break;
+	// 			endif
+	// 		endforeach
+	// 		if(!defender)
+	// 			defender := SystemFindObjectBySerial(serial, SYSFIND_SEARCH_OFFLINE_MOBILES);
+	// 		endif
+	// 		rept.append(defender);
+	// 		defender := 0;
+	// 	endforeach
+	// 	// SendReportGump(who, rept);
+	// 	EraseObjProperty(who, "LoginNotify");
+	// 	EraseObjProperty(who, "ReportMenu");
+	// endif
+	// var lr := GetObjProperty(who, "LoginReport");
+	// if(lr)
+	// 	var reportdata := {};
+	// 	var jerk;
+	// 	foreach serial in lr
+	// 		jerk := SystemFindObjectBySerial(serial, SYSFIND_SEARCH_OFFLINE_MOBILES);
+	// 		if(jerk)
+	// 			reportdata.append(jerk);
+	// 		endif
+	// 	endforeach
+	// 	EraseObjProperty(who, "LoginReport");
+	// endif
 	var nkarma := CStr(GetObjProperty(who, "ModKarma"));
 	var nfame := CStr(GetObjProperty(who, "ModFame"));
 	if(nfame)
@@ -153,7 +154,7 @@ function TrackIP(who)
 	var holder := {};
 	var amt := len(ipstring);
 	foreach thing in ipstring
-		if((thing[1] != who.ip) and (amt < 20));
+		if((thing[1] != who.ip) && (amt < 20));
 			holder.append(thing);
 		else
 			amt := amt - 1;
@@ -191,115 +192,115 @@ function staffnotify(who)
 	endif
 endfunction
 
-const LONG_COUNT_DECAY_TIME := 144000; //40 hours
-const SHORT_COUNT_DECAY_TIME := 28800; //8 hours
+// const LONG_COUNT_DECAY_TIME := 144000; //40 hours
+// const SHORT_COUNT_DECAY_TIME := 28800; //8 hours
 
-var layout := {
-"page 0",
-"nodispose",
-"noclose",
-"gumppic 0 0 206",
-"gumppic 43 0 201",
-"gumppic 460 0 207",
-"gumppic 0 43 202",
-"gumppic 43 43 200",
-"gumppic 170 43 200",
-"gumppic 295 43 200",
-"gumppic 335 43 200",
-"gumppic 43 170 200",
-"gumppic 170 170 200",
-"gumppic 295 170 200",
-"gumppic 335 170 200",
-"gumppic 43 220 200",
-"gumppic 170 220 200",
-"gumppic 295 220 200",
-"gumppic 335 220 200",
-"gumppic 460 43 203",
-"gumppic 0 340 204",
-"gumppic 43 340 233",
-"gumppic 460 340 205",
-"button 380 345 249 248 1 0 99",
-"text 50 20 40 0",
-"text 50 50 40 1",
-"text 50 70 40 2"
-};
+// var layout := {
+// "page 0",
+// "nodispose",
+// "noclose",
+// "gumppic 0 0 206",
+// "gumppic 43 0 201",
+// "gumppic 460 0 207",
+// "gumppic 0 43 202",
+// "gumppic 43 43 200",
+// "gumppic 170 43 200",
+// "gumppic 295 43 200",
+// "gumppic 335 43 200",
+// "gumppic 43 170 200",
+// "gumppic 170 170 200",
+// "gumppic 295 170 200",
+// "gumppic 335 170 200",
+// "gumppic 43 220 200",
+// "gumppic 170 220 200",
+// "gumppic 295 220 200",
+// "gumppic 335 220 200",
+// "gumppic 460 43 203",
+// "gumppic 0 340 204",
+// "gumppic 43 340 233",
+// "gumppic 460 340 205",
+// "button 380 345 249 248 1 0 99",
+// "text 50 20 40 0",
+// "text 50 50 40 1",
+// "text 50 70 40 2"
+// };
 
-var data := {
-"Now is the time for retribution!",
-"Check zero or more players to report for your murder",
-"and press OKAY."
-};
+// var data := {
+// "Now is the time for retribution!",
+// "Check zero or more players to report for your murder",
+// "and press OKAY."
+// };
 
 
-function SendReportGump(who, reportables)
-	FillInArrays(reportables);
-	var ret := SendDialogGump(who,layout,data);
-	if(!ret)
-		var reportdata := {};
-		foreach reportable in(reportables)
-			reportdata.append(reportable.serial);
-		endforeach
-		SetObjProperty(who, "LoginReport", reportdata);
-		return;
-	endif
-	foreach id in (ret.keys)
-		if(id >= 10)
-			id := id-9;
-			var mob := reportables[id];
-			if(!(mob in EnumerateOnlineCharacters()))
-				SetObjProperty(mob, "LoginNotify", who.serial);
-			else
-				AdjustNoto(mob, who);
-			endif
-			AdjustMurderCounts(mob);
-		endif
-	endforeach
-	foreach reportable in(who.reportables)
-		who.removeReportable(reportable.serial, reportable.gameclock);
-	endforeach
-endfunction
+// function SendReportGump(who, reportables)
+// 	FillInArrays(reportables);
+// 	var ret := SendDialogGump(who,layout,data);
+// 	if(!ret)
+// 		var reportdata := {};
+// 		foreach reportable in(reportables)
+// 			reportdata.append(reportable.serial);
+// 		endforeach
+// 		SetObjProperty(who, "LoginReport", reportdata);
+// 		return;
+// 	endif
+// 	foreach id in (ret.keys)
+// 		if(id >= 10)
+// 			id := id-9;
+// 			var mob := reportables[id];
+// 			if(!(mob in EnumerateOnlineCharacters()))
+// 				SetObjProperty(mob, "LoginNotify", who.serial);
+// 			else
+// 				AdjustNoto(mob, who);
+// 			endif
+// 			AdjustMurderCounts(mob);
+// 		endif
+// 	endforeach
+// 	foreach reportable in(who.reportables)
+// 		who.removeReportable(reportable.serial, reportable.gameclock);
+// 	endforeach
+// endfunction
 
-function FillInArrays(reportables)
-	var prev_y := 80;
-	var prev_x := 40;
-	var buttonret := 10;
-	layout.append("page 1");
-	foreach reportable in reportables
-		if(!reportable.cmdlevel)
-			if(buttonret==21)
-				prev_x := 300;
-				prev_y := 80;
-			endif
-			layout.append("checkbox " + CStr(prev_x) + " " + CStr(prev_y+20) + " 210 211 0 " + buttonret);
-			data.append(reportable.name);
-			layout.append("text " + CStr(prev_x+20) + " " + CStr(prev_y+20) + " 40 " + CStr(len(data)-1));
-			prev_y := prev_y+20;
-			buttonret := buttonret+1;
-		endif
-	endforeach
-endfunction
+// function FillInArrays(reportables)
+// 	var prev_y := 80;
+// 	var prev_x := 40;
+// 	var buttonret := 10;
+// 	layout.append("page 1");
+// 	foreach reportable in reportables
+// 		if(!reportable.cmdlevel)
+// 			if(buttonret==21)
+// 				prev_x := 300;
+// 				prev_y := 80;
+// 			endif
+// 			layout.append("checkbox " + CStr(prev_x) + " " + CStr(prev_y+20) + " 210 211 0 " + buttonret);
+// 			data.append(reportable.name);
+// 			layout.append("text " + CStr(prev_x+20) + " " + CStr(prev_y+20) + " 40 " + CStr(len(data)-1));
+// 			prev_y := prev_y+20;
+// 			buttonret := buttonret+1;
+// 		endif
+// 	endforeach
+// endfunction
 
-function AdjustMurderCounts(killer)
-	var onlinetime := GetObjProperty(killer,"onlinetimer");
-	var longcount := GetObjProperty(killer,"longmurders");
-	if(!longcount)
-		longcount := 0;
-	endif
-	longcount := longcount + 1;
-	if(longcount > 4)
-		killer.setMurderer(1);
-		SendSysMessage(killer,"You are now known as a murderer!");
-	endif
-	var shortcount := GetObjProperty(killer, "shortmurders");
-	if(!shortcount)
-		shortcount := 0;
-	endif
-	shortcount := shortcount + 1;
-	SetObjProperty(killer, "longmurders", longcount);
-	SetObjProperty(killer, "shortmurders", shortcount);
-	SetObjProperty(killer, "decaylongcountat", onlinetime + LONG_COUNT_DECAY_TIME);
-	SetObjProperty(killer, "decayshortcountat", onlinetime + SHORT_COUNT_DECAY_TIME);
-endfunction
+// function AdjustMurderCounts(killer)
+// 	var onlinetime := GetObjProperty(killer,"onlinetimer");
+// 	var longcount := GetObjProperty(killer,"longmurders");
+// 	if(!longcount)
+// 		longcount := 0;
+// 	endif
+// 	longcount := longcount + 1;
+// 	if(longcount > 4)
+// 		killer.setMurderer(1);
+// 		SendSysMessage(killer,"You are now known as a murderer!");
+// 	endif
+// 	var shortcount := GetObjProperty(killer, "shortmurders");
+// 	if(!shortcount)
+// 		shortcount := 0;
+// 	endif
+// 	shortcount := shortcount + 1;
+// 	SetObjProperty(killer, "longmurders", longcount);
+// 	SetObjProperty(killer, "shortmurders", shortcount);
+// 	SetObjProperty(killer, "decaylongcountat", onlinetime + LONG_COUNT_DECAY_TIME);
+// 	SetObjProperty(killer, "decayshortcountat", onlinetime + SHORT_COUNT_DECAY_TIME);
+// endfunction
 
 function RestoreMods(who)
 	foreach thing in ListEquippedItems(who)

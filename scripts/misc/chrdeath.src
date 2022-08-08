@@ -12,7 +12,6 @@ include "include/utility";
 var allmyjunk := {};
 var stackstuff := 0;
 
-
 program chrdeath(corpse, ghost)
     VS_AdjustVirtue(ghost, "Sacrifice", 1, 75);
 	EraseObjProperty(ghost, "IsMeditating");

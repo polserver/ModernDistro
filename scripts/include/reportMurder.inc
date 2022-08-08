@@ -1,95 +1,117 @@
 use uo;
 use os;
+use cliloc;
 
-include "include/bounty";
-include ":datafile:datafile";
-include ":gumps:old-gumps";
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+include ":gumps:gumpCaching";
+include ":virtue:noto";
 
-const LONG_COUNT_DECAY_TIME := 144000; //40 hours
-const SHORT_COUNT_DECAY_TIME := 28800; //8 hours
+const LONG_COUNT_DECAY_TIME := 144000; // 40 hours
+const SHORT_COUNT_DECAY_TIME := 28800; // 8 hours
 
+function SendReportGump( mobile )
 
-var reportables;
-var reportdata := array;
+	var gump := GFLoadGump( ":gumps:gumps", "ReportMurder", "ReportMurder" );
+	if( gump.errortext )
+		gump := GFCreateGump( 150, 100 );
 
-function SendReportGump(who)
-  GFInitGump();
-  GFPage(0);
-  GFNoDispose();
-  GFNoClose();
-  GFNoMove();
-  GFResizePic(0, 0, 2600, 480, 480);
-  GFButtonID(380, 345, 249, 248, 1, 99);
-  GFTextLine(50, 20, 0, "Now is the time for retribution!");
-  GFTextLine(50, 50, 0, "Check zero or more players to report for your murder");
-  GFTextLine(50, 70, 0, "and press OKAY");
-  reportables := who.reportables;
-  FillInArrays();
-  SetObjProperty(who, "ReportMenu", reportdata);
-  var ret := GFSendGump(who);
-  if(ret == 0)
-    return;
-  endif
-  EraseObjProperty(who, "ReportMenu");
-  EraseObjProperty(who, "LoginReport");
-  var holder := array;
-  foreach id in (ret.keys)
-    if(id in reportdata)
-	  var mob := SystemFindObjectBySerial(id, SYSFIND_SEARCH_OFFLINE_MOBILES);
-	  if(!mob.ip)
-	    SetObjProperty(mob.killer, "LoginNotify", who.serial);
-	  else
-	    AdjustNoto(mob, who);
-	  endif
-	  holder.append(id);
-	  AdjustMurderCounts(mob.killer);
+		GFClosable( gump, 0 );
+
+		// Load Main Background
+		GFResizePic( gump, 0, 0, GFGetCfgConst( "Defaults", "BackGround" ), 350, 425 );
+
+		GFResizePic( gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 320, 25 );
+		GFHTMLArea( gump, 15, 20, 320, 32, "<div align=center>Report Murder", 0, 0 );
+
+		// BackgroundAreas
+		GFResizePic( gump, 15, 45, GFGetCfgConst( "Defaults", "ForeGround" ), 320, 370 );
+		GFHTMLArea( gump, 20, 50, 310, 60, "<div align=center><basefont color=#A52A2A>Now is the time for retribution!</basefont>\n<basefont color=#0E0E10>Check zero or more players to report for your murder.</basefont>", 1, 0 );
+
+		// Okay Button
+		GFAddButton( gump, 150, 382, 2128, 2129, GF_CLOSE_BTN, 0xA00 );
+		GFStoreGump( ":gumps:gumps", "ReportMurder", "ReportMurder", gump );
 	endif
-  endforeach
-  foreach reportable in(who.reportables)
-	who.removeReportable(reportable.serial, reportable.gameclock);
-  endforeach
-  var parms := array;
-  parms.append(who);
-  parms.append(holder);
-  start_script(":bountyboard:bounty", parms);
+
+	var reportables := mobile.reportables,
+		num_report := reportables.Size();
+
+	GFPage( gump,  1 );
+
+	var y_pos := 140;
+	foreach entry in ( reportables )
+
+		if( entry.killer.cmdlevel > mobile.cmdlevel )
+			continue;
+		endif
+
+		if( !entry.killer.cmdlevel )
+			GFCheckBox( gump, 45, y_pos, 210, 211, 1, _entry_iter );
+			GFHTMLArea( gump, 70, y_pos+2, 200, 22, entry.killer.name, 0, 0 );
+		endif
+
+		y_pos += 20;
+		if( _entry_iter % 12 == 0 && _entry_iter < num_report )
+			GFAddButton( gump, 30, 348, 0xA92, 0xA93, GF_PAGE_BTN, gump.cur_page+1 );
+			GFPage( gump,  gump.cur_page+1 );
+			GFAddButton( gump, 30, 95, 0xA90, 0xA91, GF_PAGE_BTN, gump.cur_page-1 );
+			y_pos := 140;
+		endif
+
+		SleepMS( 2 );
+	endforeach
+
+	// And now we need to know the answer...
+	var input := GFSendGump( mobile, gump );
+
+	var holder := Array;
+	foreach key in ( input.keys )
+		if( key >= 1 && key <= num_report )
+			var value := reportables[key];
+			mobile.RemoveReportable( value.serial, value.gameclock );
+			holder.Append( value );
+
+			var source := SystemFindObjectBySerial( value.serial );
+			SendSysMessageCL( source, 1049067, Array, 0x3, 0x32 ); // You have been reported for a murder!
+			AdjustNoto( source, mobile );
+			AdjustMurderCounts( source );
+		endif
+		SleepMS( 2 );
+	endforeach
+
+	if( holder.Size() )
+		Start_Script( ":bountyboard:bounty", { mobile, holder } );
+	endif
+
+	foreach reportable in reportables
+		mobile.RemoveReportable( reportable.serial, reportable.gameclock );
+	endforeach
+
+	return 1;
 endfunction
 
-function FillInArrays()
-  var prev_y := 80;
-  var buttonret := 10;
-  GFPage(1);
-  foreach reportable in reportables
-    if(!reportable.killer.cmdlevel)
-	  if(buttonret == 21)
-	    prev_y := 80;
-	  endif
-	  reportdata.append(reportable.killer.serial);
-	  GFCheckBox(40, prev_y+20, 210, 211, 0, reportable.killer.serial);
-	  GFTextLine(60, prev_y+20, 0, reportable.killer.name);
-	  prev_y := prev_y+20;
-	  buttonret := buttonret+1;
-    endif
-  endforeach
-endfunction
+function AdjustMurderCounts( source )
 
-function AdjustMurderCounts(killer)
-  var onlinetime := GetObjProperty(killer,"onlinetimer");
-  var longcount := GetObjProperty(killer,"longmurders");
-  if(!longcount)
-	longcount := 0;
-  endif
-  longcount := longcount + 1;
-  SetObjProperty(killer,"longmurders",longcount);
-  if(longcount>4)
-	killer.setMurderer(1);
-	SendSysMessage(killer,"You are now known as a murderer!");
-  endif
-  SetObjProperty(killer,"decaylongcountat",onlinetime+LONG_COUNT_DECAY_TIME);
-  var shortcount := GetObjProperty(killer,"shortmurders");
-  if(!shortcount)
-	shortcount := 0;
-  endif
-  shortcount := shortcount + 1;
-  SetObjProperty(killer,"shortmurders",shortcount);
-  SetObjProperty(killer,"decayshortcountat",onlinetime+SHORT_COUNT_DECAY_TIME);
+	var onlinetime := GetObjProperty( source, "onlinetimer" );
+	var longcount := GetObjProperty( source, "longmurders" );
+	if( !longcount )
+		longcount := 0;
+	endif
+
+	SetObjProperty( source, "longmurders", longcount+1 );
+	if( longcount>4 )
+		source.SetMurderer( 1 );
+		SendSysMessageCL( source, 502134, Array, 0x3, 0x22 ); // You are now known as a murderer!
+	endif
+
+	SetObjProperty( source, "decaylongcountat", onlinetime+LONG_COUNT_DECAY_TIME );
+
+	var shortcount := GetObjProperty( source, "shortmurders" );
+	if( !shortcount )
+		shortcount := 0;
+	endif
+	SetObjProperty( source, "shortmurders", shortcount+1 );
+	SetObjProperty( source, "decayshortcountat", onlinetime+SHORT_COUNT_DECAY_TIME );
+
+	return 1;
 endfunction

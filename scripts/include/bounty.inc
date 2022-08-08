@@ -56,4 +56,3 @@ function MaintainBountySystem()
   print("// Removed " + count + " expired bounties.");
   print("//////////////////////////////////////////");
 endfunction
-
