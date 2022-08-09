@@ -18,7 +18,6 @@ use attributes;
 
 include ":attributes:advanceCheck";
 include ":attributes:attributeConstants";
-include ":attributes:caps";
 include ":attributes:regen";
 include ":attributes:settings";
 include ":attributes:skillCheck";
