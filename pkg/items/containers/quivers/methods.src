@@ -1,0 +1,66 @@
+use uo;
+use os;
+use cfgfile;
+use polsys;
+
+include ":containers:containers";
+include ":itemutils:itemdesc";
+
+program Install()
+	return 1;
+endprogram
+
+exported function IsQuiver( unused container )
+
+	return 1;
+
+endfunction
+
+exported function GetBaseMaterial( container )
+
+	var itemdesc := ReadConfigFile(":containers:itemdesc");
+	var object := FindConfigElem( itemdesc, container.objtype );
+	var BaseMaterial := object.BaseMaterial;
+	return BaseMaterial;
+
+endfunction
+
+exported function IsLeatherContainer( item )
+
+	var item_info := GetItemDescInfo( item.objtype );
+
+	return ( item_info.BaseMaterial == CT_LEATHER );
+
+endfunction
+
+exported function IsEngraved( item )
+
+	return GetObjProperty( item, "EngravedText" );
+
+endfunction
+
+exported function RemoveEngraving( item )
+
+	EraseObjProperty( item, "EngravedText" );
+	IncRevision( item );
+
+endfunction
+
+exported function SetEngraving( item, engraving )
+
+	SetObjProperty( item, "EngravedText", engraving );
+	IncRevision( item );
+
+endfunction
+
+exported function CloseContainer( item, mobile )
+
+    var packet := CreatePacket( 0xBF, 12 );
+    packet.SetInt16( 1, 12 );
+    packet.SetInt16( 3, 0x16 );
+    packet.SetInt32( 5, 0x0C );
+    packet.SetInt32( 9, item.serial );
+
+    return packet.SendPacket( mobile );
+endfunction
+
