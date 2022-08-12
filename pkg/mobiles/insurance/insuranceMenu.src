@@ -1,0 +1,18 @@
+use uo;
+use cliloc;
+
+include ":insurance:insurance";
+
+program ItemInsuranceMenu( who )
+
+	var things := ListEquippedItems( who ) + EnumerateItemsInContainer( who.backpack, ENUMERATE_ROOT_ONLY );
+	var insurables := {};
+	foreach thing in things
+		if( IsInsurable( thing ) )
+			insurables.append( thing );
+		endif
+	endforeach
+
+	ItemInsuranceMenuGump( who, insurables );
+
+endprogram

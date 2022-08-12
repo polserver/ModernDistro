@@ -1,7 +1,9 @@
 use uo;
 use os;
+use cliloc;
 
 include "include/sysEvent";
+include ":insurance:insurance";
 
 /*
  *
@@ -90,6 +92,37 @@ function ContextMenu_OpenPack( byref mobile, byref obj )
 	endif
 
 	return 1;
+endfunction
+
+function ContextMenu_InsureItem( byref mobile )
+
+	while( 1 )
+		SendSysMessageCL(mobile, 1060868, color := 88 ); // Target the item you wish to toggle insurance status on <ESC> to cancel
+		var ins_item := Target( mobile );
+		if( !ins_item )
+			SendSysMessageCL( mobile, 1042023, color := 33 ); // Cancelled.
+			return 0;
+		endif
+		if( !((ins_item.container == mobile.backpack) || (ins_item in ListEquippedItems( mobile ))) )
+			SendSysMessageCL( mobile, 1060871, font := 2, color := 33 ); // You can only insure items that you have equipped or that are in your backpack
+			continue;
+		endif
+		if( (ins_item.stackable) || (ins_item.cursed) || (ins_item.IsA( POLCLASS_CONTAINER )) && !ins_item.IsQuiver() )
+			SendSysMessageCL( mobile, 1060869, color := 33 ); // You cannot insure that
+			continue;
+		elseif( ins_item.newbie )
+			SendSysMessageCL( mobile, 1060870, color := 56 ); // That item is blessed and does not need to be insured
+			continue;
+		endif
+		if ( !ins_item.insured )
+			InsureItem( mobile, ins_item );
+			SendSysMessageCL(mobile, 1060873, color := 66 ); // You have insured the item
+		else
+			UninsureItem( mobile, ins_item );
+			SendSysMessageCL( mobile, 1060874, color := 40 ); // You cancel the insurance on the item
+		endif
+	endwhile
+
 endfunction
 
 function ContextMenu_HandleJoinEvent( byref mobile, byref obj )

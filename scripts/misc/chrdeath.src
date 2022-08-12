@@ -8,6 +8,7 @@ include "include/reportMurder";
 include ":timedScripts:poisonUtil";
 include ":mounts:mounts";
 include "include/utility";
+include ":insurance:insurance";
 
 var allmyjunk := {};
 var stackstuff := 0;
@@ -30,6 +31,8 @@ program chrdeath(corpse, ghost)
 	SetObjProperty(ghost, "Fame", fame);
 	SetObjProperty(corpse,"serial", ghost.serial);
 	MP_DeathUnmount(corpse);
+	CheckInsuredItems( ghost );
+	RewardTheKiller ( ghost, SystemFindObjectBySerial( last_damage.serial ) );
 	CheckForAutoRes(ghost, corpse);
 	CheckForDivineRes(ghost, corpse);
 	var corpsenamearray := SplitWords(corpse.name);
@@ -144,6 +147,68 @@ function MoveTheItem(item, oldcontainer, newcontainer)
 	else
 		MoveItemToContainer(item, newcontainer);
 	endif
+endfunction
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+//	CheckInsuredItems( ghost )
+//
+//	Purpose:	Looks for items in the ghosts backpack that have the CProp
+//				"AutoReinsure" and reinsures those items.
+//
+//	Parameter:	ghost::player ref
+//
+//	 Returns:	nothing
+//
+//	Created: 2022-08-02 00:30:17 by Yukiko
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+function CheckInsuredItems( ghost )
+
+	var things := EnumerateItemsInContainer( ghost.backpack, ENUMERATE_ROOT_ONLY );
+	foreach thing in things
+		var cost := CalculateInsCost( thing );
+		if( GetObjProperty( thing, "Reinsure" ) )
+			// This will try to reinsure the item. If the player does not have enough gold
+			// in their bank the player will be notified that the item could not be reinsured.
+			PayForInsurance( ghost, thing, cost );
+		endif
+	endforeach
+
+endfunction
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+//	RewardTheKiller( ghost, killer )
+//
+//	Purpose:	Pays out the total insured cost of the insured items the victim was holding.
+//
+//	Parameters:	ghost::player ref, killer::player ref
+//
+//	Returns:	nothing
+//
+//	Created: 2022-08-02 01:15:08 by Yukiko
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+function RewardTheKiller( ghost, killer )
+
+	var msg := "";
+	if( !killer.IsA( POLCLASS_NPC ) )
+		// Determine the reward based on the insured items in the victim's inventory.
+		var ins_reward := GetObjProperty( ghost, "InsuredTotalCost");
+		if( ins_reward )
+			msg := ghost.name + "had some items insured at a cost of " + CStr( ins_reward );
+			var bank_box := FindBankBox( killer );
+			if( !CreateCoins( bank_box, 0xEED, ins_reward ) )
+				msg := msg + " but your bank could not hold all of the gold. It must be full.";
+			else
+				msg := msg + ". The gold has been placed in your bank.";
+			endif
+			SendSysMessage( killer, msg, color := 66 );
+			EraseObjProperty( ghost, "InsuredTotalCost");
+		endif
+	endif
+
 endfunction
 
 
