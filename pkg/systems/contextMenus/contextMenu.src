@@ -58,7 +58,6 @@ program context_menu( parameters )
 		3006124:	ContextMenu_SendMerchantNodeEvent( mobile, obj, CM_CHECK_BALANCE );
 		3006126:	ContextMenu_SendMerchantNodeEvent( mobile, obj, CM_STABLE );
 		3006145:	ContextMenu_OpenPack( mobile, obj );
-		3006201:	ContextMenu_InsureItem( mobile );
 		default:	return 1;
 	endcase
 
