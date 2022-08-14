@@ -39,6 +39,16 @@ program itemdata(xObject)
 		prop.values := array {};
 		allprops.append (prop);
 	endif
+	if ( xObject.cursed )
+		prop.clilocid := 1049643; // cursed
+		prop.values := array {};
+		allprops.append (prop);
+	endif
+	if ( xObject.insured )
+		prop.clilocid := 1061682; // <b>insured</b>
+		prop.values := array {};
+		allprops.append (prop);
+	endif
 
 	if( xObject.IsEngraved() )
 		prop.clilocid := 1072305; // Engraved: ~1_INSCRIPTION~

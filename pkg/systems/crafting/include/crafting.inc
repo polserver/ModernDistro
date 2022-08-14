@@ -139,7 +139,7 @@ endfunction
 // the objtype of the original logs they was made from. Else you simply pass
 // use_on.objtype for that. This will keep the customizability open for adding in
 // special resources for crafting here also.
-function CreateCraftItem(who, craft_skill, use_on, use_onobjtype, objtype, amount, itemname, reqd)
+function CreateCraftItem(byref who, byref craft_skill, use_on, use_onobjtype, objtype, amount, itemname, reqd)
 
 	SendSysMessageCL(who, 1077561, color := 66); // You begin working.
 	playCraftWork(who, craft_skill, CRAFT_CYCLE_SUCCESS);

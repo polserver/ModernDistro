@@ -27,11 +27,11 @@ use polsys;
 function GetItemDescCfgFile(package:="")
 	var file_name := ":"+package+":itemdesc";
 	var item_cfg := ReadConfigFile(file_name);
-	
+
 	if ( item_cfg.errortext )
 		return error{"errortext":="Unable to open ["+file_name+"] ->"+item_cfg.errortext};
 	endif
-	
+
 	return item_cfg;
 endfunction
 
@@ -66,9 +66,9 @@ endfunction
  * Retrieves the value of a member from an item.
  * For < 0xFFFF it will see if it has a graphic entry
  * If it does not, it will return the object type (same thing as the graphic).
- * 
+ *
  * For > 0xFFFF it must contain a 'Graphic' entry to even start POL.
- * 
+ *
  * Parameters
  * obj_type:	Object type number (in hex) from which you want the member data.
  * text:      The member name (case sensitive).
@@ -89,7 +89,7 @@ function GetObjTypeArray ( obj_type, text:="" )
 	if( !obj_array )
 		obj_array := array { };
 	endif
-	
+
   return SplitWords(obj_array);
 endfunction
 
@@ -100,9 +100,9 @@ endfunction
  * Retrieves the proper graphic for an object type.
  * For < 0x3FFF it will see if it has a graphic entry
  * If it does not, it will return the object type (same thing as the graphic).
- * 
+ *
  * For > 0x3FFF it must contain a 'Graphic' entry to even start POL.
- * 
+ *
  * Parameters
  * obj_type:	Object type to get the graphic for.
  *
@@ -134,7 +134,7 @@ endfunction
  * Purpose
  * Retrieves the DESC entry from an itemdesc.cfg and parses it.
  * e.g. bread loa%ves/f% could be "bread loaf" or "bread loaves"
- * 
+ *
  * Parameters
  * objtype:	Object type (elem) to retrieve the description for.
  * plural:	0 - Will parse the item description in singular form.
@@ -195,7 +195,7 @@ function GetObjTypeDesc( source, plural:=0 )
 		name += "%";
 		second := Len( name );
 	endif
- 
+
 	if( !slash )
 		slash := second;
 	endif

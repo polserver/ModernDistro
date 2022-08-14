@@ -16,7 +16,7 @@ function CountCoins( byref container, coin_type )
 	return amt;
 endfunction
 
-function createcoins( container, coin_type, amt )
+function CreateCoins( container, coin_type, amt )
 
 	if( !amt )
 		return -1;
