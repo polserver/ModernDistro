@@ -1,6 +1,7 @@
 use uo;
 use os;
 use util;
+use polsys;
 
 include ":attributes:attributes";
 include ":virtue:noto";
@@ -31,7 +32,7 @@ program chrdeath(corpse, ghost)
 	SetObjProperty(ghost, "Fame", fame);
 	SetObjProperty(corpse,"serial", ghost.serial);
 	MP_DeathUnmount(corpse);
-	CheckInsuredItems( ghost );
+	CheckReInsuredItems( ghost );
 	RewardTheKiller ( ghost, SystemFindObjectBySerial( last_damage.serial ) );
 	CheckForAutoRes(ghost, corpse);
 	CheckForDivineRes(ghost, corpse);
@@ -154,7 +155,7 @@ endfunction
 //	CheckInsuredItems( ghost )
 //
 //	Purpose:	Looks for items in the ghosts backpack that have the CProp
-//				"AutoReinsure" and reinsures those items.
+//				"Reinsure" and reinsures those items.
 //
 //	Parameter:	ghost::player ref
 //
@@ -163,17 +164,32 @@ endfunction
 //	Created: 2022-08-02 00:30:17 by Yukiko
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-function CheckInsuredItems( ghost )
+function CheckReInsuredItems( ghost )
 
-	var things := EnumerateItemsInContainer( ghost.backpack, ENUMERATE_ROOT_ONLY );
+	var item;
+	var things := GetObjProperty( ghost, "ReinsureItems" );
 	foreach thing in things
-		var cost := CalculateInsCost( thing );
-		if( GetObjProperty( thing, "Reinsure" ) )
-			// This will try to reinsure the item. If the player does not have enough gold
-			// in their bank the player will be notified that the item could not be reinsured.
-			PayForInsurance( ghost, thing, cost );
-		endif
+		item := SystemFindObjectBySerial( thing );
+		var cost := CalculateInsCost( item );
+		// This will try to reinsure the item. If the player does not have enough gold
+		// in their bank the player will be notified that the item could not be reinsured.
+		PayForInsurance( ghost, item, cost );
+		// IncRevision() is needed to clear any members that might have changed on death.
+		IncRevision( item );
 	endforeach
+	EraseObjProperty( ghost, "ReinsureItems" );
+
+	// var things := EnumerateItemsInContainer( ghost.backpack, ENUMERATE_ROOT_ONLY );
+	// foreach thing in things
+		// // IncRevision() is needed to clear any members that might have changed on death.
+		// IncRevision( thing );
+		// var cost := CalculateInsCost( thing );
+		// if( GetObjProperty( thing, "Reinsure" ) )
+			// // This will try to reinsure the item. If the player does not have enough gold
+			// // in their bank the player will be notified that the item could not be reinsured.
+			// PayForInsurance( ghost, thing, cost );
+		// endif
+	// endforeach
 
 endfunction
 

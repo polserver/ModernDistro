@@ -18,7 +18,7 @@ use uo;
 include ":insurance:insurance";
 include ":attributes:attributes";
 
-program pushthroughhook()
+program CanDie()
 	// 0: deactivate hook
 	// 1: activate hook
 	return 1;
@@ -38,15 +38,23 @@ exported function CanDie( mobile )
 	// determine how much gold to pey the killer.
 	var last_damage := GetObjProperty( mobile, "LastDamage" );
 	// Insurance rewards are only payed to player killers, not to NPCs.
-	if( SystemFindObjectBySerial( last_damage.serial ) in EnumerateOnlineCharacters() )
+	var killer := SystemFindObjectBySerial( last_damage.serial );
+	if( killer.client.ip )
 		var things := ListEquippedItems( mobile ) + EnumerateItemsInContainer( mobile.backpack, ENUMERATE_ROOT_ONLY );
 		var insurance_cost := 0;
+		var reinsure_items := {};
 		foreach thing in things
 			if( thing.insured )
+				// Add up the reward for the killer.
 				insurance_cost += CalculateInsCost( thing );
+				// Re-insure items if player is set for auto re-insure.
+				if( GetObjProperty( mobile, "AutoRenewInsurance" ) )
+					reinsure_items.append( thing.serial );
+				endif
 			endif
 		endforeach
 		SetObjProperty( mobile, "InsuredTotalCost", insurance_cost );
+		SetObjProperty( mobile, "ReinsureItems", reinsure_items );
 	endif
 	//////////////////-End insurance processing-//////////////////
 	// Let the mobile die.

@@ -1,6 +1,7 @@
 use uo;
 use os;
 use cliloc;
+use polsys;
 
 include "include/sysEvent";
 include ":insurance:insurance";
@@ -109,8 +110,10 @@ function ContextMenu_InsureItem( byref mobile )
 		if( !ins_item )
 			if( insured_items.size() > 0 )
 				foreach thing in insured_items
-					if( thing.insured )
+					if( GetObjProperty( thing, "ToggleInsOn" ) )
 						PayForInsurance( mobile, thing, CalculateInsCost( thing ) );
+						EraseObjProperty( thing, "ToggleInsOn" );
+						IncRevision( thing );
 					endif
 				endforeach
 			endif
@@ -129,12 +132,11 @@ function ContextMenu_InsureItem( byref mobile )
 			SendSysMessageCL( mobile, 1060870, color := 56 ); // That item is blessed and does not need to be insured
 			continue;
 		endif
-		if ( !ins_item.insured )
+		if ( !(GetObjProperty( ins_item, "ToggleInsOn" )) && !(ins_item.insured) )
 			insured_subtotal += ins_item_cost;
 			if( !(insured_subtotal > bank_balance) )
-				// InsureItem( mobile, ins_item );
 				insured_items.append( ins_item );
-				ins_item.insured := 1;
+				SetObjProperty( ins_item, "ToggleInsOn", 1 );
 				SendSysMessageCL(mobile, 1060873, color := 66 ); // You have insured the item
 			else
 				SendSysMessage(mobile, "You don't have enough gold remaining in your bank to insure " + ins_item.name +".", 1, 33);
@@ -142,13 +144,14 @@ function ContextMenu_InsureItem( byref mobile )
 				continue;
 			endif
 		else
-			// UninsureItem( mobile, ins_item );
 			var to_be_removed := ins_item in insured_items;
 			if( to_be_removed )
 				insured_items.erase( to_be_removed );
 			endif
-			ins_item.insured := 0;
+			EraseObjProperty( ins_item, "ToggleInsOn" );
 			insured_subtotal -= ins_item_cost;
+			ins_item.insured := 0;
+			IncRevision( ins_item );
 			SendSysMessageCL( mobile, 1060874, color := 40 ); // You cancel the insurance on the item
 		endif
 	endwhile
