@@ -5,6 +5,9 @@ include ":insurance:insurance";
 
 program ItemInsuranceMenu( who )
 
+	if( TypeOf( who ) == "Array" )
+		who := who[1];
+	endif
 	var things := ListEquippedItems( who ) + EnumerateItemsInContainer( who.backpack, ENUMERATE_ROOT_ONLY );
 	var insurables := {};
 	foreach thing in things

@@ -158,6 +158,14 @@ function ContextMenu_InsureItem( byref mobile )
 
 endfunction
 
+function ContextMenu_InsuranceMenu( byref mobile )
+
+	if( !Run_Script( ":insurance:commands/player/insurancemenu", {mobile} ) )
+		Print("Could not run script");
+	endif
+
+endfunction
+
 function ContextMenu_HandleJoinEvent( byref mobile, byref obj )
 
     if( obj.IsClassMaster() )
