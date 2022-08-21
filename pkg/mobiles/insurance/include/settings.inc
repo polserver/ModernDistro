@@ -21,7 +21,7 @@ function InsP_GetSettingsCfgElem( elem_name, byref cfg_file:=0 )
 	var elem := cfg_file[elem_name];
 
 	if( elem.errortext )
-		SysLog( "Error::CP_GetSettingsCfgElem() - Unable to find elem ["+elem_name+"] ->"+elem.errortext );
+		SysLog( "Error::InsP_GetSettingsCfgElem() - Unable to find elem ["+elem_name+"] ->"+elem.errortext );
 	endif
 
 	return elem;
