@@ -50,6 +50,7 @@
 
 use os;
 use uo;
+use polsys;
 
 /////////////
 // Consts
@@ -311,6 +312,7 @@ program CPropEditor(parms1, parms2)
 
 	While (DoCPropGump(who, thing) && !finished)
 		SleepMS(25);
+		IncRevision( thing );
 	EndWhile
 
 	If (thing.isa(POLCLASS_ITEM))

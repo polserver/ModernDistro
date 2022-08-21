@@ -366,6 +366,7 @@ function BoolEdit( mobile, targ, input_info )
 
 	var value := ParseMembers( mobile, targ, input_info.name );
 	ParseMembers( mobile, targ, input_info.name, ( value ? 0 : 1 ) );
+	IncRevision( targ );
 
 	return 1;
 endfunction
@@ -377,6 +378,7 @@ function PropEdit( mobile, targ, input_info )
 	if( change != error )
 		ParseMembers( mobile, targ, input_info.name, change );
 	endif
+	IncRevision( targ );
 
 	return 1;
 endfunction
@@ -460,6 +462,7 @@ function AmountEdit( mobile, targ, input_info )
 	else
 		SubtractAmount( targ, targ.amount-change );
 	endif
+	IncRevision( targ );
 
 	return 1;
 endfunction
