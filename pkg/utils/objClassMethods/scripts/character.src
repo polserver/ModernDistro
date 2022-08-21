@@ -101,7 +101,7 @@ exported function GetContextMenuEntries( mobile, player )
 		list.Append( 3006123 ); // Open Paperdoll
 		list.Append( 3006145 ); // Open Backpack
 		// list.Append( 3006168 ); // Siege Bless
-		// list.Append( 1114299 ); // Open Item Insurance Menu
+		list.Append( 1114299 ); // Open Item Insurance Menu
 		list.Append( 3006201 ); // Toggle Item Insurance
 	else
 		list.Append( 3006123 ); // Open Paperdoll
