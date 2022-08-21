@@ -1,0 +1,14 @@
+use uo;
+use os;
+use cfgfile;
+
+include ":itemutils:itemdesc";
+
+program Install()
+	return 1;
+endprogram
+
+exported function IsMagicWand( unused item )
+	return 1;
+endfunction
+
