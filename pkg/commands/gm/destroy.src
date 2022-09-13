@@ -12,6 +12,7 @@ program textcmd_destroy( who )
 		if(GetObjProperty(tgt, "Static"))
 			SendSysMessage(who, "That item cannot be destroyed.", 1, 33);
 			SendSysMessage(who, "Only a developer can destroy it ", 1, 33);
+			continue;
 		endif
 		if(!tgt.isA(POLCLASS_NPC) || !tgt.client)
 			DestroyItem( tgt);
