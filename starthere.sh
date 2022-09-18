@@ -3,7 +3,7 @@
 #- $Id: StartHere.sh MetaPhaze $
 
 #-- If a special path is needed to the batch files set it here
-BATCH_PATH="/home/ancaria/099-alt/SH/"
+BATCH_PATH="./SH/"
 #----------
 
 #-- RETURN_TO_MENU() FUNCTION
@@ -15,35 +15,35 @@ RETURN_TO_MENU()
 #-- REALM_GEN() FUNCTION
 REALM_GEN()
 	{
-	"${BATCH_PATH}"RealmGen.sh
+	bash "${BATCH_PATH}"RealmGen.sh
 	RETURN_TO_MENU
 	}
 
 #-- ECOMPILE() FUNCTION
 ECOMPILE()
 	{
-	"${BATCH_PATH}"ECompile.sh
+	bash "${BATCH_PATH}"ECompile.sh
 #RETURN_TO_MENU
 	}
 	
 #-- CLEANUP() FUNCTION
 CLEANUP()
 	{
-	"${BATCH_PATH}"CleanUp.sh
+	bash "${BATCH_PATH}"CleanUp.sh
 	RETURN_TO_MENU
 	}
 
 #-- POL() FUNCTION
 POL()
 	{
-	"${BATCH_PATH}"POL.sh
+	bash "${BATCH_PATH}"POL.sh
 	RETURN_TO_MENU
 	}
 
 #-- ECOMPILE() FUNCTION
 POL_LOOP()
 	{
-	"${BATCH_PATH}"LoopPOL.sh
+	bash "${BATCH_PATH}"LoopPOL.sh
 	RETURN_TO_MENU
 	}
 
