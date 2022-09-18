@@ -3,7 +3,7 @@
 #- $Id: LoopPOL.sh MetaPhaze $
 
 #-- If a special path is needed to pol set it here
-POL_PATH="/home/ancaria/099-alt/pol"
+POL_PATH="./pol"
 #----------
 
 #-- START() FUNCTION

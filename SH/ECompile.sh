@@ -4,7 +4,10 @@
 
 #-- If a special path is needed to ecompile.exe set it here
 #-- Path is considered to be run from the root if started by starthere.bat
-ECOMPILE_PATH="/home/ancaria/099-alt/scripts/ecompile"
+ECOMPILE_PATH="./scripts/ecompile"
+#-- Path is considered the default ecompile configuration file for linux systems.
+ECOMPILE_CONF_PATH="./scripts/ecompile-linux.cfg"
+
 #----------
 
 #-- RETURN_TO_MENU() FUNCTION
@@ -19,7 +22,7 @@ COMPILE_SCRIPT()
 	{
 	clear
 	read -p "Path to script to compile: " CMD
-	$ECOMPILE_PATH "${CMD}"
+	$ECOMPILE_PATH -C "${ECOMPILE_CONF_PATH}" "${CMD}"
 	RETURN_TO_MENU
 	}
 
@@ -28,26 +31,47 @@ COMPILE_DIRECTORY()
 	{
 	clear
 	read -p "Path to DIRECTORY: " CMD
-	$ECOMPILE_PATH -A -b -f "${CMD}"
+	"${ECOMPILE_PATH}" -A -b -f -C "${ECOMPILE_CONF_PATH}" "${CMD}"
 	RETURN_TO_MENU
 	}
 
 #-- COMPILE_ALL_SCRIPTS() FUNCTION
 COMPILE_ALL_SCRIPTS()
 	{
-	$ECOMPILE_PATH -A -b -f
+	"${ECOMPILE_PATH}" -A -b -f -C "${ECOMPILE_CONF_PATH}"
 	RETURN_TO_MENU
 	}
 
 #-- COMPILE_ALL_SCRIPTS_OPTXT() FUNCTION
 COMPILE_ALL_SCRIPTS_OPTXT()
 	{
-	%ECOMPILE_PATH% -b -A -f -T> log\ecompile.log 2> log\ecompile_error.log
-	echo ""
-	echo " Compilation complete."
+	#ensure the log directory exists
+	[ -d log ] || mkdir log
+        echo -e "\nCompilation starting"
+	echo "Compiler: ${ECOMPILE_PATH}"
+        echo "Compiler configuration file: ${ECOMPILE_CONF_PATH}"
+	echo "Compiler log files: ./log/"
+	"${ECOMPILE_PATH}" -A -b -f -T -C "${ECOMPILE_CONF_PATH}" >log/ecompile.log 2>log/ecompile_error.log
+	echo -e "\nCompilation complete."
 	RETURN_TO_MENU
 	}
-	
+
+#-- GENERATE DEFAULT LINUX ECOMPILE CONFIG
+GENCONFIG()
+	{
+	[ -f "${ECOMPILE_CONF_PATH}" ] || \
+		( \
+	       	cp scripts/ecompile.cfg.example "${ECOMPILE_CONF_PATH}" && \
+		sed -i -e 's|ModuleDirectory=.*|ModuleDirectory=./scripts/modules|g' "${ECOMPILE_CONF_PATH}" && \
+		sed -i -e 's|IncludeDirectory=.*|IncludeDirectory=./scripts|g' "${ECOMPILE_CONF_PATH}" && \
+		sed -i -e 's|PolScriptRoot=.*|PolScriptRoot=./scripts|g' "${ECOMPILE_CONF_PATH}" && \
+		sed -i -e 's|PackageRoot=.*DistroDev\\pkg|PackageRoot=./pkg|g' "${ECOMPILE_CONF_PATH}" && \
+		sed -i -e 's|PackageRoot=.*DistroDev\\optpkg|PackageRoot=./optpkg|g' "${ECOMPILE_CONF_PATH}" && \
+		sed -i -e 's|PackageRoot=.*DistroDev\\devpkg|PackageRoot=./devpkg|g' "${ECOMPILE_CONF_PATH}" \
+	        )
+        
+	}
+
 #-- QUIT FUNCTION
 QUIT()
 	{
@@ -58,6 +82,7 @@ QUIT()
 #-- MENU FUNCTION
 MENU()
 	{
+	GENCONFIG
 	clear
 	echo "Ecompile.bat (V 1.0) by MetaPhaze"
 	echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
@@ -67,6 +92,7 @@ MENU()
 	echo " [ b ]  - Compile a directory."
 	echo " [ c ]  - Compile all .src scripts."
 	echo " [ d ]  - Compile all scripts and output to ecompile.log"
+	echo " [ e ]  - Regenerate ${ECOMPILE_CONF_PATH}"
 	echo ""
 	echo " [ x ]  - Back"
 
@@ -84,6 +110,11 @@ MENU()
 	if [ "${CMD}" == "d" ]
 		then COMPILE_ALL_SCRIPTS_OPTXT
 		fi
+        if [ "${CMD}" == "e" ]
+                then 
+			rm -f "$ECOMPILE_CONF_PATH"
+			RETURN_TO_MENU
+                fi
 	if [ "${CMD}" == "x" ] 
 		then QUIT
 		fi
