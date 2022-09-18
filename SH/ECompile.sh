@@ -4,7 +4,10 @@
 
 #-- If a special path is needed to ecompile.exe set it here
 #-- Path is considered to be run from the root if started by starthere.bat
-ECOMPILE_PATH="/home/ancaria/099-alt/scripts/ecompile"
+ECOMPILE_PATH="./scripts/ecompile"
+#-- Path is considered the default ecompile configuration file for linux systems.
+ECOMPILE_CONF_PATH="./scripts/ecompile-linux.cfg"
+
 #----------
 
 #-- RETURN_TO_MENU() FUNCTION
@@ -28,23 +31,28 @@ COMPILE_DIRECTORY()
 	{
 	clear
 	read -p "Path to DIRECTORY: " CMD
-	$ECOMPILE_PATH -A -b -f "${CMD}"
+	"${ECOMPILE_PATH}" -A -b -f "${CMD}"
 	RETURN_TO_MENU
 	}
 
 #-- COMPILE_ALL_SCRIPTS() FUNCTION
 COMPILE_ALL_SCRIPTS()
 	{
-	$ECOMPILE_PATH -A -b -f
+	"${ECOMPILE_PATH}" -A -b -f -C "${ECOMPILE_CONF_PATH}"
 	RETURN_TO_MENU
 	}
 
 #-- COMPILE_ALL_SCRIPTS_OPTXT() FUNCTION
 COMPILE_ALL_SCRIPTS_OPTXT()
 	{
-	%ECOMPILE_PATH% -b -A -f -T> log\ecompile.log 2> log\ecompile_error.log
-	echo ""
-	echo " Compilation complete."
+	#ensure the log directory exists
+	[ -d log ] || mkdir log
+        echo -e "\nCompilation starting"
+	echo "Compiler: ${ECOMPILE_PATH}"
+        echo "Compiler configuration file: ${ECOMPILE_CONF_PATH}"
+	echo "Compiler log files: ./log/"
+	"${ECOMPILE_PATH}" -A -b -f -T -C "${ECOMPILE_CONF_PATH}" >log/ecompile.log 2>log/ecompile_error.log
+	echo -e "\nCompilation complete."
 	RETURN_TO_MENU
 	}
 	

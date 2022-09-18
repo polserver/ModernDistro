@@ -3,7 +3,7 @@
 #- $Id: RealmGen.sh MetaPhaze $
 
 #-- If a special path is needed to uoconvert set it here
-UOCNVRT_PATH="/home/ancaria/099-alt/uoconvert"
+UOCNVRT_PATH="./uoconvert"
 #----------
 BUILD_ALL=0
 
@@ -148,17 +148,18 @@ COPY_CLIENT_FILES()
 	{
 	clear
 	read -p "Full path to UO directory: " UOPATH
+
 	if [ "${UOPATH}" == "" ]
 		then RETURN_TO_MENU
-		fi
-	if [ -e "mul" ]
-		then mkdir mul
-		fi
-	cp "${UOPATH}/multi.*" MUL/
-	cp "${UOPATH}/map*" MUL/
-	cp "${UOPATH}/staidx*" MUL/
-	cp "${UOPATH}/statics*" MUL/
-	cp "${UOPATH}/tiledata.mul" MUL/
+	fi
+
+	[ -d "mul" ] || mkdir mul
+
+	cp "${UOPATH}"/multi.* mul/
+	cp "${UOPATH}"/map* mul/
+	cp "${UOPATH}"/staidx* mul/
+	cp "${UOPATH}"/statics* mul/
+	cp "${UOPATH}"/tiledata.mul mul/
 	RETURN_TO_MENU
 	}
 	

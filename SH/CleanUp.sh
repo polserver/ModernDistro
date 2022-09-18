@@ -13,7 +13,8 @@ RETURN_TO_MENU ()
 REMOVE ()
 	{
 	if [ $REMOVE_TYPE != "" ] 
-		then rm -rf /home/ancaria/099-alt/$REMOVE_TYPE
+		then #rm -rf /home/ancaria/099-alt/$REMOVE_TYPE
+			find . -name ${REMOVE_TYPE} -type f -delete
 		fi
 	RETURN_TO_MENU
 	}
