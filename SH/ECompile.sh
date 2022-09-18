@@ -22,7 +22,7 @@ COMPILE_SCRIPT()
 	{
 	clear
 	read -p "Path to script to compile: " CMD
-	$ECOMPILE_PATH "${CMD}"
+	$ECOMPILE_PATH -C "${ECOMPILE_CONF_PATH}" "${CMD}"
 	RETURN_TO_MENU
 	}
 
@@ -31,7 +31,7 @@ COMPILE_DIRECTORY()
 	{
 	clear
 	read -p "Path to DIRECTORY: " CMD
-	"${ECOMPILE_PATH}" -A -b -f "${CMD}"
+	"${ECOMPILE_PATH}" -A -b -f -C "${ECOMPILE_CONF_PATH}" "${CMD}"
 	RETURN_TO_MENU
 	}
 
@@ -55,7 +55,23 @@ COMPILE_ALL_SCRIPTS_OPTXT()
 	echo -e "\nCompilation complete."
 	RETURN_TO_MENU
 	}
-	
+
+#-- GENERATE DEFAULT LINUX ECOMPILE CONFIG
+GENCONFIG()
+	{
+	[ -f "${ECOMPILE_CONF_PATH}" ] || \
+		( \
+	       	cp scripts/ecompile.cfg.example "${ECOMPILE_CONF_PATH}" && \
+		sed -i -e 's|ModuleDirectory=.*|ModuleDirectory=./scripts/modules|g' "${ECOMPILE_CONF_PATH}" && \
+		sed -i -e 's|IncludeDirectory=.*|IncludeDirectory=./scripts|g' "${ECOMPILE_CONF_PATH}" && \
+		sed -i -e 's|PolScriptRoot=.*|PolScriptRoot=./scripts|g' "${ECOMPILE_CONF_PATH}" && \
+		sed -i -e 's|PackageRoot=.*DistroDev\\pkg|PackageRoot=./pkg|g' "${ECOMPILE_CONF_PATH}" && \
+		sed -i -e 's|PackageRoot=.*DistroDev\\optpkg|PackageRoot=./optpkg|g' "${ECOMPILE_CONF_PATH}" && \
+		sed -i -e 's|PackageRoot=.*DistroDev\\devpkg|PackageRoot=./devpkg|g' "${ECOMPILE_CONF_PATH}" \
+	        )
+        
+	}
+
 #-- QUIT FUNCTION
 QUIT()
 	{
@@ -66,6 +82,7 @@ QUIT()
 #-- MENU FUNCTION
 MENU()
 	{
+	GENCONFIG
 	clear
 	echo "Ecompile.bat (V 1.0) by MetaPhaze"
 	echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
@@ -75,6 +92,7 @@ MENU()
 	echo " [ b ]  - Compile a directory."
 	echo " [ c ]  - Compile all .src scripts."
 	echo " [ d ]  - Compile all scripts and output to ecompile.log"
+	echo " [ e ]  - Regenerate ${ECOMPILE_CONF_PATH}"
 	echo ""
 	echo " [ x ]  - Back"
 
@@ -92,6 +110,11 @@ MENU()
 	if [ "${CMD}" == "d" ]
 		then COMPILE_ALL_SCRIPTS_OPTXT
 		fi
+        if [ "${CMD}" == "e" ]
+                then 
+			rm -f "$ECOMPILE_CONF_PATH"
+			RETURN_TO_MENU
+                fi
 	if [ "${CMD}" == "x" ] 
 		then QUIT
 		fi
