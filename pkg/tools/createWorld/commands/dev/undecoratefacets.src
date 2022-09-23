@@ -23,10 +23,6 @@ use polsys;
 use cliloc;
 
 include ":createWorld:decorate";
-include ":clilocs:clilocs";
-include ":timeutils:time";
-include "include/arrays";
-include ":gumps:gumps";
 include ":gumps:yesNo";
 
 
