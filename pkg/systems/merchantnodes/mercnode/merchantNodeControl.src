@@ -86,11 +86,10 @@ program merchantnode(itm)
 			DestroyRootItemInStorageArea(storage, thing.serial + " FS");
 			DestroyRootItemInStorageArea(storage, thing.serial + " PB");
 			DestroyRootItemInStorageArea(storage, thing.serial + " 1C");
-			sleep(2);
+			Sleep(2);
 		endforeach
 		spawn := holder;
 		SetObjProperty(item, "Type", spawn);
-
 	endif
 
 //
@@ -202,7 +201,7 @@ function ValidateSpawns()
 				else
 					MoveObjectToLocation(npc, 6066, 1, 0, "britannia", MOVEOBJECT_FORCELOCATION);
 					RevokePrivilege(npc, "invul");
-					KillMobile(npc);
+					npc.Kill();
 				endif
 			endif
 			sleepms(2);
@@ -215,7 +214,7 @@ function ValidateSpawns()
 		else
 			MoveObjectToLocation(npc, 6066, 1, 0, "britannia", MOVEOBJECT_FORCELOCATION);
 			RevokePrivilege(npc, "invul");
-			KillMobile(npc);
+			npc.Kill();
 		endif
 		sleepms(2);
 	endforeach
@@ -235,7 +234,7 @@ function DespawnAll()
 		if(hp)
 			MoveObjectToLocation(thing, 6066, 1, 0, "britannia", MOVEOBJECT_FORCELOCATION);
 			RevokePrivilege(thing, "invul");
-			KillMobile(thing);
+			thing.Kill();
 		endif
 		sleepms(2);
 	endforeach
@@ -249,7 +248,7 @@ function SpawnAll(map)
 		var type	 := thing[1];
 		var root1	 := thing[2];
 		var status1 := thing[3];
-		var chest	:= thing[4];
+		// var chest	:= thing[4];
 		var chk := 0;
 		foreach npc in npclist
 			if(root1 == GetObjProperty(npc, "Anchor"))
@@ -259,15 +258,21 @@ function SpawnAll(map)
 		if((chk == 0) && (status1 == 1))
 			var new := 0;
 			while((!new) && item)
-				new := CreateNpcFromTemplate(type, root1[1], root1[2], root1[3], 0, map);
-				if(new)
-					SetObjProperty(new, "Anchor", array(root1[1], root1[2], root1[3]));
-					SetObjProperty(new, "restockserial", chest);
-					npclist.append(new);
-				// else
-					// SysLog( "Error: "+new.errortext+root1[1]+" "+root1[2]+" "+root1[3]+" "+map );
+				var props := Struct {
+									"Facing" := RandomInt( 8 ),
+									"CProps" := Dictionary {
+										"Anchor" -> { root1[1], root1[2], root1[3] },
+										"MerchantNode" -> item.serial
+										// "restockserial" -> chest.serial
+										}
+									};
+				new := CreateNpcFromTemplate( type, root1[1], root1[2], root1[3], props, map );
+				if( new.IsA( POLCLASS_NPC ) )
+					npclist.Append( new );
+				else
+					Print( item.serial+" Failed to Spawn Merchant at: "+root1[1]+" "+root1[2]+" "+root1[3]+" "+map+" -> "+new.errortext );
 				endif
-				sleep(20);
+				Sleep( 20 );
 			endwhile
 		endif
 	endforeach

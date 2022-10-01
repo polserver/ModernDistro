@@ -13,12 +13,13 @@ include ":virtue:noto";
 var npcdesc_cfg := ReadConfigFile( "npcdesc" );
 
 program npcdeath(corpse)
-	var i;
-	if(GetObjProperty(corpse, "restockserial"))
-		var stocklist := SystemFindObjectBySerial(CInt(GetObjProperty(corpse, "restockserial")));
-		DestroyItem(stocklist);
-	endif
 
+	//if(GetObjProperty(corpse, "restockserial"))
+	//	var stocklist := SystemFindObjectBySerial(CInt(GetObjProperty(corpse, "restockserial")));
+	//	DestroyItem(stocklist);
+	//endif
+
+	var i;
 	var last_damage := GetObjProperty(corpse, "LastDamage");
 	var killer := last_damage.serial;
 	if (killer != error)
