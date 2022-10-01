@@ -12,9 +12,12 @@ use polsys;
 include "include/skills";
 include "include/math";
 include ":itemUtils:itemtypes";
+include ":megacliloc:settings";
 
 // Charges: 1049116
 program itemdata(xObject)
+
+	var settings := MCliloc_GetSettingsCfgElem( "Settings" );
 	// Start of Loop.
 	//var itemdesc := ReadConfigFile (":*:itemdesc");
 	var allprops := array;
@@ -28,7 +31,7 @@ program itemdata(xObject)
 		prop.values := array {owner};
 		allprops.append(prop);
 	endif
-	owner := GetObjProperty(xObject, "craftername");
+	owner := GetObjProperty(xObject, "CrafterName");
 	if (owner)
 		prop.clilocid := 1050043; // crafted by ~1_NAME~
 		prop.values := array {owner};
@@ -39,7 +42,7 @@ program itemdata(xObject)
 		prop.values := array {};
 		allprops.append (prop);
 	endif
-	if ( xObject.cursed )
+	if ( xObject.cursed && !GetObjProperty( xObject, "HiddenCurse" ) )
 		prop.clilocid := 1049643; // cursed
 		prop.values := array {};
 		allprops.append (prop);
@@ -96,13 +99,63 @@ program itemdata(xObject)
 		if (xObject.isa (POLCLASS_EQUIPMENT))
 			if (xObject.isa(POLCLASS_ARMOR))
 				var armordesc := GetItemDescriptor(xObject.objtype);
-				if (xObject.ar_mod > 0)
-					prop.clilocid := 1072382; // physical resist +~1_val~%
-					prop.values := array {xObject.ar_mod};
-					allprops.append (prop);
+				if (xObject.resist_physical > 0)
+					if( Settings.ShowResistMods )
+						prop.clilocid := 1072382; // physical resist +~1_val~%
+						prop.values := array {xObject.resist_physical_mod};
+						allprops.append (prop);
+					endif
 					prop.clilocid := 1080361; // physical resist ~1_val~% (total)
-					prop.values := array {xObject.ar};
+					prop.values := array {xObject.resist_physical};
 					allprops.append (prop);
+				endif
+				if (xObject.resist_fire > 0)
+					if( Settings.ShowResistMods )
+						prop.clilocid := 1072383; // fire resist +~1_val~%
+						prop.values := array {xObject.resist_fire_mod};
+						allprops.append (prop);
+					endif
+					prop.clilocid := 1080362; // fire resist ~1_val~% (total)
+					prop.values := array {xObject.resist_fire};
+					allprops.append (prop);
+				endif
+				if (xObject.resist_cold > 0)
+					if( Settings.ShowResistMods )
+						prop.clilocid := 1072384; // cold resist +~1_val~%
+						prop.values := array {xObject.resist_cold_mod};
+						allprops.append (prop);
+					endif
+					prop.clilocid := 1080363; // cold resist ~1_val~% (total)
+					prop.values := array {xObject.resist_cold};
+					allprops.append (prop);
+				endif
+				if (xObject.resist_poison > 0)
+					if( Settings.ShowResistMods )
+						prop.clilocid := 1072385; // poison resist +~1_val~%
+						prop.values := array {xObject.resist_poison_mod};
+						allprops.append (prop);
+					endif
+					prop.clilocid := 1080364; // poison resist ~1_val~% (total)
+					prop.values := array {xObject.resist_poison};
+					allprops.append (prop);
+				endif
+				if (xObject.resist_energy > 0)
+					if( Settings.ShowResistMods )
+						prop.clilocid := 1072386; // energy resist +~1_val~%
+						prop.values := array {xObject.resist_energy_mod};
+						allprops.append (prop);
+					endif
+					prop.clilocid := 1080365; // energy resist ~1_val~% (total)
+					prop.values := array {xObject.resist_energy};
+					allprops.append (prop);
+
+				// if (xObject.ar_mod > 0)
+					// prop.clilocid := 1072382; // physical resist +~1_val~%
+					// prop.values := array {xObject.ar_mod};
+					// allprops.append (prop);
+					// prop.clilocid := 1080361; // physical resist ~1_val~% (total)
+					// prop.values := array {xObject.ar};
+					// allprops.append (prop);
 				else
 					prop.clilocid := 1060448; // physical resist ~1_val~%
 					prop.values := array {xObject.ar};
@@ -139,6 +192,31 @@ program itemdata(xObject)
 				prop.clilocid := 1061168; // weapon damage ~1_val~ - ~2_val~
 				prop.values := array {CINT((weapondesc.MinDamage + xObject.dmg_mod)*damagefactor), CINT((weapondesc.MaxDamage + xObject.dmg_mod)*damagefactor)};
 				allprops.append (prop);
+				if (xObject.damage_physical > 0)
+					prop.clilocid := 1060403; // physical damage ~1_val~% (total)
+					prop.values := array {xObject.damage_physical};
+					allprops.append (prop);
+				endif
+				if (xObject.damage_fire > 0)
+					prop.clilocid := 1060405; // fire damage ~1_val~%
+					prop.values := array {xObject.damage_fire};
+					allprops.append (prop);
+				endif
+				if (xObject.damage_cold > 0)
+					prop.clilocid := 1060404; // cold damage ~1_val~%
+					prop.values := array {xObject.damage_cold};
+					allprops.append (prop);
+				endif
+				if (xObject.damage_poison > 0)
+					prop.clilocid := 1060406; // poison damage ~1_val~%
+					prop.values := array {xObject.damage_poison};
+					allprops.append (prop);
+				endif
+				if (xObject.damage_energy > 0)
+					prop.clilocid := 1060407; // energy damage ~1_val~%
+					prop.values := array {xObject.damage_energy};
+					allprops.append (prop);
+				endif
 				//Speed
 				prop.clilocid := 1061167; // weapon speed ~1_val~
 				prop.values := array {weapondesc.Speed};
@@ -168,8 +246,10 @@ program itemdata(xObject)
 				endcase
 				prop.values := array {};
 				allprops.append(prop);
-
-			endif
+				if(xObject.IsMagicWand() && GetObjProperty( xObject, "IDed" ))
+					ChargedItems( xObject, prop, allprops );
+				endif
+			endif // End of elseif (xObject.isa (POLCLASS_WEAPON))
 			var skillid := GetObjProperty(xObject, "skilladv");
 			if (GetObjProperty (xObject, "skill"+skillid))
 				var skillname := GetSkillName(skillid);
@@ -203,10 +283,9 @@ program itemdata(xObject)
 					allprops.append (prop);
 					spell := "e";
 				endif
-				if (spell == "")
-					// 1017324-1017371, 1049116, 1060487-1060492, 1061837,
-					// 1062412-1062416, 1072852-1072853, 1075217, 1076207,
-					// 1112590,
+				ChargedItems( xobject, prop, allprops );
+				// Old code.
+				/* if (spell == "")
 					spell := GetObjProperty(xObject, "itemspellname");
 					if (!spell)
 						prop.clilocid := 1075217;
@@ -244,7 +323,7 @@ program itemdata(xObject)
 						endif
 						allprops.append (prop);
 					endif
-				endif
+				endif */
 			endif
 			//Durability
 			prop.clilocid := 1060639; // durability ~1_val~ / ~2_val~
@@ -286,19 +365,10 @@ program itemdata(xObject)
 			prop.clilocid := 1042886; // ~1_NUMBERS_OF_SPELLS~ Spells
 			prop.values := array {xObject.spells().size()};
 			allprops.append (prop);
-		// Necro spellbook
-		elseif (xObject.objtype == 0xA100)
-			prop.clilocid := 1042886; // ~1_NUMBERS_OF_SPELLS~ Spells
-			prop.values := array {NecroSpellCount(xObject)};
-			allprops.append (prop);
-		// Currently a druid bag I assume
-		elseif (xObject.objtype == 0x1706b)
-			prop.clilocid := 1042886; // ~1_NUMBERS_OF_SPELLS~ Spells
-			prop.values := array {DruidSpellCount(xObject)};
-			allprops.append (prop);
+			CastingProps( xobject, prop, allprops );
 		// House sign
-		elseif (IsSign(xObject))
-			owner := GetObjProperty (xObject, "lastownername");
+		elseif ( xObject.IsHouseSign() )
+			owner := SystemFindObjectBySerial( GetObjProperty (xObject, "ownerserial") );
 			if (owner)
 				prop.clilocid := 1041602; // Owner: ~1_val~
 				prop.values := array {owner};
@@ -309,6 +379,77 @@ program itemdata(xObject)
 	return allprops;
 
 endprogram
+
+function CastingProps( byref xobject, prop, byref allprops )
+
+	if (xobject.faster_casting)
+		prop.clilocid := 1060413; // faster casting ~1_val~
+		prop.values := array {xObject.faster_casting};
+		allprops.append (prop);
+	endif
+	if (xobject.faster_cast_recovery)
+		prop.clilocid := 1060412; // faster cast recovery ~1_val~
+		prop.values := array {xObject.faster_cast_recovery};
+		allprops.append (prop);
+	endif
+	if (xobject.lower_mana_cost)
+		prop.clilocid := 1060433; // lower mana cost ~1_val~%
+		prop.values := array {xObject.lower_mana_cost};
+		allprops.append (prop);
+	endif
+	if (xobject.lower_reagent_cost)
+		prop.clilocid := 1060434; // lower reagent cost ~1_val~%
+		prop.values := array {xObject.lower_reagent_cost};
+		allprops.append (prop);
+	endif
+	if (xobject.spell_damage_increase)
+		prop.clilocid := 1072380; // spell damage increase ~1_val~% (total)
+		prop.values := array {xObject.spell_damage_increase};
+		allprops.append (prop);
+	endif
+
+	return;
+
+endfunction
+
+function ChargedItems( byref object, property, byref all_properties )
+	var effect := GetObjProperty( object, "damagemod" )[4, GetObjProperty( object, "damagemod" ).length()];
+	case( effect )
+		"clumsiness":			property.clilocid := 1017326; // clumsiness charges: ~1_val~
+		"feeblemindedness":		property.clilocid := 1017327; // feeblemind charges: ~1_val~
+		"healing":				property.clilocid := 1017329; // healing charges: ~1_val~
+		"weakness":				property.clilocid := 1017328; // weakness charges: ~1_val~
+		"harming":				property.clilocid := 1017334; // harm charges: ~1_val~
+		"fireballs":			property.clilocid := 1060487; // fireball charges: ~1_val~
+		"greater healing":		property.clilocid := 1017330; // greater healing charges: ~1_val~
+		"lightning":			property.clilocid := 1060491; // lightning charges: ~1_val~
+		"mana draining":		property.clilocid := 1017339; // mana drain charges: ~1_val~
+		"identification":		property.clilocid := 1017350; // identification charges: ~1_val~
+		"magic arrow":			property.clilocid := 1060492; // magic arrow charges: ~1_val~
+		"night sight":			property.clilocid := 1017324; // night sight charges: ~1_val~
+		"protection":			property.clilocid := 1017325; // protection charges: ~1_val~
+		"agility":				property.clilocid := 1017331; // agility charges: ~1_val~
+		"cunning":				property.clilocid := 1017332; // cunning charges: ~1_val~
+		"strength":				property.clilocid := 1017333; // strength charges: ~1_val~
+		"curse":				property.clilocid := 1017335; // curse charges: ~1_val~
+		"bless":				property.clilocid := 1017336; // bless charges: ~1_val~
+		"Teleport":				property.clilocid := 1017337; // Teleport Charges: ~1_val~
+		"curing":				property.clilocid := 1017338; // curing charges: ~1_val~
+		"paralyzation":			property.clilocid := 1017340; // paralyzation charges: ~1_val~
+		"invisibility":			property.clilocid := 1017347; // invisibility charges: ~1_val~
+		"restoration":			property.clilocid := 1017348; // restoration charges: ~1_val~
+		"spell reflection":		property.clilocid := 1017371; // spell reflection charges: ~1_val~
+		"lesser poison":		property.clilocid := 1062412; // lesser poison charges: ~1_val~
+		"poison":				property.clilocid := 1062413; // poison charges: ~1_val~
+		"greater poison":		property.clilocid := 1062414; // greater poison charges: ~1_val~
+		"deadly poison":		property.clilocid := 1062415; // deadly poison charges: ~1_val~
+		"lethal poison":		property.clilocid := 1062416; // lethal poison charges: ~1_val~
+	endcase
+	property.values := array {GetObjProperty( object, "charges" )};
+	all_properties.append (property);
+	return;
+
+endfunction
 
 function NecroSpellCount(book)
 	var GreaterFlag := CINT (GetObjProperty (book, "Greater"));
