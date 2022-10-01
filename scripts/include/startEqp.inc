@@ -222,16 +222,16 @@ endfunction
 function ProcessWand(item)
   var amt;
   case(RandomInt(10) + 1)
-    1: amt :=  15;   SetObjProperty(item, "SpellId",  1);   SetObjProperty(item, "damagemod", "of clumsiness");
-    2: amt :=  15;   SetObjProperty(item, "SpellId",  3);   SetObjProperty(item, "damagemod", "of feeblemindedness");
-    3: amt :=  15;   SetObjProperty(item, "SpellId",  4);   SetObjProperty(item, "damagemod", "of healing");
-    4: amt :=  15;   SetObjProperty(item, "SpellId",  8);   SetObjProperty(item, "damagemod", "of weakness");
-    5: amt :=  10;   SetObjProperty(item, "SpellId", 12);   SetObjProperty(item, "damagemod", "of harming");
-    6: amt :=   5;   SetObjProperty(item, "SpellId", 18);   SetObjProperty(item, "damagemod", "of fireballs");
-    7: amt :=   5;   SetObjProperty(item, "SpellId", 29);   SetObjProperty(item, "damagemod", "of greater healing");
-    8: amt :=   3;   SetObjProperty(item, "SpellId", 30);   SetObjProperty(item, "damagemod", "of lightning");
-    9: amt :=  10;   SetObjProperty(item, "SpellId", 31);   SetObjProperty(item, "damagemod", "of mana draining");
-   10: amt := 100;   SetObjProperty(item, "SpellId", 65);   SetObjProperty(item, "damagemod", "of identification");
+	 1:	amt :=  15;   SetObjProperty(item, "SpellId",  1);	SetObjProperty(item, "damagemod", "of clumsiness");
+	 2:	amt :=  15;   SetObjProperty(item, "SpellId",  3);	SetObjProperty(item, "damagemod", "of feeblemindedness");
+	 3:	amt :=  15;   SetObjProperty(item, "SpellId",  4);	SetObjProperty(item, "damagemod", "of healing");
+	 4:	amt :=  15;   SetObjProperty(item, "SpellId",  8);	SetObjProperty(item, "damagemod", "of weakness");
+	 5:	amt :=  10;   SetObjProperty(item, "SpellId", 12);	SetObjProperty(item, "damagemod", "of harming");
+	 6:	amt :=   5;   SetObjProperty(item, "SpellId", 18);	SetObjProperty(item, "damagemod", "of fireballs");
+	 7:	amt :=   5;   SetObjProperty(item, "SpellId", 29);	SetObjProperty(item, "damagemod", "of greater healing");
+	 8:	amt :=   3;   SetObjProperty(item, "SpellId", 30);	SetObjProperty(item, "damagemod", "of lightning");
+	 9:	amt :=  10;   SetObjProperty(item, "SpellId", 31);	SetObjProperty(item, "damagemod", "of mana draining");
+	10: amt := 100;   SetObjProperty(item, "SpellId", 65);	SetObjProperty(item, "damagemod", "of identification");
   endcase
   SetObjProperty(item, "charges", (amt + RandomInt(10)));
   item.usescript := ":wands:magicWands";
