@@ -21,7 +21,7 @@ program merchantnode(itm)
 	item.invisible := 1;
 	SetObjProperty(item, "#wait", 1);
 	SetNodeName("initializing");
-	sleep(RandomInt(1));
+	sleep(RandomInt(3));
 
 // Assign Merchant Node serial to the npc as a cprop.
 	var npc := 0;
@@ -40,7 +40,7 @@ program merchantnode(itm)
 		SetNodeName("globally disabled");
 		SetObjProperty(item, "#wait", 2);
 		while(GetGlobalProperty("nomerchants"))
-			sleep(1);
+			sleep(5);
 		endwhile
 	endif
 
@@ -128,7 +128,7 @@ program merchantnode(itm)
 			endif
 			var ev := os::wait_for_event(30);
 			case(ev.type)
-				SYSEVENT_SPEECH: 
+				SYSEVENT_SPEECH:
 						if(template == 2)
 							ProcessBankerText(ev);
 						else
@@ -244,6 +244,7 @@ function DespawnAll()
 endfunction
 
 function SpawnAll(map)
+
 	foreach thing in spawn
 		var type	 := thing[1];
 		var root1	 := thing[2];
@@ -263,8 +264,10 @@ function SpawnAll(map)
 					SetObjProperty(new, "Anchor", array(root1[1], root1[2], root1[3]));
 					SetObjProperty(new, "restockserial", chest);
 					npclist.append(new);
+				// else
+					// SysLog( "Error: "+new.errortext+root1[1]+" "+root1[2]+" "+root1[3]+" "+map );
 				endif
-				sleep(1);
+				sleep(20);
 			endwhile
 		endif
 	endforeach
@@ -332,7 +335,7 @@ function ProcessMerchantText(ev)
 					endif
 				endforeach
 			endif
-		
+
 
 		// Has the player said the name of the vendor?  Use that.
 			var vendorname;

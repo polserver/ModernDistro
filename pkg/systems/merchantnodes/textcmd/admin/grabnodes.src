@@ -25,7 +25,7 @@ program textcmd_grabnodes(who, text)
 					dimensions := {0, 0, -127, 2304, 1600, 127};
 		"Malas":	map := Lower(facet);
 					dimensions := {0, 0, -127, 2560, 2048, 127};
-		"tokuno":	map := Lower(facet);
+		"Tokuno":	map := Lower(facet);
 					dimensions := {0, 0, -127, 1448, 1448, 127};
 		"Termur":	map := Lower(facet);
 					dimensions := {0, 0, -127, 1280, 4095, 127};
