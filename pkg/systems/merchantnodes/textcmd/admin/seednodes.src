@@ -20,7 +20,7 @@ program textcmd_seednode(who)
 		"Trammel":	map := "britannia_alt";
 		"Ilshenar":	map := Lower(facet);
 		"Malas":	map := Lower(facet);
-		"tokuno":	map := Lower(facet);
+		"Tokuno":	map := Lower(facet);
 		"Termur":	map := Lower(facet);
 	endcase
 
