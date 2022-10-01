@@ -190,6 +190,7 @@ function CreateCraftItem(byref who, byref craft_skill, use_on, use_onobjtype, ob
 				if((makermark == 1) && (myskill >= 100))
 					nme := "an exceptional "+nme+" ["+
 					menu_config[craft_skill].ExceptionalName+" "+who.name+"]";
+					SetObjProperty( theitem, "CrafterName", who.name );
 				else
 					nme := "an exceptional "+nme;
 				endif
