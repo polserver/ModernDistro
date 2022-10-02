@@ -1,7 +1,3 @@
-//randname.inc
-//
-//assigns a random name from the list according to obtype and gender
-
 use uo;
 use os;
 use cfgfile;
@@ -10,56 +6,112 @@ use basic;
 
 include ":npcs:randNameUtil";
 
-function RandomName(character)
+function OpenNamesCfgFile()
+
+	var cfg_file := ReadConfigFile( "::names" );
+	if( cfg_file.errortext )
+		return error{ "errortext":="Unable to find names.cfg -> "+cfg_file.errortext };
+	endif
+
+	return cfg_file;
+endfunction
+
+function FindNamesElem( byref elem_name, byref cfg_file:=0 )
+
+	if( TypeOfInt( cfg_file ) != OT_CONFIGFILEREF )
+		cfg_file := OpenNamesCfgFile();
+		if( cfg_file.errortext )
+			return cfg_file.errortext;
+		endif
+	endif
+
+	var cfg_elem := FindConfigElem( cfg_file, elem_name );
+	if( cfg_elem.errortext )
+		return error{ "errortext":="Unable to find '"+elem_name+"' in names.cfg -> "+cfg_elem.errortext };
+	endif
+
+	return cfg_elem;
+endfunction
+
+function FetchRandomName( byref elem_name )
+
+	var cfg_elem := FindNamesElem( elem_name );
+	if( cfg_elem.errortext )
+		return 0;
+	endif
+
+	var names := GetConfigStringArray( cfg_elem, "Name" );
+	if( names.errortext )
+		return 0;
+	endif
+
+	return names.RandomEntry();
+endfunction
+
+function RandomName( character )
+
 	var newname := " ";
 	case( character.graphic )
-	    OBJ_BIRD:		newname := AssignName( character, BIRD_IDX );
-	    OBJ_DAEMON:		newname := AssignName( character, DAEMON_IDX );
-	    OBJ_DAEMON_SWORD:	newname := AssignName( character, DAEMON_IDX );
-	    OBJ_DRAGON_RED:	newname := AssignName( character, DRAGON_IDX );
-	    OBJ_DRAGON_GREY: 	newname := AssignName( character, DRAGON_IDX );
-	    OBJ_MALE: 		newname := AssignName( character, MALE_IDX );
-	    OBJ_FEMALE:		newname := AssignName( character, FEMALE_IDX );
-	    OBJ_LIZARD:		newname := AssignName( character, LIZARD_IDX );
-	    OBJ_LIZARD_MACE:	newname := AssignName( character, LIZARD_IDX );
-	    OBJ_LIZARD_SPEAR:	newname := AssignName( character, LIZARD_IDX );
-	    OBJ_ORC:		newname := AssignName( character, ORC_IDX );
-	    OBJ_ORC_CLUB:	newname := AssignName( character, ORC_IDX );
-	    OBJ_ORC_CAPT:	newname := AssignName( character, ORC_IDX );
-	    OBJ_OGRE:		newname := AssignName( character, OGRE_IDX );
-	    OBJ_RATMAN:		newname := AssignName( character, RATMAN_IDX );
-	    OBJ_RATMAN_SWORD:	newname := AssignName( character, RATMAN_IDX );
-	    OBJ_RATMAN_AXE:	newname := AssignName( character, RATMAN_IDX );
-	    default: 		exit;
+		OBJ_BIRD:			newname := AssignName( character, "Bird" );
+
+		OBJ_DAEMON:
+		OBJ_DAEMON_SWORD:
+							newname := AssignName( character, "Demonic" );
+
+		OBJ_DRAGON_RED:
+		OBJ_DRAGON_GREY:
+							newname := AssignName( character, "Draconic" );
+
+		OBJ_MALE: 			newname := AssignName( character, "HumanMale" );
+		OBJ_FEMALE:			newname := AssignName( character, "HumanFemale" );
+
+		OBJ_LIZARD:
+		OBJ_LIZARD_MACE:
+		OBJ_LIZARD_SPEAR:
+							newname := AssignName( character, "Lizardman" );
+
+		OBJ_ORC:
+		OBJ_ORC_CLUB:
+		OBJ_ORC_CAPT:
+							newname := AssignName( character, "Orc" );
+
+		OBJ_OGRE:			newname := AssignName( character, "Ogre" );
+
+		OBJ_RATMAN:
+		OBJ_RATMAN_SWORD:
+		OBJ_RATMAN_AXE:
+							newname := AssignName( character, "Ratman" );
+
+		default: 		exit;
 	endcase
-	return(newname);
+
+	return newname;
 endfunction
 
-function AssignName( character, index )
-    var cfg := ReadConfigFile( "names" );
-    var elem := FindConfigElem( cfg, index );
-    var number := GetConfigInt( elem, "Count" );
-    var dice_str := "1d" + CStr(number);
-    var choice := RandomDiceRoll( dice_str );
-    var entry := "Name" + choice;
-    var str := GetConfigString( elem, entry );
-    var title := PreserveTitle( character );
-    str := str + title;
-    return( str );
+function AssignName( character, elem_name )
+
+	return FetchRandomName( elem_name )+PreserveTitle( character );
 endfunction
 
-function PreserveTitle( character )
-  var myname := character.name;
-  var start := find( myname, ">", 1 );
-  if( !start )
-    return;
-  endif
-  var title := myname[ start+1, (len( myname ) - 8) ];
-  if( !title )
-    return("");
-  endif
-  return( title );
+// Allows for passing a string or mobile_ref
+function PreserveTitle( npc )
+
+	var myname := "";
+	if( TypeOfInt( npc ) == OT_STRING )
+		myname := npc;
+	else
+		myname := npc.name;
+	endif
+
+	var start := Find( myname, ">", 1 );
+	if( !start )
+		return;
+	endif
+
+	var title := myname[ start+1, ( Len( myname ) - 8 ) ];
+	if( !title )
+		return "";
+	endif
+
+	return title;
 endfunction
-
-
-

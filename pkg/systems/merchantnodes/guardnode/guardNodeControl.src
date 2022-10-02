@@ -141,6 +141,7 @@ function SpawnAll()
     var x := cint(item.x + RandomInt(11) - RandomInt(11));
     var y := cint(item.y + RandomInt(11) - RandomInt(11));
     var z := cint(GetWorldHeight(x, y, item.realm));
+
     var npc := CreateNpcFromTemplate(spawn, x, y, z, 0, item.realm);
     if(npc)
       npclist.append(npc);

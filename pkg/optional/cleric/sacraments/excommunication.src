@@ -42,15 +42,15 @@ program excommunication(params)
 				member_list.erase(targ.serial in member_list);
 				faith.setprop("MemberList", member_list);
 				PlaySoundEffect(targ, 519);
-				EraseObjProperty(targ, "Devotion");
-				EraseObjProperty (targ, "Piety");
+				EraseObjProperty( targ, "Devotion" );
+				EraseObjProperty( targ, "Piety" );
 			elseif(targ.serial in cleric_list)
 				cleric_list.erase(targ.serial in cleric_list);
 				faith.setprop("ClericList", cleric_list);
 				PlaySoundEffect(targ, 519);
 				SetObjProperty(targ, "Devotion", "Faithless");
-				EraseObjProperty ( targ, "Cleric");
-				EraseObjProperty (targ, "Piety");
+				EraseObjProperty( targ, "Cleric" );
+				EraseObjProperty( targ, "Piety" );
 				// Restore previous skills
 				ResetSkills(targ);
 			else
@@ -59,7 +59,7 @@ program excommunication(params)
 				SendSysMessage(who, "This appears to be a bug. Please report it to a staff member.", color := 33);
 				return 0;
 			endif
-            SetBaseSkillBaseValue(targ, AP_AttributeNameToSkillId(MEDITATION), 40);
+			SetAttributeBaseValue( targ, MEDITATION, CInt( CDbl( 40 ) * 10.0 ) );
 			SendSysMessage(targ, "You have been cast out of " + hp_devotion);
 			SendSysMessage(who, targ.name + " has been cast out of " + hp_devotion);
 		endif

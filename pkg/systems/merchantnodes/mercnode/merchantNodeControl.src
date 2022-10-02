@@ -4,13 +4,13 @@ use util;
 use cfgfile;
 
 include "include/eventID";
-include ":attributes:attributes";
-include "include/sysEvent";
 include "include/mrcSpawn";
-include "include/utility";
-include ":damage:damage";
+include "include/NPCUtil";
+include "include/sysEvent";
+include ":body:bodyHues";
+include ":npcs:randName";
 
-var npclist := {};
+var npclist := Array;
 var spawn, amt, item, status, rng, tmplate;
 var npccfg := ReadConfigFile("::npcdesc");
 
@@ -54,7 +54,7 @@ program merchantnode(itm)
 	endif
 	item.color := 0;
 
-// construct a list of npcs in a struct.
+// construct a list of npcs in an array.
 	foreach entry in GetObjProperty(item, "NpcList");
 		var critter := SystemFindObjectBySerial(entry);
 		if(critter)
@@ -256,16 +256,9 @@ function SpawnAll(map)
 			endif
 		endforeach
 		if((chk == 0) && (status1 == 1))
-			var new := 0;
-			while((!new) && item)
-				var props := Struct {
-									"Facing" := RandomInt( 8 ),
-									"CProps" := Dictionary {
-										"Anchor" -> { root1[1], root1[2], root1[3] },
-										"MerchantNode" -> item.serial
-										// "restockserial" -> chest.serial
-										}
-									};
+			var new := 0,
+				props := MerchantSetup( type, root1, map );
+			while( ( !new ) && item )
 				new := CreateNpcFromTemplate( type, root1[1], root1[2], root1[3], props, map );
 				if( new.IsA( POLCLASS_NPC ) )
 					npclist.Append( new );
@@ -276,6 +269,36 @@ function SpawnAll(map)
 			endwhile
 		endif
 	endforeach
+endfunction
+
+// ToDo: Assigning specific name to a merchant via an optional parameter which will likely be a struct
+// containing gender, name
+function MerchantSetup( npctemplate, root1, map )
+
+	var color := RandomHumanSkinHue(),
+		gender := RandomInt( 2 ),
+		template_elem := NPC_GetNPCConfig( npctemplate );
+
+	var name := ( !gender ? FetchRandomName( "HumanMale" ) : FetchRandomName( "HumanFemale" ) ),
+		title := PreserveTitle( template_elem.Name );
+
+	var props := Struct{
+						"Name" := name+title,
+						"Color" := color,
+						"TrueColor" := color,
+						"Gender" := gender,
+						"Objtype" := ( ( gender == 0 ) ? 0x190 : 0x191 ),
+						"Graphic" := ( ( gender == 0 ) ? 0x190 : 0x191 ),
+						"Facing" := RandomInt( 8 ),
+						"Speech_Font" := 0x3,
+						"Speech_Color" := RandomIntMinMax( 2, 1000 ),
+						"CProps" := Dictionary {
+							"Anchor" -> { root1[1], root1[2], root1[3], map },
+							"MerchantNode" -> item.serial
+							}
+						};
+
+	return props;
 endfunction
 
 function ProcessBankerText(ev)

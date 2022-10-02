@@ -7,8 +7,11 @@
 /////////////////////////////////////////////////////////////////////////////
 
 include ":attributes:attributes";
+
 program textcmd_refreshme( who )
-    AP_SetVital(who, VITALID_LIFE, AP_GetVitalMaximumValue(who, VITALID_LIFE));
-    AP_SetVital(who, VITALID_MANA, AP_GetVitalMaximumValue(who, VITALID_MANA));
-    AP_SetVital(who, VITALID_STAMINA, AP_GetVitalMaximumValue(who, VITALID_STAMINA));
+
+    AP_RefreshVitals( who );
+    who.SetLightLevel( 0, 86400 );
+
+    return 1;
 endprogram

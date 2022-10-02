@@ -9,7 +9,7 @@ include ":attributes:attributes";
 
 program textcmd_RefreshVitals( who, text )
 
-	var targ;
+	var targ, time := 86400;
 	if( text == "me" )
 		targ := who;
 	else
@@ -19,9 +19,11 @@ program textcmd_RefreshVitals( who, text )
 			SendSysMessage( who, "Cancelled." );
 			return 0;
 		endif
+		time := 3600;
 	endif
-	
+
 	AP_RefreshVitals( targ );
-	
+	targ.SetLightLevel( 0, time );
+
 	SendSysMessage( who, "Done." );
 endprogram

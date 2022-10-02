@@ -12,8 +12,6 @@ include "include/sysEvent";
 include "include/anchors";
 include "include/speech";
 include "include/client";
-include "include/res";
-include "include/resPenalty";
 include "include/begging";
 
 const SOUND_EFFECT_RES := 0x215;

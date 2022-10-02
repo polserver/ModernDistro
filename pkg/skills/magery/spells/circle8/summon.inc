@@ -55,7 +55,7 @@ function summon_creature( caster, circle := 8, npctemplate, cast_loc, controldif
 		thecritter.setMurderer(1);
 	endif
 
-	SetBaseSkillBaseValue( thecritter, SKILLID_RESISTING_SPELLS,  magery*10  );
+	SetAttributeBaseValue( thecritter, MAGERY, magery*10 );
 	PlaySoundEffect(caster, SFX_SPELL_SUMMON_ELEMENTAL);
 
 	if ("Longevity" in attributelist)

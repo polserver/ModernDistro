@@ -21,9 +21,6 @@
 // i3 = vendor's "Buyable" item container.
 // SendSellWindow(ev.source, me, inv_fs, inv_pb, inv_1c);
 ///////////////////////////////////////////////////////////////////////
-
-
-
 use npc;
 use os;
 use uo;
@@ -192,12 +189,10 @@ function Lookiehere(who, npc)
   endforeach
 endfunction
 
-
 ///////////////////
 //  called when someone hands in a job bag
 // Added by Yukiko 04-Oct-2006 from Sanc scripts.
 ///////////////////
-
 function PayForJobCompleted (byref ev)
 	var bag := ev.item;
 	var player := ev.source;
@@ -248,11 +243,9 @@ function PayForJobCompleted (byref ev)
 	SetGlobalProperty ("#jobs_for_account_"+player.acctname, playerjobs);
 endfunction
 
-
 ///////////////////
 //  called by 'sell bag'
 ///////////////////
-
 function BuyBag (byref you)
 	PrintTextAbovePrivate ( me, "What bag of stuff would you like to sell me?", you );
 	var bag := Target (you);
@@ -321,13 +314,9 @@ function BuyBag (byref you)
 	endif
 endfunction
 
-
-
-
 ///////////////////
 //  called by 'sell all'
 ///////////////////
-
 function BuyAll (byref you)
 
 	PrintTextAbovePrivate (me, "What would you like me to buy all of?", you );
@@ -399,14 +388,10 @@ function BuyAll (byref you)
 	endif
 endfunction
 
-
-
-
 ///////////////////
 //  determines if the item is one that can be bought when using 'sell bag', 'sell all', or one of
 //  other others
 ///////////////////
-
 function IsBuyableItem (byref character, byref item, byref from_bag)
 	if ( item.newbie )
 		return 0;

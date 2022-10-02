@@ -277,7 +277,8 @@ function heal(who, patient, counter, healing)
 					SendSysMessage(patient, who.name + " has healed " + CStr(healamt) + " of damage.", color := 56);
 					SendSysMessage(who, "You have healed " + patient.name + " of " + CStr(healamt) + " of damage.", color := 56);
 				endif
-			    AwardPoints(who, SKILLID_HEALING, (healamt * 2));
+				SkillCheck( who, HEALING, ( CDbl( GetAttributeBaseValue( who, HEALING ) ) / 10.0 ), "", ADV_ALL );
+			    // AwardPoints(who, SKILLID_HEALING, (healamt * 2));
 			    break;
 		    else
 			    // Throw 'em a bone.  No chance of gain, though.
@@ -361,11 +362,13 @@ function cure(who, patient, counter, healing)
 				if (TS_GetTimerNames(patient, "P").size() == 0)
 					SendSysMessage(who,"You have cured your patient completely.");
 					SendSysMessage(patient, who.name + " has cured you completely.");
-					AwardPoints(who, SKILLID_HEALING, (healamt * 100));
+					SkillCheck( who, HEALING, ( CDbl( GetAttributeBaseValue( who, HEALING ) ) / 10.0 ), "", ADV_ALL );
+					// AwardPoints(who, SKILLID_HEALING, (healamt * 100));
 				else
 					SendSysMessage(who, "You have helped but your patient is still poisoned.");
 					SendSysMessage(patient, who.name + " has tried to cure your poison.");
-					AwardPoints(who, SKILLID_HEALING, (CInt(healamt/2) * 100));
+					SkillCheck( who, HEALING, ( CDbl( GetAttributeBaseValue( who, HEALING ) ) / 10.0 ), "", ADV_ALL );
+					// AwardPoints(who, SKILLID_HEALING, (CInt(healamt/2) * 100));
 				endif
 				break;
 			else
@@ -408,7 +411,8 @@ function resurrect_pc(who, patient, counter)
 		endif
 		if(counter >= 10)
 			if(SkillCheck( who, HEALING, healamt, 100 ) > 0)
-				AwardPoints(who, SKILLID_HEALING, 400);
+				SkillCheck( who, HEALING, ( CDbl( GetAttributeBaseValue( who, HEALING ) ) / 10.0 ), "", ADV_ALL );
+				// AwardPoints(who, SKILLID_HEALING, 400);
 				if(do_res(who, patient))
 				VS_AdjustVirtue(who, "Compassion", 1, 100);
 				var karma := CInt( GetObjProperty(who, "Karma") );

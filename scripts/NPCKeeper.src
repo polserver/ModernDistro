@@ -11,7 +11,7 @@ var pncfg := ReadConfigFile("npcdesc");
 var equipt;
 
 program npckeep(who)
-  SetObjProperty(who, "AiSerial", cint(who.serial));
+  SetObjProperty( who, "AiSerial", CInt( who.serial ) );
   var colors := pncfg[who.npctemplate].colors;
   if(colors)
     colors := SplitWords(colors);
@@ -111,18 +111,17 @@ program npckeep(who)
   else
     pncfg := ReadConfigFile("npcdesc");
     equipt := GetObjProperty(who, "Equipt");
-    if(equipt)
-      if(who.graphic == 0x190)
+    if( equipt )
+      if( who.graphic == 0x190 && !GetObjProperty( who, "MerchantNode" ) )
         case(randomint(2))
           0: who.graphic := 0x190;
              who.gender := 0;
-             equipt := equipt + "M";
           1: who.graphic := 0x191;
              who.gender := 1;
-             equipt := equipt + "F";
         endcase
       endif
-      SetObjProperty(who, "Graphic", cint(who.graphic));
+      equipt += !who.gender ? "M" : "F";
+      SetObjProperty(who, "Graphic", CInt(who.graphic));
       Habille(who, equipt);
       EraseObjProperty(who, "Equipt");
       var lewtgroup := pncfg[who.npctemplate].lootgroup;
@@ -187,33 +186,33 @@ endprogram
 
 function Adjustment(who, type)
   if(type == "Mage")
-    SetBaseSkillBaseValue(who, SKILLID_MAGERY,          1000);
-    SetBaseSkillBaseValue(who, SKILLID_EVALUATING_INTELLIGENCE,         1000);
-    SetBaseSkillBaseValue(who, SKILLID_RESISTING_SPELLS, 900);
-    SetBaseSkillBaseValue(who, SKILLID_TACTICS,         700);
-    SetBaseSkillBaseValue(who, SKILLID_WRESTLING,       700);
+    SetAttributeBaseValue( who, MAGERY, 1000 );
+    SetAttributeBaseValue( who, EVALUATING_INTELLIGENCE, 1000 );
+    SetAttributeBaseValue( who, RESISTING_SPELLS, 900 );
+    SetAttributeBaseValue( who, TACTICS, 700 );
+    SetAttributeBaseValue( who, WRESTLING, 700 );
   elseif(type == "Thief")
-    SetBaseSkillBaseValue(who, SKILLID_FENCING,         1000);
-    SetBaseSkillBaseValue(who, SKILLID_RESISTING_SPELLS, 60);
-    SetBaseSkillBaseValue(who, SKILLID_TACTICS,         80);
-    SetBaseSkillBaseValue(who, SKILLID_ANATOMY,         600);
+    SetAttributeBaseValue( who, FENCING, 1000 );
+    SetAttributeBaseValue( who, RESISTING_SPELLS, 600 );
+    SetAttributeBaseValue( who, TACTICS, 800 );
+    SetAttributeBaseValue( who, ANATOMY, 600 );
   elseif(type == "Paladin")
-    SetBaseSkillBaseValue(who, SKILLID_RESISTING_SPELLS, 800);
-    SetBaseSkillBaseValue(who, SKILLID_TACTICS,         1000);
-    SetBaseSkillBaseValue(who, SKILLID_SWORDSMANSHIP,   1000);
-    SetBaseSkillBaseValue(who, SKILLID_MACEFIGHTING,    1000);
-    SetBaseSkillBaseValue(who, SKILLID_FENCING,         1000);
-    SetBaseSkillBaseValue(who, SKILLID_WRESTLING,       900);
-    SetBaseSkillBaseValue(who, SKILLID_ANATOMY,         1000);
-    AP_SetTrueStat(who, STRENGTH, 80);
+    SetAttributeBaseValue( who, RESISTING_SPELLS, 800 );
+    SetAttributeBaseValue( who, TACTICS, 1000 );
+    SetAttributeBaseValue( who, SWORDSMANSHIP, 1000 );
+    SetAttributeBaseValue( who, MACEFIGHTING, 1000 );
+    SetAttributeBaseValue( who, FENCING, 1000 );
+    SetAttributeBaseValue( who, WRESTLING, 900 );
+    SetAttributeBaseValue( who, ANATOMY, 1000 );
+    SetAttributeBaseValue( who, STRENGTH, 800 );
   elseif((type == "Fighter1") || (type == "Fighter2") || (type == "Fighter3") || (type == "Fighter4"))
-    SetBaseSkillBaseValue(who, SKILLID_RESISTING_SPELLS, 600);
-    SetBaseSkillBaseValue(who, SKILLID_TACTICS,         900);
-    SetBaseSkillBaseValue(who, SKILLID_SWORDSMANSHIP,   900);
-    SetBaseSkillBaseValue(who, SKILLID_MACEFIGHTING,    900);
-    SetBaseSkillBaseValue(who, SKILLID_FENCING,         900);
-    SetBaseSkillBaseValue(who, SKILLID_WRESTLING,       900);
-    SetBaseSkillBaseValue(who, SKILLID_ANATOMY,         900);
+    SetAttributeBaseValue( who, RESISTING_SPELLS, 600 );
+    SetAttributeBaseValue( who, TACTICS, 900 );
+    SetAttributeBaseValue( who, SWORDSMANSHIP, 900 );
+    SetAttributeBaseValue( who, MACEFIGHTING, 900 );
+    SetAttributeBaseValue( who, FENCING, 900 );
+    SetAttributeBaseValue( who, WRESTLING, 900 );
+    SetAttributeBaseValue( who, ANATOMY, 900 );
   endif
 endfunction
 

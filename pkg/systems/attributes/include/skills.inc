@@ -49,7 +49,7 @@ endfunction
  */
 function AP_GetTrueSkill( who, skill_name )
 
-	return CDbl( GetAttributeBaseValue( who, skill_name )) / 10.0;
+	return CDbl( GetAttributeBaseValue( who, skill_name ) ) / 10.0;
 endfunction
 
 /*
@@ -89,7 +89,7 @@ endfunction
  */
 function AP_SetTrueSkill( mobile, skill_name, points )
 
-        var result;
+  var result;
 	if( points >= 0 )
 		result := SetAttributeBaseValue( mobile, skill_name, CInt( CDbl( points ) * 10.0 + 0.1 ));
 	else
@@ -353,6 +353,7 @@ function ModifyAttributeTemporaryModBaseValue(who, attributeid, moda)
   return SetAttributeTemporaryMod(who, attributeid, Cint(GetAttributeTemporaryMod(who, attributeid)+ moda));
 endfunction
 
+/*
 function AwardPoints(who, skillid, skillpoints)
 
     // If it ain't a mobile then don't bother
@@ -422,6 +423,7 @@ function AwardPoints(who, skillid, skillpoints)
     endif
     return 1;
 endfunction
+*/
 
 function AwardRawAttributePoints(who, attributeid, rawpoints, skillid)
   if(!who.isA(POLCLASS_MOBILE))
