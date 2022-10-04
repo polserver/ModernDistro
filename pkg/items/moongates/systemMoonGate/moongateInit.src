@@ -91,8 +91,16 @@ function BuildGumpForGate(gate, byref town_name, byref config)
 		var cfg_elem := config[_realm_iter];
 		GFPage(gump, page);
 
-		foreach entry in ( GetConfigStringDictionary(cfg_elem, "Town") )
+                var configdict := GetConfigStringDictionary(cfg_elem, "Town");
+
+		if ( configdict.errortext )
+			SysLog("Error::Loading config ->"+configdict.errortext);
+			return error{"errortext" := "Unable to read config file: :Moongates:Town"};
+		endif
+
+		foreach entry in ( configdict )
 			entry := entry; // To avoid compiler warnings.
+
 			if ( _entry_iter == town_name && _realm_iter == gate.realm )
 				GFGumpPic(gump, 153, y_pos+5, 2104);
 			else
