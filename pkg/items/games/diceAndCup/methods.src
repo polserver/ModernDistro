@@ -1,0 +1,39 @@
+use uo;
+use os;
+use util;
+
+program dice_and_cup_methods()
+
+	return 1;
+endprogram
+
+exported function IsDiceAndCup( item )
+	
+	item := item; // Avoid compiler warnings...
+
+	return 1;
+endfunction
+
+exported function OnTelekinesis( item, mobile )
+
+	PlayStationaryEffectEx( item.x, item.y, item.z, item.realm, 0x376A, 32, 9, 	0x139E );
+	PlaySoundEffectXYZ( item.x, item.y, item.z, 0x1F6, item.realm );
+
+	Roll( item, mobile );
+
+	return 1;
+endfunction
+
+exported function Roll( item, mobile )
+
+	item := item; // Avoid compiler warnings...
+
+	var one := RandomDiceRoll( "1d6" );
+	var two := RandomDiceRoll( "1d6" );
+
+	SendSysMessage( mobile, "The first die rolls to a stop and shows: "+one );
+	SendSysMessage( mobile, "The second die stops and shows: "+two );
+	SendSysMessage( mobile, "Total for this roll: "+CInt( one+two ) );
+
+	return 1;
+endfunction

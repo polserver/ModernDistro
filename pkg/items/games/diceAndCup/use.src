@@ -1,0 +1,9 @@
+use uo;
+use os;
+
+program dice_and_cup_usescript( mobile, cup )
+
+	cup.Roll( mobile );
+
+	return 1;
+endprogram
