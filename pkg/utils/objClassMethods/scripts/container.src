@@ -1,4 +1,19 @@
+use uo;
+use os;
+use polsys;
+
 program Install()
 	Print( "Custom Container Class Methods Installed." );
 	return 1;
 endprogram
+
+exported function CloseContainer( item, mobile )
+
+    var packet := CreatePacket( 0xBF, MSGLEN_VARIABLE );
+	packet.SetInt16( 1, 12 );
+	packet.SetInt16( 3, 0x16 );
+	packet.SetInt32( 5, 0x0C );
+	packet.SetInt32( 9, item.serial );
+
+	return packet.SendPacket( mobile );
+endfunction
