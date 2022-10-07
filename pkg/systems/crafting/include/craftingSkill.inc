@@ -72,7 +72,7 @@ function CraftCheckSkill(who, craft_skill, difficulty, points, report:=0)
 	if(GainCheck >= GainCap)
 		points := 0;
 	endif
-	if ( CDbl(AP_GetSkill(who, craft_skill)) < 35.0 )
+	if ( CDbl(AP_GetSkill(who, craft_skill)) < 10.0 )
 		points := points * 2;
 		chance := 100;
 	endif
