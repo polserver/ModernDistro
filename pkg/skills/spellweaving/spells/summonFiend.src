@@ -5,7 +5,7 @@ include ":damage:damage";
 include ":magery:spellRestrictions";
 
 
-program summon_fiend parms )
+program summon_fiend( parms )
 	var circle := 1;
 	var delivery := "notarget";
 	var noto := "neutral";
