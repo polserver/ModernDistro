@@ -3,6 +3,8 @@ use cliloc;
 
 
 include ":attributes:attributes";
+include "include/sounds";
+include "include/client";
 
 CONST MIN_ARCANIST_REQ := 2;
 CONST MAX_ARCANIST_ALLOWED := 4;
