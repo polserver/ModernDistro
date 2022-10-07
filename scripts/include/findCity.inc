@@ -5,9 +5,9 @@ use cfgfile;
 include "include/utility";
 
 UnloadConfigFile("regions");
-var  regions_cfg := ReadConfigFile("//regions/regions");               // Reads regions.cfg
+var  regions_cfg := ReadConfigFile("::regions/regions");               // Reads regions.cfg
 
-if(!regions_cfg.errortext)
+if(regions_cfg.errortext)
 	Broadcast("findCity.inc: Can't read regions.cfg", 2, 33);
 	Broadcast(regions_cfg.errortext, 2, 33);
 	return 0;
