@@ -8,13 +8,15 @@
 function CraftCheckSkill(who, craft_skill, difficulty, points, report:=0)
 
 	SkillCheck(who, craft_skill, difficulty, points);
+endfunction
 	// As the comment above states, this function, the commented out code below,
 	// is closer to the OSI skill advancement system. I have commented out that
 	// code and added a function call to the main skill check function above.
 	// This will allow a developer to relatively easily switch between the two
 	// and determine which better suits their needs. To switch, simply comment
-	// out the SkillCheck function call above and remove the /* below and the */
-	// at the end of this file. Save the file. Then recompile all scripts.
+	// out the SkillCheck function call and the endfunction statement above
+	// and remove the /* below and the */ at the end of this file.
+	// Save the file. Then recompile all scripts.
 	// After that, if POL is running, go to the console window, press
 	// <shift> 'S' to unlock the console and press 'u' to unload all
 	// cached scripts. The changes will be loaded the first time you attempt
