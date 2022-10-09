@@ -74,7 +74,6 @@ function SkillCheck( mobile, attrib_name, difficulty, award_diff:="", advance_fl
 				// hunger := 1;
 				hunger := 9;
 			endif
-Print("if( !mobile.IsA( POLCLASS_NPC ) )");
 			// This determines how much hunger will affect success, I think :P
 			var hc_settings := AP_GetSettingsCfgElem( "Hunger" ),
 			hunger_setting := CInt( hc_settings.MaxHungerAffect ),
