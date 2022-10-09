@@ -15,7 +15,7 @@ endfunction
 	// This will allow a developer to relatively easily switch between the two
 	// and determine which better suits their needs. To switch, simply comment
 	// out the SkillCheck function call and the endfunction statement above
-	// and remove the /* below and the */ at the end of this file.
+	// and remove the /* below and the */ at line 119.
 	// Save the file. Then recompile all scripts.
 	// After that, if POL is running, go to the console window, press
 	// <shift> 'S' to unlock the console and press 'u' to unload all
@@ -116,7 +116,7 @@ endfunction
 	return 1;
 
 endfunction
-
+*/
 // This is a modified version of the CraftCheckSkill. The purpose
 // of this function is to mimic the OSI % chance system exceptional.
 // This system is, .2% chance per .1 skill above the required skill (+30)
@@ -149,4 +149,3 @@ function ExceptionalCraft(skill, reqd, aidskill:=0, report:=0);
 	endif
 
 endfunction
-*/
