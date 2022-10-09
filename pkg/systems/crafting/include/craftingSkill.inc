@@ -1,10 +1,26 @@
 // //$Id: craftingSkill.inc 1487 2009-03-13 19:19:37Z muaddib_pol $
 
+
+
+
 // This is a modified version of the ShilCheckSkill export. The purpose
 // of this function is to mimic the OSI % chance system crafting uses.
 function CraftCheckSkill(who, craft_skill, difficulty, points, report:=0)
 
-	difficulty := CDbl(difficulty);
+	SkillCheck(who, craft_skill, difficulty, points);
+	// As the comment above states, this function, the commented out code below,
+	// is closer to the OSI skill advancement system. I have commented out that
+	// code and added a function call to the main skill check function above.
+	// This will allow a developer to relatively easily switch between the two
+	// and determine which better suits their needs. To switch, simply comment
+	// out the SkillCheck function call above and remove the /* below and the */
+	// at the end of this file. Save the file. Then recompile all scripts.
+	// After that, if POL is running, go to the console window, press
+	// <shift> 'S' to unlock the console and press 'u' to unload all
+	// cached scripts. The changes will be loaded the first time you attempt
+	// to craft anything. If POL is not running start the server.
+
+/*	difficulty := CDbl(difficulty);
 	points := CDbl(points);
 	if(difficulty == error)
 		return 0;
@@ -80,6 +96,7 @@ function CraftCheckSkill(who, craft_skill, difficulty, points, report:=0)
 	if(RandomInt(1000) < chance)
 		if(points > 0)
 			CheckSkillAdvance(who, craft_skill, points, chance);
+			CheckStatsForSkill( who, craft_skill );
 		endif
 		return 1;
 	else
@@ -88,6 +105,7 @@ function CraftCheckSkill(who, craft_skill, difficulty, points, report:=0)
 				chance := chance / 2;
 				points := points / 2;
 				CheckSkillAdvance(who, craft_skill, points, chance);
+				CheckStatsForSkill( who, craft_skill );
 			endif
 		endif
 		return 0;
@@ -129,3 +147,4 @@ function ExceptionalCraft(skill, reqd, aidskill:=0, report:=0);
 	endif
 
 endfunction
+*/

@@ -16,7 +16,6 @@ use util;
 use math;
 
 include ":attributes:attributes_ex";
-// include ":character:skillLocks";
 
 /*
  * CheckStatsForSkill(mobile, skill_name)
@@ -35,7 +34,6 @@ include ":attributes:attributes_ex";
 function CheckStatsForSkill( mobile, skill_name )
 
 	 foreach stat_entry in ( AP_GetSkillStats( skill_name ))
-
 		var stat_name := CStr( _stat_entry_iter ),
 		    check_chance := CInt( stat_entry[1] ),
                     stat_mult := RandomDiceRoll( CStr( stat_entry[2] ));

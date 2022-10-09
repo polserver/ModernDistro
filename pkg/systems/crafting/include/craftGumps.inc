@@ -108,7 +108,7 @@ function sendCraftGump(who, skill_name)
 		atc := CInt(GFExtractData(res, atc));
 		if(!atc || CInt(atc) < 1)
 			atc := 1;
-		elseif(atc > CInt(menu_config["Setup"].MaxAmount))
+		elseif((atc > CInt(menu_config["Setup"].MaxAmount)) && (!who.cmdlevel))
 			SendSysMessage(who, "You can only make between 1 and "+menu_config["Setup"].MaxAmount+" at a time.");
 			return 0;
 		endif
