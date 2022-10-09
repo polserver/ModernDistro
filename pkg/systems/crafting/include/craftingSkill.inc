@@ -7,22 +7,7 @@
 // of this function is to mimic the OSI % chance system crafting uses.
 function CraftCheckSkill(who, craft_skill, difficulty, points, report:=0)
 
-	SkillCheck(who, craft_skill, difficulty, points);
-endfunction
-	// As the comment above states, this function, the commented out code below,
-	// is closer to the OSI skill advancement system. I have commented out that
-	// code and added a function call to the main skill check function above.
-	// This will allow a developer to relatively easily switch between the two
-	// and determine which better suits their needs. To switch, simply comment
-	// out the SkillCheck function call and the endfunction statement above
-	// and remove the /* below and the */ at line 119.
-	// Save the file. Then recompile all scripts.
-	// After that, if POL is running, go to the console window, press
-	// <shift> 'S' to unlock the console and press 'u' to unload all
-	// cached scripts. The changes will be loaded the first time you attempt
-	// to craft anything. If POL is not running start the server.
-
-/*	difficulty := CDbl(difficulty);
+	difficulty := CDbl(difficulty);
 	points := CDbl(points);
 	if(difficulty == error)
 		return 0;
@@ -116,7 +101,7 @@ endfunction
 	return 1;
 
 endfunction
-*/
+
 // This is a modified version of the CraftCheckSkill. The purpose
 // of this function is to mimic the OSI % chance system exceptional.
 // This system is, .2% chance per .1 skill above the required skill (+30)
