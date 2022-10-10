@@ -35,7 +35,7 @@ program use_InscTool(mobile, tool)
 	var the_objtype := rinfo[1];
 	var amt         := rinfo[2];
 
-	if(craft_config[Hex(the_objtype)].assemble == 1)
+	if(craft_config[the_objtype].assemble == 1)
 		CraftAssembly(mobile, TINKERING, tool, the_objtype, amt);
 	else
 		makeTinkerItems(mobile, the_objtype, amt, tool);

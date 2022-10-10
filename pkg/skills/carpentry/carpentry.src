@@ -47,7 +47,7 @@ program use_carptool(who, tool)
 		return 0;
 	endif
 
-	if(craft_config[Hex(the_objtype)].assemble == 1)
+	if(craft_config[the_objtype].assemble == 1)
 		AssembleParts(who, tool, the_objtype, amt);
 	else
 		CarpentryItems(who, tool, the_objtype, amt);
