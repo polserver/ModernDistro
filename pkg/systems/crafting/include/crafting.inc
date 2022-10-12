@@ -467,13 +467,13 @@ endfunction
 //			 0 = Fail. Not near any of the required objtypes.
 function isNearRequiredObject(who, objtype)
 
-	var RequiredObject := craft_config[objtype].CraftNear;
+	var RequiredObject := Lower(craft_config[objtype].CraftNear);
   if(RequiredObject == "" || RequiredObject == "nothing")
     return 1;
   endif
   foreach item in ( ListItemsNearLocation(who.x, who.y, who.z, 3) )
     // The following added to suport "ObjectKind", ie. "fire", "fireplace", "forge", "oven", "mill" etc.
-    if( item.ObjectKind() == RequiredObject )
+    if( Lower(item.ObjectKind()) == RequiredObject )
       return 1;
     endif
   endforeach

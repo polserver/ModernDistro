@@ -1,5 +1,8 @@
 // //$Id: craftingSkill.inc 1487 2009-03-13 19:19:37Z muaddib_pol $
 
+
+
+
 // This is a modified version of the ShilCheckSkill export. The purpose
 // of this function is to mimic the OSI % chance system crafting uses.
 function CraftCheckSkill(who, craft_skill, difficulty, points, report:=0)
@@ -80,6 +83,7 @@ function CraftCheckSkill(who, craft_skill, difficulty, points, report:=0)
 	if(RandomInt(1000) < chance)
 		if(points > 0)
 			CheckSkillAdvance(who, craft_skill, points, chance);
+			CheckStatsForSkill( who, craft_skill );
 		endif
 		return 1;
 	else
@@ -88,6 +92,7 @@ function CraftCheckSkill(who, craft_skill, difficulty, points, report:=0)
 				chance := chance / 2;
 				points := points / 2;
 				CheckSkillAdvance(who, craft_skill, points, chance);
+				CheckStatsForSkill( who, craft_skill );
 			endif
 		endif
 		return 0;

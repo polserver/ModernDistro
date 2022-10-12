@@ -40,7 +40,7 @@ program use_FletchTool(who, tool)
 		return 0;
 	endif
 
-	if(craft_config[Hex(the_objtype)].assemble == 1)
+	if(craft_config[the_objtype].assemble == 1)
 		CraftAssembly(who, BOWCRAFT_FLETCHING, tool, the_objtype, amt);
 	else
 		makeBowcraftItems(who, the_objtype, amt, tool);

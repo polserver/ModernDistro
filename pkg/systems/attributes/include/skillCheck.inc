@@ -39,22 +39,21 @@ const ADV_DISABLE	:= 0x4; // 4 - because the default is ADV_ALL.
  *
  */
 function SkillCheck( mobile, attrib_name, difficulty, award_diff:="", advance_flags:=ADV_ALL )
-
   var skill_check_result := 0;
 	if( mobile.dead )
 		SendSysMessage( mobile, "You can't use skills while dead.", 3, 33 );
-        print("Skill Check Failed Because Player Dead");
+        print("SkillCheck failed because the player is dead.");
 		return -100;
 	elseif( GetObjProperty( mobile, "NoGains" ))
 		SendSysMessage( mobile, "Your skills are disabled.", 3, 33 );
-        print("Skill Check Failed Because Player Dead");
+        print("SkillCheck failed because the player is set to 'NoGain'.");
 		return -100;
 	elseif( mobile.IsA( POLCLASS_NPC ))
-    if( GetObjProperty( mobile, "CanTrain" ))
-			advance_flags := ADV_STATS;
-    else
-			advance_flags := ADV_DISABLE;
-    endif
+		if( GetObjProperty( mobile, "CanTrain" ))
+				advance_flags := ADV_STATS;
+		else
+				advance_flags := ADV_DISABLE;
+		endif
 	endif
 
 	// Difficulty checks
@@ -75,7 +74,6 @@ function SkillCheck( mobile, attrib_name, difficulty, award_diff:="", advance_fl
 				// hunger := 1;
 				hunger := 9;
 			endif
-
 			// This determines how much hunger will affect success, I think :P
 			var hc_settings := AP_GetSettingsCfgElem( "Hunger" ),
 			hunger_setting := CInt( hc_settings.MaxHungerAffect ),
@@ -102,7 +100,6 @@ function SkillCheck( mobile, attrib_name, difficulty, award_diff:="", advance_fl
 	if( advance_flags & ADV_SKILL )
 		CheckSkillAdvance( mobile, attrib_name, difficulty, CInt( award_diff ));
 	endif
-
 	if( advance_flags & ADV_STATS )
 		CheckStatsForSkill( mobile, attrib_name );
 	endif

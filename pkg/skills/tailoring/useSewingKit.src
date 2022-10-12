@@ -40,7 +40,7 @@ program use_SewingKit(who, tool)
 		return 0;
 	endif
 
-	if(craft_config[Hex(the_objtype)].assemble == 1)
+	if(craft_config[the_objtype].assemble == 1)
 		CraftAssembly(who, TAILORING, tool, the_objtype, amt);
 	else
 		makeTailoringItems(who, the_objtype, amt, tool);
