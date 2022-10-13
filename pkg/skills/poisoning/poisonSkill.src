@@ -73,8 +73,8 @@ program do_poisoning( who )
     	SendSysMessageCL(who, 502145, color := 33); // You cannot poison that! You can only poison bladed or piercing weapons, food or drink.)
     	return 0;
     endif */
-    var potion_strength :=FindConfigElem(alchemy_itemdesc_file, the_poison.objtype);
-	stren :=CInt(GetConfigInt(potion_strength, "strength"));
+    var potion_attribute :=FindConfigElem(alchemy_itemdesc_file, the_poison.objtype);
+	stren :=CInt(GetConfigInt(potion_attribute, "strength"));
 	if(stren.errortext)
 		SysLog("No 'strength' entry for poison potion in alchemy itemdesc file.");
 		return;
@@ -144,6 +144,37 @@ program do_poisoning( who )
 					obj := CreateItemInBackpack( who, "parrow", 10 );
 					SetObjProperty(obj, "PoisonStrength", stren);
 					SetObjProperty(obj, "Duration", duration);
+					
+					// There might be more elegant ways to solve that.
+					// Also i would love to see an approach that makes it easier to add new poisons
+					// without altering the code.
+
+					var oldName := obj.name;
+					var pColor := CInt(GetConfigInt(potion_attribute, "Color"));
+
+					case( stren )
+						1:	
+							SendSysMessage(who,"poison strenght 1 detected.");
+							// change that to poison pot color once the pots have different colors.
+							obj.color := pColor;
+							SetName(obj, "lesser " + oldName);
+						2:	
+							// for regular poison we will only change color once colors are introduced.
+							obj.color := pColor;
+						3:
+							// greater poison
+							obj.color := pColor;
+							SetName(obj, "greater " + oldName);
+						4:	
+							// deadly poison
+							obj.color := pColor;
+							SetName(obj, "deadly " + oldName);
+							
+						default:           
+							//leaving that here but the case should never happen
+							SendSysMessage(who,"Can not determine proper poison strenght");
+					endcase
+
 					hitscripts := GetObjProperty(the_item, "HitScripts");
 					if (!hitscripts)
 						hitscripts := {};
@@ -185,7 +216,7 @@ program do_poisoning( who )
 		endif
 endprogram
 
-
+/*
 function poisonArrows (arrow)
 
 //    var arrow := CreateItemInBackpack( who, obj, 10 );
@@ -195,6 +226,7 @@ function poisonArrows (arrow)
     SetObjProperty(arrow, "HitScripts", {":combat:poisonHit"});
 
 endfunction
+*/
 
 function VirtueDrop(player, strength)
 	// Adjust the following virtues negatively for poisoning a weapon.
