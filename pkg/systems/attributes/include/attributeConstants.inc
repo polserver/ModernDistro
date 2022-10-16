@@ -73,7 +73,7 @@ enum SKILLS
 	STEALTH			:= "Stealth",
 	REMOVE_TRAP		:= "RemoveTrap",
 	NECROMANCY		:= "Necromancy",
-	FOCUS		:= "BattleFocus",
+	FOCUS		:= "Focus",
 	CHIVALRY		:= "Chivalry",
 	BUSHIDO       := "Bushido",
 	NINJITSU      := "Ninjitsu",
@@ -90,4 +90,4 @@ var List_of_Skills := array{"Alchemy", "Anatomy", "AnimalLore", "ItemIdentificat
                   "ForensicEvaluation", "Herding", "Hiding", "Provocation", "Inscription", "Lockpicking", "Magery", "ResistingSpells", "Tactics", "Snooping",
                   "Musicianship", "Poisoning", "Archery", "SpiritSpeak", "Stealing", "Tailoring", "AnimalTaming", "TasteIdentification", "Tinkering",
                   "Tracking", "Veterinary", "Swordsmanship", "MaceFighting", "Fencing", "Wrestling", "Lumberjacking", "Mining", "Meditation", "Stealth",
-                  "RemoveTrap", "Necromancy", "BattleFocus", "Chivalry", "Bushido", "Ninjitsu", "Spellweaving", "Mysticism", "Imbuing", "Throwing"};
+                  "RemoveTrap", "Necromancy", "Focus", "Chivalry", "Bushido", "Ninjitsu", "Spellweaving", "Mysticism", "Imbuing", "Throwing"};

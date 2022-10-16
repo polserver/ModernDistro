@@ -664,4 +664,27 @@ function GetSkillConfigElem(skillid)
   endif
 endfunction
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+//	AP_GetPlayerTotalSkillPoints( player )
+//
+//	Purpose:	Totals all of the attribute (skill) points for a player.
+//
+//	Parameter:	mobileref::player
+//
+//	Returns:	The aggregate of a player's skill points.
+//
+//	Created:	2022-10-08 18:44:06 by Yukiko
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+function AP_GetPlayerTotalSkillPoints( player )
+
+	var attrib_names := AP_ListAttributesByType( "Skill" );
+	var attrib_points := 0;
+	foreach attrib_name in attrib_names
+		attrib_points := attrib_points + GetAttributeBaseValue( player, attrib_name );
+	endforeach
+	return attrib_points;
+
+endfunction
 
