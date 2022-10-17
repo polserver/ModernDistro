@@ -8,17 +8,17 @@ program my_form( who, help )
 			return 0;
 	endif
 
-	myForm := GetObjProperty(who, "MyForm");
-	
+	var myForm := GetObjProperty(who, "MyForm");
+
 	if( !myForm )
 		SendSysMessage(who, "You may not have used .gmform to change state, make sure you use that command first in future.", color := 36);
-		if(me.gender == 1)
+		if(who.gender == 1)
 			myForm := 0x191;
 		else
 			myForm := 0x190;
 		endif
 	endif
-	
+
 	who.graphic := CInt(myForm);
 	EraseObjProperty(who, "MyForm");
 	SendSysMessage(who, "You are no longer in GM form.", color := 88);
