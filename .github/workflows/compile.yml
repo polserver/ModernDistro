@@ -30,7 +30,7 @@ jobs:
       - name: Compile
         run: |
           scripts/ecompile -A -T
-          if (( $(find . -name "*.ecl" | wc -l) < 1)); then exit 1; fi;
+          if (( $(find . -name "*.ecl" | wc -l) < 1)); then echo "ERROR: Failed to find any compiled .ecl files"; exit 1; fi;
 
   notify_on_failure:
     needs: compile_test
