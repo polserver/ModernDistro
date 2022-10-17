@@ -1,16 +1,26 @@
 use os;
 use uo;
 
-program my_form( who )
+program my_form( who, help )
 
-	who.graphic := CInt(GetObjProperty(who, "MyForm"));
+	if (help)
+			SendSysMessage(who, "This command switches you back to your normal form. Use .gmform to switch to GM Form", color := 88);
+			return 0;
+	endif
+
+	var myForm := GetObjProperty(who, "MyForm");
+
+	if( !myForm )
+		SendSysMessage(who, "You may not have used .gmform to change state, make sure you use that command first in future.", color := 36);
+		if(who.gender == 1)
+			myForm := 0x191;
+		else
+			myForm := 0x190;
+		endif
+	endif
+
+	who.graphic := CInt(myForm);
 	EraseObjProperty(who, "MyForm");
 	SendSysMessage(who, "You are no longer in GM form.", color := 88);
-	
-	if(me.gender == 1)
-		me.graphic := 0x191;
-	else
-		me.graphic := 0x190;
-	endif
 
 endprogram
