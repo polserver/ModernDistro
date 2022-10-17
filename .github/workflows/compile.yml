@@ -18,7 +18,6 @@ jobs:
           echo "Unzip Complete"
           cp ecompile scripts/
           cp *.em scripts/
-          > scripts/ecompile.cfg
           ls -l scripts/ecompile.cfg
           echo "ModuleDirectory=scripts" >> scripts/ecompile.cfg
           echo "IncludeDirectory=scripts" >> scripts/ecompile.cfg
@@ -32,6 +31,7 @@ jobs:
       - name: Compile
         run: |
           scripts/ecompile -A -T
+          if (( $(find . -name "*.ecl" | wc -l) < 1)); then exit 1; fi;
 
   notify_on_failure:
     needs: compile_test
