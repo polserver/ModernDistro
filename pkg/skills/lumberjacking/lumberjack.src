@@ -12,6 +12,7 @@ include "include/utility";
 include ":itemutils:toolWear";
 include ":virtue:noto";
 include ":damage:damage";
+include ":resourcecore:wood";
 
 const UACTION_CHOP := 0x0d;
 //const FX_POISON_GAS := 0x113a;
@@ -58,7 +59,11 @@ program use_axe(me, axe)
 endprogram
 
 function Do_Chops(me, axe, tree)
+  var logtype := GetObjtypeByName( GetConfigString( FindConfigElem( ReadConfigFile(":resourcecore:trees"), tree.objtype), "LogType" ) );
   var difficulty := GetHarvestDifficulty("wood", tree.x, tree.y, tree.objtype);
+
+  broadcast( "Harvestdifficulty: " + difficulty + " Logtype: " + logtype );
+
   if(difficulty == error)
     SendSysMessage(me, "There's not enough wood here to chop");
     return 1;
@@ -68,17 +73,22 @@ function Do_Chops(me, axe, tree)
     return 1;
   endif
   var points := CInt((AP_GetSkill(me, LUMBERJACKING) * 2) + 10);
+  //var logtypename := GetConfigString( CInt(logtype), "Desc" );
+  var logtypename := GetConfigString( FindConfigElem( ReadConfigFile(":logs:itemdesc"), logtype), "Desc" );
+
+  broadcast( "Logtypename: " + logtypename );
+
   if(SkillCheck(me, LUMBERJACKING, difficulty, points) > 0)
     var wood_amount := HarvestResource( "wood", tree.x, tree.y, 1, 10 );
     if(wood_amount == 0)
       SendSysMessage(me, "There's not enough wood here to chop.");
       return 1;
     endif
-    if(!CreateItemInBackpack(me, 0x1bdd, wood_amount))
+    if(!CreateItemInBackpack(me, logtype, wood_amount))
       SendSysMessage(me, "Your backpack is too full.");
       return 1;
     else
-      SendSysMessage(me, "You put some logs in your backpack");
+      SendSysMessage(me, "You put some " + StrReplace(logtypename, "%", "") + " in your backpack");
       CheckToolWear (me, axe, LUMBERJACKING);
       return 0;
     endif
@@ -106,7 +116,11 @@ function TreeNearby(me, axe)
     chopfurniture(me, tree.item);
     return 0;
   elseif(is_tree(tree.objtype))
-    var difficulty := GetHarvestDifficulty( "wood", tree.x, tree.y, tree.objtype );
+//    var logtype := CInt(is_tree(tree.objtype));
+//    SendSysMessage(me, "You are targetting logtype: " + logtype + "from treetype: " + tree.objtype);
+
+    var difficulty := GetHarvestDifficulty("wood", tree.x, tree.y, tree.objtype);
+//    broadcast( "Harvestdifficulty: " + difficulty );
     if(difficulty == error)
       SendSysMessage(me, "There's not enough wood here to chop.");
       return 0;
@@ -148,22 +162,100 @@ function is_furniture(theobj, thing)
 endfunction
 
 function is_tree(theobj)
-  if((theobj >= 0x0c99) && (theobj <= 0x0cea))
-    return 1;
-  elseif((theobj >= 0x0cf3) && (theobj <= 0x0d03))
-    return 1;
-  elseif((theobj >= 0x0d41) && (theobj <= 0x0dab))
-    return 1;
-  elseif((theobj >= 0x12b6) && (theobj <= 0x12c7))
-    return 1;
-  elseif((theobj >= 0x0d37) && (theobj <= 0x0d38))
-    return 1;
-  elseif((theobj == 0x0c9e) || (theobj == 0x0ca8) || (theobj == 0x0caa) || (theobj == 0x0cab))
-    return 1;
-  else
-    return 0;
-  endif
+// NOTE: normal tree log is: 0x1bdd
+
+	var treeconfigfile := ReadConfigFile(":resourcecore:trees");
+	var tree := FindConfigElem( treeconfigfile, theobj );
+	var logtype := GetConfigString( tree, "LogType" );
+	var logtypeobj := GetObjtypeByName( logtype );
+
+        broadcast("target: " + theobj + " tree: " + tree + " logtype: " + logtype + " logtypeobj: " + logtypeobj);
+
+        return logtypeobj;
+
+
+/*
+        if ((theobj >= 0x0c99) and (theobj <= 0x0c9d))		// Small palm
+                return 0x1bdd;
+//        elseif (theobj == 0x0c9e)				// Small tree
+//                return 0x1bdd;
+//        elseif ((theobj >= 0x0c9f) and (theobj <= 0x0ca5))	// Plants and flowers
+//                return 0x1bdd;
+        elseif (theobj == 0x0ca6)				// Ponytail palm
+                return 0x1bdd;
+//        elseif ((theobj == 0x0ca7) or (theobj == 0x0ca9))		// Plants and flowers
+//                return 0x1bdd;
+        elseif ((theobj == 0x0ca8) or (theobj == 0x0caa) or (theobj == 0x0cab)) // Banana
+                return 0x26302;
+//        elseif ((theobj >= 0x0cac) and (theobj <= 0x0cc8))	// Plants and flowers
+//                return 0x705a;
+        elseif ((theobj >= 0x0cc9) and (theobj <= 0x0cd5))	// Normal tree and leaves
+                return 0x705a;
+        elseif ((theobj >= 0x0cd6) and (theobj <= 0x0cd9))	// Cedar
+                return 0x26304;
+        elseif ((theobj >= 0x0cda) and (theobj <= 0x0cdf))	// Oak
+                return 0x2630F;
+        elseif ((theobj >= 0x0ce0) and (theobj <= 0x0ce5))	// Walnut
+                return 0x26318;
+        elseif (((theobj >= 0x0ce6) and (theobj <= 0x0ce8)) or ((theobj >= 0x224A) and (theobj <=0x224B)))	// Willow
+                return 0x26319;
+        elseif ((theobj >= 0x0ce9) and (theobj <= 0x0cea))	// Sapling
+                return 0x1bdd;
+//        elseif ((theobj >= 0x0cf3) and (theobj <= 0x0cf7))	// Fallen log
+//                return ;
+        elseif (((theobj >= 0x0cf8) and (theobj <= 0x0cf9)) or ((theobj >= 0x0cfa) and (theobj <= 0x0d03)))	// Cypress
+                return 0x26307;
+        elseif ((theobj >= 0x0d37) and (theobj <= 0x0d38))	// Yucca
+                return 0x2631B;
+        elseif ((theobj >= 0x0d41) and (theobj <= 0x0d93))	// Big tropical tree and leaves
+                return 0x1bdd;
+        elseif ((theobj >= 0x0d94) and (theobj <= 0x0d9b))	// Apple
+                return 0x26300;
+        elseif ((theobj >= 0x246C) and (theobj <= 0x2470))      // Bamboo
+                return 0x1bdd;
+	elseif ((theobj >= 0x2471) and (theobj <= 0x2477))      // Cherry
+                return 0x26305;
+        elseif (theobj == 0x0C95)                               // Coconut
+                return 0x26306;
+        elseif (theobj == 0x0C96)                               // Date
+                return 0x26308;
+        elseif ((theobj >= 0x2478) and (theobj <= 0x247E))      // Maple
+                return 0x2630E;
+        elseif (theobj == 0x0C9E)                               // Ohii
+                return 0x26310;
+        elseif ((theobj >= 0x0d9c) and (theobj <= 0x0da3))	// Peach
+                return 0x26311;
+        elseif ((theobj >= 0x0da4) and (theobj <= 0x0dab))	// Pear
+                return 0x26312;
+        elseif ((theobj >= 0x26ED) and (theobj <= 0x26F3))      // Plum
+                return 0x26310;
+        elseif ((theobj >= 0x0CC9) and (theobj <= 0x0CC9))      // Spider Tree
+                return 0x26316;
+        elseif ((theobj >= 0x12b6) and (theobj <= 0x12c7))	// Yew tree
+                return 0x2631A;
+        else
+                return 0;
+        endif
+*/
 endfunction
+
+//function is_tree(theobj)
+//  if((theobj >= 0x0c99) && (theobj <= 0x0cea))
+//    return 1;
+//  elseif((theobj >= 0x0cf3) && (theobj <= 0x0d03))
+//    return 1;
+//  elseif((theobj >= 0x0d41) && (theobj <= 0x0dab))
+//    return 1;
+//  elseif((theobj >= 0x12b6) && (theobj <= 0x12c7))
+//    return 1;
+//  elseif((theobj >= 0x0d37) && (theobj <= 0x0d38))
+//    return 1;
+//  elseif((theobj == 0x0c9e) || (theobj == 0x0ca8) || (theobj == 0x0caa) || (theobj == 0x0cab))
+//    return 1;
+//  else
+//    return 0;
+//  endif
+//endfunction
 
 
 function IsAxEquipped(me,axe)
@@ -254,9 +346,9 @@ function use_blade(who, blade, use_on)
     return;
   endif
   var checkme := use_on.objtype;
-  if((checkme == UOBJ_LOG) || (checkme == 0x1bd7))
-    CarveLogs(who, blade, use_on);
-  elseif(use_on.npctemplate == "sheep")
+//  if((checkme == UOBJ_LOG) || (checkme == 0x1bd7))
+//    CarveLogs(who, blade, use_on);
+  if(use_on.npctemplate == "sheep")
     process_wool(who, blade, use_on);
   elseif(use_on.objtype == UOBJ_CORPSE)
     ReleaseItem(blade);
@@ -412,6 +504,8 @@ function Carve_Corpse(who, cadaver)
   endif
 endfunction
 
+// this needs to go
+/*
 function CarveLogs(who, blade, logs)
   if(logs.movable == 0)
     SendSysMessage(who, "You cannot use those logs.");
@@ -521,6 +615,8 @@ function setquality(who, bow)
   bow.hp := bow.maxhp;
   SendSysMessage(who, "You created an exceptional item.");
 endfunction
+*/
+
 
 function ExceptionalFameMod(who, skill, diff, points)
   if(skill > diff - 20)
