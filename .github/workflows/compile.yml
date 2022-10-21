@@ -15,20 +15,22 @@ jobs:
           rm -f *_dbg.zip
           rm -f Nightly-Linux-clang.zip
           unzip -j -o polserver*.zip
+          echo "Unzip Complete"
           cp ecompile scripts/
           cp *.em scripts/
-          echo "ModuleDirectory=scripts" >>scripts/ecompile.cfg
-          echo "IncludeDirectory=scripts" >>scripts/ecompile.cfg
-          echo "PolScriptRoot=scripts" >>scripts/ecompile.cfg
-          echo "PackageRoot=pkg" >>scripts/ecompile.cfg
-          echo "DisplaySummary=1" >>scripts/ecompile.cfg
-          echo "DisplayWarnings=1" >>scripts/ecompile.cfg
-          echo "CompileAspPages=1" >>scripts/ecompile.cfg
+          echo "ModuleDirectory=scripts" >> scripts/ecompile.cfg
+          echo "IncludeDirectory=scripts" >> scripts/ecompile.cfg
+          echo "PolScriptRoot=scripts" >> scripts/ecompile.cfg
+          echo "PackageRoot=pkg" >> scripts/ecompile.cfg
+          echo "DisplaySummary=1" >> scripts/ecompile.cfg
+          echo "DisplayWarnings=1" >> scripts/ecompile.cfg
+          echo "CompileAspPages=1" >> scripts/ecompile.cfg
           sudo apt-get update
           sudo apt-get install clang-8 -y
       - name: Compile
         run: |
           scripts/ecompile -A -T
+          if (( $(find . -name "*.ecl" | wc -l) < 1)); then echo "ERROR: Failed to find any compiled .ecl files"; exit 1; fi;
 
   notify_on_failure:
     needs: compile_test
