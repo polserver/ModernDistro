@@ -12,7 +12,10 @@ include "include/utility";
 include ":itemutils:toolWear";
 include ":virtue:noto";
 include ":damage:damage";
+include ":resourcecore:resourceCore";
 include ":resourcecore:wood";
+
+
 
 const UACTION_CHOP := 0x0d;
 //const FX_POISON_GAS := 0x113a;
@@ -42,6 +45,8 @@ program use_axe(me, axe)
   mex := me.x;
   mey := me.y;
   var mount;
+
+/*
   repeat
     mount := GetEquipmentByLayer(me, 25);
     if(mount)
@@ -55,14 +60,17 @@ program use_axe(me, axe)
     PlaySoundEffect(me, SFX_SKILL_LUMBERJACK);
     sleepms(2500);
     checker := Do_Chops(me, axe, tree);
+    //checker := AXE_HarvestResource( me, tree );
   until(checker == 1);
+*/
+    AXE_HarvestResource( me, tree );
 endprogram
 
 function Do_Chops(me, axe, tree)
   var logtype := GetObjtypeByName( GetConfigString( FindConfigElem( ReadConfigFile(":resourcecore:trees"), tree.objtype), "LogType" ) );
   var difficulty := GetHarvestDifficulty("wood", tree.x, tree.y, tree.objtype);
 
-  broadcast( "Harvestdifficulty: " + difficulty + " Logtype: " + logtype );
+  SendSysMessage(me, "Harvestdifficulty: " + difficulty + " Logtype: " + logtype );
 
   if(difficulty == error)
     SendSysMessage(me, "There's not enough wood here to chop");
@@ -76,7 +84,7 @@ function Do_Chops(me, axe, tree)
   //var logtypename := GetConfigString( CInt(logtype), "Desc" );
   var logtypename := GetConfigString( FindConfigElem( ReadConfigFile(":logs:itemdesc"), logtype), "Desc" );
 
-  broadcast( "Logtypename: " + logtypename );
+  //broadcast( "Logtypename: " + logtypename );
 
   if(SkillCheck(me, LUMBERJACKING, difficulty, points) > 0)
     var wood_amount := HarvestResource( "wood", tree.x, tree.y, 1, 10 );
@@ -169,7 +177,7 @@ function is_tree(theobj)
 	var logtype := GetConfigString( tree, "LogType" );
 	var logtypeobj := GetObjtypeByName( logtype );
 
-        broadcast("target: " + theobj + " tree: " + tree + " logtype: " + logtype + " logtypeobj: " + logtypeobj);
+        //broadcast("target: " + theobj + " tree: " + tree + " logtype: " + logtype + " logtypeobj: " + logtypeobj);
 
         return logtypeobj;
 
@@ -679,4 +687,112 @@ function ExceptionalFameMod(who, skill, diff, points)
     endif
     SetNotoTitle(who, karma, fame);
   endif
+endfunction
+
+function AXE_HarvestResource( byref mobile, byref use_on )
+
+	var data_elem := 0,
+		last_harvest := 0,
+		quantity :=  0,
+		settings := 0,
+		resource_name := "",
+		sounds := 0,
+		amount := 0,
+		cfg_file := "",
+		item_desc := "";
+
+// Why is this not true? 
+//	if( RC_IsTree( use_on ) )
+		data_elem := RC_FindWoodDataElem( Cstr( use_on.x+"_"+use_on.y+"_"+use_on.z+"_"+use_on.realm ) );
+		last_harvest := RC_GetWoodProps( data_elem, "Harvest" );
+		quantity := RC_GetWoodProps( data_elem, "Quantity" );
+		settings := RC_GetSettingsCfgElem( "WoodSettings" );
+		cfg_file := RC_GetTreesCfgElem( use_on.objtype );
+		item_desc := GetConfigString( FindConfigElem( ReadConfigFile(":logs:itemdesc"), GetObjtypeByName(cfg_file.LogType) ), "Desc" );
+		resource_name := "wood";
+		//Broadcast("RC_IsTree is true");
+//	endif
+
+	quantity += Floor( Cint( ReadGameClock() - last_harvest ) / CInt( settings.SecondsPerRegrow ) );
+	if( quantity > CInt( settings.MaxYield ) )
+		quantity := CInt( settings.MaxYield );
+	endif
+
+        //Broadcast("Quantity: " + quantity + " Itemdesc: " + item_desc);
+
+	if( quantity < 1 )
+		SendSysMessage( mobile, "There are not enough "+FormatItemDescription(item_desc)+" here to harvest.", 0x3, 0x22 );
+		return 0;
+	elseif( CoordinateDistance( mobile.x, mobile.y, use_on.x, use_on.y ) > 2 )
+		SendSysMessage( mobile, "You must be closer to harvest any "+FormatItemDescription(item_desc)+"!", 0x3, 0x22 );
+		return 0;
+	endif
+
+	RC_StartCharacterTracker( mobile, mobile.x, mobile.y, mobile.realm, GetPid() );
+
+	EnableEvents(EVID_OPPONENT_MOVED);
+
+	while( quantity > 0 )
+		sounds := CInt( SplitWords( settings.EffectSounds ).RandomEntry() );
+
+		amount := CInt( CDbl( GetAttributeBaseValue( mobile, LUMBERJACKING ) / 10.0 ) / 20.0 );
+		if( amount < 1 )
+			amount := 1;
+		elseif( amount > 10 )
+			amount := 10;
+		endif
+
+                //broadcast("Amount 1: " + amount + " Quantity 1: " + quantity);
+
+		if( quantity < amount )
+			amount := CInt( quantity );
+			quantity := 0;
+		endif
+
+                //broadcast("Amount 2: " + amount + " Quantity 2: " + quantity);
+
+		if( amount < 1 )
+			SendSysMessage( mobile, "There's not enough "+FormatItemDescription(item_desc)+" here to harvest.", 0x3, 0x22 );
+			return 0;
+		endif
+
+                //broadcast("Amount 3: " + amount + " Quantity 3: " + quantity);
+
+		PerformAction( mobile, CInt( settings.EffectAction ) );
+		PlaySoundEffectXYZ( use_on.x, use_on.y, use_on.z, sounds, use_on.realm );
+
+		if( !CheckSkill( mobile, LUMBERJACKING, CInt( cfg_file.Difficulty ), 100 ) )
+			amount /= 2;
+		endif
+		SleepMS( 1900 );
+
+//		if( resource_name == "wood" )
+//			RC_HarvestFruit( mobile );
+//		endif
+
+		var create_item := CreateItemInBackpack( mobile, cfg_file.LogType, amount );
+		if( create_item )
+//			if( resource_name == "wood" )
+			SendSysMessage( mobile, "You place "+FormatItemDescription( item_desc, amount )+" in your backpack.", 0x3, 0x42 );
+//			elseif( resource_name == "clay" )
+//				SendSysMessage( mobile, "You place "+FormatItemDescription( "brick%s% of "+resource_name, amount )+" in your backpack.", 0x3, 0x42 );
+//			endif
+		else
+			//Broadcast("ERROR: "+create_item.ErrorText);
+			create_item := CreateItemAtLocation( mobile.x, mobile.y, mobile.z, cfg_file.LogType, amount, mobile.realm );
+			SendSysMessage( mobile, "Your backpack is full and the "+FormatItemDescription( item_desc, amount )+" is placed at your feet.", 0x3, 0x32 );
+		endif
+
+		quantity -= amount;
+		if( quantity < 0 )
+			quantity := 0;
+		endif
+
+		if( quantity == 0 )
+			SendSysMessage( mobile, "You have chopped all the "+FormatItemDescription(item_desc)+".", 0x3, 0x32 );
+		endif
+
+		data_elem.SetProp( "Harvest", ReadGameClock() );
+		data_elem.SetProp( "Quantity", quantity );
+	endwhile
 endfunction

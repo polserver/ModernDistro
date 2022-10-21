@@ -87,6 +87,27 @@ function RC_FindWoodDataElem( byref elem_name, byref datafile := 0 )
 	return df_elem;
 endfunction
 
+function RC_GetWoodProps( byref data_elem, byref prop_name )
+
+	var df_prop := data_elem.GetProp( prop_name ),
+		settings := 0;
+
+	if( df_prop.errortext )
+		settings := RC_GetSettingsCfgElem( "WoodSettings" );
+	endif
+       
+        if( df_prop.errortext )
+		settings := RC_GetSettingsCfgElem( "FruitSettings" );
+		case( prop_name )
+			"Harvest": return 0;
+			"Quantity": return CInt( settings.MaxYield );
+		endcase
+	endif
+
+
+	return df_prop;
+endfunction
+
 function RC_GetTreeCfgFile()
 
 	var cfg := ReadConfigFile( ":resourcecore:trees" );
