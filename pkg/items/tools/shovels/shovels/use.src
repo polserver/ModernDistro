@@ -341,7 +341,8 @@ function SHOVEL_HarvestResource( byref mobile, byref use_on )
 		endif
 
 		if( quantity < amount )
-			amount := quantity;
+			amount := CInt( quantity );
+			quantity := 0;
 		endif
 
 		if( amount < 1 )
