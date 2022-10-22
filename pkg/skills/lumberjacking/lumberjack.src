@@ -63,7 +63,7 @@ program use_axe(me, axe)
     //checker := AXE_HarvestResource( me, tree );
   until(checker == 1);
 */
-    AXE_HarvestResource( me, tree );
+    AXE_HarvestResource( me, tree, axe );
 endprogram
 
 function Do_Chops(me, axe, tree)
@@ -689,7 +689,7 @@ function ExceptionalFameMod(who, skill, diff, points)
   endif
 endfunction
 
-function AXE_HarvestResource( byref mobile, byref use_on )
+function AXE_HarvestResource( byref mobile, byref use_on, byref tool )
 
 	var data_elem := 0,
 		last_harvest := 0,
@@ -718,7 +718,9 @@ function AXE_HarvestResource( byref mobile, byref use_on )
 		quantity := CInt( settings.MaxYield );
 	endif
 
-        //Broadcast("Quantity: " + quantity + " Itemdesc: " + item_desc);
+	if (mobile.cmdlevel >= 5)
+        	Broadcast("Quantity: " + quantity + " Itemdesc: " + item_desc,  requiredCmdLevel := 5);
+        endif
 
 	if( quantity < 1 )
 		SendSysMessage( mobile, "There are not enough "+FormatItemDescription(item_desc)+" here to harvest.", 0x3, 0x22 );
@@ -742,46 +744,108 @@ function AXE_HarvestResource( byref mobile, byref use_on )
 			amount := 10;
 		endif
 
-                //broadcast("Amount 1: " + amount + " Quantity 1: " + quantity);
+		if (mobile.cmdlevel >= 5)
+                	broadcast("Amount 1: " + amount + " Quantity 1: " + quantity, requiredCmdLevel := 5);
+		endif
 
 		if( quantity < amount )
 			amount := CInt( quantity );
 			quantity := 0;
 		endif
 
-                //broadcast("Amount 2: " + amount + " Quantity 2: " + quantity);
+		if (mobile.cmdlevel >= 5)
+                	broadcast("Amount 2: " + amount + " Quantity 2: " + quantity, requiredCmdLevel := 5);
+		endif
 
 		if( amount < 1 )
 			SendSysMessage( mobile, "There's not enough "+FormatItemDescription(item_desc)+" here to harvest.", 0x3, 0x22 );
 			return 0;
 		endif
 
-                //broadcast("Amount 3: " + amount + " Quantity 3: " + quantity);
+		if (mobile.cmdlevel >= 5)
+                	broadcast("Amount 3: " + amount + " Quantity 3: " + quantity, requiredCmdLevel := 5);
+                endif
 
 		PerformAction( mobile, CInt( settings.EffectAction ) );
 		PlaySoundEffectXYZ( use_on.x, use_on.y, use_on.z, sounds, use_on.realm );
 
-		if( !CheckSkill( mobile, LUMBERJACKING, CInt( cfg_file.Difficulty ), 100 ) )
-			amount /= 2;
-		endif
+		var cs_result := CheckSkill( mobile, LUMBERJACKING, CInt( cfg_file.Difficulty ), 100 );
+		var sc_result := SkillCheck( mobile, LUMBERJACKING, CInt( cfg_file.Difficulty ) );
+		
+		if (mobile.cmdlevel >= 5)
+                	broadcast("CheckSkill result: " + cs_result + "SkillCheck result: " + sc_result, requiredCmdLevel := 5);
+                endif
+
+// We dont have a hook in the distro
+//		if( !CheckSkill( mobile, LUMBERJACKING, CInt( cfg_file.Difficulty ), 100 ) )
+
+// This is what happens when the SkillCheck fails:
+		if( !sc_result )
+			if ( amount >= 2 )
+				amount /= 2;
+			endif
+			SendSysMessage( mobile, "You failed to harvest any logs and made parts of the resource unusable." );
+			quantity -= amount;
+			
+			if( quantity < 0 )
+				quantity := 0;
+			endif
+
+			data_elem.SetProp( "Harvest", ReadGameClock() );
+			data_elem.SetProp( "Quantity", quantity );
+			SleepMS( 1900 );
+			continue;
+		endif 			
+
 		SleepMS( 1900 );
 
-//		if( resource_name == "wood" )
-//			RC_HarvestFruit( mobile );
-//		endif
-
 		var create_item := CreateItemInBackpack( mobile, cfg_file.LogType, amount );
+		
+		if (mobile.cmdlevel >= 5)
+			Broadcast("ERROR: "+create_item.ErrorText, requiredCmdLevel := 5);
+			Broadcast("X: " + mobile.x + " Y: " + mobile.y + " Z: " + mobile.z + " LT: " + cfg_file.LogType + " #: " + amount + " Realm: " + mobile.realm, requiredCmdLevel := 5);
+		endif			
+		
+		
 		if( create_item )
-//			if( resource_name == "wood" )
 			SendSysMessage( mobile, "You place "+FormatItemDescription( item_desc, amount )+" in your backpack.", 0x3, 0x42 );
-//			elseif( resource_name == "clay" )
-//				SendSysMessage( mobile, "You place "+FormatItemDescription( "brick%s% of "+resource_name, amount )+" in your backpack.", 0x3, 0x42 );
-//			endif
 		else
-			//Broadcast("ERROR: "+create_item.ErrorText);
-			create_item := CreateItemAtLocation( mobile.x, mobile.y, mobile.z, cfg_file.LogType, amount, mobile.realm );
+			if (mobile.cmdlevel >= 5)
+				Broadcast("ERROR: "+create_item.ErrorText, requiredCmdLevel := 5);
+				Broadcast("X: " + mobile.x + " Y: " + mobile.y + " Z: " + mobile.z + " LT: " + cfg_file.LogType + " #: " + amount + " Realm: " + mobile.realm, requiredCmdLevel := 5);
+			endif	
+
+			// Lets check if the object is already on the ground and increment its amount instead of littering.
+			var objects_on_ground := ListItemsAtLocation( mobile.x, mobile.y, mobile.z, mobile.realm );
+			var found_on_ground := 0;
+			
+			foreach obj in objects_on_ground
+				if (mobile.cmdlevel >= 5)
+					Broadcast("Objecttype found: "+obj.objtype+" Logtype found: "+GetObjtypeByName(cfg_file.LogType), requiredCmdLevel := 5);
+					Broadcast("X: " + mobile.x + " Y: " + mobile.y + " Z: " + mobile.z + " LT: " + cfg_file.LogType + " #: " + amount + " Realm: " + mobile.realm, requiredCmdLevel := 5);
+				endif	
+				if (obj.objtype == GetObjtypeByName(cfg_file.LogType))
+					if ( !found_on_ground )
+						AddAmount( obj, amount );
+						found_on_ground := 1;
+					endif
+				endif
+			endforeach
+						
+			if( !found_on_ground )
+				create_item := CreateItemAtLocation( mobile.x, mobile.y, mobile.z, cfg_file.LogType, amount, mobile.realm );
+			endif
+				
+			if (mobile.cmdlevel >= 5)
+				Broadcast("ERROR: "+create_item.ErrorText, requiredCmdLevel := 5);
+			endif
 			SendSysMessage( mobile, "Your backpack is full and the "+FormatItemDescription( item_desc, amount )+" is placed at your feet.", 0x3, 0x32 );
+			
 		endif
+//		else
+//			SendSysMessage( mobile, "You have made some wood unsuable while trying to gather logs.");
+//			amount := 1;
+//		endif
 
 		quantity -= amount;
 		if( quantity < 0 )
@@ -794,5 +858,9 @@ function AXE_HarvestResource( byref mobile, byref use_on )
 
 		data_elem.SetProp( "Harvest", ReadGameClock() );
 		data_elem.SetProp( "Quantity", quantity );
+		
+		RC_CheckToolDurability( mobile, tool );
+		
 	endwhile
+	
 endfunction
