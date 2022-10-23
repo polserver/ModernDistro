@@ -1,0 +1,16 @@
+use uo;
+use os;
+
+program install_sicle_methods( item )
+
+	item := item; // Avoid Compiler Warnings...
+
+	return 1;
+endprogram
+
+exported function IsSicle( item )
+
+	item := item; // Avoid Compiler Warnings...
+
+	return 1;
+endfunction

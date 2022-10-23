@@ -393,6 +393,10 @@ function SHOVEL_HarvestResource( byref mobile, byref use_on, byref tool )
 				SendSysMessage( mobile, "You place "+FormatItemDescription( "brick%s% of "+resource_name, amount )+" in your backpack.", 0x3, 0x42 );
 			endif
 		else
+		
+		CreateStackableItemAtLocation(mobile, settings.ResourceType, amount, range := 0);
+		
+		/*
 			// Lets check if the object is already on the ground and increment its amount instead of littering.
 			var objects_on_ground := ListItemsNearLocationOfType( mobile.x, mobile.y, mobile.z, 0, settings.ResourceType, mobile.realm );
 			var found_on_ground := 0;
@@ -414,6 +418,7 @@ function SHOVEL_HarvestResource( byref mobile, byref use_on, byref tool )
 			if( !found_on_ground )
 				create_item := CreateItemAtLocation( mobile.x, mobile.y, mobile.z, settings.ResourceType, amount, mobile.realm );
 			endif
+		*/
 			
 			SendSysMessage( mobile, "Your backpack is full and the "+resource_name+" is placed at your feet.", 0x3, 0x32 );
 		endif

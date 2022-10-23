@@ -1,18 +1,24 @@
 use uo;
 use os;
 
-function RC_CheckToolDurability( byref mobile, byref tool )
+function RC_CheckToolDurability( byref mobile, byref tool, byref chance := 0.25 )
 
-	if( tool.hp > 0 )
-		if( tool.hp >= 1 )
-			tool.hp -= 1;
-		endif
-	elseif( tool.maxhp > 0 )
-		tool.maxhp_mod -= 1;
-		SendSysMessage( mobile, "Your tool has been damaged.", 0x3, 0x32 );
+	if( TypeOfInt( chance ) == OT_LONG )
+		return error{ "errortext":="'Chance' must be a double." };
 	endif
 
-	return ( tool.maxhp >= 1 );
+	if( RandomFloat( 1.0 ) < chance )
+		if( tool.hp > 0 )
+			if( tool.hp >= 1 )
+				tool.hp -= 1;
+			endif
+		elseif( tool.maxhp > 0 )
+			tool.maxhp_mod -= 1;
+			SendSysMessage( mobile, "Your tool has been damaged.", 0x3, 0x32 );
+		endif
+	endif
+	
+	return( tool.maxhp > 1 );
 endfunction
 
 function RC_StartCharacterTracker( byref mobile, byref x, byref y, byref realm, byref PID )
