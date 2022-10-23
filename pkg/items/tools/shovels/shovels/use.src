@@ -394,18 +394,19 @@ function SHOVEL_HarvestResource( byref mobile, byref use_on, byref tool )
 			endif
 		else
 			// Lets check if the object is already on the ground and increment its amount instead of littering.
-			var objects_on_ground := ListItemsAtLocation( mobile.x, mobile.y, mobile.z, mobile.realm );
+			var objects_on_ground := ListItemsNearLocationOfType( mobile.x, mobile.y, mobile.z, 0, settings.ResourceType, mobile.realm );
 			var found_on_ground := 0;
 			
 			foreach obj in objects_on_ground
 				if (mobile.cmdlevel >= 5)
-					Broadcast("Objecttype found: "+obj.objtype+" Logtype found: "+GetObjtypeByName(settings.ResourceType), requiredCmdLevel := 5);
-					Broadcast("X: " + mobile.x + " Y: " + mobile.y + " Z: " + mobile.z + " LT: " + settings.ResourceType + " #: " + amount + " Realm: " + mobile.realm, requiredCmdLevel := 5);
+					SendSysMessage(mobile, "Objecttype found: "+obj.objtype+" Logtype found: "+GetObjtypeByName(settings.ResourceType) );
+					SendSysMessage(mobile, "X: " + mobile.x + " Y: " + mobile.y + " Z: " + mobile.z + " LT: " + settings.ResourceType + " #: " + amount + " Realm: " + mobile.realm );
 				endif	
 				if (obj.objtype == GetObjtypeByName(settings.ResourceType))
 					if ( !found_on_ground )
 						AddAmount( obj, amount );
 						found_on_ground := 1;
+						break;
 					endif
 				endif
 			endforeach
