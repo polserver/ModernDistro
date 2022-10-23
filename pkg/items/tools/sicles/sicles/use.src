@@ -38,17 +38,18 @@ program use_sicle( mobile, sicle )
 		return 0;
 	endif
 
-/* not working but needs to be fixed.
-//	if( !RC_IsTree( use_on ) )
+	var objtype := use_on.item ? use_on.item.objtype : use_on.objtype;
+
+	if( !RC_IsTree( objtype ) )
 	
-		var testvar := RC_IsTree( use_on );
-		Broadcast("Testvar: "+testvar);
+//		var testvar := RC_IsTree( use_on );
+//		Broadcast("Testvar: "+testvar);
 	
 		// Check if tree is a fruit tree!
 		SendSysMessage( mobile, "You can only use a sicle to harvest fruits from a tree.", 0x3, 0x22 );
 		return 0;
-//	endif
-*/
+	endif
+
 	// Otherwise we harvest fruits from a fruit tree.
 	SICLE_HarvestResource( mobile, use_on, sicle );
 	// Done harvesting, so exit.
