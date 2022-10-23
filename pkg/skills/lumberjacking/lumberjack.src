@@ -719,7 +719,7 @@ function AXE_HarvestResource( byref mobile, byref use_on, byref tool )
 	endif
 
 	if (mobile.cmdlevel >= 5)
-        	Broadcast("Quantity: " + quantity + " Itemdesc: " + item_desc,  requiredCmdLevel := 5);
+        	SendSysMessage(mobile, "Quantity: " + quantity + " Itemdesc: " + item_desc );
         endif
 
 	if( quantity < 1 )
@@ -745,7 +745,7 @@ function AXE_HarvestResource( byref mobile, byref use_on, byref tool )
 		endif
 
 		if (mobile.cmdlevel >= 5)
-                	broadcast("Amount 1: " + amount + " Quantity 1: " + quantity, requiredCmdLevel := 5);
+                	SendSysMessage(mobile, "Amount 1: " + amount + " Quantity 1: " + quantity );
 		endif
 
 		if( quantity < amount )
@@ -754,7 +754,7 @@ function AXE_HarvestResource( byref mobile, byref use_on, byref tool )
 		endif
 
 		if (mobile.cmdlevel >= 5)
-                	broadcast("Amount 2: " + amount + " Quantity 2: " + quantity, requiredCmdLevel := 5);
+                	SendSysMessage(mobile, "Amount 2: " + amount + " Quantity 2: " + quantity );
 		endif
 
 		if( amount < 1 )
@@ -763,7 +763,7 @@ function AXE_HarvestResource( byref mobile, byref use_on, byref tool )
 		endif
 
 		if (mobile.cmdlevel >= 5)
-                	broadcast("Amount 3: " + amount + " Quantity 3: " + quantity, requiredCmdLevel := 5);
+                	SendSysMessage(mobile, "Amount 3: " + amount + " Quantity 3: " + quantity );
                 endif
 
 		PerformAction( mobile, CInt( settings.EffectAction ) );
@@ -773,7 +773,7 @@ function AXE_HarvestResource( byref mobile, byref use_on, byref tool )
 		var sc_result := SkillCheck( mobile, LUMBERJACKING, CInt( cfg_file.Difficulty ) );
 		
 		if (mobile.cmdlevel >= 5)
-                	broadcast("CheckSkill result: " + cs_result + "SkillCheck result: " + sc_result, requiredCmdLevel := 5);
+                	SendSysMessage(mobile, "CheckSkill result: " + cs_result + "SkillCheck result: " + sc_result );
                 endif
 
 // We dont have a hook in the distro
@@ -802,8 +802,8 @@ function AXE_HarvestResource( byref mobile, byref use_on, byref tool )
 		var create_item := CreateItemInBackpack( mobile, cfg_file.LogType, amount );
 		
 		if (mobile.cmdlevel >= 5)
-			Broadcast("ERROR: "+create_item.ErrorText, requiredCmdLevel := 5);
-			Broadcast("X: " + mobile.x + " Y: " + mobile.y + " Z: " + mobile.z + " LT: " + cfg_file.LogType + " #: " + amount + " Realm: " + mobile.realm, requiredCmdLevel := 5);
+			SendSysMessage(mobile, "ERROR: "+create_item.ErrorText );
+			SendSysMessage(mobile, "X: " + mobile.x + " Y: " + mobile.y + " Z: " + mobile.z + " LT: " + cfg_file.LogType + " #: " + amount + " Realm: " + mobile.realm );
 		endif			
 		
 		
@@ -811,23 +811,24 @@ function AXE_HarvestResource( byref mobile, byref use_on, byref tool )
 			SendSysMessage( mobile, "You place "+FormatItemDescription( item_desc, amount )+" in your backpack.", 0x3, 0x42 );
 		else
 			if (mobile.cmdlevel >= 5)
-				Broadcast("ERROR: "+create_item.ErrorText, requiredCmdLevel := 5);
-				Broadcast("X: " + mobile.x + " Y: " + mobile.y + " Z: " + mobile.z + " LT: " + cfg_file.LogType + " #: " + amount + " Realm: " + mobile.realm, requiredCmdLevel := 5);
+				SendSysMessage(mobile, "ERROR: "+create_item.ErrorText );
+				SendSysMessage(mobile, "X: " + mobile.x + " Y: " + mobile.y + " Z: " + mobile.z + " LT: " + cfg_file.LogType + " #: " + amount + " Realm: " + mobile.realm );
 			endif	
 
 			// Lets check if the object is already on the ground and increment its amount instead of littering.
-			var objects_on_ground := ListItemsAtLocation( mobile.x, mobile.y, mobile.z, mobile.realm );
+			var objects_on_ground := ListItemsNearLocationOfType( mobile.x, mobile.y, mobile.z, 0, cfg_file.LogType, mobile.realm );
 			var found_on_ground := 0;
 			
 			foreach obj in objects_on_ground
 				if (mobile.cmdlevel >= 5)
-					Broadcast("Objecttype found: "+obj.objtype+" Logtype found: "+GetObjtypeByName(cfg_file.LogType), requiredCmdLevel := 5);
-					Broadcast("X: " + mobile.x + " Y: " + mobile.y + " Z: " + mobile.z + " LT: " + cfg_file.LogType + " #: " + amount + " Realm: " + mobile.realm, requiredCmdLevel := 5);
+					SendSysMessage(mobile, "Objecttype found: "+obj.objtype+" Logtype found: "+GetObjtypeByName(cfg_file.LogType) );
+					SendSysMessage(mobile, "X: " + mobile.x + " Y: " + mobile.y + " Z: " + mobile.z + " LT: " + cfg_file.LogType + " #: " + amount + " Realm: " + mobile.realm );
 				endif	
 				if (obj.objtype == GetObjtypeByName(cfg_file.LogType))
 					if ( !found_on_ground )
 						AddAmount( obj, amount );
 						found_on_ground := 1;
+						break;
 					endif
 				endif
 			endforeach
@@ -837,7 +838,7 @@ function AXE_HarvestResource( byref mobile, byref use_on, byref tool )
 			endif
 				
 			if (mobile.cmdlevel >= 5)
-				Broadcast("ERROR: "+create_item.ErrorText, requiredCmdLevel := 5);
+				Broadcast("ERROR: "+create_item.ErrorText, 5);
 			endif
 			SendSysMessage( mobile, "Your backpack is full and the "+FormatItemDescription( item_desc, amount )+" is placed at your feet.", 0x3, 0x32 );
 			
