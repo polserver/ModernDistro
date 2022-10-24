@@ -33,10 +33,12 @@ program use_cookingtool(who, tool)
 	EraseObjProperty(who, "#HealTimer");
 
 	var rinfo := sendCraftGump(who, COOKING);
+
 	// OK was pressed, close it on out
 	if(rinfo == 0)
 		return 0;
 	endif
+
 	var the_objtype := rinfo[1];
 	var amt         := rinfo[2];
 
@@ -46,8 +48,9 @@ program use_cookingtool(who, tool)
 		RequiredObjectMissing(who, the_objtype);
 		return 0;
 	endif
+
 	if(craft_config[the_objtype].assemble == 1)
-		CraftAssembly(who, COOKING, tool, the_objtype, amt);
+		CraftAssembly(who, craft_skill, tool, the_objtype, amt);
 	else
 		CookItems(who, the_objtype, amt, tool);
 	endif
@@ -61,7 +64,7 @@ function CookItems(who, what, amt, tool)
 		return 0;
 	endif
 
-	// // // Metal is sent for the ResourceList entry type.
+	// Metal is sent for the ResourceList entry type.
 	var itemchk := MaterialSelection(who, craft_skill, lower(craft_config[what].Material_1));
 	if( !itemchk )
 		return 0;
@@ -91,7 +94,6 @@ function CookItems(who, what, amt, tool)
 		if( GetAmount(use_on) >= material )
 			if( CraftCheckSkill(who, craft_skill, diff, pts) )
 				theitem := CreateCraftItem(who, craft_skill, use_on, use_on.objtype, what, material, itemname, reqd);
-				// theitem := CraftAssembly(who, craft_skill, tool, use_on.objtype, amt);
 				if( TypeOf(theitem) != "ItemRef" )
 					SubtractAmount(use_on, (material / 2));
 					SendSysMessage(who, "You failed to create the item, and some of your materials are lost.");
