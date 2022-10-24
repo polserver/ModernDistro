@@ -88,3 +88,38 @@ function EmptyHands_Check( mobile )
  
         return 1;
 endfunction
+
+// This function is used for backpack full scenarios 
+// to stack items if there is already an item of the same type on the ground
+function CreateStackableItemAtLocation(mobile, resourcetype, amount, range := 0)
+
+	// Lets check if the object is already on the ground and increment its amount instead of littering.
+	var objects_on_ground := ListItemsNearLocationOfType( mobile.x, mobile.y, mobile.z, range, resourcetype, mobile.realm );
+	var found_on_ground := 0;
+
+	foreach obj in objects_on_ground
+	/*
+		if (mobile.cmdlevel >= 5)
+			SendSysMessage(mobile, "Objecttype found: "+obj.objtype+" Logtype found: "+GetObjtypeByName(resourcetype) );
+			SendSysMessage(mobile, "X: " + mobile.x + " Y: " + mobile.y + " Z: " + mobile.z + " LT: " + resourcetype + " #: " + amount + " Realm: " + mobile.realm );
+		endif
+	*/
+
+		if (obj.objtype == GetObjtypeByName(resourcetype))
+			if ( !found_on_ground )
+				AddAmount( obj, amount );
+				found_on_ground := 1;
+				break;
+			endif
+		endif
+	endforeach
+
+	if( !found_on_ground )
+		var create_item := CreateItemAtLocation( mobile.x, mobile.y, mobile.z, resourcetype, amount, mobile.realm );
+	endif
+/*
+	if (mobile.cmdlevel >= 5)
+		Broadcast("ERROR: "+create_item.ErrorText, 5);
+	endif
+*/
+endfunction

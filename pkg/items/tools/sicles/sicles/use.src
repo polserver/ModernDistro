@@ -1,0 +1,205 @@
+use uo;
+use os;
+use polsys;
+
+include ":attributes:attributes";
+include ":itemutils:itemUtil";
+include ":resourcecore:resourceCore";
+include ":resourcecore:wood";
+/*
+include "include/startEqp";
+include ":keys:key";
+*/
+
+// Need to damage the tool in the main gathering loop
+// Need to figure out why the tracking script is not doing what it should be doing
+// and stopping the process of gathering when the player moves.
+program use_sicle( mobile, sicle )
+
+/*
+	var dirt_amt := 0,
+		harvested_amt := 0,
+*/
+	var use_on := 0;
+
+	if( !useItem_check( mobile, sicle, ITEM_EQUIPPED ) )
+		return 0;
+	elseif( GetEquipmentByLayer( mobile, 25 ) )
+		SendSysMessage( mobile, "You cannot harvest fruits while mounted.", 0x3, 0x22 );
+		return 0;
+	endif
+
+
+	SendSysMessage(mobile, "What do you wish to do with the sicle?", color := 88);
+
+	use_on := TargetCoordinates( mobile );
+	if( !use_on )
+		SendSysMessage( mobile, "Cancelled.", 0x3, 0x32 );
+		return 0;
+	endif
+
+	var objtype := use_on.item ? use_on.item.objtype : use_on.objtype;
+
+	if( !RC_IsTree( objtype ) )
+	
+//		var testvar := RC_IsTree( use_on );
+//		Broadcast("Testvar: "+testvar);
+	
+		// Check if tree is a fruit tree!
+		SendSysMessage( mobile, "You can only use a sicle to harvest fruits from a tree.", 0x3, 0x22 );
+		return 0;
+	endif
+
+	// Otherwise we harvest fruits from a fruit tree.
+	SICLE_HarvestResource( mobile, use_on, sicle );
+	// Done harvesting, so exit.
+	return 1;
+
+endprogram
+
+function SICLE_HarvestResource( byref mobile, byref use_on, byref tool )
+
+	var data_elem := 0,
+		last_harvest := 0,
+		quantity :=  0,
+		settings := 0,
+		resource_name := "",
+		sounds := 0,
+		amount := 0,
+		cfg_file := "",
+		item_desc := "";
+
+//	if( RC_IsSandPatch( use_on ) )
+		data_elem := RC_FindWoodDataElem( Cstr( use_on.x+"_"+use_on.y+"_"+use_on.z+"_"+use_on.realm ) );
+		last_harvest := RC_GetFruitProps( data_elem, "FruitHarvest" );
+		quantity := RC_GetFruitProps( data_elem, "FruitQuantity" );
+		settings := RC_GetSettingsCfgElem( "FruitSettings" );
+		cfg_file := RC_GetTreesCfgElem( use_on.objtype );
+		item_desc := GetConfigString( FindConfigElem( ReadConfigFile(":food_drink:itemdesc"), GetObjtypeByName(cfg_file.FruitType) ), "Desc" );
+		resource_name := "fruit";
+//	endif
+
+	if ( !cfg_file.FruitType )
+		SendSysMessage( mobile, "This kind of tree does not have fruits to harvest.");
+		return 0;
+	endif
+
+	quantity += Floor( Cint( ReadGameClock() - last_harvest ) / CInt( settings.SecondsPerRegrow ) );
+	if( quantity > CInt( settings.MaxYield ) )
+		quantity := CInt( settings.MaxYield );
+	endif
+
+	if( quantity < 1 )
+		SendSysMessage( mobile, "There's not enough "+FormatItemDescription(item_desc)+" here to harvest.", 0x3, 0x22 );
+		return 0;
+	elseif( CoordinateDistance( mobile.x, mobile.y, use_on.x, use_on.y ) > 2 )
+		SendSysMessage( mobile, "You must be closer to harvest any "+FormatItemDescription(item_desc)+"!", 0x3, 0x22 );
+		return 0;
+	endif
+
+	RC_StartCharacterTracker( mobile, mobile.x, mobile.y, mobile.realm, GetPid() );
+
+	EnableEvents(EVID_OPPONENT_MOVED);
+
+	while( quantity > 0 )
+		sounds := CInt( SplitWords( settings.EffectSounds ).RandomEntry() );
+
+		amount := CInt( CDbl( GetAttributeBaseValue( mobile, LUMBERJACKING ) / 10.0 ) / 20.0 );
+		if( amount < 1 )
+			amount := 1;
+		elseif( amount > 6 )
+			amount := 6;
+		endif
+
+		if( quantity < amount )
+			amount := CInt( quantity );
+			quantity := 0;
+		endif
+
+		if( amount < 1 )
+			SendSysMessage( mobile, "There's not enough "+FormatItemDescription(item_desc)+" here to harvest.", 0x3, 0x22 );
+			return 0;
+		endif
+
+		PerformAction( mobile, CInt( settings.EffectAction ) );
+		PlaySoundEffectXYZ( use_on.x, use_on.y, use_on.z, sounds, use_on.realm );
+
+		var sc_result := SkillCheck( mobile, LUMBERJACKING, CInt( settings.Difficulty ) );
+
+//		if( !CheckSkill( mobile, LUMBERJACKING, CInt( settings.Difficulty ), 100 ) )
+//			if ( amount >= 2 )
+//				amount /= 2;
+//			endif
+//		endif 			
+
+// This is what happens when the SkillCheck fails:
+		if( !sc_result )
+			if ( amount >= 2 )
+				amount /= 2;
+			endif
+			SendSysMessage( mobile, "You failed to harvest any materials and made parts of the resource unusable." );
+			quantity -= amount;
+			
+			if( quantity < 0 )
+				quantity := 0;
+			endif
+
+			data_elem.SetProp( "FruitHarvest", ReadGameClock() );
+			data_elem.SetProp( "FruitQuantity", quantity );
+			SleepMS( 1900 );
+			continue;
+		endif
+
+		SleepMS( 1900 );
+
+		var create_item := CreateItemInBackpack( mobile, cfg_file.FruitType, amount );
+		if( create_item )
+			SendSysMessage( mobile, "You place "+FormatItemDescription( item_desc, amount )+" in your backpack.", 0x3, 0x42 );
+		else
+		
+		CreateStackableItemAtLocation(mobile, cfg_file.FruitType, amount, range := 0);
+		
+		/*
+			// Lets check if the object is already on the ground and increment its amount instead of littering.
+			var objects_on_ground := ListItemsNearLocationOfType( mobile.x, mobile.y, mobile.z, 0, cfg_file.FruitType, mobile.realm );
+			var found_on_ground := 0;
+			
+			foreach obj in objects_on_ground
+				if (mobile.cmdlevel >= 5)
+					SendSysMessage(mobile, "Objecttype found: "+obj.objtype+" FruitType found: "+GetObjtypeByName(cfg_file.FruitType) );
+					SendSysMessage(mobile, "X: " + mobile.x + " Y: " + mobile.y + " Z: " + mobile.z + " LT: " + cfg_file.FruitType + " #: " + amount + " Realm: " + mobile.realm );
+				endif	
+				if (obj.objtype == GetObjtypeByName(cfg_file.FruitType))
+					if ( !found_on_ground )
+						AddAmount( obj, amount );
+						found_on_ground := 1;
+						break;
+					endif
+				endif
+			endforeach
+						
+			if( !found_on_ground )
+				create_item := CreateItemAtLocation( mobile.x, mobile.y, mobile.z, cfg_file.FruitType, amount, mobile.realm );
+			endif
+		*/
+			
+			SendSysMessage( mobile, "Your backpack is full and the "+FormatItemDescription( item_desc, amount )+" is placed at your feet.", 0x3, 0x32 );
+		endif
+
+		quantity -= amount;
+		if( quantity < 0 )
+			quantity := 0;
+		endif
+
+		if( quantity == 0 )
+			SendSysMessage( mobile, "You have harvested all the "+FormatItemDescription( item_desc, amount )+".", 0x3, 0x32 );
+		endif
+
+		data_elem.SetProp( "FruitHarvest", ReadGameClock() );
+		data_elem.SetProp( "FruitQuantity", quantity );
+		
+		RC_CheckToolDurability( mobile, tool );
+		
+	endwhile
+	
+endfunction
