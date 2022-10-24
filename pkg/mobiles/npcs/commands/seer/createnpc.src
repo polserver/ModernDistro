@@ -23,7 +23,7 @@ include ":gumps:gumpPrompt";
 
 program	text_command_createnpc(who, template)
 
-	var	mercscripts := {"appraiser", "barber", "banker", "bucsBanker", "bucsTownHealer", "davesHealer",
+	var	mercscripts := {"appraiser", "barber", "banker", "bucsBanker", "bucsTownHealer",
 						"healer", "merchant", "stablemaster", "townguard", "townHealer"};
 	var	guardscripts := {"townGuard", "instakillGuard"};
 	var	npc_config := ReadConfigFile("::npcdesc");
