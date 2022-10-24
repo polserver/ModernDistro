@@ -95,7 +95,7 @@ function RC_GetWoodProps( byref data_elem, byref prop_name )
 	if( df_prop.errortext )
 		settings := RC_GetSettingsCfgElem( "WoodSettings" );
 	endif
-       
+
         if( df_prop.errortext )
 		settings := RC_GetSettingsCfgElem( "FruitSettings" );
 		case( prop_name )

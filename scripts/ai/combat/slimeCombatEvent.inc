@@ -68,7 +68,7 @@ function CanEat(unused character, item)
   if ( ( item.objtype >= 0x2030 ) && (item.objtype <= 0x2060) )
     return 0;
   endif
-  if ( (item.objtype == 0x0e75) || (item.objtype == 0xf021 ) )
+  if ( (item.objtype == 0x0e75) || (item.objtype == 0x1F021 ) )
     return 0;
   endif
   if (!item.maxhp)

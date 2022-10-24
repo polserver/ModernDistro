@@ -116,7 +116,7 @@ program job (parms)
 	SendSysMessage (player, "You begin working", color := 66);
 	while (amount)
 		DoWorkNoiseAndAction (player, worknoise, workaction);
-		var it := CreateItemInContainer (bag, 0xF021, 1);
+		var it := CreateItemInContainer (bag, 0x1F021, 1);
 		if (it)
 			it.graphic := itemtype;
 			it.movable := 0;
