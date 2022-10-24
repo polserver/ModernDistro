@@ -41,7 +41,7 @@ program use_AlchTool(who, tool)
 	var the_objtype := rinfo[1];
 	var amt         := rinfo[2];
 
-	if(craft_config[the_objtype].assemble == 1)
+	if(craft_config[Hex(the_objtype)].Assemble == 1)
 		CraftAssembly(who, ALCHEMY, tool, the_objtype, amt);
 	else
 		makeAlchemyItems(who, the_objtype, amt, tool);
