@@ -114,7 +114,6 @@ function TrainSkill(me, who, item)
 			say( "You gave me too much gold. I returned the excess." );
 			var excess_gold := gold_received - train_max_cost;
 			CreateItemInContainer( who.backpack, 0xEED, excess_gold );
-			Say( "I have returned the excess gold." );
 			gold_received := gold_received - excess_gold;
 		endif
 		SetAttributeBaseValue( who, attribute_name, gold_received );
