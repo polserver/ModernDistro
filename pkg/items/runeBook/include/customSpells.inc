@@ -17,7 +17,7 @@ function runebookRecall( who, parms, book, charges, use_charge:=0 )
 		charges -= 1;
 		SetCharges( book, who, charges );
   else
-		var script := Start_Script( ":magery:spellStarter", {who, 32, 0, 0, runebook_info, 0} );
+		var script := Start_Script( ":magery:spellStarter", {who, 32, 0, 0, runebook_info, 1} );
 		if( script.errortext )
 			SendSysMessage( who, "Error - Could not start spell starter ->"+script.errortext );
 			return 0;
