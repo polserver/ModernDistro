@@ -1,17 +1,19 @@
 /*
-        2009-10-20
+	2009-10-20
 
-        Author: Austin
+	Author: Austin
 
-        Purpose
-        Assists in the use of storage areas.
+	Purpose
+	Assists in the use of storage areas.
 
-        CP_GetStorageContainerForMobile(container_id, storage_area_name:=0)
-        CP_GetStorageAreaContainer(mobile, storage_area_name:=0, create:=CP_NOCREATE)
-        CP_CreateStorageAreaContainer(container_id, storage_area_name:=0)
-        CP_RegisterStorageArea(storage_area_name)
-        CP_RemoveStorageAreaContainer(container_id, storage_area_name)
-        CP_StorageDebugMsg(text)
+	CP_ListStorageAreas()
+    CP_GetStorageArea( storage_area_name, create:=CP_NOCREATE )
+	CP_GetStorageContainerForMobile(container_id, storage_area_name:=0)
+	CP_GetStorageAreaContainer(mobile, storage_area_name:=0, create:=CP_NOCREATE)
+	CP_CreateStorageAreaContainer(container_id, storage_area_name:=0)
+	CP_RegisterStorageArea(storage_area_name)
+	CP_RemoveStorageAreaContainer(container_id, storage_area_name)
+	CP_StorageDebugMsg(text)
 */
 use uo;
 use os;
@@ -20,19 +22,23 @@ use polsys;
 use storage;
 
 // * Global Variables *
-CONST CP_NOCREATE	:= 0x0;
-CONST CP_CREATE		:= 0x1;
+CONST CP_NOCREATE               := 0x0;
+CONST CP_CREATE                 := 0x1;
 
-CONST CP_DEFAULT_AREA	:= "World Bank";
-CONST CP_DEFAULT_PREFIX	:= "[Root Container] ";
-//CONST CP_DEFAULT_PREFIX	:= "Bankbox of ";
+CONST CP_AUCTION_AREA           := "Auction Storage";
+CONST CP_BANK_AREA              := "World Bank";
+CONST CP_DEFAULT_AREA           := "World Bank";
+CONST CP_KEYRING_AREA           := "Keyring Storage";
+CONST CP_MERCHANT_AREA          := "Merchant Storage";
+
+CONST CP_DEFAULT_PREFIX         := "[Root Container] ";
 
 /*
  * Set the 'box_type' variable to the object name of the container type
  * you want to be used for bank box.
  * Example: "pouch" "metalchest" "barrel"
  *
- * This is ONLY used when a new root container is created. It can be changed on
+ * This is ONLY used when a new root container is created. It can be  changed on
  * the fly inside of a script for when you want to use specific container
  * types for special storage areas.
  *
@@ -43,6 +49,11 @@ var container_type	:= "BankBox";
 
 // Toggles the bank related debug messages on and off.
 var STORAGE_DEBUG	:= 1;
+
+function CP_ListStorageAreas()
+
+    return { CP_AUCTION_AREA, CP_BANK_AREA, CP_KEYRING_AREA, CP_MERCHANT_AREA };
+endfunction
 
 /*
  * CP_GetMobileContainerID(mobile)
@@ -72,7 +83,7 @@ endfunction
  * Purpose
  *
  * Parameters
- * mobile:		Owner of the container that will be retrieved (uses .serial of it)
+ * mobile:		Owner of the container that will be retrieved (uses  .serial of it)
  * storage_area_name:	Name of the storage area to retrieve the container from.
  * create:		Controls if the container will be created if it does not already exist.
  *
@@ -90,6 +101,35 @@ function CP_GetStorageContainerForMobile( mobile, storage_area_name:=0, create:=
 	var root_container := CP_GetStorageAreaContainer( container_id, storage_area_name, create );
 
 	return root_container;
+endfunction
+
+/*
+ * CP_GetStorageArea( storage_area_name, create:=CP_NOCREATE )
+ *
+ * Purpose
+ * Retrieves the storage area or if set, creates and then returns storage area.
+ *
+ * Parameters
+ * storage_area_name:   Name of the storage area to retrieve and/or create.
+ * create:      Controls if the container will be created if it does not already exist.
+ *
+ * Return value
+ * A storage area object
+ *
+ */
+function CP_GetStorageArea( storage_area_name, create:=CP_NOCREATE )
+
+    var storage_area := FindStorageArea( storage_area_name );
+    if( !storage_area && create == CP_CREATE )
+        // The storage area does not exist - so create it.
+        storage_area := CreateStorageArea( storage_area_name );
+    endif
+
+    if( storage_area.errortext )
+        CP_StorageDebugMsg( "Error::CP_GetStorageArea() - "+storage_area.errortext );
+    endif
+
+    return storage_area;
 endfunction
 
 /*
@@ -114,7 +154,7 @@ function CP_GetStorageAreaContainer( container_id, storage_area_name:=0, create:
 	endif
 
 	var container_name := CP_DEFAULT_PREFIX + container_id;
-//	var container_name := container_id;
+	// var container_name := container_id;
 
 	var storage_area := FindStorageArea( storage_area_name );
 	if( !storage_area )
@@ -159,8 +199,11 @@ function CP_CreateStorageAreaContainer( container_id, storage_area_name:=0 )
 		storage_area := CreateStorageArea( storage_area_name );
 	endif
 
-	var container_name := CP_DEFAULT_PREFIX + container_id;
+    if( storage_area_name == CP_MERCHANT_AREA || storage_area_name == CP_AUCTION_AREA )
+        container_type := "vendorbag";
+	endif
 
+    var container_name := CP_DEFAULT_PREFIX + container_id;
 	var root_container := CreateRootItemInStorageArea( storage_area, container_name, container_type );
 	if( root_container.errortext )
 		CP_StorageDebugMsg( "Error::CP_CreateStorageAreaContainer() - "+root_container.errortext );
@@ -263,4 +306,3 @@ function CP_StorageDebugMsg( report_text )
 
 	return 1;
 endfunction
-
