@@ -1,7 +1,9 @@
 use uo;
 use util;
 
-include "util/bank";
+include "include/objtype";
+include ":containers:storageAreas";
+include ":currency:currency";
 include ":insurance:settings";
 include ":itemUtils:itemdesc";
 include ":itemutils:offsets";
@@ -63,7 +65,7 @@ endfunction
 //////////////////////////////////////////////////////////////////////////////////////////
 function UninsureItem( byref player, item )
 
-	var bankbox := FindBankBox( player );
+	var bankbox := CP_GetStorageContainerForMobile( player, CP_BANK_AREA, CP_CREATE );
 	var refund := CalculateInsCost( item );
 	if( !CreateItemInContainer( bankbox, 0xEED, refund ) )
 		SendSysMessage( player, "I could not refund the insurance cost for " + item.name + ".", color := 33 );
@@ -133,7 +135,7 @@ endfunction
 //////////////////////////////////////////////////////////////////////////////////////////
 function PayForInsurance( byref player, byref item, cost )
 
-	var bankbox := FindBankBox( player );
+	var bankbox := CP_GetStorageContainerForMobile( player, CP_BANK_AREA, CP_CREATE );
 	if(!SpendCoin(player, cost, bankbox, UOBJ_GOLD_COIN))
 		// SendSysMessageCL( player, 1061079 ); // You lack the funds to purchase the insurance
 		SendSysMessage(player, "You don't have enough in the bank to insure " + item.name +".", 1, 33);
@@ -370,7 +372,7 @@ endfunction
 
 function CalculateBankGold( byref mobile )
 
-	var bankbox := FindBankBox( mobile );
+	var bankbox := CP_GetStorageContainerForMobile( mobile, CP_BANK_AREA, CP_CREATE );
 	if( !bankbox )
 		SendSysMessage( mobile, "You don't have a bank box.", 0x3, 0x22 );
 		return error{ "errortext":="Could not find the player's bank box." };
@@ -386,7 +388,7 @@ endfunction
 
 function ConsumeGoldFromBank( byref mobile, amt )
 
-	var bankbox := FindBankBox( mobile );
+	var bankbox := CP_GetStorageContainerForMobile( mobile, CP_BANK_AREA, CP_CREATE );
 	if( !bankbox )
 		SendSysMessage( mobile, "You don't have a bank box.", 0x3, 0x22 );
 		return 0;

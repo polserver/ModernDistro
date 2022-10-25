@@ -6,7 +6,7 @@ use uo;
 
 include "include/utility";
 include "include/client";
-include "util/bank";
+include ":containers:storageAreas";
 
 var storage:=findstoragearea("Merchant Storage");
 var inv_sell:=find_or_create_item(storage,"AUCTION",0xE7C);
@@ -90,13 +90,13 @@ if(!buyer) buyer:=SystemFindObjectBySerial(temp,SYSFIND_SEARCH_OFFLINE_MOBILES);
    remove_properties(item);
 
    if(bid == 0) // no bids return item to bank
-        bankbox:=FindBankBox(seller);
+        bankbox:=CP_GetStorageContainerForMobile( seller, CP_BANK_AREA, CP_CREATE );
 	moveitemtocontainer(item,bankbox);
 	return;
    endif
 
    // move item to buyer's bank
-   bankbox:=FindBankBox(buyer);
+   bankbox:=CP_GetStorageContainerForMobile( buyer, CP_BANK_AREA, CP_CREATE );
    moveitemtocontainer(item,bankbox);
 
    pay_seller(bid,seller);

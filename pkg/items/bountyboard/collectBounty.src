@@ -4,7 +4,7 @@ use datafile;
 
 include ":datafile:datafile";
 include "include/bounty";
-include "util/bank";
+include ":containers:storageAreas";
 
 program collectBounty(parms)
   print("P: " + parms);
@@ -25,7 +25,7 @@ program collectBounty(parms)
     PrintTextAbove(me, "You have brought in the head of " + bounty[1] + ". That fiend was responsible for " + bounty[3] + " murders.");
     PrintTextAbove(me, "Lord British has offered a reward of " + bounty[2] + " gold pieces, which I shall place in your bankbox.");
     var gold := Cint(bounty[2]);
-    var bank := FindBankBox(who);
+    var bank := CP_GetStorageContainerForMobile( who, CP_BANK_AREA, CP_CREATE );
     while(gold >= 60000)
       gold := gold - 60000;
       CreateItemInContainer(bank, 0xeed, 60000);

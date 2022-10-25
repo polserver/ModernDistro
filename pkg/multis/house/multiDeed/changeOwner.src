@@ -1,7 +1,7 @@
 use uo;
 use cliloc;
 
-include "util/bank";
+include ":containers:storageAreas";
 include ":keys:key";
 include ":gumps:gumpPrompt";
 
@@ -16,7 +16,7 @@ program change_owner(who, deed)
 	var old_owner_serial := GetObjProperty(sign, "ownerserial");
 	var old_owner := SystemFindObjectBySerial(old_owner_serial, SYSFIND_SEARCH_OFFLINE_MOBILES);
 	SetObjProperty(sign, "lastownername", old_owner.name);
-	var new_owner_bank := FindBankBox(who);
+	var new_owner_bank := CP_GetStorageContainerForMobile( who, CP_BANK_AREA, CP_CREATE );
 	var new_lock_id := AllocateLockID();
 	SetObjProperty(sign, "LockID", new_lock_id);
 	var bank_key := CreateItemInContainer(new_owner_bank, "goldkey");

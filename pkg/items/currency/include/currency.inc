@@ -1,6 +1,7 @@
 use uo;
 use os;
 
+include "include/objtype";
 include "include/utility";
 
 var coinarray := {};

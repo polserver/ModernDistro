@@ -5,7 +5,8 @@ use cliloc;
 use cfgfile;
 
 include ":keys:key";
-include "util/bank";
+include ":containers:storageAreas";
+include ":currency:currency";
 include ":gumps:gumps";
 include "include/findCity";
 include "include/housing";
@@ -42,7 +43,7 @@ sign := sgn;
     // This is when the house is 'new', the sign showing 'For Sale'.
     if(GetObjProperty(sign, "NewHouse"))
 		var price := sign.GetHousePrice();
-		var bankbox := FindBankBox( who );
+		var bankbox := CP_GetStorageContainerForMobile( who, CP_BANK_AREA, CP_CREATE );
 		var signserial := CInt(sign.serial);
 
 		var extdoors :={};

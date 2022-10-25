@@ -2,18 +2,6 @@ use basic;
 use storage;
 
 // Used in two files...
-function find_or_create_storage( areaname )
-  var area;
-  area := FindStorageArea( areaname );
-  if(!area)
-	area := CreateStorageArea( areaname );
-    if(area)
-    endif
-  endif
-  return area;
-endfunction
-
-// Used in three files...
 function find_or_create_item(storage, name, objtype := 0x1966a)
 	var item_found := FindRootItemInStorageArea(storage, name);
 	if(item_found)
@@ -23,7 +11,6 @@ function find_or_create_item(storage, name, objtype := 0x1966a)
 	item_found := CreateRootItemInStorageArea( storage, name, objtype);
 	return item_found;
 endfunction
-
 
 function IsLocationAccessible(character, x, y, z)
   var xd, yd, zd;

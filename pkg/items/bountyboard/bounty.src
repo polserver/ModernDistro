@@ -3,14 +3,14 @@ use os;
 
 include "include/bounty";
 include ":datafile:datafile";
-include "util/bank";
+include ":containers:storageAreas";
 include ":gumps:gumps";
 include "include/client";
 
 program Assign_Bounty(parms)
   var who := parms[1];
   var data := parms[2];
-  var bank := FindBankBox(who);
+  var bank := CP_GetStorageContainerForMobile( who, CP_BANK_AREA, CP_CREATE );
   foreach id in data
     var holder := FindMyGold(bank);
 	var mygold := Cint(holder[1]);

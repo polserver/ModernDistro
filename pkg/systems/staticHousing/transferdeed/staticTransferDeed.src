@@ -11,11 +11,11 @@ use uo;
 use os;
 use cfgfile;
 
+include ":containers:storageAreas";
 include ":gumps:gumps";
+include ":keys:key";
 include ":staticHousing:gumpMessage";
 include ":staticHousing:settings";
-include "util/bank";
-include ":keys:key";
 
 const UOBJECT_BRASS_SIGN := 0x20bd2;
 const UOBJECT_WOOD_SIGN := 0x20bd0;
@@ -32,7 +32,7 @@ program ChangeHouseOwner(who, deed)
 	maxsecures := maxsecures;
 	var price := GetObjProperty( deed, "Price");
 	price := price;
-    var bankbox := FindBankBox( who );
+    var bankbox := CP_GetStorageContainerForMobile( who, CP_BANK_AREA, CP_CREATE );
 	var btcheck := 0;
 	var inpack := 0;
 
