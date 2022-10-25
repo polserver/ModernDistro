@@ -1,0 +1,10 @@
+use uo;
+use os;
+
+program OpenDistroDocs(who)
+
+	SendSysMessage( who, "Opening the Distro Documentation.", color := 88 );
+	OpenURL( who, POLCore().poldir + "/docs/Distro Documentation/index.html" );
+	return;
+
+endprogram
