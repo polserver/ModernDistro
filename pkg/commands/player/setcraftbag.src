@@ -5,7 +5,6 @@ use os;
 include "include/client";
 include "include/objtype";
 //include "include/itemtypes";
-//include "util/bank";
 
 ///////////////////
 //  set the bag into which the crafted items will go
@@ -26,7 +25,7 @@ program SetCraftBag (who)
 		EraseObjProperty (who, "craftingbagserial");
 		return;
 	endif
-	
+
 	if (!InInventory (who.backpack, bag) )
 		SendSysMessage (who, "That is not in your inventory.", color := 33);
 		return;
