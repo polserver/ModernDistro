@@ -20,7 +20,7 @@ program SpellStarter(params)
 	var scroll := params[3]; // Scroll ObjType being used
 	var targ := params[4]; // NPC target used if NPC is casting the spell.
 	var runebook := params[5]; // Used if casting recall or gate from a runebook.
-	var no_regs__no_mana := params[6]; // If > 0 spell does not require regs and mana, for runebook back pages.
+	var no_regs__no_mana := params[6]; // If equals 1 spell does not require regs and mana, for runebook back pages.
 	// if (scroll == 1)
 	// endif
 	if ( !Attach(mobile) )
@@ -68,10 +68,11 @@ program SpellStarter(params)
 		requires_mana := 1;
 	endif
 	// This check for casting from back pages of a runebook.
-	if( !no_regs__no_mana )
-		requires_regs := 1;
-		requires_mana := 1;
+	if( no_regs__no_mana )
+		requires_regs := 0;
+		requires_mana := 0;
 	endif
+
 	if ( GetObjProperty(mobile, "#Casting") )
 		SendSysMessage(mobile, "You cannot cast right now.", color := 33);
 		return 0;
