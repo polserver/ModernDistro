@@ -130,7 +130,7 @@ program stablemaster()
                                         elseif( pet.master != player )
                                           Say( "This creature does not belong to you." );
                                         else
-                                          var price := 30 + ( AP_GetStat( pet, STRENGTH ) / 5 );
+                                          var price := CInt(30 + ( AP_GetStat( pet, STRENGTH ) / 5 ));
                                           Say("I charge " + price + " per real world week to take care of " + pet.name + ".");
                                           if( !player.SpendGold( price ) )
                                             Say("You dont have " + price + " gold coins!");
