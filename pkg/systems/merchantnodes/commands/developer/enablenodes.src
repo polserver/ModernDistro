@@ -1,0 +1,39 @@
+use uo;
+use os;
+use polsys;
+
+include ":merchantnodes:nodeEvents";
+
+program enable_merchant_nodes_textcmd( mobile )
+
+	SendSysMessage( mobile, "Force enabling all nodes currently disabled!", 0x3, 0x42 );
+
+	var maps := Realms();
+	foreach realm in ( maps.Keys() )
+// Merchant Nodes...
+		foreach node in ( ListItemsInBoxOfObjType( GetObjtypeByName( "MerchantNode" ), 0, 0, -128, maps[realm].width, maps[realm].height, 128, realm ) )
+			if( node.GetStatus() )
+				continue;
+			endif
+			Set_Critical( 1 );
+			SetObjProperty( node, "Status", "on" );
+			Set_Critical( 0 );
+			node.SendMerchantNodeEvent( Struct{ "type":=SLEEP_EVENT } );
+			SleepMS( 5 );
+		endforeach
+
+// Guard Nodes....
+		foreach node in ( ListItemsInBoxOfObjType( GetObjtypeByName( "GuardNode" ), 0, 0, -128, maps[realm].width, maps[realm].height, 128, realm ) )
+			if( GetObjProperty( node, "Status" ) == "on" )
+				continue;
+			endif
+
+			SetObjProperty( node, "Status", "on" );
+			SleepMS( 5 );
+		endforeach
+	endforeach
+
+	SendSysMessage( mobile, "Task completed.", 0x3, 0x42 );
+
+	return 1;
+endprogram

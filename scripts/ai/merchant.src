@@ -1,25 +1,25 @@
 ///////////////////////////////////////////////////////////////////////
 // This is a description of how these variables are used.
 //
-// inv_fs = vendor inventory.
-// inv_fs also sent when staff asks "showinventory".
+// shop_sell = vendor inventory.
+// shop_sell also sent when staff asks "showinventory".
 //
-// inv_rs = restock. sent when staff asks "showrestock".
-// inv_rs also has a CProp, "MyGold".
-// SendOpenSpecialContainer(ev.source, inv_rs);
+// shop_resale = restock. sent when staff asks "showrestock".
+// shop_resale also has a CProp, "MyGold".
+// SendOpenSpecialContainer(ev.source, shop_resale);
 //
-// inv_pb = sent with "buy" window.
+// shop_buy = sent with "buy" window.
 // function prototype:
 // SendBuyWindow( character, container, vendor, items, flags := 0 )
-// SendBuyWindow(ev.source, inv_fs, me, inv_pb);
+// SendBuyWindow(ev.source, shop_sell, me, shop_buy);
 //
-// inv_1c = sent with "sell" window.
+// shop_resale = sent with "sell" window.
 // function prototype:
 // SendSellWindow( character, vendor, i1, i2, i3, flags := 0 )
 // i1 = "for sale" item container.
 // i2 = vendor's "Bought from player" item container.
 // i3 = vendor's "Buyable" item container.
-// SendSellWindow(ev.source, me, inv_fs, inv_pb, inv_1c);
+// SendSellWindow(ev.source, me, shop_sell, shop_buy, shop_resale);
 ///////////////////////////////////////////////////////////////////////
 use npc;
 use os;
@@ -36,6 +36,7 @@ include "include/anchors";
 include "include/findCity";
 include "include/begging";
 include ":attributes:attributes";
+include ":containers:storageAreas";
 include ":npcs:trainSkill";
 include "include/objtype";
 
@@ -43,7 +44,7 @@ const MAX_SKILLS      := 48;
 
 var me := Self();
 me.hidden := 1;
-var inv_fs, inv_pb, inv_1c, inv_rs;
+var shop_sell, shop_resale, shop_buy;
 var merchant_type := GetObjProperty(me,"MerchantType");
 var equipt        := GetObjProperty(me, "Equipt");
 var npccfg        := ReadConfigFile("npcdesc");
@@ -63,16 +64,14 @@ program merchant()
   drop_anchor();
   myanchor     := GetObjProperty(me, "Anchor");
   var spawnname := merchant_type + " " + myanchor[1] + " " + myanchor[2] + " " + myanchor[3];
-  inv_fs := FindRootItemInStorageArea(storage, spawnname + " FS");
-  inv_pb := FindRootItemInStorageArea(storage, spawnname + " PB");
-  inv_1c := FindRootItemInStorageArea(storage, spawnname + " 1C");
-  inv_rs := FindRootItemInStorageArea(storage, spawnname + " RS");
-  while((!inv_rs) or (!inv_fs) or (!inv_pb) or (!inv_1c))
+  shop_sell := CP_GetStorageAreaContainer( spawnname+" ShopSell", CP_MERCHANT_AREA, CP_NOCREATE );
+  shop_resale := CP_GetStorageAreaContainer( spawnname+" ShopeResale", CP_MERCHANT_AREA, CP_NOCREATE );
+  shop_buy := CP_GetStorageAreaContainer( spawnname+" ShopBuy", CP_MERCHANT_AREA, CP_NOCREATE );
+  while((!shop_sell) || (!shop_resale) || (!shop_buy))
     sleep(5);
-    inv_fs := FindRootItemInStorageArea(storage, spawnname + " FS");
-    inv_pb := FindRootItemInStorageArea(storage, spawnname + " PB");
-    inv_1c := FindRootItemInStorageArea(storage, spawnname + " 1C");
-    inv_rs := FindRootItemInStorageArea(storage, spawnname + " RS");
+    shop_sell := CP_GetStorageAreaContainer( spawnname+" ShopSell", CP_MERCHANT_AREA, CP_NOCREATE );
+    shop_resale := CP_GetStorageAreaContainer( spawnname+" ShopeResale", CP_MERCHANT_AREA, CP_NOCREATE );
+    shop_buy := CP_GetStorageAreaContainer( spawnname+" ShopBuy", CP_MERCHANT_AREA, CP_NOCREATE );
   endwhile
   me.hidden := 0;
   EnableEvents(SYSEVENT_ITEM_GIVEN);
@@ -89,20 +88,20 @@ program merchant()
       case (ev.type)
         EVID_NODE:                var txt := lower(ev.text);
                                   if((ev.source.cmdlevel > 2) && (txt["showinventory"]))
-                                    SendOpenSpecialContainer(ev.source, inv_fs);
+                                    SendOpenSpecialContainer(ev.source, shop_sell);
                                   elseif((ev.source.cmdlevel > 2) && (txt["showrestock"]))
-                                    SendOpenSpecialContainer(ev.source, inv_rs);
+                                    SendOpenSpecialContainer(ev.source, shop_resale);
                                   else
                                     if(txt["buy"])
                                       TurnToward(ev.source);
-                                      var res := SendBuyWindow(ev.source, inv_fs, me, inv_pb);
+                                      var res := SendBuyWindow( ev.source, shop_sell, me, shop_buy, VENDOR_SEND_AOS_TOOLTIP );
 									  res := res;
                                     elseif(txt["sell"])
-                                      if(GetObjProperty(inv_rs, "MyGold") >= 1000)
+                                      if(GetObjProperty(shop_resale, "MyGold") >= 1000)
                                         TurnToward(ev.source);
                                         var count := ModifyPCSellList(merchant_type, (ev.source));
                                         if(count >= 1)
-                                          var res := SendSellWindow(ev.source, me, inv_fs, inv_pb, inv_1c);
+                                          var res := SendSellWindow( ev.source, Self(), shop_sell, shop_buy, shop_resale, VENDOR_SEND_AOS_TOOLTIP );
 										  res := res;
                                         else
                                           PrintTextAbovePrivate(me, "You dont have anything I would be interested in.", ev.source);
@@ -127,15 +126,13 @@ program merchant()
         SYSEVENT_MERCHANT_BOUGHT: TurnToward(ev.source);
                                   PrintTextAbovePrivate(me, "The total of thy sale is " + ev.amount, ev.source);
                                   if(lower(merchant_type) != "appraiser")
-                                    var mygold := GetObjProperty(inv_rs, "MyGold");
+                                    var mygold := GetObjProperty(shop_resale, "MyGold");
                                     mygold := mygold - ev.amount;
-                                    SetObjProperty(inv_rs, "MyGold", mygold);
+                                    SetObjProperty(shop_resale, "MyGold", mygold);
                                   endif
-                                  foreach thing in EnumerateItemsInContainer(inv_pb)
-                                    if(MoveItemToContainer(thing, inv_fs))
+                                  foreach thing in EnumerateItemsInContainer(shop_buy)
+                                    if(MoveItemToContainer(thing, shop_sell))
                                       SetObjProperty(thing,"ClearRestock", (ReadGameClock() + 1800));
-//                                      thing.buyprice  := itemconfig[thing.objtype].VendorBuysFor;
-//                                      thing.sellprice := itemconfig[thing.objtype].VendorSellsFor;
                                     else
                                       DestroyItem(thing);
                                     endif
@@ -146,21 +143,17 @@ program merchant()
                                   foreach thing in EnumerateItemsInContainer((ev.source).backpack, ENUMERATE_ROOT_ONLY)
                                     EraseObjProperty(thing, "ClearRestock");
                                   endforeach
-                                  if(lower(merchant_type) != "appraiser")
-                                    var mygold := GetObjProperty(inv_rs, "MyGold");
+                                  if( Lower( merchant_type ) != "appraiser" )
+                                    var mygold := GetObjProperty(shop_resale, "MyGold");
                                     mygold := mygold + ev.amount;
-                                    SetObjProperty(inv_rs, "MyGold", mygold);
+                                    SetObjProperty(shop_resale, "MyGold", mygold);
                                   endif
                                   PlaySoundEffect(me, 0x38);
         SYSEVENT_ITEM_GIVEN:    TurnToward (ev.source);
-                                if ( GetObjProperty ( ev.item, "merchant") )
+                                if ( GetObjProperty( ev.item, "merchant") )
                                         PayForJobCompleted ( ev );
-//                                elseif (GetObjProperty (ev.item, "deliverto") and GetObjProperty (ev.item, "deliverto") == me.serial)
-//                                        PayForItemDelivery (ev);
                                 elseif ( ev.item.objtype == UOBJ_GOLD_COIN )
                                         TrainSkill(me, ev.source, ev.item);
-//                                else
-//                                        TakeItem(ev.source, ev.item);
                                 endif
 
       endcase

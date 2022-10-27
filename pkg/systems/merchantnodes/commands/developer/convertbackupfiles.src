@@ -1,0 +1,74 @@
+use uo;
+use os;
+use cfgfile;
+use polsys;
+
+include ":merchantnodes:file";
+
+program convert_to_xml_textcmd( mobile )
+	
+	var list := MN_WriteXMLFile( SplitNodesByRealm() );
+
+	SendSysMessage( mobile, "Conversion complete!", 0x3, 0x42 );
+
+	return 1;
+endprogram
+
+function SplitNodesByRealm()
+
+	var cfgfile := 0,
+		cfg_elem := 0,
+		list := Dictionary,
+		node_list := Dictionary{ "MerchantNodes"->Struct, "GuardNodes"->Struct },
+		node_type := "",
+		cprops := "";
+
+	foreach map in ( { "Felucca", "Trammel", "Ilshenar", "Malas", "Tokuno", "Termur" } )
+		cfgfile := ReadConfigFile( ":merchantnodes:packedNodes-for-"+map );
+
+		foreach key in ( GetConfigStringKeys( cfgfile ) )
+			node_type := key["merchant"] ? "MerchantNodes" : "GuardNodes";
+			cfg_elem := FindConfigElem( cfgfile, key );
+
+			if( !list.Exists( cfg_elem.Realm ) )
+				list.Insert( Lower( cfg_elem.Realm ), node_list );
+			endif
+
+			cprops := Pack( UpdateCProps( Unpack( cfg_elem.data ), Lower( cfg_elem.Realm ) ) );
+			list[Lower( cfg_elem.Realm )][node_type].Insert( key, Struct{ "CProps":=cprops, "Realm":=Lower( cfg_elem.Realm ), "X":=cfg_elem.X, "Y":=cfg_elem.Y, "Z":=cfg_elem.Z } );
+		endforeach
+	endforeach
+
+	return list;
+endfunction
+
+function UpdateCProps( data, realm )
+
+	var i := 1,
+		merchant_info := Dictionary,
+		range := data[2][2],
+		templates := data[6][2],
+		npc_info := data[1][2],
+		template_name := "",
+		anchor := Array;
+
+	for( i:=1; i<=templates.Size(); i++ )
+		template_name := templates[i][1];
+		anchor := templates[i][2];
+		merchant_info.Insert( npc_info[i], Struct{ "Anchor":=Struct{ "X":=anchor[1], "Y":=anchor[2], "Z":=anchor[3], "Realm":=realm }, "Enabled":=1, "Info":=Struct{ "Gender":=-1, "Name":="<Random>", "RandomizeSkinHue":=1, "RandomizeSpeechHue":=1 }, "Template":=template_name } );
+	endfor
+
+	var death_list := Dictionary;
+	foreach key in ( merchant_info.Keys() )
+		death_list.Insert( key, Struct{ "Info":=merchant_info[key], "Time":=-1 } );
+	endforeach
+	var cprops := {
+					{ "DeathList", death_list },
+					{ "MerchantInfo", merchant_info },
+					{ "Range", range },
+					{ "RespawnTime", 60.0 },
+					{ "RestockTime", 60.0 }
+				  };
+
+	return cprops;
+endfunction

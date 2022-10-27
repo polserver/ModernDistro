@@ -1,0 +1,34 @@
+use uo;
+use os;
+use polsys;
+
+include ":merchantnodes:gumps";
+
+program createnode_textcmd( mobile )
+	
+	var node_opts := MN_SettingsGump( mobile );
+	if( !node_opts )
+		SendSysMessage( mobile, "Cancelled.", 0x3, 0x32 );
+		return 0;
+	endif
+
+	var loc := TargetCoordinates( mobile );
+	if( !loc )
+		SendSysMessage( mobile, "Cancelled.", 0x3, 0x32 );
+		return 0;
+	endif
+
+// We will set the node up, setting cprops pre item creation to avoid any
+// potential wonkiness within the control script...
+	var node := GetItemDescriptor( GetObjtypeByName( "MerchantNode" ) );
+	node.Invisible := 1;
+	node.Movable := 0;
+	node.CProps.Insert( "Status", "on" );
+	foreach key in ( node_opts.Keys() )
+		node.CProps.Insert( key, node_opts[key] );
+	endforeach
+
+	CreateItemAtLocation( loc.x, loc.y, loc.z, node, 1, loc.realm );
+
+	return 1;
+endprogram

@@ -5,6 +5,7 @@ use uo;
 
 include "include/eventID";
 include ":attributes:attributes";
+include ":containers:storageAreas";
 include "include/sysEvent";
 include ":npcs:randName";
 include "include/utility";
@@ -13,7 +14,6 @@ include "include/speech";
 include "include/client";
 include ":npcs:garment";
 include ":npcs:NPCBackpacks";
-include "util/bank";
 include "include/anchors";
 include "include/findCity";
 include "include/begging";
@@ -32,7 +32,7 @@ var me := Self();
 me.hidden := 1;
 var buyimage  := {0x211b, 0x211c, 0x2121, 0x2124, 0x211f, 0x2120, 0x2126, 0x20f6, 0x211a, 0x2123, 0x2125, 0x2122, 0x211e, 0x211d, 0x2119, 0x20e6, 0x2108, 0x2103, 0x2101, 0x2135, 0x2136, 0x2137, 0x2127};
 var sellimage := {0xc9, 0xd9, 0xcc, 0xc8, 0xe2, 0xe4, 0x123, 0xdc, 0x06, 0xee, 0xcd, 0xe1, 0xd4, 0x05, 0xd6, 0xcf, 0xd1, 0xd8, 0xcb, 0xd2, 0xda, 0xdb, 0x124};
-var speech, inv_rs, inv_fs, inv_pb, inv_1c;
+var speech, shop_sell, shop_resale, shop_buy;
 var merchant_type := GetObjProperty(me, "MerchantType");
 var npccfg := ReadConfigFile( "npcdesc" );
 var mystorage := GetObjProperty(me, "Pets");
@@ -56,17 +56,16 @@ program stablemaster()
   endif
   drop_anchor();
   myanchor     := GetObjProperty(me, "Anchor");
+
   var spawnname := merchant_type + " " + myanchor[1] + " " + myanchor[2] + " " + myanchor[3];
-  inv_fs := FindRootItemInStorageArea(storage, spawnname + " FS");
-  inv_pb := FindRootItemInStorageArea(storage, spawnname + " PB");
-  inv_1c := FindRootItemInStorageArea(storage, spawnname + " 1C");
-  inv_rs := FindRootItemInStorageArea(storage, spawnname + " RS");
-  while((!inv_rs) or (!inv_fs) or (!inv_pb) or (!inv_1c))
-    sleep(5);
-    inv_fs := FindRootItemInStorageArea(storage, spawnname + " FS");
-    inv_pb := FindRootItemInStorageArea(storage, spawnname + " PB");
-    inv_1c := FindRootItemInStorageArea(storage, spawnname + " 1C");
-    inv_rs := FindRootItemInStorageArea(storage, spawnname + " RS");
+  shop_sell := CP_GetStorageAreaContainer( spawnname+" ShopSell", CP_MERCHANT_AREA, CP_NOCREATE );
+  shop_resale := CP_GetStorageAreaContainer( spawnname+" ShopeResale", CP_MERCHANT_AREA, CP_NOCREATE );
+  shop_buy := CP_GetStorageAreaContainer( spawnname+" ShopBuy", CP_MERCHANT_AREA, CP_NOCREATE );
+  while((!shop_sell) || (!shop_resale) || (!shop_buy))
+    Sleep(5);
+    shop_sell := CP_GetStorageAreaContainer( spawnname+" ShopSell", CP_MERCHANT_AREA, CP_NOCREATE );
+    shop_resale := CP_GetStorageAreaContainer( spawnname+" ShopeResale", CP_MERCHANT_AREA, CP_NOCREATE );
+    shop_buy := CP_GetStorageAreaContainer( spawnname+" ShopBuy", CP_MERCHANT_AREA, CP_NOCREATE );
   endwhile
   me.hidden := 0;
   EnableEvents(EVID_NODE);
@@ -94,16 +93,16 @@ program stablemaster()
       case (ev.type)
         EVID_NODE:                text := Lower(ev.text);
                                   if((ev.source.cmdlevel > 2) && (text["showinventory"]))
-                                    SendOpenSpecialContainer(ev.source, inv_fs);
+                                    SendOpenSpecialContainer(ev.source, shop_sell);
                                   endif
                                     if(text["buy"])
                                       TurnToward(ev.source);
                                       var res;
-                                      res := SendBuyWindow(ev.source, inv_fs, Self(), inv_pb );
+                                      res := SendBuyWindow(ev.source, shop_sell, Self(), shop_buy );
                                       if (!res)
                                       endif
                                     elseif (text["sell"])
-                                      if(GetObjProperty(inv_rs, "MyGold") >= 1000)
+                                      if(GetObjProperty(shop_resale, "MyGold") >= 1000)
                                         TurnToward(ev.source);
                                     sellanimal(ev.source);
                                       else
@@ -120,44 +119,45 @@ program stablemaster()
                                       TurnToward(ev.source);
                                       say("Show me your pet.");
                                       pet := Target(player);
-                                      if (pet)
-                                        var tempdata := GetObjProperty(pet, "master");
-                                        var summoned := GetObjProperty(pet, "summoned");
-                                        if((pet.script == "tamed") && (!summoned))
-                                          if (tempdata == player.serial)
-                                            var price := 30 + (AP_GetStat(pet, STRENGTH)/5);
-                                            say("I charge " + price + " per real world week to take care of " + pet.name + ".");
-                                            if (GetPayment(player, price))
-                                              say("Keep this ticket and give it to me when you want " + pet.name + " back.");
-                                              var ticket := CreateItemInBackpack(player, 0x14f0, 1);
-                                              ticket.usescript := "";
-                                              Save_Pet_Data(ticket, pet);
-                                            endif
-                                          else
-                                            say("This is not a zoo!");
-                                          endif
-                                        elseif((pet.graphic == CID_HUMAN_MALE) || (pet.graphic == CID_HUMAN_FEMALE) )
-                                          say("Do I look like an Inn Keeper?!");
+                                      if( pet )
+                                        var summoned := GetObjProperty( pet, "summoned" );
+                                        if((pet.graphic == CID_HUMAN_MALE) || (pet.graphic == CID_HUMAN_FEMALE) )
+                                          Say( "Do I look like an Inn Keeper?!" );
+                                        elseif( pet.script != "tamed" )
+                                          Say( "I don't run a zoo here you know." );
+                                        elseif( summoned )
+                                          Say( "I don't deal in summoned beings." );
+                                        elseif( pet.master != player )
+                                          Say( "This creature does not belong to you." );
                                         else
-                                          say("That is not your pet.");
+                                          var price := 30 + ( AP_GetStat( pet, STRENGTH ) / 5 );
+                                          Say("I charge " + price + " per real world week to take care of " + pet.name + ".");
+                                          if( !player.SpendGold( price ) )
+                                            Say("You dont have " + price + " gold coins!");
+                                          else
+                                            Say("Keep this ticket and give it to me when you want " + pet.name + " back.");
+                                            var ticket := CreateItemInBackpack(player, 0x14f0, 1);
+                                            ticket.usescript := "";
+                                            Save_Pet_Data( ticket, pet );
+                                          endif
                                         endif
                                       endif
                                     endif
                                   endif
         SYSEVENT_MERCHANT_BOUGHT: TurnToward(ev.source);
                                   PrintTextAbovePrivate(Self(), "The total of thy sale is " + ev.amount, ev.source );
-                                  var mygold := GetObjProperty(inv_rs, "MyGold");
+                                  var mygold := GetObjProperty(shop_resale, "MyGold");
                                   mygold := mygold - ev.amount;
-                                  SetObjProperty(inv_rs, "MyGold", mygold);
-                                  foreach item in EnumerateItemsInContainer(inv_pb )
+                                  SetObjProperty(shop_resale, "MyGold", mygold);
+                                  foreach item in EnumerateItemsInContainer(shop_buy )
                                     DestroyItem(item);
                                   endforeach
                                   PlaySoundEffect(me, 0x38);
         SYSEVENT_MERCHANT_SOLD:   TurnToward(ev.source);
                                   PrintTextAbovePrivate(Self(), "The total of thy purchase is " + ev.amount, ev.source );
-                                  var mygold := GetObjProperty(inv_rs, "MyGold");
+                                  var mygold := GetObjProperty(shop_resale, "MyGold");
                                   mygold := mygold + ev.amount;
-                                  SetObjProperty(inv_rs, "MyGold", mygold);
+                                  SetObjProperty(shop_resale, "MyGold", mygold);
                                   foreach item in EnumerateItemsInContainer(ev.source.backpack )
                                 petname :=GetObjProperty(item, "animalkind");
                                 if(petname)
@@ -210,13 +210,13 @@ function sellanimal(who)
   if((the_pet.script == "tamed") && (tempdata == who.serial) && (!summoned))
     var theitem;
     if((the_pet.objtype==0xd3) && (the_pet.color==0x02e6))
-      theitem := CreateItemInContainer(inv_fs, 0x20cf, 1);
+      theitem := CreateItemInContainer(shop_sell, 0x20cf, 1);
     elseif(the_pet.objtype==0xd3)
-      theitem := CreateItemInContainer(inv_fs, 0x2118, 1);
+      theitem := CreateItemInContainer(shop_sell, 0x2118, 1);
     else
       for(i:=1;i<=sellimage.size();i:=i+1)
         if(the_pet.objtype==sellimage[i])
-          theitem := CreateItemInContainer(inv_fs, buyimage[i], 1);
+          theitem := CreateItemInContainer(shop_sell, buyimage[i], 1);
           break;
         endif
       endfor
@@ -225,13 +225,13 @@ function sellanimal(who)
     SetObjProperty(theitem, "ClearRestock", (ReadGameClock() + 1800));
 
     var buyamount := CInt(AP_GetStat(the_pet, STRENGTH) / 2);
-    var mygold := GetObjProperty(inv_rs, "MyGold");
+    var mygold := GetObjProperty(shop_resale, "MyGold");
     if(buyamount > mygold)
       say("Im sorry, but I cannot afford to buy any pets right now.");
       return;
     else
       mygold := mygold - buyamount;
-      SetObjProperty(inv_rs, "MyGold", mygold);
+      SetObjProperty(shop_resale, "MyGold", mygold);
       say(the_pet.name + " is worth $" + buyamount);
       SetObjProperty(the_pet, "guardkill", 1);
       MoveObjectToLocation(the_pet, 5555, 1111, 0, "britannia_alt", MOVEOBJECT_FORCELOCATION); // new map problem
@@ -311,25 +311,6 @@ function Load_Ticket_Data(player, ticket)
     DestroyItem(ticket);
   else
     TakeItem(player, ticket);
-  endif
-endfunction
-
-function GetPayment(player, price)
-  var backpack := EnumerateItemsInContainer(player.backpack);
-  var a := 0;
-  foreach item in backpack
-    if ((item.objtype == 0xeed) && (item.amount >= price) )
-      if(SubtractAmount(item, price))
-        a := 1;
-        break;
-      endif
-    endif
-  endforeach
-  if(a == 1)
-    return 1;
-  else
-    say("You dont have " + price + " gold coins!");
-    return 0;
   endif
 endfunction
 

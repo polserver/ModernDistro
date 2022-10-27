@@ -2,13 +2,17 @@
 use cfgfile;
 
 include ":attributes:attributes";
+include ":containers:storageAreas";
+include ":itemutils:itemdesc";
+include ":itemutils:itemInfo";
 include "include/utility";
 
 var mrcspawn_cfg := ReadConfigFile("::mrcspawn");
 var itemconfig := ReadConfigFile(":*:itemdesc");
-var storage := find_or_create_storage("Merchant Storage");
+var storage := CP_GetStorageArea( CP_MERCHANT_AREA, CP_CREATE );
 
-function FindMerchantType(mrctype)
+function FindMerchantType( mrctype )
+
 	var npcdesccfg	:= ReadConfigFile(":*:npcdesc");
 	var elem := FindConfigElem(npcdesccfg, Lower(mrctype));
 	var retval := 0;
@@ -25,27 +29,45 @@ function FindMerchantType(mrctype)
 	return retval;
 endfunction
 
-function create_node_merc(merchanttype, name)
-	var inv_rs := find_or_create_item(storage, name + " RS");
-	var inv_fs := find_or_create_item(storage, name + " FS");
-	var inv_pb := find_or_create_item(storage, name + " PB");
-	var inv_1c := find_or_create_item(storage, name + " 1C");
-	inv_1c := inv_1c;
-	inv_pb := inv_pb;
-	SetObjProperty(inv_rs, "MerchantType", merchanttype);
-	SetObjProperty(inv_rs, "MyGold", 5000);
-	StockInventory(merchanttype, inv_rs);
-	RestockInitialInventory(inv_rs, inv_fs);
+function Create_Node_Merc( merchanttype, name )
+
+	var shop_sell := CP_GetStorageAreaContainer( name+" ShopSell", CP_MERCHANT_AREA, CP_CREATE );
+	var shop_resale := CP_GetStorageAreaContainer( name+" ShopeResale", CP_MERCHANT_AREA, CP_CREATE );
+	var shop_buy := CP_GetStorageAreaContainer( name+" ShopBuy", CP_MERCHANT_AREA, CP_CREATE );
+
+	SetObjProperty( shop_resale, "MerchantType", merchanttype );
+	SetObjProperty( shop_resale, "MyGold", 5000 );
+	StockInventory( merchanttype, shop_sell );
+	RestockInitialInventory( shop_sell, shop_resale );
 endfunction
 
-function destroy_node_merc(name)
-	DestroyRootItemInStorageArea(storage, name + " RS");
-	DestroyRootItemInStorageArea(storage, name + " FS");
-	DestroyRootItemInStorageArea(storage, name + " PB");
-	DestroyRootItemInStorageArea(storage, name + " 1C");
+function Destroy_Node_Merc(name)
+	CP_RemoveStorageAreaContainer( name+" ShopSell", CP_MERCHANT_AREA );
+	CP_RemoveStorageAreaContainer( name+" ShopeResale", CP_MERCHANT_AREA );
+	CP_RemoveStorageAreaContainer( name+" ShopBuy", CP_MERCHANT_AREA );
 endfunction
 
-function StockInventory(merchanttype, inventory)
+function RestockInventory( merchanttype, name )
+
+	var container := CP_GetStorageAreaContainer( name+" ShopSell", CP_MERCHANT_AREA, CP_CREATE );
+	foreach item in ( EnumerateItemsInContainer( container, ENUMERATE_ROOT_ONLY ) )
+		DestroyItem( item );
+		SleepMS( 5 );
+	endforeach
+
+	var mtype := FindConfigElem( mrcspawn_cfg, merchanttype );
+	if(mtype)
+		foreach productgroup in GetConfigStringArray(mtype, "Sells");
+			var pg_elem := FindConfigElem(mrcspawn_cfg, productgroup);
+			foreach itemstr in GetConfigStringArray(pg_elem, "Item")
+				SpawnItem( container, itemstr );
+				sleepms(10);
+			endforeach
+		endforeach
+	endif
+endfunction
+
+function StockInventory( merchanttype, inventory )
 	var mtype := FindConfigElem(mrcspawn_cfg, merchanttype);
 	if(mtype)
 		foreach productgroup in GetConfigStringArray(mtype, "Sells");
@@ -58,33 +80,33 @@ function StockInventory(merchanttype, inventory)
 	endif
 endfunction
 
-function SpawnItem(inventory, itemstr)
+function SpawnItem( inventory, itemstr )
+
 	var split := SplitWords(itemstr);
-	var objtype := split[1];
-	var amount_of_stuff := Cint(split[2]);
-	var buyprice	:= itemconfig[objtype].VendorBuysFor;
-	var sellprice := itemconfig[objtype].VendorSellsFor;
-	if(Cint(objtype))
-		objtype := Cint(objtype);
-	else
-		objtype := Cint(GetObjtypeByName(objtype));
+	var objtype := CInt( split[1] ) ?: CInt( GetObjtypeByName( split[1] ) );
+	var amount := CInt( split[2] );
+	if( !objtype )
+		SysLog( "Could not determine objtype for itemstr: "+itemstr, LOG_DATETIME );
+		return 0;
 	endif
-	if(!objtype)
-		syslog("could not determine objtype for itemstr: " + itemstr);
-		return;
-	endif
+
+// Added check for stackable graphic, if graphic is stackable there's
+// no need to iterate through amount.
 	var res;
-	if(amount_of_stuff > 0)
-		var i;
-		for( i := 1; i <= amount_of_stuff; i := i + 1 )
-			res := CreateItemInInventory(inventory, objtype, 1);
-			res.buyprice	:= buyprice;
-			res.sellprice := sellprice;
-		endfor
+	if( amount > 0 )
+		var graphic := GetItemDescInfo( objtype ).Graphic ?: objtype;
+		if( IU_GetTileInfo( graphic ).Stackable == 1 )
+			CreateItemInContainer( inventory, objtype, amount );
+		else
+			var i;
+			for( i:=1; i<=amount; i++ )
+				res := CreateItemInContainer( inventory, objtype, 1 );
+			endfor
+		endif
 	endif
 endfunction
 
-function checkstock(rs, pak)
+function CheckStock(rs, pak)
 // purpose: to remove items that the vendor does not carry, but have been sold to it.
 // and replenish the purchasing gold supply for the vendor.
 	var mygold := Cint(GetObjProperty(rs, "MyGold"));
@@ -110,7 +132,7 @@ function RestockInitialInventory(source, destination)
 	var merchanttype := GetObjProperty(source, "MerchantType");
 	merchanttype := merchanttype;
 	var multiplier, amount_of_things, mlt, things;
-	var newarray := {};
+	var newarray := Array;
 	foreach thing in EnumerateItemsInContainer(source)
 		newarray.append(thing.objtype);
 		amount_of_things := 0;
@@ -157,7 +179,7 @@ function RestockInitialInventory(source, destination)
 		sleepms(1);
 	endforeach
 	foreach thing in EnumerateItemsInContainer(destination)
-		if((!(thing.objtype in newarray)) and (!GetObjProperty(thing, "ClearRestock")))
+		if((!(thing.objtype in newarray)) && (!GetObjProperty(thing, "ClearRestock")))
 			DestroyItem(thing);
 		endif
 	endforeach
@@ -207,7 +229,7 @@ function RestockMyInventory(source, destination)
 			var i;
 			// make one of everything you need
 			for(i:=1; i<= mlt; i := i+1)
-				if((mygold > buyprice) or (merchanttype == "Architect"))
+				if((mygold > buyprice) || (merchanttype == "Architect"))
 					var res := CreateItemInInventory(destination, thing.objtype, 1);
 					res.sellprice := sellprice;
 					res.buyprice := buyprice;
@@ -224,7 +246,7 @@ function RestockMyInventory(source, destination)
 
 	// ditch the leftovers
 	foreach thing in EnumerateItemsInContainer(destination)
-		if((!(thing.objtype in newarray)) and (!GetObjProperty(thing, "ClearRestock")))
+		if((!(thing.objtype in newarray)) && (!GetObjProperty(thing, "ClearRestock")))
 			mygold := mygold + Cint(thing.amount * thing.buyprice);
 			DestroyItem(thing);
 		endif
@@ -236,7 +258,7 @@ function CountExisting(container, objtype)
 	var amount_of_things := 0;
 	var things := {};
 	foreach thing in EnumerateItemsInContainer(container)
-		if((thing.objtype == objtype) and (Cint(GetObjProperty(thing, "ClearRestock")) == 0))
+		if((thing.objtype == objtype) && (Cint(GetObjProperty(thing, "ClearRestock")) == 0))
 			things.append(thing);
 			amount_of_things := amount_of_things + thing.amount;
 		endif

@@ -1,0 +1,160 @@
+use uo;
+use os;
+
+include ":gumps:selectionGump";
+include ":gumps:yesNo";
+include ":merchantnodes:file";
+
+program grab_nodes_textcmd( mobile )
+
+	var wipe_nodes := 0,
+		nodes := Array;
+	if( mobile.cmdlevel > 4 )
+		wipe_nodes := YesNo( mobile, "Do you want to wipe all nodes after backing them up?" );
+		if( wipe_nodes )
+			SendSysMessage( mobile, "All nodes will be wiped once they are backed up.", 0x3, 0x32 );
+		endif
+		Sleep( 1 );
+	endif
+
+	var facet_list := ListFacets(),
+		map := 0,
+		maps := Realms(),
+		facets := SelectionGumpEx( mobile, "Grab the nodes from which facet?", facet_list.Keys(), BTN_TYPE_CHECKBOX );
+	if( !facets )
+		SendSysMessage( mobile, "Cancelled.", 0x3, 0x32 );
+		return 0;
+	endif
+
+// Preclean xml file to avoid appending issues...
+	CleanXMLFile( maps, facets, facet_list );
+
+	var list := Dictionary,
+		node_list := Dictionary{ "MerchantNodes"->Struct, "GuardNodes"->Struct };
+	foreach facet in ( facets )
+		if( !list.Exists( facet_list[facet] ) )
+			list.Insert( facet_list[facet], node_list );
+		endif
+
+		map := maps[facet_list[facet]];
+		foreach node in ( ListItemsInBoxOfObjType( GetObjtypeByName( "MerchantNode" ), 0, 0, -127, map.Width, map.Height, 127, facet_list[facet] ) )
+			list[facet_list[facet]]["MerchantNodes"].Insert( CStr( node.serial ), ProcessNode( node ) );
+			if( wipe_nodes )
+				nodes.Append( node );
+			endif
+		endforeach
+
+		foreach node in ( ListItemsInBoxOfObjType( GetObjtypeByName( "GuardNode" ), 0, 0, -127, map.Width, map.Height, 127, facet_list[facet] ) )
+			list[facet_list[facet]]["GuardNodes"].Insert( CStr( node.serial ), ProcessNode( node ) );
+			if( wipe_nodes )
+				nodes.Append( node );
+			endif
+		endforeach
+
+		SleepMS( 10 );
+	endforeach
+
+	MN_WriteXMLFile( list );
+
+	SendSysMessage( mobile, "Nodes have been backed up!", 0x3, 0x42 );
+
+	if( wipe_nodes )
+		Sleep( 1 );
+		if( YesNo( mobile, "Just a final check, are you sure you want to wipe all nodes?" ) )
+			foreach node in ( nodes )
+				DestroyItem( node );
+			endforeach
+		endif
+	endif
+
+	return 1;
+endprogram
+
+function ProcessNode( byref node )
+
+	var cprops := Array,
+		merchant_info := Dictionary,
+		death_list := Dictionary;
+	if( node.objtype == 0x1887A )
+		var prop_names := { "MerchantInfo", "Range", "RespawnTime", "RestockTime", "Status" };
+		foreach name in ( prop_names )
+			if( name == "MerchantInfo" )
+				merchant_info := GetObjProperty( node, "MerchantInfo" );
+				foreach key in ( merchant_info.Keys() )
+					death_list.Insert( key, Struct{ "Info":=merchant_info[key], "Time":=-1 } );
+				endforeach
+				cprops.Append( { "DeathList", death_list } );
+				cprops.Append( { "MerchantInfo", GetObjProperty( node, "MerchantInfo" ) } );
+			elseif( GetObjProperty( node, name ) )
+				cprops.Append( { name, GetObjProperty( node, name ) } );
+			else
+				if( name == "Range" )
+					cprops.Append( { name, node.GetRange() } );
+				elseif( name == "RespawnTime" )
+					cprops.Append( { name, node.GetRespawnTime() } );
+				elseif( name == "RestockTime" )
+					cprops.Append( { name, node.GetRestockTime() } );
+				endif
+			endif
+		endforeach
+	elseif( node.objtype == 0x1887B )
+		foreach name in ( node.PropNames() )
+			if( name["#"] || name == "Children" )
+				continue;
+			endif
+			cprops.Append( { name, GetObjProperty( node, name ) } );
+		endforeach
+	endif
+
+	var info := Struct{
+						"CProps":=Pack( cprops ),
+						"Realm":=node.realm,
+						"X":=node.x,
+						"Y":=node.y,
+						"Z":=node.z
+					  };
+
+	return info;
+endfunction
+
+function ListFacets()
+
+	var list := Struct;
+	foreach key in ( Realms().Keys() )
+		case( key )
+			REALM_BRITANNIA:		list.Insert( "Felucca", REALM_BRITANNIA ); break;
+			REALM_BRITANNIA_ALT:	list.Insert( "Trammel", REALM_BRITANNIA_ALT ); break;
+			REALM_ILSHENAR:			list.Insert( "Ilshenar", REALM_ILSHENAR ); break;
+			REALM_MALAS:			list.Insert( "Malas", REALM_MALAS ); break;
+			REALM_TOKUNO:			list.Insert( "Tokuno", REALM_TOKUNO ); break;
+			REALM_TERMUR:			list.Insert( "Ter_Mur", REALM_TERMUR ); break;
+		endcase
+	endforeach
+
+	return list;
+endfunction
+
+function CleanXMLFile( byref maps, byref facets, byref facet_list )
+
+	var xml_file := MN_OpenNodesXMLFile(),
+		node := xml_file["Facets"],
+		map := 0;
+	foreach facet in ( facets )
+		map := maps[facet_list[facet]];
+		if( node[facet] )
+			if( ListItemsInBoxOfObjType( GetObjtypeByName( "MerchantNode" ), 0, 0, -127, map.Width, map.Height, 127, facet_list[facet] ).Size() )
+				if( node[facet]["MerchantNodes"] )
+					node[facet].RemoveXMLNode( "MerchantNodes" );
+				endif
+			endif
+
+			if( ListItemsInBoxOfObjType( GetObjtypeByName( "GuardNode" ), 0, 0, -127, map.Width, map.Height, 127, facet_list[facet] ).Size() )
+				if( node[facet]["GuardNodes"] )
+					node[facet].RemoveXMLNode( "GuardNodes" );
+				endif
+			endif
+		endif
+	endforeach
+	xml_file.SaveXML( ":merchantnodes:backUps/nodes.xml" );
+
+endfunction

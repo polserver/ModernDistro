@@ -1,14 +1,65 @@
 use uo;
 use os;
 
-include ":security:contextMenuReport";
+include ":contextmenus:constants";
+include ":contextmenus:contextMenu";
+include ":contextmenus:events";
 
-program popupmenu( mobile, obj )
+program context_menu( mobile, obj )
 
-	var script := Start_Script( ":contextmenus:contextMenu", { mobile, obj } );
-	if( script.errortext )
-		ContextMenu_ReportText( mobile, "Unable to start ':contextmenus:contextMenu' -> "+script.errortext, CM_REPORT_CONSOLE+CM_REPORT_SYSLOG+CM_REPORT_BROADCAST );
+	var list := obj.GetContextMenuEntries( mobile );
+	if( !list.Size() || TypeOfInt( list ) != OT_ARRAY )
+		return 0;
 	endif
+
+	var context_menu := SendPopUpMenu( mobile, obj, list );
+	if( context_menu.errortext )
+		Print( context_menu.errortext );
+	endif
+
+	var ret := list[context_menu];
+	if( TypeOfInt( ret ) == OT_STRUCT )
+		if( ret.disabled == 1 )
+			return 0;
+		endif
+		ret := ret.cliloc;
+	endif
+
+// If older numbers we need to subtract to match the
+// case statement values in the constants.inc file...
+	if( ret > 3000000 && ret < 3032767 )
+		ret -= 3000000;
+	endif
+
+	case( ret )
+		1018323:	ContextMenu_RotateObject( mobile, obj );
+		1114299:	SendSysMessage( mobile, "Not yet enabled.", 0x3, 0x32 );
+
+		// 1154112:
+		// 1154113:
+									// ContextMenu_ToggleTrades( mobile );
+
+		CM_CLILOC_BUY:						ContextMenu_SendMerchantNodeEvent( mobile, obj, CM_VENDOR_BUY );
+		CM_CLILOC_SELL:						ContextMenu_SendMerchantNodeEvent( mobile, obj, CM_VENDOR_SELL );
+		CM_CLILOC_BANKBOX:					ContextMenu_SendMerchantNodeEvent( mobile, obj, CM_OPEN_BANK );
+		CM_CLILOC_CMD_GUARD:				ContextMenu_SendNPCEvent( mobile, obj, CM_GUARD_ME );
+		CM_CLILOC_CMD_FOLLOW:				ContextMenu_SendNPCEvent( mobile, obj, CM_FOLLOW_ME );
+		CM_CLILOC_CMD_DROP:					ContextMenu_SendNPCEvent( mobile, obj, CM_DROP );
+		CM_CLILOC_CMD_KILL:					ContextMenu_SendNPCEvent( mobile, obj, CM_KILL );
+		CM_CLILOC_CMD_STOP:					ContextMenu_SendNPCEvent( mobile, obj, CM_STOP );
+		CM_CLILOC_TRANSFER:					ContextMenu_SendNPCEvent( mobile, obj, CM_TRANSFER );
+		CM_CLILOC_CMD_STAY:					ContextMenu_SendNPCEvent( mobile, obj, CM_STAY );
+		// CM_CLILOC_RESIGN:				ContextMenu_HandleResignEvent( mobile, obj );
+		// CM_CLILOC_JOIN:					ContextMenu_HandleJoinEvent( mobile, obj );
+		CM_CLILOC_RELEASE:					ContextMenu_SendNPCEvent( mobile, obj, CM_RELEASE );
+		CM_CLILOC_OPEN_PAPERDOLL:			OpenPaperdoll( mobile, obj );
+		CM_CLILOC_CHECK_BALANCE:			ContextMenu_SendMerchantNodeEvent( mobile, obj, CM_CHECK_BALANCE );
+		CM_CLILOC_STABLE_PET:				ContextMenu_SendMerchantNodeEvent( mobile, obj, CM_STABLE );
+		CM_CLILOC_OPEN_BACKPACK:			ContextMenu_OpenPack( mobile, obj );
+		CM_CLILOC_TOGGLE_ITEM_INSURANCE:	ContextMenu_InsureItem( mobile );
+		default:	return 0;
+	endcase
 
 	return 1;
 endprogram
+

@@ -18,14 +18,11 @@ endfunction
 
 exported function GetContextMenuEntries( npc, player )
 
-	var list := Array,
-		disabled := ContextMenu_Disabled( player, npc, CM_RANGE_CHECK+CM_LOS_CHECK+CM_DEAD_CHECK );
-
+	var list := Array;
 	if( HasPaperdoll( npc.graphic ) )
-		list.Append( 3006123 );
+		ContextMenu_AddEntry( list, CM_CLILOC_OPEN_PAPERDOLL );
 	endif
-
-	list.Append( Struct{ "cliloc":=3006126, "disabled":=disabled } );
+	ContextMenu_AddEntry( list, CM_CLILOC_STABLE_PET, 0xFFFF, Struct{ "Flags":=CM_RANGE_CHECK+CM_LOS_CHECK+CM_DEAD_CHECK, "Mobile":=player, "Object":=npc, "Range":=5 } );
 
 	return list;
 endfunction

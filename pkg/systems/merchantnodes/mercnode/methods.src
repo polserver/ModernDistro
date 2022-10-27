@@ -1,0 +1,222 @@
+use uo;
+use os;
+use polsys;
+
+include ":merchantnodes:nodeEvents";
+include ":merchantnodes:settings";
+
+program merchant_nods_methods()
+
+	return 1;
+endprogram
+
+exported function IsMerchantNode( item )
+
+	item := item; // Avoid Compiler Warning...
+
+	return 1;
+endfunction
+
+// Loads list which defines types of merchants spawned on a given node
+// Dictionary{ serial -> Struct{ "Anchor":=Struct{ "X":=targ.x, "Y":=targ.y, "Z":=targ.z, "Realm":=targ.realm }, "Enabled":=1, "Info":=Struct{ "Gender":=-1, "Name":="<Random>", "RandomizeSkinHue":=1, "RandomizeSpeechHue":=1 }, "Template":=template_name },
+			// serial -> Struct{ "Anchor":=Struct{ "X":=targ.x, "Y":=targ.y, "Z":=targ.z, "Realm":=targ.realm }, "Enabled":=1, "Info":=Struct{ "Gender":=-1, "Name":="<Random>", "RandomizeSkinHue":=1, "RandomizeSpeechHue":=1 }, "Template":=template_name }
+		  // };
+exported function LoadMerchantInfo( item )
+
+	var types := GetObjProperty( item, "MerchantInfo" );
+	if( TypeOfInt( types ) != OT_DICTIONARY )
+		// return array;
+		SetObjProperty( item, "MerchantInfo", Dictionary );
+		return Dictionary;
+	endif
+
+	return types;
+endfunction
+
+exported function AddToMerchantInfo( item, serial, info )
+
+	if( TypeOfInt( info ) != OT_STRUCT )
+		return error{ "errortext":="'info' parameter must be a Struct." };
+	elseif( TypeOfInt( serial ) != OT_LONG )
+		return error{ "errortext":="'serial' parameter must be an integer." };
+	endif
+
+	var list := LoadMerchantInfo( item );
+	list.Insert( serial, info );
+	SaveMerchantInfo( item, list );
+
+	return list;
+endfunction
+
+exported function RemoveFromMerchantInfo( item, serial )
+
+	if( TypeOfInt( serial ) != OT_LONG )
+		return error{ "errortext":="'serial' parameter must be an integer." };
+	endif
+
+	var list := LoadMerchantInfo( item );
+	list.Erase( serial );
+	SaveMerchantInfo( item, list );
+
+	return list;
+endfunction
+
+// Saves list of types of merchants spawned on a given node.
+exported function SaveMerchantInfo( item, list )
+
+	if( TypeOfInt( list ) != OT_DICTIONARY )
+		return error{ "errortext":="'list' parameter must be a Dictionary." };
+	endif
+
+	return SetObjProperty( item, "MerchantInfo", list );
+endfunction
+
+exported function GetRange( item )
+
+	var def_range := CInt( MN_FindSettingsElem( "Settings" ).DefaultRange ),
+		range := GetObjProperty( item, "Range" );
+
+	return range ?: def_range;
+endfunction
+
+exported function SetRange( item, range )
+
+	if( TypeOfInt( range ) != OT_LONG )
+		return error{ "errortext":="'range' must be an integer." };
+	endif
+
+	return SetObjProperty( item, "Range", range );
+endfunction
+
+exported function GetRespawnTime( item )
+
+	var def_respawn_time := CDbl( MN_FindSettingsElem( "Settings" ).RespawnTime ),
+		respawn_time := GetObjProperty( item, "RespawnTime" );
+
+	return respawn_time ?: def_respawn_time;
+endfunction
+
+exported function SetRespawnTime( item, respawn_time )
+
+	if( TypeOfInt( respawn_time ) != OT_DOUBLE )
+		return error{ "errortext":="'respawn_time' must be a double." };
+	endif
+
+	return SetObjProperty( item, "RespawnTime", respawn_time );
+endfunction
+
+exported function GetRestockTime( item )
+
+	var def_restock_time := CDbl( MN_FindSettingsElem( "Settings" ).RestockTime ),
+		restock_time := GetObjProperty( item, "RestockTime" );
+
+	return restock_time ?: def_restock_time;
+endfunction
+
+exported function SetRestockTime( item, restock_time )
+
+	if( TypeOfInt( restock_time ) != OT_DOUBLE )
+		return error{ "errortext":="'restock_time' must be a double." };
+	endif
+
+	return SetObjProperty( item, "RestockTime", restock_time );
+endfunction
+
+exported function GetStatus( item )
+
+	var status := GetObjProperty( item, "Status" );
+	if( status.errortext )
+		SetObjProperty( item, "Status", "on" );
+		status := GetObjProperty( item, "Status" );
+	endif
+
+	return status == "on";
+endfunction
+
+exported function DisableNode( item )
+
+	SetObjProperty( item, "Status", "off" );
+
+	return SendMerchantNodeEvent( item, Struct{ "type":=SLEEP_EVENT } );
+endfunction
+
+exported function EnableNode( item )
+
+	SetObjProperty( item, "Status", "on" );
+
+	return SendMerchantNodeEvent( item, Struct{ "type":=SLEEP_EVENT } );
+endfunction
+
+exported function ToggleStatus( item )
+
+	var toggle := ( ( GetObjProperty( item, "Status" ) == "on" ) ? "off" : "on" );
+
+	SetObjProperty( item, "Status", toggle );
+
+	return toggle == "on";
+endfunction
+
+exported function LoadDeathList( item )
+
+	var list := GetObjProperty( item, "DeathList" );
+	if( TypeOfInt( list ) != OT_DICTIONARY )
+		SetObjProperty( item, "DeathList", Dictionary );
+		return Dictionary;
+	endif
+
+	return list;
+endfunction
+
+exported function SaveDeathList( item, list )
+
+	if( TypeOfInt( list ) != OT_DICTIONARY )
+		return error{ "errortext":="'list' must be a dictionary object." };
+	endif
+
+	return SetObjProperty( item, "DeathList", list );
+endfunction
+
+exported function SendDeathEvent( item, serial )
+
+	var info := item.LoadMerchantInfo();
+
+	return SendMerchantNodeEvent( item, Struct{ "serial":=serial, "info":=info[serial], "type":=RESPAWN_EVENT } );
+endfunction
+
+exported function GetControlScript( item )
+
+	return item.process;
+endfunction
+
+/*
+ *
+ * SendMerchantNodeEvent( item, event )
+ *
+ * Parameters:
+ * item - merchant_node_itemref
+ * event - Struct containing event specific info.
+ *
+ * Purpose:
+ * Simplify sending an event to the control script of a merchant node.
+ *
+ * Date: 2022-10-03 02:38:54
+ * Shard Name: Pangaea
+ *
+ * Author: Oden (ThisIsMe)
+ * Email: DavidJSGardner@Gmail.com
+ * ICQ: 625-658-845
+ * Skype: DavidJSGardner
+ * Discord: ThisIsMe#7491
+ *
+ * Return Values:
+ * N/A
+ *
+ */
+exported function SendMerchantNodeEvent( item, event )
+
+	if( GetObjProperty( item, "#BeingDestroyed" ) )
+		return 0;
+	endif
+
+	return item.process.SendEvent( event );
+endfunction

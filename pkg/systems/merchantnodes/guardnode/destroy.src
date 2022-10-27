@@ -1,0 +1,19 @@
+use vitals;
+use uo;
+use os;
+use cfgfile;
+
+include "include/mrcSpawn";
+include":damage:damage";
+
+program destroy(item)
+
+  foreach thing in GetObjProperty( item, "NpcList" )
+    var npc := SystemFindObjectBySerial( CInt( thing ) );
+    if( npc )
+      npc.Kill();
+    endif
+  endforeach
+
+  return 1;
+endprogram

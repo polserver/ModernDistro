@@ -3,8 +3,13 @@ use os;
 use polsys;
 use util;
 
+include ":containers:storageAreas";
+include ":contextmenus:contextMenu";
+
 program Install()
+
 	Print( "Custom Character Class Methods Installed." );
+
 	return 1;
 endprogram
 
@@ -16,6 +21,32 @@ exported function ClearCombatAbility( mobile )
 		ability_reset.SendPacket( mobile );
 
 	return 1;
+endfunction
+
+/*
+BF.17 - Display Help Topic
+byte	ID (BF)
+word	Packet Size
+word	0x17
+byte	0x01
+dword	Topic ID
+byte	Display (0x00 = no, 0x01 = yes)
+*/
+exported function DisplayHelpTopic( mobile, topic, show )
+
+	var packet := CreatePacket( 0xBF, MSGLEN_VARIABLE );
+	packet.SetInt16( 1, 11 );
+	packet.SetInt16( 3, 0x17 );
+	packet.SetInt8( 5, 0x01 );
+	packet.SetInt32( 6, topic );
+	packet.SetInt8( 10, show );
+
+	return packet.SendPacket( mobile );
+endfunction
+
+exported function BankBox( mobile )
+
+	return CP_GetStorageContainerForMobile( mobile, CP_BANK_AREA, CP_CREATE );
 endfunction
 
 /*
@@ -94,17 +125,15 @@ endfunction
 // 3006198 - Tithe Gold
 exported function GetContextMenuEntries( mobile, player )
 
+// GetPackageByName(name)
 	var list := Array;
 	if( mobile == player )
-		// The commented lines are awaiting a Core update or a packet hook to work with
-		// the newer clients.
-		list.Append( 3006123 ); // Open Paperdoll
-		list.Append( 3006145 ); // Open Backpack
-		// list.Append( 3006168 ); // Siege Bless
-		list.Append( 1114299 ); // Open Item Insurance Menu
-		list.Append( 3006201 ); // Toggle Item Insurance
+		ContextMenu_AddEntry( list, CM_CLILOC_OPEN_PAPERDOLL );
+		ContextMenu_AddEntry( list, CM_CLILOC_OPEN_BACKPACK );
+		ContextMenu_AddEntry( list, 1114299, 0xFFFF, Struct{ "Flags":=CM_DEAD_CHECK, "Mobile":=mobile } ); // Open Item Insurance Menu
+		ContextMenu_AddEntry( list, CM_CLILOC_TOGGLE_ITEM_INSURANCE, 0xFFFF, Struct{ "Flags":=CM_DEAD_CHECK, "Mobile":=mobile } ); // Toggle Item Insurance
 	else
-		list.Append( 3006123 ); // Open Paperdoll
+		ContextMenu_AddEntry( list, CM_CLILOC_OPEN_PAPERDOLL );
 	endif
 
 	return list;

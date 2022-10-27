@@ -144,7 +144,6 @@ program do_poisoning( who )
 					obj := CreateItemInBackpack( who, "parrow", 10 );
 					SetObjProperty(obj, "PoisonStrength", stren);
 					SetObjProperty(obj, "Duration", duration);
-					
 					// There might be more elegant ways to solve that.
 					// Also i would love to see an approach that makes it easier to add new poisons
 					// without altering the code.
@@ -153,24 +152,24 @@ program do_poisoning( who )
 					var pColor := CInt(GetConfigInt(potion_attribute, "Color"));
 
 					case( stren )
-						1:	
+						1:
 							SendSysMessage(who,"poison strenght 1 detected.");
 							// change that to poison pot color once the pots have different colors.
 							obj.color := pColor;
 							SetName(obj, "lesser " + oldName);
-						2:	
+						2:
 							// for regular poison we will only change color once colors are introduced.
 							obj.color := pColor;
 						3:
 							// greater poison
 							obj.color := pColor;
 							SetName(obj, "greater " + oldName);
-						4:	
+						4:
 							// deadly poison
 							obj.color := pColor;
 							SetName(obj, "deadly " + oldName);
-							
-						default:           
+
+						default:
 							//leaving that here but the case should never happen
 							SendSysMessage(who,"Can not determine proper poison strenght");
 					endcase

@@ -1,0 +1,156 @@
+use uo;
+use os;
+
+include "include/mrcSpawn";
+include ":merchantnodes:gumps";
+include ":merchantnodes:nodeEvents";
+include ":merchantnodes:settings";
+
+program merchant_node_usescript( mobile, node )
+
+	if( mobile.cmdlevel < 3 )
+		SendSysMessage( mobile, "You cannot make use of this peculiar item." );
+		return 0;
+	endif
+
+	var gump := 0,
+		ms := 0,
+		result := 0,
+		info := Dictionary;
+
+	while( mobile.connected )
+		info := node.LoadMerchantInfo();
+		gump := MN_BuildBaseGump();
+		MN_PopulateGump( gump, node );
+
+		result := GFSendGump( mobile, gump );
+		if( result[0] <= 1 || result[0] == CLOSE_BTN )
+			SendSysMessage( mobile, "Cancelled.", 0x3, 0x22 );
+			return 0;
+		elseif( result[0] == ACCEPT_BTN )
+			foreach key in ( result.keys )
+				if( key >= 5001 && key <= 5010 )
+					MN_ToggleMerchant( node, info, info.Keys()[key-5000] );
+					node.SaveMerchantInfo( info );
+				endif
+
+				if( key >= 6001 && key <= 6010 )
+					node.SendMerchantNodeEvent( Struct{ "serial":=info.Keys()[key-6000], "type":=RESTOCK_EVENT } );
+				endif
+				ms += 300;
+			endforeach
+			SleepMS( ms );
+		elseif( result[0] == RESPAWN_MERCHANTS_BTN )
+			ms := node.LoadDeathList().Keys().Size()*300;
+			node.SendMerchantNodeEvent( Struct{ "type":=RESPAWN_ALL_EVENT } );
+			SleepMS( ms );
+		elseif( result[0] == TOGGLE_NODE_BTN )
+			node.ToggleStatus();
+			node.SendMerchantNodeEvent( Struct{ "type":=SLEEP_EVENT } );
+			SleepMS( 300 );
+		elseif( result[0] == ADD_MERCHANT_BTN )
+			MN_AddMerchant( mobile, node );
+			Sleep( 1 );
+		elseif( result[0] == RESTOCK_ALL_BTN )
+			node.SendMerchantNodeEvent( Struct{ "source":=mobile, "type":=RESTOCK_ALL_EVENT } );
+		elseif( result[0] == UNCACHE_BTN )
+			GFEraseGump( ":gumps:gumps", "MerchantNode", "MerchantNode" );
+			return 0;
+		elseif( result[0] == NODE_SETTINGS_BTN )
+			var node_opts := MN_SettingsGump( mobile, node, 1 );
+			foreach key in ( node_opts.Keys() )
+				node.SetProp( key, node_opts[key] );
+			endforeach
+
+			if( node_opts.Exists( "Range" ) || node_opts.Exists( "RestockTime" ) )
+				node.SendMerchantNodeEvent( Struct{ "type":=UPDATE_EVENT } );
+			endif
+		elseif( result[0] >= 7001 && result[0] <= 7010 )
+			node.SendMerchantNodeEvent( Struct{ "type":=DELETE_EVENT, "serial":=info.Keys()[result[0]-7000] } );
+		elseif( result[0] >= 8001 && result[0] <= 8010 )
+			var serial := info.Keys()[result[0]-8000];
+			if( MN_CustomizeVendorGump( mobile, node, serial ) )
+				var npc := SystemFindObjectBySerial( serial );
+				if( npc.IsA( POLCLASS_NPC ) )
+					MoveObjectToLocation( npc, 6066, 1, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION );
+					SetObjProperty( npc, "#Disabled", 0x1 );
+					info := node.LoadMerchantInfo();
+					node.SendMerchantNodeEvent( Struct{ "info":=info[serial], "serial":=serial, "type":=SPAWN_EVENT } );
+					npc.Kill();
+				endif
+				SleepMS( 100 );
+			endif
+		endif
+		SleepMS( 250 );
+	endwhile
+
+	return 1;
+endprogram
+
+function MN_ToggleMerchant( byref node, byref info, serial )
+
+	var enabled := ( info[serial].Enabled == 0 ? 1 : 0 );
+	info[serial].Erase( "Enabled" );
+	info[serial].Insert( "Enabled", enabled );
+	var npc := 0;
+	if( !enabled )
+		npc := SystemFindObjectBySerial( serial );
+		if( npc.IsA( POLCLASS_NPC ) )
+			MoveObjectToLocation( npc, 6066, 1, 0, _DEFAULT_REALM, MOVEOBJECT_FORCELOCATION );
+			SetObjProperty( npc, "#Disabled", 0x1 );
+			npc.Kill();
+		endif
+	else
+		node.SendMerchantNodeEvent( Struct{ "info":=info[serial], "serial":=serial, "type":=SPAWN_EVENT } );
+	endif
+
+	return 1;
+endfunction
+
+function MN_AddMerchant( byref mobile, byref node )
+
+	var list := node.LoadMerchantInfo();
+	if( list.Size() == 10 )
+		SendSysMessage( mobile, "You can not add anymore merchants to this node.", 0x3, 0x32 );
+		return 0;
+	endif
+
+	var template_name := RequestInput( mobile, node, "What template would you like to spawn?" );
+	if( !template_name )
+		SendSysMessage( mobile, "Cancelled action.", 0x3, 0x22 );
+		return 0;
+	endif
+
+	var merchant_type := FindMerchantType( template_name ) || ( Lower( template_name ) in { "banker", "bucsbanker" } );
+	if( !merchant_type )
+		SendSysMessage( mobile, "That is not a valid merchant type.", 0x3, 0x32 );
+		return 0;
+	endif
+
+	var targ := TargetCoordinates( mobile );
+	if( !targ )
+		SendSysMessage( mobile, "Cancelled action.", 0x3, 0x32 );
+		return 0;
+	endif
+
+	var merchant_info := Struct{ "Anchor":=Struct{ "X":=targ.x, "Y":=targ.y, "Z":=targ.z, "Realm":=targ.realm }, "Enabled":=1, "Info":=Struct{ "Gender":=-1, "Name":="<Random>", "RandomizeSkinHue":=1, "RandomizeSpeechHue":=1 }, "Template":=template_name };
+
+	node.SendMerchantNodeEvent( Struct{ "info":=merchant_info, "serial":=0, "type":=SPAWN_EVENT } );
+
+	return 1;
+endfunction
+
+function MN_AssignStaticProps( byref mobile, byref node, byref serial )
+
+	var list := node.LoadMerchantInfo();
+	if( ( TypeOfInt( list ) != OT_DICTIONARY ) || !list.Size() )
+		SendSysMessage( mobile, "There does not seem to be a merchant list set yet for this node." );
+		return 0;
+	endif
+
+	var static_values := MN_CustomizeVendorGump( mobile );
+
+	list[serial].Info := static_values;
+
+	return node.SaveMerchantInfo( list );
+endfunction

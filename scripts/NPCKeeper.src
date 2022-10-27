@@ -1,5 +1,6 @@
 use uo;
 use os;
+use polsys;
 
 include "include/startEqp";
 include ":attributes:attributes";
@@ -7,7 +8,7 @@ include ":npcs:garment";
 include ":npcs:randName";
 include "include/client";
 
-var pncfg := ReadConfigFile("npcdesc");
+var pncfg := ReadConfigFile("::npcdesc");
 var equipt;
 
 program npckeep(who)
@@ -45,23 +46,18 @@ program npckeep(who)
       20: ttitle := " the noble";                 equipt := "peasant2";
     endcase
     pickdestination(who, equipt);
-    case(randomint(2))
-      0: who.graphic := 0x190;
-         who.gender := 0;
-         equipt := equipt + "M";
-      1: who.graphic := 0x191;
-         who.gender := 1;
-         equipt := equipt + "F";
-    endcase
+    who.gender := RandomInt( 2 );
+    who.graphic := 0x190+who.gender;
+    equipt += ( who.gender == 0 ) ? "M" : "F";
     SetObjProperty(who, "Graphic", cint(who.graphic));
     SetName(who, RandomName(who));
     SetName(who, who.name + ttitle);
     if(equipt)
       Habille(who, equipt);
       EraseObjProperty(who, "Equipt");
-      var lewtgroup := pncfg[who.npctemplate].lootgroup;
-      if(lewtgroup)
-        MakeLoot(who, cint(lewtgroup));
+      var loot_group := pncfg[who.npctemplate].lootgroup;
+      if(loot_group)
+        MakeLoot(who, cint(loot_group));
       endif
     endif
   elseif(who.name["<employee>"])
@@ -88,45 +84,38 @@ program npckeep(who)
     SetObjProperty(who, "MerchantType", equipt);
     SetObjProperty(who, "HireCost", cint(cost));
     Adjustment(who, equipt);
-    case(randomint(2))
-      0: who.graphic := 0x190;
-         who.gender := 0;
-         equipt := equipt + "M";
-      1: who.graphic := 0x191;
-         who.gender := 1;
-         equipt := equipt + "F";
-    endcase
+    who.gender := RandomInt( 2 );
+    who.graphic := 0x190+who.gender;
+    equipt += ( who.gender == 0 ) ? "M" : "F";
     SetObjProperty(who, "Graphic", cint(who.graphic));
     SetName(who, RandomName(who));
     SetName(who, who.name + ttitle);
-    pncfg := ReadConfigFile("npcdesc");
+    pncfg := ReadConfigFile("::npcdesc");
     if(equipt)
       Habille(who, equipt);
       EraseObjProperty(who, "Equipt");
-      var lewtgroup := pncfg[who.npctemplate].lootgroup;
-      if(lewtgroup)
-        MakeLoot(who, cint(lewtgroup));
+      var loot_group := pncfg[who.npctemplate].lootgroup;
+      if(loot_group)
+        MakeLoot(who, cint(loot_group));
       endif
     endif
   else
-    pncfg := ReadConfigFile("npcdesc");
+    pncfg := ReadConfigFile("::npcdesc");
     equipt := GetObjProperty(who, "Equipt");
     if( equipt )
       if( who.graphic == 0x190 && !GetObjProperty( who, "MerchantNode" ) )
-        case(randomint(2))
-          0: who.graphic := 0x190;
-             who.gender := 0;
-          1: who.graphic := 0x191;
-             who.gender := 1;
-        endcase
+        who.gender := RandomInt( 2 );
+        who.graphic := 0x190+who.gender;
       endif
-      equipt += !who.gender ? "M" : "F";
+      if( Lower( who.npctemplate ) != "barmaid" )
+        equipt += ( who.gender == 0 ) ? "M" : "F";
+      endif
       SetObjProperty(who, "Graphic", CInt(who.graphic));
       Habille(who, equipt);
       EraseObjProperty(who, "Equipt");
-      var lewtgroup := pncfg[who.npctemplate].lootgroup;
-      if(lewtgroup)
-        MakeLoot(who, cint(lewtgroup));
+      var loot_group := pncfg[who.npctemplate].lootgroup;
+      if( loot_group )
+        MakeLoot(who, cint(loot_group));
       endif
     endif
     if(who.name["<random>"])
@@ -170,18 +159,22 @@ program npckeep(who)
       endif
     endif
   endif
+
 //moved out so all templates can use this
-      if(pncfg[who.npctemplate].colorrange)
-        var parms := splitwords(pncfg[who.npctemplate].colorrange);
-        who.color := randomint(Cint(parms[2]) - Cint(parms[1]))+Cint(parms[1]);
-      endif
-      if(pncfg[who.npctemplate].mount)
-        var mymount := CreateItemAtLocation(5288, 1176, 0, 0xf021, 1, _DEFAULT_REALM);
-        var mountparms := splitwords(pncfg[who.npctemplate].mount);
-        mymount.graphic := Cint(mountparms[1]);
-        mymount.color := Cint(mountparms[2]);
-        EquipItem(who, mymount);
-      endif
+  if(pncfg[who.npctemplate].colorrange)
+    var parms := splitwords(pncfg[who.npctemplate].colorrange);
+    who.color := randomint(Cint(parms[2]) - Cint(parms[1]))+Cint(parms[1]);
+  endif
+
+  if( pncfg[who.npctemplate].mount )
+    var mountparms := SplitWords( pncfg[who.npctemplate].mount );
+
+    var desc := GetItemDescriptor( 0x1F021 );
+    desc.Graphic := CInt( mountparms[1] );
+    desc.Color := CInt( mountparms[2] );
+
+    EquipItem( who, CreateItemInInventory( who.backpack, desc, 1 ) );
+  endif
 endprogram
 
 function Adjustment(who, type)

@@ -55,7 +55,7 @@ program guardnode(itm)
 	endif
 	var gc := 0;
 	while(item)
-		if((GetObjProperty(item, "Status") == "on") and (!GetGlobalProperty("noguards")))
+		if((GetObjProperty(item, "Status") == "on") && (!GetGlobalProperty("noguards")))
 			spawn := GetObjProperty(item, "Type");
 			amt   := GetObjProperty(item, "Amount");
 			if(ReadGameClock() >= gc)
@@ -69,11 +69,8 @@ program guardnode(itm)
 				SYSEVENT_SPEECH:	if(lower(ev.text)["guard"])
 										var crims := CrimCheck(ev.source);
 										if(len(crims) != 0)
-											var evnt     := array;
-											evnt.+type   := EVID_NODE;
-											evnt.+crims  := crims;
 											foreach mobile in npclist
-												SendEvent(mobile, evnt);
+												SendEvent( mobile, Struct{ "crims":=crims, "type":=EVID_NODE } );
 											endforeach
 										endif
 									endif
@@ -95,7 +92,7 @@ program guardnode(itm)
 			endif
 			DespawnAll();
 			ValidateSpawns();
-			while((GetObjProperty(item, "Status") == "off") or (GetGlobalProperty("noguards")))
+			while((GetObjProperty(item, "Status") == "off") || (GetGlobalProperty("noguards")))
 				var ev := os::wait_for_event(120);
 				ev := ev;
 			endwhile
@@ -164,7 +161,7 @@ function crimcheck(me)
 	foreach npc in ListMobilesNearLocation(me.x, me.y, me.z, 15, me.realm)
     if(InGuardZone(npc))
 		timer := Cint(GetObjProperty(npc, "guardstimer"));
-		if((npc.criminal) and (!npc.dead))
+		if((npc.criminal) && (!npc.dead))
 			if(timer < ReadGameClock())
 				crims.append(npc);
 			endif
@@ -178,22 +175,22 @@ function crimcheck(me)
 					endif
 				endif
 			endif
-		elseif((!npccfg[npc.npctemplate].guardignore) and (npc.isA(POLCLASS_NPC)))
+		elseif((!npccfg[npc.npctemplate].guardignore) && (npc.isA(POLCLASS_NPC)))
 			if(timer < ReadGameClock())
 				crims.append(npc);
 			endif
 		else
 			foreach combatant in ListHostiles(npc, 15)
 				timer := Cint(GetObjProperty(combatant, "guardstimer"));
-				if(((combatant.criminal) and (!combatant.dead)) and ((Cint(GetObjProperty(combatant, "guardstimer")) >= ReadGameClock()) || (timer.errortext)))
+				if(((combatant.criminal) && (!combatant.dead)) && ((Cint(GetObjProperty(combatant, "guardstimer")) >= ReadGameClock()) || (timer.errortext)))
 					if(timer < ReadGameClock())
 						crims.append(combatant);
 					endif
-				elseif(((npc.script == "tamed") || (npc.script == "employed")) and (npc.criminal))
+				elseif(((npc.script == "tamed") || (npc.script == "employed")) && (npc.criminal))
 					if(timer < ReadGameClock())
 						crims.append(combatant);
 					endif
-				elseif((!npccfg[combatant.npctemplate].guardignore) and (combatant.isA(POLCLASS_NPC)))
+				elseif((!npccfg[combatant.npctemplate].guardignore) && (combatant.isA(POLCLASS_NPC)))
 					if(timer < ReadGameClock())
 						crims.append(combatant);
 					endif

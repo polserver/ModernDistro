@@ -5,6 +5,7 @@ use uo;
 
 include "include/eventID";
 include ":attributes:attributes";
+include ":containers:storageAreas";
 include "include/sysEvent";
 include ":npcs:randName";
 include "include/utility";
@@ -24,7 +25,7 @@ const MAX_SKILLS      := 48;
 
 var me := Self();
 me.hidden := 1;
-var inv_fs, inv_pb, inv_1c, inv_rs;
+var shop_sell, shop_resale, shop_buy;
 var merchant_type := GetObjProperty(me, "MerchantType");
 var npccfg        := ReadConfigFile("npcdesc");
 
@@ -41,16 +42,14 @@ set_priority(50);
   drop_anchor();
   myanchor := GetObjProperty(me, "Anchor");
   var spawnname := merchant_type + " " + myanchor[1] + " " + myanchor[2] + " " + myanchor[3];
-  inv_fs := FindRootItemInStorageArea(storage, spawnname + " FS");
-  inv_pb := FindRootItemInStorageArea(storage, spawnname + " PB");
-  inv_1c := FindRootItemInStorageArea(storage, spawnname + " 1C");
-  inv_rs := FindRootItemInStorageArea(storage, spawnname + " RS");
-  while((!inv_rs) or (!inv_fs) or (!inv_pb) or (!inv_1c))
+  shop_sell := CP_GetStorageAreaContainer( spawnname+" ShopSell", CP_MERCHANT_AREA, CP_NOCREATE );
+  shop_resale := CP_GetStorageAreaContainer( spawnname+" ShopeResale", CP_MERCHANT_AREA, CP_NOCREATE );
+  shop_buy := CP_GetStorageAreaContainer( spawnname+" ShopBuy", CP_MERCHANT_AREA, CP_NOCREATE );
+  while((!shop_sell) or (!shop_resale) or (!shop_buy))
     sleep(5);
-    inv_fs := FindRootItemInStorageArea(storage, spawnname + " FS");
-    inv_pb := FindRootItemInStorageArea(storage, spawnname + " PB");
-    inv_1c := FindRootItemInStorageArea(storage, spawnname + " 1C");
-    inv_rs := FindRootItemInStorageArea(storage, spawnname + " RS");
+    shop_sell := CP_GetStorageAreaContainer( spawnname+" ShopSell", CP_MERCHANT_AREA, CP_NOCREATE );
+    shop_resale := CP_GetStorageAreaContainer( spawnname+" ShopeResale", CP_MERCHANT_AREA, CP_NOCREATE );
+    shop_buy := CP_GetStorageAreaContainer( spawnname+" ShopBuy", CP_MERCHANT_AREA, CP_NOCREATE );
   endwhile
   me.hidden := 0;
   EnableEvents( SYSEVENT_ITEM_GIVEN);
@@ -74,21 +73,24 @@ set_priority(50);
         SYSEVENT_DAMAGED:         lookiehere(me);
         EVID_NODE:                var txt := ev.text;
                                   if((ev.source.cmdlevel > 2) && (ev.text["showinventory"]))
-                                    SendOpenSpecialContainer(ev.source, inv_fs);
+                                    SendOpenSpecialContainer(ev.source, shop_sell);
                                   elseif((ev.source.cmdlevel > 2) && (ev.text["unloadcfg"]))
                                     UnloadConfigFile("::mrcspawn");
                                   else
                                     if(ev.text["buy"])
-                                      TurnToward(ev.source);
-                                      SendBuyWindow(ev.source, inv_fs, Self(), inv_pb);
-                                      foreach thing in EnumerateItemsInContainer((ev.source).backpack, ENUMERATE_ROOT_ONLY)
+                                      TurnToward( ev.source );
+                                      // SendBuyWindow( ev.source, shop_sell, Self(), shop_buy );
+									  SendBuyWindow( ev.source, shop_sell, me, shop_buy, VENDOR_SEND_AOS_TOOLTIP );
+
+									  foreach thing in EnumerateItemsInContainer((ev.source).backpack, ENUMERATE_ROOT_ONLY)
                                         EraseObjProperty(thing, "ClearRestock");
                                       endforeach
                                     elseif (ev.text["sell"])
                                       if(GetObjProperty(me, "MyGold") >= 1000)
-                                        TurnToward(ev.source);
+                                        TurnToward( ev.source );
                                         ModifyPCSellList(merchant_type, (ev.source));
-                                        var res := SendSellWindow(ev.source, Self(), inv_fs, inv_pb, inv_1c);
+                                        // var res := SendSellWindow( ev.source, Self(), shop_sell, shop_buy, shop_resale );
+                                        var res := SendSellWindow( ev.source, Self(), shop_sell, shop_buy, shop_resale, VENDOR_SEND_AOS_TOOLTIP );
                                         if(res)
                                           PrintTextAbovePrivate(Self(), "You dont have anything I would be interested in.", ev.source);
                                         endif
@@ -105,8 +107,8 @@ set_priority(50);
                                   var mygold := GetObjProperty(me, "MyGold");
                                   mygold := mygold - ev.amount;
                                   SetObjProperty(me, "MyGold", mygold);
-                                  foreach item in EnumerateItemsInContainer(inv_pb)
-                                    MoveItemToContainer(item, inv_fs);
+                                  foreach item in EnumerateItemsInContainer(shop_buy)
+                                    MoveItemToContainer(item, shop_sell);
                                     SetObjProperty(item,"ClearRestock", (ReadGameClock() + 1800));
 //                                    item.buyprice  := itemconfig[item.objtype].VendorBuysFor;
 //                                   item.sellprice := itemconfig[item.objtype].VendorSellsFor;

@@ -7,7 +7,7 @@ use util;
 */
 function RandomHumanSkinHue()
 
-	return ( RandomIntMinMax( 1001, 1060 ) | 0x8000 );
+	return ( RandomIntMinMax( 1002, 1058 ) | 0x8000 );
 endfunction
 
 /*

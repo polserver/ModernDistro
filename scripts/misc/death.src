@@ -6,6 +6,7 @@ use cfgfile;
 
 include "include/client";
 include ":attributes:attributes";
+include ":merchantnodes:nodeEvents";
 include ":npcs:NPCBackpacks";
 include ":damage:damage";
 include ":virtue:noto";
@@ -61,6 +62,14 @@ program npcdeath(corpse)
 	dismount(corpse);
 
 	Set_Critical(0);
+
+	var merchant_node := GetObjProperty( corpse, "MerchantNode" );
+	if( merchant_node )
+		var node := SystemFindObjectBySerial( merchant_node );
+		if( node.IsMerchantNode() && !GetObjProperty( corpse, "#Disabled" ) )
+			node.SendDeathEvent( corpse.ownerserial );
+		endif
+	endif
 
 	if (GetObjProperty(corpse, "totem"))
 		RemakeTotem(corpse, elem);
@@ -118,7 +127,7 @@ endprogram
 function dismount(corpse)
 	var mount := 0;GetEquipmentByLayer( corpse, 25 );
 	foreach item in EnumerateItemsInContainer(corpse)
-		if (item.objtype == 0xf021)
+		if (item.objtype == 0x1F021)
 			mount := item;
 			break;
 		endif
@@ -233,4 +242,3 @@ function RemakeTotem(corpse, npctemplate)
 	set_critical(0);
 
 endfunction
-

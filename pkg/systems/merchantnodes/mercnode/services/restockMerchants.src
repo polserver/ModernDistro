@@ -1,0 +1,48 @@
+use uo;
+use os;
+
+include "include/mrcSpawn";
+include ":containers:storageAreas";
+include ":security:merchantNodeReport";
+
+program restock_service_script( parameters )
+	
+	var node := 0,
+		initial := 0,
+		entry := Struct,
+		shop_sell := 0,
+		shop_resale := 0;
+
+	if( TypeOfInt( parameters ) != OT_ARRAY )
+		MerchantNode_ReportText( GetPID().name+" -> parameters must be an array containing node item_ref and boolean {1/0} value of whether this is the initial run of script typically on shard start up.", MN_REPORT_CONSOLE+MN_REPORT_SYSLOG );
+		return 0;
+	else
+		node := parameters[1];
+		initial := parameters[2];
+	endif
+
+	var merchant_info := node.LoadMerchantInfo();
+	foreach key in ( merchant_info.Keys() )
+		entry := merchant_info[key];
+		if( !FindMerchantType( entry.Template ) )
+			continue;
+		elseif( !SystemFindObjectBySerial( key ) )
+			continue;
+		endif
+
+		shop_sell := CP_GetStorageAreaContainer( entry.Template+" "+entry.Anchor.X+" "+entry.Anchor.Y+" "+entry.Anchor.Z+" ShopSell", CP_MERCHANT_AREA, CP_NOCREATE );
+		shop_resale := CP_GetStorageAreaContainer( entry.Template+" "+entry.Anchor.X+" "+entry.Anchor.Y+" "+entry.Anchor.Z+" ShopeResale", CP_MERCHANT_AREA, CP_NOCREATE );
+		if( !shop_sell || !shop_resale )
+			continue;
+		endif
+
+		if( initial == 1 )
+			RestockInitialInventory( shop_resale, shop_sell );
+			SetObjProperty( shop_resale, "MyGold", 5000 );
+		else
+			RestockMyInventory( shop_resale, shop_sell );
+		endif
+	endforeach
+
+	return 1;
+endprogram

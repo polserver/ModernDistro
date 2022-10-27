@@ -1,0 +1,77 @@
+use uo;
+use os;
+use polsys;
+
+include ":gumps:selectionGump";
+include ":merchantnodes:file";
+
+program seednodes_textcmd( mobile )
+
+	var xml_file := MN_OpenNodesXMLFile(),
+		facets := SelectionGumpEx( mobile, "Grab the nodes from which facet?", ListFacets( xml_file ), BTN_TYPE_CHECKBOX );
+	if( !facets )
+		SendSysMessage( mobile, "Cancelled.", 0x3, 0x32 );
+		return 0;
+	endif
+
+	foreach facet in ( facets )
+// Seed Merchant Nodes...
+		if( xml_file["Facets"][facet]["MerchantNodes"] )
+			foreach node in ( xml_file["Facets"][facet]["MerchantNodes"] )
+				Print( CStr( node ) );
+				CreateNode( node, "MerchantNode" );
+			endforeach
+		endif
+
+// Seed Guard Nodes...
+		if( xml_file["Facets"][facet]["GuardNodes"] )
+			foreach node in ( xml_file["Facets"][facet]["GuardNodes"] )
+				CreateNode( node, "GuardNode" );
+			endforeach
+		endif
+
+		SleepMS( 20 );
+	endforeach
+
+	SendSysMessage( mobile, "Nodes have been seeded.", 0x3, 0x42 );
+
+	return 1;
+endprogram
+
+function CreateNode( byref xml_node, byref node_type:="MerchantNode" )
+
+	var desc := GetItemDescriptor( GetObjtypeByName( node_type ) );
+	desc.Color := node_type == "GuardNode" ? 0x85 : 0x0;
+	desc.Invisible := 1;
+	desc.Movable := 0;
+
+	var cprops := Unpack( xml_node.attributes["CProps"] );
+	foreach prop in ( cprops )
+		desc.CProps.Insert( prop[1], prop[2] );
+	endforeach
+	desc.CProps.Insert( "Status", "on" );
+
+	var realm := xml_node.attributes["Realm"],
+		x := CInt( xml_node.attributes["X"] ),
+		y := CInt( xml_node.attributes["Y"] ),
+		z := CInt( xml_node.attributes["Z"] );
+
+	var node := CreateItemAtLocation( x, y, z, desc, 1, realm );
+
+	return 1;
+endfunction
+
+function ListFacets( byref xml_file )
+
+	var list := Array,
+		active_facets := Realms().Keys();
+	foreach node in ( xml_file["Facets"] )
+		if( !( node.attributes["Realm"] in active_facets ) )
+			continue;
+		endif
+
+		list.Append( CStr( node ) );
+	endforeach
+
+	return list;
+endfunction

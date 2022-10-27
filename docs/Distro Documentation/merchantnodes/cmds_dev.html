@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    <meta http-equiv="Content-Language" content="en-us">
+    <title>Merchant Nodes</title>
+    <link rel="stylesheet" type="text/css" href="docs.css">
+  </head>
+  <body>
+    <div id="container">
+      <div id="header">
+        <h1 style="text-align: center;">Merchant Node - Developer Commands<br>
+        </h1>
+        <div style="text-align: center;"> </div>
+        <p style="text-align: center;">For the merchantnodes package in the
+          Distro, by <a href="mailto:distro@polserver.com">Yukiko</a>.</p>
+        <hr>
+        <h2 style="text-align: center;">Developer Commands<big><big><span style="font-weight: bold;"></span></big></big><br>
+        </h2>
+      </div>
+      <div id="content">
+        <table style="text-align: left; width: 100%;" cellspacing="2" cellpadding="10"
+
+          border="3">
+          <tbody>
+            <tr>
+              <td style="vertical-align: top;"><span style="font-weight: bold;">convertbackupfiles</span>
+              </td>
+              <td style="vertical-align: top;">The packed nodes files created by
+                the old merchant node system are not compatible with the new
+                merchant node system. If you have packed nodes files , use this
+                command to convert the files for use with the new merchant node
+                system. The packed node files would be named
+                packedNodes-for-&lt;facet name&gt;. Where &lt;facet name&gt;
+                would be replaced by the name of the facet the nodes were
+                grabbed from, Example: packedNodes-for-Felucca.<br>
+                Usage is: .convertbackupfiles </td>
+            </tr>
+            <tr>
+              <td style="vertical-align: top;"><span style="font-weight: bold;">disablenodes</span></td>
+              <td style="vertical-align: top;">This will disable all merchant
+                nodes in the selected facet.<br>
+                Usage is: .disablenodes </td>
+            </tr>
+            <tr>
+              <td style="vertical-align: top;"><span style="font-weight: bold;">enablenodes</span></td>
+              <td>This will enable all merchant nodes in the selected facet.<br>
+                Usage is: enablenodes</td>
+            </tr>
+            <tr>
+              <td><span style="font-weight: bold;">grabnodes</span></td>
+              <td>This command is very useful in the event you need to perform
+                an item wipe. It is used to save all nodes, both merchant and
+                guard nodes, and merchant and guard data from those nodes
+                located in the facet you select. To save the nodes in a facet,
+                the user selects it from a gump. The node data is saved to an
+                XML file in /pkg/systems/merchantnodes/backups. All facets are
+                stored in one XML file named nodes.xml.<br>
+                Usage is .grabnodes</td>
+            </tr>
+            <tr>
+              <td><span style="font-weight: bold;">seednodes</span></td>
+              <td>This is the opposite of grabnodes used to restore grabbed
+                nodes from a file created by the .grabnodes command. The nodes
+                will be restored to the facet the user selects from a gump.<br>
+                Usage is .seednodes.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>

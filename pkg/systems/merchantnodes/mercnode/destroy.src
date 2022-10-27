@@ -1,0 +1,26 @@
+use uo;
+use os;
+
+include "include/mrcSpawn";
+
+program merchant_node_destroy( node )
+	
+	var info := node.LoadMerchantInfo(),
+		template := "",
+		anchor := Struct,
+		npc := 0;
+
+	SetObjProperty( node, "#BeingDestroyed", 0x1 );
+	foreach serial in ( info.Keys() )
+		template := info[serial].Template;
+		anchor := info[serial].Anchor;
+		npc := SystemFindObjectBySerial( serial );
+		if( npc.IsA( POLCLASS_NPC ) )
+			Destroy_Node_Merc( template+" "+anchor.X+" "+anchor.Y+" "+anchor.Z );
+			SetObjProperty( npc, "guardkill", 1 );
+			npc.Kill();
+		endif
+	endforeach
+
+	return 1;
+endprogram

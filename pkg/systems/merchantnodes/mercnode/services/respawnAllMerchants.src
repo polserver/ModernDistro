@@ -1,0 +1,36 @@
+use uo;
+use os;
+
+include ":merchantnodes:merchantNode";
+include ":merchantnodes:nodeEvents";
+
+/*
+	Parameters: { node, force_respawn }
+	node - item_ref for given node
+	force_respawn - if TRUE, will respawn all npcs regardless of gameclock, if FALSE,
+					honor the gameclock timer...
+*/
+program respawn_all_merchants( parameters )
+	
+	var node := parameters[1],
+		force_respawn := parameters[2];
+
+	var death_list := node.LoadDeathList();
+	if( death_list.Size() )
+		var serials := Array;
+		foreach key in ( death_list.Keys() )
+			if( death_list[key].Time <= ReadGameClock() || force_respawn == TRUE )
+				if( MN_CreateNPC( Struct{ "info":=death_list[key].Info, "serial":=key }, node ) )
+					serials.Append( key );
+				endif
+			endif
+		endforeach
+
+		foreach serial in ( serials )
+			death_list.Erase( serial );
+		endforeach
+		node.SaveDeathList( death_list );
+	endif
+
+	return 1;
+endprogram

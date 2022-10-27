@@ -1,7 +1,5 @@
-
-
 function drop_anchor()
-  var cfg := ReadConfigFile("npcdesc");
+  var cfg := ReadConfigFile("::npcdesc");
   var dstart := cfg[me.npctemplate].dstart;
   var psub := cfg[me.npctemplate].psub;
   if(!psub)

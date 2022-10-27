@@ -1,0 +1,59 @@
+use uo;
+use os;
+use util;
+
+include ":merchantnodes:merchantNode";
+include ":merchantnodes:nodeEvents";
+include ":merchantnodes:settings";
+
+program merchant_node_control( node )
+
+	RegisterForSpeechEvents( node, node.GetRange() );
+
+// Respawn all merchants, Run_Script ensures script finishes before we proceed...
+	Run_Script( ":merchantnodes:mercnode/services/respawnAllMerchants", { node, TRUE } );
+
+// Restock all merchants on shard startup...
+	var restock_every := CInt( CDbl( node.GetRestockTime() * 60.0 ) ),
+		restock_in := ReadGameClock()+restock_every;
+	Start_Script( ":merchantnodes:mercnode/services/restockMerchants", { node, TRUE } );
+
+	var ev := 0,
+		death_list := node.LoadDeathList();
+	while( node )
+		ev := Wait_For_Event( 300 );
+		if( ev.type )
+			case( ev.type )
+				SYSEVENT_SPEECH:		if( node.GetStatus() )
+											MN_ProcessSpeech( ev, node );
+										endif
+				DELETE_EVENT:			MN_DeleteNPC( ev, node );
+				RESPAWN_ALL_EVENT:		Run_Script( ":merchantnodes:mercnode/services/respawnAllMerchants", { node, TRUE } );
+				RESPAWN_EVENT:			MN_RespawnNPC( ev, death_list, node );
+				RESTOCK_ALL_EVENT:		Start_Script( ":merchantnodes:mercnode/services/restockMerchants", { node, FALSE } );
+				RESTOCK_EVENT:			MN_RestockMerchant( ev, node );
+				SLEEP_EVENT:			MN_SleepNode( node );
+				SPAWN_EVENT:			MN_CreateNPC( ev, node );
+				UPDATE_EVENT:			EnableEvents( SYSEVENT_SPEECH, ev.range );
+										restock_every := CInt( CDbl( node.GetRestockTime() * 60.0 ) );
+			endcase
+		endif
+
+		death_list := node.LoadDeathList();
+		if( death_list.Size() )
+			foreach key in ( death_list.Keys() )
+				if( death_list[key].time <= ReadGameClock() )
+					Start_Script( ":merchantnodes:mercnode/services/respawnAllMerchants", { node, FALSE } );
+					break;
+				endif
+			endforeach
+		endif
+
+		if( restock_in <= ReadGameClock() )
+			Start_Script( ":merchantnodes:mercnode/services/restockMerchants", { node, FALSE } );
+			restock_in := ReadGameClock()+restock_every;
+		endif
+	endwhile
+
+	return 1;
+endprogram
