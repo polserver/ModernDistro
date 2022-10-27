@@ -1,0 +1,16 @@
+use uo;
+use os;
+
+include ":regions:regions";
+
+program textcmd_where( mobile )
+
+	var region_name := REGIONS_GetProp( mobile, "Name" );
+
+	SendSysMessage( mobile, "You are at "+mobile.x+" "+mobile.y+" "+mobile.z+" in "+mobile.realm+".", 0x3, 0x42 );
+	if( !region_name.errortext )
+		SendSysMessage( mobile, "Your region is "+region_name+".", 0x3, 0x42 );
+	endif
+
+	return 1;
+endprogram

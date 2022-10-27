@@ -1,0 +1,26 @@
+use uo;
+use os;
+
+include ":regions:regions";
+
+program whereat_textcmd( mobile )
+
+	var loc := 0,
+		region := 0;
+	while( mobile.connected )
+		loc := TargetCoordinates( mobile );
+		if( !loc )
+			SendSysMessage( mobile, "Cancelled action.", 0x3, 0x32 );
+			return 0;
+		endif
+
+		region := REGIONS_GetPropAtLocation( loc.x, loc.y, loc.realm, "Name" );
+
+		SendSysMessage( mobile, "Location coordinates are "+loc.x+" "+loc.y+" "+loc.z+" "+loc.realm, 0x3, 0x42 );
+		if( !region.errortext )
+			SendSysMessage( mobile, "Location region is "+region+".", 0x3, 0x42 );
+		endif
+	endwhile
+
+	return 1;
+endprogram
