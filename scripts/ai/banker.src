@@ -12,6 +12,7 @@ include "include/anchors";
 include "include/begging";
 include "include/string";
 include "include/findCity";
+include ":currency:currency";
 include ":itemUtils:itemdesc";
 include ":gumps:gumps";
 include ":gumps:requestGump";
@@ -69,7 +70,7 @@ program banker();
 				if(ev.source.criminal == 1)
 					say("I will not do business with criminals!");
 				else
-					var bankbox := CP_GetStorageContainerForMobile( ev.source, bank_region, CP_CREATE );
+					var bankbox := ev.source.BankBox();
 					var contents := EnumerateItemsInContainer(bankbox);
 					var camt := 0;
 					var samt := 0;
@@ -111,17 +112,11 @@ function OpenBank(you, bank_region)
   TurnToward(you);
   var bankbox := CP_GetStorageContainerForMobile( you, bank_region, CP_CREATE );
   if(bankbox)
-    var contents := EnumerateItemsInContainer(bankbox);
-    var amt := 0;
-    foreach item in contents
-      if((item.container.objtype != 0xefa) && (item.container.objtype != 0xe3b))
-        amt := (amt + 1);
-      endif
-    endforeach
-	if(amt == 1)
-		item_word := "item";
-	endif
-    PrintTextAbovePrivate(me, "Your bank box holds " + amt + " " + item_word + ".", you);
+    var contents := EnumerateItemsInContainer( bankbox, ENUMERATE_ROOT_ONLY );
+		if( contents.Size() == 1 )
+			item_word := "item";
+		endif
+    PrintTextAbovePrivate(me, "Your bank box holds " + contents.Size() + " " + item_word + ".", you);
     SendOpenSpecialContainer(you, bankbox);
   else
     say("You don't seem to have a bank box, "+ you.name);

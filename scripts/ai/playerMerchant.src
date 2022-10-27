@@ -5,7 +5,7 @@ use uo;
 use util;
 use cliloc;
 
-include "util/bank";
+include ":containers:storageAreas";
 include ":attributes:attributes";
 include "include/eventID";
 include "include/sysEvent";
@@ -226,7 +226,7 @@ function process_sale(who);
     PrintTextAbovePrivate(me, "You cannot purchase that", who);
     return;
   elseif(ok == 1)
-    var bankbox := FindBankBox(who);
+    var bankbox := CP_GetStorageContainerForMobile( who, CP_BANK_AREA, CP_CREATE );
     var price := CInt(GetObjProperty(trg, "price"));
     if((!price) || (price == error))
       PrintTextAbovePrivate(me, "Im sorry, but that is not for sale.", who);
@@ -434,7 +434,7 @@ function cashout(person)
   var mygold := CInt(GetObjProperty(me, "g"));
   var payment := 0;
   var rsrv := GetObjProperty(me,"r");
-  var pbank := FindBankBox(person);
+  var pbank := CP_GetStorageContainerForMobile( person, CP_BANK_AREA, CP_CREATE );
   if(mygold > 0)
     while(mygold > 60000)
       CreateItemInContainer(pbank, UOBJ_GOLD_COIN, 60000);

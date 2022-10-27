@@ -57,7 +57,7 @@ program HealerAI()
                               HealerStuff(ev.source);
                             endif
       SYSEVENT_ITEM_GIVEN:  next_wander := ReadGameClock()+60;
-		                TakeItem(ev.source,ev.item);
+                            TakeItem(ev.source,ev.item);
     endcase
     until(!(ev := os::wait_for_event(4)));
     if (ReadGameClock() >= next_wander)

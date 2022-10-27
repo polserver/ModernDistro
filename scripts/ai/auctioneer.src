@@ -5,6 +5,7 @@ use npc;
 use os;
 use uo;
 
+include ":containers:storageAreas";
 include ":npcs:randName";
 include "include/eventID";
 include "include/client";
@@ -20,12 +21,11 @@ include "include/utility";
     var inv_sell:=find_or_create_item(storage,"AUCTION",0xE7C);
 
     if(!storage or !inv_sell)
-	exit;
+		exit;
     endif
 
     EnableEvents (EVID_SPEECH, 2);
     EnableEvents (EVID_ITEM_GIVEN);
-
 
 program auctioneerai()
 

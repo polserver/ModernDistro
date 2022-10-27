@@ -1,17 +1,20 @@
 use uo;
 use os;
 
-include "util/bank";
-include "include/utility";
 include "include/teleporters";
+include ":containers:storageAreas";
 
 program world_start_up()
-	print("Opening world bank");
-	OpenWorldBank();
-	print("Initializing merchant storage");
-	find_or_create_storage("Merchant Storage");
-	print("Wiping merchant storage");
-	start_script("storageWipe");
-	print("Initializing teleporters");
+
+	foreach name in ( CP_ListStorageAreas() )
+		CP_GetStorageArea( name, CP_CREATE );
+		Print( "Initializing "+name+" Area." );
+	endforeach
+	Start_Script( "storageWipe" );
+	Print( "Wiping merchant storage" );
+
+	Print( "Initializing teleporters" );
 	CreateTeleporters();
+
+	return 1;
 endprogram

@@ -13,13 +13,14 @@ include "include/anchors";
 include "include/findCity";
 include "include/begging";
 include ":attributes:attributes";
+include ":containers:storageAreas";
 include ":npcs:trainSkill";
 
 const MAX_SKILLS      := 48;
 
 var me := Self();
 me.hidden := 1;
-var inv_fs, inv_pb, inv_1c, inv_rs;
+var shop_sell, shop_resale, shop_buy;
 var merchant_type := GetObjProperty(me,"MerchantType");
 var equipt        := GetObjProperty(me, "Equipt");
 var npccfg        := ReadConfigFile("npcdesc");
@@ -39,16 +40,14 @@ program barber()
   drop_anchor();
   myanchor     := GetObjProperty(me, "Anchor");
   var spawnname := merchant_type + " " + myanchor[1] + " " + myanchor[2] + " " + myanchor[3];
-  inv_fs := FindRootItemInStorageArea(storage, spawnname + " FS");
-  inv_pb := FindRootItemInStorageArea(storage, spawnname + " PB");
-  inv_1c := FindRootItemInStorageArea(storage, spawnname + " 1C");
-  inv_rs := FindRootItemInStorageArea(storage, spawnname + " RS");
-  while((!inv_rs) or(!inv_fs) or(!inv_pb) or(!inv_1c))
+  shop_sell := CP_GetStorageAreaContainer( spawnname+" ShopSell", CP_MERCHANT_AREA, CP_NOCREATE );
+  shop_resale := CP_GetStorageAreaContainer( spawnname+" ShopeResale", CP_MERCHANT_AREA, CP_NOCREATE );
+  shop_buy := CP_GetStorageAreaContainer( spawnname+" ShopBuy", CP_MERCHANT_AREA, CP_NOCREATE );
+  while((!shop_sell) or (!shop_resale) or (!shop_buy))
     sleep(5);
-    inv_fs := FindRootItemInStorageArea(storage, spawnname + " FS");
-    inv_pb := FindRootItemInStorageArea(storage, spawnname + " PB");
-    inv_1c := FindRootItemInStorageArea(storage, spawnname + " 1C");
-    inv_rs := FindRootItemInStorageArea(storage, spawnname + " RS");
+    shop_sell := CP_GetStorageAreaContainer( spawnname+" ShopSell", CP_MERCHANT_AREA, CP_NOCREATE );
+    shop_resale := CP_GetStorageAreaContainer( spawnname+" ShopeResale", CP_MERCHANT_AREA, CP_NOCREATE );
+    shop_buy := CP_GetStorageAreaContainer( spawnname+" ShopBuy", CP_MERCHANT_AREA, CP_NOCREATE );
   endwhile
   me.hidden := 0;
   EnableEvents(SYSEVENT_ITEM_GIVEN);
@@ -65,18 +64,18 @@ program barber()
       case(ev.type)
         EVID_NODE:                var txt := lower(ev.text);
                                   if((ev.source.cmdlevel > 2) && (txt["showinventory"]))
-                                    SendOpenSpecialContainer(ev.source, inv_fs);
+                                    SendOpenSpecialContainer(ev.source, shop_sell);
                                   else
                                     if(txt["buy"])
                                       TurnToward(ev.source);
-                                      var res := SendBuyWindow(ev.source, inv_fs, Self(), inv_pb);
+                                      var res := SendBuyWindow( ev.source, shop_sell, me, shop_buy, VENDOR_SEND_AOS_TOOLTIP );
 									  res := res;
                                     elseif (txt["sell"])
-                                      if(GetObjProperty(inv_rs, "MyGold") >= 1000)
+                                      if(GetObjProperty(shop_resale, "MyGold") >= 1000)
                                         TurnToward(ev.source);
                                         var count := ModifyPCSellList(merchant_type, (ev.source));
                                         if(count >= 1)
-                                          var res := SendSellWindow(ev.source, Self(), inv_fs, inv_pb, inv_1c);
+                                          var res := SendSellWindow( ev.source, Self(), shop_sell, shop_buy, shop_resale, VENDOR_SEND_AOS_TOOLTIP );
 										  res := res;
                                         else
                                           PrintTextAbovePrivate(Self(), "You dont have anything I would be interested in.", ev.source);
@@ -92,12 +91,12 @@ program barber()
         SYSEVENT_MERCHANT_BOUGHT: TurnToward(ev.source);
                                   PrintTextAbovePrivate( me, "The total of thy sale is " + ev.amount, ev.source);
                                   if(lower(merchant_type) != "appraiser")
-                                    var mygold := GetObjProperty(inv_rs, "MyGold");
+                                    var mygold := GetObjProperty(shop_resale, "MyGold");
                                     mygold := mygold - ev.amount;
-                                    SetObjProperty(inv_rs, "MyGold", mygold);
+                                    SetObjProperty(shop_resale, "MyGold", mygold);
                                   endif
-                                  foreach thing in EnumerateItemsInContainer(inv_pb)
-                                    if(MoveItemToContainer(thing, inv_fs))
+                                  foreach thing in EnumerateItemsInContainer(shop_buy)
+                                    if(MoveItemToContainer(thing, shop_sell))
                                       SetObjProperty(thing,"ClearRestock", (ReadGameClock() + 1800));
 //                                      thing.buyprice  := itemconfig[thing.objtype].VendorBuysFor;
 //                                      thing.sellprice := itemconfig[thing.objtype].VendorSellsFor;
@@ -108,9 +107,9 @@ program barber()
                                   PlaySoundEffect(me, 0x38);
         SYSEVENT_MERCHANT_SOLD:   TurnToward(ev.source);
                                   PrintTextAbovePrivate(me, "The total of thy purchase is " + ev.amount, ev.source);
-                                  var mygold := GetObjProperty(inv_rs, "MyGold");
+                                  var mygold := GetObjProperty(shop_resale, "MyGold");
                                   mygold := mygold + ev.amount;
-                                  SetObjProperty(inv_rs, "MyGold", mygold);
+                                  SetObjProperty(shop_resale, "MyGold", mygold);
                                   foreach item in EnumerateItemsInContainer( ev.source.backpack)
                                     EraseObjProperty(item, "ClearRestock");
                                     var hairwhere := GetObjProperty(item, "faceloc");

@@ -12,7 +12,6 @@ use cliloc;
 
 include "include/findCity";
 //include "include/utility";
-//include "util/bank";
 include ":currency:currency";
 include "include/string";
 //include ":gumps:gumpMessage";

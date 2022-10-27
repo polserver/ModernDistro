@@ -3,7 +3,7 @@ use os;
 use uo;
 
 include ":saver:saveOpts";
-include "util/bank";
+include ":containers:storageAreas";
 
 while (1)
   sleep( MINUTES_BETWEEN_SAVES * 60 );
@@ -65,10 +65,10 @@ function DeleteAccount(acctname, act);
   while(i <= 5)
     chr := act.GetCharacter(i);
     if(chr)
-      WipeBankBox(chr);
+	  CP_RemoveStorageAreaContainer( "Bankbox of "+chr.serial, CP_BANK_AREA );
       foreach thing in ListEquippedItems(chr)
         if(thing != chr.backpack)
-          if(thing.objtype == 0xf021)
+          if(thing.objtype == 0x1F021)
             ms := GetObjProperty(thing, "serial");
             mt := SystemFindObjectBySerial(ms);
             mt.Kill();

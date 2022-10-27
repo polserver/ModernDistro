@@ -10,6 +10,7 @@ include ":timedScripts:poisonUtil";
 include ":mounts:mounts";
 include "include/utility";
 include ":insurance:insurance";
+include ":containers:storageAreas";
 
 var allmyjunk := {};
 var stackstuff := 0;
@@ -214,7 +215,7 @@ function RewardTheKiller( ghost, killer )
 		var ins_reward := GetObjProperty( ghost, "InsuredTotalCost");
 		if( ins_reward )
 			msg := ghost.name + "had some items insured at a cost of " + CStr( ins_reward );
-			var bank_box := FindBankBox( killer );
+			var bank_box := CP_GetStorageContainerForMobile( killer, CP_BANK_AREA, CP_CREATE );
 			if( !CreateCoins( bank_box, 0xEED, ins_reward ) )
 				msg := msg + " but your bank could not hold all of the gold. It must be full.";
 			else
