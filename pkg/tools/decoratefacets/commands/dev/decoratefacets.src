@@ -1,15 +1,23 @@
 /////////////////////////////////////////////////////////////////////
 //
-// Program Name: UndecorateFacets( who )
+// Program Name: DecorateFacets(who, text)
 //
 // Author: Yukiko
 //
 // Date Created: 2022-02-01
 //
-// Description: Removes all decorations from a facet placed by
-//				the decoratefacets command.
+// Description: Creates decorations in the selected facets (realms).
 //
-// Parameters: who::objref to the user of the command.
+// Notes: Only the realms present will be listed in the gump.
+//		  Entering the command .DecorateFacets ALL will decorate
+//		  all facets (realms) present in the server.
+//
+// Sincere thanks to ThisIsMe for extracting the facet decorations
+// and thanks to the ServUO community for making ThisIsme's work
+// possible.
+//
+// Parameters: who::mobileref to person issuing the command
+//			   text::strinfref
 //
 // Return Value: none
 //
@@ -22,50 +30,63 @@ use file;
 use polsys;
 use cliloc;
 
-include ":createWorld:decorate";
+include ":decoratefacets:decorate";
 include ":gumps:yesNo";
 
 
-program UndecorateFacets( who )
+program DecorateFacets(who, text)
 
-	var selected_facets := {};	// An array that contains the facets to be undecorated.
+	var selected_facets := {};	// An array that contains the facets to be decorated.
 	var decorate_all := 0;
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This section initialises items, some are missing statics like the centre tiles of some of the
+// marked teleporter sites, and decorations in the different facets (realms). I have taken some
+// care not to duplicate items but there could be the possibility of two of the same it being
+// placed at the same location.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////
+	if(CStr(text) == "ALL")
+		decorate_all := 1;
+	endif
 	var Post_SA := YesNo( who, "Please select the map version you are using, pre-Stygian Abyss or post Stygian Abyss:", "Post", "Pre", 0, NOT_LOCALIZED );
-	selected_facets := UnecorateFacetsGump ( who, decorate_all );
+	Print(Post_SA);
+	selected_facets := DecorateFacetsGump ( who, decorate_all );
 	foreach facet in selected_facets
 		case(facet)
-			"britannia":		RemoveDecorations(facet);
+			"britannia":		PlaceDecorations(facet);
 								if(Post_SA)
 									facet := facet + "/newMagincia";
-									RemoveDecorations(facet);
+									PlaceDecorations(facet);
 								else
 									facet := facet + "/oldMagincia";
-									RemoveDecorations(facet);
+									PlaceDecorations(facet);
 								endif
-								EraseGlobalProperty("britannia_Decorated");
+								SetGlobalProperty("britannia_Decorated", 1);
 			"britannia_alt":	if(Post_SA)
 									facet := facet + "/postSA";
-									RemoveDecorations(facet);
+									PlaceDecorations(facet);
 								else
-									RemoveDecorations(facet + "/preSA");
+									PlaceDecorations(facet + "/preSA");
 									facet := facet + "/preSA/oldMagincia";
-									RemoveDecorations(facet);
+									PlaceDecorations(facet);
 								endif
-								EraseGlobalProperty("britannia_alt_Decorated");
-			"ilshenar":			RemoveDecorations(facet);
-								EraseGlobalProperty("ilshenar_Decorated");
-			"malas":			RemoveDecorations(facet);
-								EraseGlobalProperty("malas_Decorated");
-			"tokuno":			RemoveDecorations(facet);
-								EraseGlobalProperty("tokuno_Decorated");
-			"termur":			RemoveDecorations(facet);
-								EraseGlobalProperty("termur_Decorated");
+								SetGlobalProperty("britannia_alt_Decorated", 1);
+			"ilshenar":			PlaceDecorations(facet);
+								SetGlobalProperty("ilshenar_Decorated", 1);
+			"malas":			PlaceDecorations(facet);
+								SetGlobalProperty("malas_Decorated", 1);
+			"tokuno":			PlaceDecorations(facet);
+								SetGlobalProperty("tokuno_Decorated", 1);
+			"termur":			PlaceDecorations(facet);
+								SetGlobalProperty("termur_Decorated", 1);
 		endcase
 	endforeach
 
 endprogram
 
-function RemoveDecorations(facet)
+function PlaceDecorations(facet)
 
 	Print("Processing facet " + facet);
 	var files := ListDecorationConfigFiles( ":createWorld:decorations/" + facet );
@@ -77,13 +98,13 @@ function RemoveDecorations(facet)
 		deco_keys := ListDecorationCfgfileContents( cfg_file );
 		foreach key in deco_keys
 			cfg_elem := FindConfigElem( cfg_file, key );
-			RemoveDecorationFromFacet( cfg_elem );
+			CreateItemForDecoration( cfg_file_name, key, cfg_elem );
 		endforeach
 	endforeach
 
 endfunction
 
-function UnecorateFacetsGump ( who, check_all := 0 )
+function DecorateFacetsGump ( who, check_all := 0 )
 	var continuousloop := 1;
 	var deco_these := Array {};
 	var facet_list := Array { "britannia", "britannia_alt", "ilshenar", "malas", "tokuno", "termur", "eoden" };
@@ -100,7 +121,7 @@ function UnecorateFacetsGump ( who, check_all := 0 )
 		GFMovable ( facet_gump, 0 );
 		GFPage ( facet_gump, 0 );
 		GFResizePic ( facet_gump, 0, 0, 9200, 280, 375 );
-		GFHTMLArea ( facet_gump, 10, 10, 260, 26, "UNDECORATE WHICH FACETS?:", 1, 0 ); // Title
+		GFHTMLArea ( facet_gump, 10, 10, 260, 26, "DECORATE WHICH FACETS?:", 1, 0 ); // Title
 
 		// Generated the size of the "Paper" background and a list of present facets
 		foreach relm in Realms()
@@ -122,7 +143,7 @@ function UnecorateFacetsGump ( who, check_all := 0 )
 			// Need to grab the place within the array the facet cliloc number is to check against
 			// POL's funky facet names
 			ArrayPlace := facet in facet_clilocs;
-			if ( GetGlobalProperty ( CStr ( facet_list[CInt ( ArrayPlace )]+"_Decorated" ) ) )
+			if ( !GetGlobalProperty ( CStr ( facet_list[CInt ( ArrayPlace )]+"_Decorated" ) ) )
 				GFCheckBox ( facet_gump, 15, RealmCheck, 9792, 9793, check_all, facet ); // Facet Check Box
 				GFAddHTMLLocalized ( facet_gump, 40, RealmY, 220, 26, facet, 0, 0, 0x7C00  ); // Facet Name
 			else

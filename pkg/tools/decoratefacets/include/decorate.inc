@@ -146,13 +146,13 @@ function CreateItemForDecoration( file_name, key, cfg_elem )
 		item.color := cfg_elem.Color;
 		item.movable := 0;
 		// Place the 'Static' CProp on the item. Now only the udestry commands can delete it.
-		SetObjProperty( item, "Static", 0x1 );
+		SetObjProperty( item, "DecorateFacetsStatic", 0x1 );
 		SetObjProperty( item, "DecorationInfo", Struct{ "FileName":=file_name, "Key":=key } );
 	else
 		desc.Color := cfg_elem.Color;
 		desc.Movable := 0;
 		// Place the 'Static' CProp on the item. Now only the udestry commands can delete it.
-		desc.CProps.Insert( "Static", 0x1 );
+		desc.CProps.Insert( "DecorateFacetsStatic", 0x1 );
 		desc.CProps.Insert( "DecorationInfo", Struct{ "FileName":=file_name, "Key":=key } );
 		item := CreateItemAtLocation( cfg_elem.X,  cfg_elem.Y, cfg_elem.Z, desc, cfg_elem.Amount, cfg_elem.Realm );
 	endif
@@ -187,7 +187,7 @@ function RemoveDecorationFromFacet( cfg_elem )
 	var	things := ListItemsAtLocation( cfg_elem.x, cfg_elem.y, cfg_elem.z, cfg_elem.realm );
 
 	foreach thing in things
-		if( thing.objtype == cfg_elem.objtype && GetObjProperty(thing, "Static") )
+		if( thing.objtype == cfg_elem.objtype && GetObjProperty(thing, "DecorateFacetsStatic") )
 			DestroyItem( thing );
 			break;
 		endif

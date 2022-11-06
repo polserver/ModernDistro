@@ -1,0 +1,24 @@
+use os;
+use uo;
+
+include "include/client";
+include ":attributes:attributes";
+include ":gumps:requestGump";
+
+program textcmd_setskill( who, level )
+	if( !level )
+		level := CDbl( RequestGump( who, "Power down level", "", "0" ));
+	else
+		level := CDbl( level );
+	endif
+
+	foreach attrib_name in AP_ListAttributesByType()
+		AP_SetTrueSkill( who, attrib_name, level );
+		SleepMS(10);
+	endforeach
+
+	AP_RefreshVitals( who );
+
+	SendSysMessage( who, "Done." );
+	return 1;
+endprogram
