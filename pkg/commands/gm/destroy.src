@@ -9,7 +9,7 @@ program textcmd_destroy( who )
 			SendSysMessage(who, "Cancelled.", 1, 33);
 			return 0;
 		endif
-		if(GetObjProperty(tgt, "Static"))
+		if(GetObjProperty(tgt, "DecorateFacetsStatic"))
 			SendSysMessage(who, "That item cannot be destroyed.", 1, 33);
 			SendSysMessage(who, "Only a developer can destroy it ", 1, 33);
 			continue;

@@ -15,7 +15,7 @@ program textcmd_udestroy( who )
 			SendSysMessage(who, "Cancelled.", 1, 33);
 			return 0;
 		endif
-		if(!GetObjProperty(tgt, "Static"))
+		if(!GetObjProperty(tgt, "DecorateFacetsStatic"))
 			SendSysMessage(who, "You may only use this command to destroy items", color := 40);
 			SendSysMessage(who, "placed by the decoratefacets command.", color := 40);
 		elseif(!tgt.isA(POLCLASS_NPC) || !tgt.client)

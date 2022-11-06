@@ -16,7 +16,7 @@ program textcmd_destroyRadius( who, range )
     endif
     var tgt := ListItemsNearLocation(who.x, who.y, who.z, range, who.realm );
     foreach x in tgt
-		if(!GetObjProperty(x, "Permanent"))
+		if(!GetObjProperty(x, "DecorateFacetsStatic"))
             DestroyItem( x );
 		endif
     endforeach

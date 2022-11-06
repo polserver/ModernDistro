@@ -29,7 +29,7 @@ program textcmd_udestroyRadius(who, text)
 		if (!range)
 			stuff := ListItemsAtLocation( trg.x, trg.y, LIST_IGNORE_Z, trg.realm);
 			foreach thing in stuff
-				if(GetObjProperty(thing, "Static"))
+				if(GetObjProperty(thing, "DecorateFacetsStatic"))
 					DestroyItem( thing );
 				endif
 			endforeach
