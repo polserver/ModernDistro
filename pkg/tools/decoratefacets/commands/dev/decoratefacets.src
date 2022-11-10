@@ -89,12 +89,12 @@ endprogram
 function PlaceDecorations(facet)
 
 	Print("Processing facet " + facet);
-	var files := ListDecorationConfigFiles( ":createWorld:decorations/" + facet );
+	var files := ListDecorationConfigFiles( ":decoratefacets:decorations/" + facet );
 	var deco_keys := {};
 	var cfg_elem;
 	var cfg_file;
 	foreach cfg_file_name in files
-		cfg_file := OpenDecorationCfgfile( ":createWorld:decorations/" + facet + "/" + cfg_file_name );
+		cfg_file := OpenDecorationCfgfile( ":decoratefacets:decorations/" + facet + "/" + cfg_file_name );
 		deco_keys := ListDecorationCfgfileContents( cfg_file );
 		foreach key in deco_keys
 			cfg_elem := FindConfigElem( cfg_file, key );
