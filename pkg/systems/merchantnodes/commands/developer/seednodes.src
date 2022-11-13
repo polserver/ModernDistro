@@ -8,7 +8,7 @@ include ":merchantnodes:file";
 program seednodes_textcmd( mobile )
 
 	var xml_file := MN_OpenNodesXMLFile(),
-		facets := SelectionGumpEx( mobile, "Grab the nodes from which facet?", ListFacets( xml_file ), BTN_TYPE_CHECKBOX );
+		facets := SelectionGumpEx( mobile, "Seed the nodes in which facet?", ListFacets( xml_file ), BTN_TYPE_CHECKBOX );
 	if( !facets )
 		SendSysMessage( mobile, "Cancelled.", 0x3, 0x32 );
 		return 0;
