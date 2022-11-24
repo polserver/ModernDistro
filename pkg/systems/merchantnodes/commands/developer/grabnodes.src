@@ -1,5 +1,6 @@
 use uo;
 use os;
+use datafile;
 
 include ":gumps:selectionGump";
 include ":gumps:yesNo";
@@ -9,6 +10,11 @@ program grab_nodes_textcmd( mobile )
 
 	var wipe_nodes := 0,
 		nodes := Array;
+	// var sn_df := OpenDataFile( "wandering_healers" );
+	// if( !sn_df )
+		// SysLog( "Error --> verifyNPCs.src. Cannot open wandering_healers datafile." );
+		// Broadcast( "Error --> verifyNPCs.src. Cannot open wandering_healers datafile.", requiredcmdlevel := 4 );
+	// endif
 	if( mobile.cmdlevel > 4 )
 		wipe_nodes := YesNo( mobile, "Do you want to wipe all nodes after backing them up?" );
 		if( wipe_nodes )
@@ -50,6 +56,11 @@ program grab_nodes_textcmd( mobile )
 				nodes.Append( node );
 			endif
 		endforeach
+		// var w_healers := wh_df.Keys();
+		// foreach healer in w_healers
+			// SystemFindObjectBySerial( healer ).kill();
+			// SleepMS( 10 );
+		// endforeach
 
 		SleepMS( 10 );
 	endforeach
@@ -63,6 +74,9 @@ program grab_nodes_textcmd( mobile )
 		if( YesNo( mobile, "Just a final check, are you sure you want to wipe all nodes?" ) )
 			foreach node in ( nodes )
 				DestroyItem( node );
+			endforeach
+			foreach facet in facets
+				RemoveSpecialNPCs( facet );
 			endforeach
 		endif
 	endif
@@ -158,3 +172,41 @@ function CleanXMLFile( byref maps, byref facets, byref facet_list )
 	xml_file.SaveXML( ":merchantnodes:backUps/nodes.xml" );
 
 endfunction
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+//	RemoveSpecialNPCs( facet )
+//
+//	Purpose:	This function deletes the special NPCs from the facet.
+//
+//	Parameter:	string::facet - the facet (realm) from which to remove the special NPCs.
+//
+//	Returns:	Nothing.
+//
+//	Created:	2022-11-20 21:39:16 by Yukiko
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+function RemoveSpecialNPCs( facet )
+
+	// special NPCs element for the datafile.
+	var sn_data_el;
+	var sn;
+	var sn_elem;
+	var sn_df := OpenDataFile( ":npcs:specialNPCs" );
+	if(!sn_df)
+		SysLog( "Error --> grabnodes.src - Cannot open data file :npcs:specialNPCs." );
+		return;
+	endif
+	var sn_serials := sn_df.keys();
+	foreach sn_serial in sn_serials
+		sn_elem := sn_df.FindElement( CInt(sn_serial ));
+		if( sn_elem.GetProp( "facet" ) == facet )
+			sn := SystemFindObjectBySerial( sn_serial );
+			SetObjProperty( sn, "guardkill", 1 );
+			sn.kill();
+			sn_df.DeleteElement( sn_serial );
+		endif
+	endforeach
+
+endfunction
+

@@ -5,80 +5,93 @@ use uo;
 include ":saver:saveOpts";
 include ":containers:storageAreas";
 
-while (1)
-  sleep( MINUTES_BETWEEN_SAVES * 60 );
-  accountcheck();
-  syslog( "Saving World State" );
-  Broadcast( "Saving World State" );
-  var duration := ReadGameClock();
-  var res := SaveWorldState();
-  duration := ReadGameClock() - duration;
-  if (res)
-    SetGlobalProperty( "#:saver:lastsave", ReadGameClock() );
-    syslog( "World state saved (" + duration + " seconds)" );
-  else
-    Broadcast( "Error saving world state!  Oh, the humanity!" );
-    syslog( "Error saving world state: " + res );
-  endif
-endwhile
+program saver()
+
+	while (1)
+		sleep( MINUTES_BETWEEN_SAVES * 60 );
+		var verify_NPCs := Start_Script( ":npcs:verifySpecialNPCs", {} );
+		if( !verify_NPCs )
+			Print( "Error --> saver.src - Could not start verifySpecialNPCs.src." );
+		endif
+		accountcheck();
+		syslog( "Saving World State" );
+		Broadcast( "Saving World State" );
+		var duration := ReadGameClock();
+		var res := SaveWorldState();
+		duration := ReadGameClock() - duration;
+		if (res)
+			SetGlobalProperty( "#:saver:lastsave", ReadGameClock() );
+			syslog( "World state saved (" + duration + " seconds)" );
+		else
+			Broadcast( "Error saving world state!  Oh, the humanity!" );
+			syslog( "Error saving world state: " + res );
+		endif
+	endwhile
+
+endprogram
 
 function accountcheck()
-  var accts := ListAccounts();
-  var lasttime;
-  var acct, chr, holder;
-  var i := 1;
-  var rgc := ReadGameClock();
-  foreach nme in accts
-    acct := FindAccount(nme);
-    if(acct)
-      lasttime := acct.GetProp("LastLogin");
-      if(!lasttime)
-        acct.setprop("LastLogin", rgc);
-      else
-        if((rgc - lasttime) > 31557600)
-          i := 1;
-          while(i <= 5)
-            chr := acct.GetCharacter(i);
-            if(chr)
-              holder := GetObjProperty(chr, "LastLogin");
-              if(holder > lasttime)
-                lasttime := holder;
-              endif
-            endif
-            i := i + 1;
-          endwhile
-          if((rgc - lasttime) > 31557600)
-// Disabling auto account deletion
-//            DeleteAccount(nme, acct);
-          endif
-        endif
-      endif
-    endif
-  endforeach
+
+	var accts := ListAccounts();
+	var lasttime;
+	var acct, chr, holder;
+	var i := 1;
+	var rgc := ReadGameClock();
+	foreach nme in accts
+		acct := FindAccount(nme);
+		if(acct)
+			lasttime := acct.GetProp("LastLogin");
+			if(!lasttime)
+				acct.setprop("LastLogin", rgc);
+			else
+				if((rgc - lasttime) > 31557600)
+					i := 1;
+					while(i <= 5)
+						chr := acct.GetCharacter(i);
+						if(chr)
+							holder := GetObjProperty(chr, "LastLogin");
+							if(holder > lasttime)
+								lasttime := holder;
+							endif
+						endif
+						i := i + 1;
+					endwhile
+					if((rgc - lasttime) > 31557600)
+					// Disabling auto account deletion
+					//            DeleteAccount(nme, acct);
+					endif
+			endif
+			endif
+		endif
+	endforeach
+
 endfunction
 
 function DeleteAccount(acctname, act);
-  print("account " + acctname + " has been banned for inactivity.");
-  act.ban();
-  var chr, mt, ms;
-  var i := 1;
-  while(i <= 5)
-    chr := act.GetCharacter(i);
-    if(chr)
-	  CP_RemoveStorageAreaContainer( "Bankbox of "+chr.serial, CP_BANK_AREA );
-      foreach thing in ListEquippedItems(chr)
-        if(thing != chr.backpack)
-          if(thing.objtype == 0x1F021)
-            ms := GetObjProperty(thing, "serial");
-            mt := SystemFindObjectBySerial(ms);
-            mt.Kill();
-          endif
-          MoveItemToContainer(thing, chr.backpack);
-        endif
-      endforeach
-      destroyitem(chr.backpack);
-      act.DeleteCharacter(i);
-    endif
-    i := i + 1;
-  endwhile
+
+	print("account " + acctname + " has been banned for inactivity.");
+	act.ban();
+	var chr, mt, ms;
+	var i := 1;
+	while(i <= 5)
+		chr := act.GetCharacter(i);
+		if(chr)
+			CP_RemoveStorageAreaContainer( "Bankbox of "+chr.serial, CP_BANK_AREA );
+			foreach thing in ListEquippedItems(chr)
+				if(thing != chr.backpack)
+					if(thing.objtype == 0x1F021)
+						ms := GetObjProperty(thing, "serial");
+						mt := SystemFindObjectBySerial(ms);
+						mt.Kill();
+					endif
+					MoveItemToContainer(thing, chr.backpack);
+				endif
+			endforeach
+			destroyitem(chr.backpack);
+			act.DeleteCharacter(i);
+		endif
+		i := i + 1;
+	endwhile
+
 endfunction
+

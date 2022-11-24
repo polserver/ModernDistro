@@ -1,7 +1,12 @@
 use uo;
+use os;
 
 program textcmd_savenow()
     Broadcast( "Saving Game State Now" );
+	var verify_NPCs := Start_Script( ":npcs:verifySpecialNPCs", {} );
+	if( !verify_NPCs )
+		SysLog( "Error --> savenow.src - Could not start verifySpecialNPCs.src." );
+	endif
     SaveWorldState();
     Broadcast( "Carry on, then" );
 endprogram

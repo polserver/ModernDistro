@@ -1,0 +1,64 @@
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+//	VerifySpecialNPCs( )
+//
+//	Description:	Verifies the existence of NPCs not spawned by merchant nodes,
+//					the spawn system or spawn points. If they are not are not
+//					present in the game, they will be recreated.
+//
+//	Parameter:		None.
+//
+//	Returns:		1 - On success, 0 - If an error occurred.
+//
+//	Created:		2022-11-14 00:43:31 by Yukiko
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+use uo;
+use os;
+use datafile;
+
+program VerifySpecialNPCs( )
+
+	var sn; // Placeholder for a new NPC, if we need one.
+	var sn_elem;
+	var sn_template := "";
+	var sn_x := 0;
+	var sn_y := 0;
+	var sn_z := 0;
+	var sn_facet := "";
+	var sn_df := OpenDataFile( ":npcs:specialNPCs" );
+	if( !sn_df )
+		SysLog( "Error --> verifyNPCs.src. Cannot open wandering_healers datafile." );
+		Broadcast( "Error --> verifyNPCs.src. Cannot open wandering_healers datafile.", requiredcmdlevel := 4 );
+		return 0;
+	endif
+	// w_healers contains the serial of the wandering healers that are supposed to be
+	// in the world.
+	var special_NPCs := sn_df.Keys();
+	// overrides is here in case we want to modify the healer upon creation.
+	var overrides := struct;
+	foreach s_npc in special_NPCs
+		sn_elem := sn_df.FindElement(s_npc);
+		if( !SystemFindObjectBySerial( s_npc ) )
+			sn_template := sn_elem.GetProp( "template" );
+			sn_x := sn_elem.GetProp( "x" );
+			sn_y := sn_elem.GetProp( "y" );
+			sn_z := sn_elem.GetProp( "z" );
+			sn_facet := Lower(sn_elem.GetProp( "facet" ));
+			sn := CreateNpcFromTemplate( sn_template, sn_x, sn_y, sn_z, overrides, Lower( sn_facet ) );
+			sn_df.DeleteElement( s_npc );
+			if( !sn )
+				SysLog( "Error --> VerifyNPCs.src could not creare a wandering healer at "+sn_x+", "+sn_y+", "+sn_z+", "+sn_facet );
+				continue;
+			endif
+			sn_elem := sn_df.CreateElement( sn.serial );
+			sn_elem.SetProp( "x", sn.x );
+			sn_elem.SetProp( "y", sn.y );
+			sn_elem.SetProp( "z", sn.z );
+			sn_elem.SetProp( "facet", sn.realm );
+
+		endif
+	endforeach
+
+endprogram
+

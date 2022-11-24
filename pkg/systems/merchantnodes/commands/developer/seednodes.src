@@ -1,6 +1,7 @@
 use uo;
 use os;
 use polsys;
+use datafile;
 
 include ":gumps:selectionGump";
 include ":merchantnodes:file";
@@ -15,7 +16,7 @@ program seednodes_textcmd( mobile )
 	endif
 
 	foreach facet in ( facets )
-// Seed Merchant Nodes...
+		// Seed Merchant Nodes...
 		if( xml_file["Facets"][facet]["MerchantNodes"] )
 			foreach node in ( xml_file["Facets"][facet]["MerchantNodes"] )
 				Print( CStr( node ) );
@@ -23,12 +24,15 @@ program seednodes_textcmd( mobile )
 			endforeach
 		endif
 
-// Seed Guard Nodes...
+		// Seed Guard Nodes...
 		if( xml_file["Facets"][facet]["GuardNodes"] )
 			foreach node in ( xml_file["Facets"][facet]["GuardNodes"] )
 				CreateNode( node, "GuardNode" );
 			endforeach
 		endif
+
+		// Add the Wandering Healers...
+		AddSpecialNPCs( facet );
 
 		SleepMS( 20 );
 	endforeach
@@ -75,3 +79,69 @@ function ListFacets( byref xml_file )
 
 	return list;
 endfunction
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+//	AddSpecialNPCs( facet )
+//
+//	Purpose:	This function adds wandering healers from the wanderinghealers.cfg file
+//				to the shard.
+//
+//	Parameter:	string::facet - the facet (realm) to which to add healers.
+//
+//	Returns:	Nothing.
+//
+//	Created:	2022-11-14 01:02:35 by Yukiko
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+function AddSpecialNPCs( facet )
+
+	var sn_cfg  := ReadConfigFile( ":npcs:specialNPCs" );
+	if(!sn_cfg)
+		SysLog( "Error --> seednode.src - Cannot read :npcs:specialNPC." );
+		return;
+	endif
+	var sn_elem := FindConfigElem( sn_cfg, facet );
+	if(!sn_elem)
+		SysLog( "Error --> seednode.src - Facet not found." );
+		return;
+	endif
+//	var sn_elem := FindConfigElem( sn_cfg, facet );
+	var sn_locs := {};
+	sn_locs := GetConfigStringArray( sn_elem, "Location" );
+	var sn_template := "";
+	var sn_x := 0;
+	var sn_y := 0;
+	var sn_z := 0;
+	// wandering healer element for the datafile.
+	var sn_data_el;
+	var sn_df := CreateDataFile( ":npcs:specialNPCs", DF_KEYTYPE_INTEGER );
+	if(!sn_df)
+		SysLog( "Error --> seednode.src - Cannot create data file :npcs:specialNPCs." );
+		return;
+	endif
+	var npc_info := {};
+	// overrides is here in case we want to modify the healer upon creation.
+	var overrides := struct;
+	foreach location in sn_locs
+		npc_info := SplitWords( location );
+		sn_template := npc_info[1];
+		sn_x := CInt( npc_info[2] );
+		sn_y := CInt( npc_info[3] );
+		sn_z := CInt( npc_info[4] );
+		var sn := CreateNpcFromTemplate( npc_info[1], sn_x, sn_y, sn_z, overrides, Lower( facet ) );
+		if( !sn )
+			SysLog( "Error --> seednode.src could not creare a wandering healer at "+sn_x+", "+sn_y+", "+sn_z+", "+facet+"." );
+			Print(sn.errortext);
+		else
+			sn_data_el := sn_df.CreateElement( sn.serial );
+			sn_data_el.SetProp( "template", sn_template );
+			sn_data_el.SetProp( "x", sn_x );
+			sn_data_el.SetProp( "y", sn_y );
+			sn_data_el.SetProp( "z", sn_z );
+			sn_data_el.SetProp( "facet", facet );
+		endif
+	endforeach
+
+endfunction
+
