@@ -28,8 +28,7 @@ program VerifySpecialNPCs( )
 	var sn_facet := "";
 	var sn_df := OpenDataFile( ":npcs:specialNPCs" );
 	if( !sn_df )
-		SysLog( "Error --> verifyNPCs.src. Cannot open wandering_healers datafile." );
-		Broadcast( "Error --> verifyNPCs.src. Cannot open wandering_healers datafile.", requiredcmdlevel := 4 );
+		SysLog( "verifyNPCs.src. Cannot open specialNPCs datafile." );
 		return 0;
 	endif
 	// w_healers contains the serial of the wandering healers that are supposed to be
