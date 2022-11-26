@@ -349,41 +349,6 @@ const UOBJ_AGAPITE_INGOT        := 0x1630f;
 const UOBJ_VERITE_INGOT         := 0x16310;
 const UOBJ_VALORITE_INGOT       := 0x16311;
 
-const UOBJ_VELVITE_ORE      	:= 0x16205;
-const UOBJ_CRIMSONITE_ORE	:= 0x16206;
-const UOBJ_CORAL_ORE         	:= 0x16207;
-const UOBJ_FLESH_ORE		:= 0x16208;
-const UOBJ_TEKRHAN_ORE		:= 0x16209;
-const UOBJ_ROYAL_ORE            := 0x1620a;
-const UOBJ_MALACHITE_ORE        := 0x1620b;
-const UOBJ_MOONSTONE_ORE	:= 0x1620c;
-const UOBJ_SUNSTONE_ORE		:= 0x1620d;
-const UOBJ_ELVEN_ORE		:= 0x1620e;
-const UOBJ_GLACIAL_ORE          := 0x1620f;
-const UOBJ_SILVER_ORE           := 0x16210;
-const UOBJ_GOLD_ORE          	:= 0x16211;
-const UOBJ_VOLCANIC_ORE		:= 0x16212;
-const UOBJ_ONYX_ORE             := 0x16213;
-const UOBJ_PYRITE_ORE           := 0x16214;
-
-const UOBJ_VELVITE_INGOT      	:= 0x16245;
-const UOBJ_CRIMSONITE_INGOT	:= 0x16246;
-const UOBJ_CORAL_INGOT         	:= 0x16247;
-const UOBJ_FLESH_INGOT		:= 0x16248;
-const UOBJ_TEKRHAN_INGOT	:= 0x16249;
-const UOBJ_ROYAL_INGOT          := 0x1624a;
-const UOBJ_MALACHITE_INGOT      := 0x1624b;
-const UOBJ_LUNAR_INGOT		:= 0x1624c;
-const UOBJ_SOLAR_INGOT		:= 0x1624d;
-const UOBJ_ELVEN_INGOT		:= 0x1624e;
-const UOBJ_GLACIAL_INGOT        := 0x1624f;
-const UOBJ_SILVER_INGOT         := 0x16250;
-const UOBJ_GOLD_INGOT        	:= 0x16251;
-const UOBJ_VOLCANIC_INGOT	:= 0x16252;
-const UOBJ_ONYX_INGOT           := 0x16253;
-const UOBJ_PYRITE_INGOT         := 0x16254;
-
-
 /////////////////////////
 // musical instruments //
 /////////////////////////
