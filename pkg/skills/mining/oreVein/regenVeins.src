@@ -13,16 +13,16 @@ var settings := MSP_GetSettingsCfgElem("Settings");
 
 program GlobalControl()
 	MSP_ReportText("---=[ ORE VEIN REGENERATOR HAS STARTED UP ]=---", MSP_REPORT_SYSLOG);
-	
+
 	var cycle_wait := CInt(settings.RegenWait);
 	if ( cycle_wait < 1 )
 		cycle_wait := 30;
 	endif
 	cycle_wait *= 60;
-	
+
 	SetGlobalProperty("#OreVeinRegenPId", GetPid());
-	
-	Set_Priority(1);
+
+	Set_Priority(5);
 	while( 1 )
 		Sleep(cycle_wait);
 		RegenVeins();
@@ -32,18 +32,30 @@ endprogram
 function RegenVeins()
 	MSP_ReportText("Running ore vein regeneration cycle...", MSP_REPORT_SYSLOG);
 	var data_file := DFOpenDataFile("VeinInfo", DF_CREATE);
-	
+
 	foreach elem_name in ( DFGetElemNames(data_file) )
 		var ore_vein := SystemFindObjectBySerial(CInt(elem_name));
 		var amount := ore_vein.GetRemainingOre();
-		var max_avail_vein_ore := CInt((settings."MavAvailVeinOre"));
-		if(amount < max_avail_vein_ore)
-			amount += 1;
-			ore_vein.SetRemainingOre(amount);
+		// We will try to read custom_max_avail_vein_ore from the vein object.
+		var custom_max_avail_vein_ore := ore_vein.GetMaxOre();
+		// Now we read the default maximum available ore from settings.
+		var default_max_avail_vein_ore := CInt((settings."MaxAvailVeinOre"));
+		// if there is a custom maximum ore set on the vein object, we will use that.
+		if(custom_max_avail_vein_ore)
+			if(amount < custom_max_avail_vein_ore)
+				amount += 1;
+				ore_vein.SetRemainingOre(amount);
+			endif
+		// If not, we will use the default maximum vein ore from settings
+		else
+			if(amount < default_max_avail_vein_ore)
+				amount += 1;
+				ore_vein.SetRemainingOre(amount);
+			endif
 		endif
-		
+
 		Sleep(1);
 	endforeach
-	
+
 	return 1;
 endfunction
