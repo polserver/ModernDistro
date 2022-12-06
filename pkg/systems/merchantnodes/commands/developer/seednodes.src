@@ -131,7 +131,7 @@ function AddSpecialNPCs( facet )
 		sn_z := CInt( npc_info[4] );
 		var sn := CreateNpcFromTemplate( npc_info[1], sn_x, sn_y, sn_z, overrides, Lower( facet ) );
 		if( !sn )
-			SysLog( "Error --> seednode.src could not creare a wandering healer at "+sn_x+", "+sn_y+", "+sn_z+", "+facet+"." );
+			SysLog( "Error --> seednode.src could not creare " + sn_template + " at "+sn_x+", "+sn_y+", "+sn_z+", "+facet+"." );
 			Print(sn.errortext);
 		else
 			sn_data_el := sn_df.CreateElement( sn.serial );

@@ -194,7 +194,7 @@ function RemoveSpecialNPCs( facet )
 	var sn_elem;
 	var sn_df := OpenDataFile( ":npcs:specialNPCs" );
 	if(!sn_df)
-		SysLog( "Error --> grabnodes.src - Cannot open data file :npcs:specialNPCs." );
+		SysLog( "grabnodes.src - Cannot open data file :npcs:specialNPCs." );
 		return;
 	endif
 	var sn_serials := sn_df.keys();
