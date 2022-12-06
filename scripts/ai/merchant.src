@@ -451,11 +451,6 @@ function IsBuyableItem (byref character, byref item, byref from_bag)
 
 		UOBJ_FEATHER:
 		UOBJ_HIDE:
-		UOBJ_RED_HIDE:
-		UOBJ_BLUE_HIDE:
-		UOBJ_BROWN_HIDE:
-		UOBJ_GREEN_HIDE:
-		UOBJ_SILVER_HIDE:
 		UOBJ_LOG:
 		0x0DF2:	//wand
 		0x0DF3:	//wand
