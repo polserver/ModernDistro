@@ -8,8 +8,30 @@ include ":merchantnodes:file";
 
 program seednodes_textcmd( mobile )
 
+	var merc_seeded_facets := {};	// These are facets that have been seeded
+		merc_seeded_facets := GetGlobalProperty( "MerchantSeededFacets" );
+
+	if(!merc_seeded_facets)
+		merc_seeded_facets := {};
+	endif
+
 	var xml_file := MN_OpenNodesXMLFile(),
-		facets := SelectionGumpEx( mobile, "Seed the nodes in which facet?", ListFacets( xml_file ), BTN_TYPE_CHECKBOX );
+		// These are facets that are stored with merchant nodes and merchant data.
+		backed_up_facets := ListFacets( xml_file );
+
+	// Here we remove facets that have been seeded from the list that will be sent in the gump.
+	if(merc_seeded_facets.Size())
+		var pos := 0;
+		foreach facet in ( merc_seeded_facets )
+			pos := (facet in backed_up_facets);
+			if(!pos)
+				continue;
+			endif
+			backed_up_facets.erase( pos );
+		endforeach
+	endif
+
+	var facets := SelectionGumpEx( mobile, "Seed the nodes in which facet?", backed_up_facets, BTN_TYPE_CHECKBOX );
 	if( !facets )
 		SendSysMessage( mobile, "Cancelled.", 0x3, 0x32 );
 		return 0;
@@ -19,7 +41,7 @@ program seednodes_textcmd( mobile )
 		// Seed Merchant Nodes...
 		if( xml_file["Facets"][facet]["MerchantNodes"] )
 			foreach node in ( xml_file["Facets"][facet]["MerchantNodes"] )
-				Print( CStr( node ) );
+				// Print( CStr( node ) );
 				CreateNode( node, "MerchantNode" );
 			endforeach
 		endif
@@ -35,11 +57,13 @@ program seednodes_textcmd( mobile )
 		AddSpecialNPCs( facet );
 
 		SleepMS( 20 );
+		merc_seeded_facets.append( facet );
 	endforeach
 
+	SetGlobalProperty( "MerchantSeededFacets", merc_seeded_facets );
 	SendSysMessage( mobile, "Nodes have been seeded.", 0x3, 0x42 );
-
 	return 1;
+
 endprogram
 
 function CreateNode( byref xml_node, byref node_type:="MerchantNode" )
@@ -95,7 +119,11 @@ endfunction
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 function AddSpecialNPCs( facet )
-
+	case(Lower(facet))
+		"felucca": facet := "britannia";
+		"trammel": facet := "britannia_alt";
+		default:
+	endcase
 	var sn_cfg  := ReadConfigFile( ":npcs:specialNPCs" );
 	if(!sn_cfg)
 		SysLog( "Error --> seednode.src - Cannot read :npcs:specialNPC." );
@@ -131,8 +159,8 @@ function AddSpecialNPCs( facet )
 		sn_z := CInt( npc_info[4] );
 		var sn := CreateNpcFromTemplate( npc_info[1], sn_x, sn_y, sn_z, overrides, Lower( facet ) );
 		if( !sn )
-			SysLog( "Error --> seednode.src could not creare " + sn_template + " at "+sn_x+", "+sn_y+", "+sn_z+", "+facet+"." );
-			Print(sn.errortext);
+			// SysLog( "Error --> seednode.src could not creare " + sn_template + " at "+sn_x+", "+sn_y+", "+sn_z+", "+facet+"." );
+			// Print(sn.errortext);
 		else
 			sn_data_el := sn_df.CreateElement( sn.serial );
 			sn_data_el.SetProp( "template", sn_template );

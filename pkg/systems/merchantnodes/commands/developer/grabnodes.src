@@ -10,6 +10,10 @@ program grab_nodes_textcmd( mobile )
 
 	var wipe_nodes := 0,
 		nodes := Array;
+	// The following variables are used to track which facets are spawned.
+	var merc_seeded_facets := {},
+		remove_from_gp := "";
+		merc_seeded_facets := GetGlobalProperty( "MerchantSeededFacets" );
 	// var sn_df := OpenDataFile( "wandering_healers" );
 	// if( !sn_df )
 		// SysLog( "Error --> verifyNPCs.src. Cannot open wandering_healers datafile." );
@@ -26,7 +30,8 @@ program grab_nodes_textcmd( mobile )
 	var facet_list := ListFacets(),
 		map := 0,
 		maps := Realms(),
-		facets := SelectionGumpEx( mobile, "Grab the nodes from which facet?", facet_list.Keys(), BTN_TYPE_CHECKBOX );
+		// facets := SelectionGumpEx( mobile, "Grab the nodes from which facet?", facet_list.Keys(), BTN_TYPE_CHECKBOX );
+		facets := SelectionGumpEx( mobile, "Grab the nodes from which facet?", merc_seeded_facets, BTN_TYPE_CHECKBOX );
 	if( !facets )
 		SendSysMessage( mobile, "Cancelled.", 0x3, 0x32 );
 		return 0;
@@ -75,12 +80,19 @@ program grab_nodes_textcmd( mobile )
 			foreach node in ( nodes )
 				DestroyItem( node );
 			endforeach
+			var clean_gp := 0;
 			foreach facet in facets
 				RemoveSpecialNPCs( facet );
+				// This 'if' clause removes spawned facets from the global property.
+				clean_gp := facet in merc_seeded_facets;
+
+				if( clean_gp )
+					merc_seeded_facets.erase( clean_gp );
+				endif
 			endforeach
 		endif
 	endif
-
+	SetGlobalProperty( "MerchantSeededFacets", merc_seeded_facets );
 	return 1;
 endprogram
 
