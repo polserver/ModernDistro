@@ -30,8 +30,7 @@ program grab_nodes_textcmd( mobile )
 	var facet_list := ListFacets(),
 		map := 0,
 		maps := Realms(),
-		// facets := SelectionGumpEx( mobile, "Grab the nodes from which facet?", facet_list.Keys(), BTN_TYPE_CHECKBOX );
-		facets := SelectionGumpEx( mobile, "Grab the nodes from which facet?", merc_seeded_facets, BTN_TYPE_CHECKBOX );
+		facets := SelectionGumpEx( mobile, "Grab the nodes from which facet?", facet_list.Keys(), BTN_TYPE_CHECKBOX );
 	if( !facets )
 		SendSysMessage( mobile, "Cancelled.", 0x3, 0x32 );
 		return 0;
