@@ -60,8 +60,9 @@ program WrestlingHitScript(attacker, defender, weapon, armor, basedamage, rawdam
 			if(rawdamage < 1)
 				rawdamage := 1;
 			endif
-			anat := Cint(AP_GetSkill(attacker, ANATOMY) / 20);
-			rawdamage := Cint(rawdamage + anat);
+			// anat := Cint(AP_GetSkill(attacker, ANATOMY) / 20);
+			anat_dmg_mod := CalcAnatomyDmgMod( attacker );
+			rawdamage := Cint(rawdamage * anat_dmg_mod);
 			// This next line appears to increase that damage too high.
 			rawdamage := rawdamage + RandomInt( CInt((AP_GetSkill(attacker, ANATOMY) ) / 20));
 			ApplyRawDamageEX(defender, rawdamage, DMG_PHYSICAL, attacker);

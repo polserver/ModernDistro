@@ -478,14 +478,14 @@ endfunction
  *
  */
 function SetResistance(mobile, name, value)
-  value := CInt(value);
-  case(name)
-    RES_COLD: mobile.resist_cold_mod := value;
-    RES_ENERGY: mobile.resist_energy_mod := value;
-    RES_FIRE: mobile.resist_fire_mod := value;
-    RES_PHYSICAL: mobile.resist_physical_mod := value;
-    RES_POISON: mobile.resist_poison_mod := value;
-  endcase
+	value := CInt(value);
+	case(name)
+		RES_COLD: mobile.resist_cold_mod := value;
+		RES_ENERGY: mobile.resist_energy_mod := value;
+		RES_FIRE: mobile.resist_fire_mod := value;
+		RES_PHYSICAL: mobile.resist_physical_mod := value;
+		RES_POISON: mobile.resist_poison_mod := value;
+	endcase
 	return value;
 endfunction
 
@@ -503,14 +503,14 @@ endfunction
  *
  */
 function ModifyResistance(mobile, name, value)
-  value := CInt(value);
-  case(name)
-    RES_PHYSICAL_MOD: mobile.resist_physical_mod := mobile.resist_physical_mod + value;
-    RES_FIRE_MOD: mobile.resist_fire_mod := mobile.resist_fire_mod + value;
-    RES_COLD_MOD: mobile.resist_cold_mod := mobile.resist_cold_mod + value;
-    RES_POISON_MOD: mobile.resist_poison_mod := mobile.resist_poison_mod + value;
-    RES_ENERGY_MOD: mobile.resist_energy_mod := mobile.resist_energy_mod + value;
-  endcase
+	value := CInt(value);
+	case(name)
+		RES_PHYSICAL_MOD: mobile.resist_physical_mod := mobile.resist_physical_mod + value;
+		RES_FIRE_MOD: mobile.resist_fire_mod := mobile.resist_fire_mod + value;
+		RES_COLD_MOD: mobile.resist_cold_mod := mobile.resist_cold_mod + value;
+		RES_POISON_MOD: mobile.resist_poison_mod := mobile.resist_poison_mod + value;
+		RES_ENERGY_MOD: mobile.resist_energy_mod := mobile.resist_energy_mod + value;
+	endcase
 	return value;
 endfunction
 
@@ -535,14 +535,14 @@ endfunction
  *
  */
 function SetDamage(mobile, name, value)
-  value := CInt(value);
-  case(name)
-    DMG_COLD: mobile.damage_cold_mod := value;
-    DMG_ENERGY: mobile.damage_energy_mod := value;
-    DMG_FIRE: mobile.damage_fire_mod := value;
-    DMG_PHYSICAL: mobile.damage_physical_mod := value;
-    DMG_POISON: mobile.damage_poison_mod := value;
-  endcase
+	value := CInt(value);
+	case(name)
+		DMG_COLD: mobile.damage_cold_mod := value;
+		DMG_ENERGY: mobile.damage_energy_mod := value;
+		DMG_FIRE: mobile.damage_fire_mod := value;
+		DMG_PHYSICAL: mobile.damage_physical_mod := value;
+		DMG_POISON: mobile.damage_poison_mod := value;
+	endcase
 	return value;
 endfunction
 
@@ -560,14 +560,14 @@ endfunction
  *
  */
 function ModifyDamage(mobile, name, value)
-  value := CInt(value);
-  case(name)
-    DMG_COLD_MOD: mobile.damage_cold_mod := mobile.damage_cold_mod + value;
-    DMG_ENERGY_MOD: mobile.damage_energy_mod := mobile.damage_energy_mod + value;
-    DMG_FIRE_MOD: mobile.damage_fire_mod := mobile.damage_fire_mod + value;
-    DMG_PHYSICAL_MOD: mobile.damage_physical_mod := mobile.damage_physical_mod + value;
-    DMG_POISON_MOD: mobile.damage_poison_mod := mobile.damage_poison_mod + value;
-  endcase
+	value := CInt(value);
+	case(name)
+		DMG_COLD_MOD: mobile.damage_cold_mod := mobile.damage_cold_mod + value;
+		DMG_ENERGY_MOD: mobile.damage_energy_mod := mobile.damage_energy_mod + value;
+		DMG_FIRE_MOD: mobile.damage_fire_mod := mobile.damage_fire_mod + value;
+		DMG_PHYSICAL_MOD: mobile.damage_physical_mod := mobile.damage_physical_mod + value;
+		DMG_POISON_MOD: mobile.damage_poison_mod := mobile.damage_poison_mod + value;
+	endcase
 	return value;
 endfunction
 
@@ -746,3 +746,41 @@ function KillMobile(mob, repsys:=0, attacker := 0)
 	endif
 
 Endfunction
+
+function CalcAnatomyDmgMod( byref who )
+
+	var anat_dmg_mod := CDbl( 0 );
+	var anat_skil := GetAttribute( who, ANATOMY, ATTRIBUTE_PRECISION_TENTHS );
+
+	if( anat_skill < 100 )
+		anat_dmg_mod := 0.0;
+	elseif( (anat_skill >= 100) && (anat_skil <= 200) )
+		anat_dmg_mod := 0.05;
+	elseif( (anat_skill >= 200) && (anat_skil <= 300) )
+		anat_dmg_mod := 0.10;
+	elseif( (anat_skill >= 300) && (anat_skil <= 400) )
+		anat_dmg_mod := 0.15;
+	elseif( (anat_skill >= 400) && (anat_skil <= 500) )
+		anat_dmg_mod := 0.20;
+	elseif( (anat_skill >= 500) && (anat_skil <= 600) )
+		anat_dmg_mod := 0.25;
+	elseif( (anat_skill >= 600) && (anat_skil <= 700) )
+		anat_dmg_mod := 0.30;
+	elseif( (anat_skill >= 700) && (anat_skil <= 800) )
+		anat_dmg_mod := 0.35;
+	elseif( (anat_skill >= 800) && (anat_skil <= 900) )
+		anat_dmg_mod := 0.40;
+	elseif( (anat_skill >= 900) && (anat_skil <= 1000) )
+		anat_dmg_mod := 0.45;
+	elseif( (anat_skill >= 1000) && (anat_skil <= 1100) )
+		anat_dmg_mod := 0.55;
+	elseif( (anat_skill >= 1100) && (anat_skil <= 1200) )
+		anat_dmg_mod := 0.60;
+	elseif( anat_skill >= 1200 )
+		anat_dmg_mod := 0.65;
+	endif
+
+	return anat_dmg_mod;
+
+endfunction
+
