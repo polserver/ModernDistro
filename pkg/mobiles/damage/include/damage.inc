@@ -750,31 +750,31 @@ Endfunction
 function CalcAnatomyDmgMod( byref who )
 
 	var anat_dmg_mod := CDbl( 0 );
-	var anat_skil := GetAttribute( who, ANATOMY, ATTRIBUTE_PRECISION_TENTHS );
+	var anat_skill := GetAttribute( who, ANATOMY, ATTRIBUTE_PRECISION_TENTHS );
 
 	if( anat_skill < 100 )
 		anat_dmg_mod := 0.0;
-	elseif( (anat_skill >= 100) && (anat_skil <= 200) )
+	elseif( (anat_skill >= 100) && (anat_skill <= 200) )
 		anat_dmg_mod := 0.05;
-	elseif( (anat_skill >= 200) && (anat_skil <= 300) )
+	elseif( (anat_skill >= 200) && (anat_skill  <= 300) )
 		anat_dmg_mod := 0.10;
-	elseif( (anat_skill >= 300) && (anat_skil <= 400) )
+	elseif( (anat_skill >= 300) && (anat_skill <= 400) )
 		anat_dmg_mod := 0.15;
-	elseif( (anat_skill >= 400) && (anat_skil <= 500) )
+	elseif( (anat_skill >= 400) && (anat_skill <= 500) )
 		anat_dmg_mod := 0.20;
-	elseif( (anat_skill >= 500) && (anat_skil <= 600) )
+	elseif( (anat_skill >= 500) && (anat_skill <= 600) )
 		anat_dmg_mod := 0.25;
-	elseif( (anat_skill >= 600) && (anat_skil <= 700) )
+	elseif( (anat_skill >= 600) && (anat_skill <= 700) )
 		anat_dmg_mod := 0.30;
-	elseif( (anat_skill >= 700) && (anat_skil <= 800) )
+	elseif( (anat_skill >= 700) && (anat_skill <= 800) )
 		anat_dmg_mod := 0.35;
-	elseif( (anat_skill >= 800) && (anat_skil <= 900) )
+	elseif( (anat_skill >= 800) && (anat_skill <= 900) )
 		anat_dmg_mod := 0.40;
-	elseif( (anat_skill >= 900) && (anat_skil <= 1000) )
+	elseif( (anat_skill >= 900) && (anat_skill <= 1000) )
 		anat_dmg_mod := 0.45;
-	elseif( (anat_skill >= 1000) && (anat_skil <= 1100) )
+	elseif( (anat_skill >= 1000) && (anat_skill <= 1100) )
 		anat_dmg_mod := 0.55;
-	elseif( (anat_skill >= 1100) && (anat_skil <= 1200) )
+	elseif( (anat_skill >= 1100) && (anat_skill <= 1200) )
 		anat_dmg_mod := 0.60;
 	elseif( anat_skill >= 1200 )
 		anat_dmg_mod := 0.65;
