@@ -61,10 +61,8 @@ program WrestlingHitScript(attacker, defender, weapon, armor, basedamage, rawdam
 				rawdamage := 1;
 			endif
 			// anat := Cint(AP_GetSkill(attacker, ANATOMY) / 20);
-			var anat_dmg_mod := CalcAnatomyDmgMod( attacker );
-			rawdamage := Cint(CDbl(rawdamage) * anat_dmg_mod);
 			// This next line appears to increase that damage too high.
-			rawdamage := rawdamage + RandomInt( CInt((AP_GetSkill(attacker, ANATOMY) ) / 20));
+			// rawdamage := rawdamage + RandomInt( CInt((AP_GetSkill(attacker, ANATOMY) ) / 20));
 			ApplyRawDamageEX(defender, rawdamage, DMG_PHYSICAL, attacker);
 			return;
 		else
@@ -81,10 +79,10 @@ program WrestlingHitScript(attacker, defender, weapon, armor, basedamage, rawdam
 			if(rawdamage < 1)
 				rawdamage := 1;
 			endif
-			anat := Cint(AP_GetSkill(attacker, ANATOMY) / 20);
-			rawdamage := Cint(rawdamage + anat);
+			// anat := Cint(AP_GetSkill(attacker, ANATOMY) / 20);
+			// rawdamage := Cint(rawdamage + anat);
 			// This next line appears to increase that damage too high.
-			rawdamage := rawdamage + RandomInt( CInt((AP_GetSkill(attacker, ANATOMY) ) / 20));
+			// rawdamage := rawdamage + RandomInt( CInt((AP_GetSkill(attacker, ANATOMY) ) / 20));
 			ApplyRawDamageEX(defender, rawdamage, DMG_PHYSICAL, attacker);
 			return;
 		endif
@@ -105,10 +103,10 @@ program WrestlingHitScript(attacker, defender, weapon, armor, basedamage, rawdam
 		if(rawdamage < 1)
 			rawdamage := 1;
 		endif
-		anat := Cint(GetEffectiveSkill(attacker, SKILLID_ANATOMY) / 20);
-		rawdamage := Cint(rawdamage + anat);
+		// anat := Cint(GetEffectiveSkill(attacker, SKILLID_ANATOMY) / 20);
+		// rawdamage := Cint(rawdamage + anat);
 		// This next line appears to increase that damage too high.
-		rawdamage := rawdamage + RandomInt( CInt((AP_GetSkill(attacker, ANATOMY) ) / 20));
+		// rawdamage := rawdamage + RandomInt( CInt((AP_GetSkill(attacker, ANATOMY) ) / 20));
 		ApplyRawDamageEX(defender, rawdamage, DMG_PHYSICAL, attacker);
 		return;
 	endif

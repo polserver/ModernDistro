@@ -155,7 +155,6 @@ endfunction
 // Modifies damage for anatomy, then applies it to the target.
 function DealDamage(defender, attacker, rawdamage)
 
-	rawdamage := CInt(rawdamage * CalcAnatomyDmgMod( attacker ));
 	ApplyRawDamageEX(defender, rawdamage, DMG_PHYSICAL, attacker);
 
 endfunction

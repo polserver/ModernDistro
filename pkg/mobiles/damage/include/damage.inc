@@ -560,6 +560,7 @@ endfunction
  *
  */
 function ModifyDamage(mobile, name, value)
+
 	value := CInt(value);
 	case(name)
 		DMG_COLD_MOD: mobile.damage_cold_mod := mobile.damage_cold_mod + value;
@@ -568,7 +569,12 @@ function ModifyDamage(mobile, name, value)
 		DMG_PHYSICAL_MOD: mobile.damage_physical_mod := mobile.damage_physical_mod + value;
 		DMG_POISON_MOD: mobile.damage_poison_mod := mobile.damage_poison_mod + value;
 	endcase
+	// Modify damage with anatomy damage mod.
+	value := value * CalcAnatomyDmgMod( mobile );
+	// Modify damage with tactics damage mod.
+	value := value * CalcTacticsDmgMod( mobile );
 	return value;
+
 endfunction
 
 
@@ -747,6 +753,19 @@ function KillMobile(mob, repsys:=0, attacker := 0)
 
 Endfunction
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+//	CalcAnatomyDmgMod( byref who )
+//
+//	Purpose:	Returns the anatomy damage mod as a percentage.
+//
+//	Parameter:	mobileref::who
+//
+//	Returns:	double::anat_dmg_mod as a percentage.
+//
+//	Created:	2023-01-06 02:06:13 by Yukiko
+//
+//////////////////////////////////////////////////////////////////////////////////////////
 function CalcAnatomyDmgMod( byref who )
 
 	var anat_dmg_mod := CDbl( 0 );
@@ -781,6 +800,28 @@ function CalcAnatomyDmgMod( byref who )
 	endif
 
 	return anat_dmg_mod;
+
+endfunction
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+//	CalcTacticsDmgMod( byref who )
+//
+//	Purpose:	Returns the tactics damage mod as a percentage.
+//
+//	Parameter:	mobileref::who
+//
+//	Returns:	double::tactics_dmg_mod
+//
+//	Created:	2023-01-06 02:09:09 by Yukiko
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+function CalcTacticsDmgMod( byref who )
+
+	var tactics_skill := GetAttribute( who, TACTICS );
+	var tactics_dmg_mod := CDbl( (tactics_skill ) + 50.0) * 0.01;
+
+	return tactics_dmg_mod;
 
 endfunction
 
