@@ -353,7 +353,7 @@ function cure(who, patient, counter, healing)
 			break;
 		elseif(AP_GetVital(who, VITALID_LIFE) < chp)
 			if((RandomInt(100)+1) > AP_GetTrueStat(who, DEXTERITY))
-				SendSysMessage( who, 500961, color := 40 ); // Your fingers slip!
+				SendSysMessageCL( who, 500961, color := 40 ); // Your fingers slip!
 				healamt := (healamt - 1);
 				count := count + 1;
 				if(count >= 5)
@@ -380,7 +380,7 @@ function cure(who, patient, counter, healing)
 				endif
 				break;
 			else
-				SendSysMessage ( who , "You could not heal your patient." );
+				SendSysMessage( who , "You could not heal your patient." );
 			endif
 		endif
 		counter := counter + 1;
