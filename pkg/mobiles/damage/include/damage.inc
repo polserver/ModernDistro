@@ -6,7 +6,11 @@
  */
 // Version 2
 // 2017-11-15  Yukiko changed resistances from using a CProp to use built-in members.
-//
+// Some functions are not used. When I switched from using a CProp containing resistances
+// to the built-in resist members, some functions were no longer needed. I left them IncRevision
+// for expansion if a developer wishes to add custom resistances later.
+// See https://github.com/polserver/legacy_scripts/tree/master/legacy_Distros/releases/097/Distro/pkg/mobiles/damage/include/damage.inc
+// for the original functions.
 // To do: Add the ability to have custom resistances through the use of a CProp.
 //
 
@@ -172,21 +176,26 @@ endfunction
 function ApplySpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circle := 1, spell := "")
 
 	amount := CInt(amount);
-
-	if( mobile.IsA(POLCLASS_NPC) )
-		amount := amount * 2;
+	// base damage * ( 3 * Evaluating Intelligence / 100 + 1 )
+	if( source )
+		amount := amount + CInt( (3 * GetAttribute( source, EVALUATING_INTELLIGENCE ) / 100) ) + 1;
 	endif
 
+	//				Settings Checks
 	// Check to see if we are using magic resistance with damage spells.
 	var settings := DMG_GetSettingsCfgElem("Settings");
 	if ( CInt(settings.UseMRInAllSpells) )
 		amount := Resisted(circle, source, mobile, amount);
 	endif
+	// Get the damage mod when the victim is an NPC.
+	if( mobile.IsA(POLCLASS_NPC) )
+		amount := CInt( amount * CDbl( settings.NPCDamageMod ) );
+	endif
 	// Check to see if we will take standard resistances into account against spell damage.
-	// settings := DMG_GetSettingsCfgElem("Settings");
 	if ( CInt(settings.UseDamageTypes) )
 		amount := CalcDamageAmount(mobile, amount, type);
 	endif
+	//				End Settings Checks.
 
 	if ( amount == error )
 		return 0;
@@ -229,16 +238,23 @@ endfunction
  */
 function ApplyRawSpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circle := 1, spell := "")
 	amount := CInt(amount);
-	var settings := DMG_GetSettingsCfgElem("Settings");
-	if ( settings.UseMRInAllSpells )
-		amount := Resisted(circle, source, mobile, amount);
+
+	// base damage * ( 3 * Evaluating Intelligence / 100 + 1 )
+	if( source )
+		amount := amount + CInt( (3 * GetAttribute( source, EVALUATING_INTELLIGENCE ) / 100) ) + 1;
 	endif
+
+	//				Settings Checks
+	var settings := DMG_GetSettingsCfgElem("Settings");
+	// Get the damage mod when the victim is an NPC.
+	if( mobile.IsA(POLCLASS_NPC) )
+		amount := CInt( amount * CDbl( settings.NPCDamageMod ) );
+	endif
+	//				End Settings Checks.
 
 	if ( amount == error )
 		return 0;
 	endif
-
-	settings := DMG_GetSettingsCfgElem("Settings");
 
 	if ( amount < 0 )
 		HealDamage(mobile, Abs(amount));
@@ -278,10 +294,14 @@ endfunction
  */
 function CalcDamageAmount(mobile, amount, type)
 
-	amount := CInt(amount);
-  // If type == DMG_FORCED we don't take resistances into account.
+	// Modify damage with anatomy damage mod.
+	amount := amount * CalcAnatomyDmgMod( mobile );
+	// Modify damage with tactics damage mod.
+	amount := amount * CalcTacticsDmgMod( mobile );
+
+	// If type == DMG_FORCED we don't take resistances into account.
 	if ( type == DMG_FORCED )
-		return amount;
+		return CInt(amount);
 	endif
 
 	var resistance := CDbl(GetResistance(mobile, type));
@@ -456,9 +476,7 @@ function GetNPCResistance(template, type:=0)
 	endif
 endfunction
 
-
-
-/*
+/* Not used.
  * SetResistance(mobile, name, value)
  *
  * Purpose
@@ -489,7 +507,7 @@ function SetResistance(mobile, name, value)
 	return value;
 endfunction
 
-/*
+/* Not used.
  * ModifyResistance(mobile, name, value)
  * Purpose
  * Modifies a resistance value on a mobile.
@@ -515,7 +533,7 @@ function ModifyResistance(mobile, name, value)
 endfunction
 
 
-/*
+/* Not used.
  * SetDamage(mobile, name, value)
  *
  * Purpose
@@ -546,7 +564,7 @@ function SetDamage(mobile, name, value)
 	return value;
 endfunction
 
-/*
+/* Not used.
  * ModifyDamage(mobile, name, value)
  * Purpose
  * Modifies a damage value on a mobile.
@@ -577,9 +595,7 @@ function ModifyDamage(mobile, name, value)
 
 endfunction
 
-
-
-/*
+/* Not used.
  * GetDamageMembers(mobile)
  *
  * Purpose
@@ -610,7 +626,7 @@ function GetDamageMembers(mobile)
 endfunction
 
 
-/*
+/* Not used.
  * ResistancePercentToMult(percent)
  *
  * Purpose
@@ -633,7 +649,7 @@ function ResistancePercentToMult(percent)
     endif
 endfunction
 
-/*
+/* Not used.
  * ResistanceMultToPercent(percent)
  *
  * Purpose
