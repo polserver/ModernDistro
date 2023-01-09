@@ -110,6 +110,7 @@ endfunction
 
 function HealerStuff(mobile)
   var parms := {me, mobile};
+  TurnToward( mobile );
   start_script("doRes", parms);
   return;
 endfunction
