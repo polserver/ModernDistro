@@ -86,8 +86,13 @@ endenum
  *
  */
 function ApplyDamageEX(mobile, amount, type:=DMG_FORCED, source:=0)
+
+	// Print("Damage amount before adjustment is "+amount);
 	amount := CInt(amount);
 	amount := CalcDamageAmount(mobile, amount, type);
+	// Print("Source is "+source.name);
+	// Print("Damage type is "+type);
+	// Print("Damage amount after adjustment is "+amount);
 
 	if ( amount == error )
 		return 0;
@@ -294,10 +299,13 @@ endfunction
  */
 function CalcDamageAmount(mobile, amount, type)
 
+	var base_damage := amount;
 	// Modify damage with anatomy damage mod.
-	amount := amount * CalcAnatomyDmgMod( mobile );
+	amount := amount + (amount * CalcAnatomyDmgMod( mobile ));
 	// Modify damage with tactics damage mod.
-	amount := amount * CalcTacticsDmgMod( mobile );
+	amount := amount + (amount * CalcTacticsDmgMod( mobile ));
+	// Modify damage with arms lore damage mod.
+	amount := amount + (amount * CalcArmsLoreDmgMod( mobile ));
 
 	// If type == DMG_FORCED we don't take resistances into account.
 	if ( type == DMG_FORCED )
@@ -784,34 +792,34 @@ Endfunction
 //////////////////////////////////////////////////////////////////////////////////////////
 function CalcAnatomyDmgMod( byref who )
 
-	var anat_dmg_mod := CDbl( 0 );
-	var anat_skill := GetAttribute( who, ANATOMY, ATTRIBUTE_PRECISION_TENTHS );
+	var anat_dmg_mod := 0.0;
+	var anat_skill := CDbl( GetAttribute( who, ANATOMY, ATTRIBUTE_PRECISION_TENTHS ) ) / 10.0;
 
-	if( anat_skill < 100 )
+	if( anat_skill < 10.0 )
 		anat_dmg_mod := 0.0;
-	elseif( (anat_skill >= 100) && (anat_skill <= 200) )
+	elseif( (anat_skill >= 10.0) && (anat_skill <= 20.0) )
 		anat_dmg_mod := 0.05;
-	elseif( (anat_skill >= 200) && (anat_skill  <= 300) )
+	elseif( (anat_skill >= 20.0) && (anat_skill  <= 30.0) )
 		anat_dmg_mod := 0.10;
-	elseif( (anat_skill >= 300) && (anat_skill <= 400) )
+	elseif( (anat_skill >= 30.0) && (anat_skill <= 40.0) )
 		anat_dmg_mod := 0.15;
-	elseif( (anat_skill >= 400) && (anat_skill <= 500) )
+	elseif( (anat_skill >= 40.0) && (anat_skill <= 50.0) )
 		anat_dmg_mod := 0.20;
-	elseif( (anat_skill >= 500) && (anat_skill <= 600) )
+	elseif( (anat_skill >= 50.0) && (anat_skill <= 60.0) )
 		anat_dmg_mod := 0.25;
-	elseif( (anat_skill >= 600) && (anat_skill <= 700) )
+	elseif( (anat_skill >= 60.0) && (anat_skill <= 70.0) )
 		anat_dmg_mod := 0.30;
-	elseif( (anat_skill >= 700) && (anat_skill <= 800) )
+	elseif( (anat_skill >= 70.0) && (anat_skill <= 80.0) )
 		anat_dmg_mod := 0.35;
-	elseif( (anat_skill >= 800) && (anat_skill <= 900) )
+	elseif( (anat_skill >= 80.0) && (anat_skill <= 90.0) )
 		anat_dmg_mod := 0.40;
-	elseif( (anat_skill >= 900) && (anat_skill <= 1000) )
+	elseif( (anat_skill >= 90.0) && (anat_skill <= 100.0) )
 		anat_dmg_mod := 0.45;
-	elseif( (anat_skill >= 1000) && (anat_skill <= 1100) )
+	elseif( (anat_skill >= 100.0) && (anat_skill <= 110.0) )
 		anat_dmg_mod := 0.55;
-	elseif( (anat_skill >= 1100) && (anat_skill <= 1200) )
+	elseif( (anat_skill >= 110.0) && (anat_skill <= 120.0) )
 		anat_dmg_mod := 0.60;
-	elseif( anat_skill >= 1200 )
+	elseif( anat_skill >= 120.0 )
 		anat_dmg_mod := 0.65;
 	endif
 
@@ -834,10 +842,30 @@ endfunction
 //////////////////////////////////////////////////////////////////////////////////////////
 function CalcTacticsDmgMod( byref who )
 
-	var tactics_skill := GetAttribute( who, TACTICS );
-	var tactics_dmg_mod := CDbl( (tactics_skill ) + 50.0) * 0.01;
+	var tactics_skill := CDbl( GetAttribute( who, TACTICS, ATTRIBUTE_PRECISION_TENTHS ) ) / 10.0;
+	var tactics_dmg_mod := (tactics_skill + 50.0) * 0.01;
 
 	return tactics_dmg_mod;
 
 endfunction
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+//	CalcArmsLoreDmgMod( who )
+//
+//	Purpose:	Returns the arms lore damage mod as a percentage.
+//
+//	Parameter:	mobileref::who
+//
+//	Returns:	double::arms_lore_dmg_mod
+//
+//	Created:	2023-01-13 21:49:47 by Yukiko
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+function CalcArmsLoreDmgMod( byref who )
+
+	var arms_lore_skill := CDbl( GetAttribute( who, ARMS_LORE, ATTRIBUTE_PRECISION_TENTHS ) ) / 10.0;
+	var arms_lore_dmg_mod := (arms_lore_skill / 20) * 0.01;
+	return arms_lore_dmg_mod;
+
+endfunction
