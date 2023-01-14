@@ -369,7 +369,14 @@ function RunWeaponHitScripts(byref a_info, byref d_info, armor_hit, base_damage,
 		weapon_scripts := GetWeaponHitScripts((a_info.mobile).weapon);
 	endif
 
-	var params := array{a_info.mobile, d_info.mobile, (a_info.mobile).weapon, armor_hit, base_damage, raw_damage};
+	var params := array{a_info.mobile, d_info.mobile, a_info.mobile.weapon, armor_hit, CInt(base_damage), CInt(raw_damage)};
+	if( a_info.mobile.weapon.hitscript != "" )
+		var script := Start_Script(a_info.mobile.weapon.hitscript, params);
+		if( script.errortext )
+			Print( script.errortext );
+		endif
+	endif
+
 	foreach hitscript in ( weapon_scripts )
 		var script := Start_Script(hitscript, params);
 		if ( !script || script.errortext )
