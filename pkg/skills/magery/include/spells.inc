@@ -275,7 +275,7 @@ endfunction
  */
 function MS_GetSpellDamage(mobile, targ, base_damage)
 	var eval_int_bonus := CInt((AP_GetSkill(mobile, EVALUATING_INTELLIGENCE) * 3) / 100) + 1;
-	var intel_bonus := CInt(AP_GetStat(mobile, "Intelligence") / 10);
+	var intel_bonus := CInt(AP_GetStat(mobile, INTELLIGENCE) / 10);
 
 	var sdi_bonus := CInt(mobile.spell_damage_increase);
 	// SDI bonus capped at 15% for PvP
@@ -570,7 +570,7 @@ endfunction
 
 
 // Find friendlies and add them to the list of includes
-// Note: A friendly is anything non-criminal and non-murderer. I guess.
+// Note: A friendly is anything non-criminal and non-murderer.
 function MS_GetFriendlies(targ, area_size:=1)
 	var friendlies := {};
 	if ( !targ.realm )
