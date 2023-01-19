@@ -88,8 +88,8 @@ endenum
 function ApplyDamageEX(mobile, amount, type:=DMG_FORCED, source:=0)
 
 	// Print("Damage amount before adjustment is "+amount);
-	amount := CInt(amount);
-	amount := CalcDamageAmount(mobile, amount, type);
+	// amount := CInt( amount );
+	amount := CInt( CalcDamageAmount( mobile, amount, type, source ) );
 	// Print("Source is "+source.name);
 	// Print("Damage type is "+type);
 	// Print("Damage amount after adjustment is "+amount);
@@ -99,7 +99,7 @@ function ApplyDamageEX(mobile, amount, type:=DMG_FORCED, source:=0)
 	endif
 
 	if ( amount < 0 )
-		HealDamage(mobile, Abs(amount));
+		HealDamage(mobile, Abs( amount ));
 	else
 		if ( source )
 			SetLastDamageInfo(mobile, amount, type, source);
@@ -107,10 +107,10 @@ function ApplyDamageEX(mobile, amount, type:=DMG_FORCED, source:=0)
 		endif
     // Added for necro wraith form
     if(source and GetObjProperty(source, "wraith"))
-      DoManaSuck(mobile, source, amount);
+		DoManaSuck(mobile, source, amount);
     endif
     if(GetObjProperty(source , "cursed_weapon"))
-      LifeDrain(source, amount, 50);
+		LifeDrain(source, amount, 50);
     endif
 		ApplyDamage(mobile, amount);
 	endif
@@ -133,8 +133,8 @@ endfunction
  *
  */
 function ApplyRawDamageEX(mobile, amount, type:=DMG_FORCED, source:=0)
-	amount := CInt(amount);
-	amount := CalcDamageAmount(mobile, amount, type);
+
+	amount := CInt( CalcDamageAmount( mobile, amount, type, source ) );
 
 	if ( amount == error )
 		return 0;
@@ -197,9 +197,9 @@ function ApplySpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circle 
 		amount := CInt( amount * CDbl( settings.NPCDamageMod ) );
 	endif
 	// Check to see if we will take standard resistances into account against spell damage.
-	if ( CInt(settings.UseDamageTypes) )
-		amount := CalcDamageAmount(mobile, amount, type);
-	endif
+	// if ( CInt(settings.UseDamageTypes) )
+		// amount := CalcDamageAmount(mobile, amount, type);
+	// endif
 	//				End Settings Checks.
 
 	if ( amount == error )
@@ -242,7 +242,6 @@ endfunction
  *
  */
 function ApplyRawSpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circle := 1, spell := "")
-	amount := CInt(amount);
 
 	// base damage * ( 3 * Evaluating Intelligence / 100 + 1 )
 	if( source )
@@ -278,7 +277,7 @@ function ApplyRawSpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circ
 		LifeDrain(source, amount, 50);
 	endif
 
-	return amount;
+	return CInt( amount );
 endfunction
 
 /*
@@ -297,15 +296,16 @@ endfunction
  * Integer
  *
  */
-function CalcDamageAmount(mobile, amount, type)
+function CalcDamageAmount(mobile, amount, type, source)
 
-	var base_damage := amount;
-	// Modify damage with anatomy damage mod.
-	amount := amount + (amount * CalcAnatomyDmgMod( mobile ));
-	// Modify damage with tactics damage mod.
-	amount := amount + (amount * CalcTacticsDmgMod( mobile ));
-	// Modify damage with arms lore damage mod.
-	amount := amount + (amount * CalcArmsLoreDmgMod( mobile ));
+	if( source )
+		// Add all of the skill damage mods together
+		var skill_dmg_mod := CalcAnatomyDmgMod( source ) + CalcTacticsDmgMod( source ) + CalcArmsLoreDmgMod( source ) + CalcLumberjackingDamageMod( source );
+		if( skill_dmg_mod > 300.0 )
+			skill_dmg_mod := 300.0;
+		endif
+		amount := amount + (amount * skill_dmg_mod);
+	endif
 
 	// If type == DMG_FORCED we don't take resistances into account.
 	if ( type == DMG_FORCED )
@@ -413,8 +413,8 @@ endfunction
  * GetResistance(mobile, type)
  *
  * Purpose
- * Retrieves the resistances list for a mobile, taking into consideration
- * the magic resist skill.
+ * Retrieves the elemental resistances list for a mobile, taking
+ * into consideration the magic resist skill.
  *
  *
  * Parameters
@@ -438,7 +438,7 @@ function GetResistance(mobile, type:=0)
       DMG_PHYSICAL: amt := mobile.resist_physical;
       DMG_POISON: amt := mobile.resist_poison;
     endcase
-		return amt;
+	return amt;
 endfunction
 
 /* Not used.
@@ -779,21 +779,21 @@ Endfunction
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //
-//	CalcAnatomyDmgMod( byref who )
+//	CalcAnatomyDmgMod( byref attacker )
 //
 //	Purpose:	Returns the anatomy damage mod as a percentage.
 //
-//	Parameter:	mobileref::who
+//	Parameter:	mobileref::attacker
 //
 //	Returns:	double::anat_dmg_mod as a percentage.
 //
 //	Created:	2023-01-06 02:06:13 by Yukiko
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-function CalcAnatomyDmgMod( byref who )
+function CalcAnatomyDmgMod( byref attacker )
 
 	var anat_dmg_mod := 0.0;
-	var anat_skill := CDbl( GetAttribute( who, ANATOMY, ATTRIBUTE_PRECISION_TENTHS ) ) / 10.0;
+	var anat_skill := CDbl( GetAttribute( attacker, ANATOMY, ATTRIBUTE_PRECISION_TENTHS ) ) / 10.0;
 
 	if( anat_skill < 10.0 )
 		anat_dmg_mod := 0.0;
@@ -833,16 +833,16 @@ endfunction
 //
 //	Purpose:	Returns the tactics damage mod as a percentage.
 //
-//	Parameter:	mobileref::who
+//	Parameter:	mobileref::attacker
 //
 //	Returns:	double::tactics_dmg_mod
 //
 //	Created:	2023-01-06 02:09:09 by Yukiko
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-function CalcTacticsDmgMod( byref who )
+function CalcTacticsDmgMod( byref attacker )
 
-	var tactics_skill := CDbl( GetAttribute( who, TACTICS, ATTRIBUTE_PRECISION_TENTHS ) ) / 10.0;
+	var tactics_skill := CDbl( GetAttribute( attacker, TACTICS, ATTRIBUTE_PRECISION_TENTHS ) ) / 10.0;
 	var tactics_dmg_mod := (tactics_skill + 50.0) * 0.01;
 
 	return tactics_dmg_mod;
@@ -855,17 +855,49 @@ endfunction
 //
 //	Purpose:	Returns the arms lore damage mod as a percentage.
 //
-//	Parameter:	mobileref::who
+//	Parameter:	mobileref::attacker
 //
 //	Returns:	double::arms_lore_dmg_mod
 //
 //	Created:	2023-01-13 21:49:47 by Yukiko
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-function CalcArmsLoreDmgMod( byref who )
+function CalcArmsLoreDmgMod( byref attacker )
 
-	var arms_lore_skill := CDbl( GetAttribute( who, ARMS_LORE, ATTRIBUTE_PRECISION_TENTHS ) ) / 10.0;
+	var arms_lore_skill := CDbl( GetAttribute( attacker, ARMS_LORE, ATTRIBUTE_PRECISION_TENTHS ) ) / 10.0;
 	var arms_lore_dmg_mod := (arms_lore_skill / 20) * 0.01;
 	return arms_lore_dmg_mod;
 
 endfunction
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+//	CalcLumberjackingDamageMod( byref attacker )
+//
+//	Purpose:	Returns the lumberjacking damage mod as a percentage.
+//
+//	Parameter:	mobileref::attacker
+//
+//	Returns:	double::lumberjack_dmg_mod
+//
+//	Created:	2023-01-17 02:37:49 by Yukiko
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+function CalcLumberjackingDamageMod( byref attacker )
+
+	if( attacker.weapon.IsAxe() )
+		var lumberjack_skill := CDbl( GetAttribute( attacker, LUMBERJACKING, ATTRIBUTE_PRECISION_TENTHS ) ) / 10.0;
+		var lumberjack_dmg_mod := 0.0;
+		if( lumberjack_skill < 100.0 )
+			lumberjack_dmg_mod := lumberjack_skill / 5.0;
+		else
+			lumberjack_dmg_mod := (lumberjack_skill / 5.0) + 10.0;
+		endif
+
+		return lumberjack_dmg_mod;
+	endif
+
+	return 0.0;
+
+endfunction
+
