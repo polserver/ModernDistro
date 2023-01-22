@@ -1,0 +1,13 @@
+use os;
+
+program Start()
+
+	var junk := Start_Script( ":focus:fauxFocus" );
+	if(!junk)
+		Print("Cannot start Faux Focus!!!");
+		Print(junk.errortext);
+	else
+		Print("Started Faux Focus.");
+	endif
+endprogram
+

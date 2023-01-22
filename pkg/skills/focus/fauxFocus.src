@@ -1,0 +1,21 @@
+use os;
+use uo;
+
+include ":attributes:attributes";
+include ":focus:settings";
+
+program FauxFocusSkillGain()
+
+	var settings := Focus_GetSettingsCfgElem( "Settings" );
+	var delay_modifier := CInt( settings.FocusDelay );
+	var online_players := {};
+	while( 1 )
+		online_players := EnumerateOnlineCharacters();
+		foreach player in online_players
+			SkillCheck( player, FOCUS, -1, 10 );
+		endforeach
+		Sleep( 120 + (RandomIntMinMax( 120, delay_modifier ) + 1) );
+	endwhile
+
+endprogram
+
