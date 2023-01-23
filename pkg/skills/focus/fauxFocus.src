@@ -7,12 +7,23 @@ include ":focus:settings";
 program FauxFocusSkillGain()
 
 	var settings := Focus_GetSettingsCfgElem( "Settings" );
-	var delay_modifier := CInt( settings.FocusDelay );
+	if( !settings )
+		SysLog( "Error --> :focus:fauxFocus Cannot load element Settings" );
+	endif
+	var delay_modifier := 0;
+	var points := 0;
 	var online_players := {};
 	while( 1 )
+		if( !settings )
+			settings := 160;
+			points := 10;
+		else
+			delay_modifier := CInt( settings.FocusDelay );
+			points := CInt( settings.SkillPoints );
+		endif
 		online_players := EnumerateOnlineCharacters();
 		foreach player in online_players
-			SkillCheck( player, FOCUS, -1, 10 );
+			SkillCheck( player, FOCUS, -1, points );
 		endforeach
 		Sleep( 120 + (RandomIntMinMax( 120, delay_modifier ) + 1) );
 	endwhile
