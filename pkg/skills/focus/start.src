@@ -2,12 +2,12 @@ use os;
 
 program Start()
 
-	var junk := Start_Script( ":focus:fauxFocus" );
+	var junk := Start_Script( ":focus:focus" );
 	if(!junk)
-		Print("Cannot start Faux Focus!!!");
+		Print("Cannot start focus!!!");
 		Print(junk.errortext);
 	else
-		Print("Started Faux Focus.");
+		Print("Started focus.");
 	endif
 endprogram
 
