@@ -6,7 +6,11 @@
  */
 // Version 2
 // 2017-11-15  Yukiko changed resistances from using a CProp to use built-in members.
-//
+// Some functions are not used. When I switched from using a CProp containing resistances
+// to the built-in resist members, some functions were no longer needed. I left them IncRevision
+// for expansion if a developer wishes to add custom resistances later.
+// See https://github.com/polserver/legacy_scripts/tree/master/legacy_Distros/releases/097/Distro/pkg/mobiles/damage/include/damage.inc
+// for the original functions.
 // To do: Add the ability to have custom resistances through the use of a CProp.
 //
 
@@ -82,15 +86,20 @@ endenum
  *
  */
 function ApplyDamageEX(mobile, amount, type:=DMG_FORCED, source:=0)
-	amount := CInt(amount);
-	amount := CalcDamageAmount(mobile, amount, type);
+
+	// Print("Damage amount before adjustment is "+amount);
+	// amount := CInt( amount );
+	amount := CInt( CalcDamageAmount( mobile, amount, type, source ) );
+	// Print("Source is "+source.name);
+	// Print("Damage type is "+type);
+	// Print("Damage amount after adjustment is "+amount);
 
 	if ( amount == error )
 		return 0;
 	endif
 
 	if ( amount < 0 )
-		HealDamage(mobile, Abs(amount));
+		HealDamage(mobile, Abs( amount ));
 	else
 		if ( source )
 			SetLastDamageInfo(mobile, amount, type, source);
@@ -98,10 +107,10 @@ function ApplyDamageEX(mobile, amount, type:=DMG_FORCED, source:=0)
 		endif
     // Added for necro wraith form
     if(source and GetObjProperty(source, "wraith"))
-      DoManaSuck(mobile, source, amount);
+		DoManaSuck(mobile, source, amount);
     endif
     if(GetObjProperty(source , "cursed_weapon"))
-      LifeDrain(source, amount, 50);
+		LifeDrain(source, amount, 50);
     endif
 		ApplyDamage(mobile, amount);
 	endif
@@ -124,8 +133,8 @@ endfunction
  *
  */
 function ApplyRawDamageEX(mobile, amount, type:=DMG_FORCED, source:=0)
-	amount := CInt(amount);
-	amount := CalcDamageAmount(mobile, amount, type);
+
+	amount := CInt( CalcDamageAmount( mobile, amount, type, source ) );
 
 	if ( amount == error )
 		return 0;
@@ -172,21 +181,26 @@ endfunction
 function ApplySpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circle := 1, spell := "")
 
 	amount := CInt(amount);
-
-	if( mobile.IsA(POLCLASS_NPC) )
-		amount := amount * 2;
+	// base damage * ( 3 * Evaluating Intelligence / 100 + 1 )
+	if( source )
+		amount := amount + CInt( (3 * GetAttribute( source, EVALUATING_INTELLIGENCE ) / 100) ) + 1;
 	endif
 
+	//				Settings Checks
 	// Check to see if we are using magic resistance with damage spells.
 	var settings := DMG_GetSettingsCfgElem("Settings");
 	if ( CInt(settings.UseMRInAllSpells) )
 		amount := Resisted(circle, source, mobile, amount);
 	endif
-	// Check to see if we will take standard resistances into account against spell damage.
-	// settings := DMG_GetSettingsCfgElem("Settings");
-	if ( CInt(settings.UseDamageTypes) )
-		amount := CalcDamageAmount(mobile, amount, type);
+	// Get the damage mod when the victim is an NPC.
+	if( mobile.IsA(POLCLASS_NPC) )
+		amount := CInt( amount * CDbl( settings.NPCDamageMod ) );
 	endif
+	// Check to see if we will take standard resistances into account against spell damage.
+	// if ( CInt(settings.UseDamageTypes) )
+		// amount := CalcDamageAmount(mobile, amount, type);
+	// endif
+	//				End Settings Checks.
 
 	if ( amount == error )
 		return 0;
@@ -228,17 +242,23 @@ endfunction
  *
  */
 function ApplyRawSpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circle := 1, spell := "")
-	amount := CInt(amount);
-	var settings := DMG_GetSettingsCfgElem("Settings");
-	if ( settings.UseMRInAllSpells )
-		amount := Resisted(circle, source, mobile, amount);
+
+	// base damage * ( 3 * Evaluating Intelligence / 100 + 1 )
+	if( source )
+		amount := amount + CInt( (3 * GetAttribute( source, EVALUATING_INTELLIGENCE ) / 100) ) + 1;
 	endif
+
+	//				Settings Checks
+	var settings := DMG_GetSettingsCfgElem("Settings");
+	// Get the damage mod when the victim is an NPC.
+	if( mobile.IsA(POLCLASS_NPC) )
+		amount := CInt( amount * CDbl( settings.NPCDamageMod ) );
+	endif
+	//				End Settings Checks.
 
 	if ( amount == error )
 		return 0;
 	endif
-
-	settings := DMG_GetSettingsCfgElem("Settings");
 
 	if ( amount < 0 )
 		HealDamage(mobile, Abs(amount));
@@ -257,7 +277,7 @@ function ApplyRawSpellDamageEX(mobile, amount, type:=DMG_FORCED, source:=0, circ
 		LifeDrain(source, amount, 50);
 	endif
 
-	return amount;
+	return CInt( amount );
 endfunction
 
 /*
@@ -276,12 +296,20 @@ endfunction
  * Integer
  *
  */
-function CalcDamageAmount(mobile, amount, type)
+function CalcDamageAmount(mobile, amount, type, source)
 
-	amount := CInt(amount);
-  // If type == DMG_FORCED we don't take resistances into account.
+	if( source )
+		// Add all of the skill damage mods together
+		var skill_dmg_mod := CalcAnatomyDmgMod( source ) + CalcTacticsDmgMod( source ) + CalcArmsLoreDmgMod( source ) + CalcLumberjackingDamageMod( source );
+		if( skill_dmg_mod > 300.0 )
+			skill_dmg_mod := 300.0;
+		endif
+		amount := amount + (amount * skill_dmg_mod);
+	endif
+
+	// If type == DMG_FORCED we don't take resistances into account.
 	if ( type == DMG_FORCED )
-		return amount;
+		return CInt(amount);
 	endif
 
 	var resistance := CDbl(GetResistance(mobile, type));
@@ -385,8 +413,8 @@ endfunction
  * GetResistance(mobile, type)
  *
  * Purpose
- * Retrieves the resistances list for a mobile, taking into consideration
- * the magic resist skill.
+ * Retrieves the elemental resistances list for a mobile, taking
+ * into consideration the magic resist skill.
  *
  *
  * Parameters
@@ -410,7 +438,7 @@ function GetResistance(mobile, type:=0)
       DMG_PHYSICAL: amt := mobile.resist_physical;
       DMG_POISON: amt := mobile.resist_poison;
     endcase
-		return amt;
+	return amt;
 endfunction
 
 /* Not used.
@@ -456,9 +484,7 @@ function GetNPCResistance(template, type:=0)
 	endif
 endfunction
 
-
-
-/*
+/* Not used.
  * SetResistance(mobile, name, value)
  *
  * Purpose
@@ -478,18 +504,18 @@ endfunction
  *
  */
 function SetResistance(mobile, name, value)
-  value := CInt(value);
-  case(name)
-    RES_COLD: mobile.resist_cold_mod := value;
-    RES_ENERGY: mobile.resist_energy_mod := value;
-    RES_FIRE: mobile.resist_fire_mod := value;
-    RES_PHYSICAL: mobile.resist_physical_mod := value;
-    RES_POISON: mobile.resist_poison_mod := value;
-  endcase
+	value := CInt(value);
+	case(name)
+		RES_COLD: mobile.resist_cold_mod := value;
+		RES_ENERGY: mobile.resist_energy_mod := value;
+		RES_FIRE: mobile.resist_fire_mod := value;
+		RES_PHYSICAL: mobile.resist_physical_mod := value;
+		RES_POISON: mobile.resist_poison_mod := value;
+	endcase
 	return value;
 endfunction
 
-/*
+/* Not used.
  * ModifyResistance(mobile, name, value)
  * Purpose
  * Modifies a resistance value on a mobile.
@@ -503,19 +529,19 @@ endfunction
  *
  */
 function ModifyResistance(mobile, name, value)
-  value := CInt(value);
-  case(name)
-    RES_PHYSICAL_MOD: mobile.resist_physical_mod := mobile.resist_physical_mod + value;
-    RES_FIRE_MOD: mobile.resist_fire_mod := mobile.resist_fire_mod + value;
-    RES_COLD_MOD: mobile.resist_cold_mod := mobile.resist_cold_mod + value;
-    RES_POISON_MOD: mobile.resist_poison_mod := mobile.resist_poison_mod + value;
-    RES_ENERGY_MOD: mobile.resist_energy_mod := mobile.resist_energy_mod + value;
-  endcase
+	value := CInt(value);
+	case(name)
+		RES_PHYSICAL_MOD: mobile.resist_physical_mod := mobile.resist_physical_mod + value;
+		RES_FIRE_MOD: mobile.resist_fire_mod := mobile.resist_fire_mod + value;
+		RES_COLD_MOD: mobile.resist_cold_mod := mobile.resist_cold_mod + value;
+		RES_POISON_MOD: mobile.resist_poison_mod := mobile.resist_poison_mod + value;
+		RES_ENERGY_MOD: mobile.resist_energy_mod := mobile.resist_energy_mod + value;
+	endcase
 	return value;
 endfunction
 
 
-/*
+/* Not used.
  * SetDamage(mobile, name, value)
  *
  * Purpose
@@ -535,18 +561,18 @@ endfunction
  *
  */
 function SetDamage(mobile, name, value)
-  value := CInt(value);
-  case(name)
-    DMG_COLD: mobile.damage_cold_mod := value;
-    DMG_ENERGY: mobile.damage_energy_mod := value;
-    DMG_FIRE: mobile.damage_fire_mod := value;
-    DMG_PHYSICAL: mobile.damage_physical_mod := value;
-    DMG_POISON: mobile.damage_poison_mod := value;
-  endcase
+	value := CInt(value);
+	case(name)
+		DMG_COLD: mobile.damage_cold_mod := value;
+		DMG_ENERGY: mobile.damage_energy_mod := value;
+		DMG_FIRE: mobile.damage_fire_mod := value;
+		DMG_PHYSICAL: mobile.damage_physical_mod := value;
+		DMG_POISON: mobile.damage_poison_mod := value;
+	endcase
 	return value;
 endfunction
 
-/*
+/* Not used.
  * ModifyDamage(mobile, name, value)
  * Purpose
  * Modifies a damage value on a mobile.
@@ -560,20 +586,24 @@ endfunction
  *
  */
 function ModifyDamage(mobile, name, value)
-  value := CInt(value);
-  case(name)
-    DMG_COLD_MOD: mobile.damage_cold_mod := mobile.damage_cold_mod + value;
-    DMG_ENERGY_MOD: mobile.damage_energy_mod := mobile.damage_energy_mod + value;
-    DMG_FIRE_MOD: mobile.damage_fire_mod := mobile.damage_fire_mod + value;
-    DMG_PHYSICAL_MOD: mobile.damage_physical_mod := mobile.damage_physical_mod + value;
-    DMG_POISON_MOD: mobile.damage_poison_mod := mobile.damage_poison_mod + value;
-  endcase
+
+	value := CInt(value);
+	case(name)
+		DMG_COLD_MOD: mobile.damage_cold_mod := mobile.damage_cold_mod + value;
+		DMG_ENERGY_MOD: mobile.damage_energy_mod := mobile.damage_energy_mod + value;
+		DMG_FIRE_MOD: mobile.damage_fire_mod := mobile.damage_fire_mod + value;
+		DMG_PHYSICAL_MOD: mobile.damage_physical_mod := mobile.damage_physical_mod + value;
+		DMG_POISON_MOD: mobile.damage_poison_mod := mobile.damage_poison_mod + value;
+	endcase
+	// Modify damage with anatomy damage mod.
+	value := value * CalcAnatomyDmgMod( mobile );
+	// Modify damage with tactics damage mod.
+	value := value * CalcTacticsDmgMod( mobile );
 	return value;
+
 endfunction
 
-
-
-/*
+/* Not used.
  * GetDamageMembers(mobile)
  *
  * Purpose
@@ -604,7 +634,7 @@ function GetDamageMembers(mobile)
 endfunction
 
 
-/*
+/* Not used.
  * ResistancePercentToMult(percent)
  *
  * Purpose
@@ -627,7 +657,7 @@ function ResistancePercentToMult(percent)
     endif
 endfunction
 
-/*
+/* Not used.
  * ResistanceMultToPercent(percent)
  *
  * Purpose
@@ -746,3 +776,128 @@ function KillMobile(mob, repsys:=0, attacker := 0)
 	endif
 
 Endfunction
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+//	CalcAnatomyDmgMod( byref attacker )
+//
+//	Purpose:	Returns the anatomy damage mod as a percentage.
+//
+//	Parameter:	mobileref::attacker
+//
+//	Returns:	double::anat_dmg_mod as a percentage.
+//
+//	Created:	2023-01-06 02:06:13 by Yukiko
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+function CalcAnatomyDmgMod( byref attacker )
+
+	var anat_dmg_mod := 0.0;
+	var anat_skill := CDbl( GetAttribute( attacker, ANATOMY, ATTRIBUTE_PRECISION_TENTHS ) ) / 10.0;
+
+	if( anat_skill < 10.0 )
+		anat_dmg_mod := 0.0;
+	elseif( (anat_skill >= 10.0) && (anat_skill <= 20.0) )
+		anat_dmg_mod := 0.05;
+	elseif( (anat_skill >= 20.0) && (anat_skill  <= 30.0) )
+		anat_dmg_mod := 0.10;
+	elseif( (anat_skill >= 30.0) && (anat_skill <= 40.0) )
+		anat_dmg_mod := 0.15;
+	elseif( (anat_skill >= 40.0) && (anat_skill <= 50.0) )
+		anat_dmg_mod := 0.20;
+	elseif( (anat_skill >= 50.0) && (anat_skill <= 60.0) )
+		anat_dmg_mod := 0.25;
+	elseif( (anat_skill >= 60.0) && (anat_skill <= 70.0) )
+		anat_dmg_mod := 0.30;
+	elseif( (anat_skill >= 70.0) && (anat_skill <= 80.0) )
+		anat_dmg_mod := 0.35;
+	elseif( (anat_skill >= 80.0) && (anat_skill <= 90.0) )
+		anat_dmg_mod := 0.40;
+	elseif( (anat_skill >= 90.0) && (anat_skill <= 100.0) )
+		anat_dmg_mod := 0.45;
+	elseif( (anat_skill >= 100.0) && (anat_skill <= 110.0) )
+		anat_dmg_mod := 0.55;
+	elseif( (anat_skill >= 110.0) && (anat_skill <= 120.0) )
+		anat_dmg_mod := 0.60;
+	elseif( anat_skill >= 120.0 )
+		anat_dmg_mod := 0.65;
+	endif
+
+	return anat_dmg_mod;
+
+endfunction
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+//	CalcTacticsDmgMod( byref who )
+//
+//	Purpose:	Returns the tactics damage mod as a percentage.
+//
+//	Parameter:	mobileref::attacker
+//
+//	Returns:	double::tactics_dmg_mod
+//
+//	Created:	2023-01-06 02:09:09 by Yukiko
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+function CalcTacticsDmgMod( byref attacker )
+
+	var tactics_skill := CDbl( GetAttribute( attacker, TACTICS, ATTRIBUTE_PRECISION_TENTHS ) ) / 10.0;
+	var tactics_dmg_mod := (tactics_skill + 50.0) * 0.01;
+
+	return tactics_dmg_mod;
+
+endfunction
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+//	CalcArmsLoreDmgMod( who )
+//
+//	Purpose:	Returns the arms lore damage mod as a percentage.
+//
+//	Parameter:	mobileref::attacker
+//
+//	Returns:	double::arms_lore_dmg_mod
+//
+//	Created:	2023-01-13 21:49:47 by Yukiko
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+function CalcArmsLoreDmgMod( byref attacker )
+
+	var arms_lore_skill := CDbl( GetAttribute( attacker, ARMS_LORE, ATTRIBUTE_PRECISION_TENTHS ) ) / 10.0;
+	var arms_lore_dmg_mod := (arms_lore_skill / 20) * 0.01;
+	return arms_lore_dmg_mod;
+
+endfunction
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+//	CalcLumberjackingDamageMod( byref attacker )
+//
+//	Purpose:	Returns the lumberjacking damage mod as a percentage.
+//
+//	Parameter:	mobileref::attacker
+//
+//	Returns:	double::lumberjack_dmg_mod
+//
+//	Created:	2023-01-17 02:37:49 by Yukiko
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+function CalcLumberjackingDamageMod( byref attacker )
+
+	if( attacker.weapon.IsAxe() )
+		var lumberjack_skill := CDbl( GetAttribute( attacker, LUMBERJACKING, ATTRIBUTE_PRECISION_TENTHS ) ) / 10.0;
+		var lumberjack_dmg_mod := 0.0;
+		if( lumberjack_skill < 100.0 )
+			lumberjack_dmg_mod := lumberjack_skill / 5.0;
+		else
+			lumberjack_dmg_mod := (lumberjack_skill / 5.0) + 10.0;
+		endif
+
+		return lumberjack_dmg_mod;
+	endif
+
+	return 0.0;
+
+endfunction
+

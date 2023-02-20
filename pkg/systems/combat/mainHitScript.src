@@ -26,6 +26,15 @@ var item_cfg := ReadConfigFile(":*:itemdesc");
 
 program MainHitScript(attacker, defender, weapon, armor, basedamage, rawdamage)
 	Print("In mainHitScript");
+	if( TypeOfInt( attacker ) == OT_ARRAY )
+		rawdamage := attacker[6];
+		basedamage := attacker[5];
+		armor := attacker[4];
+		weapon := attacker[3];
+		defender := attacker[2];
+		attacker := attacker[1];
+	endif
+
 	//
 	// Cheat checker
 	//
@@ -87,7 +96,7 @@ program MainHitScript(attacker, defender, weapon, armor, basedamage, rawdamage)
 	// Raw = post armor
 	//
 	if ( rawdamage > 0 )
-		ApplyRawDamageEX(defender, CInt(rawdamage), DMG_FORCED, attacker);
+		ApplyDamageEX(defender, CInt(rawdamage), DMG_FORCED, attacker);
 //		MakeBleed(defender);
 	endif
 

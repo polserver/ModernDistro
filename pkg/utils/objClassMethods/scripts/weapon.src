@@ -1,4 +1,19 @@
+use cfgfile;
+
+
 program Install()
 	Print( "Custom Weapon Class Methods Installed." );
 	return 1;
 endprogram
+
+exported function IsAxe( item )
+
+	var item_descs := ReadConfigFile( ":*:itemdesc" );
+	var item_info := FindConfigElem( item_descs, item.objtype );
+	if( GetConfigInt( item_info, "Axe" ) )
+		return 1;
+	endif
+
+return 0;
+
+endfunction

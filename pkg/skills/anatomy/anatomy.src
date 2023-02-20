@@ -4,6 +4,7 @@
 
 use uo;
 use unicode;
+use cliloc;
 
 include ":attributes:attributes";
 include "include/trainingskill";
@@ -17,22 +18,22 @@ program Anatomy(who)
 	TrainingSkill(who, data[3]);
   EraseObjProperty(who, "IsMeditating");
   EraseObjProperty(who, "HealTimer");
-  SendSysMessageUC(who, CAscZ("Whom shall I examine?"), "ENG");
+  SendSysMessageCL(who, 500321, color := 88 ); // Whom shall I examine?
   var subject := Target(who);
   // target checks begin here
   if(!subject)
     return;
   elseif(subject.serial == who.serial)
-    PrintTextAbovePrivateUC(who, CAscZ("You know yourself quite well enough already."), "ENG", who);
+    PrintTextAboveCL( who, 500324, color := 56 );
     return;
   elseif(subject.graphic == 0x2006)
-    SendSysMessageUC(who, CAscZ("Looks pretty dead to you."), "ENG");
+    SendSysMessage(who, "Looks pretty dead to you.", color := 44);
     return;
   elseif(!subject.isA(POLCLASS_MOBILE))
-    SendSysMessageUC(who, CAscZ("That cannot be inspected."), "ENG");
+    SendSysMessageCL(who, 500326, color := 33 ); // That can not be inspected.
     return;
   elseif(Distance(who, subject) > 3)
-		    SendSysMessage(who, "Your subject is too far away", color := 33);
+		    SendSysMessageCL(who, 501975, color := 33 ); // That is too far away.
 		    return 0;
   endif
   // variables for sys messages

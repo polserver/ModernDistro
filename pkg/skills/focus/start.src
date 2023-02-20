@@ -1,0 +1,13 @@
+use os;
+
+program Start()
+
+	var junk := Start_Script( ":focus:focus" );
+	if(!junk)
+		Print("Cannot start focus!!!");
+		Print(junk.errortext);
+	else
+		Print("Started focus.");
+	endif
+endprogram
+

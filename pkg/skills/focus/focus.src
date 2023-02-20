@@ -1,0 +1,61 @@
+use os;
+use uo;
+
+include ":attributes:attributes";
+include ":focus:settings";
+
+program FauxFocusSkillGain()
+
+	var settings := Focus_GetSettingsCfgElem( "Settings" );
+	if( !settings )
+		SysLog( "Error --> :focus:focus Cannot load element Settings" );
+	endif
+	var points := 0;
+	var online_players := {};
+
+	var prev_stam_level := 0;
+	var prev_mana_level := 0;
+
+	while( 1 )
+		points := CInt( settings.SkillPoints );
+		// If no point value is defined in setings or it equals
+		// 0 then use the default point gain defined in
+		// attributes.cfg for Focus.
+		if(!points)
+			points := "";
+		endif
+		online_players := EnumerateOnlineCharacters();
+		foreach player in online_players
+			if(!player)
+				continue;
+			endif
+			// The following two 'if' clauses are to reduce server load, hopefully.
+			if((GetVital( player, STAMINA ) == GetVitalMaximumValue( player, STAMINA )))
+				continue;
+			endif
+			if((GetVital( player, MANA ) == GetVitalMaximumValue( player, MANA )))
+				continue;
+			endif
+
+			prev_stam_level := GetObjProperty( player, "PrevStamLevel" );
+			if(!prev_stam_level)
+				SetObjProperty( player, "PrevStamLevel", GetVital( player, STAMINA ) );
+			elseif(GetVital( player, STAMINA ) > prev_stam_level)
+				SkillCheck( player, FOCUS, -1, points );
+			endif
+			prev_mana_level := GetObjProperty( player, "PrevManaLevel" );
+			if(!prev_stam_level)
+				SetObjProperty( player, "PrevManaLevel", GetVital( player, MANA ) );
+			elseif(GetVital( player, MANA ) > prev_mana_level)
+				SkillCheck( player, FOCUS, -1, points );
+			endif
+			SetObjProperty( player, "PrevStamLevel", GetVital( player, STAMINA ) );
+			SetObjProperty( player, "PrevManaLevel", GetVital( player, MANA ) );
+		endforeach
+
+		var sleep_time := CInt( settings.SleepTime );
+		Sleep( sleep_time );
+	endwhile
+
+endprogram
+
