@@ -197,7 +197,6 @@ endfunction
 function MP_Mount( mobile, npc_mount )
 
 	// mobile.graphic := 400 + mobile.gender;
-
 	var mount_piece := MP_GetMountPiece( mobile );
 	if( mount_piece )
 		return error{"errortext":="Mobile is already mounted."};
