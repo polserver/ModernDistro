@@ -4,6 +4,7 @@ use cfgfile;
 use datafile;
 
 function SHRINK_GetCfgFile()
+
 	var cfg_file := ReadConfigFile( ":body:config/shrink" );
 	if( cfg_file.errortext )
 		SysLog( "Error::SHRINK_GetShrinkCfgFile() - Unable to open shrink.cfg ->"+cfg_file.errortext );
@@ -44,9 +45,11 @@ function SHRINK_GetDatafileElem( elem_name )
 endfunction
 
 function SHRINK_GetObjtype( graphic )
+
 	var df_elem := SHRINK_GetDatafileElem( "Categories" ),
 		df_prop := 0,
 		val := 0;
+
 	if( df_elem.errortext )
 		return df_elem.errortext;
 	endif
@@ -56,8 +59,8 @@ function SHRINK_GetObjtype( graphic )
 		return df_prop.errortext;
 	endif
 
-	if( df_prop.Exists( CStr( graphic ) ) )
-		val := df_prop[ CStr( graphic ) ];
+	if( df_prop.Exists( graphic ) )
+		val := df_prop[ graphic ];
 	else
 		val := error{"errortext":="Error::Could not find shrinkable in dictionary."};
 	endif

@@ -1,0 +1,13 @@
+use uo;
+use os;
+
+program reinitbodytable_textcmd( mobile )
+
+	var script := Start_Script( ":body:scripts/initialize/initializeBodyTable" );
+	if ( script.errortext )
+		SendSysMessage( mobile, "Unable to start script -> "+script.errortext, 0x3, 0x22 );
+		return 0;
+	endif
+
+	return 1;
+endprogram

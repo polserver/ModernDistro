@@ -134,9 +134,10 @@ program TimedScript_Incognito(params)
 			elseif(new_hair == "elfbuns")
 				new_hair := "elflonghair";
 			endif
-			CreateItemInBackpack(mobile, new_hair);
-			new_hair.color := RandomElvenHairHue();
-			EquipItem(mobile, new_hair);
+
+			var hair := CreateItemInBackpack( mobile, new_hair );
+			hair.color := RandomElvenHairHue();
+			EquipItem( mobile, hair );
 	else
 			name_template := 14;
 			DestroyItem(GetEquipmentByLayer(mobile, LAYER_HAIR));
@@ -146,9 +147,10 @@ program TimedScript_Incognito(params)
 			elseif(new_hair == "elflonghair")
 				new_hair := "elfbuns";
 			endif
-			CreateItemInBackpack(mobile, new_hair);
-			new_hair.color := RandomElvenHairHue();
-			EquipItem(mobile, new_hair);
+
+			var hair := CreateItemInBackpack( mobile, new_hair );
+			hair.color := RandomElvenHairHue();
+			EquipItem( mobile, hair );
 		endif
 	elseif(mobile.graphic == 0x29A || mobile.graphic == 0x29B) // Gargoyle graphic
 		// Gargoyle stuff

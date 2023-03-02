@@ -7,7 +7,7 @@ use util;
 */
 function RandomHumanSkinHue()
 
-	return ( RandomIntMinMax( 1002, 1058 ) | 0x8000 );
+	return RandomDiceRoll( "1d57+1001" ) | 0x8000;
 endfunction
 
 /*
@@ -20,7 +20,7 @@ function RandomElvenSkinHue()
 				  0x76D, 0x384, 0x579, 0x3E9, 0x374, 0x389, 0x385, 0x376,
 				  0x53F, 0x381, 0x382, 0x383, 0x76B, 0x3E5, 0x51D, 0x3E6 };
 
-	return ( hues.RandomEntry() | 0x8000 );
+	return hues[RandomDiceRoll( "1d"+hues.Size() )];
 endfunction
 
 /*
@@ -58,12 +58,22 @@ endfunction
 
 function RandomTigerHue()
 
-	return ( ( RandomDiceRoll( "1d1000" ) == 500 ) ? 0x1F4 : 0 );
+	var hue := 0;
+	if( RandomDiceRoll( "1d1000" ) == 500 )
+		hue := 2500;
+	endif
+
+	return hue;
 endfunction
 
 function RandomSheepHue()
 
-	return ( ( RandomDiceRoll( "1d850" ) == 428 ) ? 0x455 : 0 );
+	var hue := 0;
+	if( RandomDiceRoll( "1d850" ) == 428 )
+		hue := 1109;
+	endif
+
+	return hue;
 endfunction
 
 function RandomSnakeHue()
@@ -77,7 +87,6 @@ function RandomBirdHue()
 endfunction
 
 function RandomSlimeHue()
-
 	return RandomDiceRoll( "1d25+2200" );
 endfunction
 

@@ -1,0 +1,96 @@
+use os;
+use uo;
+
+include ":attributes:attributes";
+include ":itemutils:itemUtil_ex";
+
+program shrunkennpc_usescript( mobile, item )
+
+	SendSysMessage( mobile, "Where would you like to unshrink your pocket npc?", 0x3, 0x42 );
+	var loc := TargetCoordinates( mobile );
+	if( !loc )
+		SendSysMessage( mobile, "Cancelled action.", 0x3, 0x32 );
+		return 0;
+	endif
+
+	var mob := UnshrinkNPC( item );
+	if( mob.errortext )
+		SendSysMessage( mobile, mob.errortext, 0x3, 0x22 );
+		return 0;
+	endif
+
+	MoveObjectToLocation( mob, loc.x, loc.y, loc.z, loc.realm, MOVEOBJECT_FORCELOCATION );
+	// DestroyItem( item );
+
+	return 1;
+endprogram
+
+function UnshrinkNPC( byref item )
+
+	var shrink_info := item.ShrinkInfo();
+
+	var props := Struct{
+		"Color":=( item.color | 0x8000 ),
+		"Facing":=RandomInt( 8 ),
+		"Gender":=shrink_info.Gender,
+		"Graphic":=shrink_info.Graphic,
+		"Name":=item.name,
+		"Script":=shrink_info.Script,
+		"TrueColor":=shrink_info.TrueColor,
+		"TrueObjtype":=shrink_info.TrueObjtype,
+
+		"CProps" := item.CustomProps()
+	};
+	props.CProps.CProps.Insert( "#NoDress", 0x1 );
+
+	var npc := CreateNpcFromTemplate( shrink_info.Template, 5980, 0, 0, props, REALM_BRITANNIA, 1 );
+	if( npc.errortext )
+		return error{ "errortext":="Could not unshrink npc -> "+npc.errortext };
+	endif
+	npc.tithing:=shrink_info.Tithing;
+	npc.title_guild:=shrink_info.GuildTitle;
+	npc.title_prefix:=shrink_info.PrefixTitle;
+	npc.title_race:=shrink_info.RaceTitle;
+	npc.title_suffix:=shrink_info.SuffixTitle;
+
+// Let's setup npc attributes...
+	foreach attribute in ( AP_ListAttributesByType( "skill" ) )
+		SetAttributeBaseValue( npc, attribute, 0 );
+	endforeach
+
+	var attributes := item.Attributes();
+	foreach attribute in ( attributes.Keys() )
+		SetAttributeBaseValue( npc, attribute, attributes[attribute] );
+	endforeach
+
+// Let's Setup npc vitals...
+	var vitals := item.Vitals();
+	foreach vital in ( vitals.Keys() )
+		SetVital( npc, vital, vitals[vital] );
+	endforeach
+
+// Let's Dress the npc...
+	EquipNPC( npc, item.Equipment() );
+
+// Let's Add the npc's loot...
+	RestoreItemsFromColdStorageInContainer( item.Inventory(), npc.backpack );
+
+	return npc;
+endfunction
+
+function EquipNPC( byref npc, byref equipment_list )
+
+	if( !npc.backpack )
+		EquipItem( npc, CreateItemAtLocation( npc.x, npc.y, npc.z, "Backpack", 1, npc.realm ) );
+		if( !npc.backpack )
+			return error{ "errortext":="Could not equip backpack on npc." };
+		endif
+	endif
+
+	RestoreItemsFromColdStorageInContainer( equipment_list, npc.backpack );
+	foreach item in ( EnumerateItemsInContainer( npc.backpack, ENUMERATE_ROOT_ONLY ) )
+		EquipItem( npc, item );
+	endforeach
+
+	return 1;
+endfunction
