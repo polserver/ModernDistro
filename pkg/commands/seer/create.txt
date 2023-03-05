@@ -1,0 +1,13 @@
+<u><div align="center">Create Textcmd Help</div></u>
+<BASEFONT COLOR="#101010">
+<h1>Usage:</h1>
+.create [search_string | objtype] [amount]
+
+<h1>Parameters:</h1>
+search_string and an objtype are interchangeable, however if objtype is used, the command will try to create the item matching that objtype and will not present the create menu.
+
+amount is completely optional, if amount is not sent, the command assumes the user will want to create one item. If the amount is greater than 10 and the item being created is not stackable the command will only create 10 of that item. If the item is stackable and the amount is greater than 60000, the command will create stacks of items until the amount is reached.
+
+<h1>Description:</h1>
+Used to create an item in user's inventory, if a string partially matches an item's name, a menu will appear listing up to 5000 items that match the string criteria, if no string is given, the same menu will be presented only empty which searches can then be made within the menu.
+</BASEFONT>

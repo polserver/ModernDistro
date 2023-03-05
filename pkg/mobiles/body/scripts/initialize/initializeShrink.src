@@ -6,6 +6,7 @@ use datafile;
 include ":body:shrink";
 
 program generate_body_types_df()
+
 	var shrink_list := Dictionary,
 		data_elem := SHRINK_GetDatafileElem( "Categories" );
 
@@ -16,7 +17,6 @@ program generate_body_types_df()
 
 	var cfg_file := SHRINK_GetCfgFile();
 	foreach elem_name in ( GetConfigIntKeys( cfg_file ) )
-		SleepMS( 5 );
 		var cfg_elem := FindConfigElem( cfg_file, elem_name );
 		if( cfg_elem.errortext )
 			Print( "cfg_elem error -> "+cfg_elem.errortext );
@@ -27,11 +27,13 @@ program generate_body_types_df()
 			Print( "objtype error -> "+objtype.errortext );
 		endif		
 
-		shrink_list.Insert( CStr( elem_name ), objtype );
+		shrink_list.Insert( elem_name, objtype );
 	endforeach
 
 	data_elem.SetProp( "ShrinkList", shrink_list );
 	Print( "Done generating Shrink List...." );
+	SetGlobalProperty( "ShrinkDictionaryInitialized", 0x1 );
+
 	return 1;
 endprogram
 

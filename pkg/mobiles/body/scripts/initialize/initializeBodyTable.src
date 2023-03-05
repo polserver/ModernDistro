@@ -35,5 +35,7 @@ program generate_body_types_df()
 		data_elem.SetProp( type_name, type_list );
 	endforeach
 
+	SetGlobalProperty( "BodyDictionaryInitialized", 0x1 );
+
 	return 1;
 endprogram

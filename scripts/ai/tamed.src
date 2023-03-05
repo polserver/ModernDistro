@@ -571,7 +571,7 @@ function OpenMyPack()
 		endif
 		var alreadymounted := GetEquipmentByLayer(master, 25);
 		if(alreadymounted)
-			SendSysMessage(master, "Already mounted.", color := 33);
+			SendSysMessage(master, "You are already mounted.", color := 33);
 			return;
 		endif
 

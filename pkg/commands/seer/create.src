@@ -1,198 +1,119 @@
 use uo;
 use os;
-use cliloc;
 use polsys;
-use cfgfile;
 
-include ":gumps:gumps";
-include ":gumps:requestGump";
+include ":commands:cmdhelp";
+include ":commands:create";
 
-//1114057 1114778 1114779 1150340
-program textcmd_Create( mobile, text )
+program create_textcmd( mobile, search_string )
 
-	text := SplitWords( text );
-	var item := text[1],
-		amount := CInt( text[2] );
-	
-	if( item.Length() < 1 )
-		BuildSearchGump( mobile );
-		return 1;
+	var gump := 0,
+		result := 0,
+		page := 0,
+		amount := 1,
+		search_results := Dictionary;
+
+	var split := SplitWords( search_string, " ", -1 );
+	if( split.Size() == 1 )
+		search_string := Trim( split[1], TRIM_BOTH );
+	elseif( split.Size() == 2 )
+		search_string := Trim( split[1], TRIM_BOTH );
+		amount := ( CInt( split[2] ) >= 1 ? CInt( split[2] ) : 1 );
 	endif
 
-	if( !CInt( item ) )
-		item := GetObjtypeByName( item );
-		if ( !item )
-			BuildSearchGump( mobile, text[1] );
-			return 1;
+	if( search_string == "?" )
+		GetCmdHelp( mobile, ":commands:seer/create.txt" );
+		search_string := "";
+	endif
+
+// If the search_string is an int we will try to create the item,
+// If the search_string typed in matches an existing item name, we will
+// create the item,
+// If the search_string typed in is a string of any length, we will try to match
+// names accordingly.
+// I should likely do a string length match so the user doesn't type in a single letter
+// and get hit with tons of items in the list.
+	if( CInt( search_string ) )
+		CreateItem( mobile, GetItemInfo( CInt( search_string ), GetItemDescriptor( CInt( search_string ) ) ), amount );
+		return 1;
+	elseif( GetObjtypeByName( search_string ) )
+		CreateItem( mobile, GetItemInfo( GetObjtypeByName( search_string ), GetItemDescriptor( GetObjtypeByName( CInt( search_string ) ) ) ), amount );
+		return 1;
+	elseif( search_string.Length() )
+		if( search_string.Length() > 2 )
+			amount := -1;
+			BuildList( search_string, search_results );
+		else
+			SendSysMessage( mobile, "Invalid search string.", 0x3, 0x32 );
 		endif
-		item := CInt( item );
 	endif
-	
-	if( amount < 1 )
-		amount := 1;
+
+	var pid := GetObjProperty( mobile, "#CreateGumpPid" );
+	if( TypeOfInt( GetProcess( pid ) ) == OT_SCRIPTEXREF )
+		CloseGump( mobile, pid, 0 );
 	endif
-	
-	var create_item := CreateItem( mobile, item, amount );
-	if( !create_item )
-		BuildSearchGump( mobile, item );
-		return 1;
-	endif
+	SetObjProperty( mobile, "#CreateGumpPid", GetPid() );
+
+	while( mobile.connected )
+		gump := CreateGump( search_string, page, search_results, ( search_string.Length() > 3 ? 1 : 0 ) );
+
+		result := GFSendGump( mobile, gump );
+		if( result[0] <= 1 )
+			SendSysMessage( mobile, "Cancelled action.", 0x3, 0x32 );
+			return 0;
+		elseif( result[0] == 2 )
+			search_string := GFExtractData( result, 3 );
+			if( search_string.errortext )
+				search_string := "";
+			endif
+			amount := -1;
+			page := 0;
+			search_results := Dictionary;
+
+			if( search_string.Length() )
+				if( search_string.Length() > 2 )
+					BuildList( search_string, search_results );
+				else
+					SendSysMessage( mobile, "Invalid search string.", 0x3, 0x32 );
+				endif
+			endif
+		elseif( result[0] == 4 )
+			page -= 1;
+		elseif( result[0] == 5 )
+			page += 1;
+		elseif( result[0] >= 6 && result[0] <= 5006 )
+			CreateItem( mobile, search_results[search_results.Keys()[result[0]-5]], amount );
+			amount := -1;
+		endif
+	endwhile
 
 	return 1;
 endprogram
 
-function StrCompare( text )
-	var master_array := Array, item_struct := Struct;
-	var itemdesc_cfg := ReadConfigFile( ":*:itemdesc" );
-	var cfg_int_keys, item_descriptor;
-	if( itemdesc_cfg )
-		cfg_int_keys := GetConfigIntKeys( itemdesc_cfg );
-		foreach key in cfg_int_keys
-			item_descriptor := GetItemDescriptor( key );
-			if( Find( Lower( item_descriptor.Name ), Lower( text ), 1 ) )
-				item_struct.+Objtype := key;
-				item_struct.+Name := item_descriptor.name;
-			
-				master_array.Append( item_struct );
-				item_struct := Struct;
-			endif
-			SleepMS( 1 );
-		endforeach
-	endif
+function CreateItem( byref mobile, byref item_entry, byref amount )
 
-	return master_array;
-endfunction
-
-function BuildSearchGump( mobile, text := "" )
-	var search_string, explicitSearch := "";
-	var search_results := Array;
-	// SendSysMessage( mobile, ""+text, 0x3, 0x42 );
-	while( 1 )
-		var gump := GFCreateGump( 25, 65 );
-		var PageNum := 1;
-		if( text.length() < 3 && text.length() > 0 )
-			explicitSearch := "Your search term was too short.(Must be longer than 2 letters long.)";
-			text := "";
-		elseif( text == "" )
-			explicitSearch := "No results to display.";
-		else
-			search_results := StrCompare( text );
-			if( search_results.Size() < 1 )
-				explicitSearch := "Nothing matched your search terms."; 
-			endif
-		endif
-		
-		GFPage( gump, 0 );
-		GFDisposable( gump, 0 );
-		GFResizePic( gump, 0, 0, 9250, 426, 286 );
-		GFPicTiled( gump, 13, 13, 400, 20, 2624 );
-		GFAddAlphaRegion( gump, 13, 13, 400, 20 );
-		GFPicTiled( gump, 43, 13, 184, 20, 3004 ); // White Border around search box
-		GFPicTiled( gump, 44, 14, 182, 18, 2624 ); // Black background of search box
-		GFAddAlphaRegion( gump, 44, 14, 182, 18 ); // Transparency of black background of search box
-		GFAddButton( gump, 13, 12, 4011, 4013, GF_CLOSE_BTN, 0x1771 ); // Initiate Search string button
-		
-		search_string := GFTextEntry( gump, 46, 12, 180, 20, 0x480, text, 0 );
-
-		GFAddHTMLLocalized( gump, 232, 13, 100, 20, 3010005, 0, 0, 0x7FFF ); // Color 0x7FFF
-		GFPicTiled( gump, 13, 43, 400, 200, 2624 );
-		GFAddAlphaRegion( gump, 13, 43, 400, 200 );
-		GFPicTiled( gump, 13, 253, 400, 20, 2624 );
-		GFAddAlphaRegion( gump, 13, 253, 400, 20 );
-		GFAddButton( gump, 383, 252, 4017, 4019, GF_CLOSE_BTN, 0x1770 );
-		
-		GFPage( gump, 1 );
-		var i := 1, pageCount := 0, index;
-		if( search_results.Size() > 0 )
-			for( i:=0; i<search_results.Size(); i++ )
-				index := CInt( i % 10 );
-				GFAddButton( gump, 13, 42 +( index * 20 ), 4023, 4025, GF_CLOSE_BTN, 100+i );
-				GFAddHTMLLocalized( gump, 47, 44 +( index * 20 ), 300, 20, 1114057, 0, 0, 0x7FFF, search_results[i+1].Name );
-				pageCount += 1;
-				if( pageCount == 10 && i+1 < search_results.Size() )
-				  GFAddButton( gump, 213, 252, 4005, 4007, GF_PAGE_BTN, PageNum+1 );
-				  GFAddHTMLLocalized( gump, 247, 254, 170, 20, 1061027, 0, 0, 0x7FFF ); // Next page
-				  PageNum += 1;
-				  GFPage( gump, PageNum );
-				  GFAddButton( gump, 13, 252, 4014, 4016, GF_PAGE_BTN, PageNum-1 );
-				  GFAddHTMLLocalized( gump, 47, 254, 170, 20, 1061028, 0, 0, 0x7FFF ); // Previous Page
-				  pageCount := 0;
-				endif
-				SleepMS( 3 );
-			endfor 
-		else
-			GFAddHTMLLocalized( gump, 18, 44, 396, 40, 1114057, 0, 0, 0x7FFF, explicitSearch );
-		endif
-		
-		var result := GFSendGump( mobile, gump );
-			text := GFExtractData( result, search_string );
-			result := result[0];
-		// SendSysMessage( mobile, ""+result+" Array size "+search_results.Size(), 0x3, 0x42 );
-		if( result == 0x1770 || result[0] <= 1 )
-			SendSysMessageCL( mobile, 1042021, array, 0x3, 0x22 );
+	if( amount == -1 )
+		amount := CInt( RequestInput( mobile, mobile.backpack, "How many of this object do you want to create?" ) );
+		if( amount <= 0 )
+			SendSysMessage( mobile, "Cancelled action.", 0x3, 0x32 );
 			return 0;
 		endif
-		
-		if( result == 0x1771 )
-			continue;
-		endif
-		
-		// Add createitem stuff here.
-		var list_index := result-99;
-		if( ( list_index ) <= search_results.Size() )
-			var amount := RequestGump( mobile, "How many do you wish to create?", "Non stackable items will create 10 items at most.", "1", CANCEL_BTN_ON, 5 );
-			if( amount.errortext )
-				SendSysMessageCL( mobile, 1042021, array, 0x3, 0x22 );
-				return 0;
-			elseif( !amount || !CInt( amount ) )
-				SendSysMessage( mobile, "You must enter an integer greater than 0.", 0x3, 0x22 );
-				return 0;
-			elseif( CInt( amount ) > 60000 )
-				amount := 60000;
-			endif
-		
-			CreateItem( mobile, search_results[list_index].Objtype, CInt( amount ) );
-		endif
-	endwhile
-	return 0;
-endfunction
-
-function CreateItem( mobile, item, amount )
-	var created;
-	SendSysMessage( mobile, "Hit ESC to create the item in your backpack.", 0x3, 0x42 );
-	var targ := TargetCoordinates( mobile );
-	if( !targ )
-		created := CreateItemInBackpack( mobile, item, amount );
-		if( !created )
-			if( amount > 10 )
-				SendSysMessage( mobile, "Item is not stackable. No more than 10 will be created at a time.", 0x3, 0x22 );
-				amount := 10;
-			endif
-		
-			for( amount; amount > 0; amount -= 1 )
-				created := CreateItemAtLocation( mobile.x, mobile.y, mobile.z, item, 1, mobile.realm );
-				SleepMS(5);
-			endfor
-		endif
-	else
-		created := CreateItemAtLocation( targ.x, targ.y, targ.z, item, amount, targ.realm );
-		if( !created )
-			if( amount > 10 )
-				SendSysMessage( mobile, "Item is not stackable. No more than 10 will be created at a time.", 0x3, 0x22 );
-				amount := 10;
-			endif
-		
-			for( amount; amount > 0; amount -= 1 )
-				created := CreateItemAtLocation( targ.x, targ.y, targ.z, item, 1, targ.realm );
-				SleepMS(5);
-			endfor
-		endif
-	endif
-	
-	if( !created )
-		SendSysMessage( mobile, "Error: Could not create "+Hex( item ), 0x3, 0x22 );
-		return 0;
 	endif
 
-	return 1;
+	if( !item_entry.Stackable )
+		if( amount > 10 )
+			amount == 10;
+		endif
+	endif
+
+	var created := Array;
+	if( !item_entry.Stackable )
+		created := CreateItemUnstackableInContainer( mobile, item_entry.Objtype, amount, mobile.backpack );
+	elseif( item_entry.Stackable )
+		created := CreateItemStacksInContainer( mobile, item_entry.Objtype, amount, mobile.backpack );
+	endif
+
+	foreach obj in ( created )
+		ITEM_ReportText( mobile, "Item serial: "+obj.Serial+", item name "+obj.Desc+" created by "+mobile.name+" ["+mobile.acctname+"]", ITEM_REPORT_SYSLOG );
+	endforeach
 endfunction

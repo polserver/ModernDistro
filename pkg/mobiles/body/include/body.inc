@@ -5,7 +5,7 @@ use datafile;
 
 function BODY_GetCfgFile()
 
-	var cfg_file := ReadConfigFile( ":body:config/bodyTable" );
+	var cfg_file := ReadConfigFile( ":body:bodyTable" );
 	if( cfg_file.errortext )
 		SysLog( "Error::GetBodyTableCfgFile() - Unable to open bodyTable.cfg ->"+cfg_file.errortext );
 	endif

@@ -1,46 +1,126 @@
-//
-// .create command - create items
-// Items created with this command will not decay.
-// Two forms:
-//   ".create [objtype] [amount]" - specify object type and amount
-//       amount defaults to 1
-//   ".create" - show the item creation menu, create one of that item
-//
 use uo;
+use os;
+use polsys;
 
-program textcmd_createat( who, text )
-    if (text)
-        var params := SplitWords( text );
-        var objtype := params[1];
-        var amount := CInt( params[2] );
+include ":commands:cmdhelp";
+include ":commands:create";
 
-        if (CInt(objtype))
-            objtype := CInt(objtype);
-        endif
+program createat_textcmd( mobile, search_string )
 
-        if (!amount)
-            amount := 1;
-        endif
+	var gump := 0,
+		result := 0,
+		page := 0,
+		amount := 1,
+		search_results := Dictionary;
 
-        // print( "objtype=" + Hex(objtype) + ", amount=" + amount );
-       
-        var i;
-        for( i := 1; i <= amount; i := i + 1 )
-            SendSysMessage( who, "Now select a location on the ground, where you want the item to appear." );
-            var place := TargetCoordinates( who );
-            var item := CreateItemAtLocation( place.x, place.y, place.z, objtype, 1, who.realm );
-            item.decayAt := 0;
-        endfor
-    else
-/*        var selection := SelectMenuItem2( who, "ItemCreation" );
-        if (selection)
-            SendSysMessage( who, "Now select a location on the ground, where you want the item to appear." );
-            var place := TargetCoordinates( who );
-            var created := CreateItemAtLocation( place.x, place.y, place.z, selection.objtype, 1, who.realm );
-            created.color := selection.color;
-            created.decayAt := 0;
-            SetObjProperty(created, "Created", who.name);
-        endif */
-        SendSysMessage (who, "You must specify an item to create.", color :=33);
-    endif
+	var split := SplitWords( search_string, " ", -1 );
+	if( split.Size() == 1 )
+		search_string := Trim( split[1], TRIM_BOTH );
+	elseif( split.Size() == 2 )
+		search_string := Trim( split[1], TRIM_BOTH );
+		amount := ( CInt( split[2] ) >= 1 ? CInt( split[2] ) : 1 );
+	endif
+
+	if( search_string == "?" )
+		GetCmdHelp( mobile, ":commands:seer/createat.txt" );
+		search_string := "";
+	endif
+
+// If the search_string is an int we will try to create the item,
+// If the search_string typed in matches an existing item name, we will
+// create the item,
+// If the search_string typed in is a string of any length, we will try to match
+// names accordingly.
+// I should likely do a string length match so the user doesn't type in a single letter
+// and get hit with tons of items in the list.
+	if( CInt( search_string ) )
+		CreateItem( mobile, GetItemInfo( CInt( search_string ), GetItemDescriptor( CInt( search_string ) ) ), amount );
+		return 1;
+	elseif( GetObjtypeByName( search_string ) )
+		CreateItem( mobile, GetItemInfo( GetObjtypeByName( search_string ), GetItemDescriptor( GetObjtypeByName( CInt( search_string ) ) ) ), amount );
+		return 1;
+	elseif( search_string.Length() )
+		if( search_string.Length() > 2 )
+			amount := -1;
+			BuildList( search_string, search_results );
+		else
+			SendSysMessage( mobile, "Invalid search string.", 0x3, 0x32 );
+		endif
+	endif
+
+	var pid := GetObjProperty( mobile, "#CreateGumpPid" );
+	if( TypeOfInt( GetProcess( pid ) ) == OT_SCRIPTEXREF )
+		CloseGump( mobile, pid, 0 );
+	endif
+	SetObjProperty( mobile, "#CreateGumpPid", GetPid() );
+
+	while( mobile.connected )
+		gump := CreateGump( search_string, page, search_results, ( search_string.Length() > 3 ? 1 : 0 ) );
+
+		result := GFSendGump( mobile, gump );
+		if( result[0] <= 1 )
+			SendSysMessage( mobile, "Cancelled action.", 0x3, 0x32 );
+			return 0;
+		elseif( result[0] == 2 )
+			search_string := GFExtractData( result, 3 );
+			if( search_string.errortext )
+				search_string := "";
+			endif
+			amount := -1;
+			page := 0;
+			search_results := Dictionary;
+
+			if( search_string.Length() )
+				if( search_string.Length() > 2 )
+					BuildList( search_string, search_results );
+				else
+					SendSysMessage( mobile, "Invalid search string.", 0x3, 0x32 );
+				endif
+			endif
+		elseif( result[0] == 4 )
+			page -= 1;
+		elseif( result[0] == 5 )
+			page += 1;
+		elseif( result[0] >= 6 && result[0] <= 5006 )
+			CreateItem( mobile, search_results[search_results.Keys()[result[0]-5]], amount );
+			amount := -1;
+		endif
+	endwhile
+
+	return 1;
 endprogram
+
+function CreateItem( byref mobile, byref item_entry, byref amount )
+
+	if( amount == -1 )
+		amount := CInt( RequestInput( mobile, mobile.backpack, "How many of this object do you want to create?" ) );
+		if( amount <= 0 )
+			SendSysMessage( mobile, "Cancelled action.", 0x3, 0x32 );
+			return 0;
+		endif
+	endif
+
+	if( !item_entry.Stackable )
+		if( amount > 10 )
+			amount == 10;
+		endif
+	endif
+
+	SendSysMessage( mobile, "Where do you wish to place this object?", 0x3, 0x42 );
+	var loc := TargetCoordinates( mobile );
+	if( !loc )
+		SendSysMessage( mobile, "Cancelled action.", 0x3, 0x32 );
+		return 0;
+	endif
+
+	var created := Array;
+	if( !item_entry.Stackable )
+		created := CreateItemUnstackableAtLocation( mobile, item_entry.Objtype, amount, loc.x, loc.y, loc.z, loc.realm );
+	elseif( item_entry.Stackable )
+		created := CreateItemStacksAtLocation( mobile, item_entry.Objtype, amount, loc.x, loc.y, loc.z, loc.realm );
+	endif
+
+	foreach obj in ( created )
+		ITEM_ReportText( mobile, "Item serial: "+obj.Serial+", item name "+obj.Desc+" created by "+mobile.name+" ["+mobile.acctname+"]", ITEM_REPORT_SYSLOG );
+	endforeach
+endfunction

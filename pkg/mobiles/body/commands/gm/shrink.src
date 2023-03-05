@@ -1,0 +1,114 @@
+use uo;
+use os;
+use polsys;
+use cfgfile;
+
+include ":attributes:attributes";
+include ":body:shrink";
+include ":itemutils:itemUtil_ex";
+include ":itemutils:layers";
+
+program shrink_textcmd( mobile )
+
+	SendSysMessage( mobile, "What would you like to shrink?", 0x3, 0x42 );
+	var use_on := Target( mobile );
+	if( !use_on )
+	     SendSysMessage( mobile, "Cancelled action.", 0x3, 0x32 );
+	     return 0;
+	elseif( !use_on.IsA( POLCLASS_NPC ) )
+	     SendSysMessage( mobile, "This can only be used on NPCs.", 0x3, 0x32 );
+	     return 0;
+	endif
+
+	var shrunken_npc := CreateItemInBackpack( mobile, SetupShrunkenNPC( use_on ), 1 );
+	if( shrunken_npc.errortext )
+		SendSysMessage( mobile, "Could not shrink npc, inventory may be full.", 0x3, 0x22 );
+		return 0;
+	endif
+	SaveShrunkenInventory( use_on, shrunken_npc );
+
+	return 1;
+endprogram
+
+function SetupShrunkenNPC( byref use_on )
+
+	var shrink_info := Struct{ "Gender":=use_on.gender,
+							   "Graphic":=use_on.graphic,
+							   "GuildTitle":=use_on.title_guild,
+							   "PrefixTitle":=use_on.title_prefix,
+							   "RaceTitle":=use_on.title_race,
+							   "Script":=use_on.script,
+							   "SuffixTitle":=use_on.title_suffix,
+							   "Template":=use_on.npctemplate,
+							   "Tithing":=use_on.tithing,
+							   "TrueColor":=use_on.truecolor,
+							   "TrueObjtype":=use_on.trueobjtype
+							 };
+	var shrunken_npc := GetItemDescriptor( GetObjtypeByName( "ShrunkenNPC" ) );
+	shrunken_npc.Color := use_on.color;
+	shrunken_npc.Desc := use_on.name;
+	shrunken_npc.Graphic := SHRINK_GetObjtype( use_on.graphic );
+	shrunken_npc.Newbie := 1;
+
+	shrunken_npc.CProps.Insert( "%ShrinkInfo%", shrink_info );
+
+// Backup attributes...
+	var tmp := Struct;
+	foreach attribute in ( AP_ListAttributesByType() )
+		if( GetAttributeBaseValue( use_on, attribute ) > 0 )
+			tmp.Insert( attribute, GetAttributeBaseValue( use_on, attribute ) );
+		endif
+	endforeach
+	shrunken_npc.CProps.Insert( "%Attributes%", tmp );
+
+// Backup Current Vitals...
+	tmp := Struct;
+	foreach vital in ( { HITS, HUNGER, MANA, STAMINA } )
+		tmp.Insert( vital, GetVital( use_on, vital ) );
+	endforeach
+	shrunken_npc.CProps.Insert( "%Vitals%", tmp );
+
+// Backup Current CProps...
+	tmp := Dictionary;
+	foreach prop in ( GetObjPropertyNames( use_on ) )
+		if( prop in { "anchorx", "anchory", "anchorz", "myhome" } )
+			continue;
+		endif
+
+		tmp.Insert( prop, GetObjProperty( use_on, prop ) );
+	endforeach
+	shrunken_npc.CProps.Insert( "%CustomProps%", tmp );
+
+	SaveShrunkenInventory( use_on, shrunken_npc );
+
+	return shrunken_npc;
+endfunction
+
+function SaveShrunkenInventory( byref use_on, byref shrunken_npc )
+
+	var items := Array,
+		item := 0;
+	foreach layer in ( { LAYER_HAND1, LAYER_HAND2, LAYER_SHOES, LAYER_PANTS, LAYER_SHIRT, LAYER_HELM, LAYER_GLOVES, LAYER_RING, LAYER_TALISMAN, LAYER_NECK, LAYER_HAIR, LAYER_WAIST, LAYER_CHEST, LAYER_WRIST, LAYER_BEARD, LAYER_TUNIC, LAYER_EARS, LAYER_ARMS, LAYER_CAPE, LAYER_ROBE, LAYER_SKIRT, LAYER_LEGS, LAYER_MOUNT } )
+		item := GetEquipmentByLayer( use_on, layer );
+		if( !item.IsA( POLCLASS_ITEM ) )
+			continue;
+		elseif( item.IsContainer() || item.IsQuiver() )
+			continue;
+		elseif( item.IsHair() )
+			Print( "Found Hair: "+item.objtype );
+		endif
+
+		items.Append( item );
+	endforeach
+	shrunken_npc.CProps.Insert( "%Equipment%", StoreItemsInColdStorage( items, 0 ) );
+
+	items := Array;
+	foreach item in ( EnumerateItemsInContainer( use_on.backpack, ENUMERATE_ROOT_ONLY ) )
+		if( item.IsContainer() || item.IsQuiver() )
+			continue;
+		endif
+
+		items.Append( item );
+	endforeach
+	shrunken_npc.CProps.Insert( "%Inventory%", StoreItemsInColdStorage( items, 0 ) );
+endfunction

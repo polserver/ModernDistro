@@ -1,13 +1,21 @@
+use uo;
 use os;
 
 program init_body_types()
-	InitializeBodyTable_DF();
-	InitializeShrink_DF();
+
+	if( !GetGlobalProperty( "BodyDictionaryInitialized" ) )
+		InitializeBodyTable_DF();
+	endif
+
+	if( !GetGlobalProperty( "ShrinkDictionaryInitialized" ) )
+		InitializeShrink_DF();
+	endif
 
 	return 1;
 endprogram
 
 function InitializeBodyTable_DF()
+
 	var script := Start_Script( ":body:scripts/initialize/initializeBodyTable" );
 	if ( script.errortext )
 		SysLog(script.errortext);
@@ -17,6 +25,7 @@ function InitializeBodyTable_DF()
 endfunction
 
 function InitializeShrink_DF()
+
 	var script := Start_Script( ":body:scripts/initialize/initializeShrink" );
 	if ( script.errortext )
 		SysLog(script.errortext);

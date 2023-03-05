@@ -1,0 +1,49 @@
+use uo;
+use os;
+
+program methods_install()
+
+	return 1;
+endprogram
+
+exported function IsShrunkenNPC( item )
+
+	item := item; // Avoid Compiler Warnings...
+
+	return 1;
+endfunction
+
+exported function Attributes( item )
+
+	return GetObjProperty( item, "%Attributes%" );
+endfunction
+
+exported function CustomProps( item )
+
+	var cprops := GetObjProperty( item, "%CustomProps%" );
+	if( TypeOfInt( cprops ) != OT_DICTIONARY )
+		cprops := Dictionary;
+	endif
+
+	return cprops;
+endfunction
+
+exported function ShrinkInfo( item )
+
+	return GetObjProperty( item, "%ShrinkInfo%" );
+endfunction
+
+exported function Vitals( item )
+
+	return GetObjProperty( item, "%Vitals%" );
+endfunction
+
+exported function Equipment( item )
+
+	return GetObjProperty( item, "%Equipment%" );
+endfunction
+
+exported function Inventory( item )
+
+	return GetObjProperty( item, "%Inventory%" );
+endfunction
