@@ -40,11 +40,11 @@ program Guild_Create( mobile )
 
 	GFTextLine( gump, 25, 165, 2100, "Guild Name:" );
 	GFResizePic( gump, 150, 165, GFGetCfgConst( "Defaults", "ForeGround" ), 200, 25 );
-	var guild_name_temp := GFTextEntry( gump, 160, 165, 200, 20, 1720, "", 3 );
+	var guild_name_temp := GFTextEntry( gump, 160, 170, 200, 20, 1720, "", 3 );
 
 	GFTextLine( gump, 25, 190, 2100, "Guild Abbreviation:" );
 	GFResizePic( gump, 150, 190, GFGetCfgConst( "Defaults", "ForeGround" ), 200, 25 );
-	var abbreviation_temp := GFTextEntry( gump, 160, 190, 200, 20, 1720, "", 4 );
+	var abbreviation_temp := GFTextEntry( gump, 160, 195, 200, 20, 1720, "", 4 );
 
 	GFAddButton( gump, 25, 250, 2128, 2129, GF_CLOSE_BTN, 0xA1 ); // Okay
 	GFAddButton( gump, 100, 250, 2119, 2120, GF_CLOSE_BTN, 0xA2 ); // Cancel
@@ -127,15 +127,15 @@ function AddGuild( guild_GM, guild_name, guild_abbr )
 		guild.SetProp( "Abbr",  guild_abbr );
 		guild.SetProp( "Master", guild_GM.serial );
 
-                SetObjProperty( guild_GM, "Guild_Title", "GuildMaster" );
-                SetObjProperty( guild_GM, "Guild_Abbr", 1 );
+		SetObjProperty( guild_GM, "Guild_Title", "GuildMaster" );
+		SetObjProperty( guild_GM, "Guild_Abbr", 1 );
 
 		guild.AddMember( guild_GM );
-                guild_GM.title_guild := "GuildMaster ["+guild_abbr+"]";
+		guild_GM.title_guild := "GuildMaster ["+guild_abbr+"]";
 
 		SendSysMessage( guild_GM, "Guild was successfully created.", 3, 68 );
-                ReportText( guild.GetProp( "Name" )+" successfully created by "+guild_GM.name+" Serial: "+guild_GM.serial, REPORT_SYSLOG );
-        else
+		ReportText( guild.GetProp( "Name" )+" successfully created by "+guild_GM.name+" Serial: "+guild_GM.serial, REPORT_SYSLOG );
+	else
 		SendSysMessage( guild_GM, "Guild creation failed.", 3, 33 );
 		SysLog( "Error creating guild -> ["+guild.errortext+"] + CharSerial -> ["+guild_gm.serial+"]" );
 	endif

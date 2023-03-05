@@ -12,6 +12,7 @@
 use uo;
 use os;
 use util;
+use cliloc;
 
 include ":security:report";
 include "include/housing";
@@ -462,6 +463,9 @@ function PlaceGuildStone( mobile )
 
 	var sign := GetHouseSign( mobile );
 	if( !sign )
+		Print( "Guild.inc ---> No sign found." );
+	endif
+	if( !sign )
 		SendSysMessage( mobile, "You nust be inside a house to place a guild stone.", color := 33 );
 		return 0;
 	endif
@@ -472,7 +476,7 @@ function PlaceGuildStone( mobile )
 		SendSysMessage( mobile, "Cancelled.", 3, 33 );
 		return 0;
 	elseif( !CheckLosAt( mobile, targ.x, targ.y, targ.z ));
-		SendSysMessage( mobile, "Can not see this!", 3, 33 );
+		SendSysMessage( mobile, "Cannot see this!", 3, 33 );
 		return 0;
 	elseif( !sign.IsLocationInsideHouse( targ ) );
 		SendSysMessage( mobile, "This is not in a house!", 3, 33 );
@@ -486,7 +490,7 @@ function PlaceGuildStone( mobile )
 		SendSysMessage( mobile, "This is not in your house!", 3, 33 );
 		return 0;
 	elseif( guild_house && guild_house != guild_info )
-		SendSysMessage( mobile, "The house already protect a guildstone!", 3, 33 );
+		SendSysMessage( mobile, "There is already a guild stone in this building.", 3, 33 );
 		return 0;
 	endif
 
@@ -1050,9 +1054,80 @@ endfunction
 function DestroyGuildStone( guild )
 
 	var guildstone_serial := guild.GetProp( "GuildStone" );
+	var guild_stone := SystemFindObjectBySerial( guildstone_serial );
+	var sign := GetHouseSign( guild_stone );
 	if( guildstone_serial )
+		EraseObjProperty( sign, "GuildStone" );
 		DestroyItem( SystemFindObjectBySerial( guildstone_serial ));
 	endif
 
 	return 1;
+endfunction
+
+function DisbandGuild( who )
+
+	if( !YesNo( who, "Are you sure?" ) )
+		SendSysMessageCL( who, 1042023, color := 33 ); // Cancelled.
+		return 0;
+	endif
+
+	var gm_guild_id := who.guildid;
+	if( !gm_guild_id )
+		SendSysMessage( who, "You do not appear to be in a guild.", color := 40 );
+		return 0;
+	endif
+	var gm_guild := FindGuild( gm_guild_id );
+	if( gm_guild.members.size() > 1)
+		SendSysMessage( who, "You must remove the guild members before you disband the guild.", color := 40 );
+		return 0;
+	endif
+	var guild_stone_serial := gm_guild.GetProp( "GuildStone" );
+	gm_guild.eraseprop( "Name" );
+	gm_guild.eraseprop( "Abbr" );
+	gm_guild.eraseprop( "Master" );
+
+	EraseObjProperty( who, "Guild_Title" );
+	EraseObjProperty( who, "Guild_Abbr" );
+
+	who.title_guild := "";
+	gm_guild.removemember(who);
+	DestroyItem( SystemFindObjectBySerial( guild_stone_serial ) );
+
+	DestroyGuild( gm_guild );
+
+	SendSysMessage( who, "Guild was successfully disbanded.", 3, 68 );
+	return 1;
+endfunction
+
+function PurchaseGuildColor( who )
+
+	var guild_color := Run_Script( ":guildColors:scripts/services/buyGuildColor", who );
+	if( guild_color )
+		var gm_guild := who.guild;
+		var guild_stone_serial := gm_guild.GetProp( "GuildStone" );
+		var guild_stone := SystemFindObjectBySerial( guild_stone_serial );
+		gm_guild.setprop( "GuildColor", guild_color );
+		guild_stone.color := guild_color;
+	else
+		SendSysMessage( who, "Cancelled.", color := 33 );
+	endif
+
+endfunction
+
+function DyeClothes( who )
+
+	SendSysMessage( who, "Press <ESC> when finished.", color := 88 );
+	var done :=0;
+	var clothing := 0;
+	while(!done)
+
+		clothing := TargetCoordinates( who );
+		if( !clothing )
+			done := 1;
+		else
+			clothing.item.color := who.guild.getprop( "GuildColor" );
+		endif
+
+	endwhile
+
 endfunction

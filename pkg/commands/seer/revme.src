@@ -1,0 +1,21 @@
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+//	RevealMe( who )
+//
+//	Description:	Text command: Sets concealment to 0, thus unconcealing the user.
+//
+//	Parameter:		mobileref:: who
+//
+//	Returns:		Nothing
+//
+//	Created:		2023-02-25 23:11:57 by Yukiko
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+use uo;
+
+program RevealMe( who )
+
+	who.concealed := 0;
+	SendSysMessage( who, "You are unconcealed.", color := 66 );
+
+endprogram
