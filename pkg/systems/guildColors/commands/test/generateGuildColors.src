@@ -1,0 +1,22 @@
+use uo;
+use os;
+use cfgfile;
+use datafile;
+
+include ":guildcolors:guildColors";
+
+program generate_guild_colors_textcmd( mobile )
+
+	var color_df := GC_GetGuildColorDatafile();
+	foreach color in ( color_df.Keys() )
+		color_df.DeleteElement( color );
+	endforeach
+
+	EraseGlobalProperty( "GuildColorsGenerated" );
+
+	UnloadConfigFile( ":guildcolors:guildColors" );
+
+	SendSysMessage( mobile, "Generating guild color datafile.", 0x3, 0x42 );
+
+	Start_Script( ":guildcolors:scripts/init/initializeGuildColors" );
+endprogram

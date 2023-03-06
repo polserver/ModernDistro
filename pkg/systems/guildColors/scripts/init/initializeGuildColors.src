@@ -1,0 +1,56 @@
+use uo;
+use os;
+use cfgfile;
+use datafile;
+
+include ":guildcolors:guildColors";
+
+program init_guild_color_datafile()
+
+	var cfg_file := ReadConfigFile( ":guildcolors:guildColors" ),
+		datafile := GC_GetGuildColorDatafile(),
+		colors := Array,
+		cfg_elem := 0,
+		df_elem := 0,
+		df_prop := 0;
+
+	if( cfg_file.errortext )
+		Print( "Error reading guild color config file. -> "+cfg_file.errortext );
+		return 0;
+	elseif( datafile.errortext )
+		Print( "Error reading or creating guild color datafile. -> "+cfg_file.errortext );
+		return 0;
+	endif
+
+	colors := GetConfigIntKeys( cfg_file );
+	if( colors.errortext )
+		Print( "Error getting config int keys. -> "+colors.errortext );
+		return 0;
+	endif
+
+	foreach color in colors
+		df_elem := datafile.FindElement( color );
+		if( TypeOfInt( df_elem ) == OT_DATAELEMREF )
+			continue;
+		endif
+
+		df_elem := datafile.CreateElement( color );
+		if( df_elem.errortext )
+			Print( "Error creating datafile element entry. -> "+df_elem.errortext );
+			return 0;
+		endif
+
+		cfg_elem := FindConfigElem( cfg_file, color );
+		if( cfg_elem.errortext )
+			Print( "Error reading cfg elem entry. -> "+cfg_elem.errortext );
+			return 0;
+		endif
+
+		df_prop := df_elem.SetProp( "Name", GetConfigString( cfg_elem, "Name" ) );
+	endforeach
+
+	SetGlobalProperty( "GuildColorsGenerated", ReadGameClock() );
+	Print( "Done Generating Guild Color Datafile..." );
+
+	return 1;
+endprogram
