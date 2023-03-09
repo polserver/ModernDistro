@@ -19,7 +19,21 @@ function GC_GetGuildColorDatafile()
 	endif
 endfunction
 
-function GC_RetrieveActiveGuildColors()
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+//	GC_RetrieveAvailableGuildColors()
+//
+//	Purpose:	Returns an array of integers of guild colors that are not in use
+//				by any guild, and thus are available for purchase.
+//
+//	Parameter:	None
+//
+//	Returns:	array::of integers
+//
+//	Created:	2023-03-07 03:26:14 by Yukiko
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+function GC_RetrieveAvailableGuildColors()
 
 	var color_df := GC_GetGuildColorDatafile(),
 		keys := color_df.Keys(),
@@ -40,7 +54,21 @@ function GC_RetrieveActiveGuildColors()
 	return active_list;
 endfunction
 
-function GC_RetrieveInactiveGuildColors()
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+//	GC_GuildColorsInUse()
+//
+//	Purpose:	Returns an array of integers of guild colors that are in use
+//				by guilds, and thus are not available for purchase.
+//
+//	Parameter:	None
+//
+//	Returns:	array::of integers
+//
+//	Created:	2023-03-07 03:23:03 by Yukiko
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+function GC_GuildColorsInUse()
 
 	var color_df := GC_GetGuildColorDatafile(),
 		keys := color_df.Keys(),
@@ -88,4 +116,27 @@ function GC_PurchaseGuildColor( byref mobile, byref color, byref buyer_id )
 	df_elem.SetProp( "PurchasedBy", buyer_id );
 
 	return 1;
+endfunction
+
+function MakeColorAvailableForPurchase( byref color )
+
+	var datafile := GC_GetGuildColorDatafile(),
+		df_elem := 0,
+		df_prop := 0,
+		settings_cfg := 0;
+
+	if( datafile.errortext )
+		return datafile.errortext;
+	endif
+
+	df_elem := datafile.FindElement( color );
+	if( df_elem.errortext )
+		return error{ "errortext":="Error finding color from 'GC_PurchaseGuildColor' in datafile -> "+df_elem.errortext };
+	endif
+
+	// df_elem.SetProp( "Purchased", ReadGameClock() );
+	// df_elem.SetProp( "PurchasedBy", buyer_id );
+	df_elem.eraseprop( "Purchased" );
+	df_elem.eraseprop( "PurchasedBy" );
+
 endfunction

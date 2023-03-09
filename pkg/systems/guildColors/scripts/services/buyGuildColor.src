@@ -13,7 +13,7 @@ include ":guildcolors:settings";
 include ":itemutils:itemdesc";
 include ":itemutils:itemInfo";
 
-var guild_colors := GC_RetrieveActiveGuildColors(),
+var guild_colors := GC_RetrieveAvailableGuildColors(),
 	clothing_array := GetConfigIntArray( GC_GetSettingsCfgElem( "Clothing" ), "Objtype" );
 
 program buyguildcolor_script( mobile )
