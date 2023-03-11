@@ -146,6 +146,7 @@ function showGuildMemberInfo( mobile, byref gump, guild, viewer )
 		GFTextLine( gump, 60, 380, 2100, "Resign from the guild." );
 		GFRadioButton( gump, 40, 380, 210, 211, 0, 0xb07 );
 
+		// This option does not appear in the gump until the guild master has chosen a guild color.
 		if( guild.getprop("GuildColor") )
 			GFTextLine( gump, 60, 420, 2100, "Dye clothes with the guild color." );
 			GFRadioButton( gump, 40, 420, 210, 211, 0, 0xB09 );
@@ -199,6 +200,7 @@ function showGuildMasterInfo( mobile, byref gump, guild, viewer )
 	GFTextLine( gump, 60, 180, 2100, "Set the guild charter." );
 	GFRadioButton( gump, 40, 180, 210, 211, 0, 0xc00 );
 
+	// This gump option changes depending on whether a guild master has placed a guild stone.
 	if( !mobile.guild.getprop( "GuildStone" ) )
 		GFTextLine( gump, 60, 200, 2100, "Place the GuildStone." );
 		GFRadioButton( gump, 40, 200, 210, 211, 0, 0xc01 );
@@ -207,18 +209,22 @@ function showGuildMasterInfo( mobile, byref gump, guild, viewer )
 		GFRadioButton( gump, 40, 200, 210, 211, 0, 0xC0C );
 	endif
 
-	GFTextLine( gump, 60, 220, 2100, "Change the guild's name. ( "+CInt( settings.RegistrationFee )+" gp )" );
-	GFRadioButton( gump, 40, 220, 210, 211, 0, 0xc02 );
+	GFTextLine( gump, 60, 220, 2100, "Choose a color for your guild stone." );
+	GFRadioButton( gump, 40, 220, 210, 211, 0, 0xC0E );
 
-	GFTextLine( gump, 60, 240, 2100, "Change the guild's icon." );
-	GFRadioButton( gump, 40, 240, 210, 211, 0, 0xc04 );
+	GFTextLine( gump, 60, 240, 2100, "Change the guild's name. ( "+CInt( settings.RegistrationFee )+" gp )" );
+	GFRadioButton( gump, 40, 240, 210, 211, 0, 0xc02 );
 
+	GFTextLine( gump, 60, 260, 2100, "Change the guild's icon." );
+	GFRadioButton( gump, 40, 260, 210, 211, 0, 0xc04 );
+
+	// This gump option changes depending on whether a guild has been assigned a color.
 	if( !guild.getprop("GuildColor") )
-		GFTextLine( gump, 60, 260, 2100, "Buy a color for the guild. ( " + g_color_settings.Cost + "gp )" );
-		GFRadioButton( gump, 40, 260, 210, 211, 0, 0xC0B );
+		GFTextLine( gump, 60, 280, 2100, "Buy a color for the guild. ( " + g_color_settings.Cost + "gp )" );
+		GFRadioButton( gump, 40, 280, 210, 211, 0, 0xC0B );
 	else
-		GFTextLine( gump, 60, 260, 2100, "Remove the color from the guild." );
-		GFRadioButton( gump, 40, 260, 210, 211, 0, 0xC0D );
+		GFTextLine( gump, 60, 280, 2100, "Remove the color from the guild." );
+		GFRadioButton( gump, 40, 280, 210, 211, 0, 0xC0D );
 	endif
 
 	GFTextLine( gump, 60, 300, 2100, "Grant title to another member.");
@@ -289,6 +295,9 @@ function showGuildMasterInfo( mobile, byref gump, guild, viewer )
 		return 1;
 	elseif( input[0xC0D] )
 		RemoveGuildColor( mobile );
+		return 1;
+	elseif( input[0xC0E] )
+		ColorGuildStone( mobile );
 		return 1;
 	else
 		toggle_menu := 0;
