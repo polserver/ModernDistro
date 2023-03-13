@@ -209,7 +209,7 @@ function showGuildMasterInfo( mobile, byref gump, guild, viewer )
 		GFRadioButton( gump, 40, 200, 210, 211, 0, 0xC0C );
 	endif
 
-	GFTextLine( gump, 60, 220, 2100, "Choose a color for your guild stone." );
+	GFTextLine( gump, 60, 220, 2100, "Change the guild stone's color." );
 	GFRadioButton( gump, 40, 220, 210, 211, 0, 0xC0E );
 
 	GFTextLine( gump, 60, 240, 2100, "Change the guild's name. ( "+CInt( settings.RegistrationFee )+" gp )" );

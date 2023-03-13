@@ -113,10 +113,8 @@ endfunction
 
 function ViewRecruits( mobile, guild, viewer )
 
-	// New code
 	var vote_for :={},
 		vote_against:={};
-	//////////////////////
 	var gump := GFCreateGump();
         showOptionBG( gump, "View Recruits", 1 );
 
@@ -135,8 +133,6 @@ function ViewRecruits( mobile, guild, viewer )
 		var the_recruit := SystemFindObjectBySerial( recruit.serial );
 		GFTextLine( gump, 60, y_pos, 2100, the_recruit.name );
 
-		// GFTextLine( gump, 270, y_pos, 2100, CInt( recruit.votefor ));
-		// GFTextLine( gump, 325, y_pos, 2100, CInt( recruit.voteagainst ));
 		if( !recruit.votefor )
 			recruit.votefor := vote_for;
 		endif
@@ -170,25 +166,34 @@ function ViewRecruits( mobile, guild, viewer )
 
         var player_ref := SystemFindObjectBySerial( guild_recruits[input].serial );
         if( !Yesno( viewer, "What is your advice for the recruitment of "+player_ref.name+"?", "I vote for "+player_ref.name+".", "I vote against "+player_ref.name+"." ))
+			// Vote against
+			// If the guild member has already voted against the recruit, prevent the member
+			// from voting against the recruit again.
 			if( viewer.serial in guild_recruits[input].voteagainst )
 				SendSysMessage( viewer, "You can only cast one vote against " + guild_recruits[input].name + ".", color := 33 );
 				return;
 			endif
+			// This determines if the guild member has voted for the recruit
+			// and if so, it removes them from the votefor array.
 			if( viewer.serial in guild_recruits[input].votefor )
 				guild_recruits[input].votefor.erase((viewer.serial in guild_recruits[input].votefor));
 			endif
+			// Add the member to the voteagainst array and set the 'Recruit' CProp
 			guild_recruits[input].voteagainst.append(viewer.serial);
 			guild.SetProp( "Recruit", guild_recruits );
         else // vote for
+			// If the guild member has already voted for the recruit, prevent the member
+			// from voting for the recruit again.
 			if( viewer.serial in guild_recruits[input].votefor )
 				SendSysMessage( viewer, "You can only cast one vote for " + guild_recruits[input].name + ".", color := 33 );
-				// Print(viewer.serial in guild_recruits[input].votefor);
-				// Print(TypeOf(guild_recruits[input].votefor));
 				return;
 			endif
+			// This determines if the guild member has voted against the recruit
+			// and if so, it removes them from the voteagainst array.
 			if( viewer.serial in guild_recruits[input].voteagainst )
 				guild_recruits[input].voteagainst.erase((viewer.serial in guild_recruits[input].voteagainst));
 			endif
+			// Add the member to the votefor array and set the 'Recruit' CProp
 			guild_recruits[input].votefor.append(viewer.serial);
 			guild.SetProp( "Recruit", guild_recruits );
         endif
@@ -531,11 +536,13 @@ function PlaceGuildStone( mobile )
 	guild_stone.SetGuild( mobile.guildid );
 	SetName( guild_stone, guild.GetProp( "Name" ));
 	var guild_color := guild.getprop("GuildColor");
-	// if(guild_color)
-		// guild_stone.color := guild_color;
-	// else
-		// guild_stone.color := CInt(GC_GetSettingsCfgElem( "GuildSettings" ).DefaultGuildStoneColor);
-	// endif
+	// Sometimes the color chosen for a guild does not look right on the guild stone.
+	// This is why there is an option to change the guild stone's color in the guild master gump.
+	if(guild_color)
+		guild_stone.color := guild_color;
+	else
+		guild_stone.color := CInt(GC_GetSettingsCfgElem( "GuildSettings" ).DefaultGuildStoneColor);
+	endif
 
 	guild.SetProp( "GuildStone", guild_stone.serial );
 	sign.SetGuildStone( guild_stone.serial );
