@@ -12,9 +12,11 @@
 use uo;
 use os;
 use util;
+use cliloc;
 
 include ":security:report";
 include "include/housing";
+include ":guildColors:guildColors";
 
 function ViewRosters( mobile, guild, viewer )
 
@@ -98,8 +100,8 @@ function RecruitAPlayer( mobile, guild, viewer )
 
 		var recruit_list := struct;
 		recruit_list.+serial := targ.serial;
-		recruit_list.+votefor := 0;
-		recruit_list.+voteagainst  := 0;
+		recruit_list.+votefor := {};
+		recruit_list.+voteagainst  := {};
 
 		var recruit_size := recruit.Size();
 		recruit[recruit_size+1] := recruit_list;
@@ -111,6 +113,8 @@ endfunction
 
 function ViewRecruits( mobile, guild, viewer )
 
+	var vote_for :={},
+		vote_against:={};
 	var gump := GFCreateGump();
         showOptionBG( gump, "View Recruits", 1 );
 
@@ -129,8 +133,14 @@ function ViewRecruits( mobile, guild, viewer )
 		var the_recruit := SystemFindObjectBySerial( recruit.serial );
 		GFTextLine( gump, 60, y_pos, 2100, the_recruit.name );
 
-		GFTextLine( gump, 270, y_pos, 2100, CInt( recruit.votefor ));
-		GFTextLine( gump, 325, y_pos, 2100, CInt( recruit.voteagainst ));
+		if( !recruit.votefor )
+			recruit.votefor := vote_for;
+		endif
+		if( !recruit.voteagainst )
+			recruit.voteagainst := vote_against;
+		endif
+		GFTextLine( gump, 270, y_pos, 2100, recruit.votefor.size() );
+		GFTextLine( gump, 325, y_pos, 2100, recruit.voteagainst.size() );
 
 		GFAddButton( gump, 40, y_pos+3, 2117, 2118, GF_CLOSE_BTN, _recruit_iter );
 
@@ -154,15 +164,37 @@ function ViewRecruits( mobile, guild, viewer )
 
         input := input[0];
 
-        var player_ref := SystemFindObjectBySerial( guild_recruits[input].serial ),
-            vote_for := CInt( guild_recruits[input].votefor ),
-            vote_against := CInt( guild_recruits[input].voteagainst );
-
+        var player_ref := SystemFindObjectBySerial( guild_recruits[input].serial );
         if( !Yesno( viewer, "What is your advice for the recruitment of "+player_ref.name+"?", "I vote for "+player_ref.name+".", "I vote against "+player_ref.name+"." ))
-			guild_recruits[input].voteagainst := vote_against + 1;
+			// Vote against
+			// If the guild member has already voted against the recruit, prevent the member
+			// from voting against the recruit again.
+			if( viewer.serial in guild_recruits[input].voteagainst )
+				SendSysMessage( viewer, "You can only cast one vote against " + guild_recruits[input].name + ".", color := 33 );
+				return;
+			endif
+			// This determines if the guild member has voted for the recruit
+			// and if so, it removes them from the votefor array.
+			if( viewer.serial in guild_recruits[input].votefor )
+				guild_recruits[input].votefor.erase((viewer.serial in guild_recruits[input].votefor));
+			endif
+			// Add the member to the voteagainst array and set the 'Recruit' CProp
+			guild_recruits[input].voteagainst.append(viewer.serial);
 			guild.SetProp( "Recruit", guild_recruits );
-        else
-			guild_recruits[input].votefor := vote_for + 1;
+        else // vote for
+			// If the guild member has already voted for the recruit, prevent the member
+			// from voting for the recruit again.
+			if( viewer.serial in guild_recruits[input].votefor )
+				SendSysMessage( viewer, "You can only cast one vote for " + guild_recruits[input].name + ".", color := 33 );
+				return;
+			endif
+			// This determines if the guild member has voted against the recruit
+			// and if so, it removes them from the voteagainst array.
+			if( viewer.serial in guild_recruits[input].voteagainst )
+				guild_recruits[input].voteagainst.erase((viewer.serial in guild_recruits[input].voteagainst));
+			endif
+			// Add the member to the votefor array and set the 'Recruit' CProp
+			guild_recruits[input].votefor.append(viewer.serial);
 			guild.SetProp( "Recruit", guild_recruits );
         endif
 
@@ -472,7 +504,7 @@ function PlaceGuildStone( mobile )
 		SendSysMessage( mobile, "Cancelled.", 3, 33 );
 		return 0;
 	elseif( !CheckLosAt( mobile, targ.x, targ.y, targ.z ));
-		SendSysMessage( mobile, "Can not see this!", 3, 33 );
+		SendSysMessage( mobile, "Cannot see this!", 3, 33 );
 		return 0;
 	elseif( !sign.IsLocationInsideHouse( targ ) );
 		SendSysMessage( mobile, "This is not in a house!", 3, 33 );
@@ -486,7 +518,7 @@ function PlaceGuildStone( mobile )
 		SendSysMessage( mobile, "This is not in your house!", 3, 33 );
 		return 0;
 	elseif( guild_house && guild_house != guild_info )
-		SendSysMessage( mobile, "The house already protect a guildstone!", 3, 33 );
+		SendSysMessage( mobile, "There is already a guild stone in this building.", 3, 33 );
 		return 0;
 	endif
 
@@ -500,14 +532,58 @@ function PlaceGuildStone( mobile )
 		return 0;
 	endif
 
+	guild_stone.setprop("HouseSign", sign.serial);
 	guild_stone.SetGuild( mobile.guildid );
 	SetName( guild_stone, guild.GetProp( "Name" ));
-	guild_stone.color := 68;
+	var guild_color := guild.getprop("GuildColor");
+	// Sometimes the color chosen for a guild does not look right on the guild stone.
+	// This is why there is an option to change the guild stone's color in the guild master gump.
+	if(guild_color)
+		guild_stone.color := guild_color;
+	else
+		guild_stone.color := CInt(GC_GetSettingsCfgElem( "GuildSettings" ).DefaultGuildStoneColor);
+	endif
 
 	guild.SetProp( "GuildStone", guild_stone.serial );
 	sign.SetGuildStone( guild_stone.serial );
 
 	return 1;
+endfunction
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+//	RemoveGuildStone( mobile )
+//
+//	Purpose:	Looks for a guild stone belonging to the guild master's guild.
+//				Once found, the guild stone is destroyed and references are removed
+//				from the guild and the house sign where it was located.
+//	Parameter:	mobileref::mobile
+//
+//	Returns:	Nothing
+//
+//	Created:	2023-03-06 19:47:39 by Yukiko
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+function RemoveGuildStone( mobile )
+
+	var guild_stone := SystemFindObjectBySerial( mobile.guild.getprop( "GuildStone" ) );
+	foreach item in ListObjectsInBox( guild_stone.x-32, guild_stone.y-32, -128, guild_stone.x+32, guild_stone.y+32, +127, guild_stone.realm)
+		case(item.objtype)
+			0xBD0:
+			0xBD2:
+			0x20BD1:
+			0x20BD2:
+			0x20BCF:
+			0x20BD0:
+			0x260FA: if (item.IsObjectInsideHouse(guild_stone))
+						if( (GetObjProperty( item, "GuildStone" )) == guild_stone.serial)
+							break;
+						endif
+					endif
+		endcase
+	endforeach
+	DestroyGuildStone( mobile.guild );
+
 endfunction
 
 function ChangeGuildName( mobile, guild, viewer )
@@ -1050,9 +1126,138 @@ endfunction
 function DestroyGuildStone( guild )
 
 	var guildstone_serial := guild.GetProp( "GuildStone" );
+	var guild_stone := SystemFindObjectBySerial( guildstone_serial );
+	var sign := GetHouseSign( guild_stone );
 	if( guildstone_serial )
-		DestroyItem( SystemFindObjectBySerial( guildstone_serial ));
+		EraseObjProperty( sign, "GuildStone" );
+		guild.eraseprop("GuildStone");
+		DestroyItem( guild_stone );
 	endif
 
 	return 1;
 endfunction
+
+function DisbandGuild( who )
+
+	if( !YesNo( who, "Are you sure you want to disband the guild? Any clothes previously dyed the guild color will have color removed upon being equipped." ) )
+		SendSysMessageCL( who, 1042023, color := 33 ); // Cancelled.
+		return 0;
+	endif
+
+	var gm_guild_id := who.guildid;
+	if( !gm_guild_id )
+		SendSysMessage( who, "You do not appear to be in a guild.", color := 40 );
+		return 0;
+	endif
+	var gm_guild := FindGuild( gm_guild_id );
+	if( gm_guild.members.size() > 1)
+		SendSysMessage( who, "You must remove the guild members before you disband the guild.", color := 40 );
+		return 0;
+	endif
+
+	gm_guild.eraseprop( "Name" );
+	gm_guild.eraseprop( "Abbr" );
+	gm_guild.eraseprop( "Master" );
+
+	EraseObjProperty( who, "Guild_Title" );
+	EraseObjProperty( who, "Guild_Abbr" );
+
+	who.title_guild := "";
+	gm_guild.removemember(who);
+	DestroyGuildStone( gm_guild );
+
+	DestroyGuild( gm_guild );
+
+	SendSysMessage( who, "Guild was successfully disbanded.", 3, 68 );
+	return 1;
+endfunction
+
+function PurchaseGuildColor( who )
+
+	var guild_color := Run_Script( ":guildColors:scripts/services/buyGuildColor", who );
+	if( guild_color )
+		var gm_guild := who.guild;
+		var guild_stone_serial := gm_guild.GetProp( "GuildStone" );
+		var guild_stone := SystemFindObjectBySerial( guild_stone_serial );
+		gm_guild.setprop( "GuildColor", guild_color );
+		guild_stone.color := guild_color;
+	else
+		SendSysMessage( who, "Cancelled.", color := 33 );
+	endif
+
+endfunction
+
+function RemoveGuildColor( who )
+
+	if( !YesNo( who, "Are you sure you want to remove the guild color? Any clothes previously dyed the guild color will have color removed upon being equipped." ) )
+		SendSysMessageCL( who, 1042023, color := 33 ); // Cancelled.
+		return 0;
+	endif
+	var guild_color := who.guild.getprop("GuildColor");
+	if( !guild_color )
+		SendSysMessage( who, "Your guild has not purchased a color.", color := 40 );
+		return 0;
+	endif
+
+	MakeColorAvailableForPurchase( guild_color );
+	SendSysMessage( who, "Your guild's color has been removed.", color := 66 );
+	var guild_members := who.guild.members;
+	var equipped_items := {};
+	foreach person in guild_members
+		equipped_items := ListEquippedItems( person );
+		foreach item in equipped_items
+			if( item.color == guild_color )
+				item.color := 0;
+			endif
+		endforeach
+		SendSysMessage( person, "The guild master has removed the current guild color.", color := 88 );
+		SendSysMessage( person, "Your equipped guild colored items are no longer colored.", color := 88 );
+		SendSysMessage( person, "Any unequipped guild colored items will lose their color when equipped.", color := 88 );
+	endforeach
+	var guild_stone := SystemFindObjectBySerial( who.guild.getprop("GuildStone") );
+	var guild_settings := GC_GetSettingsCfgElem( "GuildSettings" );
+	guild_stone.color := CInt(guild_settings.DefaultGuildStoneColor);
+	who.guild.setprop("GuildColor", 0);
+
+	SendSysMessage( who, "The guild color has been removed.", color := 66 );
+
+endfunction
+
+function DyeClothes( who )
+
+	SendSysMessage( who, "Press <ESC> when finished.", color := 88 );
+	var done :=0;
+	var clothing := 0;
+	while(!done)
+
+		clothing := TargetCoordinates( who );
+		if( !clothing )
+			done := 1;
+		elseif( !clothing.item.IsClothes() )
+			SendSysMessage( who, "You can only dye clothes with a guild color.", color := 33 );
+		else
+			clothing.item.color := who.guild.getprop( "GuildColor" );
+			SetObjProperty( clothing.item, "GuildColor", who.guild.getprop( "GuildColor" ) );
+		endif
+
+	endwhile
+	SendSysMessage( who, "Finished dying clothes.", color := 56 );
+
+endfunction
+
+function ColorGuildStone( who )
+
+	SendSysMessage( who, "Select the guild stone:", color := 88 );
+	var guild_stone := Target( who );
+	if( guild_stone.objtype != 0x2A390 )
+		SendSysMessage( who, "That is not a guild stone.", color := 33 );
+		return;
+	endif
+	if( !guild_stone.getprop("GuildID") )
+		SendSysMessage( who, "That stone is not affiliated with a guild.", color := 33 );
+		return;
+	endif
+	var guild_color := SelectColor(who, guild_stone);
+	guild_stone.color := guild_color;
+endfunction
+

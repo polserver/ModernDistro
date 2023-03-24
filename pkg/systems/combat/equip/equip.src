@@ -5,8 +5,23 @@ use cfgfile;
 include "include/client";
 include ":attributes:attributes";
 include ":combat:equip";
+include ":guildColors:guildColors";
 
 program equip(who, item)
+
+	// Handle guild color changes of items being equipped, if needed.
+	var guild_color := who.guild.getprop("GuildColor");
+	if( who.guild )
+		if( (item.color != guild_color) && (item.getprop("GuildColor") >= 0) )
+			item.color := guild_color;
+			if( !guild_color )
+				item.eraseprop("GuildColor");
+			else
+				item.setprop("GuildColor", guild_color);
+			endif
+			SendSysMessage( who, "That item's color has been changed to reflect your guild's current color.", color := 88 );
+		endif
+	endif
 
     var val := HandleMods(who, item);
     return val;

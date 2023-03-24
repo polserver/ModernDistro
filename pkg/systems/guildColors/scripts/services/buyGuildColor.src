@@ -1,0 +1,200 @@
+use uo;
+use os;
+use util;
+use cfgfile;
+use datafile;
+
+include ":currency:currency";
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+include ":gumps:gumpCaching";
+include ":guildcolors:guildColors";
+include ":guildcolors:settings";
+include ":itemutils:itemdesc";
+include ":itemutils:itemInfo";
+
+var guild_colors := GC_RetrieveAvailableGuildColors(),
+	clothing_array := GetConfigIntArray( GC_GetSettingsCfgElem( "Clothing" ), "Objtype" );
+
+program buyguildcolor_script( mobile )
+
+	if( GetProcess( GetObjProperty( mobile, "#BuyGuildColor" ) ) )
+		return 0;
+	endif
+	SetObjProperty( mobile, "#BuyGuildColor", GetPID() );
+
+	var gump := 0,
+		result := 0,
+		color_select := 1,
+		color := 0,
+		color_page := 0,
+		clothing_page := 0,
+		objtype := 0x1F03,
+		model_type := 0,
+		purchased := 0;
+
+	while( mobile.connected )
+		gump := BuildMainColorSelectionGump( color_select, model_type, objtype, color );
+		if( color_select )
+			ListAvailableColors( gump, color, color_page );
+		else
+			ListAvailableClothingStyles( gump, objtype, clothing_page );
+		endif
+
+		result := GFSendGump( mobile, gump );
+		result := result[0];
+		if( !result )
+			return 0;
+		endif
+
+		if( result == 9 )
+			if( color_select )
+				if( color_page > 0 )
+					color_page := color_page - 1;
+				endif
+			else
+				if( clothing_page > 0 )
+					clothing_page := clothing_page - 1;
+				endif
+			endif
+		elseif( result == 10 )
+			if( color_select )
+				color_page := color_page + 1;
+			else
+				clothing_page := clothing_page + 1;
+			endif
+		elseif( result == 42 )
+			model_type := model_type ? 0 : 1;
+		elseif( result == 33 )
+			color_select := color_select ? 0 : 1;
+		elseif( result == 101 )
+			purchased := GC_PurchaseGuildColor( mobile, color, mobile.guildid );
+			if( purchased.errortext )
+				SendSysMessage( mobile, purchased.errortext, 0x3, 0x22 );
+				return 0;
+			else
+				return color;
+			endif
+		elseif( result >= 1000 && result <= 1000+guild_colors.Size() )
+			result := CInt( result-1000 );
+			color := guild_colors[result];
+		elseif( result >= 2000 && result <= 2000+clothing_array.Size() )
+			result := CInt( result-2000 );
+			objtype := clothing_array[result];
+		endif
+	endwhile
+endprogram
+
+function BuildMainColorSelectionGump( byref color_select, byref gender, byref objtype, byref color )
+
+	if( !color )
+		color := guild_colors[1];
+	endif
+
+	if( !objtype )
+		objtype := 0x1F03;
+	endif
+
+	var datafile := GFOpenCacheDatafile();
+	GFEraseGump( datafile, "Gumps", "BuyGuildColor" );
+	var gump := GFLoadGump( datafile, "Gumps", "BuyGuildColor" );
+	if( gump.errortext )
+// All the gump stuff in this if statement are cached to the default
+// gumps datafile under BuyGuildColor.
+		gump := GFCreateGump( 50, 50 );
+
+		GFPage( gump, 0 );
+		GFResizePic( gump, 0, 0, 9250, 486, 457 );
+		GFPicTiled( gump, 13, 13, 460, 431, 2624 );
+		GFAddAlphaRegion( gump, 13, 13, 460, 431 );
+		GFPicTiled( gump, 207, 18, 262, 239, 3004 );
+		GFPicTiled( gump, 208, 19, 260, 237, 2624 );
+		GFResizePic( gump, 18, 18, 3000, 184, 421 ); // List Selection
+
+		GFAddButton( gump, 207, 262, 4005, 4007, GF_CLOSE_BTN, 42 );
+		GFHTMLArea( gump, 242, 265, 226, 26, "<BASEFONT COLOR=#C2C2C2>Change Model Gender</BASEFONT>", 0, 0 );
+
+		GFAddButton( gump, 308, 407, 0x2C7E, 0x2C80, GF_CLOSE_BTN, 101 );
+		GFAddButton( gump, 207, 289, 4005, 4007, GF_CLOSE_BTN, 33 ); // Change Clothing/Change Color button
+		GFStoreGump( datafile, "Gumps", "BuyGuildColor", gump );
+	endif
+	GFGumpPic( gump, 209, 19, 12+gender, 1002 ); // Human Gump Art
+
+	GFGumpPic( gump, 209, 19, GetGumpArt( objtype, gender ), color-1 ); // Clothing Gump Art
+	GFTextLine( gump, 214, 24, 1153, "Current Color ID: "+Hex( color ) );
+
+	if( color_select )
+		GFHTMLArea( gump, 242, 291, 226, 26, "<BASEFONT COLOR=#C2C2C2>Change Model's Clothing</BASEFONT>", 0, 0 );
+	else
+		GFHTMLArea( gump, 242, 291, 226, 26, "<BASEFONT COLOR=#C2C2C2>Change Clothing Color</BASEFONT>", 0, 0 );
+	endif
+
+// Price of color...
+	GFHTMLArea( gump, 310, 415, 156, 27, "<BASEFONT COLOR=#C2C2C2><div align=center>"+MakeNumberHumanReadable( CInt( GC_GetSettingsCfgElem( "Prices" ).Cost ) )+" Gold Coins</div></BASEFONT>", 0, 0 );
+
+	return gump;
+endfunction
+
+function ListAvailableColors( byref gump, byref selected_color, byref page )
+
+	var datafile := GC_GetGuildColorDatafile(),
+		button_y := 23,
+		df_elem := 0,
+		position := CInt(( page * 13 ) + 1 ),
+		i := 0;
+
+	for( i:=position; i<=guild_colors.Size(); i:=i+1 )
+		df_elem := datafile.FindElement( guild_colors[i] );
+		if( selected_color != guild_colors[i] )
+			GFAddButton( gump, 23, button_y, 9792, 9793, GF_CLOSE_BTN, 1000+i );
+		else
+			GFGumpPic( gump, 23, button_y, 9793, 0 );
+		endif
+
+		GFTextLine( gump, 48, button_y+3, 0, df_elem.GetProp( "Name" ) );
+
+		button_y := button_y + 32;
+		if( !( i % 13 ) || i == guild_colors.Size() )
+			if( i != guild_colors.Size() )
+				GFAddButton( gump, 187, 417, 2706, 2707, GF_CLOSE_BTN, 10 ); // Next Page
+			endif
+
+			if( page > 0 )
+				GFAddButton( gump, 187, 21, 2704, 2705, GF_CLOSE_BTN, 9 ); // Back Button
+			endif
+
+			return 1;
+		endif
+	endfor
+endfunction
+
+function ListAvailableClothingStyles( byref gump, byref objtype, byref page )
+
+	var position := CInt(( page * 13 ) + 1 ),
+		button_y := 23,
+		i := 0,
+		j := 0;
+
+	for( i:=position; i<=clothing_array.Size(); i:=i+1 )
+		if( objtype != clothing_array[i] )
+			GFAddButton( gump, 23, button_y, 9792, 9793, GF_CLOSE_BTN, 2000+i );
+		else
+			GFGumpPic( gump, 23, button_y, 9793, 0 );
+		endif
+
+		GFTextLine( gump, 48, button_y+3, 0, GetItemDescInfo( clothing_array[i] ).Desc );
+
+		button_y := button_y + 32;
+		if( !( i % 13 ) || i == clothing_array.Size() )
+			if( i != clothing_array.Size() )
+				GFAddButton( gump, 187, 417, 2706, 2707, GF_CLOSE_BTN, 10 ); // Next Page
+			endif
+
+			if( page > 0 )
+				GFAddButton( gump, 187, 21, 2704, 2705, GF_CLOSE_BTN, 9 ); // Back Button
+			endif
+
+			return 1;
+		endif
+	endfor
+endfunction

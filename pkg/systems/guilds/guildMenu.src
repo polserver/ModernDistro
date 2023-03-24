@@ -11,247 +11,298 @@ include ":gumps:gumps_ex";
 include ":guilds:guild";
 include ":guilds:settings";
 include ":guilds:validate";
+include ":guildColors:settings";
 include "include/security";
 include "include/string";
 
 var toggle_menu := 0;
 var settings := Guild_GetSettingsCfgElem( "Settings" );
+var g_color_settings := GC_GetSettingsCfgElem( "Prices" );
 
 program Guild_Create( parms )
 
-        var mobile,
-            viewer,
-            guild_id := 0;
+	var mobile,
+		viewer,
+		guild_id := 0;
 
 	if( Lower( TypeOf( parms )) == "array" )
-                mobile := parms[1];
-                viewer := parms[2];
-                if( Lower( TypeOf( parms[2] )) == "integer" )
-                        guild_id := parms[2];
-                        viewer := mobile;
-                endif
-        else
-                mobile := parms;
-                viewer := parms;
+		mobile := parms[1];
+		viewer := parms[2];
+		if( Lower( TypeOf( parms[2] )) == "integer" )
+			guild_id := parms[2];
+			viewer := mobile;
+		endif
+	else
+		mobile := parms;
+		viewer := parms;
 	endif
 
-        if( GetProcess( CInt( GetObjProperty( mobile, "#GuildButton" ))))
+	if( GetProcess( CInt( GetObjProperty( mobile, "#GuildButton" ))))
 		return 0;
 	else
 		SetObjProperty( mobile, "#GuildButton", GetPid() );
 	endif
 
 	showGuildInfo( mobile, viewer, guild_id );
+	return 1;
 
-        return 1;
 endprogram
 
 function showGuildInfo( mobile, viewer, guild_id := 0 )
 
-        var temp_guild;
-        if( !guild_id )
-                temp_guild := mobile.guildid;
+	var temp_guild;
+	if( !guild_id )
+		temp_guild := mobile.guildid;
+	else
+		temp_guild := guild_id;
+	endif
 
-        else
-                temp_guild := guild_id;
-        endif
-
-        var guild := FindGuild( temp_guild );
-        if( guild.errortext )
-                SendSysMessage( mobile, "Error cant find guild -->"+guild.errortext );
-                return 0;
-        endif
+	var guild := FindGuild( temp_guild );
+	if( guild.errortext )
+		SendSysMessage( mobile, "Error cant find guild -->"+guild.errortext );
+		return 0;
+	endif
 
 	var gump := GFCreateGump();
 
 	GFResizePic( gump, 0, 0, GFGetCfgConst( "Defaults", "BackGround" ), 400, 520 );
-        GFResizePic( gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 370, 25 );
+	GFResizePic( gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 370, 25 );
 	GFResizePic( gump, 15, 45, GFGetCfgConst( "Defaults", "ForeGround" ), 370, 465 );
 	GFTextMid( gump, 15, 17, 400, 1720, "Guild Menu for "+guild.GetProp( "Name" ) );
+	if( mobile.guild == guild )
+		GFAddButton( gump, 100, 470, 2119, 2120, GF_CLOSE_BTN, 0xA2 ); // Cancel
+	endif
 
-	GFAddButton( gump, 100, 470, 2119, 2120, GF_CLOSE_BTN, 0xA2 ); // Cancel
 	GFAddButton( gump, 25, 470, 2128, 2129, GF_CLOSE_BTN, 0xA1 ); // Okay
 
-        var temp_charter := guild.GetProp( "Charter" );
-        var text_charter;
+	var temp_charter := guild.GetProp( "Charter" );
+	var text_charter;
 
-        foreach line in temp_charter
-                if( _line_iter == 1 )
-                	text_charter := CStr( line );
-                else
-                	text_charter += " "+CStr( line );
-                endif
+	foreach line in temp_charter
+		if( _line_iter == 1 )
+			text_charter := CStr( line );
+		else
+			text_charter += " "+CStr( line );
+		endif
 
 		SleepMS(5);
-        endforeach
+	endforeach
 
-        if( !text_charter )
+	if( !text_charter )
 		text_charter := "No charter.";
-        endif
+	endif
 
-        var guild_icon := guild.GetProp( "GuildIcon" );
-        if( !guild_icon )
-                 guild_icon := 0x15a9;
-        endif
+	var guild_icon := guild.GetProp( "GuildIcon" );
+	if( !guild_icon )
+		guild_icon := 0x15a9;
+	endif
 
-        GFGumpPic( gump, 295, 430, guild_icon );
-
+	GFGumpPic( gump, 295, 430, guild_icon );
 	GFResizePic( gump, 30, 60, GFGetCfgConst( "Backgrounds", "GOLDTRIM" ), 337, 100 );
 	GFHTMLArea( gump, 40, 70, 326, 80, text_charter, 0, 1 );
 
-        if( toggle_menu )
-                if( mobile.serial == guild.GetProp( "Master" ) || viewer.cmdlevel >= 3 )
-                	showGuildMasterInfo( mobile, gump, guild, viewer );
-                else
-                        showGuildMemberInfo( mobile, gump, guild, viewer );
-                endif
-        else
-                showGuildMemberInfo( mobile, gump, guild, viewer );
-        endif
+	if( toggle_menu )
+		if( mobile.serial == guild.GetProp( "Master" ) || viewer.cmdlevel >= 3 )
+			showGuildMasterInfo( mobile, gump, guild, viewer );
+		else
+			showGuildMemberInfo( mobile, gump, guild, viewer );
+		endif
+	else
+		showGuildMemberInfo( mobile, gump, guild, viewer );
+	endif
 
-        return 1;
+	return 1;
 endfunction
 
 function showGuildMemberInfo( mobile, byref gump, guild, viewer )
 
-        GFTextLine( gump, 60, 180, 2100, "View the current guild roster." );
-        GFRadioButton( gump, 40, 180, 210, 211, 0, 0xb00 );
+	if( mobile.guild == guild )
+		GFTextLine( gump, 60, 180, 2100, "View the current guild roster." );
+		GFRadioButton( gump, 40, 180, 210, 211, 0, 0xb00 );
 
-        GFTextLine( gump, 60, 220, 2100, "Recruit someone into the guild." );
-        GFRadioButton( gump, 40, 220, 210, 211, 0, 0xb01 );
+		GFTextLine( gump, 60, 220, 2100, "Recruit someone into the guild." );
+		GFRadioButton( gump, 40, 220, 210, 211, 0, 0xb01 );
 
-        GFTextLine( gump, 60, 240, 2100, "View list of sponsored recruits." );
-        GFRadioButton( gump, 40, 240, 210, 211, 0, 0xb02 );
+		GFTextLine( gump, 60, 240, 2100, "View list of sponsored recruits." );
+		GFRadioButton( gump, 40, 240, 210, 211, 0, 0xb02 );
 
-        GFTextLine( gump, 60, 280, 2100, "View list of your allies." );
-        GFRadioButton( gump, 40, 280, 210, 211, 0, 0xb03 );
+		GFTextLine( gump, 60, 280, 2100, "View list of your allies." );
+		GFRadioButton( gump, 40, 280, 210, 211, 0, 0xb03 );
 
-        GFTextLine( gump, 60, 300, 2100, "View list of your enemies." );
-        GFRadioButton( gump, 40, 300, 210, 211, 0, 0xb04 );
+		GFTextLine( gump, 60, 300, 2100, "View list of your enemies." );
+		GFRadioButton( gump, 40, 300, 210, 211, 0, 0xb04 );
 
-        GFTextLine( gump, 60, 320, 2100, "View all guilds." );
-        GFRadioButton( gump, 40, 320, 210, 211, 0, 0xb05 );
+		GFTextLine( gump, 60, 320, 2100, "View all guilds." );
+		GFRadioButton( gump, 40, 320, 210, 211, 0, 0xb05 );
 
-        GFTextLine( gump, 60, 360, 2100, "Toggle your guild title on or off." );
-        GFRadioButton( gump, 40, 360, 210, 211, 0, 0xb06 );
-        if( GetObjProperty( mobile, "Guild_Abbr" ))
-		GFTextLine( gump, 310, 360, 70, "ON" );
-        else
-		GFTextLine( gump, 310, 360, 33, "OFF" );
-        endif
+		GFTextLine( gump, 60, 340, 2100, "Toggle your guild title on or off." );
+		GFRadioButton( gump, 40, 340, 210, 211, 0, 0xb06 );
+		if( GetObjProperty( mobile, "Guild_Abbr" ))
+			GFTextLine( gump, 310, 340, 70, "ON" );
+		else
+			GFTextLine( gump, 310, 340, 33, "OFF" );
+		endif
 
-        GFTextLine( gump, 60, 380, 2100, "Resign from the guild." );
-        GFRadioButton( gump, 40, 380, 210, 211, 0, 0xb07 );
+		GFTextLine( gump, 60, 380, 2100, "Resign from the guild." );
+		GFRadioButton( gump, 40, 380, 210, 211, 0, 0xb07 );
 
-        GFTextLine( gump, 60, 420, 2100, "Guild Master functions." );
-        GFRadioButton( gump, 40, 420, 210, 211, 0, 0xb08 );
+		// This option does not appear in the gump until the guild master has chosen a guild color.
+		if( guild.getprop("GuildColor") )
+			GFTextLine( gump, 60, 420, 2100, "Dye clothes with the guild color." );
+			GFRadioButton( gump, 40, 420, 210, 211, 0, 0xB09 );
+		endif
 
-        var input := GFSendGump( viewer, gump );
-        if( !input || input[0xA2] )
+		GFTextLine( gump, 60, 440, 2100, "Guild Master functions." );
+		GFRadioButton( gump, 40, 440, 210, 211, 0, 0xb08 );
+	endif
+
+	var input := GFSendGump( viewer, gump );
+	if( !input || input[0xA2] )
 		SendSysMessage( viewer, "Cancelled.", 3, 68 );
 		return 0;
-        elseif( input[0xb00] )
-                ViewRosters( mobile, guild, viewer );
-                return 1;
-        elseif( input[0xb01] )
-                RecruitAPlayer( mobile, guild, viewer );
-                return 1;
-        elseif( input[0xb02] )
-                ViewRecruits( mobile, guild, viewer );
-                return 1;
-        elseif( input[0xb03] )
-                ViewAllies( mobile, guild, viewer );
-                return 1;
-        elseif( input[0xb04] )
-                ViewEnemies( mobile, guild, viewer );
-                return 1;
-        elseif( input[0xb05] )
-                PendingStatus( mobile, guild, viewer );
-                return 1;
-        elseif( input[0xb06] )
-                ToggleTitle( mobile, guild, viewer );
-                return 1;
-        elseif( input[0xb07] )
-                Resign( mobile, guild, viewer );
-                return 1;
-        elseif( input[0xb08] )
-                toggle_menu := 1;
-                showGuildInfo( mobile, viewer );
-                return 1;
-        endif
+	elseif( input[0xb00] )
+		ViewRosters( mobile, guild, viewer );
+		return 1;
+	elseif( input[0xb01] )
+		RecruitAPlayer( mobile, guild, viewer );
+		return 1;
+	elseif( input[0xb02] )
+		ViewRecruits( mobile, guild, viewer );
+		return 1;
+	elseif( input[0xb03] )
+		ViewAllies( mobile, guild, viewer );
+		return 1;
+	elseif( input[0xb04] )
+		ViewEnemies( mobile, guild, viewer );
+		return 1;
+	elseif( input[0xb05] )
+		PendingStatus( mobile, guild, viewer );
+		return 1;
+	elseif( input[0xb06] )
+		ToggleTitle( mobile, guild, viewer );
+		return 1;
+	elseif( input[0xb07] )
+		Resign( mobile, guild, viewer );
+		return 1;
+	elseif( input[0xb08] )
+		toggle_menu := 1;
+		showGuildInfo( mobile, viewer );
+		return 1;
+	elseif( input[0xB09] )
+		// toggle_menu := 1;
+		DyeClothes( mobile );
+		return 1;
+	endif
 endfunction
 
 function showGuildMasterInfo( mobile, byref gump, guild, viewer )
 
-        GFTextLine( gump, 60, 180, 2100, "Set the guild charter." );
-        GFRadioButton( gump, 40, 180, 210, 211, 0, 0xc00 );
+	GFTextLine( gump, 60, 180, 2100, "Set the guild charter." );
+	GFRadioButton( gump, 40, 180, 210, 211, 0, 0xc00 );
 
-        GFTextLine( gump, 60, 200, 2100, "Place the GuildStone." );
-        GFRadioButton( gump, 40, 200, 210, 211, 0, 0xc01 );
+	// This gump option changes depending on whether a guild master has placed a guild stone.
+	if( !mobile.guild.getprop( "GuildStone" ) )
+		GFTextLine( gump, 60, 200, 2100, "Place the GuildStone." );
+		GFRadioButton( gump, 40, 200, 210, 211, 0, 0xc01 );
+	else
+		GFTextLine( gump, 60, 200, 2100, "Remove the GuildStone." );
+		GFRadioButton( gump, 40, 200, 210, 211, 0, 0xC0C );
+	endif
 
-        GFTextLine( gump, 60, 240, 2100, "Change the guild's name. ("+CInt( settings.RegistrationFee )+" gp)" );
-        GFRadioButton( gump, 40, 240, 210, 211, 0, 0xc02 );
+	GFTextLine( gump, 60, 220, 2100, "Change the guild stone's color." );
+	GFRadioButton( gump, 40, 220, 210, 211, 0, 0xC0E );
 
-        GFTextLine( gump, 60, 260, 2100, "Change the guild's icon." );
-        GFRadioButton( gump, 40, 260, 210, 211, 0, 0xc04 );
+	GFTextLine( gump, 60, 240, 2100, "Change the guild's name. ( "+CInt( settings.RegistrationFee )+" gp )" );
+	GFRadioButton( gump, 40, 240, 210, 211, 0, 0xc02 );
 
-        GFTextLine( gump, 60, 300, 2100, "Grant title to another member." );
-        GFRadioButton( gump, 40, 300, 210, 211, 0, 0xc03 );
+	GFTextLine( gump, 60, 260, 2100, "Change the guild's icon." );
+	GFRadioButton( gump, 40, 260, 210, 211, 0, 0xc04 );
 
-        GFTextLine( gump, 60, 320, 2100, "Pending recruit seeking membership." );
-        GFRadioButton( gump, 40, 320, 210, 211, 0, 0xc05 );
+	// This gump option changes depending on whether a guild has been assigned a color.
+	if( !guild.getprop("GuildColor") )
+		GFTextLine( gump, 60, 280, 2100, "Buy a color for the guild. ( " + g_color_settings.Cost + "gp )" );
+		GFRadioButton( gump, 40, 280, 210, 211, 0, 0xC0B );
+	else
+		GFTextLine( gump, 60, 280, 2100, "Remove the color from the guild." );
+		GFRadioButton( gump, 40, 280, 210, 211, 0, 0xC0D );
+	endif
 
-        GFTextLine( gump, 60, 340, 2100, "Dismiss a member." );
-        GFRadioButton( gump, 40, 340, 210, 211, 0, 0xc06 );
+	GFTextLine( gump, 60, 300, 2100, "Grant title to another member.");
+	GFRadioButton( gump, 40, 300, 210, 211, 0, 0xc03 );
 
-        GFTextLine( gump, 60, 380, 2100, "Declare war against another guild." );
-        GFRadioButton( gump, 40, 380, 210, 211, 0, 0xc07 );
+	GFTextLine( gump, 60, 320, 2100, "Pending recruit seeking membership." );
+	GFRadioButton( gump, 40, 320, 210, 211, 0, 0xc05 );
 
-        GFTextLine( gump, 60, 400, 2100, "Declare peace towards another guild." );
-        GFRadioButton( gump, 40, 400, 210, 211, 0, 0xc08 );
+	GFTextLine( gump, 60, 340, 2100, "Dismiss a member." );
+	GFRadioButton( gump, 40, 340, 210, 211, 0, 0xc06 );
 
-        GFTextLine( gump, 60, 440, 2100, "Transfer Leadership" );
-        GFRadioButton( gump, 40, 440, 210, 211, 0, 0xc09 );
+	GFTextLine( gump, 60, 380, 2100, "Declare war against another guild." );
+	GFRadioButton( gump, 40, 380, 210, 211, 0, 0xc07 );
 
-        var input := GFSendGump( viewer, gump );
-        if( !input || input[0xA2] )
-                toggle_menu := 0;
-                showGuildInfo( mobile, viewer );
-                return 1;
-        elseif( input[0xc00] )
-                SetCharter( mobile, guild, viewer );
-                return 1;
-        elseif( input[0xc01] )
-                PlaceGuildStone( mobile );
-                return 1;
-        elseif( input[0xc02] )
-                ChangeGuildName( mobile, guild, viewer );
-                return 1;
-        elseif( input[0xc03] )
-                GrantTitle( mobile, guild, viewer );
-                return 1;
-        elseif( input[0xc04] )
-                ChangeGuildIcon( mobile, guild, viewer );
-                return 1;
-        elseif( input[0xc05] )
-                RecruitStatus( mobile, guild, viewer );
-                return 1;
-        elseif( input[0xc06] )
-                DismissMember( mobile, guild, viewer );
-                return 1;
-        elseif( input[0xc07] )
-                DeclareWar( mobile, guild, viewer );
-                return 1;
-        elseif( input[0xc08] )
-                //DeclarePeace( mobile, guild, viewer );
-                SendSysMessage( mobile, "Option not implemented yet, but we are working on it.", 3, 68 );
-                return 1;
-        elseif( input[0xc09] )
-                TransferLeader( mobile, guild, viewer );
-                return 1;
-        else
-                toggle_menu := 0;
-                showGuildInfo( mobile, viewer );
-                return 1;
-        endif
+	GFTextLine( gump, 60, 400, 2100, "Declare peace towards another guild." );
+	GFRadioButton( gump, 40, 400, 210, 211, 0, 0xc08 );
+
+	GFTextLine( gump, 60, 420, 2100, "Transfer Leadership" );
+	GFRadioButton( gump, 40, 420, 210, 211, 0, 0xc09 );
+
+	GFTextLine( gump, 60, 440, 2100, "Disband (Destroy) the Guild" );
+	GFRadioButton( gump, 40, 440, 210, 211, 0, 0xc0A );
+
+	var input := GFSendGump( viewer, gump );
+	if( !input || input[0xA2] )
+		toggle_menu := 0;
+		showGuildInfo( mobile, viewer );
+		return 1;
+	elseif( input[0xC00] )
+		SetCharter( mobile, guild, viewer );
+		return 1;
+	elseif( input[0xC01] )
+		PlaceGuildStone( mobile );
+		return 1;
+	elseif( input[0xC02] )
+		ChangeGuildName( mobile, guild, viewer );
+		return 1;
+	elseif( input[0xC03] )
+		GrantTitle( mobile, guild, viewer );
+		return 1;
+	elseif( input[0xC04] )
+		ChangeGuildIcon( mobile, guild, viewer );
+		return 1;
+	elseif( input[0xC05] )
+		RecruitStatus( mobile, guild, viewer );
+		return 1;
+	elseif( input[0xC06] )
+		DismissMember( mobile, guild, viewer );
+		return 1;
+	elseif( input[0xC07] )
+		DeclareWar( mobile, guild, viewer );
+		return 1;
+	elseif( input[0xC08] )
+		//DeclarePeace( mobile, guild, viewer );
+		SendSysMessage( mobile, "Option not implemented yet, but we are working on it.", 3, 68 );
+		return 1;
+	elseif( input[0xC09] )
+		TransferLeader( mobile, guild, viewer );
+		return 1;
+	elseif( input[0xC0A] )
+		DisbandGuild( mobile );
+		return 1;
+	elseif( input[0xC0B] )
+		PurchaseGuildColor( mobile );
+		return 1;
+	elseif( input[0xC0C] )
+		RemoveGuildStone( mobile );
+		return 1;
+	elseif( input[0xC0D] )
+		RemoveGuildColor( mobile );
+		return 1;
+	elseif( input[0xC0E] )
+		ColorGuildStone( mobile );
+		return 1;
+	else
+		toggle_menu := 0;
+		showGuildInfo( mobile, viewer );
+		return 1;
+	endif
+
 endfunction
