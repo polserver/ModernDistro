@@ -37,7 +37,7 @@ program create_textcmd( mobile, search_string )
 		CreateItem( mobile, GetItemInfo( CInt( search_string ), GetItemDescriptor( CInt( search_string ) ) ), amount );
 		return 1;
 	elseif( GetObjtypeByName( search_string ) )
-		CreateItem( mobile, GetItemInfo( GetObjtypeByName( search_string ), GetItemDescriptor( GetObjtypeByName( CInt( search_string ) ) ) ), amount );
+		CreateItem( mobile, GetItemInfo( GetObjtypeByName( search_string ), GetItemDescriptor( GetObjtypeByName( search_string ) ) ), amount );
 		return 1;
 	elseif( search_string.Length() )
 		if( search_string.Length() > 2 )
