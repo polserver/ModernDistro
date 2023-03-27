@@ -50,8 +50,10 @@ program Gump_YesNo( params )
 	var yn_gump := GFCreateGump( 140, 100 );
 	GFClosable( yn_gump, 0 );
 
-	GFResizePic( yn_gump, 0, 0, GFGetCfgConst( "Defaults", "BackGround" ), 400, 205 );
-	GFResizePic( yn_gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 370, 175 );
+	// GFResizePic( yn_gump, 0, 0, GFGetCfgConst( "Defaults", "BackGround" ), 400, 205 );
+	// GFResizePic( yn_gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 370, 175 );
+	GFResizePic( yn_gump, 0, 0, GFGetCfgConst( "Defaults", "BackGround" ), 440, 205 );
+	GFResizePic( yn_gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 410, 175 );
 
 
 	var y_pos := 20;

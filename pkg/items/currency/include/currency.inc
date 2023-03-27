@@ -1,11 +1,26 @@
 use uo;
 use os;
+use basic;
+use math;
+use util;
 
 include "include/objtype";
 include "include/utility";
 
 var coinarray := {};
 var createdamt := 0;
+var incrementsOfOne := {"Zero",    "One",     "Two",       "Three",    "Four",
+              			"Five",    "Six",     "Seven",     "Eight",    "Nine",
+              			"Ten",     "Eleven",  "Twelve",    "Thirteen", "Fourteen",
+              			"Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"};
+
+var incrementsOfTen := {"",      "",      "Twenty",  "Thirty", "Fourty",
+              			"Fifty", "Sixty", "Seventy", "Eighty", "Ninety"};
+
+var millionName := "Million",
+	thousandName := "Thousand",
+	hundredName := "Hundred",
+	andName := "and";
 
 function CountCoins( byref container, coin_type )
 
@@ -71,3 +86,135 @@ function SpendCoin( who, amt, cont, cointype )
 
 	return ConsumeSubstance( cont, cointype, CInt( amt ) );
 endfunction
+
+function ConvertCurrencyToText( value )
+
+	var string_currency := "";
+	if( IsNegative( value ) )
+		return error{"errortext":="ConvertCurrencyToText function does not handle negative values."};
+	endif
+
+	if( value >= 1000000 )
+		string_currency := string_currency+ParseTriplet( value / 1000000 )+" "+millionName;
+		value := value % 1000000;
+		if( value == 0 )
+			return string_currency;
+		endif
+	endif
+
+
+	if( value >= 1000 )
+		if( Len( string_currency ) > 0 )
+			string_currency := string_currency+", ";
+		endif
+		string_currency := string_currency+ParseTriplet( value / 1000 ) + " " + thousandName;
+		value := value % 1000;
+		if( value == 0 )
+			return string_currency;
+		endif
+	endif
+
+	if( Len( string_currency ) > 0 )
+		string_currency := string_currency+", ";
+	endif
+
+	string_currency := string_currency+ParseTriplet( value );
+
+	return string_currency;
+endfunction
+
+function ParseTriplet( i )
+
+	var result := "";
+	if( i >= 100 )
+		result := result + incrementsOfOne[(i / 100)+1] + " " + hundredName;
+		i := i % 100;
+		if( i == 0 )
+			return result;
+		endif
+	endif
+
+	if( Len( result ) > 0 )
+		result := result + " " + andName + " ";
+	endif
+
+	if( i >= 20 )
+		result := result + incrementsOfTen[(i / 10)+1];
+		i := i % 10;
+		if( i == 0 )
+			return result;
+		endif
+	endif
+
+	if( Len( result ) > 0 )
+		result := result + " ";
+	endif
+
+	result := result + incrementsOfOne[i+1];
+	return result;
+endfunction
+
+function IsNegative( byref value )
+
+	return ( value < 0 );
+endfunction
+
+// Takes an int and converts into human readable format
+// 500234343 becomes 500.234.343 for example
+// Limited to int32 numbers (so max 2.147.483.647)
+function MakeNumberHumanReadable(number)
+
+	var delimiter := ",";
+
+	number := CStr(number);
+
+	var is_negative := 0;
+	if(number[1] == "-")
+		is_negative := 1;
+		var newnumber := "";
+		var c := 2;
+		for(c;c<=len(number);c:=c+1)
+			newnumber := newnumber + number[c];
+		endfor
+		number := newnumber;
+	endif
+
+	var numlen := len(number);
+
+	var res := numlen%3;
+
+	var i, pre := "";
+	for( i:=1; i<=res; i:=i+1 )
+		pre := pre+CStr(number[i]);
+	endfor
+
+	var prelen := len(pre);
+
+	if(numlen > 3 && prelen > 0)
+		pre := pre+delimiter;
+	endif
+
+	var j,after := "";
+	for( j:=prelen+1;j<=numlen;j:=j+1)
+		after := after+CStr(number[j]);
+	endfor
+
+	var afterlen := len(after);
+
+	var h, final := "";
+	for(h:=1;h<=afterlen;h:=h+1)
+		final := final+after[h];
+		if( !( h%3 ) && h < afterlen)
+			final := final+delimiter;
+		endif
+	endfor
+	final := pre+final;
+
+	if(is_negative)
+		final := "-"+final;
+	endif
+
+	return CStr(final);
+
+endfunction
+

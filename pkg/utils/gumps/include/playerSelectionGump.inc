@@ -8,7 +8,7 @@ include ":gumps:gumps";
  * SelectCharacter( mobile, cmdlevel:=0 )
  *
  * Purpose
- * Sends a list of players to the character from whic he may select one.
+ * Sends a list of players to the character from which he may select one.
  *
  * Parameters
  * mobile:     Reference to the character which should receive the gump
@@ -20,14 +20,14 @@ include ":gumps:gumps";
  */
 function SelectCharacter( mobile, cmdlevel:=0 )
 
-        var gump := GFCreateGump();
+	var gump := GFCreateGump();
 
 	GFResizePic( gump, 0, 0, GFGetCfgConst( "Defaults", "BackGround" ), 310, 380 );
 
 	GFResizePic( gump, 15, 15, GFGetCfgConst( "Defaults", "ForeGround" ), 280, 25 );
 	GFResizePic( gump, 15, 45, GFGetCfgConst( "Defaults", "ForeGround" ), 280, 320 );
 
-        GFAddAlphaRegion( gump, 0, 0, 310, 380 );
+	GFAddAlphaRegion( gump, 0, 0, 310, 380 );
 
 	GFTextLine( gump, 30, 15, 1720, "Select Player" );
 
@@ -40,7 +40,7 @@ function SelectCharacter( mobile, cmdlevel:=0 )
 	GFPage( gump, 1 );
 	foreach name in ( list_keys )
 
-                GFTextLine( gump, 25, y_pos, 2100, name );
+		GFTextLine( gump, 25, y_pos, 2100, name );
 		GFAddButton( gump, 261, y_pos+3, 2117, 2118, GF_CLOSE_BTN, _name_iter );
 
 		y_pos += 20;
@@ -78,7 +78,7 @@ function GetCharactersList( cmdlevel );
  	foreach acct_name in ( ListAccounts() )
 		var account := FindAccount( acct_name );
 		var i := 1;
-                while( i <= 5 )
+		while( i <= 5 )
  	 	 	var character := account.GetCharacter(i);
  	 	 	if( character )
  	 	 	 	if( character.cmdlevel <= cmdlevel )
@@ -87,7 +87,7 @@ function GetCharactersList( cmdlevel );
  	 	 	endif
  	 	 	i += 1;
  	 	 	SleepMS(5);
-                endwhile
+		endwhile
 		SleepMS(5);
 	endforeach
 

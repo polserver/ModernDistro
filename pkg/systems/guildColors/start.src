@@ -1,0 +1,13 @@
+use uo;
+use os;
+
+program guild_color_start()
+
+	var colors_generated := GetGlobalProperty( "GuildColorsGenerated" );
+	if( colors_generated.errortext )
+		Start_Script( ":guildcolors:scripts/init/initializeGuildColors" );
+	endif
+
+	return 1;
+
+endprogram
