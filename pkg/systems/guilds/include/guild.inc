@@ -18,7 +18,7 @@ include ":security:report";
 include "include/housing";
 include ":guildColors:guildColors";
 
-function ViewRosters( mobile, guild, viewer )
+function ViewRosters( mobile, guild )
 
 	var gump := GFCreateGump();
         showOptionBG( gump, "View Rosters", 1 );
@@ -53,44 +53,37 @@ function ViewRosters( mobile, guild, viewer )
 		SleepMS(2);
 	endforeach
 
-        GFSendGump( viewer, gump );
+        GFSendGump( mobile, gump );
 
-        return showGuildInfo( mobile, viewer );
 endfunction
 
-function RecruitAPlayer( mobile, guild, viewer )
+function RecruitAPlayer( mobile, guild )
 
-	SendSysMessage( viewer, "Who would you like to recruit into the guild?", 3, 88 );
-	var targ := Target( viewer );
+	SendSysMessage( mobile, "Who would you like to recruit into the guild?", 3, 88 );
+	var targ := Target( mobile );
 	if( !targ )
-		SendSysMessage( viewer, "Cancelled.", 3, 33 );
-		return showGuildInfo( mobile, viewer );
+		SendSysMessage( mobile, "Cancelled.", 3, 33 );
 	elseif( targ.serial == mobile.serial )
-		SendSysMessage( viewer, "You shall consider therapy.", 3, 44 );
-		return showGuildInfo( mobile, viewer );
+		SendSysMessage( mobile, "You shall consider therapy.", 3, 44 );
 	elseif( !targ.IsA( POLCLASS_MOBILE ) || targ.IsA( POLCLASS_NPC ))
-		SendSysMessage( viewer, "You must target a player.", 3, 33 );
-		return showGuildInfo( mobile, viewer );
+		SendSysMessage( mobile, "You must target a player.", 3, 33 );
 	elseif( targ.guildid )
-		SendSysMessage( viewer, targ.name+" is already in a guild.", 3, 44 );
-		return showGuildInfo( mobile, viewer );
+		SendSysMessage( mobile, targ.name+" is already in a guild.", 3, 44 );
 	endif
 
 	foreach recruit in ( guild.GetProp( "Recruit" ))
 		if( targ.serial == recruit.serial )
-			SendSysMessage( viewer, targ.name+" is already recruited for the guild.", 3, 44 );
-			return showGuildInfo( mobile, viewer );
+			SendSysMessage( mobile, targ.name+" is already recruited for the guild.", 3, 44 );
 		endif
 		SleepMS(5);
 	endforeach
 
-	SendSysMessage( viewer, "We are waiting the answer...", 3, 68 );
+	SendSysMessage( mobile, "We are waiting the answer...", 3, 68 );
 
 	if( !YesNo( targ, "Would you like to join the guild "+guild.GetProp( "Name" )+"?", "I accept", "I decline", 10 ))
-		SendSysMessage( viewer, targ.name+" has declined the invitation.", 3, 44 );
-		return showGuildInfo( mobile, viewer );
+		SendSysMessage( mobile, targ.name+" has declined the invitation.", 3, 44 );
 	else
-		SendSysMessage( viewer, targ.name+" has been recruited for the guild.", 3, 68 );
+		SendSysMessage( mobile, targ.name+" has been recruited for the guild.", 3, 68 );
 		SendSysMessage( targ, "You have been recruited for the guild.", 3, 68 );
 
 		var recruit := guild.GetProp( "Recruit" );
@@ -107,22 +100,26 @@ function RecruitAPlayer( mobile, guild, viewer )
 		recruit[recruit_size+1] := recruit_list;
 		guild.SetProp( "Recruit", recruit );
 
-		return showGuildInfo( mobile, viewer );
 	endif
 endfunction
 
-function ViewRecruits( mobile, guild, viewer )
+function ViewRecruits( mobile, guild )
 
 	var vote_for :={},
 		vote_against:={};
+	var guild_recruits := guild.GetProp( "Recruit" );
+	var num := guild_recruits.Size();
+
+	if( !num || guild_recruits.errortext )
+		SendSysMessage( mobile, "There are no recruits listed in the roster.", color := 40 );
+		return 1;
+	endif
+
 	var gump := GFCreateGump();
-        showOptionBG( gump, "View Recruits", 1 );
+	showOptionBG( gump, "View Recruits", 1 );
 
-        GFTextLine( gump, 60, 60, 1720, "Player Name" );
-        GFTextLine( gump, 260, 60, 1720, "For / Against" );
-
-        var guild_recruits := guild.GetProp( "Recruit" ),
-	    num := guild_recruits.Size();
+	GFTextLine( gump, 60, 60, 1720, "Player Name" );
+	GFTextLine( gump, 260, 60, 1720, "For / Against" );
 
 	var counter := 0;
 	var y_pos := 100;
@@ -157,51 +154,50 @@ function ViewRecruits( mobile, guild, viewer )
 		SleepMS(2);
 	endforeach
 
-        var input := GFSendGump( viewer, gump );
+        var input := GFSendGump( mobile, gump );
         if( !input || input[0xA1] )
-			return showGuildInfo( mobile, viewer );
+			return 1;
         endif
 
         input := input[0];
 
         var player_ref := SystemFindObjectBySerial( guild_recruits[input].serial );
-        if( !Yesno( viewer, "What is your advice for the recruitment of "+player_ref.name+"?", "I vote for "+player_ref.name+".", "I vote against "+player_ref.name+"." ))
+        if( !Yesno( mobile, "What is your advice for the recruitment of "+player_ref.name+"?", "I vote for "+player_ref.name+".", "I vote against "+player_ref.name+"." ))
 			// Vote against
 			// If the guild member has already voted against the recruit, prevent the member
 			// from voting against the recruit again.
-			if( viewer.serial in guild_recruits[input].voteagainst )
-				SendSysMessage( viewer, "You can only cast one vote against " + guild_recruits[input].name + ".", color := 33 );
+			if( mobile.serial in guild_recruits[input].voteagainst )
+				SendSysMessage( mobile, "You can only cast one vote against " + guild_recruits[input].name + ".", color := 33 );
 				return;
 			endif
 			// This determines if the guild member has voted for the recruit
 			// and if so, it removes them from the votefor array.
-			if( viewer.serial in guild_recruits[input].votefor )
-				guild_recruits[input].votefor.erase((viewer.serial in guild_recruits[input].votefor));
+			if( mobile.serial in guild_recruits[input].votefor )
+				guild_recruits[input].votefor.erase((mobile.serial in guild_recruits[input].votefor));
 			endif
 			// Add the member to the voteagainst array and set the 'Recruit' CProp
-			guild_recruits[input].voteagainst.append(viewer.serial);
+			guild_recruits[input].voteagainst.append(mobile.serial);
 			guild.SetProp( "Recruit", guild_recruits );
         else // vote for
 			// If the guild member has already voted for the recruit, prevent the member
 			// from voting for the recruit again.
-			if( viewer.serial in guild_recruits[input].votefor )
-				SendSysMessage( viewer, "You can only cast one vote for " + guild_recruits[input].name + ".", color := 33 );
+			if( mobile.serial in guild_recruits[input].votefor )
+				SendSysMessage( mobile, "You can only cast one vote for " + guild_recruits[input].name + ".", color := 33 );
 				return;
 			endif
 			// This determines if the guild member has voted against the recruit
 			// and if so, it removes them from the voteagainst array.
-			if( viewer.serial in guild_recruits[input].voteagainst )
-				guild_recruits[input].voteagainst.erase((viewer.serial in guild_recruits[input].voteagainst));
+			if( mobile.serial in guild_recruits[input].voteagainst )
+				guild_recruits[input].voteagainst.erase((mobile.serial in guild_recruits[input].voteagainst));
 			endif
 			// Add the member to the votefor array and set the 'Recruit' CProp
-			guild_recruits[input].votefor.append(viewer.serial);
+			guild_recruits[input].votefor.append(mobile.serial);
 			guild.SetProp( "Recruit", guild_recruits );
         endif
 
-        return showGuildInfo( mobile, viewer );
 endfunction
 
-function ViewAllies( mobile, guild, viewer )
+function ViewAllies( mobile, guild )
 
 	var gump := GFCreateGump();
 	showOptionBG( gump, "View Allies", 1 );
@@ -243,12 +239,11 @@ function ViewAllies( mobile, guild, viewer )
 		SleepMS(2);
 	endforeach
 
-        GFSendGump( viewer, gump );
+        GFSendGump( mobile, gump );
 
-        return showGuildInfo( mobile, viewer );
 endfunction
 
-function ViewEnemies( mobile, guild, viewer )
+function ViewEnemies( mobile, guild )
 
 	var gump := GFCreateGump();
 	showOptionBG( gump, "View Ennemies", 1 );
@@ -290,12 +285,11 @@ function ViewEnemies( mobile, guild, viewer )
 		SleepMS(2);
 	endforeach
 
-	GFSendGump( viewer, gump );
+	GFSendGump( mobile, gump );
 
-	return showGuildInfo( mobile, viewer );
 endfunction
 
-function PendingStatus( mobile, guild, viewer )
+function PendingStatus( mobile, guild )
 
 	var gump := GFCreateGump();
 	showOptionBG( gump, "Guild Status", 1 );
@@ -339,12 +333,11 @@ function PendingStatus( mobile, guild, viewer )
 		SleepMS(2);
 	endforeach
 
-	GFSendGump( viewer, gump );
+	GFSendGump( mobile, gump );
 
-	return showGuildInfo( mobile, viewer );
 endfunction
 
-function ToggleTitle( mobile, guild, viewer )
+function ToggleTitle( mobile, guild )
 
 	var abbr := guild.GetProp( "Abbr" ),
 		temp_name := "["+abbr+"]";
@@ -352,7 +345,7 @@ function ToggleTitle( mobile, guild, viewer )
 	if( !GetObjProperty( mobile, "Guild_Abbr" ))
 		var guild_title := GetObjProperty( mobile, "Guild_Title" );
 		if( !guild_title )
-			SendSysMessage( viewer, "You do not have a guild title yet.", 3, 68 );
+			SendSysMessage( mobile, "You do not have a guild title yet.", 3, 68 );
 			mobile.title_guild := abbr;
 		else
 			mobile.title_guild := guild_title+" "+temp_name;
@@ -363,18 +356,16 @@ function ToggleTitle( mobile, guild, viewer )
 		mobile.title_guild := abbr;
 	endif
 
-	return showGuildInfo( mobile, viewer );
 endfunction
 
-function Resign( mobile, guild, viewer )
+function Resign( mobile, guild )
 
 	if( mobile.serial == guild.GetProp( "Master" ))
 		if( guild.members.Size() > 1 )
-			SendSysMessage( viewer, "You must pass the leadership before leaving the guild.", 3, 33 );
-			return showGuildInfo( mobile, viewer );
+			SendSysMessage( mobile, "You must pass the leadership before leaving the guild.", 3, 33 );
 		else
-			if( !Yesno( viewer, "Are you sure you want to disband the guild?", "Yes, I am.", "No, do not disband the guild." ))
-				return showGuildInfo( mobile, viewer );
+			if( !Yesno( mobile, "Are you sure you want to disband the guild?", "Yes, I am.", "No, do not disband the guild." ))
+				return 1;
 			else
 				SendSysMessage( mobile, "You are no longer a member of "+guild.GetProp( "Name" )+".", 3, 68 );
 				EraseObjProperty( mobile, "Guild_Title" );
@@ -394,7 +385,7 @@ function Resign( mobile, guild, viewer )
 					SleepMS(5);
 				endforeach
 
-				ReportText( guild.GetProp( "Name" )+" destroyed by "+viewer.name+" Serial: "+viewer.serial, REPORT_SYSLOG );
+				ReportText( guild.GetProp( "Name" )+" destroyed by "+mobile.name+" Serial: "+mobile.serial, REPORT_SYSLOG );
 
 				guild.EraseProp( "Abbr" );
 				guild.EraseProp( "Charter" );
@@ -414,27 +405,27 @@ function Resign( mobile, guild, viewer )
 
 				var destroy_guild := DestroyGuild( guild );
 				if( destroy_guild.errortext )
-					NotifyStaffOnline( viewer, "Error destroying guild -->"+destroy_guild.errortext );
+					NotifyStaffOnline( mobile, "Error destroying guild -->"+destroy_guild.errortext );
 				endif
 			endif
 		endif
 	else
-		if( !Yesno( viewer, "Are you sure you want to leave the guild?", "Yes, I am.", "No, I do not leave the guild." ))
-			return showGuildInfo( mobile, viewer );
+		if( !Yesno( mobile, "Are you sure you want to leave the guild?", "Yes, I am.", "No, I do not leave the guild." ))
+			return 1;
 		else
 			SendSysMessage( mobile, "You are no longer a member of "+guild.GetProp( "Name" )+".", 3, 68 );
 			EraseObjProperty( mobile, "Guild_Title" );
 			EraseObjProperty( mobile, "Guild_Abbr" );
 			mobile.title_guild := "";
 			guild.RemoveMember( mobile );
-			ReportText( mobile.name+" resigned from "+guild.GetProp( "Name" )+" by "+viewer.name+" Serial: "+viewer.serial, REPORT_SYSLOG );
+			ReportText( mobile.name+" resigned from "+guild.GetProp( "Name" )+" by "+mobile.name+" Serial: "+mobile.serial, REPORT_SYSLOG );
 		endif
 	endif
 
 	return 1;
 endfunction
 
-function SetCharter( mobile, guild, viewer )
+function SetCharter( mobile, guild )
 
 	var gump := GFCreateGump();
 	showOptionBG( gump, "Set Charter" );
@@ -458,9 +449,9 @@ function SetCharter( mobile, guild, viewer )
 		y_pos += 20;
 	endfor
 
-	var input := GFSendGump( viewer, gump );
+	var input := GFSendGump( mobile, gump );
 	if( !input )
-		return showGuildInfo( mobile, viewer );
+		return 1;
 	else
 		var i;
 		for( i:=1; i<=the_msg.Size(); i+=1 )
@@ -487,7 +478,6 @@ function SetCharter( mobile, guild, viewer )
 		endif
 	endif
 
-	return showGuildInfo( mobile, viewer );
 endfunction
 
 function PlaceGuildStone( mobile )
@@ -586,30 +576,30 @@ function RemoveGuildStone( mobile )
 
 endfunction
 
-function ChangeGuildName( mobile, guild, viewer )
+function ChangeGuildName( mobile, guild )
 
-	var new_name := SendTextEntryGump( viewer, "Select a new name for the guild.", TE_CANCEL_ENABLE, TE_STYLE_NORMAL, CInt( settings.MaxNameLen ));
+	var new_name := SendTextEntryGump( mobile, "Select a new name for the guild.", TE_CANCEL_ENABLE, TE_STYLE_NORMAL, CInt( settings.MaxNameLen ));
 	if( !new_name )
-		SendSysMessage( viewer, "Cancelled.", 3, 33 );
-		return showGuildInfo( mobile, viewer );
+		SendSysMessage( mobile, "Cancelled.", 3, 33 );
+		return 1;
 	elseif( !ValidStr( new_name ))
-		SendSysMessage( viewer, "Guild name contains illegal characters.", 3, 33 );
-		return showGuildInfo( mobile, viewer );
+		SendSysMessage( mobile, "Guild name contains illegal characters.", 3, 33 );
+		return 1;
 	elseif( !ValidName( new_name ))
-		SendSysMessage( viewer, "Guild name already exists.", 3, 33 );
-		return showGuildInfo( mobile, viewer );
+		SendSysMessage( mobile, "Guild name already exists.", 3, 33 );
+		return 1;
 	endif
 
-	var new_abbr := SendTextEntryGump( viewer, "Select a new abbreviation for the guild.", TE_CANCEL_ENABLE, TE_STYLE_NORMAL, CInt( settings.MaxAbbrLen ));
+	var new_abbr := SendTextEntryGump( mobile, "Select a new abbreviation for the guild.", TE_CANCEL_ENABLE, TE_STYLE_NORMAL, CInt( settings.MaxAbbrLen ));
 	if( !new_abbr )
-		SendSysMessage( viewer, "Cancelled.", 3, 33 );
-		return showGuildInfo( mobile, viewer );
+		SendSysMessage( mobile, "Cancelled.", 3, 33 );
+		return 1;
 	elseif( !ValidStr( new_abbr ))
-		SendSysMessage( viewer, "Guild abbreviation contains illegal characters.", 3, 33 );
-		return showGuildInfo( mobile, viewer );
+		SendSysMessage( mobile, "Guild abbreviation contains illegal characters.", 3, 33 );
+		return 1;
 	elseif( !ValidName( new_abbr ))
-		SendSysMessage( viewer, "Guild abbreviation already exists.", 3, 33 );
-		return showGuildInfo( mobile, viewer );
+		SendSysMessage( mobile, "Guild abbreviation already exists.", 3, 33 );
+		return 1;
 	endif
 
 	var regist_fee := CInt( settings.RegistrationFee );
@@ -617,9 +607,9 @@ function ChangeGuildName( mobile, guild, viewer )
 		regist_fee := 250000;
 	endif
 
-	if( !viewer.SpendGold( regist_fee ) && viewer.cmdlevel < 3 )
-		SendSysMessage( viewer, "You do not have enough gold to cover the fee.", 3, 33 );
-		return showGuildInfo( mobile, viewer );
+	if( !mobile.SpendGold( regist_fee ) && mobile.cmdlevel < 3 )
+		SendSysMessage( mobile, "You do not have enough gold to cover the fee.", 3, 33 );
+		return 1;
 	endif
 
 	guild.SetProp( "Name", new_name );
@@ -639,12 +629,11 @@ function ChangeGuildName( mobile, guild, viewer )
 		SetName( guildstone, new_name );
 	endif
 
-	SendSysMessage( viewer, "Guild name and abbreviation has been changed.", 3, 66 );
+	SendSysMessage( mobile, "Guild name and abbreviation has been changed.", 3, 66 );
 
-	return showGuildInfo( mobile, viewer );
 endfunction
 
-function GrantTitle( mobile, guild, viewer )
+function GrantTitle( mobile, guild )
 
 	var gump := GFCreateGump();
 	showOptionBG( gump, "Grant Title", 1 );
@@ -682,21 +671,21 @@ function GrantTitle( mobile, guild, viewer )
 		SleepMS(2);
 	endforeach
 
-        var input := GFSendGump( viewer, gump );
+        var input := GFSendGump( mobile, gump );
         if( !input || input[0xA1] )
-                return showGuildInfo( mobile, viewer );
+			return 1;
         endif
 
         input := input[0];
 
         var player_ref := guild_members[input];
-        var new_title := SendTextEntryGump( viewer, "What's the new member title?", TE_CANCEL_ENABLE, TE_STYLE_NORMAL, CInt( settings.MaxTitleLen ));
+        var new_title := SendTextEntryGump( mobile, "What's the new member title?", TE_CANCEL_ENABLE, TE_STYLE_NORMAL, CInt( settings.MaxTitleLen ));
         if( !new_title )
-                SendSysMessage( viewer, "Cancelled.", 3, 33 );
-                return showGuildInfo( mobile, viewer );
+                SendSysMessage( mobile, "Cancelled.", 3, 33 );
+                return 1;
         elseif( !ValidStr( new_title ))
-			SendSysMessage( viewer, "Title contains illegal characters.", 3, 33 );
-			return showGuildInfo( mobile, viewer );
+			SendSysMessage( mobile, "Title contains illegal characters.", 3, 33 );
+			return 1;
         endif
 
         var guild_abbr := "["+guild.GetProp( "Abbr" )+"]";
@@ -705,10 +694,10 @@ function GrantTitle( mobile, guild, viewer )
 
         player_ref.title_guild := new_title+" "+guild_abbr;
 
-        return showGuildInfo( mobile, viewer );
+        return 1;
 endfunction
 
-function ChangeGuildIcon( mobile, guild, viewer )
+function ChangeGuildIcon( mobile, guild )
 
 	var gump := GFCreateGump();
 	showOptionBG( gump, "Guild Icon" );
@@ -743,9 +732,9 @@ function ChangeGuildIcon( mobile, guild, viewer )
 		SleepMS(2);
 		endforeach
 
-	var input := GFSendGump( viewer, gump );
+	var input := GFSendGump( mobile, gump );
 	if( !input || input[0xA2] )
-		return showGuildInfo( mobile, viewer );
+		return 1;
 	endif
 
 	var new_icon;
@@ -758,10 +747,18 @@ function ChangeGuildIcon( mobile, guild, viewer )
 
 	guild.SetProp( "GuildIcon", new_icon );
 
-	return showGuildInfo( mobile, viewer );
+	return 1;
 endfunction
 
-function RecruitStatus( mobile, guild, viewer )
+function RecruitStatus( mobile, guild )
+
+	var guild_recruits := guild.GetProp( "Recruit" ),
+	num := guild_recruits.Size();
+
+	if( !num || guild_recruits.errortext )
+		SendSysMessage( mobile, "There are no recruits listed in the roster.", color := 40 );
+		return 1;
+	endif
 
 	var gump := GFCreateGump();
 	showOptionBG( gump, "Recruit Status", 1 );
@@ -769,8 +766,6 @@ function RecruitStatus( mobile, guild, viewer )
 	GFTextLine( gump, 60, 60, 1720, "Player Name" );
 	GFTextLine( gump, 260, 60, 1720, "For / Against" );
 
-	var guild_recruits := guild.GetProp( "Recruit" ),
-	num := guild_recruits.Size();
 
 	var counter := 0;
 	var y_pos := 100;
@@ -799,15 +794,15 @@ function RecruitStatus( mobile, guild, viewer )
 		SleepMS(2);
 	endforeach
 
-	var input := GFSendGump( viewer, gump );
+	var input := GFSendGump( mobile, gump );
 	if( !input || input[0xA1] )
-		return showGuildInfo( mobile, viewer );
+		return 1;
 	endif
 
 	input := input[0];
 
 	var player_ref := SystemFindObjectBySerial( guild_recruits[input].serial );
-	if( !Yesno( viewer, "Are you sure you want to add "+player_ref.name+" to the guild?", "Yes, I am.", "No, I do not accept "+player_ref.name+" in the guild." ))
+	if( !Yesno( mobile, "Are you sure you want to add "+player_ref.name+" to the guild?", "Yes.", "No." ))
 		SendSysMessage( player_ref, "Your application for "+guild.GetProp( "Name" )+" has been rejected.", 3, 33 );
 	else
 		foreach member in ( guild.members )
@@ -824,18 +819,25 @@ function RecruitStatus( mobile, guild, viewer )
 	guild_recruits.Erase( input );
 	guild.SetProp( "Recruit", guild_recruits );
 
-	return showGuildInfo( mobile, viewer );
+	return 1;
 endfunction
 
-function DismissMember( mobile, guild, viewer )
+function DismissMember( mobile, guild )
+
+	var guild_members := {};
+	guild_members := guild.members;
+	var num := guild_members.Size();
+	if( (!num) || (guild_members.errortext) || (guild_members) )
+	// if( !guild_members )
+		SendSysMessage( mobile, "You are the only member of your guild.", color := 40 );
+		return 1;
+	endif
 
 	var gump := GFCreateGump();
 	showOptionBG( gump, "Dismiss Member", 1 );
 
 	GFTextLine( gump, 60, 60, 1720, "Player Name" );
 
-	var guild_members := guild.members,
-	num := guild_members.Size();
 
 	var counter := 0;
 	var y_pos := 100;
@@ -863,18 +865,18 @@ function DismissMember( mobile, guild, viewer )
 		SleepMS(2);
 	endforeach
 
-	var input := GFSendGump( viewer, gump );
+	var input := GFSendGump( mobile, gump );
 	if( !input || input[0xA1] )
-		return showGuildInfo( mobile, viewer );
+		return 1;
 	endif
 
 	input := input[0];
 
 	var player_ref := guild_members[input];
-	if( Yesno( viewer, "Are you sure you want to dismiss "+player_ref.name+"?", "Yes, I am.", "No, I do not dismiss "+player_ref.name+"." ))
-		SendSysMessage( viewer, player_ref.name+" has been removed from the guild.", 3, 68 );
+	if( Yesno( mobile, "Are you sure you want to dismiss "+player_ref.name+"?", "Yes.", "No." ))
+		SendSysMessage( mobile, player_ref.name+" has been removed from the guild.", 3, 68 );
 		SendSysMessage( player_ref, "You are no longer member of "+guild.GetProp( "Name" )+".", 3, 68 );
-		ReportText( player_ref.name+" resigned from "+guild.GetProp( "Name" )+" by "+viewer.name+" Serial: "+viewer.serial, REPORT_SYSLOG );
+		ReportText( player_ref.name+" resigned from "+guild.GetProp( "Name" )+" by "+mobile.name+" Serial: "+mobile.serial, REPORT_SYSLOG );
 
 		guild.RemoveMember( player_ref );
 		player_ref.title_guild := "";
@@ -883,10 +885,10 @@ function DismissMember( mobile, guild, viewer )
 		EraseObjProperty( mobile, "GuildChat" );
 	endif
 
-	return showGuildInfo( mobile, viewer );
+	return 1;
 endfunction
 
-function DeclareWar( mobile, guild, viewer )
+function DeclareWar( mobile, guild )
 
 	var gump := GFCreateGump();
 	showOptionBG( gump, "Declare War", 1 );
@@ -922,17 +924,17 @@ function DeclareWar( mobile, guild, viewer )
 		SleepMS(2);
 	endforeach
 
-	var input := GFSendGump( viewer, gump );
+	var input := GFSendGump( mobile, gump );
 	if( !input || input[0xA1] )
-		return showGuildInfo( mobile, viewer );
+		return 1;
 	endif
 
 	input := input[0];
 
 	var guild_ref := total_guild[input];
 
-	if( Yesno( viewer, "Are you sure you want to declare war against "+guild_ref.GetProp( "Name" )+"?", "Yes, I am.", "No, it's a big mistake." ))
-		SendSysMessage( viewer, "Your declaration of war is now official!", 3, 68 );
+	if( Yesno( mobile, "Are you sure you want to declare war against "+guild_ref.GetProp( "Name" )+"?", "Yes.", "No." ))
+		SendSysMessage( mobile, "Your declaration of war is now official!", 3, 68 );
 
 		guild.AddEnemyGuild( guild_ref );
 		Broadcast( "The guild "+guild.GetProp( "Name" )+" declares war against "+guild_ref.GetProp( "Name" )+".", 3, 33 );
@@ -950,7 +952,7 @@ function DeclareWar( mobile, guild, viewer )
 		guildWar[guildWar_size+1] := war_list;
 		guild.SetProp( "WarDelay", guildWar );
 
-		//We need to store these infos to the other guild too...
+		//We need to store this info to the other guild too...
 		var guild_refWar := guild_ref.GetProp( "WarDelay" );
 		if( !guild_refWar )
 			guild_refWar := array{};
@@ -963,10 +965,10 @@ function DeclareWar( mobile, guild, viewer )
 		guild_ref.SetProp( "WarDelay", guild_refWar );
 	endif
 
-	return showGuildInfo( mobile, viewer );
+	return 1;
 endfunction
 
-function DeclarePeace( mobile, guild, viewer )
+function DeclarePeace( mobile, guild )
 
 	var gump := GFCreateGump();
 	showOptionBG( gump, "Declare Peace", 1 );
@@ -1002,22 +1004,22 @@ function DeclarePeace( mobile, guild, viewer )
 		SleepMS(2);
 	endforeach
 
-	var input := GFSendGump( viewer, gump );
+	var input := GFSendGump( mobile, gump );
 	if( !input || input[0xA1] )
-		return showGuildInfo( mobile, viewer );
+		return 1;
 	endif
 
 	input := input[0];
 
 	var guild_ref := total_guild[input];
-	var days_peace := SendTextEntryGump( viewer, "How long shall be the alliance? [1-"+CInt( settings.MaxWarPeaceStatutDays )+" days]", TE_CANCEL_ENABLE, TE_STYLE_NUMERICAL, CInt( settings.MaxWarPeaceStatutDays ));
+	var days_peace := SendTextEntryGump( mobile, "How long shall be the alliance? [1-"+CInt( settings.MaxWarPeaceStatutDays )+" days]", TE_CANCEL_ENABLE, TE_STYLE_NUMERICAL, CInt( settings.MaxWarPeaceStatutDays ));
 	if( !CInt( days_peace ))
-		SendSysMessage( viewer, "Cancelled.", 3, 33 );
-		return showGuildInfo( mobile, viewer );
+		SendSysMessage( mobile, "Cancelled.", 3, 33 );
+		return 1;
 	endif
 
-	if( Yesno( viewer, "Are you sure you want to declare an alliance with "+guild_ref.GetProp( "Name" )+"?", "Yes, I am.", "No, I do not declare an alliance with "+guild_ref.GetProp( "Name" )+"." ))
-		SendSysMessage( viewer, "Your alliance has been made.", 3, 66 );
+	if( Yesno( mobile, "Are you sure you want to declare an alliance with "+guild_ref.GetProp( "Name" )+"?", "Yes.", "No." ))
+		SendSysMessage( mobile, "Your alliance has been made.", 3, 66 );
 
 		guild.AddAllyGuild( guild_ref );
 		Broadcast( "The guild "+guild.GetProp( "Name" )+" declares an alliance with "+guild_ref.GetProp( "Name" )+" for "+days_peace+" days.", 3, 68 );
@@ -1036,7 +1038,7 @@ function DeclarePeace( mobile, guild, viewer )
 		guildPeace[guildPeace_size+1] := peace_list;
 		guild.SetProp( "PeaceDelay", guildPeace );
 
-		//We need to add these info to the other guild too...
+		//We need to add this info to the other guild too...
 		var guild_refPeace := guild_ref.GetProp( "PeaceDelay" );
 		if( !guild_refPeace )
 			guild_refPeace := array{};
@@ -1049,10 +1051,10 @@ function DeclarePeace( mobile, guild, viewer )
 		guild_ref.SetProp( "PeaceDelay", guild_refPeace );
 	endif
 
-	return showGuildInfo( mobile, viewer );
+	return 1;
 endfunction
 
-function TransferLeader( mobile, guild, viewer )
+function TransferLeader( mobile, guild )
 
 	var gump := GFCreateGump();
 	showOptionBG( gump, "Transfer Leadership", 1 );
@@ -1088,23 +1090,23 @@ function TransferLeader( mobile, guild, viewer )
 		SleepMS(2);
 	endforeach
 
-	var input := GFSendGump( viewer, gump );
+	var input := GFSendGump( mobile, gump );
 	if( !input || input[0xA1] )
-		return showGuildInfo( mobile, viewer );
+		return 1;
 	endif
 
 	input := input[0];
 
 	var player_ref := guild_members[input];
-	if( Yesno( viewer, "Are you sure you want to transfer leadership to "+player_ref.name+"?", "Yes, I am.", "No, I do not transfer the leadership." ))
-		SendSysMessage( viewer, player_ref.name+" is now the Guild Master.", 3, 68 );
+	if( Yesno( mobile, "Are you sure you want to transfer leadership to "+player_ref.name+"?", "Yes.", "No." ))
+		SendSysMessage( mobile, player_ref.name+" is now the Guild Master.", 3, 68 );
 		SendSysMessage( player_ref, "You are now the Guild Master of "+guild.GetProp( "Name" )+".", 3, 68 );
 		guild.SetProp( "Master", player_ref.serial );
 		DestroyGuildStone( guild );
-		toggle_menu := 0;
+		guild_master_menu := 0;
 	endif
 
-	return showGuildInfo( mobile, viewer );
+	return 1;
 endfunction
 
 function showOptionBG( byref gump, menu, no_cancel:=0 )
@@ -1139,7 +1141,7 @@ endfunction
 
 function DisbandGuild( who )
 
-	if( !YesNo( who, "Are you sure you want to disband the guild? Any clothes previously dyed the guild color will have color removed upon being equipped." ) )
+	if( !YesNo( who, "Are you sure you want to disband the guild?" ) )
 		SendSysMessageCL( who, 1042023, color := 33 ); // Cancelled.
 		return 0;
 	endif
@@ -1183,7 +1185,10 @@ function PurchaseGuildColor( who )
 		guild_stone.color := guild_color;
 	else
 		SendSysMessage( who, "Cancelled.", color := 33 );
+		return 1;
 	endif
+
+	return 1;
 
 endfunction
 
@@ -1191,12 +1196,12 @@ function RemoveGuildColor( who )
 
 	if( !YesNo( who, "Are you sure you want to remove the guild color? Any clothes previously dyed the guild color will have color removed upon being equipped." ) )
 		SendSysMessageCL( who, 1042023, color := 33 ); // Cancelled.
-		return 0;
+		return 1;
 	endif
 	var guild_color := who.guild.getprop("GuildColor");
 	if( !guild_color )
 		SendSysMessage( who, "Your guild has not purchased a color.", color := 40 );
-		return 0;
+		return 1;
 	endif
 
 	MakeColorAvailableForPurchase( guild_color );
@@ -1251,11 +1256,15 @@ function ColorGuildStone( who )
 	var guild_stone := Target( who );
 	if( guild_stone.objtype != 0x2A390 )
 		SendSysMessage( who, "That is not a guild stone.", color := 33 );
-		return;
+		return 0;
 	endif
 	if( !guild_stone.getprop("GuildID") )
 		SendSysMessage( who, "That stone is not affiliated with a guild.", color := 33 );
-		return;
+		return 0;
+	endif
+	if( who.guildid != guild_stone.getprop("GuildID") )
+		SendSysMessage( who, "That is not your guild stone.", color := 33 );
+		return 0;
 	endif
 	var guild_color := SelectColor(who, guild_stone);
 	guild_stone.color := guild_color;

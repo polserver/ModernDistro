@@ -1,0 +1,371 @@
+use uo;
+use os;
+use guilds;
+
+include ":gumps:gumps";
+include ":guilds:guild";
+include ":guilds:settings";
+include ":guilds:validate";
+include ":guildColors:settings";
+include "include/security";
+include "include/string";
+
+// CONST BTN_TYPE_RADIO	:= 0x1;	// Allows selecting one item in the list. "OKAY" must be clicked to return selections.
+// CONST BTN_TYPE_CHECKBOX	:= 0x2;	// Allows multiple selections in the list. "OKAY" must be clicked to return the selections.
+// CONST BTN_TYPE_NORMAL	:= 0x4;	// Allows selecting an item in the list. Gump returns choice when selection is made.
+// CONST BTN_NOTYPE		:= 0x8; // Displays a list of strings contained in options with no selection button.
+
+// CONST OKAY_BTN		:= 0xA00;
+var guild_master_menu := 0;
+var settings := Guild_GetSettingsCfgElem( "Settings" );
+var g_color_settings := GC_GetSettingsCfgElem( "Prices" );
+
+ program GuildMenu( who )
+
+	return ShowGuildInfo( who );
+
+ endprogram
+
+function ShowGuildInfo( byref who )
+
+	var choices := {};
+	var tool_tips := {};
+	var returned_value := 0;
+	var p_guild := who.guild;
+
+	// Get the guild icon to display in the gump.
+	var g_icon := who.guild.GetProp( "GuildIcon" );
+	// If no icon has been chosen by the guild master
+	// then display the generic UO icon.
+	if( !g_icon )
+		g_icon := 0x15a9;
+	endif
+
+	// Here we setup the text to display in the charter HTML element.
+	var temp_charter := p_guild.GetProp( "Charter" );
+	var text_charter;
+
+	foreach line in temp_charter
+		if( _line_iter == 1 )
+			text_charter := CStr( line );
+		else
+			text_charter += " "+CStr( line );
+		endif
+
+		SleepMS(5);
+	endforeach
+	// If no charter has been entered by the guild master
+	// then display "No charter."
+	if( !text_charter )
+		text_charter := "No charter.";
+	endif
+
+	// A regular member will see the member's menu.
+	if( !who.getprop("GuildMasterMenu") )
+		return ShowGuildMemberInfo( who, text_charter, g_icon );
+	else // Guild Master menu selected.
+		return ShowGuildMasterInfo( who, text_charter, g_icon );
+	endif
+	// return 1;
+
+endfunction
+
+function ShowGuildMemberInfo( who, text_charter, g_icon )
+
+	var p_guild := who.guild;
+	var g_title := "Guild Menu for "+p_guild.GetProp( "Name" );
+	var choices := {};
+	var tool_tips := {};
+	var returned_value := 0;
+	// If the user of the guild stone is a guild member, display the menu.
+	// If not, no menu will be displayed in the gump.
+	if( who.guildid == p_guild.guildid )
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// Options for the members menu start here.
+	// If you add new options, add them at the end of this list.
+	//////////////////////////////////////////////////////////////////////////////////////////
+		choices := {"Guild Master functions.",
+					"View the current guild roster.",
+					"Recruit someone into the guild.",
+					"View list of sponsored recruits",
+					"View list of your allies.",
+					"View list of your enemies.",
+					"View all guilds."};
+		// This 'if' block selects which menu option to display based on
+		// the player's guild title display status.
+		if( GetObjProperty( who, "Guild_Abbr" ))
+			choices.append( "Do not display your guild title." );
+		else
+			choices.append( "Display your guild title." );
+		endif
+
+		choices := choices + {	"Dye clothes with the guild color.",
+								"Resign from the guild."};
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// Options for the members menu end here.
+	// If you add new options, add them above this comment block.
+	//////////////////////////////////////////////////////////////////////////////////////////
+
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// The tooltips for the members menu optins begin here.
+	// As you add new menu options, add the tooltip for each option at the end of this list.
+	//
+	// If you do not want to have a tooltip for a particular menu option,
+	// add an empty string, "", as the tooltip for that menu option
+	//////////////////////////////////////////////////////////////////////////////////////////
+		tool_tips := { 	"Access the Guild Master menu.", "Displays a list of guild members.", "Add someone to the recruits roster.",
+						"Vote for, or against, adding a recruit to be a guild member.",
+						"View allied guilds.", "View enemy guilds.", "View all other guilds and their ally status with this guild", "You can decide if you want your guild title to be displayed.",
+						"Proudly display your guild color with your clothes.", "Please do not resign. :)"};
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// The tooltips for the guild master menu optins end here.
+	// As you add new menu options, add the tooltip for each option above this comment block.
+	//////////////////////////////////////////////////////////////////////////////////////////
+	endif
+	// returned_value := GuildGump( who, g_title, text_charter, g_icon, choices, 4, 0, tool_tips );
+	returned_value := GuildGump( who, g_title, text_charter, g_icon, choices, 0, tool_tips );
+
+	case( returned_value )
+		 0: return 0; // The gump was closed.
+		 1: if( who.serial == p_guild.getprop( "Master" ) || who.cmdlevel >= 3 )
+				who.setprop("GuildMasterMenu", 1);
+				return 1;
+			endif
+		 2: ViewRosters( who, p_guild );
+			return 1;
+		 3: RecruitAPlayer( who, p_guild );
+			return 1;
+		 4: ViewRecruits( who, p_guild );
+			return 1;
+		 5: ViewAllies( who, p_guild );
+			return 1;
+		 6: ViewEnemies( who, p_guild );
+			return 1;
+		 7: PendingStatus( who, p_guild );
+			return 1;
+		 8: ToggleTitle( who, p_guild );
+			return 1;
+		 9: DyeClothes( who );
+			return 1;
+		10: Resign( who, p_guild );
+			return 1;
+	endcase
+
+endfunction
+
+function ShowGuildMasterInfo( who, text_charter, g_icon )
+
+	var p_guild := who.guild;
+	var g_title := "Guild Menu for "+p_guild.GetProp( "Name" );
+	var choices := {};
+	var tool_tips := {};
+	var returned_value := 0;
+
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// Options for the guild master menu start here.
+	// If you add new options, add them at the end of this list.
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// If the guildstone has not been placed display this option.
+	// Option 1
+	if( !p_guild.getprop( "GuildStone" ) )
+		choices.append( "Place the GuildStone." );
+	else // Otherwise display this option.
+		choices.append( "Remove the GuildStone." );
+	endif
+	// Options 2 - 5
+	choices := choices + {	"Change the guild stone's color.",
+							"Change the guild's name. ( "+CInt( settings.RegistrationFee )+" gp )",
+							"Change the guild's icon.",
+							"Set or change the guild's charter" };
+
+	// If no guild color has been purchased display this option.
+	// Option 6
+	if( !p_guild.getprop("GuildColor") )
+		choices.append( "Buy a color for the guild. ( " + g_color_settings.Cost + "gp )" );
+	else // Otherwise display this option
+		choices.append( "Remove the color from the guild." );
+	endif
+	// Options 7 - 13
+	choices := choices + {	"Grant title to another member.",
+							"Pending recruits seeking membership.",
+							"Dismiss a member.",
+							"Declare war against another guild.",
+							"Declare peace with another guild.",
+							"Transfer Leadership",
+							"Disband (Destroy) the Guild"};
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// Options for the guild master menu end here.
+	// If you add new options, add them above this comment block.
+	//////////////////////////////////////////////////////////////////////////////////////////
+
+
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// The tooltips for the guild master menu optins begin here.
+	// As you add new menu options, add the tooltip for each option at the end of this list.
+	//
+	// If you do not want to have a tooltip for a particular menu option,
+	// add an empty string, "", as the tooltip for that menu option
+	//////////////////////////////////////////////////////////////////////////////////////////
+	tool_tips := {	"This option allows you to place the guildstone, or remove it to place it in a new location.",
+					"Some guild colors do not look good on the guild stone. use this to change the stone's color.",
+					"Are you tired of your guild's name? You can change it.",
+					"Pick a different icon for your guild.",
+					"Add information about your guild for the guild menu,",
+					"Be proud of your guild. Buy a special color. If you bought a color, this option will change to allow removing it. ",
+					"You can assign special titles to members.",
+					"Choose to accept or reject a recruit into the guild.",
+					"Remove a member from the guild.",
+					"This option is not finished yet.",
+					"This option is not finished yet.",
+					"Use this to resign as guild master and assign that position to someone else.",
+					"This will destroy the guild and remove all members." };
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// The tooltips for the guild master menu optins end here.
+	// As you add new menu options, add the tooltip for each option above this comment block.
+	//////////////////////////////////////////////////////////////////////////////////////////
+
+	// returned_value := GuildGump( who, g_title, text_charter, g_icon, choices, 4, 0, tool_tips );
+	returned_value := GuildGump( who, g_title, text_charter, g_icon, choices, 0, tool_tips );
+
+	if( !returned_value )
+		who.eraseprop("GuildMasterMenu");
+		return 1;
+	endif
+
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// I felt I needed to offer some comments regarding switches 1 and 6 in the case
+	// block below. The 1st and 6th options in the menu will change based on the dynamics
+	// in game. For example in option 1, if the guild master has not placed the guild stone
+	// the menu will display "Place the GuildStone.". If the guild stone has been placed
+	// the menu will display "Remove the GuildStone.". So I look for the substring "Place"
+	// in the choices array at the 'returned_value' position in the array, which will be 1.
+	// If "Place" is not present then we call the RemoveGuildStone() function.
+	// The same techique is used for option 6.
+	// Note: I am aware that experienced programmers will probably understand this.
+	// I have included this lengthy comment for users new to programming or new to eScript.
+	//////////////////////////////////////////////////////////////////////////////////////////
+	case( returned_value )
+		 1: if( choices[returned_value]["Place"] )
+				PlaceGuildStone( who );
+			else
+				RemoveGuildStone( who );
+			endif
+			return 1;
+		 2: ColorGuildStone( who );
+			return 1;
+		 3: ChangeGuildName( who, p_guild );
+			return 1;
+		 4: ChangeGuildIcon( who, p_guild );
+			return 1;
+		 5: SetCharter( who, p_guild );
+			return 1;
+		 6: if( choices[returned_value]["Buy"] )
+				PurchaseGuildColor( who );
+			else
+				RemoveGuildColor( who );
+			endif
+			return 1;
+		 7: GrantTitle( who, p_guild );
+			return 1;
+		 8: RecruitStatus( who, p_guild );
+			return 1;
+		 9: DismissMember( who, p_guild );
+			return 1;
+		10: // DeclareWar( who, p_guild );
+			SendSysMessage( who, "Option not finished yet, but we are working on it.", 3, 68 );
+			return 1;
+		11: // DeclarePeace( who, p_guild );
+			SendSysMessage( who, "Option not finished yet, but we are working on it.", 3, 68 );
+			return 1;
+		12: TransferLeader( who, p_guild );
+			return 1;
+		13: DisbandGuild( who );
+			return 1;
+	endcase
+
+endfunction
+
+
+/*
+* GuildGump( who, g_title, charter_text, g_icon, choices, transparent := 0, tooltips :={} )
+*
+* Parameters:	mobile			-	reference to a player.
+*				g_title			-	The guild title displayed at the top of the gump.
+*				charter_text	-	The text of the guild's charter.
+*				g_icon			-	The guild's icon to be displayed in the gump.
+*				choices			-	An array containing the list of choices to be displayed in the gump.
+*				transparent		-	If set to 1 makes the gump transparent. This parameter is optional and
+*									defaults to no transparency but if you pass a tooltips parameter you must
+*									specify this parameter.
+*				tooltips		-	Array of tooltips for each item in the options array. These can be
+*									custom string tooltips or integer cliloc numbers. This parameter is
+*									optional and defaults to an empty array (no tooltips) if no tooltip
+*									array is passed to the function.
+*
+* Return Values: Integer::The ordinal position within the array the of choice that the user selected
+*				 0 if no selection is made by right-clicking the gump to close it.
+*/
+function GuildGump( mobile, g_title, charter_text, g_icon, choices, transparent := 0, tooltips :={} )
+
+	var num_options := 0;
+	if( Lower( TypeOf( choices )) != "array" )
+		return error{"errortext":="Options list must be an array."};
+	endif
+
+	var s_gump := GFCreateGump();
+	GFResizePic( s_gump, 0, 0, 9250, 400, 520 );
+	GFPicTiled( s_gump, 13, 13, 372, 494, 3004 );
+
+	if(transparent)
+		GFAddAlphaRegion( s_gump, 0, 0, 310, 480 );
+	endif
+	GFGumpPic( s_gump, 315, 440, g_icon );
+	GFHTMLArea( s_gump, 13,  25, 374, 26, "<div align=center>" + g_title, 0, 0 );
+	if( !BTN_TYPE_NORMAL )
+		GFAddButton( s_gump, 135, 440, 2128, 2129, GF_CLOSE_BTN, OKAY_BTN );
+	endif
+	GFResizePic( s_gump, 30, 60, GFGetCfgConst( "Backgrounds", "GOLDTRIM" ), 337, 100 );
+	GFHTMLArea( s_gump, 40, 70, 326, 80, charter_text, 0, 1 );
+
+	GFPage( s_gump, 1 );
+
+	// If options were sent then this gump is being viewed by a guild member.
+	// Otherwise we do not display any buttons or options for non-members.
+	if( choices.size() )
+		num_options := choices.Size();
+		var y_pos := 180;
+		foreach entry in ( choices )
+			GFAddButton( s_gump, 30, y_pos+3, 9792, 9793, GF_CLOSE_BTN, _entry_iter );
+			GFHTMLArea( s_gump, 60, y_pos+3, 272, 26, entry, 1, 0 );
+
+			if(TypeOf(tooltips[_entry_iter]) == "String")
+				GFTooltip(s_gump, 1042971, tooltips[_entry_iter]);
+			elseif(TypeOf(tooltips[_entry_iter]) == "Integer")
+				GFTooltip(s_gump, tooltips[_entry_iter]);
+			endif
+			y_pos := y_pos+31;
+
+			if( _entry_iter % 8 == 0 && _entry_iter < num_options )
+				GFAddButton( s_gump, 340, 406, 0xA92, 0xA93, GF_PAGE_BTN, s_gump.cur_page+1 );
+				GFPage( s_gump, s_gump.cur_page+1 );
+				GFAddButton( s_gump, 340, 184, 0xA90, 0xA91, GF_PAGE_BTN, s_gump.cur_page-1 );
+				y_pos := 180;
+			endif
+
+
+			SleepMS(10);
+		endforeach
+	endif
+
+	var input := GFSendGump( mobile, s_gump );
+	if( !input[0] )
+		return error{"errortext":="No option was selected."};
+	endif
+	var selections_made := 0;
+	var val := input[0];
+	if( !input[0] )
+		return 0;
+	endif
+	return choices[val] in choices;
+endfunction
+
