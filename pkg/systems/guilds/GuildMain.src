@@ -1,0 +1,49 @@
+use uo;
+use guilds;
+
+include ":gumps:gumps";
+include ":gumps:gumps_ex";
+include ":guilds:guild";
+include ":guilds:settings";
+include ":guilds:validate";
+include ":guildColors:settings";
+// include ":guilds:doGuildGump";
+include "include/security";
+include "include/string";
+
+var guild_master_menu := 0;
+var settings := Guild_GetSettingsCfgElem( "Settings" );
+var g_color_settings := GC_GetSettingsCfgElem( "Prices" );
+
+program Guild_Create( parms )
+
+	var display_guild_menu := 1;
+	var mobile,
+		viewer,
+		guild_id := 0;
+
+	if( Lower( TypeOf( parms )) == "array" )
+		mobile := parms[1];
+		viewer := parms[2];
+		if( Lower( TypeOf( parms[2] )) == "integer" )
+			guild_id := parms[2];
+			viewer := mobile;
+		endif
+	else
+		mobile := parms;
+		viewer := parms;
+	endif
+
+	if( GetProcess( CInt( GetObjProperty( mobile, "#GuildButton" ))))
+		return 0;
+	else
+		SetObjProperty( mobile, "#GuildButton", GetPid() );
+	endif
+
+	repeat
+		display_guild_menu := Run_Script( ":guilds:doGuildGump", mobile );
+	until( display_guild_menu == 0 );
+	return 0;
+
+endprogram
+

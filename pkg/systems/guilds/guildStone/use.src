@@ -22,7 +22,7 @@ program UseGuildStone( mobile, item )
 
         SetName( item, guild.GetProp( "Name" ));
 
-        var script := Start_Script( ":guilds:guildMenu", {mobile, guild_id} );
+        var script := Start_Script( ":guilds:GuildMain", {mobile, guild_id} );
         if( script.errortext )
                 SendSysMessage( mobile, "Error starting script <:guilds:guildMenu> -->"+script.errortext );
                 return 0;
