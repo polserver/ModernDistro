@@ -233,3 +233,10 @@ function GetObjTypeDesc( source, plural:=0 )
 
 	return s_first + s_middle + s_last;
 endfunction
+
+function GetNameByObjtype( byref objtype )
+
+	var item_info := GetItemDescInfo( objtype );
+
+	return item_info.Name;
+endfunction

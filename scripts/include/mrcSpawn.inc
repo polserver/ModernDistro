@@ -42,6 +42,7 @@ function Create_Node_Merc( merchanttype, name )
 endfunction
 
 function Destroy_Node_Merc(name)
+
 	CP_RemoveStorageAreaContainer( name+" ShopSell", CP_MERCHANT_AREA );
 	CP_RemoveStorageAreaContainer( name+" ShopeResale", CP_MERCHANT_AREA );
 	CP_RemoveStorageAreaContainer( name+" ShopBuy", CP_MERCHANT_AREA );
@@ -68,6 +69,7 @@ function RestockInventory( merchanttype, name )
 endfunction
 
 function StockInventory( merchanttype, inventory )
+
 	var mtype := FindConfigElem(mrcspawn_cfg, merchanttype);
 	if(mtype)
 		foreach productgroup in GetConfigStringArray(mtype, "Sells");
@@ -80,30 +82,16 @@ function StockInventory( merchanttype, inventory )
 	endif
 endfunction
 
-function SpawnItem( inventory, itemstr )
+function SpawnItem(byref inventory, itemstr)
 
-	var split := SplitWords(itemstr);
-	var objtype := CInt( split[1] ) ?: CInt( GetObjtypeByName( split[1] ) );
-	var amount := CInt( split[2] );
-	if( !objtype )
-		SysLog( "Could not determine objtype for itemstr: "+itemstr, LOG_DATETIME );
+	var entry := SplitWords( itemstr );
+	var objtype := entry[1];
+	if( !CInt( objtype ) && !GetObjtypeByName( objtype ) )
 		return 0;
 	endif
 
-// Added check for stackable graphic, if graphic is stackable there's
-// no need to iterate through amount.
-	var res;
-	if( amount > 0 )
-		var graphic := GetItemDescInfo( objtype ).Graphic ?: objtype;
-		if( IU_GetTileInfo( graphic ).Stackable == 1 )
-			CreateItemInContainer( inventory, objtype, amount );
-		else
-			var i;
-			for( i:=1; i<=amount; i++ )
-				res := CreateItemInContainer( inventory, objtype, 1 );
-			endfor
-		endif
-	endif
+	var count := CInt( entry[2] ) <= 0 ? 1 : CInt( entry[2] );
+	CreateItemInInventory( inventory, objtype, count );
 endfunction
 
 function CheckStock(rs, pak)
