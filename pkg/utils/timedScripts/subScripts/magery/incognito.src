@@ -37,8 +37,9 @@ var female_gargy_horns := {"FemaleHornStyle1", "FemaleHornStyle2", "FemaleHornSt
 							"FemaleHornStyle5", "FemaleHornStyle6", "FemaleHornStyle7", "FemaleHornStyle8"};
 
 program TimedScript_Incognito(params)
+
 	var mobile := params[1];
-	params := 0;
+	var duration := params[4];
 	var hair_types := array;
 	var beard_types := array;
 
@@ -70,13 +71,12 @@ program TimedScript_Incognito(params)
 
 		var hair := GetEquipmentByLayer(mobile, LAYER_HAIR);
 		var beard := GetEquipmentByLayer(mobile, LAYER_BEARD);
-		orig_info.+hair := hair.name;
+		orig_info.+hair := hair.objtype;
 		orig_info.+hair_color := hair.color;
-		orig_info.+beard := beard.name;
-		orig_info.+beard_color := hair.color;
+		orig_info.+beard := beard.objtype;
+		orig_info.+beard_color := beard.color;
 
 		SetObjProperty(mobile, "Incognito", orig_info);
-		Print("Incognito original:"+orig_info);
 	else
 		// Prevent Incognito spell if the caster is under the influence.
 		return 0;
@@ -85,8 +85,8 @@ program TimedScript_Incognito(params)
 	// Remove title prefix and suffix, ignore guild and race for now.
 	mobile.title_prefix := "";
 	mobile.title_suffix := "";
-	//mobile.title_guild := "";
-	//mobile.title_race := "";
+	mobile.title_guild := "";
+	mobile.title_race := "";
 
 	// Set gender and color
 	mobile.gender := RandomInt(2);
@@ -103,7 +103,7 @@ program TimedScript_Incognito(params)
 		new_hair_color := new_hair_color[RandomInt(new_hair_color.Size()) + 1];
 
 		if ( mobile.gender == 0 )
-			name_template := "5"; // Human Male names
+			name_template := "HumanMale"; // Human Male names
 			DestroyItem(GetEquipmentByLayer(mobile, LAYER_HAIR));
 			var new_hair := CreateItemInBackpack(mobile, hair_types[RandomInt(hair_types.Size()) + 1]);
 			new_hair.color := new_hair_color;
@@ -116,7 +116,7 @@ program TimedScript_Incognito(params)
 
 			EquipItem(mobile, new_beard);
 		else
-			name_template := "6"; // Human Female names
+			name_template := "HumanFemale"; // Human Female names
 			DestroyItem(GetEquipmentByLayer(mobile, LAYER_HAIR));
 			var new_hair := CreateItemInBackpack(mobile, hair_types[RandomInt(hair_types.Size()) + 1]);
 			new_hair.color := new_hair_color;
@@ -125,7 +125,7 @@ program TimedScript_Incognito(params)
 	elseif(mobile.graphic == 0x25D || mobile.graphic == 0x25E) // Elf graphic
 		// Elven stuff
 		if(mobile.gender == 0)
-			name_template := 13;
+			name_template := "ElfMale";
 			DestroyItem(GetEquipmentByLayer(mobile, LAYER_HAIR));
 
 			var new_hair := hair_types[RandomInt(hair_types.Size()) + 1];
@@ -139,7 +139,7 @@ program TimedScript_Incognito(params)
 			hair.color := RandomElvenHairHue();
 			EquipItem( mobile, hair );
 	else
-			name_template := 14;
+			name_template := "ElfFemale";
 			DestroyItem(GetEquipmentByLayer(mobile, LAYER_HAIR));
 			var new_hair := hair_types[RandomInt(hair_types.Size()) + 1];
 			if(new_hair == "elfmidlong")
@@ -155,7 +155,7 @@ program TimedScript_Incognito(params)
 	elseif(mobile.graphic == 0x29A || mobile.graphic == 0x29B) // Gargoyle graphic
 		// Gargoyle stuff
 		if(mobile.gender == 0)
-			name_template := 16;
+			name_template := "GargoyleMale";
 			DestroyItem(GetEquipmentByLayer(mobile, LAYER_HAIR));
 			var new_hair := CreateItemInBackpack(mobile, hair_types[RandomInt(hair_types.Size()) + 1]);
 			new_hair.color := RandomGargoyleHornHue();
@@ -166,20 +166,21 @@ program TimedScript_Incognito(params)
 
 			EquipItem(mobile, new_beard);
 		else
-			name_template := 17;
+			name_template := "GargoyleFemale";
 			DestroyItem(GetEquipmentByLayer(mobile, LAYER_HAIR));
 			var new_horn := CreateItemInBackpack(mobile, hair_types[RandomInt(hair_types.Size()) + 1]);
 			new_horn.color := RandomGargoyleHornHue();
 			EquipItem(mobile, new_horn);
 		endif
 	else
-		SendSysMessage(mobile, "You must be in your natural form forthis spell.", color := 33);
+		SendSysMessage(mobile, "You must be in your natural form for this spell.", color := 33);
 		return;
 	endif
 	// Give mobile a random name
 	var names := ReadConfigFile("::names");
 	var name_list := GetConfigStringArray(names[name_template], "Name");
 	SetName(mobile, name_list[RandomInt(name_list.Size()) + 1]);
-
+    mobile.addBuff(buff_icon, duration, cliloc_name, cliloc_desc, {5});
 	return 1;
+
 endprogram
