@@ -43,6 +43,13 @@ program SpellStarter(params)
 		return 0;
 	endif
 
+	// Check for conflicting spells.
+	var conflict := conflict := ConflictsCheck( mobile, spell_id );
+	if( conflict )
+		SendSysMessage( mobile, "You cannot cast this spell while under the influence of " + conflict + ".", color := 33 );
+		return 0;
+	endif
+
 	// Perform various checks to see if mobile can perform the spell
 	var requires_mana := 1;
 	var requires_regs := 1;
@@ -55,6 +62,7 @@ program SpellStarter(params)
 		requires_mana := CInt(settings_elem.PlyrScrollsReqMana);
 		requires_regs := CInt(settings_elem.PlyrScrollsReqRegs);
 	endif
+
 	// Check for staff requirement of reagents and mana for casting spells.
 	if ( !mobile.IsA(POLCLASS_NPC) && (mobile.cmdlevel >= CInt(settings_elem.StaffCmdLvl)) && !scroll )
 		requires_mana := CInt(settings_elem.StaffRequiresMana);
@@ -67,6 +75,7 @@ program SpellStarter(params)
 		requires_regs := 0;
 		requires_mana := 1;
 	endif
+
 	// This check for casting from back pages of a runebook.
 	if( no_regs__no_mana )
 		requires_regs := 0;
@@ -318,4 +327,47 @@ function FailSpell(mobile)
 	// The fizzle GFX is not suposed to play unless interrupted
 	PlaySoundEffect(mobile, SFX_SPELL_FAIL);
 	return 1;
+endfunction
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+//	ConflictsCheck( byref mobile, byref spell_id )
+//
+//	Purpose:	This function checks for any spell for that the mobile might have active
+//				which conflicts with the spell the mobile is attempting to cast.
+//
+//	Parameter:	mobile::mobileref, current_spell::string
+//
+//	Returns:	The a string, the conflicting spell name or an empty string if
+//				no conflicts were found for the current spell being cast.
+//
+//	Created:	2023-05-16 01:29:14 by Yukiko
+//
+//	Comments:	Currently, there are only two standard magery spells that conflict with
+//				each other, Incognito and Polymorph. It is possible, if a developer adds
+//				optional magic systems such as the sorcery or cleric packages this
+//				function might need to be modified.
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+function ConflictsCheck( byref mobile, byref spell_id )
+
+	var current_spell_elem := MS_GetSpellsCfgElem(spell_id);
+	var current_spell := current_spell_elem.Name;
+	var conlicting_spells := current_spell_elem.Conflicts;
+	var conflicts := SplitWords( conlicting_spells );
+	// var temp := spell_id in
+	var conflicting_spell := conflicts;
+
+
+
+	MS_GetSpellsCfgElem(spell_id);
+	if( current_spell == "Incognito" && GetObjProperty( mobile, "Polymorphed" ) )
+		return "Polymorph";
+	elseif( current_spell == "Polymorph" && GetObjProperty( mobile, "Incognito" ) )
+		return "Incognito";
+	else
+		return "";
+	endif
+	// return conflicting_spell_name;
+// NecroHBeast
 endfunction

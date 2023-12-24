@@ -22,10 +22,10 @@ program horrific_beast( params )
 		SetObjProperty (caster, "oldrace", caster.title_race);
 		SetObjProperty (caster, "oldmurderer", caster.murderer);
 	elseif(Getobjproperty(caster, "poly") == 2)
-		if(getobjproperty(caster, "horrificbeast"))
-			eraseobjproperty(caster,"horrificbeast");
-			eraseobjproperty(caster,"NewRegenRateForLife");
-			recalcvitals(caster);
+		if(GetObjProperty(caster, "horrificbeast"))
+			EraseObjProperty(caster,"horrificbeast");
+			EraseObjProperty(caster,"NewRegenRateForLife");
+			RecalcVitals(caster);
 			PlaySoundEffect(caster, 0x165);
 			PlayObjectCenteredEffectEx( caster, 0x3728, 1, 13, 9918, 92, 0, 3 );
 			caster.graphic := caster.trueobjtype;
@@ -45,32 +45,32 @@ program horrific_beast( params )
 			EraseObjProperty (caster, "poly");
 			return 0;
 		endif
-		if(getobjproperty(caster, "wraith") && !caster.cmdlevel)
+		if(GetObjProperty(caster, "wraith") && !caster.cmdlevel)
 			 RevokePrivilege(caster, "freemove");
 			caster.ar_mod := caster.ar_mod - getobjproperty(caster, "wraith");
 		endif
 
-		eraseobjproperty(caster,"wraith");
-		eraseobjproperty(caster,"vampire");
+		EraseObjProperty(caster,"wraith");
+		EraseObjProperty(caster,"vampire");
 		if(Cint(GetObjProperty(caster, "vampiric_resist")))
 			var vampresist := Cint(GetObjProperty(caster, "vampiric_resist"));
 			SetAttributeBaseValue(caster, RESISTING_SPELLS, vampresist * 10);
 			EraseObjProperty(caster, "vampiric_resist");
 		endif
-		eraseobjproperty(caster,"lichform");
-		eraseobjproperty(caster,"NewRegenRateForLife");
-		eraseobjproperty(caster,"NewRegenRateForMana");
-		eraseobjproperty(caster,"NewRegenRateForStamina");
-		recalcvitals(caster);
+		EraseObjProperty(caster,"lichform");
+		EraseObjProperty(caster,"NewRegenRateForLife");
+		EraseObjProperty(caster,"NewRegenRateForMana");
+		EraseObjProperty(caster,"NewRegenRateForStamina");
+		RecalcVitals(caster);
 	endif
 
 	PlaySoundEffect(caster, 0x165);
 	PlayObjectCenteredEffectEx( caster, 0x3728, 1, 13, 9918, 92, 0, 3 );
 	caster.graphic := 0x2EA;
 	caster.murderer := 1;
-	setobjproperty(caster, "horrificbeast", 1);
-	setobjproperty(caster, "poly", 2);
-	setobjproperty(caster, "NewRegenRateForLife", 15000);
+	SetObjProperty(caster, "horrificbeast", 1);
+	SetObjProperty(caster, "poly", 2);
+	SetObjProperty(caster, "NewRegenRateForLife", 15000);
 	RecalcVitals(caster);
 
 
