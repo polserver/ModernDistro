@@ -85,16 +85,22 @@ pol.cfg
 *.bak
 
 # POL binaries and cfgs that are in the polserver release
+pol
 pol.exe
 libmysql.dll
+uoconvert
 uoconvert.exe
 uoconvert.cfg
 uoconvert.txt
+uotool
 uotool.exe
 uotool.txt
+ecompile
 ecompile.exe
+poltool
 poltool.exe
 ecompile.cfg
+runecl
 runecl.exe
 pol.cfg.example
 animxlate.cfg
