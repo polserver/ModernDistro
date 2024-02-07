@@ -12,11 +12,3 @@ enum MN_EVENTS
 	SPAWN_EVENT			:= 0x80,
 	UPDATE_EVENT		:= 0x100
 endenum
-
-// Kind of silly but these are here for the two scripts started,
-// makes the second parameter passed in the array more clear as
-// to what is going on...
-enum SCRIPT_OPTS
-	FALSE				:= 0x0,
-	TRUE				:= 0x1
-endenum
