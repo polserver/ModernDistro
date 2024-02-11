@@ -15,7 +15,7 @@ function summon_creature( caster, circle := 8, npctemplate, cast_loc, gate)
   sleep(2);
   thecritter := CreateNpcFromTemplate(npctemplate, 5849, 1207, 0, parms, caster.realm);
   if(npctemplate == "daemon")
-    thecritter.setCriminal(1);w
+    thecritter.setCriminal(1);
     caster.setCriminal(1);
   endif
   MoveObjectToLocation(thecritter, cast_loc.x, cast_loc.y, cast_loc.z, thecritter.realm, MOVEOBJECT_FORCELOCATION);
