@@ -357,8 +357,8 @@ function ConflictsCheck( byref mobile, byref spell_id )
 	var conflicts := SplitWords( conlicting_spells );
 	var conlicting_spells_names := {};
 	var temp := CStr(spell_id) in conflicts;
-	var running_timers := TS_GetTimerNames(mobile);
 	// Added the following on 2024-02-06
+	// var running_timers := TS_GetTimerNames(mobile);
 	// foreach spell in conflicts
 		// Get spell_name of conflicting spell.
 		// Check against running timers.
