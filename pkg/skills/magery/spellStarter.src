@@ -338,7 +338,7 @@ endfunction
 //
 //	Parameter:	mobile::mobileref, current_spell::string
 //
-//	Returns:	The a string, the conflicting spell name or an empty string if
+//	Returns:	The string, the conflicting spell name or an empty string if
 //				no conflicts were found for the current spell being cast.
 //
 //	Created:	2023-05-16 01:29:14 by Yukiko
@@ -355,12 +355,19 @@ function ConflictsCheck( byref mobile, byref spell_id )
 	var current_spell := current_spell_elem.Name;
 	var conlicting_spells := current_spell_elem.Conflicts;
 	var conflicts := SplitWords( conlicting_spells );
-	// var temp := spell_id in
-	var conflicting_spell := conflicts;
+	var conlicting_spells_names := {};
+	var temp := CStr(spell_id) in conflicts;
+	var running_timers := TS_GetTimerNames(mobile);
+	// Added the following on 2024-02-06
+	// foreach spell in conflicts
+		// Get spell_name of conflicting spell.
+		// Check against running timers.
+		// If spell_name in running_timers.
+		// return spell_name.
+	// endforeach
+	// return "";
 
 
-
-	MS_GetSpellsCfgElem(spell_id);
 	if( current_spell == "Incognito" && GetObjProperty( mobile, "Polymorphed" ) )
 		return "Polymorph";
 	elseif( current_spell == "Polymorph" && GetObjProperty( mobile, "Incognito" ) )
@@ -368,6 +375,5 @@ function ConflictsCheck( byref mobile, byref spell_id )
 	else
 		return "";
 	endif
-	// return conflicting_spell_name;
 // NecroHBeast
 endfunction
