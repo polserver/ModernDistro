@@ -45,7 +45,10 @@ function CreateStackArrayInContainer (container, objtype, amount, limit_per_stac
 	for loops := 1 to (amount/limit_per_stack)
 		result.append(CreateItemInContainer(container, objtype, limit_per_stack));
 	endfor
-	result.append(CreateItemInContainer(container, objtype, amount-(amount/limit_per_stack)*limit_per_stack));
+	var remainder := amount-(amount/limit_per_stack)*limit_per_stack;
+	if (remainder > 0)
+		result.append(CreateItemInContainer(container, objtype, remainder));
+	endif
 	return result;
 endfunction
 
