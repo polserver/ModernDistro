@@ -16,7 +16,7 @@ Program NPC_By_Taxonomy_Cache()
 	var Tax_NPC_list := {};		// A temp array that holds all NPCs in a certain classification.
 	var NPC_keys := {};			// Holds all of the keys from npcdesc.cfg
 	var NPC_Ref := 0;			// Used to hold a ObjRef to an NPC.
-	var class := 0;				// Used to hold a reference to a datafile element.
+	var clazz := 0;				// Used to hold a reference to a datafile element.
 	var temp := "";				// A temp variable to hold a string.
 
 	UnloadConfigFile(":npcs:settings");
@@ -49,7 +49,7 @@ Program NPC_By_Taxonomy_Cache()
 		endif
 		taxonomies.append(temp);
 	endforeach
-	class := NPC_Taxonomy_df.CreateElement("Taxonomies");
+	clazz := NPC_Taxonomy_df.CreateElement("Taxonomies");
 	// This is the fun part, building the datafile.
 	foreach thing in taxonomies
 		// Create the classification element in <thing>.
@@ -72,7 +72,7 @@ Program NPC_By_Taxonomy_Cache()
 			endif
 		endforeach
 		// Store the NPC_List in the datafile.
-		class.SetProp(thing, Tax_NPC_list);
+		clazz.SetProp(thing, Tax_NPC_list);
 	endforeach
 	Print("NPC datafile setup done.");
 endprogram
