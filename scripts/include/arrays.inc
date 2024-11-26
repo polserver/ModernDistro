@@ -30,18 +30,15 @@ use uo;
  * Returns an error on failure.
  *
  */
-function ImplodeArray(glue, byref the_array)
-	if ( Lower(TypeOf(the_array)) != "array" )
-		return error{"errortext":="Object passed was not an array."};
+function ImplodeArray( glue, byref the_array )
+
+	if( TypeOfInt( glue ) != OT_STRING )
+		return error{ "errortext":="Object 'glue' passed was not a string." };
+	elseif( TypeOfInt( the_array ) != OT_ARRAY )
+		return error{ "errortext":="Object 'the_array' passed was not an array." };
 	endif
 
-	var str_array := "";
-	foreach element in ( the_array )
-		str_array += (CStr(element)+glue);
-		SleepMS(2);
-	endforeach
-
-	return str_array;
+	return glue.Join( the_array );
 endfunction
 
 /*
