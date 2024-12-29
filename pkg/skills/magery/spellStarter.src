@@ -13,6 +13,7 @@ include ":containers:containers";
 include ":itemUtils:itemdesc";
 include "include/client";
 include "include/sounds";
+include ":timedScripts:timedScripts";
 
 program SpellStarter(params)
 	var mobile := params[1]; // Caster
@@ -44,7 +45,7 @@ program SpellStarter(params)
 	endif
 
 	// Check for conflicting spells.
-	var conflict := conflict := ConflictsCheck( mobile, spell_id );
+	var conflict := ConflictsCheck( mobile, spell_id );
 	if( conflict )
 		SendSysMessage( mobile, "You cannot cast this spell while under the influence of " + conflict + ".", color := 33 );
 		return 0;
@@ -356,24 +357,24 @@ function ConflictsCheck( byref mobile, byref spell_id )
 	var conlicting_spells := current_spell_elem.Conflicts;
 	var conflicts := SplitWords( conlicting_spells );
 	var conlicting_spells_names := {};
-	var temp := CStr(spell_id) in conflicts;
+	var con_spel_elem;
+	var con_spell_name := "";
+// Print("current_spell == "+current_spell);
+
 	// Added the following on 2024-02-06
-	// var running_timers := TS_GetTimerNames(mobile);
-	// foreach spell in conflicts
+	var running_timers := TS_GetTimerNames(mobile);
+	foreach con_spell_id in conflicts
 		// Get spell_name of conflicting spell.
+		con_spel_elem := MS_GetSpellsCfgElem(con_spell_id);
+		con_spell_name := con_spel_elem.Name;
 		// Check against running timers.
-		// If spell_name in running_timers.
-		// return spell_name.
-	// endforeach
-	// return "";
+		If (con_spell_name in running_timers)
+			return con_spell_name;
+		endif
+	endforeach
+
+	return "";
 
 
-	if( current_spell == "Incognito" && GetObjProperty( mobile, "Polymorphed" ) )
-		return "Polymorph";
-	elseif( current_spell == "Polymorph" && GetObjProperty( mobile, "Incognito" ) )
-		return "Incognito";
-	else
-		return "";
-	endif
 // NecroHBeast
 endfunction

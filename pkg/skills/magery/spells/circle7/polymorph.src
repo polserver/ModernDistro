@@ -73,13 +73,13 @@ program cast_polymorph( parms )
 	endif
 
 
-
-	if(!GetObjProperty(caster, "Polymorphed"))
+	if(!("Polymorph" in TS_GetTimerNames(caster)))
+	// if(!GetObjProperty(caster, "Polymorph"))
 		// Preserve caster's graphic and colour in a CProp on the character.
-		my_form.+graphic := caster.graphic;
+		// my_form.+graphic := caster.graphic;
 		my_form.colour := caster.color;
-		SetObjProperty(caster, "MyOrigForm", my_form);
-		SetObjProperty(caster, "Polymorphed", 1);
+		// SetObjProperty(caster, "MyOrigForm", my_form);
+		SetObjProperty(caster, "Polymorph", caster.color);
 		// Get the appropriate group of creatures based on magery skill.
 		critter_group := GetGroup(critgroup);
 		// Pick a random creature from the group.
@@ -103,14 +103,16 @@ program cast_polymorph( parms )
 		caster.addbuff(buff_icon, 0, cliloc_name, cliloc_desc, article + "\t" + crit_name); // You are transformed into ~1_ARTICLE~ ~2_FORM~.
 		// Honesty takes a hit for polymorphing.
 		VS_AdjustVirtue(caster, "Honesty", -1, 50);
+		TS_StartTimer(caster, "Polymorph", 10);
 	else
 		// Restore caster's graphic and colour.
-		my_form := GetObjProperty(caster, "MyOrigForm");
-		caster.graphic := my_form.graphic;
-		caster.color := my_form.colour;
+		// my_form := GetObjProperty(caster, "MyOrigForm");
+		// caster.graphic := my_form.graphic;
+		// caster.color := my_form.colour;
 		// Clear the CProps and delete the buff icon.
-		EraseObjProperty(caster, "MyOrigForm");
-		EraseObjProperty(caster, "Polymorphed");
+		// EraseObjProperty(caster, "MyOrigForm");
+		// EraseObjProperty(caster, "Polymorphed");
+		TS_LowerDuration(caster, "Polymorph", -1);
 		caster.delbuff(buff_icon);
 	endif
 

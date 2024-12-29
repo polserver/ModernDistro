@@ -11,7 +11,7 @@ program wraith_form( params )
 	//var spellID := params[3];
 	//var cast_on := params[4]; // Target of spell if required.
 
-	if(Getobjproperty(caster, "wraith"))
+	if(Getobjproperty(caster, "WraithForm"))
 		PlayObjectCenteredEffectEx( caster, 0x374A, 1, 15, 9902, 4, 3, 1108 );
 		caster.graphic := caster.trueobjtype;
 		caster.color := caster.truecolor;
@@ -35,7 +35,7 @@ program wraith_form( params )
 
 		return 0;
 	endif
-	
+
 	if (Getobjproperty(caster, "poly")  == 1)
 		SendSysMessage(caster,"You are already under the influence of the spell!");
 		return 0;
@@ -62,7 +62,7 @@ program wraith_form( params )
         eraseobjproperty(caster,"NewRegenRateForStamina");
 		RecalcVitals(caster);
 	endif
-	
+
 	PlaySoundEffect(caster, 0x17F);
 	PlayObjectCenteredEffectEx( caster, 0x374A, 1, 15, 9902, 4, 3, 1108 );
 	Sleep(1);
@@ -72,7 +72,7 @@ program wraith_form( params )
 	else
 		caster.graphic := 0x2EB;
 	endif
-	
+
 	caster.color :=0;
 	caster.title_prefix := "";
 	caster.title_suffix := "";
@@ -83,5 +83,5 @@ program wraith_form( params )
 	ModifyResistance(caster, "Energy", -5);
 	ModifyResistance(caster, "Physical", 15);
 	SetobjProperty(caster, "poly", 2);
-	SetObjProperty(caster, "wraith", 1);
+	SetObjProperty(caster, "Wraith Form", 1);
 endprogram

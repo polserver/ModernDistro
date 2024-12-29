@@ -11,15 +11,23 @@ include ":virtue:virtue";
 program cast_incognito(parms)
 	var caster := parms[1];
     var info := parms[2];
+	var duration := 0;
 
 
 	MS_PlaySpellSFX(info.spell_id, caster);
 	MS_PlaySpellGFX(info.spell_id, caster, caster);
 
-	// Duration: ((Eval / 5) + 1) * 6
-	var duration := AP_GetSkill(caster, MAGERY) * 1.2;
-	TS_StartTimer(caster, "Incognito", duration, 0, caster);
-	VS_AdjustVirtue(caster, "Honesty", -1, 100);
+
+	if( !GetObjProperty( caster, "Incognito" ) )
+		// On OSI Duration is calculated ((Eval / 5) + 1) * 6
+		duration := AP_GetSkill(caster, MAGERY) * 1.2;
+
+		// TS_StartTimer(caster, "Incognito", duration, 0, caster);
+		TS_StartTimer(caster, "Incognito", 1);
+		VS_AdjustVirtue(caster, "Honesty", -1, 100);
+	else
+		TS_LowerDuration( caster, "Incognito", -1 );
+	endif
 
 	return 1;
 endprogram
