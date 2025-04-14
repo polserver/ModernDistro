@@ -130,7 +130,7 @@ function BuildHouseLockdownArea (sign, housetype)
 			homeinfo[3] := sign.y - 15;
 			homeinfo[4] := sign.x + 8;
 			homeinfo[5] := sign.y + 1;
-//		0x113ec:	//foundation 7x7		
+//		0x113ec:	//foundation 7x7
 //			homeinfo[2] := sign.x - 1;
 //			homeinfo[3] := sign.y - 8;
 //			homeinfo[4] := sign.x + 7;
@@ -151,7 +151,7 @@ function BuildHouseLockdownArea (sign, housetype)
 				homeinfo[4] := sign.x + width;
 				homeinfo[5] := sign.y;
 			endif
-				
+
 //			//
 //			homeinfo[2] := sign.x - ;
 //			homeinfo[3] := sign.y - ;

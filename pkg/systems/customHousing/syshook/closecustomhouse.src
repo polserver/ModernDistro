@@ -7,7 +7,7 @@ Const UOBJECT_WOOD_SIGN := 0x0bd0;
 exported function CloseCustomHouse ( who, house)
 	if (who.concealed < 2)
 		who.concealed := 0;
-	endif	
+	endif
 	var components := GetObjProperty (house, "components");
 	var lockid := 0;
 	foreach compo in (components)

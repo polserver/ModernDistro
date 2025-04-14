@@ -8,9 +8,7 @@ include "include/objtype";
 include ":gumps:gumps";
 include ":gumps:gumps_ex";
 include "include/utility";
-//include "include/itemtypes";
-include ":customhousing:house";
-include "util/bank";
+include ":containers:storageAreas";
 
 Const UOBJECT_BRASS_SIGN := 0x0bd2;
 Const UOBJECT_WOOD_SIGN := 0x0bd0;
@@ -147,8 +145,8 @@ function CreateHouseAndKeys (character, housetype, x, y, z, rlm)
 		PrintTextAbovePrivate (character, "*Your backpack is full!*", character );
 		return 0;
     endif
-
-	var bankbox := FindBankBox(character.acctname);
+	var bank_region := CP_DEFAULT_AREA;
+	var bankbox := CP_GetStorageContainerForMobile( character, bank_region, CP_CREATE );
 	var bankkey := CreateItemInContainer (bankbox, UOBJ_GOLD_KEY);
 	if (!bankkey)
 		PrintTextAbovePrivate (character, "*Your bankbox is full!*", character );
