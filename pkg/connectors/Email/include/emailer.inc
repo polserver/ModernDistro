@@ -3,17 +3,17 @@
  * Purpose
  * Provide a single function to be able to quickly send email from within the server without external programs.
  * (Excluding an SMTP server)
- * 
+ *
  * Created by Dev GIB
  *
  */
 use uo;
 use os;
 
-
 /*
- * SendEmail( ToAddress, Subject, Body, Modifiers)
+ * SendEmailDeprecated( ToAddress, Subject, Body, Modifiers)
  *
+ * Deprecated: use os::SendEmail
  * Purpose
  * Sends an email to address or addresses based on information given to the function.
  * Multiple emails can be defined for any given email field, its important to seperate with a semicolon
@@ -35,70 +35,81 @@ use os;
  * Failure - Returns error message.
  *
  */
-function SendEmail( ToEmail, Subject, Body, Modifiers:=0)
+function SendEmailDeprecated( ToEmail, Subject, Body, Modifiers := 0 )
 
-	var settings_cfg := ReadConfigFile(":emailer:settings");
-	if( settings_cfg.errortext )
-		SysLog("Error::SendEmail() - Unable to open [:emailer:settings.cfg] ->"+settings_cfg.errortext);
-		return error{"errortext" := "Unable to open [:emailer:settings.cfg]"};
-	endif
-	
-	var cfg_elem := FindConfigElem( settings_cfg, "Settings" );
-	
-	var smtpHost := GetConfigString( cfg_elem, "host" );
-	var LoggingLevel := cInt(GetConfigString( cfg_elem, "LoggingLevel" ));
-	if( LoggingLevel == error )
-		LogToFile("::log/emailer.log", "Error::SendEmail() - Logging level config not found or incorrect.", LOG_DATETIME);
-	endif
-	if( smtpHost == error )
-		if( LoggingLevel >= 1 )
-			LogToFile("::log/emailer.log", "Error::SendEmail() - SMTP host config not found or incorrect.", LOG_DATETIME);
-		endif
-		return error{"errortext" := "SMTP host config not found or incorrect."};
-	endif
-	var smtpPort := GetConfigString( cfg_elem, "port" );
-	if( smtpPort == error )
-		if( LoggingLevel >= 1 )
-			LogToFile("::log/emailer.log", "Error::SendEmail() - SMTP port config not found or incorrect.", LOG_DATETIME);
-		endif
-		return error{"errortext" := "SMTP port config not found or incorrect."};
-	endif
-	
-	if( !Modifiers )
-		Modifiers := struct{};
-		Modifiers.FromEmail := ""; 
-		Modifiers.ToContactName := "";
-		Modifiers.CC := "";
-		Modifiers.BCC := "";
-		Modifiers.ReplyTo := "";
-	endif
-	
-	if( !Modifiers.FromEmail )
-		Modifiers.FromEmail := GetConfigString( cfg_elem, "FromEmail" );//Sets the FromEmail to the default FromEmail in the config file.
-	endif
-	
-	
-	if( ValidateEmail( ToEmail ) != 1 )
-		if( LoggingLevel >= 1 )
-			LogToFile("::log/emailer.log", "Error::SendEmail() - ToEmail is not valid: "+ToEmail, LOG_DATETIME);
-		endif
-	   return error{"errortext":="ToEmail is not valid."};
-	endif
-	if( ValidateEmail( Modifiers.FromEmail ) != 1 )
-		if( LoggingLevel >= 1 )
-			LogToFile("::log/emailer.log", "Error::SendEmail() - Modifiers.FromEmail is not valid: "+Modifiers.FromEmail, LOG_DATETIME);
-		endif
-	   return error{"errortext":="FromAddress is not valid."};
-	endif
-	
-	var EmailCommand := BuildEmailStruct( ToEmail, Subject, Body, Modifiers );
-	if( LoggingLevel > 0 ) EmailCommand.LL := LoggingLevel; endif
-	var connection := OpenConnection( smtpHost, cint(smtpPort), ":emailer:sendEmail", EmailCommand, 1 );
-	if( connection == error )
-		return connection;
-	endif
-	return 1;
-	  
+  var settings_cfg := ReadConfigFile( ":emailer:settings" );
+  if ( settings_cfg.errortext )
+    SysLog( "Error::SendEmail() - Unable to open [:emailer:settings.cfg] ->" + settings_cfg.errortext );
+    return error{ "errortext" := "Unable to open [:emailer:settings.cfg]" };
+  endif
+
+  var cfg_elem := FindConfigElem( settings_cfg, "Settings" );
+
+  var smtpHost := GetConfigString( cfg_elem, "host" );
+  var LoggingLevel := cInt( GetConfigString( cfg_elem, "LoggingLevel" ) );
+  if ( LoggingLevel == error )
+    LogToFile( "::log/emailer.log",
+               "Error::SendEmail() - Logging level config not found or incorrect.",
+               LOG_DATETIME );
+  endif
+  if ( smtpHost == error )
+    if ( LoggingLevel >= 1 )
+      LogToFile( "::log/emailer.log",
+                 "Error::SendEmail() - SMTP host config not found or incorrect.",
+                 LOG_DATETIME );
+    endif
+    return error{ "errortext" := "SMTP host config not found or incorrect." };
+  endif
+  var smtpPort := GetConfigString( cfg_elem, "port" );
+  if ( smtpPort == error )
+    if ( LoggingLevel >= 1 )
+      LogToFile( "::log/emailer.log",
+                 "Error::SendEmail() - SMTP port config not found or incorrect.",
+                 LOG_DATETIME );
+    endif
+    return error{ "errortext" := "SMTP port config not found or incorrect." };
+  endif
+
+  if ( !Modifiers )
+    Modifiers := struct{};
+    Modifiers.FromEmail := "";
+    Modifiers.ToContactName := "";
+    Modifiers.CC := "";
+    Modifiers.BCC := "";
+    Modifiers.ReplyTo := "";
+  endif
+
+  if ( !Modifiers.FromEmail )
+    Modifiers.FromEmail := GetConfigString( cfg_elem, "FromEmail" ); // Sets the FromEmail to the default FromEmail in the config file.
+  endif
+
+  if ( ValidateEmail( ToEmail ) != 1 )
+    if ( LoggingLevel >= 1 )
+      LogToFile( "::log/emailer.log", "Error::SendEmail() - ToEmail is not valid: "
+               + ToEmail, LOG_DATETIME );
+    endif
+    return error{ "errortext" := "ToEmail is not valid." };
+  endif
+  if ( ValidateEmail( Modifiers.FromEmail ) != 1 )
+    if ( LoggingLevel >= 1 )
+      LogToFile( "::log/emailer.log",
+                 "Error::SendEmail() - Modifiers.FromEmail is not valid: "
+               + Modifiers.FromEmail, LOG_DATETIME );
+    endif
+    return error{ "errortext" := "FromAddress is not valid." };
+  endif
+
+  var EmailCommand := BuildEmailStruct( ToEmail, Subject, Body, Modifiers );
+  if ( LoggingLevel > 0 )
+    EmailCommand.LL := LoggingLevel;
+  endif
+  var connection := OpenConnection( smtpHost, cint( smtpPort ),
+                                    ":emailer:sendEmail", EmailCommand, 1 );
+  if ( connection == error )
+    return connection;
+  endif
+  return 1;
+
 endfunction
 
 /*
@@ -121,23 +132,21 @@ function ValidateEmail( Address )
   var HasAtSymbol := 0;
   var HasFullStop := 0;
   var i;
-  
-  for ( i:= 1; i< address.length(); i:=i+1)
-    if( HasAtSymbol == 1 && HasFullStop == 1 )
-    	return 1;
+
+  for ( i := 1; i < address.length(); i := i + 1 )
+    if ( HasAtSymbol == 1 && HasFullStop == 1 )
+      return 1;
     endif
-  	if ( address[i] == "@" )
-  		HasAtSymbol := 1;
-  	elseif( address[i] == "." );
-  	  HasFullStop := 1;
-  	endif
+    if ( address[i] == "@" )
+      HasAtSymbol := 1;
+    elseif ( address[i] == "." )
+      HasFullStop := 1;
+    endif
   endfor
-  
+
   return 0;
-   
+
 endfunction
-
-
 
 /*
  * BuildEmailStruct( ToEmail, Subject, Body, Modifiers )
@@ -164,18 +173,27 @@ endfunction
  */
 
 function BuildEmailStruct( ToEmail, Subject, Body, Modifiers )
-	
-	var TempStruct := struct{};
-	
-	TempStruct.ToEmail := ToEmail;
-	TempStruct.Subject := Subject;
-	TempStruct.Body := Body;
-	TempStruct.FromEmail := Modifiers.FromEmail;
-	if( Modifiers.ToContactName ) TempStruct.ToContactName := Modifiers.ToContactName; endif
-	if( Modifiers.CC ) TempStruct.CC := Modifiers.CC; endif
-	if( Modifiers.BCC ) TempStruct.BCC := Modifiers.BCC;endif
-	if( Modifiers.ReplyTo ) TempStruct.ReplyTo := Modifiers.ReplyTo; endif
-	
-	return TempStruct;
-	
+
+  var TempStruct := struct{};
+
+  TempStruct.ToEmail := ToEmail;
+  TempStruct.Subject := Subject;
+  TempStruct.Body := Body;
+  TempStruct.FromEmail := Modifiers.FromEmail;
+  if ( Modifiers.ToContactName )
+    TempStruct.ToContactName := Modifiers.ToContactName;
+  endif
+  if ( Modifiers.CC )
+    TempStruct.CC := Modifiers.CC;
+  endif
+  if ( Modifiers.BCC )
+    TempStruct.BCC := Modifiers.BCC;
+  endif
+  if ( Modifiers.ReplyTo )
+    TempStruct.ReplyTo := Modifiers.ReplyTo;
+  endif
+
+  return TempStruct;
+
 endfunction
+
