@@ -1,0 +1,632 @@
+use uo;
+use os;
+
+include "include/client";
+include "include/objtype";
+include "include/utility";
+include ":itemutils:itemtypes";
+include ":gumps:gumps";
+include ":customhousing:house";
+include ":doors:doors";
+
+var gump_layout := array{};
+var gump_data := array{};
+
+program use_house_sign (character, sign)
+	broadcast("PING");
+	//If its a deeded house, make sure its house exists...
+	if (sign.objtype != 0x17060)
+		var hserial := GetObjProperty (sign, "house_serial");
+		if (!hserial)
+			return;
+		endif
+	endif
+
+//	//Friends don't get the options
+//	if (!IsAFriend (sign, character))
+//		DisplayNonFriendSign (character, sign);
+//		return;
+//	endif
+
+	BuildHouseSignGump (character, sign);
+	SendSysMessage (character, "Your current Housevalue is " + GetAccountHouseValue (character.acctname) );
+
+	var result := SendDialogGump (character, gump_layout, gump_data );
+	var accountname := GetObjProperty (sign, "account");
+	if (accountname != character.acctname and character.cmdlevel < 3)
+		SendSysMessage (character, "This is not your house!");
+		return;
+	endif
+
+	case (result[0])
+		1:
+			//disown or demolish the house, depending on if its static or deeded
+			if (sign.objtype == 0x17060)
+				DisownHouse (character, sign);
+			else
+				var hserial := GetObjProperty (sign, "house_serial");
+				var house := SystemFindObjectBySerial (hserial);
+				if (!MakeADeed (character, house))
+					return;
+				endif
+				var addons := GetObjProperty (house, "components");
+				if (addons.size())
+					foreach item in addons
+						DestroyItem (SystemFindObjectBySerial (item));
+					endforeach
+				endif
+				ReleaseAll (character, sign);
+				DestroyMulti (house);
+			endif
+		2:	RenameHouse (character, sign);
+		3:	ChangeHouseLocks (character, sign);
+		5: 
+			set_critical (1);
+			ChangeOwner (character, sign);
+			set_critical (0);
+		6:
+			ChangeHouseSign (character, sign);
+		7:
+			var customhouse := SystemFindObjectBySerial (GetObjProperty (sign, "house_serial"));
+			if (customhouse.custom)
+				var homeinfo := GetObjProperty (sign, "homeinfo");
+				if (!homeinfo)
+					SendSysMessage (character, "Error finding house definition.");
+					return;	
+				endif
+				CloseHouseDoors (character, sign);
+				MoveObjectToLocation(character, (homeinfo[4] + homeinfo[2]) / 2, (homeinfo[5] + homeinfo[3]) / 2, sign.z, sign.realm, MOVEOBJECT_FORCELOCATION);
+				SendPacket (character, "B9000F97DF");
+				if (!character.concealed)
+					character.concealed := 1;
+				endif
+				customhouse.acceptcommit(character, 0);
+				var customizehouse := SendHousingTool(character, customhouse);
+				if (!customizehouse)
+					SendSysMessage (character, "Error: " +  customizehouse.errortext);
+				endif
+			else
+				SendSysMessage (character, "Your house can't be customized.");
+			endif
+		101:
+		102:
+		103:
+		104:
+		105:
+		106:
+		107:
+		108:
+			AdjustHouseFriendsFromSign (character, sign, CINT(result[0])-100 );
+		default:
+			SendSysMessage (character, "Error:  Unknown gump return!");
+			return;
+	endcase
+endprogram
+
+
+function CloseHouseDoors (character, sign)
+	var homeinfo := GetObjProperty (sign, "homeinfo");
+	if (!homeinfo)
+		SendSysMessage (character, "Error finding house definition.");
+		return;	
+	endif
+	foreach item in ListObjectsInBox (homeinfo[2], homeinfo[3], -127, homeinfo[4], homeinfo[5], 127, sign.realm)
+		if (IsDoor (item))
+			CloseDoor(item);
+		endif
+	endforeach
+
+endfunction
+
+
+///////////////////
+//  changes the locks on the doors
+///////////////////
+
+function ChangeHouseLocks (character, sign)
+	var homeinfo := GetObjProperty (sign, "homeinfo");
+	if (!homeinfo)
+		SendSysMessage (character, "Error finding house definition.");
+		return;	
+	endif
+
+	SendSysmessage (character, "Target the new master key.");
+	var newkey := Target (character);
+	if (!newkey)
+		SendSysMessage (character, "Canceled.");
+		return;
+	elseif (!IsAKey (newkey))
+		SendSysMessage (character, "That is not a key!");
+		return;
+	elseif (GetObjProperty (newkey, "lockid"))
+		SendSysMessage (character, "That seems to be the key to something else already.");
+		SendSysMessage (character, "If you use that key, it will no longer work on its previous lock.");
+		if (!YesNo (character, "Continue?"))
+			SendSysMessage (character, "Canceled.");
+			return;
+		endif
+	endif
+
+	var lockid := GetObjProperty(sign, "house_serial")+1;
+	SetObjProperty (newkey, "lockid", lockid); 
+	SetObjProperty (sign, "lockid", lockid); 
+	foreach item in ListObjectsInBox (sign.x - 32, sign.y - 32, -127, sign.x + 32, sign.y + 32, 127, sign.realm)
+		if (IsDoor (item))
+			if ((item.x >= homeinfo[2] and item.x <= homeinfo[4]) and (item.y >= homeinfo[3] and item.y <= homeinfo[5]) )
+				item.locked := 1;
+				SetObjProperty (item, "lockid", lockid);
+				PrintTextAbove (item, "*LOCKED*");
+			endif
+		endif
+	endforeach
+	SendSysmessage (character, "Locks Changed.");
+endfunction
+
+
+
+
+///////////////////
+// called when the character demolishes a house, this function makes a new deed for the house
+///////////////////
+
+function MakeADeed (character, house)
+	var deedtype := GetDeedType (house);
+	if (!deedtype)
+		SendSysMessage (character, "Error finding deed type.");
+		return 0;
+	endif
+
+	if (deedtype == 0x16230 or deedtype == 0x16231)
+		var components := GetObjProperty (house, "components");
+		var sign := 0;
+		var price := 0;
+		foreach compo in (components)
+			sign := SystemFindObjectBySerial(compo);
+			if (sign.objtype == 0x0bd0 or sign.objtype == 0x0bd2)
+				price := GetObjProperty (sign, "houseprice");
+				break;
+			endif
+		endforeach
+		if (price > 0)
+			var discount := CINT (price/10);
+			if (discount > 10000)
+				discount := 10000;
+			endif
+			var theprice := price - discount;
+
+			SendSysMessage (character, "The value of this house is " + theprice + " gold.");
+			if (!YesNo (character, "Sell it?"))
+				SendSysMessage (character, "Canceled.");
+				return 0;
+			endif
+			var newdeed := CreateItemInContainer (character.backpack, deedtype, 1);
+			if (!newdeed)
+				PrintTextAbovePrivate (character, "*Your backpack is full!*", character);
+				return 0;
+			endif
+			while (theprice > 60000)
+				if (CreateItemInContainer (character.backpack, UOBJ_GOLD_COIN, 60000))
+					theprice := theprice - 60000;
+				else
+					SendSysMessage (character, "Error creating gold!  You'll have to page a GM...");
+					SetObjProperty (character, "OWEDGOLD", theprice);
+					theprice := 0;
+				endif
+			endwhile
+			CreateItemInContainer (character.backpack, UOBJ_GOLD_COIN, theprice);
+		endif
+	else
+		var newdeed := CreateItemInContainer (character.backpack, deedtype, 1);
+		if (!newdeed)
+			PrintTextAbovePrivate (character, "*Your backpack is full!*", character);
+			return 0;
+		endif
+	endif
+	return 1;
+endfunction
+
+
+
+
+///////////////////
+//  When the character disowns a static house, this function refunds their money
+///////////////////
+
+function DisownHouse (character, sign)
+	var housevalue := GetHouseValueOfSign (sign);
+	var price := GetObjProperty (sign, "houseprice");
+	if (!price)
+		price := GetDefaultHousePrice (housevalue);
+	endif
+
+	var discount := CINT (price/10);
+	if (discount > 10000)
+		discount := 10000;
+	endif
+	var theprice := price - discount;
+
+	SendSysMessage (character, "The value of this house is " + theprice + " gold.");
+	if (!YesNo (character, "Sell it?"))
+		SendSysMessage (character, "Canceled.");
+		return;
+	endif
+
+	//make a new forsale sign
+	var newsign := CreateItemAtLocation (sign.x, sign.y, sign.z, 0x1708a, 1, sign.realm);
+	if (!newsign)
+		return;
+	endif
+	newsign.movable := 0;
+
+	SetObjProperty (newsign, "houseprice", price);
+	newsign.name := "For Sale " + price + " gold";
+	while (theprice > 60000)
+		if (CreateItemInContainer (character.backpack, UOBJ_GOLD_COIN, 60000))
+			theprice := theprice - 60000;
+		else
+			SendSysMessage (character, "Error creating gold!  You'll have to page a GM...");
+			SetObjProperty (character, "OWEDGOLD", theprice);
+			theprice := 0;
+		endif
+	endwhile
+	CreateItemInContainer (character.backpack, UOBJ_GOLD_COIN, theprice);
+
+	SetObjProperty (newsign, "housevalue", housevalue);
+	if (GetObjProperty (sign, "originalgraphic"))
+		newsign.graphic := GetObjProperty (sign, "originalgraphic");
+		SetObjProperty (newsign, "originalgraphic", newsign.graphic);
+	endif
+
+	var homeinfo := GetObjProperty (sign, "homeinfo");
+	homeinfo[1] := 0;
+	SetObjProperty (newsign, "homeinfo", homeinfo);
+
+	foreach item in ListItemsNearLocation (sign.x, sign.y, sign.z, 32, sign.realm)
+		if(Item.Isa (POLCLASS_DOOR))
+			if ((item.x >= homeinfo[2] and item.x <= homeinfo[4]) and
+					(item.y >= homeinfo[3] and item.y <= homeinfo[5]) )
+				item.locked := 0;
+				EraseObjProperty (item, "lockid");
+				PrintTextAbove (item, "*UNLOCKED*");
+			endif
+		endif
+	endforeach
+
+	ReleaseAll (character, sign);
+	DestroyItem (sign);
+endfunction
+
+
+
+
+///////////////////
+//  can change the name of the house
+///////////////////
+
+function RenameHouse (character, sign)
+	var newname := SendTextEntryGump (character, "Name it what?", TE_CANCEL_ENABLE, TE_STYLE_NORMAL, 20);
+	if (!newname)
+		SendSysMessage (character, "Canceled");
+	elseif (len(SplitWords (newname)) > 5)
+		Sendsysmessage (character, "House sign names are limited to 5 words or less.");
+	else
+		SetObjProperty (sign, "housename", newname);
+		sign.name := "A House Sign";
+	endif
+endfunction
+
+
+
+
+///////////////////
+//  changes the graphic of the housesign
+///////////////////
+
+function ChangeHouseSign (character, sign)
+	var offset := 0;
+	if (sign.objtype == 0x0bd0 or sign.objtype == 0x0bd2)
+		offset := 1;
+	elseif (GetObjProperty (sign, "originalgraphic") == 0x0bd2)
+		offset := 1;
+	elseif (GetObjProperty (sign, "originalgraphic") == 0x0bd0)
+		offset := 1;
+	endif
+
+	var itemmenu := CreateMenu ("Select a sign:");
+	AddMenuItem (itemmenu, 0x0bcf, "sign");
+	AddMenuItem (itemmenu, 0x0bd1, "sign");
+	AddMenuItem (itemmenu, 0x0b95, "sign");
+	AddMenuItem (itemmenu, 0x0ba3, "sign");
+	AddMenuItem (itemmenu, 0x0ba5, "sign");
+	AddMenuItem (itemmenu, 0x0ba7, "sign");
+	AddMenuItem (itemmenu, 0x0ba9, "sign");
+	AddMenuItem (itemmenu, 0x0bab, "sign");
+	AddMenuItem (itemmenu, 0x0bad, "sign");
+	AddMenuItem (itemmenu, 0x0baf, "sign");
+	AddMenuItem (itemmenu, 0x0bb1, "sign");
+	AddMenuItem (itemmenu, 0x0bb3, "sign");
+	AddMenuItem (itemmenu, 0x0bb5, "sign");
+	AddMenuItem (itemmenu, 0x0bb7, "sign");
+	AddMenuItem (itemmenu, 0x0bb9, "sign");
+	AddMenuItem (itemmenu, 0x0bbb, "sign");
+	AddMenuItem (itemmenu, 0x0bbd, "sign");
+	AddMenuItem (itemmenu, 0x0bbf, "sign");
+	AddMenuItem (itemmenu, 0x0bc1, "sign");
+	AddMenuItem (itemmenu, 0x0bc3, "sign");
+	AddMenuItem (itemmenu, 0x0bc5, "sign");
+	AddMenuItem (itemmenu, 0x0bc7, "sign");
+	AddMenuItem (itemmenu, 0x0bc9, "sign");
+	AddMenuItem (itemmenu, 0x0bcb, "sign");
+	AddMenuItem (itemmenu, 0x0bcd, "sign");
+	AddMenuItem (itemmenu, 0x0bd3, "sign");
+	AddMenuItem (itemmenu, 0x0bd5, "sign");
+	AddMenuItem (itemmenu, 0x0bd7, "sign");
+	AddMenuItem (itemmenu, 0x0bd9, "sign");
+	AddMenuItem (itemmenu, 0x0bdb, "sign");
+	AddMenuItem (itemmenu, 0x0bdd, "sign");
+	AddMenuItem (itemmenu, 0x0bdf, "sign");
+	AddMenuItem (itemmenu, 0x0be1, "sign");
+	AddMenuItem (itemmenu, 0x0be3, "sign");
+	AddMenuItem (itemmenu, 0x0be5, "sign");
+	AddMenuItem (itemmenu, 0x0be7, "sign");
+	AddMenuItem (itemmenu, 0x0be9, "sign");
+	AddMenuItem (itemmenu, 0x0beb, "sign");
+	AddMenuItem (itemmenu, 0x0bed, "sign");
+	AddMenuItem (itemmenu, 0x0bef, "sign");
+	AddMenuItem (itemmenu, 0x0bf1, "sign");
+	AddMenuItem (itemmenu, 0x0bf3, "sign");
+	AddMenuItem (itemmenu, 0x0bf5, "sign");
+	AddMenuItem (itemmenu, 0x0bf7, "sign");
+	AddMenuItem (itemmenu, 0x0bf9, "sign");
+	AddMenuItem (itemmenu, 0x0bfb, "sign");
+	AddMenuItem (itemmenu, 0x0bfd, "sign");
+	AddMenuItem (itemmenu, 0x0bff, "sign");
+	AddMenuItem (itemmenu, 0x0c01, "sign");
+	AddMenuItem (itemmenu, 0x0c03, "sign");
+	AddMenuItem (itemmenu, 0x0c05, "sign");
+	AddMenuItem (itemmenu, 0x0c07, "sign");
+	AddMenuItem (itemmenu, 0x0c09, "sign");
+	AddMenuItem (itemmenu, 0x0c0b, "sign");
+	AddMenuItem (itemmenu, 0x0c0d, "sign");
+	AddMenuItem (itemmenu, 0x0c43, "sign");
+	var selection := SelectMenuItem2 (character, itemmenu);
+	if (!selection.objtype)
+		SendSysMessage (character, "Canceled.");
+		return;
+	endif
+
+	sign.graphic := (selection.objtype + offset);
+endfunction
+
+
+
+
+///////////////////
+//  builds the gump to be displayed
+///////////////////
+
+function BuildHouseSignGump (character, sign)
+	gump_layout := array {
+		"page 0",
+		"resizepic 0 50 2620 310 350",
+		"gumppic 83 0 100",
+		"text 100 29 40 0",
+		"text 100 47 40 10",
+		"text 20 108 40 1",
+		"text 100 108 40 2",
+		"text 205 108 40 3",
+		"button 55 105 2640 2641 0 1",
+		"button 160 105 2640 2641 0 2",
+		"button 260 105 2640 2641 0 3",
+		"button 234 68 242 241 1 0 0",
+
+		"page 1",
+		"text 20 150 40 4",
+		"text 140 150 40 7",
+		"text 20 180 40 12",
+		"text 180 180 40 13",
+		"text 20 210 40 14",
+		"text 180 210 40 15",
+
+		"page 2",
+		"text 40 150 40 17",
+		"text 40 170 40 18",
+		"text 40 190 40 19",
+		"text 40 210 40 20",
+		"text 40 230 40 21",
+		"text 40 250 40 22",
+		"text 40 270 40 23",
+		"text 40 290 40 24",
+		"button 20 155 2104 2103 1 0 101",
+		"button 20 175 2104 2103 1 0 102",
+		"button 20 195 2104 2103 1 0 103",
+		"button 20 215 2104 2103 1 0 104",
+		"button 20 235 2104 2103 1 0 105",
+		"button 20 255 2104 2103 1 0 106",
+		"button 20 275 2104 2103 1 0 107",
+		"button 20 295 2104 2103 1 0 108",
+
+		"page 3",
+		"text 20 147 40 6",
+		"text 20 177 40 9",
+		"text 20 207 40 27",
+		"text 20 237 40 11",
+		"text 20 267 40 16",
+		"text 20 297 40 28",
+		"button 200 145 2640 2641 0 4",
+		"button 200 175 2640 2641 1 3 2",
+		"button 200 205 2640 2641 1 3 6",
+		"button 200 235 2640 2641 1 3 3",
+		"button 200 265 2640 2641 1 3 5",
+		"button 200 295 2640 2641 1 3 7",
+
+		"page 4",
+		"text 55 183 40 8",
+		"button 205 180 2640 2641 1 4 1"
+	};
+
+	gump_data := array {   
+		"",					//0 house name 1
+		"Info",				//1
+		"Friends",			//2
+		"Options",			//3
+		"House Owner :",		//4
+		"",					//5
+		"Demolish this house",	//6
+		"",					//7, owner
+		"Are you SURE?",		//8
+		"Rename this house",	//9
+		"",					//10 house name
+		"Change the locks",		//11
+		"Lockdowns:",			//12
+		"",					//13
+		"Secure Containers:",	//14
+		"",					//15
+		"Change Owners",		//16
+		"New Friend",			//17 - friend 1
+		"New Friend",			//18 - friend 2
+		"New Friend",			//19 - friend 3
+		"New Friend",			//20 - friend 4
+		"New Friend",			//21 - friend 5
+		"New Friend",			//22 - friend 6
+		"New Friend",			//23 - friend 7
+		"New Friend",			//24 - friend 8
+		"New Friend",			//25 - friend 9
+		"New Friend",			//26 - friend 10
+		"Change Signs",			//27
+		"Customize House"		//28
+	};
+
+	gump_data[14] := CSTR(GetLockdowns (sign)) + " / " + CSTR(GetMaxLockdowns (sign));
+	gump_data[16] := CSTR(GetSecures (sign))+ " / " +  CSTR(GetMaxSecures (sign));
+
+	//a couple of changes for static houses...
+	if (sign.objtype == 0x17060)
+		gump_data[7] := "Disown this House";
+	endif
+
+	if (GetObjProperty (sign, "housefriends"))
+		var friends := GetObjProperty (sign, "housefriends");
+		var counter := 18;
+		foreach key in (friends.keys())
+			var tempvar := friends[key];
+			if (tempvar)
+				var tempname := tempvar[2];
+				if (tempvar[1] == "account")
+					tempname := tempname + " (account)";
+				elseif (tempvar[1] == "merchant")
+					tempname := tempname + " (merchants)";
+				endif
+				gump_data[counter] := tempname;
+				counter := counter + 1;
+			endif
+		endforeach
+	endif
+
+	var accountname := GetObjProperty (sign, "account");
+	SetPlaqueName (sign);
+	if (accountname == character.acctname)
+		RefreshHouse (character);
+		gump_data[8] := character.name;
+		SetObjProperty (sign, "lastownername", character.name);
+	else
+		gump_data[8] := GetObjProperty (sign, "lastownername");
+		if (!gump_data[8])
+			gump_data[8] := FindOwnerName (sign);
+		endif
+	endif
+endfunction
+
+
+
+
+///////////////////
+//  splits up the words in the house's name so that it can be displayed
+///////////////////
+
+function SetPlaqueName (sign)
+	var signname := sign.desc;
+	if (!signname)
+		gump_data[1] := "-";
+		return;
+	elseif (len(signname) < 12)
+		gump_data[1] := signname;
+		return;
+	endif
+
+	var splitted := SplitWords (signname);
+	if (!splitted.size())
+		gump_data[1] := "-";
+		return;
+	elseif (splitted.size() == 1)
+		gump_data[1] := signname;
+		return;
+	elseif (splitted.size() == 2)
+		gump_data[1] := splitted[1];
+		gump_data[11] := splitted[2];
+		return;
+	endif
+
+	for j := 1 to 5
+		if (!splitted[j])
+			splitted[j] := "";
+		endif
+	endfor
+
+	if( (len(splitted[1]) + len(splitted[2]) + len(splitted[3]) + 2) <= 12 )
+		gump_data[1] := splitted[1] + " " + splitted[2] + " " + splitted[3];
+		gump_data[11] := splitted[4] + " " + splitted[5];
+	elseif( len(splitted[1]) + len(splitted[2]) + 1 <= 12 )
+		gump_data[1] := splitted[1] + " " + splitted[2];
+		gump_data[11] := splitted[3] + " " + splitted[4] + " " + splitted[5];
+	else
+		gump_data[1] := splitted[1];
+		gump_data[11] := splitted[2] + " " + splitted[3] + " " + splitted[4] + " " + splitted[5];
+	endif
+endfunction
+
+
+
+
+///////////////////
+//  if we can't figure out the owner's name any other way, this does it
+///////////////////
+
+function FindOwnerName( sign )
+	var owneraccount := GetObjProperty (sign, "account");
+	if (owneraccount)
+		var acct := FindAccount (owneraccount);
+		if (acct)
+			for i := 1 to 7
+				var char := acct.GetCharacter(i);
+				if (char)
+		            	SetObjProperty (sign, "lastownername", char.name);
+					return char.name;
+				endif
+			endfor
+		endif
+	endif
+
+	SetObjProperty (sign, "lastownername", "Unknown");
+	return "Unknown";
+endfunction
+
+
+
+
+///////////////////
+//  People who are not friends of the house don't get the options, just some random info
+///////////////////
+
+function DisplayNonFriendSign (character, sign)
+
+	return;
+
+
+
+
+endfunction
+
+
+
+
