@@ -142,6 +142,7 @@ function CreateItemForDecoration( file_name, key, cfg_elem )
 		item := 0;
 
 	if( desc.errortext )
+		desc.CProps.Insert( "NoKey", 1 );
 		item := CreateItemAtLocation( cfg_elem.X,  cfg_elem.Y, cfg_elem.Z, cfg_elem.Objtype, cfg_elem.Amount, cfg_elem.Realm );
 		item.color := cfg_elem.Color;
 		item.movable := 0;
@@ -154,6 +155,7 @@ function CreateItemForDecoration( file_name, key, cfg_elem )
 		// Place the 'Static' CProp on the item. Now only the udestry commands can delete it.
 		desc.CProps.Insert( "DecorateFacetsStatic", 0x1 );
 		desc.CProps.Insert( "DecorationInfo", Struct{ "FileName":=file_name, "Key":=key } );
+		desc.CProps.Insert( "NoKey", 1 );
 		item := CreateItemAtLocation( cfg_elem.X,  cfg_elem.Y, cfg_elem.Z, desc, cfg_elem.Amount, cfg_elem.Realm );
 	endif
 
